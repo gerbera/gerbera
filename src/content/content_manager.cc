@@ -411,15 +411,15 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
             throw_std_runtime_error("Could not add {}", path.c_str());
         }
         if (pcdir->isItem()) {
-            this->addObject(pcdir);
+            this->addObject(pcdir, true);
             obj->setRefID(pcdir->getID());
         }
     }
 
-    addObject(obj);
+    addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(path) : nullptr;
     bool isNew = false;
@@ -431,7 +431,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
             return nullptr;
         }
         if (obj->isItem()) {
-            addObject(obj);
+            addObject(obj, firstChild);
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
@@ -481,7 +481,7 @@ int ContentManager::_addFile(const fs::path& path, fs::path rootPath, AutoScanSe
 
     // checkDatabase, don't process existing
     // TODO: stat file to compare with LMT
-    auto obj = createSingleItem(path, rootPath, asSetting.followSymlinks, true, false, task);
+    auto obj = createSingleItem(path, rootPath, asSetting.followSymlinks, true, false, false, task);
     if (obj == nullptr) // object ignored
         return INVALID_OBJECT_ID;
 
@@ -828,6 +828,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         adir->setCurrentLMT(path, 0);
     }
 
+    bool firstChild = true;
     struct dirent* dent;
     while ((dent = readdir(dir)) != nullptr) {
         char* name = dent->d_name;
@@ -863,9 +864,10 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         try {
             fs::path rootPath("");
             // check database if parent, process existing
-            auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, task);
+            auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
 
             if (obj != nullptr) {
+                firstChild = false;
                 if (last_modified_current_max < statbuf.st_mtime) {
                     last_modified_new_max = statbuf.st_mtime;
                 }
@@ -1008,7 +1010,7 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
     }
 }
 
-void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
+void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool firstChild)
 {
     obj->validate();
 
@@ -1022,9 +1024,13 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj)
     session_manager->containerChangedUI(containerChanged);
 
     int parent_id = obj->getParentID();
-    if ((parent_id != -1) && (database->getChildCount(parent_id) == 1)) {
+    // this is the first entry, so the container is new also, send update for parent of parent
+    if (firstChild) {
+        firstChild = (database->getChildCount(parent_id) == 1);
+    }
+    if ((parent_id != -1) && firstChild) {
         auto parent = database->loadObject(parent_id);
-        log_debug("Will update ID {}", parent->getParentID());
+        log_debug("Will update parent ID {}", parent->getParentID());
         update_manager->containerChanged(parent->getParentID());
     }
 
@@ -1038,16 +1044,17 @@ void ContentManager::addContainer(int parentID, std::string title, const std::st
     addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
-int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain)
+std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain)
 {
     std::string tree;
     int result = INVALID_OBJECT_ID;
     std::vector<int> createdIds;
+    bool isNew = false;
 
     for (const auto& item : chain) {
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
-            return INVALID_OBJECT_ID;
+            return { INVALID_OBJECT_ID, false };
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, item->getTitle());
         log_debug("Received chain item {}", tree);
@@ -1058,6 +1065,7 @@ int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject
             database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
             containerMap[tree] = container;
+            isNew = true;
         } else {
             result = containerMap[tree]->getID();
         }
@@ -1068,13 +1076,14 @@ int ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject
         update_manager->containerChanged(result);
         session_manager->containerChangedUI(result);
     }
-    return result;
+    return { result, isNew };
 }
 
-int ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
+std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
     std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
     std::vector<int> updateID;
+    bool isNew = false;
 
     if (chain.empty())
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
@@ -1109,6 +1118,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
             containerMap[container->getLocation()] = container;
             containerList.emplace_back(container);
         }
+        isNew = true;
     } else {
         containerList.emplace_back(containerMap[newChain]);
     }
@@ -1119,7 +1129,7 @@ int ContentManager::addContainerChain(const std::string& chain, const std::strin
         session_manager->containerChangedUI(updateID.back());
     }
 
-    return containerID;
+    return { containerID, isNew };
 }
 
 void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
