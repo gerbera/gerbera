@@ -281,7 +281,9 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 
     if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
         std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(parameter->getID());
-        if (adir == nullptr)
+
+        // do not rescan while other scans are still active
+        if (adir == nullptr || adir->getActiveScanCount() > 0 || adir->getTaskCount() > 0)
             return;
 
         rescanDirectory(adir, adir->getObjectID());
