@@ -95,9 +95,9 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     if (!result.empty()) {
         auto cm = self->getContent();
         auto containerId = cm->addContainerTree(result);
-        if (containerId != INVALID_OBJECT_ID) {
+        if (containerId.first != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
-            std::string tmp = fmt::to_string(containerId);
+            std::string tmp = fmt::to_string(containerId.first);
             duk_push_string(ctx, tmp.c_str());
             return 1;
         }
@@ -194,9 +194,9 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        int parentId = stoiString(ts);
+        std::pair<int, bool> parentId = { stoiString(ts), false };
 
-        if (parentId <= 0) {
+        if (parentId.first <= 0) {
             if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
                 path = p2i->convert(path);
                 parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
@@ -206,7 +206,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             }
         }
 
-        cds_obj->setParentID(parentId);
+        cds_obj->setParentID(parentId.first);
         if (!cds_obj->isExternalItem()) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
@@ -229,10 +229,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cds_obj->setID(INVALID_OBJECT_ID);
-        cm->addObject(cds_obj);
+        cm->addObject(cds_obj, parentId.second);
 
         /* setting object ID as return value */
-        std::string tmp = fmt::to_string(parentId);
+        std::string tmp = fmt::to_string(parentId.first);
         duk_push_string(ctx, tmp.c_str());
         return 1;
     } catch (const ServerShutdownException& se) {
