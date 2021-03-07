@@ -219,8 +219,11 @@ void Server::run()
     if (url.empty()) {
         url = renderWebUri(ip, port);
     }
+    if (url.substr(0, 4) != "http") {
+        url = fmt::format("http://{}", url);
+    }
     writeBookmark(url);
-    log_info("The Web UI can be reached by following this link: http://{}/", url);
+    log_info("The Web UI can be reached by following this link: {}/", url);
     log_debug("end");
 }
 
