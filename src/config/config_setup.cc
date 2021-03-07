@@ -606,7 +606,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
         }
     }
     if (result.empty()) {
-        log_debug("{} assinging {} default values", xpath, defaultEntries.size());
+        log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         result.assign(defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
@@ -811,8 +811,10 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
         }
     }
     if (result.empty()) {
-        log_debug("{} assinging {} default values", xpath, defaultEntries.size());
-        result.insert(defaultEntries.begin(), defaultEntries.end());
+        log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        for (const auto& entry : defaultEntries) {
+            result.emplace(entry.first, entry.second);
+        }
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue);
