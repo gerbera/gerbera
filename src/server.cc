@@ -219,7 +219,7 @@ void Server::run()
     if (url.empty()) {
         url = renderWebUri(ip, port);
     }
-    if (url.substr(0, 4) != "http") {
+    if (url.find("http") != 0) { // url does not start with http
         url = fmt::format("http://{}", url);
     }
     writeBookmark(url);
