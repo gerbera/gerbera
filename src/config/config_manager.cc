@@ -175,6 +175,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "/server/upnp-string-limit", "config-server.html#upnp-string-limit",
         DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
 
+    std::make_shared<ConfigBoolSetup>(CFG_SERVER_SAMSUNG_BOOKMARK,
+        "/server/samsung-bookmark/attribute::enabled", "config-server.html#samsungbookmark",
+        DEFAULT_SAMSUNG_BOOKMARK),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE,
         "/server/storage", "config-server.html#storage",
         true),
@@ -1196,6 +1199,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     setOption(root, CFG_SERVER_ALIVE_INTERVAL);
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    setOption(root, CFG_SERVER_SAMSUNG_BOOKMARK);
 
     auto useInotify = setOption(root, CFG_IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
 

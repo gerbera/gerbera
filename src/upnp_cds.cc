@@ -249,21 +249,25 @@ void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequ
 {
     log_debug("start");
 
-    auto req_root = request->getRequest()->document_element();
-    auto objectID = req_root.child("ObjectID").text().as_string();
-    auto bookMarkPos = req_root.child("PosSecond").text().as_string();
-    auto categoryType = req_root.child("CategoryType").text().as_string();
-    auto rID = req_root.child("RID").text().as_string();
+    if (config->getBoolOption(CFG_SERVER_SAMSUNG_BOOKMARK)) {
+        auto req_root = request->getRequest()->document_element();
+        auto objectID = req_root.child("ObjectID").text().as_string();
+        auto bookMarkPos = req_root.child("PosSecond").text().as_string();
+        auto categoryType = req_root.child("CategoryType").text().as_string();
+        auto rID = req_root.child("RID").text().as_string();
 
-    log_debug("doSamsungBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
+        log_debug("doSamsungBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
 
-    std::map<std::string, std::string> m = {
-        { "bookmarkpos", bookMarkPos },
-    };
-    content->updateObject(stoiString(objectID), m);
+        std::map<std::string, std::string> m = {
+            { "bookmarkpos", bookMarkPos },
+        };
+        content->updateObject(stoiString(objectID), m);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    request->setResponse(response);
+        auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+        request->setResponse(response);
+    } else {
+        log_warning("doSamsungBookmark called, but it is disabled from configuration");
+    }
 
     log_debug("end");
 }

@@ -192,6 +192,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
         ALIVE_INTERVAL_MIN)
                             .c_str());
     setValue(CFG_SERVER_ALIVE_INTERVAL);
+    setValue(CFG_SERVER_SAMSUNG_BOOKMARK);
 
     generateDatabase();
     generateExtendedRuntime();
