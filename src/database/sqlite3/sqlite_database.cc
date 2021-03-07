@@ -117,6 +117,10 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_7_8_3 "CREATE INDEX \"grb_track_number\" ON mt_cds_object (part_number,track_number)"
 #define SQLITE3_UPDATE_7_8_4 "UPDATE \"mt_internal_setting\" SET \"value\"='8' WHERE \"key\"='db_version' AND \"value\"='7'"
 
+// updates 8->9: bookmark_pos
+#define SQLITE3_UPDATE_8_9_1 "ALTER TABLE \"mt_cds_object\" ADD \"bookmark_pos\" integer unsigned NOT NULL default 0"
+#define SQLITE3_UPDATE_8_9_2 "UPDATE \"mt_internal_setting\" SET \"value\"='9' WHERE \"key\"='db_version' AND \"value\"='8'"
+
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
     , timer(std::move(timer))
@@ -299,7 +303,15 @@ void Sqlite3Database::init()
             dbVersion = "8";
         }
 
-        if (dbVersion != "8")
+        if (dbVersion == "8") {
+            log_info("Running an automatic database upgrade from database version 8 to version 9...");
+            _exec(SQLITE3_UPDATE_8_9_1);
+            _exec(SQLITE3_UPDATE_8_9_2);
+            log_info("Database upgrade successful.");
+            dbVersion = "9";
+        }
+
+        if (dbVersion != "9")
             throw_std_runtime_error("The database seems to be from a newer version");
 
         // add timer for backups
