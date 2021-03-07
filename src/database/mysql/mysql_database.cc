@@ -95,6 +95,10 @@
 #define MYSQL_UPDATE_7_8_3 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_track_number` (`part_number`,`track_number`)"
 #define MYSQL_UPDATE_7_8_4 "UPDATE `mt_internal_setting` SET `value`='8' WHERE `key`='db_version' AND `value`='7'"
 
+// updates 8->9: bookmark_pos
+#define MYSQL_UPDATE_8_9_1 "ALTER TABLE `mt_cds_object` ADD `bookmark_pos` int(11) unsigned NOT NULL default '0' AFTER `service_id`"
+#define MYSQL_UPDATE_8_9_2 "UPDATE `mt_internal_setting` SET `value`='9' WHERE `key`='db_version' AND `value`='8'"
+
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
 {
@@ -289,7 +293,15 @@ void MySQLDatabase::init()
         dbVersion = "8";
     }
 
-    if (dbVersion != "8")
+    if (dbVersion == "8") {
+        log_info("Doing an automatic database upgrade from database version 8 to version 9...");
+        _exec(MYSQL_UPDATE_8_9_1);
+        _exec(MYSQL_UPDATE_8_9_2);
+        log_info("database upgrade successful.");
+        dbVersion = "9";
+    }
+
+    if (dbVersion != "9")
         throw_std_runtime_error("The database seems to be from a newer version (database version {})", dbVersion);
 
     lock.unlock();
