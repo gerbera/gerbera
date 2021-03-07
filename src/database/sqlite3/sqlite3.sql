@@ -17,6 +17,7 @@ CREATE TABLE "mt_cds_object" (
   "part_number" integer default NULL,
   "track_number" integer default NULL,
   "service_id" varchar(255) default NULL,
+  "bookmark_pos" integer unsigned NOT NULL default 0,
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
