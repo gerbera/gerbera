@@ -41,6 +41,8 @@
 #include "upnp_xml.h"
 #include <string>
 
+class ContentManager;
+
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
 /// Handles subscription and action invocation requests for the CDS.
@@ -95,10 +97,11 @@ protected:
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungBookmark([[maybe_unused]] const std::unique_ptr<ActionRequest>& request);
+    void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request);
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
+    std::shared_ptr<ContentManager> content;
 
     UpnpDevice_Handle deviceHandle;
     UpnpXMLBuilder* xmlBuilder;

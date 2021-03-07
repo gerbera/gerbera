@@ -31,12 +31,15 @@
 
 #include "upnp_cds.h" // API
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "config/config_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
+#include "server.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
@@ -45,6 +48,7 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
     , stringLimit(stringLimit)
     , config(context->getConfig())
     , database(context->getDatabase())
+    , content(context->getServer()->getContent())
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
@@ -243,7 +247,25 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 
 void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request)
 {
-    log_warning("Stub method for Samsung extension: X_SetBookmark");
+    log_debug("start");
+
+    auto req_root = request->getRequest()->document_element();
+    auto objectID = req_root.child("ObjectID").text().as_string();
+    auto bookMarkPos = req_root.child("PosSecond").text().as_string();
+    auto categoryType = req_root.child("CategoryType").text().as_string();
+    auto rID = req_root.child("RID").text().as_string();
+
+    log_debug("doSamsungBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
+
+    std::map<std::string, std::string> m = {
+        { "bookmarkpos", bookMarkPos },
+    };
+    content->updateObject(stoiString(objectID), m);
+
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    request->setResponse(response);
+
+    log_debug("end");
 }
 
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
