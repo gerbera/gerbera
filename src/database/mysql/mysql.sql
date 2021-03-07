@@ -24,6 +24,7 @@ CREATE TABLE `mt_cds_object` (
   `part_number` int(11) default NULL,
   `track_number` int(11) default NULL,
   `service_id` varchar(255) default NULL,
+  `bookmark_pos` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `cds_object_ref_id` (`ref_id`),
   KEY `cds_object_parent_id` (`parent_id`,`object_type`,`dc_title`),
