@@ -176,7 +176,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_SAMSUNG_BOOKMARK,
-        "/server/samsung-bookmark/attribute::enabled", "config-server.html#samsungbookmark",
+        "/server/samsung-bookmark/attribute::enabled", "config-server.html#samsung-bookmark",
         DEFAULT_SAMSUNG_BOOKMARK),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE,
         "/server/storage", "config-server.html#storage",
