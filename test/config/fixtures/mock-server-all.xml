@@ -18,6 +18,7 @@
         in an SSDP advertisement being sent every second.
     -->
   <alive>1800</alive>
+  <samsung-bookmark enabled="no" />
   <storage>
     <sqlite3 enabled="yes">
       <database-file>gerbera.db</database-file>
