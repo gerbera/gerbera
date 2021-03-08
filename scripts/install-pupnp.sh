@@ -30,7 +30,7 @@ else
    extraFlags="--prefix=/usr/local"
 fi
 
-./configure $extraFlags --enable-ipv6 --enable-reuseaddr
+./configure $extraFlags --enable-ipv6 --enable-reuseaddr --disable-blocking-tcp-connections
 if command -v nproc >/dev/null 2>&1; then
     make "-j$(nproc)"
 else
