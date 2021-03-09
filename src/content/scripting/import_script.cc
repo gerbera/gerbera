@@ -84,7 +84,4 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         gc_counter = 0;
     }
 }
-
-ImportScript::~ImportScript() = default;
-
 #endif // HAVE_JS

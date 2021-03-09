@@ -30,8 +30,6 @@
 #include "config/config_setup.h"
 #include "util/tools.h"
 
-ConfigGenerator::ConfigGenerator() = default;
-
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
     if (generated.find("") == generated.end()) {
