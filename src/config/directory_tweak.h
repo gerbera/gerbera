@@ -52,8 +52,6 @@ public:
 
 class DirectoryConfigList {
 public:
-    explicit DirectoryConfigList() = default;
-
     /// \brief Adds a new DirectoryTweak to the list.
     ///
     /// \param dir DirectoryTweak to add to the list.

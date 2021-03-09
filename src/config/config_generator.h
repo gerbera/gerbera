@@ -35,7 +35,6 @@ namespace fs = std::filesystem;
 
 class ConfigGenerator {
 public:
-    ConfigGenerator() = default;
     ~ConfigGenerator() = default;
 
     std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile);

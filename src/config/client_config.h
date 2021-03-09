@@ -40,8 +40,6 @@ class ClientConfig;
 
 class ClientConfigList {
 public:
-    explicit ClientConfigList() = default;
-
     /// \brief Adds a new ClientConfig to the list.
     ///
     /// \param dir ClientConfig to add to the list.

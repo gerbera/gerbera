@@ -38,7 +38,6 @@
 
 class IOHandler {
 public:
-    IOHandler() = default;
     virtual ~IOHandler() = default;
 
     /// \brief Opens a data for the web server.

@@ -43,7 +43,6 @@
 class ThreadExecutor : public Executor {
 public:
     /// \brief initialize the mutex and the cond
-    ThreadExecutor() = default;
     ~ThreadExecutor() override;
     bool isAlive() override { return threadRunning; }
 

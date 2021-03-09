@@ -121,7 +121,6 @@ public:
     bool getBoolOption() const override { return option; }
 
 protected:
-    BoolOption() = default;
     bool option;
 };
 

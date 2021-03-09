@@ -19,7 +19,6 @@ class Timer;
 
 class TaskProcessor {
 public:
-    TaskProcessor() = default;
     void run();
     virtual ~TaskProcessor() = default;
     void shutdown();

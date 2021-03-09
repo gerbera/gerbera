@@ -214,7 +214,6 @@ protected:
 using TranscodingProfileMap = std::map<std::string, std::shared_ptr<TranscodingProfile>>;
 class TranscodingProfileList {
 public:
-    TranscodingProfileList() = default;
     void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
