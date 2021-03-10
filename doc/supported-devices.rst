@@ -30,6 +30,7 @@ Device Flags
 The device flags have the following meaning
 
 -  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
+-  ``SAMSUNG_BOOKMARK``: 0x02, restore last played position when the media is played again (only for Samsung) 
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~
