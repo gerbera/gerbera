@@ -291,18 +291,6 @@ not configured to run on a fixed port. Each time the server is started, the book
 redirect to the servers current IP address and port. To use it, simply bookmark this file in your browser,
 the default location is ``~/.config/gerbera/gerbera.html``
 
-``samsung-bookmark``
-~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <samsung-bookmark enabled="no"/>
-
-* Optional
-* Default: **no**
-
-Resume the media at the last stopped position. Not applicable for transcoded media. For Samsung TVs only.
-
 ``upnp-string-limit``
 ~~~~~~~~~~~~~~~~~~~~~
 

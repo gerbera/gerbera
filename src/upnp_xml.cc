@@ -75,7 +75,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
-        if (config->getBoolOption(CFG_SERVER_SAMSUNG_BOOKMARK) && item->getBookMarkPos() > 10000) {
+        if (item->getBookMarkPos() > 10000) {
             auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", tmp, item->getBookMarkPos() - 10000);
             result.append_child("sec:dcmInfo").append_child(pugi::node_pcdata).set_value(dcmInfo.c_str());
         }
