@@ -32,9 +32,6 @@
 
 ConfigGenerator::ConfigGenerator() = default;
 
-std::map<std::string, std::shared_ptr<pugi::xml_node>> ConfigGenerator::generated;
-pugi::xml_document ConfigGenerator::doc;
-
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
     if (generated.find("") == generated.end()) {
