@@ -90,6 +90,17 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     shutdownFlag = false;
     layout_enabled = false;
 
+    update_manager = std::make_shared<UpdateManager>(database, server);
+#ifdef ONLINE_SERVICES
+    task_processor = std::make_shared<TaskProcessor>();
+#endif
+#ifdef HAVE_JS
+    scripting_runtime = std::make_shared<ScriptingRuntime>();
+#endif
+#ifdef HAVE_LASTFMLIB
+    last_fm = std::make_shared<LastFm>(context);
+#endif
+
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
@@ -102,17 +113,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
             }
         }
     }
-
-    update_manager = std::make_shared<UpdateManager>(database, server);
-#ifdef ONLINE_SERVICES
-    task_processor = std::make_shared<TaskProcessor>();
-#endif
-#ifdef HAVE_JS
-    scripting_runtime = std::make_shared<ScriptingRuntime>();
-#endif
-#ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>(context);
-#endif
 
     database->updateAutoscanList(ScanMode::Timed, config_timed_list);
     autoscan_timed = database->getAutoscanList(ScanMode::Timed);
