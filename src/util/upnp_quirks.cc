@@ -103,8 +103,7 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
             { "bookmarkpos", bookMarkPos },
         };
         content->updateObject(stoiString(objectID), m);
-
-        auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-        request->setResponse(response);
     }
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    request->setResponse(response);
 }
