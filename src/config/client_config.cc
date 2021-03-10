@@ -215,6 +215,10 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "SAMSUNG") {
         return QUIRK_FLAG_SAMSUNG;
     }
+    if (flag == "SAMSUNG_BOOKMARK") {
+        return QUIRK_FLAG_SAMSUNG_BOOKMARK;
+    }
+
     return stoiString(flag, 0, 0);
 }
 
@@ -228,6 +232,10 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     if (flags & QUIRK_FLAG_SAMSUNG) {
         myFlags.emplace_back("SAMSUNG");
         flags &= ~QUIRK_FLAG_SAMSUNG;
+    }
+    if (flags & QUIRK_FLAG_SAMSUNG_BOOKMARK) {
+        myFlags.emplace_back("SAMSUNG_BOOKMARK");
+        flags &= ~QUIRK_FLAG_SAMSUNG_BOOKMARK;
     }
 
     if (flags) {

@@ -126,7 +126,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root);
+        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuircks());
     }
 
     std::ostringstream buf;
@@ -249,21 +249,7 @@ void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequ
 {
     log_debug("start");
 
-    auto req_root = request->getRequest()->document_element();
-    auto objectID = req_root.child("ObjectID").text().as_string();
-    auto bookMarkPos = req_root.child("PosSecond").text().as_string();
-    auto categoryType = req_root.child("CategoryType").text().as_string();
-    auto rID = req_root.child("RID").text().as_string();
-
-    log_debug("doSamsungBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
-
-    std::map<std::string, std::string> m = {
-        { "bookmarkpos", bookMarkPos },
-    };
-    content->updateObject(stoiString(objectID), m);
-
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    request->setResponse(response);
+    request->getQuircks()->saveSamsungBookMarkedPosition(request);
 
     log_debug("end");
 }
