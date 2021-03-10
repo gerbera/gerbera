@@ -48,6 +48,7 @@ class Config;
 class ConfigValue;
 enum class ScanMode;
 class Timer;
+class StringConverter;
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
 #define BROWSE_ITEMS 0x00000002
@@ -140,7 +141,7 @@ public:
 
 class Database {
 public:
-    explicit Database(std::shared_ptr<Config> config);
+    Database() = default;
     virtual ~Database() = default;
     virtual void init() = 0;
 
@@ -286,7 +287,7 @@ public:
     ///
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
-    virtual int ensurePathExistence(fs::path path, int* changedContainer) = 0;
+    virtual int ensurePathExistence(fs::path path, int* changedContainer, StringConverter* f2i) = 0;
 
     /// \brief clears the given flag in all objects in the DB
     virtual void clearFlagInDB(int flag) = 0;
@@ -306,9 +307,6 @@ protected:
     friend class Server;
 
     virtual std::shared_ptr<Database> getSelf() = 0;
-
-protected:
-    std::shared_ptr<Config> config;
 };
 
 #endif // __STORAGE_H__

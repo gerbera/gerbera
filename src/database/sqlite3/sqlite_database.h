@@ -96,11 +96,8 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    explicit SLInitTask(std::shared_ptr<Config> config);
+    explicit SLInitTask();
     void run(sqlite3** db, Sqlite3Database* sl) override;
-
-protected:
-    std::shared_ptr<Config> config;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
@@ -139,23 +136,35 @@ protected:
 /// \brief A task for the sqlite3 thread to do a SQL exec.
 class SLBackupTask : public SLTask {
 public:
+    enum class Action {
+        Backup,
+        Restore
+    };
+
     /// \brief Constructor for the sqlite3 backup task
-    SLBackupTask(std::shared_ptr<Config> config, bool restore);
+    explicit SLBackupTask(Action action);
     void run(sqlite3** db, Sqlite3Database* sl) override;
 
 protected:
-    std::shared_ptr<Config> config;
-    bool restore;
+    Action action;
 };
 
 /// \brief The Database class for using SQLite3
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
-    Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
+    explicit Sqlite3Database(std::shared_ptr<Timer> timer, std::string fileName, fs::path initSQLPath, int synchronousMode, bool restore, bool backupEnabled, int backupInterval);
 
 private:
     void prepare();
+
+    std::string fileName;
+    fs::path initSQLPath;
+    int synchronous;
+    bool restore;
+    bool backupEnabled;
+    bool backupInterval;
+
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;
@@ -207,10 +216,11 @@ private:
     bool hasBackupTimer;
     int sqliteStatus;
 
-    friend class SLSelectTask;
+    friend class SLBackupTask;
     friend class SLExecTask;
     friend class SLInitTask;
-    friend class Sqlite3BackupTimerSubscriber;
+    friend class SLSelectTask;
+    friend class ContentManagerTest; // FIXME: We need init()
 };
 
 /// \brief Represents a result of a sqlite3 select

@@ -31,12 +31,21 @@
 
 #include "generic_task.h" // API
 
-GenericTask::GenericTask(task_owner_t taskOwner)
+GenericTask::GenericTask(TaskOwner taskOwner, std::promise<void>& promise) : promise(std::move(promise))
 {
     valid = true;
     cancellable = true;
-    taskType = Invalid;
+    taskType = TaskType::Invalid;
     taskID = 0;
     parentTaskID = 0;
     this->taskOwner = taskOwner;
+
+}
+GenericTask::GenericTask(TaskOwner taskOwner) : taskOwner(taskOwner)
+{
+    valid = true;
+    cancellable = true;
+    taskType = TaskType::Invalid;;
+    taskID = 0;
+    parentTaskID = 0;
 }

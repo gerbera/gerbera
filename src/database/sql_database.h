@@ -77,6 +77,12 @@ public:
 
 class SQLDatabase : public Database {
 public:
+    enum class Driver {
+        Unknown,
+        SQLite,
+        MySQL
+    };
+
     /* methods to override in subclasses */
     virtual std::string quote(std::string str) const = 0;
     virtual std::string quote(const char* str) const = 0;
@@ -160,15 +166,15 @@ public:
     void shutdown() override;
     virtual void shutdownDriver() = 0;
 
-    int ensurePathExistence(fs::path path, int* changedContainer) override;
+    int ensurePathExistence(fs::path path, int* changedContainer, StringConverter* f2i) override;
 
     std::string getFsRootName() override;
 
     void clearFlagInDB(int flag) override;
 
 protected:
-    explicit SQLDatabase(std::shared_ptr<Config> config);
-    //virtual ~SQLDatabase();
+    explicit SQLDatabase();
+    ~SQLDatabase() = default;
     void init() override;
 
     void doMetadataMigration() override;
@@ -176,6 +182,8 @@ protected:
 
     char table_quote_begin;
     char table_quote_end;
+
+    Driver activeDriver;
 
 private:
     std::string sql_query;

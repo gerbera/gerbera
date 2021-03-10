@@ -43,10 +43,19 @@
 
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    explicit MySQLDatabase(std::shared_ptr<Config> config);
+    explicit MySQLDatabase(std::string  dbHost, std::string dbName, std::string dbUser, int dbPort, std::string dbPass, std::string dbSock, fs::path initSQLPath);
     ~MySQLDatabase() override;
 
 private:
+    std::string dbHost;
+    std::string dbName;
+    std::string dbUser;
+    int dbPort;
+    std::string dbPass;
+    std::string dbSock;
+
+    fs::path initSQLPath;
+
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;

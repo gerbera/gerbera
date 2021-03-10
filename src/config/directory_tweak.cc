@@ -27,12 +27,14 @@
 
 #include "config/config.h"
 #include "content/content_manager.h"
-#include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
 {
-    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(location);
+    auto configList = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST);
+    if (configList == nullptr)
+        return;
+    auto tweak = configList->get(location);
     if (tweak == nullptr)
         return;
 

@@ -32,6 +32,8 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
+#include <database/database.h>
+
 #include "action_request.h"
 #include "context.h"
 #include "request_handler.h"

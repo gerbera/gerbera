@@ -504,6 +504,7 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 
 std::string readTextFile(const fs::path& path)
 {
+    log_debug("Opening text file: {}", path.u8string());
 #ifdef __linux__
     auto f = ::fopen(path.c_str(), "rte");
 #else

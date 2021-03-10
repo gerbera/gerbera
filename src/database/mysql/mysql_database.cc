@@ -33,6 +33,7 @@
 #include "mysql_database.h"
 
 #include <cstdlib>
+#include <utility>
 
 #include <netinet/in.h>
 #include <zlib.h>
@@ -95,13 +96,15 @@
 #define MYSQL_UPDATE_7_8_3 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_track_number` (`part_number`,`track_number`)"
 #define MYSQL_UPDATE_7_8_4 "UPDATE `mt_internal_setting` SET `value`='8' WHERE `key`='db_version' AND `value`='7'"
 
-MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
-    : SQLDatabase(std::move(config))
+MySQLDatabase::MySQLDatabase(std::string  dbHost, std::string dbName, std::string dbUser, int dbPort, std::string dbPass, std::string dbSock, fs::path initSQLPath) :
+    SQLDatabase(), dbHost(std::move(dbHost)), dbName(std::move(dbName)), dbUser(std::move(dbUser)), dbPort(dbPort), dbPass(std::move(dbPass)), dbSock(std::move(dbSock)), initSQLPath(initSQLPath)
 {
     mysql_init_key_initialized = false;
     mysql_connection = false;
     table_quote_begin = '`';
     table_quote_end = '`';
+
+    activeDriver = SQLDatabase::Driver::MySQL;
 }
 MySQLDatabase::~MySQLDatabase()
 {
@@ -156,13 +159,6 @@ void MySQLDatabase::init()
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1));
 
-    std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
-    std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
-    std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-    auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
-    std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
-    std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
-
     MYSQL* res_mysql;
 
     res_mysql = mysql_init(&db);
@@ -201,9 +197,8 @@ void MySQLDatabase::init()
 
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
-        auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
-        log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
-        auto sql = readTextFile(sqlFilePath);
+        log_debug("Loading initialisation SQL from: {}", initSQLPath.string());
+        auto sql = readTextFile(initSQLPath);
 
         for (const auto& statement : splitString(sql, ';')) {
             ret = mysql_real_query(&db, statement.c_str(), statement.size());

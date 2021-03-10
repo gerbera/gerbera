@@ -33,6 +33,8 @@
 
 #include <zlib.h>
 
+#include <utility>
+
 #include "config/config_manager.h"
 
 #define DB_BACKUP_FORMAT "{}.backup"
@@ -117,8 +119,8 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_7_8_3 "CREATE INDEX \"grb_track_number\" ON mt_cds_object (part_number,track_number)"
 #define SQLITE3_UPDATE_7_8_4 "UPDATE \"mt_internal_setting\" SET \"value\"='8' WHERE \"key\"='db_version' AND \"value\"='7'"
 
-Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
-    : SQLDatabase(std::move(config))
+Sqlite3Database::Sqlite3Database(std::shared_ptr<Timer> timer, std::string fileName, fs::path initSQLPath, int synchronousMode, bool restore, bool backupEnabled, int backupInterval)
+    : SQLDatabase(), fileName(std::move(fileName)), initSQLPath(std::move(initSQLPath)), synchronous(synchronousMode), restore(restore), backupEnabled(backupEnabled), backupInterval(backupInterval)
     , timer(std::move(timer))
 {
     shutdownFlag = false;
@@ -127,6 +129,9 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     dirty = false;
     dbInitDone = false;
     hasBackupTimer = false;
+
+    activeDriver = SQLDatabase::Driver::SQLite;
+    dbInitDone = false;
 }
 
 void Sqlite3Database::prepare()
@@ -134,7 +139,7 @@ void Sqlite3Database::prepare()
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
     _exec("PRAGMA journal_mode = WAL;");
-    SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
+    SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", synchronous));
 }
 
 void Sqlite3Database::init()
@@ -149,12 +154,11 @@ void Sqlite3Database::init()
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     */
 
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-    log_debug("SQLite path: {}", dbFilePath);
+    log_debug("SQLite path: {}", fileName);
 
     // check for db-file
-    if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
+    if (access(fileName.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", fileName.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
 
@@ -179,24 +183,23 @@ void Sqlite3Database::init()
         prepare();
     } catch (const std::runtime_error& e) {
         shutdown();
-        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath);
+        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", fileName);
     }
 
     std::string dbVersion;
-    std::string dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath);
+    std::string dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, fileName);
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
+        if (sqliteStatus == SQLITE_OK) {
             // try to restore database
-
             // checking for backup file
-            if (access(dbFilePathbackup.c_str(), R_OK) == 0) {
+            if (access(dbFilePathbackup.c_str(), R_OK) == 0 && restore) {
                 try {
                     // trying to copy backup file
-                    auto btask = std::make_shared<SLBackupTask>(config, true);
+                    auto btask = std::make_shared<SLBackupTask>(SLBackupTask::Action::Restore);
                     this->addTask(btask);
                     btask->waitForTask();
                     prepare();
@@ -213,7 +216,7 @@ void Sqlite3Database::init()
 
     if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
         log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
-        auto itask = std::make_shared<SLInitTask>(config);
+        auto itask = std::make_shared<SLInitTask>();
         addTask(itask);
         try {
             itask->waitForTask();
@@ -303,13 +306,12 @@ void Sqlite3Database::init()
             throw_std_runtime_error("The database seems to be from a newer version");
 
         // add timer for backups
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-            int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        if (backupEnabled) {
             timer->addTimerSubscriber(this, backupInterval, nullptr);
             hasBackupTimer = true;
 
             // do a backup now
-            auto btask = std::make_shared<SLBackupTask>(config, false);
+            auto btask = std::make_shared<SLBackupTask>(SLBackupTask::Action::Backup);
             this->addTask(btask);
             btask->waitForTask();
         }
@@ -395,11 +397,9 @@ void Sqlite3Database::threadProc()
 {
     sqlite3* db;
 
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-
-    int res = sqlite3_open(dbFilePath.c_str(), &db);
+    int res = sqlite3_open(fileName.c_str(), &db);
     if (res != SQLITE_OK) {
-        startupError = fmt::format("Sqlite3Database.init: could not open '{}'", dbFilePath);
+        startupError = fmt::format("Sqlite3Database.init: could not open '{}'", fileName);
         return;
     }
 
@@ -533,23 +533,22 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-SLInitTask::SLInitTask(std::shared_ptr<Config> config)
+SLInitTask::SLInitTask()
     : SLTask()
-    , config(std::move(config))
 {
 }
 
 void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 {
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-
     sqlite3_close(*db);
+
+    auto dbFilePath = sl->fileName;
 
     int res = sqlite3_open(dbFilePath.c_str(), db);
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
-    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+    auto sqlFilePath = sl->initSQLPath;
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = readTextFile(sqlFilePath);
 
@@ -638,17 +637,16 @@ void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
 }
 
 /* SLBackupTask */
-SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
-    : config(std::move(config))
-    , restore(restore)
+SLBackupTask::SLBackupTask(SLBackupTask::Action action)
+    : action(action)
 {
 }
 
 void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
 {
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = sl->fileName;
 
-    if (!restore) {
+    if (action == SLBackupTask::Action::Backup) {
         try {
             fs::copy(
                 dbFilePath,
@@ -712,10 +710,8 @@ Sqlite3Row::Sqlite3Row(char** row)
     this->row = row;
 }
 
-/* Sqlite3BackupTimerSubscriber */
-
 void Sqlite3Database::timerNotify(std::shared_ptr<Timer::Parameter> param)
 {
-    auto btask = std::make_shared<SLBackupTask>(config, false);
+    auto btask = std::make_shared<SLBackupTask>(SLBackupTask::Action::Backup);
     this->addTask(btask, true);
 }

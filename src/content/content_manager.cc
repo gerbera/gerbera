@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <regex>
 
+ #include <future>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -93,14 +94,19 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    for (size_t i = 0; i < config_timed_list->size(); i++) {
-        auto dir = config_timed_list->get(i);
-        if (dir != nullptr) {
-            fs::path path = dir->getLocation();
-            if (fs::is_directory(path)) {
-                dir->setObjectID(ensurePathExistence(path));
+    if (config_timed_list) {
+        for (size_t i = 0; i < config_timed_list->size(); i++) {
+            auto dir = config_timed_list->get(i);
+            if (dir != nullptr) {
+                fs::path path = dir->getLocation();
+                if (fs::is_directory(path)) {
+                    dir->setObjectID(ensurePathExistence(path));
+                }
             }
         }
+
+        database->updateAutoscanList(ScanMode::Timed, config_timed_list);
+        autoscan_timed = database->getAutoscanList(ScanMode::Timed);
     }
 
     update_manager = std::make_shared<UpdateManager>(database, server);
@@ -113,14 +119,13 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #ifdef HAVE_LASTFMLIB
     last_fm = std::make_shared<LastFm>(context);
 #endif
-
-    database->updateAutoscanList(ScanMode::Timed, config_timed_list);
-    autoscan_timed = database->getAutoscanList(ScanMode::Timed);
 }
 
 void ContentManager::run()
 {
-    timer->run();
+    if (timer) {
+        timer->run();
+    }
 #ifdef ONLINE_SERVICES
     task_processor->run();
 #endif
@@ -223,7 +228,9 @@ void ContentManager::run()
         throw_std_runtime_error("Could not start task thread");
     }
 
-    autoscan_timed->notifyAll(this);
+    if (autoscan_timed) {
+        autoscan_timed->notifyAll(this);
+    }
 
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
@@ -242,11 +249,13 @@ void ContentManager::run()
     }
 #endif
 
-    for (size_t i = 0; i < autoscan_timed->size(); i++) {
-        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(i);
-        auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
-        log_debug("Adding timed scan with interval {}", adir->getInterval());
-        timer->addTimerSubscriber(this, adir->getInterval(), param, false);
+    if (autoscan_timed) {
+        for (size_t i = 0; i < autoscan_timed->size(); i++) {
+            std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(i);
+            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
+            log_debug("Adding timed scan with interval {}", adir->getInterval());
+            timer->addTimerSubscriber(this, adir->getInterval(), param, false);
+        }
     }
 }
 
@@ -385,9 +394,9 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
         return taskList;
 
     taskList.push_back(t);
-    std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
+    std::copy_if(normalPriorityTaskQueue.begin(), normalPriorityTaskQueue.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
 
-    for (const auto& task : taskQueue2) {
+    for (const auto& task : lowPriorityTaskQueue) {
         if (task->isValid())
             taskList.clear();
     }
@@ -556,10 +565,12 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
 int ContentManager::ensurePathExistence(fs::path path)
 {
     int updateID;
-    int containerID = database->ensurePathExistence(std::move(path), &updateID);
+    int containerID = database->ensurePathExistence(std::move(path), &updateID, StringConverter::f2i(config).get());
     if (updateID != INVALID_OBJECT_ID) {
-        update_manager->containerChanged(updateID);
-        session_manager->containerChangedUI(updateID);
+        if (update_manager)
+            update_manager->containerChanged(updateID);
+        if (session_manager)
+            session_manager->containerChangedUI(updateID);
     }
     return containerID;
 }
@@ -1331,19 +1342,18 @@ void ContentManager::reloadLayout()
 
 void ContentManager::threadProc()
 {
-    std::shared_ptr<GenericTask> task;
     AutoLockU lock(mutex);
     working = true;
     while (!shutdownFlag) {
         currentTask = nullptr;
 
-        task = nullptr;
-        if (!taskQueue1.empty()) {
-            task = taskQueue1.front();
-            taskQueue1.pop_front();
-        } else if (!taskQueue2.empty()) {
-            task = taskQueue2.front();
-            taskQueue2.pop_front();
+        std::shared_ptr<GenericTask> task;
+        if (!normalPriorityTaskQueue.empty()) {
+            task = normalPriorityTaskQueue.front();
+            normalPriorityTaskQueue.pop_front();
+        } else if (!lowPriorityTaskQueue.empty()) {
+            task = lowPriorityTaskQueue.front();
+            lowPriorityTaskQueue.pop_front();
         }
 
         if (task == nullptr) {
@@ -1387,12 +1397,14 @@ void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowP
 {
     AutoLock lock(mutex);
 
-    task->setID(taskID++);
+    uint32_t id = taskID++;
+    log_debug("Adding Task {}", id);
+    task->setID(id);
 
     if (!lowPriority)
-        taskQueue1.push_back(task);
+        normalPriorityTaskQueue.push_back(task);
     else
-        taskQueue2.push_back(task);
+        lowPriorityTaskQueue.push_back(task);
     signal();
 }
 
@@ -1479,7 +1491,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
 
 void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path)
 {
-    if (t->getType() == AddFile) {
+    if (t->getType() == TaskType::AddFile) {
         auto add_task = std::static_pointer_cast<CMAddFileTask>(t);
         log_debug("comparing, task path: {}, remove path: {}", add_task->getPath().c_str(), path.c_str());
         if (startswith(add_task->getPath(), path)) {
@@ -1489,32 +1501,32 @@ void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, co
     }
 }
 
-void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
+void ContentManager::invalidateTask(unsigned int id, TaskOwner taskOwner)
 {
-    if (taskOwner == ContentManagerTask) {
+    if (taskOwner == TaskOwner::ContentManager) {
         AutoLock lock(mutex);
         auto t = getCurrentTask();
         if (t != nullptr) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
+            if ((t->getID() == id) || (t->getParentID() == id)) {
                 t->invalidate();
             }
         }
 
-        for (const auto& t : taskQueue1) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-                t->invalidate();
+        for (const auto& queueItem : normalPriorityTaskQueue) {
+            if ((queueItem->getID() == id) || (queueItem->getParentID() == id)) {
+                queueItem->invalidate();
             }
         }
 
-        for (const auto& t : taskQueue2) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-                t->invalidate();
+        for (const auto& queueItem : lowPriorityTaskQueue) {
+            if ((queueItem->getID() == id) || (queueItem->getParentID() == id)) {
+                queueItem->invalidate();
             }
         }
     }
 #ifdef ONLINE_SERVICES
-    else if (taskOwner == TaskProcessorTask)
-        task_processor->invalidateTask(taskID);
+    else if (taskOwner == TaskOwner::TaskProcessor)
+        task_processor->invalidateTask(id);
 #endif
 }
 
@@ -1563,11 +1575,11 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (const auto& t : taskQueue1) {
+            for (const auto& t : normalPriorityTaskQueue) {
                 invalidateAddTask(t, path);
             }
 
-            for (const auto& t : taskQueue2) {
+            for (const auto& t : lowPriorityTaskQueue) {
                 invalidateAddTask(t, path);
             }
 
@@ -1583,11 +1595,13 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
     }
 }
 
-void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath, bool cancellable)
+std::future<void> ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath, bool cancellable)
 {
     // building container path for the description
+    std::promise<void> promise;
+    auto future = promise.get_future();
     auto self = shared_from_this();
-    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable, std::move(promise));
 
     adir->incTaskCount();
 
@@ -1595,7 +1609,9 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
         descPath = adir->getLocation();
 
     task->setDescription("Scan: " + descPath);
+
     addTask(task, true); // adding with low priority
+    return future;
 }
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode) const
@@ -1643,6 +1659,8 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
 {
     if (adir == nullptr)
         throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
+
+    log_debug("Removing Autoscan directory: {}({})", adir->getLocation().string(), (adir->getScanMode() == ScanMode::Timed ? "timed" : "inotify"));
 
     adir->setTaskCount(-1);
 
@@ -1813,14 +1831,14 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::path path, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManager)
     , content(std::move(content))
     , path(std::move(path))
     , rootpath(std::move(rootpath))
     , asSetting(asSetting)
 {
     this->cancellable = cancellable;
-    this->taskType = AddFile;
+    this->taskType = TaskType::AddFile;
     if (this->asSetting.adir != nullptr)
         this->asSetting.adir->incTaskCount();
 }
@@ -1845,14 +1863,14 @@ void CMAddFileTask::run()
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
     int objectID, bool rescanResource, bool all)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManager)
     , content(std::move(content))
     , adir(std::move(adir))
     , objectID(objectID)
     , all(all)
     , rescanResource(rescanResource)
 {
-    this->taskType = RemoveObject;
+    this->taskType = TaskType::RemoveObject;
     cancellable = false;
 }
 
@@ -1861,15 +1879,14 @@ void CMRemoveObjectTask::run()
     content->_removeObject(adir, objectID, rescanResource, all);
 }
 
-CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-    std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable)
-    : GenericTask(ContentManagerTask)
+CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable, std::promise<void> promise)
+    : GenericTask(TaskOwner::ContentManager, promise)
     , content(std::move(content))
     , adir(std::move(adir))
     , containerID(containerId)
 {
     this->cancellable = cancellable;
-    this->taskType = RescanDirectory;
+    this->taskType = TaskType::RescanDirectory;
 }
 
 void CMRescanDirectoryTask::run()
@@ -1884,13 +1901,14 @@ void CMRescanDirectoryTask::run()
         log_debug("CMRescanDirectoryTask::run: Updating last_modified for autoscan directory {}", adir->getLocation().c_str());
         content->getContext()->getDatabase()->updateAutoscanDirectory(adir);
     }
+    promise.set_value();
 }
 
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManager)
     , content(std::move(content))
     , task_processor(std::move(task_processor))
     , timer(std::move(timer))
@@ -1899,7 +1917,7 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
 {
     this->cancellable = cancellable;
     this->unscheduled_refresh = unscheduled_refresh;
-    this->taskType = FetchOnlineContent;
+    this->taskType = TaskType::FetchOnlineContent;
 }
 
 void CMFetchOnlineContentTask::run()

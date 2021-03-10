@@ -41,6 +41,7 @@
 #include <vector>
 
 #include <dirent.h>
+#include <future>
 
 #include "autoscan.h"
 #include "cds_objects.h"
@@ -117,8 +118,7 @@ protected:
     int containerID;
 
 public:
-    CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable);
+    CMRescanDirectoryTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable, std::promise<void> promise);
     void run() override;
 };
 
@@ -161,7 +161,7 @@ public:
     std::deque<std::shared_ptr<GenericTask>> getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
-    void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
+    void invalidateTask(unsigned int id, TaskOwner taskOwner = TaskOwner::ContentManager);
 
     /* the functions below return true if the task has been enqueued */
 
@@ -278,7 +278,7 @@ public:
     /// \brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir);
 
-    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath = "", bool cancellable = true);
+    std::future<void> rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath = "", bool cancellable = true);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -393,8 +393,8 @@ protected:
 
     bool shutdownFlag;
 
-    std::deque<std::shared_ptr<GenericTask>> taskQueue1; // priority 1
-    std::deque<std::shared_ptr<GenericTask>> taskQueue2; // priority 2
+    std::deque<std::shared_ptr<GenericTask>> normalPriorityTaskQueue; // priority 1
+    std::deque<std::shared_ptr<GenericTask>> lowPriorityTaskQueue; // priority 2
     std::shared_ptr<GenericTask> currentTask;
 
     unsigned int taskID;

@@ -36,22 +36,32 @@
 #include "database/mysql/mysql_database.h"
 #include "util/tools.h"
 
-Database::Database(std::shared_ptr<Config> config)
-    : config(std::move(config))
-{
-}
-
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
 {
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
     std::shared_ptr<Database> database;
 
     if (type == "sqlite3") {
-        database = std::static_pointer_cast<Database>(std::make_shared<Sqlite3Database>(config, timer));
+        auto backupEnabled = config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
+        auto backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        auto location = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+        auto initSQLPath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        auto restore = config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE);
+        int sync = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+
+        database = std::static_pointer_cast<Database>(std::make_shared<Sqlite3Database>(timer, location, fs::path(initSQLPath), sync, restore, backupEnabled, backupInterval));
     }
 #ifdef HAVE_MYSQL
     else if (type == "mysql") {
-        database = std::static_pointer_cast<Database>(std::make_shared<MySQLDatabase>(config));
+        auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
+        auto initSQLPath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
+        std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+        std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+        std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+        std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+
+        database = std::static_pointer_cast<Database>(std::make_shared<MySQLDatabase>(dbHost, dbName, dbUser, dbPort, dbPass, dbSock, initSQLPath));
     }
 #endif
     else {

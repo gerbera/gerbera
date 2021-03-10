@@ -75,11 +75,11 @@ public:
     std::vector<std::shared_ptr<DirectoryTweak>> getArrayCopy();
 
 protected:
-    size_t origSize;
+    size_t origSize{};
     std::map<size_t, std::shared_ptr<DirectoryTweak>> indexMap;
 
-    std::recursive_mutex mutex;
-    using AutoLock = std::lock_guard<std::recursive_mutex>;
+    std::mutex mutex;
+    using AutoLock = std::lock_guard<std::mutex>;
 
     std::vector<std::shared_ptr<DirectoryTweak>> list;
     void _add(const std::shared_ptr<DirectoryTweak>& dir, size_t index);

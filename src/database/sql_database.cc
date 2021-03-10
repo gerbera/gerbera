@@ -139,8 +139,7 @@ enum class MetadataCol {
 
 /* enum for createObjectFromRow's mode parameter */
 
-SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
-    : Database(std::move(config))
+SQLDatabase::SQLDatabase() : Database()
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
@@ -283,7 +282,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             if (loc.empty())
                 throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
             if (obj->isPureItem()) {
-                int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
+                int parentID = ensurePathExistence(loc.parent_path(), changedContainer, nullptr);
                 item->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
@@ -701,7 +700,7 @@ int SQLDatabase::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
     return obj->getID();
 }
 
-int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
+int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer, StringConverter* f2i)
 {
     *changedContainer = INVALID_OBJECT_ID;
     if (path == std::string(1, DIR_SEPARATOR))
@@ -711,9 +710,8 @@ int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
     if (obj != nullptr)
         return obj->getID();
 
-    int parentID = ensurePathExistence(path.parent_path(), changedContainer);
+    int parentID = ensurePathExistence(path.parent_path(), changedContainer, f2i);
 
-    auto f2i = StringConverter::f2i(config);
     if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
@@ -1150,7 +1148,7 @@ std::string SQLDatabase::findFolderImage(int id, std::string trackArtBase)
     q << TQ("object_type") << '=' << quote(OBJECT_TYPE_ITEM);
 
     // only use this optimization on sqlite3
-    if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
+    if (activeDriver == Driver::SQLite) {
         q << " LIMIT " << MAX_ART_CONTAINERS << ")";
     } else {
         q << ")";
@@ -1456,9 +1454,7 @@ std::string SQLDatabase::toCSV(const std::vector<int>& input)
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
-    log_debug("start upnp: {}; ui: {}",
-        join(maybeEmpty->upnp, ',').c_str(),
-        join(maybeEmpty->ui, ',').c_str());
+    log_debug("start upnp: {}; ui: {}", join(maybeEmpty->upnp, ',').c_str(), join(maybeEmpty->ui, ',').c_str());
     auto changedContainers = std::make_unique<ChangedContainers>();
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return changedContainers;
@@ -1471,8 +1467,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
               << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('b')
               << " ON " << TQD('a', "id") << '=' << TQD('b', "parent_id")
               << " WHERE " << TQD('a', "object_type") << '=' << quote(1)
-              << " AND " << TQD('a', "id") << " IN ("; //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
-    std::string strSel2(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
+              << " AND " << TQD('a', "id") << " IN (";
+    std::string strSel2(") GROUP BY a.id");
 
     std::ostringstream bufSelUpnp;
     bufSelUpnp << selectSql.str();
