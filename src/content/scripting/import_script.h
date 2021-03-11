@@ -45,7 +45,7 @@ class ImportScript : public Script {
 public:
     ImportScript(std::shared_ptr<ContentManager> content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
-    ~ImportScript() override;
+    ~ImportScript() override = default;
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);
     script_class_t whoami() override { return S_IMPORT; }
