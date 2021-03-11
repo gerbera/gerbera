@@ -44,8 +44,6 @@ ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context
 {
 }
 
-ConnectionManagerService::~ConnectionManagerService() = default;
-
 void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
