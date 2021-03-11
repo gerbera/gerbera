@@ -284,7 +284,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
             if (obj->isPureItem()) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
-                item->setParentID(parentID);
+                obj->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
                 cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
@@ -348,7 +348,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
-        throw_std_runtime_error("tried to create or update an object with an illegal parent id");
+        throw_std_runtime_error("tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
     returnVal.push_back(

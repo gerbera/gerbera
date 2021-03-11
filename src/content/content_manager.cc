@@ -681,7 +681,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         struct stat statbuf;
         int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
+            log_error("_rescanDirectory: Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
             continue;
         }
 
@@ -857,7 +857,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         struct stat statbuf;
         int ret = stat(newPath.c_str(), &statbuf);
         if (ret != 0) {
-            log_error("Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
+            log_error("addRecursive: Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
             continue;
         }
 
@@ -1120,6 +1120,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         }
         isNew = true;
     } else {
+        containerID = containerMap[newChain]->getID();
         containerList.emplace_back(containerMap[newChain]);
     }
 
