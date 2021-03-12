@@ -1213,7 +1213,7 @@ bool ContentManager::isLink(const fs::path& path, bool allowLinks)
     return false;
 }
 
-std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool followSymlinks, bool magic, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool followSymlinks, bool allow_fifo)
 {
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);

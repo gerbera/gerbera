@@ -197,9 +197,7 @@ public:
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path, bool followSymlinks,
-        bool magic = true,
-        bool allow_fifo = false);
+    std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path, bool followSymlinks, bool allow_fifo = false);
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
