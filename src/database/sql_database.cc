@@ -885,9 +885,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setFlags(std::stoi(row->col(_flags)));
 
     auto meta = retrieveMetadataForObject(obj->getID());
-    if (!meta.empty())
+    if (!meta.empty()) {
         obj->setMetadata(meta);
-    else {
+    } else if (obj->getRefID() != CDS_ID_ROOT) {
         meta = retrieveMetadataForObject(obj->getRefID());
         if (!meta.empty())
             obj->setMetadata(meta);
