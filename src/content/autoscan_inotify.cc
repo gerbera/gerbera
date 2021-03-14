@@ -33,10 +33,6 @@
 #include "autoscan_inotify.h" // API
 
 #include <cassert>
-#include <filesystem>
-
-#include <dirent.h>
-#include <sys/stat.h>
 
 #include "content_manager.h"
 #include "database/database.h"
@@ -106,10 +102,11 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
+                auto dirEnt = fs::directory_entry(location);
 
                 if (adir->getRecursive()) {
                     log_debug("removing recursive watch: {}", location.c_str());
-                    monitorUnmonitorRecursive(location, true, adir, true);
+                    monitorUnmonitorRecursive(dirEnt, true, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                 } else {
                     log_debug("removing non-recursive watch: {}", location.c_str());
                     unmonitorDirectory(location, adir);
@@ -129,10 +126,11 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
+                auto dirEnt = fs::directory_entry(location);
 
                 if (adir->getRecursive()) {
                     log_debug("adding recursive watch: {}", location.c_str());
-                    monitorUnmonitorRecursive(location, false, adir, true);
+                    monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                 } else {
                     log_debug("adding non-recursive watch: {}", location.c_str());
                     monitorDirectory(location, adir, true);
@@ -190,7 +188,8 @@ void AutoscanInotify::threadProc()
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
                                 log_debug("new dir detected, adding to inotify: {}", path.c_str());
-                                monitorUnmonitorRecursive(path, false, adir, false);
+                                auto dirEnt = fs::directory_entry(path);
+                                monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                             } else {
                                 log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
                             }
@@ -228,10 +227,11 @@ void AutoscanInotify::threadProc()
                         asSetting.hidden = adir->getHidden();
                         asSetting.rescanResource = true;
                         asSetting.mergeOptions(config, path);
-                        content->addFile(fs::directory_entry(path), adir->getLocation(), asSetting, true, true, false);
+                        auto dirEnt = fs::directory_entry(path);
+                        content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
 
                         if (mask & IN_ISDIR)
-                            monitorUnmonitorRecursive(path, false, adir, false);
+                            monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
                     }
                 }
                 if (mask & IN_IGNORED) {
@@ -438,38 +438,47 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>
     }
 }
 
-void AutoscanInotify::monitorUnmonitorRecursive(const fs::path& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint)
+void AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, bool followSymlinks)
 {
     if (unmonitor)
-        unmonitorDirectory(startPath, adir);
+        unmonitorDirectory(startPath.path(), adir);
     else {
-        bool ok = (monitorDirectory(startPath, adir, startPoint) > 0);
+        bool ok = (monitorDirectory(startPath.path(), adir, startPoint) > 0);
         if (!ok)
             return;
     }
 
-    DIR* dir = opendir(startPath.c_str());
-    if (!dir) {
-        log_warning("Could not open {}", startPath.c_str());
+    std::error_code ec;
+    if (!startPath.exists(ec) || !startPath.is_directory(ec)) {
+        log_warning("Could not open {}: {}", startPath.path().c_str(), ec.message());
         return;
     }
 
-    struct dirent* dent;
-    while ((dent = readdir(dir)) != nullptr && !shutdownFlag) {
-        char* name = dent->d_name;
+    for (const auto& dirEnt : fs::directory_iterator(startPath, fs::directory_options::skip_permission_denied, ec)) {
+        if (shutdownFlag)
+            break;
+        auto name = dirEnt.path().c_str();
         if (name[0] == '.') {
             if (name[1] == 0)
                 continue;
             if (name[1] == '.' && name[2] == 0)
                 continue;
         }
+        if (!followSymlinks && dirEnt.is_symlink()) {
+            log_debug("link {} skipped", dirEnt.path().c_str());
+            continue;
+        }
 
-        fs::path fullpath = startPath / name;
-        if (fs::is_directory(fullpath))
-            monitorUnmonitorRecursive(fullpath, unmonitor, adir, false);
+        if (dirEnt.is_directory(ec) && adir->getRecursive())
+            monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
+
+        if (ec.value()) {
+            log_error("monitorUnmonitorRecursive: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
+        }
     }
-
-    closedir(dir);
+    if (ec.value()) {
+        log_error("monitorUnmonitorRecursive: Failed to read {}, {}", startPath.path().c_str(), ec.message());
+    }
 }
 
 int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, const std::vector<std::string>* pathArray)
