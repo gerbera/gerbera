@@ -626,7 +626,6 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         return;
     }
 
-    DIR* dir = nullptr;
     std::error_code ec;
     auto dirEnt = fs::directory_entry(location);
     if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
@@ -691,7 +690,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID) {
             log_info("lost autoscan for {}", newPath.c_str());
-            finishScan(dir, adir, location, last_modified_new_max);
+            finishScan(adir, location, last_modified_new_max);
             return;
         }
 
@@ -762,7 +761,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID) {
                     log_info("lost autoscan for {}", newPath.c_str());
-                    finishScan(dir, adir, location, last_modified_new_max);
+                    finishScan(adir, location, last_modified_new_max);
                     return;
                 }
                 // add directory, recursive, async, hidden flag, low priority
@@ -778,7 +777,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         }
     } // while
 
-    finishScan(dir, adir, location, last_modified_new_max);
+    finishScan(adir, location, last_modified_new_max);
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
         return;
@@ -795,19 +794,12 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 /* scans the given directory and adds everything recursively */
 void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
 {
-    //if (!hidden) {
-    //    log_debug("Checking path {}", dirEnt.path().c_str());
-    //    if (path.is_relative())
-    //        return;
-    //}
-
     auto f2i = StringConverter::f2i(config);
 
     std::error_code ec;
     if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
         throw_std_runtime_error("Could not list directory {}: {}", dirEnt.path().c_str(), ec.message());
     }
-    DIR* dir = nullptr;
 
     int parentID = database->findObjectIDByPath(dirEnt.path());
 
@@ -890,14 +882,11 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         log_error("_rescanDirectory: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
     }
 
-    finishScan(dir, adir, dirEnt.path(), last_modified_new_max);
+    finishScan(adir, dirEnt.path(), last_modified_new_max);
 }
 
-void ContentManager::finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)
 {
-    if (dir) {
-        closedir(dir);
-    }
     if (adir != nullptr) {
         adir->setCurrentLMT(location, lmt > 0 ? lmt : (time_t)1);
     }
@@ -1203,32 +1192,10 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
     }
 }
 
-bool ContentManager::isLink(const fs::path& path, bool allowLinks)
-{
-    //if (!allowLinks) {
-    //    struct stat statbuf;
-    //    int lret = lstat(path.c_str(), &statbuf);
-    //
-    //    if (lret != 0) {
-    //        log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
-    //        return true;
-    //    }
-    //
-    //    if (S_ISLNK(statbuf.st_mode)) {
-    //        log_debug("link {} skipped", path.c_str());
-    //        return true;
-    //    }
-    //}
-    return false;
-}
-
 std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allow_fifo)
 {
-    //auto dirEnt = fs::directory_entry(path);
     std::error_code ec;
 
-    //struct stat statbuf;
-    //int ret = stat(path.c_str(), &statbuf);
     if (!dirEnt.exists(ec)) {
         log_warning("File or directory does not exist: {} ({})", dirEnt.path().c_str(), ec.message());
         return nullptr;
