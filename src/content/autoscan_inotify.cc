@@ -228,7 +228,7 @@ void AutoscanInotify::threadProc()
                         asSetting.hidden = adir->getHidden();
                         asSetting.rescanResource = true;
                         asSetting.mergeOptions(config, path);
-                        content->addFile(path, adir->getLocation(), asSetting, true, true, false);
+                        content->addFile(fs::directory_entry(path), adir->getLocation(), asSetting, true, true, false);
 
                         if (mask & IN_ISDIR)
                             monitorUnmonitorRecursive(path, false, adir, false);

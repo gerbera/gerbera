@@ -178,7 +178,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 asSetting.rescanResource = false;
                 asSetting.mergeOptions(config, loc);
 
-                pcd_id = cm->addFile(loc, asSetting, false);
+                pcd_id = cm->addFile(fs::directory_entry(loc), asSetting, false);
                 if (pcd_id == INVALID_OBJECT_ID) {
                     return 0;
                 }

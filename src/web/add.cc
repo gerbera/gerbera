@@ -61,6 +61,6 @@ void web::add::process()
     asSetting.recursive = true;
     asSetting.mergeOptions(config, path);
 
-    content->addFile(path, asSetting);
+    content->addFile(fs::directory_entry(path), asSetting);
     log_debug("add: returning");
 }
