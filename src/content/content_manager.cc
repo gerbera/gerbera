@@ -32,12 +32,9 @@
 #include "content_manager.h" // API
 
 #include <cerrno>
+#include <chrono>
 #include <cstring>
-#include <filesystem>
 #include <regex>
-
-#include <sys/stat.h>
-#include <unistd.h>
 
 #include "config/config_manager.h"
 #include "config/directory_tweak.h"
@@ -215,6 +212,13 @@ void ContentManager::run()
 #endif // ATRAILERS
 
 #endif // ONLINE_SERVICES
+
+    if (layout_enabled)
+        initLayout();
+
+#ifdef HAVE_JS
+    initJS();
+#endif
 
     int ret = pthread_create(&taskThread,
         nullptr, //&attr, // attr
@@ -400,13 +404,14 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     obj->validate();
     fs::path path = obj->getLocation();
 
+    auto dirEnt = fs::directory_entry(path);
     std::error_code ec;
-    if (!isRegularFile(path, ec))
-        throw_std_runtime_error("Not a file: {}", path.c_str());
+    if (!dirEnt.is_regular_file(ec))
+        throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
     auto pcdir = database->findObjectByPath(path);
     if (pcdir == nullptr) {
-        pcdir = createObjectFromFile(path, true, allow_fifo);
+        pcdir = createObjectFromFile(dirEnt, true, allow_fifo);
         if (pcdir == nullptr) {
             throw_std_runtime_error("Could not add {}", path.c_str());
         }
@@ -419,15 +424,23 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
+template <typename TP>
+std::time_t to_time_t(TP tp)
 {
-    auto obj = checkDatabase ? database->findObjectByPath(path) : nullptr;
+    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
+        + std::chrono::system_clock::now());
+    return std::chrono::system_clock::to_time_t(asSystemTime);
+}
+
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
+{
+    auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
 
     if (obj == nullptr) {
-        obj = createObjectFromFile(path, followSymlinks);
+        obj = createObjectFromFile(dirEnt, followSymlinks);
         if (obj == nullptr) { // object ignored
-            log_debug("Link to file or directory ignored: {}", path.c_str());
+            log_debug("Link to file or directory ignored: {}", dirEnt.path().c_str());
             return nullptr;
         }
         if (obj->isItem()) {
@@ -435,7 +448,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::setMetadata(context, std::static_pointer_cast<CdsItem>(obj));
+        MetadataHandler::setMetadata(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
     }
     if (obj->isItem() && layout != nullptr && (processExisting || isNew)) {
         try {
@@ -461,36 +474,28 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::path& path
     return obj;
 }
 
-int ContentManager::_addFile(const fs::path& path, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
+int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!asSetting.hidden) {
-        if (path.is_relative())
+        if (dirEnt.path().is_relative())
             return INVALID_OBJECT_ID;
     }
 
     // never add the server configuration file
-    if (config->getConfigFilename() == path)
+    if (config->getConfigFilename() == dirEnt.path())
         return INVALID_OBJECT_ID;
 
-    if (layout_enabled)
-        initLayout();
-
-#ifdef HAVE_JS
-    initJS();
-#endif
-
     // checkDatabase, don't process existing
-    // TODO: stat file to compare with LMT
-    auto obj = createSingleItem(path, rootPath, asSetting.followSymlinks, true, false, false, task);
+    auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, task);
     if (obj == nullptr) // object ignored
         return INVALID_OBJECT_ID;
 
     if (asSetting.recursive && obj->isContainer()) {
-        addRecursive(asSetting.adir, path, asSetting.followSymlinks, asSetting.hidden, task);
+        addRecursive(asSetting.adir, dirEnt, asSetting.followSymlinks, asSetting.hidden, task);
     }
 
     if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
-        auto parentPath = path.parent_path().string();
+        auto parentPath = dirEnt.path().parent_path().string();
         updateAttachedResources(asSetting.adir, obj->getLocation().c_str(), parentPath, true);
     }
 
@@ -514,7 +519,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         asSetting.rescanResource = false;
         asSetting.mergeOptions(config, parentPath);
         // addFile(const fs::path& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
-        addFile(parentPath, asSetting, true, true, false);
+        addFile(fs::directory_entry(parentPath), asSetting, true, true, false);
         log_debug("forced rescan of {} for resource {}", parentPath.c_str(), location);
         parentRemoved = true;
     }
@@ -619,13 +624,13 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     if (location.empty()) {
         log_error("Container with ID {} has no location information", containerID);
         return;
-        //        continue;
-        // throw_std_runtime_error("Container has no location information");
     }
 
-    DIR* dir = opendir(location.c_str());
-    if (!dir) {
-        log_warning("Could not open {}: {}", location.c_str(), std::strerror(errno));
+    DIR* dir = nullptr;
+    std::error_code ec;
+    auto dirEnt = fs::directory_entry(location);
+    if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
+        log_warning("Could not open {}: {}", location.c_str(), ec.message());
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
             adir->setObjectID(INVALID_OBJECT_ID);
@@ -659,9 +664,8 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     time_t last_modified_new_max = last_modified_current_max;
     adir->setCurrentLMT(location, 0);
 
-    struct dirent* dent;
-    while ((dent = readdir(dir)) != nullptr) {
-        char* name = dent->d_name;
+    for (const auto& dirEnt : fs::directory_iterator(location, fs::directory_options::skip_permission_denied, ec)) {
+        auto name = dirEnt.path().filename().c_str();
         if (name[0] == '.') {
             if (name[1] == 0) {
                 continue;
@@ -673,15 +677,13 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 continue;
             }
         }
-        fs::path newPath = location / name;
+        fs::path newPath = dirEnt.path();
 
         if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
             break;
 
-        struct stat statbuf;
-        int ret = stat(newPath.c_str(), &statbuf);
-        if (ret != 0) {
-            log_error("_rescanDirectory: Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
+        if (!dirEnt.exists(ec)) {
+            log_error("_rescanDirectory: Failed to stat {}, {}", newPath.c_str(), ec.message());
             continue;
         }
 
@@ -693,7 +695,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
             return;
         }
 
-        if (isLink(newPath, asSetting.followSymlinks)) {
+        if (!asSetting.followSymlinks && dirEnt.is_symlink()) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
@@ -708,37 +710,38 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = adir->getHidden();
         asSetting.mergeOptions(config, location);
+        auto lwt = to_time_t(dirEnt.last_write_time(ec));
 
-        if (S_ISREG(statbuf.st_mode)) {
+        if (dirEnt.is_regular_file(ec)) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
                     list->erase(objectID);
 
                 // check modification time and update file if chagned
-                if (last_modified_current_max < statbuf.st_mtime) {
+                if (last_modified_current_max < lwt) {
                     // re-add object - we have to do this in order to trigger
                     // layout
                     removeObject(adir, objectID, false, false);
                     asSetting.recursive = false;
                     asSetting.rescanResource = false;
-                    addFileInternal(newPath, rootpath, asSetting, false);
+                    addFileInternal(dirEnt, rootpath, asSetting, false);
                     // update time variable
-                    if (last_modified_new_max < statbuf.st_mtime)
-                        last_modified_new_max = statbuf.st_mtime;
+                    if (last_modified_new_max < lwt)
+                        last_modified_new_max = lwt;
                 }
             } else {
                 // add file, not recursive, not async, not forced
                 asSetting.recursive = false;
                 asSetting.rescanResource = false;
-                addFileInternal(newPath, rootpath, asSetting, false);
-                if (last_modified_new_max < statbuf.st_mtime)
-                    last_modified_new_max = statbuf.st_mtime;
+                addFileInternal(dirEnt, rootpath, asSetting, false);
+                if (last_modified_new_max < lwt)
+                    last_modified_new_max = lwt;
             }
-        } else if (S_ISDIR(statbuf.st_mode) && asSetting.recursive) {
+        } else if (dirEnt.is_directory(ec) && asSetting.recursive) {
             int objectID = database->findObjectIDByPath(newPath);
-            if (last_modified_new_max < statbuf.st_mtime)
-                last_modified_new_max = statbuf.st_mtime;
+            if (last_modified_new_max < lwt)
+                last_modified_new_max = lwt;
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
                 if (list != nullptr)
@@ -767,8 +770,11 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 asSetting.rescanResource = false;
                 asSetting.mergeOptions(config, newPath);
                 // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
-                addFileInternal(newPath, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
+                addFileInternal(dirEnt, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
             }
+        }
+        if (ec.value()) {
+            log_error("_rescanDirectory: Failed to read {}, {}", newPath.c_str(), ec.message());
         }
     } // while
 
@@ -787,34 +793,35 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::path& path, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
+void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
 {
-    if (!hidden) {
-        log_debug("Checking path {}", path.c_str());
-        if (path.is_relative())
-            return;
-    }
+    //if (!hidden) {
+    //    log_debug("Checking path {}", dirEnt.path().c_str());
+    //    if (path.is_relative())
+    //        return;
+    //}
 
     auto f2i = StringConverter::f2i(config);
 
-    DIR* dir = opendir(path.c_str());
-    if (!dir) {
-        throw_std_runtime_error("Could not list directory {} : {}", path.c_str(), std::strerror(errno));
+    std::error_code ec;
+    if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
+        throw_std_runtime_error("Could not list directory {}: {}", dirEnt.path().c_str(), ec.message());
     }
+    DIR* dir = nullptr;
 
-    int parentID = database->findObjectIDByPath(path);
+    int parentID = database->findObjectIDByPath(dirEnt.path());
 
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
     if (task != nullptr) {
-        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), path.c_str());
+        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), dirEnt.path().c_str());
     }
 #ifdef HAVE_INOTIFY
     if (adir == nullptr) {
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nullptr && startswith(dir->getLocation(), path) && fs::is_directory(dir->getLocation())) {
+            if (dir != nullptr && startswith(dir->getLocation(), dirEnt.path()) && fs::is_directory(dir->getLocation())) {
                 adir = dir;
             }
         }
@@ -823,15 +830,14 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     time_t last_modified_current_max = 0;
     time_t last_modified_new_max = last_modified_current_max;
     if (adir != nullptr) {
-        last_modified_current_max = adir->getPreviousLMT(path);
+        last_modified_current_max = adir->getPreviousLMT(dirEnt.path());
         last_modified_new_max = last_modified_current_max;
-        adir->setCurrentLMT(path, 0);
+        adir->setCurrentLMT(dirEnt.path(), 0);
     }
 
     bool firstChild = true;
-    struct dirent* dent;
-    while ((dent = readdir(dir)) != nullptr) {
-        char* name = dent->d_name;
+    for (const auto& subDirEnt : fs::directory_iterator(dirEnt.path(), fs::directory_options::skip_permission_denied, ec)) {
+        auto name = subDirEnt.path().filename().c_str();
         if (name[0] == '.') {
             if (name[1] == 0) {
                 continue;
@@ -842,8 +848,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             if (!hidden)
                 continue;
         }
-        fs::path newPath = path / name;
-
+        fs::path newPath = subDirEnt.path();
         if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
             break;
 
@@ -854,9 +859,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         if (task != nullptr) {
             task->setDescription(fmt::format("Importing: {}", newPath.c_str()));
         }
-        struct stat statbuf;
-        int ret = stat(newPath.c_str(), &statbuf);
-        if (ret != 0) {
+        if (!subDirEnt.exists(ec)) {
             log_error("addRecursive: Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
             continue;
         }
@@ -864,31 +867,37 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         try {
             fs::path rootPath("");
             // check database if parent, process existing
-            auto obj = createSingleItem(newPath, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
+            auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
 
             if (obj != nullptr) {
                 firstChild = false;
-                if (last_modified_current_max < statbuf.st_mtime) {
-                    last_modified_new_max = statbuf.st_mtime;
+                auto lwt = to_time_t(subDirEnt.last_write_time(ec));
+                if (last_modified_current_max < lwt) {
+                    last_modified_new_max = lwt;
                 }
                 if (obj->isItem()) {
                     parentID = obj->getParentID();
                 }
                 if (obj->isContainer()) {
-                    addRecursive(adir, newPath, followSymlinks, hidden, task);
+                    addRecursive(adir, subDirEnt, followSymlinks, hidden, task);
                 }
             }
         } catch (const std::runtime_error& ex) {
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
     }
+    if (ec.value()) {
+        log_error("_rescanDirectory: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
+    }
 
-    finishScan(dir, adir, path, last_modified_new_max);
+    finishScan(dir, adir, dirEnt.path(), last_modified_new_max);
 }
 
 void ContentManager::finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)
 {
-    closedir(dir);
+    if (dir) {
+        closedir(dir);
+    }
     if (adir != nullptr) {
         adir->setCurrentLMT(location, lmt > 0 ? lmt : (time_t)1);
     }
@@ -1196,60 +1205,63 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
 
 bool ContentManager::isLink(const fs::path& path, bool allowLinks)
 {
-    if (!allowLinks) {
-        struct stat statbuf;
-        int lret = lstat(path.c_str(), &statbuf);
-
-        if (lret != 0) {
-            log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
-            return true;
-        }
-
-        if (S_ISLNK(statbuf.st_mode)) {
-            log_debug("link {} skipped", path.c_str());
-            return true;
-        }
-    }
+    //if (!allowLinks) {
+    //    struct stat statbuf;
+    //    int lret = lstat(path.c_str(), &statbuf);
+    //
+    //    if (lret != 0) {
+    //        log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
+    //        return true;
+    //    }
+    //
+    //    if (S_ISLNK(statbuf.st_mode)) {
+    //        log_debug("link {} skipped", path.c_str());
+    //        return true;
+    //    }
+    //}
     return false;
 }
 
-std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& path, bool followSymlinks, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allow_fifo)
 {
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        log_warning("File or directory does not exist: {} ({})", path.c_str(), std::strerror(errno));
+    //auto dirEnt = fs::directory_entry(path);
+    std::error_code ec;
+
+    //struct stat statbuf;
+    //int ret = stat(path.c_str(), &statbuf);
+    if (!dirEnt.exists(ec)) {
+        log_warning("File or directory does not exist: {} ({})", dirEnt.path().c_str(), ec.message());
         return nullptr;
     }
 
-    if (isLink(path, followSymlinks))
+    if (!followSymlinks && dirEnt.is_symlink())
         return nullptr;
 
     std::shared_ptr<CdsObject> obj;
-    if (S_ISREG(statbuf.st_mode) || (allow_fifo && S_ISFIFO(statbuf.st_mode))) { // item
+    if (dirEnt.is_regular_file(ec) || (allow_fifo && dirEnt.is_fifo(ec))) { // item
         /* retrieve information about item and decide if it should be included */
-        std::string mimetype = mime->getMimeType(path, MIMETYPE_DEFAULT);
+        std::string mimetype = mime->getMimeType(dirEnt.path(), MIMETYPE_DEFAULT);
         if (mimetype.empty()) {
             return nullptr;
         }
-        log_debug("Mime '{}' for file {}", mimetype, path.c_str());
+        log_debug("Mime '{}' for file {}", mimetype, dirEnt.path().c_str());
 
         std::string upnp_class = mime->mimeTypeToUpnpClass(mimetype);
         if (upnp_class.empty()) {
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
             if (content_type == CONTENT_TYPE_OGG) {
-                upnp_class = isTheora(path)
+                upnp_class = isTheora(dirEnt.path())
                     ? UPNP_CLASS_VIDEO_ITEM
                     : UPNP_CLASS_MUSIC_TRACK;
             }
         }
-        log_debug("UpnpClass '{}' for file {}", upnp_class, path.c_str());
+        log_debug("UpnpClass '{}' for file {}", upnp_class, dirEnt.path().c_str());
 
         auto item = std::make_shared<CdsItem>();
         obj = item;
-        item->setLocation(path);
-        item->setMTime(statbuf.st_mtime);
-        item->setSizeOnDisk(statbuf.st_size);
+        item->setLocation(dirEnt.path());
+        item->setMTime(to_time_t(dirEnt.last_write_time(ec)));
+        item->setSizeOnDisk(dirEnt.file_size());
 
         if (!mimetype.empty()) {
             item->setMimeType(mimetype);
@@ -1259,10 +1271,10 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         }
 
         auto f2i = StringConverter::f2i(config);
-        obj->setTitle(f2i->convert(path.filename()));
+        obj->setTitle(f2i->convert(dirEnt.path().filename()));
 
-        MetadataHandler::setMetadata(context, item);
-    } else if (S_ISDIR(statbuf.st_mode)) {
+        MetadataHandler::setMetadata(context, item, dirEnt);
+    } else if (dirEnt.is_directory(ec)) {
         auto cont = std::make_shared<CdsContainer>();
         obj = cont;
         /* adding containers is done by Database now
@@ -1276,7 +1288,10 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::path& 
         */
     } else {
         // only regular files and directories are supported
-        throw_std_runtime_error("ContentManager: skipping file {}", path.c_str());
+        throw_std_runtime_error("ContentManager: skipping file {}", dirEnt.path().c_str());
+    }
+    if (ec.value()) {
+        log_error("File or directory cannot be read: {} ({})", dirEnt.path().c_str(), ec.message());
     }
     //    auto f2i = StringConverter::f2i();
     //    obj->setTitle(f2i->convert(filename));
@@ -1407,31 +1422,31 @@ void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowP
     signal();
 }
 
-int ContentManager::addFile(const fs::path& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
 {
     fs::path rootpath;
-    if (fs::is_directory(path))
-        rootpath = path;
-    return addFileInternal(path, rootpath, asSetting, async, lowPriority, 0, cancellable);
+    if (dirEnt.is_directory())
+        rootpath = dirEnt.path();
+    return addFileInternal(dirEnt, rootpath, asSetting, async, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(path, rootpath, asSetting, async, lowPriority, 0, cancellable);
+    return addFileInternal(dirEnt, rootpath, asSetting, async, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (async) {
         auto self = shared_from_this();
-        auto task = std::make_shared<CMAddFileTask>(self, path, rootpath, asSetting, cancellable);
-        task->setDescription(fmt::format("Importing: {}", path.c_str()));
+        auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
+        task->setDescription(fmt::format("Importing: {}", dirEnt.path().c_str()));
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
     }
-    return _addFile(path, rootpath, asSetting);
+    return _addFile(dirEnt, rootpath, asSetting);
 }
 
 #ifdef ONLINE_SERVICES
@@ -1442,9 +1457,6 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
         log_debug("No surch service! {}", serviceType);
         throw_std_runtime_error("Service not found");
     }
-
-    if (layout_enabled)
-        initLayout();
 
     unsigned int parentTaskID = 0;
 
@@ -1823,10 +1835,10 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 }
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
-    fs::path path, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable)
+    const fs::directory_entry& dirEnt, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
-    , path(std::move(path))
+    , dirEnt(dirEnt)
     , rootpath(std::move(rootpath))
     , asSetting(asSetting)
 {
@@ -1836,15 +1848,15 @@ CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
         this->asSetting.adir->incTaskCount();
 }
 
-fs::path CMAddFileTask::getPath() { return path; }
+fs::path CMAddFileTask::getPath() { return dirEnt.path(); }
 
 fs::path CMAddFileTask::getRootPath() { return rootpath; }
 
 void CMAddFileTask::run()
 {
-    log_debug("running add file task with path {} recursive: {}", path.c_str(), asSetting.recursive);
+    log_debug("running add file task with path {} recursive: {}", dirEnt.path().c_str(), asSetting.recursive);
     auto self = shared_from_this();
-    content->_addFile(path, rootpath, asSetting, self);
+    content->_addFile(dirEnt, rootpath, asSetting, self);
     if (asSetting.adir != nullptr) {
         asSetting.adir->decTaskCount();
         if (asSetting.adir->updateLMT()) {

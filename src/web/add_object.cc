@@ -135,7 +135,7 @@ void web::addObject::process()
         if (location.empty())
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
-            throw_std_runtime_error("file not found");
+            throw_std_runtime_error("file not found {}", ec.message());
         obj = this->addItem(parentID, std::make_shared<CdsItem>());
         allow_fifo = true;
     } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {

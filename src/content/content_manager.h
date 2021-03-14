@@ -84,13 +84,13 @@ class TaskProcessor;
 class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
 protected:
     std::shared_ptr<ContentManager> content;
-    fs::path path;
+    fs::directory_entry dirEnt;
     fs::path rootpath;
     AutoScanSetting asSetting;
 
 public:
     CMAddFileTask(std::shared_ptr<ContentManager> content,
-        fs::path path, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable = true);
+        const fs::directory_entry& dirEnt, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable = true);
     fs::path getPath();
     fs::path getRootPath();
     void run() override;
@@ -166,18 +166,18 @@ public:
     /* the functions below return true if the task has been enqueued */
 
     /// \brief Adds a file or directory to the database.
-    /// \param path absolute path to the file
+    /// \param dirEnt absolute path to the file
     /// \param recursive recursive add (process subdirecotories)
     /// \param async queue task or perform a blocking call
     /// \param hidden true allows to import hidden files, false ignores them
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::path& path, AutoScanSetting& asSetting,
+    int addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
-    /// \param path absolute path to the file
+    /// \param dirEnt absolute path to the file
     /// \param rootpath absolute path to the container root
     /// \param recursive recursive add (process subdirecotories)
     /// \param async queue task or perform a blocking call
@@ -185,7 +185,7 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting,
+    int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(fs::path path);
@@ -197,7 +197,7 @@ public:
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const fs::path& path, bool followSymlinks, bool allow_fifo = false);
+    std::shared_ptr<CdsObject> createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allow_fifo = false);
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
@@ -342,22 +342,22 @@ protected:
 
     std::vector<std::shared_ptr<Executor>> process_list;
 
-    int addFileInternal(const fs::path& path, const fs::path& rootpath,
+    int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
         AutoScanSetting& asSetting,
         bool async = true,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(const fs::path& path, fs::path rootPath, AutoScanSetting& asSetting,
+    int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
     void _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
 
     void _rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
-    void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::path& path, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
+    void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     static bool isLink(const fs::path& path, bool allowLinks);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::path& path, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all);
     void finishScan(DIR* dir, const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);

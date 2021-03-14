@@ -65,13 +65,12 @@ MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item)
+void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
 {
-    std::string location = item->getLocation();
     std::error_code ec;
-    if (!isRegularFile(location, ec))
-        throw_std_runtime_error("Not a file: {}", location.c_str());
-    auto filesize = getFileSize(location);
+    if (!dirEnt.is_regular_file(ec))
+        throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
+    auto filesize = dirEnt.file_size();
 
     std::string mimetype = item->getMimeType();
 
@@ -118,7 +117,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const
     }
 #else
     if (content_type == CONTENT_TYPE_AVI) {
-        std::string fourcc = getAVIFourCC(item->getLocation());
+        std::string fourcc = getAVIFourCC(dirEnt.path().string());
         if (!fourcc.empty()) {
             item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                 fourcc);
