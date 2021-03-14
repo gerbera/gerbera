@@ -397,7 +397,11 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         data = _addUpdateObject(obj, true, changedContainer);
     }
 
-    exec("BEGIN TRANSACTION");
+    if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
+        exec("BEGIN TRANSACTION");
+    } else {
+        exec("START TRANSACTION");
+    }
     for (const auto& addUpdateTable : data) {
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
