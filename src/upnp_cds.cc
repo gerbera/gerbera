@@ -126,7 +126,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuircks());
+        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuirks());
     }
 
     std::ostringstream buf;
@@ -249,7 +249,7 @@ void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequ
 {
     log_debug("start");
 
-    request->getQuircks()->saveSamsungBookMarkedPosition(request);
+    request->getQuirks()->saveSamsungBookMarkedPosition(request);
 
     log_debug("end");
 }

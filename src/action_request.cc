@@ -63,7 +63,7 @@ std::string ActionRequest::getServiceID() const
     return serviceID;
 }
 
-std::shared_ptr<Quirks> ActionRequest::getQuircks() const
+std::shared_ptr<Quirks> ActionRequest::getQuirks() const
 {
     return quirks;
 }
