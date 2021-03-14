@@ -77,23 +77,29 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK) == 0 || item->getBookMarkPos() < 10000)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)
         return;
+    auto positionToRestore = item->getBookMarkPos();
+    if (positionToRestore > 10)
+        positionToRestore -= 10;
+    log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
 
-    auto positionToRestore = item->getBookMarkPos() - 10000;
-    log_debug("restoreSamsungBookMarkedPosition: Title [{}] positionToRestore [{}] msec", item->getTitle(), positionToRestore);
+    if (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)
+        positionToRestore *= 1000;
+
     auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", item->getTitle(), positionToRestore);
     result->append_child("sec:dcmInfo").append_child(pugi::node_pcdata).set_value(dcmInfo.c_str());
 }
 
 void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK) == 0) {
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
         log_debug("saveSamsungBookMarkedPosition called, but it is not enabled for this client");
     } else {
+        auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
         auto req_root = request->getRequest()->document_element();
         auto objectID = req_root.child("ObjectID").text().as_string();
-        auto bookMarkPos = req_root.child("PosSecond").text().as_string();
+        auto bookMarkPos = std::to_string(stoiString(req_root.child("PosSecond").text().as_string()) / divider);
         auto categoryType = req_root.child("CategoryType").text().as_string();
         auto rID = req_root.child("RID").text().as_string();
 
