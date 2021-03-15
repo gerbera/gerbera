@@ -81,8 +81,8 @@ const iptoi = (addr) => {
   }
   
   if (parts.length >= 6) {
-     return (parts[0] ? parts[0] << 40 : 0) +
-         (parts[1] ? parts[1] << 32 : 0) +
+     return (parts[0] ? parts[0] * (2 ** 40) : 0) +
+         (parts[1] ? parts[1] * (2 ** 32) : 0) +
          (parts[2] ? parts[2] << 24 : 0) +
          (parts[3] ? parts[3] << 16 : 0) +
          (parts[4] ? parts[4] << 8  : 0) +

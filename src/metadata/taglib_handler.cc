@@ -431,9 +431,11 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
 
     std::vector<std::string> aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (const auto& desiredFrame : aux_tags_list) {
-
         if (desiredFrame.empty()) {
-        } else if (frameListMap.contains(desiredFrame.c_str())) {
+            continue;
+        }
+
+        if (frameListMap.contains(desiredFrame.c_str())) {
             const auto frameList = frameListMap[desiredFrame.c_str()];
             if (frameList.isEmpty())
                 continue;

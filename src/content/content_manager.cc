@@ -1484,22 +1484,22 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 {
     if (taskOwner == ContentManagerTask) {
         AutoLock lock(mutex);
-        auto t = getCurrentTask();
-        if (t != nullptr) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-                t->invalidate();
+        auto tc = getCurrentTask();
+        if (tc != nullptr) {
+            if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
+                tc->invalidate();
             }
         }
 
-        for (const auto& t : taskQueue1) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-                t->invalidate();
+        for (const auto& t1 : taskQueue1) {
+            if ((t1->getID() == taskID) || (t1->getParentID() == taskID)) {
+                t1->invalidate();
             }
         }
 
-        for (const auto& t : taskQueue2) {
-            if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-                t->invalidate();
+        for (const auto& t2 : taskQueue2) {
+            if ((t2->getID() == taskID) || (t2->getParentID() == taskID)) {
+                t2->invalidate();
             }
         }
     }

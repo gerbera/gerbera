@@ -64,7 +64,7 @@
                 tweakMap[val.value] = myIndex;
               }
             } else {
-              tweakList[myIndex].status = val.status
+              tweakList[myIndex].status = val.status;
             }
           }
         }

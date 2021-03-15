@@ -217,9 +217,9 @@ export class App {
     let viewItemsCount;
     const itemsPerPage = this.serverConfig['items-per-page'];
     if (itemsPerPage && itemsPerPage.default) {
-      viewItemsCount = itemsPerPage.default
+      viewItemsCount = itemsPerPage.default;
     } else {
-      viewItemsCount = 25
+      viewItemsCount = 25;
     }
     return viewItemsCount;
   }
@@ -229,7 +229,7 @@ export class App {
       $('.login-field').hide();
       $('#login-submit').hide();
       if (this.accounts) {
-        $('#logout').show().click(Auth.logout)
+        $('#logout').show().click(Auth.logout);
       }
       Items.initialize();
       Tree.initialize();
@@ -269,7 +269,7 @@ export class App {
       type = 'danger';
       icon = 'fa-frown-o';
     }
-    Updates.showMessage(message, undefined, type, icon)
+    Updates.showMessage(message, undefined, type, icon);
   }
 
   disable() {

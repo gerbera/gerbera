@@ -47,7 +47,7 @@ $.widget('grb.dataitems', {
           img.attr('src', item.img);
           img.attr('style', 'height: 25px');
           img.addClass('rounded float-left');
-          img.appendTo(content)
+          img.appendTo(content);
         }
 
         if (item.url) {

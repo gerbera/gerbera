@@ -342,5 +342,5 @@ module.exports = function (driver) {
 
   this.getVersion = async () => {
     return await driver.findElement(By.css('#gerbera-version span'));
-  }
+  };
 };

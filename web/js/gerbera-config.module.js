@@ -113,7 +113,7 @@ const configModeChanged = (mode) => {
       loadConfig({success: true, meta: oldMeta}, 'meta');
     })
     .catch((err) => GerberaApp.error(err));
-}
+};
 
 const loadConfig = (response, item) => {
   if (response.success && item in response && response[item]) {

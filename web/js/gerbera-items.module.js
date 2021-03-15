@@ -82,7 +82,7 @@ const loadItems = (response) => {
         totalMatches: response.items.total_matches,
         itemsPerPage: GerberaApp.viewItems(),
         parentId: response.items.parent_id
-      }
+      };
     } else if (type === 'fs') {
       items = transformFiles(response.files.file);
       parentItem = response.files;

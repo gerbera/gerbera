@@ -166,10 +166,10 @@ const makeTrailFromItem = (items) => {
     enableClearConfig: enableClearConfig,
     onSave: onSave,
     onClear: onClear,
-    onRescan: onRescan
+    onRescan: onRescan,
   };
 
-  makeTrail(treeElement, config)
+  makeTrail(treeElement, config);
 };
 
 const addItem = (event) => {

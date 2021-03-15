@@ -346,7 +346,7 @@ $.widget('grb.config', {
           let lineStatus = status;
 
           if (xpath && xpath.length > 0) {
-            const itemId = "item_" + xpath.replace(RegExp('/','g'), "_") + "_" + count
+            const itemId = "item_" + xpath.replace(RegExp('/','g'), "_") + "_" + count;
             let xpathList = list.find("#" + itemId);
             if (xpathList === null || xpathList.length === 0) {
               line = $('<li></li>');
@@ -384,7 +384,7 @@ $.widget('grb.config', {
                 listValue.editor.addClass(listValue.status);
                 listValue.removeItemClicked = function(event) {
                   listValue.target.removeItemClicked (listValue, event);
-                }
+                };
                 symbol.off('click').on('click', listValue.removeItemClicked);
               } else {
                 icon.removeClass('fa-ban');
@@ -436,7 +436,7 @@ $.widget('grb.config', {
           if(item.editable) {
             itemValue.setEntryChanged = function (event) {
               itemValue.target.setEntryChanged(itemValue, event);
-            }
+            };
             itemValue.target = this;
             itemValue.config = item;
             itemValue.editor = input;
@@ -510,7 +510,7 @@ $.widget('grb.config', {
             } else {
                 link.append(' reset');
             }
-            itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); }
+            itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); };
             link.click(itemValue, itemValue.resetEntry);
             link.appendTo(itemLine);
           } else if (itemValue.status !== 'unchanged') {
@@ -548,7 +548,7 @@ $.widget('grb.config', {
       parentItem: parentItem };
     listValueNew.addItemClicked = function(event) {
       listValueNew.target.addItemClicked (listValueNew, event);
-    }
+    };
     symbolNew.off('click').on('click', listValueNew.addItemClicked);
     textNew.text('Add New Entry').appendTo(lineNew);
     //textNew.attr('title', item.item);

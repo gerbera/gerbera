@@ -1490,30 +1490,30 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         std::shared_ptr<ClientConfigListOption> value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
         auto list = value->getClientConfigListOption();
-        auto i = extractIndex(optItem);
+        auto index = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
-            auto entry = list->get(i, true);
+        if (index < SIZE_MAX) {
+            auto entry = list->get(index, true);
             std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<ClientConfig>();
-                list->add(entry, i);
+                list->add(entry, index);
             }
             if (entry != nullptr && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(i, true);
+                list->remove(index, true);
                 return true;
             }
             if (entry != nullptr && status == STATUS_RESET) {
-                list->add(entry, i);
+                list->add(entry, index);
             }
-            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue, status)) {
+            if (entry != nullptr && updateItem(index, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }
-        for (size_t i = 0; i < list->size(); i++) {
-            auto entry = value->getClientConfigListOption()->get(i);
-            if (updateItem(i, optItem, config, entry, optValue)) {
+        for (size_t client = 0; client < list->size(); client++) {
+            auto entry = value->getClientConfigListOption()->get(client);
+            if (updateItem(client, optItem, config, entry, optValue)) {
                 return true;
             }
         }
@@ -1718,30 +1718,30 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         std::shared_ptr<DirectoryTweakOption> value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
         auto list = value->getDirectoryTweakOption();
-        auto i = extractIndex(optItem);
+        auto index = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
-            auto entry = list->get(i, true);
+        if (index < SIZE_MAX) {
+            auto entry = list->get(index, true);
             std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<DirectoryTweak>();
-                list->add(entry, i);
+                list->add(entry, index);
             }
             if (entry != nullptr && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(i, true);
+                list->remove(index, true);
                 return true;
             }
             if (entry != nullptr && status == STATUS_RESET) {
-                list->add(entry, i);
+                list->add(entry, index);
             }
-            if (entry != nullptr && updateItem(i, optItem, config, entry, optValue, status)) {
+            if (entry != nullptr && updateItem(index, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }
-        for (size_t i = 0; i < list->size(); i++) {
-            auto entry = value->getDirectoryTweakOption()->get(i);
-            if (updateItem(i, optItem, config, entry, optValue)) {
+        for (size_t tweak = 0; tweak < list->size(); tweak++) {
+            auto entry = value->getDirectoryTweakOption()->get(tweak);
+            if (updateItem(tweak, optItem, config, entry, optValue)) {
                 return true;
             }
         }

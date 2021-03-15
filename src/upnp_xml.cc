@@ -56,7 +56,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-static metadata_fields_t remapMetaDataField(const std::string& fieldName)
+metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldName)
 {
     for (const auto& [f, s] : mt_names) {
         if (s == fieldName) {
@@ -66,7 +66,7 @@ static metadata_fields_t remapMetaDataField(const std::string& fieldName)
     return M_MAX;
 }
 
-static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
+void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
 {
     // e.g. used for M_ALBUMARTIST
     // name@attr[val] => <name attr="val">
