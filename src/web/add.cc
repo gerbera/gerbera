@@ -61,6 +61,7 @@ void web::add::process()
     asSetting.recursive = true;
     asSetting.mergeOptions(config, path);
 
-    content->addFile(fs::directory_entry(path), asSetting);
+    std::error_code ec;
+    content->addFile(fs::directory_entry(path, ec), asSetting);
     log_debug("add: returning");
 }

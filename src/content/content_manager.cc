@@ -404,8 +404,8 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     obj->validate();
     fs::path path = obj->getLocation();
 
-    auto dirEnt = fs::directory_entry(path);
     std::error_code ec;
+    auto dirEnt = fs::directory_entry(path, ec);
     if (!dirEnt.is_regular_file(ec))
         throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
@@ -518,8 +518,9 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         asSetting.recursive = true;
         asSetting.rescanResource = false;
         asSetting.mergeOptions(config, parentPath);
-        // addFile(const fs::path& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
-        addFile(fs::directory_entry(parentPath), asSetting, true, true, false);
+        std::error_code ec;
+        // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+        addFile(fs::directory_entry(parentPath, ec), asSetting, true, true, false);
         log_debug("forced rescan of {} for resource {}", parentPath.c_str(), location);
         parentRemoved = true;
     }
@@ -627,8 +628,8 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     }
 
     std::error_code ec;
-    auto dirEnt = fs::directory_entry(location);
-    if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
+    auto rootDir = fs::directory_entry(location, ec);
+    if (!rootDir.exists(ec) || !rootDir.is_directory(ec)) {
         log_warning("Could not open {}: {}", location.c_str(), ec.message());
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
@@ -792,28 +793,28 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
+void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
 {
     auto f2i = StringConverter::f2i(config);
 
     std::error_code ec;
-    if (!dirEnt.exists(ec) || !dirEnt.is_directory(ec)) {
-        throw_std_runtime_error("Could not list directory {}: {}", dirEnt.path().c_str(), ec.message());
+    if (!subDir.exists(ec) || !subDir.is_directory(ec)) {
+        throw_std_runtime_error("Could not list directory {}: {}", subDir.path().c_str(), ec.message());
     }
 
-    int parentID = database->findObjectIDByPath(dirEnt.path());
+    int parentID = database->findObjectIDByPath(subDir.path());
 
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
     if (task != nullptr) {
-        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), dirEnt.path().c_str());
+        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), subDir.path().c_str());
     }
 #ifdef HAVE_INOTIFY
     if (adir == nullptr) {
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nullptr && startswith(dir->getLocation(), dirEnt.path()) && fs::is_directory(dir->getLocation())) {
+            if (dir != nullptr && startswith(dir->getLocation(), subDir.path()) && fs::is_directory(dir->getLocation())) {
                 adir = dir;
             }
         }
@@ -822,13 +823,13 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     time_t last_modified_current_max = 0;
     time_t last_modified_new_max = last_modified_current_max;
     if (adir != nullptr) {
-        last_modified_current_max = adir->getPreviousLMT(dirEnt.path());
+        last_modified_current_max = adir->getPreviousLMT(subDir.path());
         last_modified_new_max = last_modified_current_max;
-        adir->setCurrentLMT(dirEnt.path(), 0);
+        adir->setCurrentLMT(subDir.path(), 0);
     }
 
     bool firstChild = true;
-    for (const auto& subDirEnt : fs::directory_iterator(dirEnt.path(), fs::directory_options::skip_permission_denied, ec)) {
+    for (const auto& subDirEnt : fs::directory_iterator(subDir.path(), fs::directory_options::skip_permission_denied, ec)) {
         auto name = subDirEnt.path().filename().c_str();
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -879,10 +880,10 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     }
     if (ec.value()) {
-        log_error("_rescanDirectory: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
+        log_error("_rescanDirectory: Failed to read {}, {}", subDir.path().c_str(), ec.message());
     }
 
-    finishScan(adir, dirEnt.path(), last_modified_new_max);
+    finishScan(adir, subDir.path(), last_modified_new_max);
 }
 
 void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)

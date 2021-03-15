@@ -368,7 +368,8 @@ int main(int argc, char** argv, char** envp)
                     asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
                     asSetting.rescanResource = false;
                     asSetting.mergeOptions(configManager, f);
-                    server->getContent()->addFile(fs::directory_entry(f), asSetting, true);
+                    std::error_code ec;
+                    server->getContent()->addFile(fs::directory_entry(f, ec), asSetting, true);
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);
