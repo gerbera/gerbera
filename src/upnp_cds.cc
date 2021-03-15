@@ -120,7 +120,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root);
+        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuirks());
     }
 
     std::ostringstream buf;
@@ -241,7 +241,11 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
 
 void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request)
 {
-    log_warning("Stub method for Samsung extension: X_SetBookmark");
+    log_debug("start");
+
+    request->getQuirks()->saveSamsungBookMarkedPosition(request);
+
+    log_debug("end");
 }
 
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)

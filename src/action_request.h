@@ -97,6 +97,9 @@ public:
     /// \brief Returns the XML representation of the request, that comes to us.
     std::unique_ptr<pugi::xml_document> getRequest() const;
 
+    /// \brief Returns the client quirks
+    std::shared_ptr<Quirks> getQuirks() const;
+
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
     void setResponse(std::unique_ptr<pugi::xml_document>& response);

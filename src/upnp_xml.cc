@@ -85,7 +85,7 @@ static void addField(pugi::xml_node& entry, const std::string& key, const std::s
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks)
 {
     auto result = parent->append_child("");
 
@@ -104,6 +104,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
+
+        if (quirks != nullptr)
+            quirks->restoreSamsungBookMarkedPosition(item, &result);
 
         auto meta = obj->getMetadata();
         std::string upnp_class = obj->getClass();

@@ -152,13 +152,14 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     item->setTrackNumber(trackNumber);
     item->setPartNumber(partNumber);
     item->setServiceID(serviceID);
+    item->setBookMarkPos(bookMarkPos);
 }
 bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
 {
     auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
         return false;
-    return (mimeType == item->getMimeType() && partNumber == item->getPartNumber() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
+    return (mimeType == item->getMimeType() && partNumber == item->getPartNumber() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID() && bookMarkPos == item->getBookMarkPos());
 }
 
 void CdsItem::validate()

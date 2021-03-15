@@ -377,6 +377,8 @@ protected:
     /// \brief unique service ID
     std::string serviceID;
 
+    unsigned int bookMarkPos;
+
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
     explicit CdsItem();
@@ -417,6 +419,12 @@ public:
 
     /// \brief Retrieve the unique service ID.
     std::string getServiceID() const { return serviceID; }
+
+    /// \brief Retrieve the last known bookmark position in milliseconds.
+    void setBookMarkPos(const unsigned int bookMarkPos) { this->bookMarkPos = bookMarkPos; }
+
+    /// \brief Set the bookmark position in milliseconds.
+    unsigned int getBookMarkPos() const { return bookMarkPos; }
 };
 
 /// \brief An item that is accessible via a URL.

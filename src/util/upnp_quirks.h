@@ -35,8 +35,12 @@ using QuirkFlags = uint32_t;
 
 #define QUIRK_FLAG_NONE 0x00000000
 #define QUIRK_FLAG_SAMSUNG 0x00000001
+#define QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC 0x00000002
+#define QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC 0x00000004
 
 // forward declaration
+class ActionRequest;
+class ContentManager;
 class Context;
 class CdsItem;
 class Headers;
@@ -50,8 +54,26 @@ public:
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_ptr<Headers>& headers) const;
 
+    /** \brief Add Samsung specific bookmark information to the request's result.
+     *
+     * \param item const std::shared_ptr<CdsItem>& Item which will be played and stores the bookmark information.
+     * \param result pugi::xml_node* Answer content.
+     * \return void
+     *
+     */
+    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const;
+
+    /** \brief Stored bookmark information into the database
+     *
+     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client, which holds the position information which should be stored
+     * \return void
+     *
+     */
+    void saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>& request) const;
+
 private:
     std::shared_ptr<Context> context;
+    std::shared_ptr<ContentManager> content;
     const ClientInfo* pClientInfo;
 };
 

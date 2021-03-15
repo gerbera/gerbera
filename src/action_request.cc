@@ -63,6 +63,11 @@ std::string ActionRequest::getServiceID() const
     return serviceID;
 }
 
+std::shared_ptr<Quirks> ActionRequest::getQuirks() const
+{
+    return quirks;
+}
+
 std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 {
     auto request = std::make_unique<pugi::xml_document>();

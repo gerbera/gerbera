@@ -30,6 +30,8 @@ Device Flags
 The device flags have the following meaning
 
 -  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
+-  ``SAMSUNG_BOOKMARK_SEC``: 0x02, restore last played position when the media is played again (only for Samsung). Not applicable for transcoded media
+-  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is recieved from the Samsung TV as msec
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~

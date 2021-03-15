@@ -29,6 +29,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "content/content_manager.h"
 #include "request_handler.h"
 #include "server.h"
 #include "util/tools.h"
@@ -37,6 +38,7 @@
 
 Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent)
     : context(std::move(context))
+    , content(this->context->getServer()->getContent())
 {
     this->context->getClients()->getInfo(addr, userAgent, &pClientInfo);
 }
@@ -71,4 +73,43 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
         url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + fmt::to_string(*it) });
     }
     headers->addHeader("CaptionInfo.sec", url);
+}
+
+void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
+{
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)
+        return;
+    auto positionToRestore = item->getBookMarkPos();
+    if (positionToRestore > 10)
+        positionToRestore -= 10;
+    log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
+
+    if (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)
+        positionToRestore *= 1000;
+
+    auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", item->getTitle(), positionToRestore);
+    result->append_child("sec:dcmInfo").append_child(pugi::node_pcdata).set_value(dcmInfo.c_str());
+}
+
+void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>& request) const
+{
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
+        log_debug("saveSamsungBookMarkedPosition called, but it is not enabled for this client");
+    } else {
+        auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
+        auto req_root = request->getRequest()->document_element();
+        auto objectID = req_root.child("ObjectID").text().as_string();
+        auto bookMarkPos = std::to_string(stoiString(req_root.child("PosSecond").text().as_string()) / divider);
+        auto categoryType = req_root.child("CategoryType").text().as_string();
+        auto rID = req_root.child("RID").text().as_string();
+
+        log_debug("saveSamsungBookMarkedPosition: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
+
+        std::map<std::string, std::string> m = {
+            { "bookmarkpos", bookMarkPos },
+        };
+        content->updateObject(stoiString(objectID), m);
+    }
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    request->setResponse(response);
 }

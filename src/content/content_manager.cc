@@ -903,6 +903,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<T>& item, const std::map<st
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
+    std::string bookmarkpos = getValueOrDefault(parameters, "bookmarkpos");
 
     log_error("updateCdsObject: CdsObject {} not updated", title);
 }
@@ -945,6 +946,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
+    std::string bookmarkpos = getValueOrDefault(parameters, "bookmarkpos");
 
     log_debug("updateCdsObject: CdsItem {} updated", title);
 
@@ -960,6 +962,8 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
 
     auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
 
+    if (!bookmarkpos.empty())
+        cloned_item->setBookMarkPos(stoiString(bookmarkpos));
     if (!mimetype.empty() && !protocol.empty()) {
         cloned_item->setMimeType(mimetype);
         auto resource = cloned_item->getResource(0);
