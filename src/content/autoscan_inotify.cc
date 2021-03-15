@@ -87,6 +87,7 @@ void AutoscanInotify::run()
 
 void AutoscanInotify::threadProc()
 {
+    std::error_code ec;
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);
@@ -102,7 +103,7 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
-                auto dirEnt = fs::directory_entry(location);
+                auto dirEnt = fs::directory_entry(location, ec);
 
                 if (adir->getRecursive()) {
                     log_debug("removing recursive watch: {}", location.c_str());
@@ -126,7 +127,7 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
-                auto dirEnt = fs::directory_entry(location);
+                auto dirEnt = fs::directory_entry(location, ec);
 
                 if (adir->getRecursive()) {
                     log_debug("adding recursive watch: {}", location.c_str());
@@ -188,7 +189,7 @@ void AutoscanInotify::threadProc()
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
                                 log_debug("new dir detected, adding to inotify: {}", path.c_str());
-                                auto dirEnt = fs::directory_entry(path);
+                                auto dirEnt = fs::directory_entry(path, ec);
                                 monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                             } else {
                                 log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
@@ -227,7 +228,7 @@ void AutoscanInotify::threadProc()
                         asSetting.hidden = adir->getHidden();
                         asSetting.rescanResource = true;
                         asSetting.mergeOptions(config, path);
-                        auto dirEnt = fs::directory_entry(path);
+                        auto dirEnt = fs::directory_entry(path, ec);
                         content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
 
                         if (mask & IN_ISDIR)
