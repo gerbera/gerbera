@@ -31,9 +31,6 @@
 #include <pugixml.hpp>
 namespace fs = std::filesystem;
 
-class ActionRequest;
-class ContentManager;
-
 using QuirkFlags = uint32_t;
 
 #define QUIRK_FLAG_NONE 0x00000000
@@ -42,6 +39,8 @@ using QuirkFlags = uint32_t;
 #define QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC 0x00000004
 
 // forward declaration
+class ActionRequest;
+class ContentManager;
 class Context;
 class CdsItem;
 class Headers;
