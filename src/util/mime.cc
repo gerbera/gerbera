@@ -88,7 +88,7 @@ std::string Mime::bufferToMimeType(const void* buffer, size_t length)
 }
 #endif
 
-std::string Mime::extensionToMimeType(const fs::path& path, const std::string& defval)
+std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
 {
     std::string extension = path.extension();
     if (!extension.empty())
@@ -99,7 +99,12 @@ std::string Mime::extensionToMimeType(const fs::path& path, const std::string& d
 
     std::string mimeType = getValueOrDefault(extension_mimetype_map, extension, "");
     if (mimeType.empty() && !ignore_unknown_extensions) {
+#ifdef HAVE_MAGIC
+        auto fileMime = fileToMimeType(path, defval);
+        mimeType = fileMime.empty() ? extension : fileMime;
+#else
         mimeType = defval.empty() ? extension : defval;
+#endif
     }
     return mimeType;
 }
@@ -115,13 +120,4 @@ std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
     if (parts.size() != 2)
         return "";
     return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
-}
-
-std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
-{
-#ifdef HAVE_MAGIC
-    return extensionToMimeType(path, fileToMimeType(path, defval));
-#else
-    return extensionToMimeType(path, defval);
-#endif
 }

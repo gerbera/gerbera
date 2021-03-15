@@ -285,7 +285,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
             if (obj->isPureItem()) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
-                item->setParentID(parentID);
+                obj->setParentID(parentID);
                 std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
                 cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
@@ -351,7 +351,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID)
-        throw_std_runtime_error("tried to create or update an object with an illegal parent id");
+        throw_std_runtime_error("tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
     returnVal.push_back(
@@ -400,7 +400,11 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         data = _addUpdateObject(obj, true, changedContainer);
     }
 
-    exec("BEGIN TRANSACTION");
+    if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
+        exec("BEGIN TRANSACTION");
+    } else {
+        exec("START TRANSACTION");
+    }
     for (const auto& addUpdateTable : data) {
         std::string operation = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
@@ -888,9 +892,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setFlags(std::stoi(row->col(_flags)));
 
     auto meta = retrieveMetadataForObject(obj->getID());
-    if (!meta.empty())
+    if (!meta.empty()) {
         obj->setMetadata(meta);
-    else {
+    } else if (obj->getRefID() != CDS_ID_ROOT) {
         meta = retrieveMetadataForObject(obj->getRefID());
         if (!meta.empty())
             obj->setMetadata(meta);

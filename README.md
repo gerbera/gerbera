@@ -44,16 +44,16 @@ sudo make install
 
 ## Dependencies
 
-| Lib          	| Version 	| Required? 	| Note                 	     | Compile-time option | Default  |
+| Library      	| Min Version	| Required? | Note                 	     | Compile-time option | Default  |
 |--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| >=1.12.1 	| XOR libnpupnp | [pupnp]                    |                     |          |
-| libnpupnp     | >=4.0.11 	| XOR libupnp   | [npupnp]                   | WITH_NPUPNP         | Disabled |
+| libupnp      	| 1.12.1 	| XOR libnpupnp | [pupnp]                    |                     |          |
+| libnpupnp     | 4.0.11 	| XOR libupnp   | [npupnp]                   | WITH_NPUPNP         | Disabled |
 | libuuid      	|         	| Depends on OS | Not required on \*BSD      |                     |          |
 | pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
 | libiconv     	|         	| Required  	|                      	     |                     |          |
-| sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
+| sqlite3      	| 3.7.0  	| Required  	| Database storage     	     |                     |          |
 | zlib          |        	| Required  	|                            |                     |          |
-| fmtlib        |        	| Required  	|                            |                     |          |
+| fmtlib        | 5.3    	| Required  	|                            |                     |          |
 | spdlog        |        	| Required  	|                            |                     |          |
 | duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
 | mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |

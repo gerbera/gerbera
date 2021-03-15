@@ -89,7 +89,7 @@ public:
     /// in internal variables.
     MRRegistrarService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
-    ~MRRegistrarService();
+    ~MRRegistrarService() = default;
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.

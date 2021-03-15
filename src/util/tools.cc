@@ -273,7 +273,7 @@ std::string renderWebUri(const std::string& ip, int port)
 
 std::string httpRedirectTo(const std::string& addr, const std::string& page)
 {
-    return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + addr + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
+    return fmt::format(R"(<html><head><meta http-equiv="Refresh" content="0;URL={}/{}"></head><body bgcolor="#dddddd"></body></html>)", addr, page);
 }
 
 std::string hexEncode(const void* data, int len)

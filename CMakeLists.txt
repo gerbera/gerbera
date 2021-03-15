@@ -353,6 +353,13 @@ else()
     Without this option Gerbera will be unable to restart with the same port number.]=])
     endif()
 
+    check_cxx_symbol_exists(UPNP_ENABLE_BLOCKING_TCP_CONNECTIONS "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_BLOCKING_TCP)
+    if (UPNP_HAS_BLOCKING_TCP)
+        message(WARNING [=[
+    !! It is strongly recommended to build libupnp with --disable-blocking-tcp-connections !!
+    Without this option non-responsive control points can cause libupnp to hang.]=])
+    endif()
+
     target_link_libraries(libgerbera PUBLIC pupnp::pupnp)
 endif()
 

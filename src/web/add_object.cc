@@ -151,7 +151,7 @@ void web::addObject::process()
         if (obj_type == STRING_OBJECT_TYPE_ITEM) {
             content->addVirtualItem(obj, allow_fifo);
         } else {
-            content->addObject(obj);
+            content->addObject(obj, true);
         }
     }
 }

@@ -57,8 +57,9 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_put_global_string(ctx, "orig");
         duk_push_string(ctx, scriptpath.c_str());
         duk_put_global_string(ctx, "object_script_path");
-        if (!scriptpath.empty()) {
-            duk_push_string(ctx, fmt::format("{}", content->getAutoscanDirectory(scriptpath)->getScanID()).c_str());
+        auto autoScan = content->getAutoscanDirectory(scriptpath);
+        if (autoScan && !scriptpath.empty()) {
+            duk_push_sprintf(ctx, "%d", autoScan->getScanID());
             duk_put_global_string(ctx, "object_autoscan_id");
         }
         execute();
@@ -84,7 +85,4 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         gc_counter = 0;
     }
 }
-
-ImportScript::~ImportScript() = default;
-
 #endif // HAVE_JS

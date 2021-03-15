@@ -215,9 +215,15 @@ void Server::run()
     // run what is needed
     content->run();
 
-    std::string url = renderWebUri(ip, port);
+    std::string url = config->getOption(CFG_VIRTUAL_URL);
+    if (url.empty()) {
+        url = renderWebUri(ip, port);
+    }
+    if (url.find("http") != 0) { // url does not start with http
+        url = fmt::format("http://{}", url);
+    }
     writeBookmark(url);
-    log_info("The Web UI can be reached by following this link: http://{}/", url);
+    log_info("The Web UI can be reached by following this link: {}/", url);
     log_debug("end");
 }
 

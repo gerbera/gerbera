@@ -54,8 +54,6 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
 {
 }
 
-ContentDirectoryService::~ContentDirectoryService() = default;
-
 void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");

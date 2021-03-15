@@ -39,5 +39,3 @@ Context::Context(std::shared_ptr<Config> config,
     , session_manager(std::move(session_manager))
 {
 }
-
-Context::~Context() = default;

@@ -16,7 +16,6 @@ configure)
          --system \
          --ingroup gerbera \
          --home /var/lib/gerbera \
-         --no-create-home \
          --gecos "Gerbera Media Server" \
          --shell /usr/sbin/nologin \
          --disabled-login \

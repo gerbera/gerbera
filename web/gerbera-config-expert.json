@@ -1001,6 +1001,68 @@
 					]
 				}
 			]
+		},
+		{
+			"item": "/server/upnp",
+			"caption": "UPnP",
+			"type": "Element",
+			"editable": true,
+			"children": [
+				{
+					"item": "/server/upnp/album-properties/upnp-property",
+					"caption": "Album-Properties",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/album-properties/upnp-property/attribute::upnp-tag",
+							"caption": "UPnP Tag",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/album-properties/upnp-property/attribute::meta-data",
+							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/server/upnp/artist-properties/upnp-property",
+					"caption": "Artist-Properties",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/artist-properties/upnp-property/attribute::upnp-tag",
+							"caption": "UPnP Tag",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/artist-properties/upnp-property/attribute::meta-data",
+							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/server/upnp/title-properties/upnp-property",
+					"caption": "Title-Properties",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/title-properties/upnp-property/attribute::upnp-tag",
+							"caption": "UPnP Tag",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/title-properties/upnp-property/attribute::meta-data",
+							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				}
+			]
 		}
 	],
 	"success": true

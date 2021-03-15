@@ -210,6 +210,9 @@ void MySQLDatabase::init()
         auto sql = readTextFile(sqlFilePath);
 
         for (const auto& statement : splitString(sql, ';')) {
+            if (statement.empty()) {
+                continue;
+            }
             ret = mysql_real_query(&db, statement.c_str(), statement.size());
             if (ret) {
                 std::string myError = getError(&db);

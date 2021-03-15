@@ -33,10 +33,6 @@
 
 #include <unistd.h>
 
-IOHandler::IOHandler() = default;
-
-IOHandler::~IOHandler() = default;
-
 /// \fn static UpnpWebFileHandle web_open(const char *filename,
 ///                                       enum UpnpOpenFileMode mode)
 /// \brief Opens a file for the web server.

@@ -44,8 +44,6 @@ MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
 {
 }
 
-MRRegistrarService::~MRRegistrarService() = default;
-
 void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");

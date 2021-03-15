@@ -32,6 +32,7 @@
 #include "upnp_xml.h" // API
 
 #include "config/config_manager.h"
+#include "content/scripting/script_names.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
@@ -53,6 +54,35 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
+}
+
+static metadata_fields_t remapMetaDataField(const std::string& fieldName)
+{
+    for (const auto& [f, s] : mt_names) {
+        if (s == fieldName) {
+            return f;
+        }
+    }
+    return M_MAX;
+}
+
+static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
+{
+    // e.g. used for M_ALBUMARTIST
+    // name@attr[val] => <name attr="val">
+    std::size_t i, j;
+    if (((i = key.find('@')) != std::string::npos)
+        && ((j = key.find('[', i + 1)) != std::string::npos)
+        && (key[key.length() - 1] == ']')) {
+        std::string attr_name = key.substr(i + 1, j - i - 1);
+        std::string attr_value = key.substr(j + 1, key.length() - j - 2);
+        std::string name = key.substr(0, i);
+        auto node = entry.append_child(name.c_str());
+        node.append_attribute(attr_name.c_str()) = attr_value.c_str();
+        node.append_child(pugi::node_pcdata).set_value(val.c_str());
+    } else {
+        entry.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
+    }
 }
 
 void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks)
@@ -90,24 +120,18 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 }
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
             } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
-                if (upnp_class == UPNP_CLASS_MUSIC_TRACK)
-                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
-            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
-                // e.g. used for M_ALBUMARTIST
-                // name@attr[val] => <name attr="val">
-                std::size_t i, j;
-                if (((i = key.find('@')) != std::string::npos)
-                    && ((j = key.find('[', i + 1)) != std::string::npos)
-                    && (key[key.length() - 1] == ']')) {
-                    std::string attr_name = key.substr(i + 1, j - i - 1);
-                    std::string attr_value = key.substr(j + 1, key.length() - j - 2);
-                    std::string name = key.substr(0, i);
-                    auto node = result.append_child(name.c_str());
-                    node.append_attribute(attr_name.c_str()) = attr_value.c_str();
-                    node.append_child(pugi::node_pcdata).set_value(val.c_str());
-                } else {
+                if (upnp_class == UPNP_CLASS_MUSIC_TRACK) {
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
                 }
+            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
+                addField(result, key, val);
+            }
+        }
+        const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
+        for (const auto& [tag, field] : titleProperties) {
+            auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
+            if (!value.empty()) {
+                addField(result, tag, value);
             }
         }
 
@@ -126,39 +150,19 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         log_debug("container is class: {}", upnp_class.c_str());
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 11> {
-                {
-                    { "dc:creator", M_ALBUMARTIST },
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:composer", M_COMPOSER },
-                    { "upnp:conductor", M_CONDUCTOR },
-                    { "upnp:orchestra", M_ORCHESTRA },
-                    { "upnp:date", M_UPNP_DATE },
-                    { "dc:date", M_UPNP_DATE },
-                    { "upnp:producer", M_PRODUCER },
-                    { "dc:publisher", M_PUBLISHER },
-                    { "upnp:genre", M_GENRE },
-                }
-            };
+            const auto albumProperties = config->getDictionaryOption(CFG_UPNP_ALBUM_PROPERTIES);
             for (const auto& [tag, field] : albumProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    addField(result, tag, value);
                 }
             }
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
-            constexpr auto albumProperties = std::array<std::pair<const char*, metadata_fields_t>, 3> {
-                {
-                    { "upnp:artist", M_ALBUMARTIST },
-                    { "upnp:albumArtist", M_ALBUMARTIST },
-                    { "upnp:genre", M_GENRE },
-                }
-            };
-            for (const auto& [tag, field] : albumProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(field));
+            const auto artistProperties = config->getDictionaryOption(CFG_UPNP_ARTIST_PROPERTIES);
+            for (const auto& [tag, field] : artistProperties) {
+                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
-                    result.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+                    addField(result, tag, value);
                 }
             }
         }

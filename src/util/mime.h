@@ -52,7 +52,6 @@ public:
     std::string bufferToMimeType(const void* buffer, size_t length);
 #endif // HAVE_MAGIC
 
-    std::string extensionToMimeType(const fs::path& path, const std::string& defval = "");
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
     std::string getMimeType(const fs::path& path, const std::string& defval = "");
 
