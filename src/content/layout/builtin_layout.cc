@@ -148,8 +148,10 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
     }
 }
 
-void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
+void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
 {
+    auto f2i = StringConverter::f2i(config);
+
     std::string desc;
 
     auto meta = obj->getMetadata();
@@ -274,6 +276,20 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj)
     chain = fmt::format("/Audio/Artists/{}/All - full name", artist);
     id = content->addContainerChain(chain);
     add(obj, id);
+
+    obj->setTitle(title);
+    std::string dir;
+    if (!rootpath.empty()) {
+        // make location relative to rootpath: "/home/.../Audio/Action/a.mp3" with rootpath "/home/.../Audio" -> "Action"
+        dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
+        dir = f2i->convert(dir);
+    } else
+        dir = esc(f2i->convert(getLastPath(obj->getLocation())));
+
+    if (!dir.empty()) {
+        id = content->addContainerChain(fmt::format("/Audio/Directories/{}", dir));
+        add(obj, id);
+    }
 }
 
 #ifdef SOPCAST
@@ -406,12 +422,12 @@ void BuiltinLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path ro
         else if (startswith(mimetype, "image"))
             addImage(clone, rootpath);
         else if ((startswith(mimetype, "audio") && (content_type != CONTENT_TYPE_PLAYLIST)))
-            addAudio(clone);
+            addAudio(clone, rootpath);
         else if (content_type == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone, rootpath);
             else
-                addAudio(clone);
+                addAudio(clone, rootpath);
         }
 
 #ifdef ONLINE_SERVICES

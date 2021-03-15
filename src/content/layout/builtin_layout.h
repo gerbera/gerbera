@@ -58,7 +58,7 @@ protected:
     static std::string esc(std::string str);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
-    void addAudio(const std::shared_ptr<CdsObject>& obj);
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     std::string mapGenre(const std::string& genre);
 #ifdef SOPCAST
     void addSopCast(const std::shared_ptr<CdsObject>& obj);
