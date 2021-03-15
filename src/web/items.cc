@@ -61,15 +61,15 @@ void web::items::process()
     xml2JsonHints->setFieldType("title", "string");
     items.append_attribute("parent_id") = parentID;
 
-    auto obj = database->loadObject(parentID);
+    auto container = database->loadObject(parentID);
     auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
-    if ((obj->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (obj->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
+    if ((container->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (container->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
 
     auto arr = database->browse(param);
-    items.append_attribute("virtual") = obj->isVirtual();
+    items.append_attribute("virtual") = container->isVirtual();
 
     items.append_attribute("start") = start;
     //items.append_attribute("returned") = arr->size();
@@ -79,10 +79,10 @@ void web::items::process()
     bool protectItems = false;
     std::string autoscanMode = "none";
 
-    auto adir = database->getAutoscanDirectory(parentID);
+    auto parentDir = database->getAutoscanDirectory(parentID);
     int autoscanType = 0;
-    if (adir != nullptr) {
-        autoscanType = adir->persistent() ? 2 : 1;
+    if (parentDir != nullptr) {
+        autoscanType = parentDir->persistent() ? 2 : 1;
         autoscanMode = "timed";
     }
 
@@ -93,8 +93,8 @@ void web::items::process()
             auto pathIDs = database->getPathIDs(parentID);
             if (pathIDs != nullptr) {
                 for (int pathId : *pathIDs) {
-                    auto adir = database->getAutoscanDirectory(pathId);
-                    if (adir != nullptr && adir->getRecursive()) {
+                    auto pathDir = database->getAutoscanDirectory(pathId);
+                    if (pathDir != nullptr && pathDir->getRecursive()) {
                         startpoint_id = pathId;
                         break;
                     }
@@ -105,10 +105,10 @@ void web::items::process()
         }
 
         if (startpoint_id != INVALID_OBJECT_ID) {
-            std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(startpoint_id);
-            if (adir != nullptr && adir->getScanMode() == ScanMode::INotify) {
+            std::shared_ptr<AutoscanDirectory> startPtDir = database->getAutoscanDirectory(startpoint_id);
+            if (startPtDir != nullptr && startPtDir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
-                if (autoscanType == 0 || adir->persistent())
+                if (autoscanType == 0 || startPtDir->persistent())
                     protectContainer = true;
 
                 autoscanMode = "inotify";
@@ -121,16 +121,16 @@ void web::items::process()
     items.append_attribute("protect_container") = protectContainer;
     items.append_attribute("protect_items") = protectItems;
 
-    for (const auto& obj : arr) {
-        //if (obj->isItem())
+    for (const auto& arrayObj : arr) {
+        //if (arrayObj->isItem())
         //{
         auto item = items.append_child("item");
-        item.append_attribute("id") = obj->getID();
-        item.append_child("title").append_child(pugi::node_pcdata).set_value(obj->getTitle().c_str());
+        item.append_attribute("id") = arrayObj->getID();
+        item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
         /// \todo clean this up, should have more generic options for online
         /// services
         // FIXME
-        auto objItem = std::static_pointer_cast<CdsItem>(obj);
+        auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 
@@ -138,7 +138,7 @@ void web::items::process()
         if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }
-        //item.append_attribute("virtual") = obj->isVirtual();
+        //item.append_attribute("virtual") = arrayObj->isVirtual();
         //}
     }
 }

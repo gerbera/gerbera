@@ -131,7 +131,7 @@ var click = (event) => {
       break;
     case 'HOME':
       home();
-      break
+      break;
   }
 };
 

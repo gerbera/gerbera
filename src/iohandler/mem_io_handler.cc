@@ -103,23 +103,22 @@ void MemIOHandler::seek(off_t offset, int whence)
 
         pos = offset;
     } else if (whence == SEEK_CUR) {
-        long temp;
-
-        if (pos == -1) {
-            temp = length;
-        } else {
-            temp = pos;
-        }
-
-        if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw_std_runtime_error("seek failed: trying to seek before the beginning/past end of file");
+        long temp = (pos == -1) ? length : pos;
+        //  (((temp + offset) > length) || ((temp + offset) < 0))
+        if (offset > 0 && (length < offset || temp > length - offset)) {
+            throw_std_runtime_error("seek failed: trying to seek past end of file");
+        } else if (offset < 0 && temp < -offset) {
+            throw_std_runtime_error("seek failed: trying to seek before the beginning of file");
         }
 
         pos = temp + offset;
     } else if (whence == SEEK_END) {
         long temp = length;
-        if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw_std_runtime_error("seek failed: trying to seek before the beginning/past end of file");
+        //  (((temp + offset) > length) || ((temp + offset) < 0))
+        if (offset > 0 && (length < offset || temp > length - offset)) {
+            throw_std_runtime_error("seek failed: trying to seek past end of file");
+        } else if (offset < 0 && temp < -offset) {
+            throw_std_runtime_error("seek failed: trying to seek before the beginning of file");
         }
 
         pos = temp + offset;

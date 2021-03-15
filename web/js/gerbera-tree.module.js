@@ -123,7 +123,7 @@ const loadTree = (response, config) => {
   config = $.extend({}, treeViewCss, treeViewEvents, config);
   if (response.success) {
     if (tree.hasClass('grb-tree')) {
-      tree.tree('destroy')
+      tree.tree('destroy');
     }
 
     Trail.destroy();
@@ -178,7 +178,7 @@ const fetchChildren = (gerberaData) => {
   })
   .catch((err) => {
     console.log(err);
-    GerberaApp.error(err)
+    GerberaApp.error(err);
   });
 };
 

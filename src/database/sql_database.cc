@@ -1957,40 +1957,42 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         return nullptr;
     int databaseID = adir->getDatabaseID();
 
-    std::ostringstream q;
-    q << "SELECT " << TQ("id")
-      << " FROM " << TQ(AUTOSCAN_TABLE)
-      << " WHERE " << TQ("obj_id") << " = "
-      << quote(checkObjectID);
-    if (databaseID >= 0)
-        q << " AND " << TQ("id") << " != " << quote(databaseID);
-
-    auto res = select(q);
-    if (res == nullptr)
-        throw_std_runtime_error("SQL error");
-
     std::unique_ptr<SQLRow> row;
-    if ((row = res->nextRow()) != nullptr) {
-        auto obj = loadObject(checkObjectID);
-        if (obj == nullptr)
-            throw_std_runtime_error("Referenced object (by Autoscan) not found.");
-        log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
-        throw_std_runtime_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
+    {
+        std::ostringstream qAs;
+        qAs << "SELECT " << TQ("id")
+            << " FROM " << TQ(AUTOSCAN_TABLE)
+            << " WHERE " << TQ("obj_id") << " = "
+            << quote(checkObjectID);
+        if (databaseID >= 0)
+            qAs << " AND " << TQ("id") << " != " << quote(databaseID);
+
+        auto res = select(qAs);
+        if (res == nullptr)
+            throw_std_runtime_error("SQL error");
+
+        if ((row = res->nextRow()) != nullptr) {
+            auto obj = loadObject(checkObjectID);
+            if (obj == nullptr)
+                throw_std_runtime_error("Referenced object (by Autoscan) not found.");
+            log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
+            throw_std_runtime_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
+        }
     }
 
     if (adir->getRecursive()) {
-        std::ostringstream q;
-        q << "SELECT " << TQ("obj_id")
-          << " FROM " << TQ(AUTOSCAN_TABLE)
-          << " WHERE " << TQ("path_ids") << " LIKE "
-          << quote(fmt::format("%,{},%", checkObjectID));
+        std::ostringstream qRec;
+        qRec << "SELECT " << TQ("obj_id")
+             << " FROM " << TQ(AUTOSCAN_TABLE)
+             << " WHERE " << TQ("path_ids") << " LIKE "
+             << quote(fmt::format("%,{},%", checkObjectID));
         if (databaseID >= 0)
-            q << " AND " << TQ("id") << " != " << quote(databaseID);
-        q << " LIMIT 1";
+            qRec << " AND " << TQ("id") << " != " << quote(databaseID);
+        qRec << " LIMIT 1";
 
-        log_debug("------------ {}", q.str().c_str());
+        log_debug("------------ {}", qRec.str().c_str());
 
-        res = select(q);
+        auto res = select(qRec);
         if (res == nullptr)
             throw_std_runtime_error("SQL error");
         if ((row = res->nextRow()) != nullptr) {
@@ -2004,24 +2006,26 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         }
     }
 
-    auto pathIDs = getPathIDs(checkObjectID);
-    if (pathIDs == nullptr)
-        throw_std_runtime_error("getPathIDs returned nullptr");
-    std::ostringstream q2;
-    q2 << "SELECT " << TQ("obj_id")
-       << " FROM " << TQ(AUTOSCAN_TABLE)
-       << " WHERE " << TQ("obj_id") << " IN ("
-       << toCSV(*pathIDs)
-       << ") AND " << TQ("recursive") << '=' << mapBool(true);
-    if (databaseID >= 0)
-        q2 << " AND " << TQ("id") << " != " << quote(databaseID);
-    q2 << " LIMIT 1";
+    {
+        auto pathIDs = getPathIDs(checkObjectID);
+        if (pathIDs == nullptr)
+            throw_std_runtime_error("getPathIDs returned nullptr");
+        std::ostringstream qPath;
+        qPath << "SELECT " << TQ("obj_id")
+              << " FROM " << TQ(AUTOSCAN_TABLE)
+              << " WHERE " << TQ("obj_id") << " IN ("
+              << toCSV(*pathIDs)
+              << ") AND " << TQ("recursive") << '=' << mapBool(true);
+        if (databaseID >= 0)
+            qPath << " AND " << TQ("id") << " != " << quote(databaseID);
+        qPath << " LIMIT 1";
 
-    res = select(q2);
-    if (res == nullptr)
-        throw_std_runtime_error("SQL error");
-    if ((row = res->nextRow()) == nullptr)
-        return pathIDs;
+        auto res = select(qPath);
+        if (res == nullptr)
+            throw_std_runtime_error("SQL error");
+        if ((row = res->nextRow()) == nullptr)
+            return pathIDs;
+    }
 
     int objectID = std::stoi(row->col(0));
     auto obj = loadObject(objectID);

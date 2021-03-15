@@ -77,7 +77,7 @@ describe('Login Suite', () => {
       }
 
       const sid = await loginPage.getCookie('SID');
-      expect(sid).to.be.null
+      expect(sid).to.be.null;
     });
 
     it('when session expires reloads the page and lets user login again.', async () => {

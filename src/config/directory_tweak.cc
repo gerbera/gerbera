@@ -63,7 +63,7 @@ void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_
         origSize = list.size() + 1;
         dir->setOrig(true);
     }
-    if (std::any_of(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == dir->getLocation()); })) {
+    if (std::any_of(list.begin(), list.end(), [&](const auto& d) { return (d->getLocation() == dir->getLocation()); })) {
         log_error("Duplicate tweak entry[{}] {}", index, dir->getLocation().string());
         return;
     }
@@ -105,7 +105,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& locatio
     AutoLock lock(mutex);
     const auto& myLocation = location.has_filename() ? location.parent_path() : location;
     for (auto testLoc = myLocation; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
-        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& d) { return (d->getLocation() == myLocation || d->getInherit()) && d->getLocation() == testLoc; });
+        auto entry = std::find_if(list.begin(), list.end(), [&](const auto& d) { return (d->getLocation() == myLocation || d->getInherit()) && d->getLocation() == testLoc; });
         if (entry != list.end() && *entry != nullptr) {
             return *entry;
         }
@@ -131,7 +131,7 @@ void DirectoryConfigList::remove(size_t id, bool edit)
             return;
         }
         const auto& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return dir->getLocation() == item->getLocation(); });
+        auto entry = std::find_if(list.begin(), list.end(), [&](const auto& item) { return dir->getLocation() == item->getLocation(); });
         list.erase(entry);
         if (id >= origSize) {
             indexMap.erase(id);

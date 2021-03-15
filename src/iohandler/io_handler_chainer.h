@@ -53,6 +53,14 @@ public:
     IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize);
     int getStatus() override { return status; }
 
+    ~IOHandlerChainer() override
+    {
+        if (buf != nullptr) {
+            delete[] buf;
+            buf = nullptr;
+        }
+    }
+
 protected:
     void threadProc() override;
 

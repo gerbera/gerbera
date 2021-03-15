@@ -124,16 +124,16 @@ std::shared_ptr<GenericTask> TaskProcessor::getCurrentTask()
 void TaskProcessor::invalidateTask(unsigned int taskID)
 {
     AutoLock lock(mutex);
-    auto t = getCurrentTask();
-    if (t != nullptr) {
-        if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-            t->invalidate();
+    auto tc = getCurrentTask();
+    if (tc != nullptr) {
+        if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
+            tc->invalidate();
         }
     }
 
-    for (const auto& t : taskQueue) {
-        if ((t->getID() == taskID) || (t->getParentID() == taskID)) {
-            t->invalidate();
+    for (const auto& tq : taskQueue) {
+        if ((tq->getID() == taskID) || (tq->getParentID() == taskID)) {
+            tq->invalidate();
         }
     }
 }
@@ -143,14 +143,14 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
     std::deque<std::shared_ptr<GenericTask>> taskList;
 
     AutoLock lock(mutex);
-    auto t = getCurrentTask();
+    auto tc = getCurrentTask();
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if (t == nullptr)
+    if (tc == nullptr)
         return taskList;
 
-    taskList.push_back(t);
+    taskList.push_back(tc);
 
     std::copy_if(taskQueue.begin(), taskQueue.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
 

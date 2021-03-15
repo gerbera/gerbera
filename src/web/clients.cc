@@ -41,7 +41,11 @@ static std::string steady_clock_to_string(std::chrono::steady_clock::time_point 
 {
     auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
         + std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()));
-    return trimString(std::asctime(std::localtime(&systime)));
+    struct tm localSystime;
+    localtime_r(&systime, &localSystime);
+    char ascString[26];
+    asctime_r(&localSystime, ascString);
+    return trimString(ascString);
 }
 
 void web::clients::process()
