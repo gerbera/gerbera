@@ -31,15 +31,12 @@
 
 #include "upnp_cds.h" // API
 
-#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "config/config_manager.h"
-#include "content/content_manager.h"
 #include "database/database.h"
-#include "server.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
@@ -48,7 +45,6 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
     , stringLimit(stringLimit)
     , config(context->getConfig())
     , database(context->getDatabase())
-    , content(context->getServer()->getContent())
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
