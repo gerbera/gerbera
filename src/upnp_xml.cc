@@ -105,7 +105,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
-        if (quirks != NULL)
+        if (quirks != nullptr)
             quirks->restoreSamsungBookMarkedPosition(item, &result);
 
         auto meta = obj->getMetadata();

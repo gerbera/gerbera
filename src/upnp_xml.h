@@ -61,7 +61,7 @@ public:
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item
-    void renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks = NULL);
+    void renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks = nullptr);
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
