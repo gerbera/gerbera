@@ -406,7 +406,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     std::error_code ec;
     auto dirEnt = fs::directory_entry(path, ec);
-    if (!dirEnt.is_regular_file(ec))
+    if (ec.value() || !dirEnt.is_regular_file(ec))
         throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
     auto pcdir = database->findObjectByPath(path);
@@ -520,9 +520,14 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         asSetting.mergeOptions(config, parentPath);
         std::error_code ec;
         // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
-        addFile(fs::directory_entry(parentPath, ec), asSetting, true, true, false);
-        log_debug("forced rescan of {} for resource {}", parentPath.c_str(), location);
-        parentRemoved = true;
+        auto dirEntry = fs::directory_entry(parentPath, ec);
+        if (!ec.value()) {
+            addFile(dirEntry, asSetting, true, true, false);
+            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location);
+            parentRemoved = true;
+        } else {
+            log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
+        }
     }
     return parentRemoved;
 }
@@ -629,7 +634,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    if (!rootDir.exists(ec) || !rootDir.is_directory(ec)) {
+    if (ec.value() || !rootDir.exists(ec) || !rootDir.is_directory(ec)) {
         log_warning("Could not open {}: {}", location.c_str(), ec.message());
         if (adir->persistent()) {
             removeObject(adir, containerID, false);

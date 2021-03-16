@@ -55,13 +55,18 @@ void web::add::process()
     else
         path = hexDecodeString(objID);
     if (path.empty())
-        throw_std_runtime_error("illegal path");
+        throw_std_runtime_error("Illegal empty path");
 
     AutoScanSetting asSetting;
     asSetting.recursive = true;
     asSetting.mergeOptions(config, path);
 
     std::error_code ec;
-    content->addFile(fs::directory_entry(path, ec), asSetting);
+    auto dirEnt = fs::directory_entry(path, ec);
+    if (!ec.value()) {
+        content->addFile(dirEnt, asSetting);
+    } else {
+        log_error("Failed to read {}: {}", path.c_str(), ec.message());
+    }
     log_debug("add: returning");
 }

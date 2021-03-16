@@ -361,15 +361,20 @@ int main(int argc, char** argv, char** envp)
             auto files = opts["add-file"].as<std::vector<std::string>>();
             for (const auto& f : files) {
                 try {
-                    // add file/directory recursively and asynchronously
-                    AutoScanSetting asSetting;
-                    asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-                    asSetting.recursive = true;
-                    asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
-                    asSetting.rescanResource = false;
-                    asSetting.mergeOptions(configManager, f);
                     std::error_code ec;
-                    server->getContent()->addFile(fs::directory_entry(f, ec), asSetting, true);
+                    auto dirEnt = fs::directory_entry(f, ec);
+                    if (!ec.value()) {
+                        // add file/directory recursively and asynchronously
+                        AutoScanSetting asSetting;
+                        asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                        asSetting.recursive = true;
+                        asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                        asSetting.rescanResource = false;
+                        asSetting.mergeOptions(configManager, f);
+                        server->getContent()->addFile(dirEnt, asSetting, true);
+                    } else {
+                        log_error("Failed to read {}: {}", f.c_str(), ec.message());
+                    }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                     exit(EXIT_FAILURE);
