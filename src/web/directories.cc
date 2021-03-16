@@ -88,13 +88,8 @@ void web::directories::process()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 
-        bool hasContent = false;
-        for (auto& subIt : fs::directory_iterator(filepath, ec)) {
-            if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
-                continue;
-            hasContent = true;
-            break;
-        }
+        const auto& dir = fs::directory_iterator(filepath, ec);
+        bool hasContent = std::any_of(fs::begin(dir), fs::end(dir), [&](const auto& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
