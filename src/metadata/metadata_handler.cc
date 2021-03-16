@@ -68,7 +68,7 @@ MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
 void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
 {
     std::error_code ec;
-    if (!dirEnt.is_regular_file(ec))
+    if (!isRegularFile(dirEnt, ec))
         throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
     auto filesize = getFileSize(dirEnt);
 
