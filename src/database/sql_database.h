@@ -35,6 +35,7 @@
 #include <mutex>
 #include <sstream>
 #include <unordered_set>
+#include <utility>
 
 #include "database.h"
 
@@ -184,27 +185,33 @@ private:
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
 
+    enum class Operation {
+        Insert,
+        Update,
+        Delete
+    };
+
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable {
     public:
-        AddUpdateTable(const std::string& tableName, const std::map<std::string, std::string>& dict, const std::string& operation)
+        AddUpdateTable(std::string tableName, std::map<std::string, std::string> dict, Operation operation)
+            : tableName(std::move(tableName))
+            , dict(std::move(dict))
+            , operation(operation)
         {
-            this->tableName = tableName;
-            this->dict = dict;
-            this->operation = operation;
         }
-        std::string getTableName() const { return tableName; }
-        std::map<std::string, std::string> getDict() const { return dict; }
-        std::string getOperation() const { return operation; }
+        [[nodiscard]] std::string getTableName() const { return tableName; }
+        [[nodiscard]] std::map<std::string, std::string> getDict() const { return dict; }
+        [[nodiscard]] Operation getOperation() const { return operation; }
 
     protected:
         std::string tableName;
         std::map<std::string, std::string> dict;
-        std::string operation;
+        Operation operation;
     };
-    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer);
+    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
 
-    void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
+    void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
     std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
@@ -227,7 +234,6 @@ private:
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     static std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
-    int _getAutoscanDirectoryInfo(int objectID, const std::string& field);
     std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /* location helper: filesystem path or virtual path to db location*/

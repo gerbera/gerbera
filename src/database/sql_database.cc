@@ -191,7 +191,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     return findObjectByPath(location);
 }
 
-std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, bool isUpdate, int* changedContainer)
+std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
 {
     std::shared_ptr<CdsObject> refObj = nullptr;
     bool hasReference = false;
@@ -227,12 +227,12 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     if (hasReference || playlistRef)
         cdsObjectSql["ref_id"] = quote(refObj->getID());
-    else if (isUpdate)
+    else if (op == Operation::Update)
         cdsObjectSql["ref_id"] = SQL_NULL;
 
     if (!hasReference || refObj->getClass() != obj->getClass())
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
-    else if (isUpdate)
+    else if (op == Operation::Update)
         cdsObjectSql["upnp_class"] = SQL_NULL;
 
     //if (!hasReference || refObj->getTitle() != obj->getTitle())
@@ -240,7 +240,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     //else if (isUpdate)
     //    cdsObjectSql["dc_title"] = SQL_NULL;
 
-    if (isUpdate)
+    if (op == Operation::Update)
         cdsObjectSql["auxdata"] = SQL_NULL;
     if (auto auxData = obj->getAuxData(); !auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
         cdsObjectSql["auxdata"] = quote(dictEncode(auxData));
@@ -259,7 +259,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             cdsObjectSql["resources"] = quote(resStr);
         else
             cdsObjectSql["resources"] = SQL_NULL;
-    } else if (isUpdate) {
+    } else if (op == Operation::Update) {
         cdsObjectSql["resources"] = SQL_NULL;
     }
 
@@ -268,7 +268,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     cdsObjectSql["flags"] = quote(obj->getFlags());
 
     if (obj->isContainer()) {
-        if (!(isUpdate && obj->isVirtual()))
+        if (!(op == Operation::Update && obj->isVirtual()))
             throw_std_runtime_error("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
         std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql["location"] = quote(dbLocation);
@@ -294,7 +294,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 cdsObjectSql["location_hash"] = SQL_NULL;
             }
         } else {
-            if (isUpdate) {
+            if (op == Operation::Update) {
                 cdsObjectSql["location"] = SQL_NULL;
                 cdsObjectSql["location_hash"] = SQL_NULL;
             }
@@ -303,14 +303,14 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         if (item->getTrackNumber() > 0) {
             cdsObjectSql["track_number"] = quote(item->getTrackNumber());
         } else {
-            if (isUpdate)
+            if (op == Operation::Update)
                 cdsObjectSql["track_number"] = SQL_NULL;
         }
 
         if (item->getPartNumber() > 0) {
             cdsObjectSql["part_number"] = quote(item->getPartNumber());
         } else {
-            if (isUpdate)
+            if (op == Operation::Update)
                 cdsObjectSql["part_number"] = SQL_NULL;
         }
 
@@ -320,7 +320,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             else
                 cdsObjectSql["service_id"] = SQL_NULL;
         } else {
-            if (isUpdate)
+            if (op == Operation::Update)
                 cdsObjectSql["service_id"] = SQL_NULL;
         }
 
@@ -330,7 +330,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal;
 
     // check for a duplicate (virtual) object
-    if (hasReference && !isUpdate) {
+    if (hasReference && op != Operation::Update) {
         std::ostringstream q;
         q << "SELECT " << TQ("id")
           << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -352,10 +352,10 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
     returnVal.push_back(
-        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, isUpdate ? "update" : "insert"));
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
-        generateMetadataDBOperations(obj, isUpdate, returnVal);
+        generateMetadataDBOperations(obj, op, returnVal);
     }
 
     return returnVal;
@@ -364,9 +364,9 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
 {
     if (obj->getID() != INVALID_OBJECT_ID)
-        throw_std_runtime_error("tried to add an object with an object ID set");
+        throw_std_runtime_error("Tried to add an object with an object ID set");
 
-    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, false, changedContainer);
+    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
     for (const auto& addUpdateTable : tables) {
         auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb->str().c_str());
@@ -390,11 +390,11 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
-        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, "update"));
+        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, Operation::Update));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
-        data = _addUpdateObject(obj, true, changedContainer);
+        data = _addUpdateObject(obj, Operation::Update, changedContainer);
     }
 
     if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
@@ -403,17 +403,22 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         exec("START TRANSACTION");
     }
     for (const auto& addUpdateTable : data) {
-        std::string operation = addUpdateTable->getOperation();
+        Operation op = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
-        if (operation == "update") {
-            qb = sqlForUpdate(obj, addUpdateTable);
-        } else if (operation == "insert") {
+
+        switch (op) {
+        case Operation::Insert:
             qb = sqlForInsert(obj, addUpdateTable);
-        } else if (operation == "delete") {
+            break;
+        case Operation::Update:
+            qb = sqlForUpdate(obj, addUpdateTable);
+            break;
+        case Operation::Delete:
             qb = sqlForDelete(obj, addUpdateTable);
+            break;
         }
 
-        log_debug("upd_query: {}", qb->str().c_str());
+        log_debug("upd_query: {}", qb->str());
         exec(qb->str());
     }
     exec("COMMIT");
@@ -2087,22 +2092,22 @@ void SQLDatabase::clearFlagInDB(int flag)
     exec(qb.str());
 }
 
-void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, bool isUpdate,
+void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
     std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
     auto dict = obj->getMetadata();
-    if (!isUpdate) {
+    if (op == Operation::Insert) {
         for (const auto& [key, val] : dict) {
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "insert"));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, op));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
         for (const auto& [key, val] : dict) {
-            std::string operation = dbMetadata.find(key) == dbMetadata.end() ? "insert" : "update";
+            Operation operation = dbMetadata.find(key) == dbMetadata.end() ? Operation::Insert : Operation::Update;
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
@@ -2114,7 +2119,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
                 std::map<std::string, std::string> metadataSql;
                 metadataSql["property_name"] = quote(key);
                 metadataSql["property_value"] = quote(val);
-                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, "delete"));
+                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, Operation::Delete));
             }
         }
     }
