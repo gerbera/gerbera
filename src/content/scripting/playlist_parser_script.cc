@@ -85,7 +85,7 @@ js_getCdsObject(duk_context* ctx)
         auto cm = self->getContent();
         std::error_code ec;
         auto dirEnt = fs::directory_entry(path, ec);
-        if (!ec.value()) {
+        if (!ec) {
             obj = cm->createObjectFromFile(dirEnt, false);
         } else {
             log_error("Failed to read {}: {}", path.c_str(), ec.message());

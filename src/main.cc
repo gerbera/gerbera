@@ -363,7 +363,7 @@ int main(int argc, char** argv, char** envp)
                 try {
                     std::error_code ec;
                     auto dirEnt = fs::directory_entry(f, ec);
-                    if (!ec.value()) {
+                    if (!ec) {
                         // add file/directory recursively and asynchronously
                         AutoScanSetting asSetting;
                         asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);

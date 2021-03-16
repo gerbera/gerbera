@@ -406,7 +406,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     std::error_code ec;
     auto dirEnt = fs::directory_entry(path, ec);
-    if (ec.value() || !dirEnt.is_regular_file(ec))
+    if (ec || !dirEnt.is_regular_file(ec))
         throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
     auto pcdir = database->findObjectByPath(path);
@@ -521,7 +521,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         std::error_code ec;
         // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
         auto dirEntry = fs::directory_entry(parentPath, ec);
-        if (!ec.value()) {
+        if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
             log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location);
             parentRemoved = true;
@@ -634,7 +634,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
 
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    if (ec.value() || !rootDir.exists(ec) || !rootDir.is_directory(ec)) {
+    if (ec || !rootDir.exists(ec) || !rootDir.is_directory(ec)) {
         log_warning("Could not open {}: {}", location.c_str(), ec.message());
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
@@ -778,7 +778,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 addFileInternal(dirEnt, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
             }
         }
-        if (ec.value()) {
+        if (ec) {
             log_error("_rescanDirectory: Failed to read {}, {}", newPath.c_str(), ec.message());
         }
     } // while
@@ -884,7 +884,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
     }
-    if (ec.value()) {
+    if (ec) {
         log_error("_rescanDirectory: Failed to read {}, {}", subDir.path().c_str(), ec.message());
     }
 
@@ -1267,7 +1267,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         // only regular files and directories are supported
         throw_std_runtime_error("ContentManager: skipping file {}", dirEnt.path().c_str());
     }
-    if (ec.value()) {
+    if (ec) {
         log_error("File or directory cannot be read: {} ({})", dirEnt.path().c_str(), ec.message());
     }
     //    auto f2i = StringConverter::f2i();

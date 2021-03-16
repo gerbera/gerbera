@@ -129,7 +129,7 @@ void AutoscanInotify::threadProc()
                 }
 
                 auto dirEnt = fs::directory_entry(location, ec);
-                if (!ec.value()) {
+                if (!ec) {
                     if (adir->getRecursive()) {
                         log_debug("Adding recursive watch: {}", location.c_str());
                         monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
@@ -194,7 +194,7 @@ void AutoscanInotify::threadProc()
                             if (adir->getHidden() || name.at(0) != '.') {
                                 log_debug("Detected new dir, adding to inotify: {}", path.c_str());
                                 auto dirEnt = fs::directory_entry(path, ec);
-                                if (!ec.value()) {
+                                if (!ec) {
                                     monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                                 } else {
                                     log_error("Failed to read {}: {}", path.c_str(), ec.message());
@@ -229,7 +229,7 @@ void AutoscanInotify::threadProc()
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("Adding {}", path.c_str());
                         auto dirEnt = fs::directory_entry(path, ec);
-                        if (!ec.value()) {
+                        if (!ec) {
                             AutoScanSetting asSetting;
                             asSetting.adir = adir;
                             asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
@@ -485,11 +485,11 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& start
         if (dirEnt.is_directory(ec) && adir->getRecursive())
             monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
 
-        if (ec.value()) {
+        if (ec) {
             log_error("monitorUnmonitorRecursive: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
         }
     }
-    if (ec.value()) {
+    if (ec) {
         log_error("monitorUnmonitorRecursive: Failed to read {}, {}", startPath.path().c_str(), ec.message());
     }
 }

@@ -172,7 +172,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 fs::path loc = self->getProperty("location");
                 std::error_code ec;
                 auto dirEnt = fs::directory_entry(loc, ec);
-                if (!ec.value()) {
+                if (!ec) {
                     AutoScanSetting asSetting;
                     asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
                     asSetting.recursive = false;
