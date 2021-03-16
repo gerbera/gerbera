@@ -74,7 +74,7 @@ Mime::~Mime()
 std::string Mime::fileToMimeType(const fs::path& path, const std::string& defval)
 {
     const char* mimeType = magic_file(magicCookie, path.c_str());
-    if (mimeType[0] == '\0') {
+    if (!mimeType || mimeType[0] == '\0') {
         return defval;
     }
 
