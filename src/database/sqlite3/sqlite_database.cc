@@ -345,6 +345,16 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
+void Sqlite3Database::beginTransaction()
+{
+    _exec("BEGIN TRANSACTION");
+}
+
+void Sqlite3Database::commit()
+{
+    _exec("COMMIT");
+}
+
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
 {
     try {

@@ -367,6 +367,9 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
         throw_std_runtime_error("Tried to add an object with an object ID set");
 
     std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
+    bool withTrans = tables.size() > 1;
+    if (withTrans)
+        beginTransaction();
     for (const auto& addUpdateTable : tables) {
         auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb->str().c_str());
@@ -378,6 +381,8 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
             exec(qb->str(), false);
         }
     }
+    if (withTrans)
+        commit();
 }
 
 void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
@@ -397,11 +402,9 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         data = _addUpdateObject(obj, Operation::Update, changedContainer);
     }
 
-    if (config->getOption(CFG_SERVER_STORAGE_DRIVER) == "sqlite3") {
-        exec("BEGIN TRANSACTION");
-    } else {
-        exec("START TRANSACTION");
-    }
+    bool withTrans = data.size() > 1;
+    if (withTrans)
+        beginTransaction();
     for (const auto& addUpdateTable : data) {
         Operation op = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
@@ -421,7 +424,8 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
         log_debug("upd_query: {}", qb->str());
         exec(qb->str());
     }
-    exec("COMMIT");
+    if (withTrans)
+        commit();
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
