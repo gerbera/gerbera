@@ -75,7 +75,10 @@ bool startswith(const std::string& str, const std::string& check);
 /// \brief returns lowercase of str
 std::string toLower(std::string str);
 
+/// \brief convert string to integer
 int stoiString(const std::string& str, int def = 0, int base = 10);
+/// \brief convert string to unsigned long
+unsigned long stoulString(const std::string& str, int def = 0, int base = 10);
 
 /// \brief  Used to replace potential multiple following //../ with single /
 std::string reduceString(std::string str, char ch);

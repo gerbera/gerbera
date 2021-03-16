@@ -963,7 +963,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         }
 
         item->setTrackNumber(stoiString(row->col(_track_number)));
-        item->setBookMarkPos(stoiString(row->col(_bookmark_pos)));
+        item->setBookMarkPos(stoulString(row->col(_bookmark_pos)));
         item->setPartNumber(stoiString(row->col(_part_number)));
 
         if (!row->col(_ref_service_id).empty())
