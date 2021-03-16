@@ -136,6 +136,7 @@ CdsItem::CdsItem()
     , mimeType(MIMETYPE_DEFAULT)
     , partNumber(0)
     , trackNumber(0)
+    , bookMarkPos(0)
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";

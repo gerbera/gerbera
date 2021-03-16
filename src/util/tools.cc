@@ -149,6 +149,13 @@ int stoiString(const std::string& str, int def, int base)
 
     return std::stoi(str, nullptr, base);
 }
+unsigned long stoulString(const std::string& str, int def, int base)
+{
+    if (str.empty() || !std::isdigit(*str.c_str()))
+        return def;
+
+    return std::stoul(str, nullptr, base);
+}
 
 std::string reduceString(std::string str, char ch)
 {
