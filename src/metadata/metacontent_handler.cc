@@ -59,8 +59,9 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
             }
         } else {
             auto fileNames = std::map<std::string, fs::path>();
-            for (const auto& p : fs::directory_iterator(folder))
-                if (p.is_regular_file())
+            std::error_code ec;
+            for (const auto& p : fs::directory_iterator(folder, ec))
+                if (isRegularFile(p, ec))
                     fileNames[toLower(p.path().filename())] = p;
 
             for (const auto& name : names) {

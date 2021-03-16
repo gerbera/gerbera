@@ -401,7 +401,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     std::error_code ec;
     auto dirEnt = fs::directory_entry(path, ec);
-    if (ec || !dirEnt.is_regular_file(ec))
+    if (ec || !isRegularFile(dirEnt, ec))
         throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
     auto pcdir = database->findObjectByPath(path);
@@ -712,7 +712,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         asSetting.mergeOptions(config, location);
         auto lwt = to_time_t(dirEnt.last_write_time(ec));
 
-        if (dirEnt.is_regular_file(ec)) {
+        if (isRegularFile(dirEnt, ec)) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 if (list != nullptr)
@@ -1221,7 +1221,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         return nullptr;
 
     std::shared_ptr<CdsObject> obj;
-    if (dirEnt.is_regular_file(ec) || (allow_fifo && dirEnt.is_fifo(ec))) { // item
+    if (isRegularFile(dirEnt, ec) || (allow_fifo && dirEnt.is_fifo(ec))) { // item
         /* retrieve information about item and decide if it should be included */
         std::string mimetype = mime->getMimeType(dirEnt.path(), MIMETYPE_DEFAULT);
         if (mimetype.empty()) {

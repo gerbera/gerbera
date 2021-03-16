@@ -63,7 +63,7 @@ void web::files::process()
     for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
-        if (!isRegularFile(it.path(), ec))
+        if (!isRegularFile(it, ec))
             continue;
         if (exclude_config_files && startswith(filepath.filename(), "."))
             continue;
