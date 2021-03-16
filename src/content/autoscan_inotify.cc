@@ -106,10 +106,10 @@ void AutoscanInotify::threadProc()
                 auto dirEnt = fs::directory_entry(location, ec);
 
                 if (adir->getRecursive()) {
-                    log_debug("removing recursive watch: {}", location.c_str());
+                    log_debug("Removing recursive watch: {}", location.c_str());
                     monitorUnmonitorRecursive(dirEnt, true, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                 } else {
-                    log_debug("removing non-recursive watch: {}", location.c_str());
+                    log_debug("Removing non-recursive watch: {}", location.c_str());
                     unmonitorDirectory(location, adir);
                 }
 
@@ -127,16 +127,20 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
-                auto dirEnt = fs::directory_entry(location, ec);
 
-                if (adir->getRecursive()) {
-                    log_debug("adding recursive watch: {}", location.c_str());
-                    monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                auto dirEnt = fs::directory_entry(location, ec);
+                if (!ec.value()) {
+                    if (adir->getRecursive()) {
+                        log_debug("Adding recursive watch: {}", location.c_str());
+                        monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                    } else {
+                        log_debug("Adding non-recursive watch: {}", location.c_str());
+                        monitorDirectory(location, adir, true);
+                    }
+                    content->rescanDirectory(adir, adir->getObjectID(), location, false);
                 } else {
-                    log_debug("adding non-recursive watch: {}", location.c_str());
-                    monitorDirectory(location, adir, true);
+                    log_error("Failed to read {}: {}", location.c_str(), ec.message());
                 }
-                content->rescanDirectory(adir, adir->getObjectID(), location, false);
 
                 lock.lock();
             }
@@ -188,11 +192,15 @@ void AutoscanInotify::threadProc()
                     if (adir != nullptr && adir->getRecursive()) {
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
-                                log_debug("new dir detected, adding to inotify: {}", path.c_str());
+                                log_debug("Detected new dir, adding to inotify: {}", path.c_str());
                                 auto dirEnt = fs::directory_entry(path, ec);
-                                monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                                if (!ec.value()) {
+                                    monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                                } else {
+                                    log_error("Failed to read {}: {}", path.c_str(), ec.message());
+                                }
                             } else {
-                                log_debug("new dir detected, irgnoring because it's hidden: {}", path.c_str());
+                                log_debug("Detected new dir, irgnoring because it's hidden: {}", path.c_str());
                             }
                         }
                     }
@@ -219,20 +227,24 @@ void AutoscanInotify::threadProc()
                             content->removeObject(adir, objectID, !(mask & IN_MOVED_TO));
                     }
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
-                        log_debug("adding {}", path.c_str());
-                        // path, recursive, async, hidden, rescanResource, low priority, cancellable
-                        AutoScanSetting asSetting;
-                        asSetting.adir = adir;
-                        asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-                        asSetting.recursive = adir->getRecursive();
-                        asSetting.hidden = adir->getHidden();
-                        asSetting.rescanResource = true;
-                        asSetting.mergeOptions(config, path);
+                        log_debug("Adding {}", path.c_str());
                         auto dirEnt = fs::directory_entry(path, ec);
-                        content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
-
-                        if (mask & IN_ISDIR)
-                            monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+                        if (!ec.value()) {
+                            AutoScanSetting asSetting;
+                            asSetting.adir = adir;
+                            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                            asSetting.recursive = adir->getRecursive();
+                            asSetting.hidden = adir->getHidden();
+                            asSetting.rescanResource = true;
+                            asSetting.mergeOptions(config, path);
+                            // path, recursive, async, hidden, rescanResource, low priority, cancellable
+                            content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
+                            if (mask & IN_ISDIR) {
+                                monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+                            }
+                        } else {
+                            log_error("Failed to read {}: {}", path.c_str(), ec.message());
+                        }
                     }
                 }
                 if (mask & IN_IGNORED) {

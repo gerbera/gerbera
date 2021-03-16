@@ -170,22 +170,25 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
             if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
                 fs::path loc = self->getProperty("location");
-
-                AutoScanSetting asSetting;
-                asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-                asSetting.recursive = false;
-                asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
-                asSetting.rescanResource = false;
-                asSetting.mergeOptions(config, loc);
-
                 std::error_code ec;
-                pcd_id = cm->addFile(fs::directory_entry(loc, ec), asSetting, false);
-                if (pcd_id == INVALID_OBJECT_ID) {
-                    return 0;
-                }
+                auto dirEnt = fs::directory_entry(loc, ec);
+                if (!ec.value()) {
+                    AutoScanSetting asSetting;
+                    asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                    asSetting.recursive = false;
+                    asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                    asSetting.rescanResource = false;
+                    asSetting.mergeOptions(config, loc);
 
-                auto mainObj = self->getDatabase()->loadObject(pcd_id);
-                cds_obj = self->dukObject2cdsObject(mainObj);
+                    pcd_id = cm->addFile(dirEnt, asSetting, false);
+                    if (pcd_id == INVALID_OBJECT_ID) {
+                        return 0;
+                    }
+                    auto mainObj = self->getDatabase()->loadObject(pcd_id);
+                    cds_obj = self->dukObject2cdsObject(mainObj);
+                } else {
+                    log_error("Failed to read {}: {}", loc.c_str(), ec.message());
+                }
             } else
                 cds_obj = self->dukObject2cdsObject(orig_object);
         } else

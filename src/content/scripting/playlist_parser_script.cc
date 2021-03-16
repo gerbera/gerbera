@@ -84,9 +84,15 @@ js_getCdsObject(duk_context* ctx)
     if (obj == nullptr) {
         auto cm = self->getContent();
         std::error_code ec;
-        obj = cm->createObjectFromFile(fs::directory_entry(path, ec), false);
-        if (obj == nullptr) // object ignored
+        auto dirEnt = fs::directory_entry(path, ec);
+        if (!ec.value()) {
+            obj = cm->createObjectFromFile(dirEnt, false);
+        } else {
+            log_error("Failed to read {}: {}", path.c_str(), ec.message());
+        }
+        if (obj == nullptr) { // object ignored
             return 0;
+        }
     }
     self->cdsObject2dukObject(obj);
     return 1;
