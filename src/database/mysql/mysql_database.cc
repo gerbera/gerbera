@@ -342,6 +342,16 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return err_buf.str();
 }
 
+void MySQLDatabase::beginTransaction()
+{
+    _exec("START TRANSACTION");
+}
+
+void MySQLDatabase::commit()
+{
+    _exec("COMMIT");
+}
+
 std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
 {
 #ifdef MYSQL_SELECT_DEBUG

@@ -169,8 +169,13 @@ private:
     std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
     std::string quote(char val) const override { return quote(std::string(1, val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
+
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
+
+    void beginTransaction() override;
+    void commit() override;
+
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     void _exec(const char* query);

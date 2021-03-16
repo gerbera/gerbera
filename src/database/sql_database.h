@@ -88,10 +88,12 @@ public:
     virtual std::string quote(bool val) const = 0;
     virtual std::string quote(char val) const = 0;
     virtual std::string quote(long long val) const = 0;
+
+    virtual void beginTransaction() = 0;
+    virtual void commit() = 0;
+
     virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
     virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
-
-    void dbReady();
 
     /* wrapper functions for select and exec */
     std::shared_ptr<SQLResult> select(const std::string& buf)
