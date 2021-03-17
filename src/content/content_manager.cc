@@ -670,6 +670,11 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     adir->setCurrentLMT(location, 0);
 
     for (const auto& dirEnt : fs::directory_iterator(location, fs::directory_options::skip_permission_denied, ec)) {
+        fs::path newPath = dirEnt.path();
+        if (ec) {
+            log_error("_rescanDirectory: Failed to iterate {}, {}", newPath.c_str(), ec.message());
+            continue;
+        }
         auto name = dirEnt.path().filename().c_str();
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -682,13 +687,12 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 continue;
             }
         }
-        fs::path newPath = dirEnt.path();
 
         if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
             break;
 
         if (!dirEnt.exists(ec)) {
-            log_error("_rescanDirectory: Failed to stat {}, {}", newPath.c_str(), ec.message());
+            log_error("_rescanDirectory: Cannot access entry {}, {}", newPath.c_str(), ec.message());
             continue;
         }
 
@@ -834,7 +838,12 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     bool firstChild = true;
-    for (const auto& subDirEnt : fs::directory_iterator(subDir.path(), fs::directory_options::skip_permission_denied, ec)) {
+    for (const auto& subDirEnt : fs::directory_iterator(subDir, fs::directory_options::skip_permission_denied, ec)) {
+        fs::path newPath = subDirEnt.path();
+        if (ec) {
+            log_error("addRecursive: Failed to iterate {}, {}", newPath.c_str(), ec.message());
+            continue;
+        }
         auto name = subDirEnt.path().filename().c_str();
         if (name[0] == '.') {
             if (name[1] == 0) {
@@ -846,7 +855,6 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             if (!hidden)
                 continue;
         }
-        fs::path newPath = subDirEnt.path();
         if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
             break;
 
@@ -858,7 +866,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             task->setDescription(fmt::format("Importing: {}", newPath.c_str()));
         }
         if (!subDirEnt.exists(ec)) {
-            log_error("addRecursive: Failed to stat {}, {}", newPath.c_str(), std::strerror(errno));
+            log_error("addRecursive: Cannot access entry {}, {}", newPath.c_str(), ec.message());
             continue;
         }
 
