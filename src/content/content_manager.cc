@@ -1227,7 +1227,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         obj = item;
         item->setLocation(dirEnt.path());
         item->setMTime(to_time_t(dirEnt.last_write_time(ec)));
-        item->setSizeOnDisk(dirEnt.file_size());
+        item->setSizeOnDisk(getFileSize(dirEnt));
 
         if (!mimetype.empty()) {
             item->setMimeType(mimetype);
