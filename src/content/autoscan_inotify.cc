@@ -466,31 +466,27 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& start
         log_warning("Could not open {}: {}", startPath.path().c_str(), ec.message());
         return;
     }
-
-    for (const auto& dirEnt : fs::directory_iterator(startPath, fs::directory_options::skip_permission_denied, ec)) {
+    auto dIter = fs::directory_iterator(startPath, ec);
+    if (ec) {
+        log_error("monitorUnmonitorRecursive: Failed to iterate {}, {}", startPath.path().c_str(), ec.message());
+        return;
+    }
+    for (const auto& dirEnt : dIter) {
         if (shutdownFlag)
             break;
-        auto name = dirEnt.path().c_str();
-        if (name[0] == '.') {
-            if (name[1] == 0)
-                continue;
-            if (name[1] == '.' && name[2] == 0)
-                continue;
-        }
-        if (!followSymlinks && dirEnt.is_symlink()) {
+
+        if (!followSymlinks && dirEnt.is_symlink(ec)) {
             log_debug("link {} skipped", dirEnt.path().c_str());
             continue;
         }
 
-        if (dirEnt.is_directory(ec) && adir->getRecursive())
+        if (dirEnt.is_directory(ec) && adir->getRecursive()) {
             monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
+        }
 
         if (ec) {
             log_error("monitorUnmonitorRecursive: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
         }
-    }
-    if (ec) {
-        log_error("monitorUnmonitorRecursive: Failed to read {}, {}", startPath.path().c_str(), ec.message());
     }
 }
 
