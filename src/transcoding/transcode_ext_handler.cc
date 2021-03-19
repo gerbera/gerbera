@@ -136,7 +136,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
             try {
                 chmod(location.c_str(), S_IWUSR | S_IRUSR);
 
-                std::unique_ptr<IOHandler> c_ioh = std::make_unique<CurlIOHandler>(url, nullptr,
+                std::unique_ptr<IOHandler> c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 std::unique_ptr<IOHandler> p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
@@ -195,7 +195,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
     std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list);
     auto io_handler = std::make_unique<BufferedIOHandler>(
-        u_ioh,
+        config, u_ioh,
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
     return io_handler;
 }

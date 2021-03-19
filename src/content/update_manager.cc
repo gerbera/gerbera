@@ -47,8 +47,9 @@
 #define MAX_OBJECT_IDS_OVERLOAD 30
 #define OBJECT_ID_HASH_CAPACITY 3109
 
-UpdateManager::UpdateManager(std::shared_ptr<Database> database, std::shared_ptr<Server> server)
-    : database(std::move(database))
+UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database, std::shared_ptr<Server> server)
+    : config(std::move(config))
+    , database(std::move(database))
     , server(std::move(server))
     , objectIDHash(std::make_unique<std::unordered_set<int>>())
     , shutdownFlag(false)
@@ -59,20 +60,7 @@ UpdateManager::UpdateManager(std::shared_ptr<Database> database, std::shared_ptr
 
 void UpdateManager::run()
 {
-    /*
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    */
-
-    pthread_create(
-        &updateThread,
-        nullptr, // &attr, // attr
-        UpdateManager::staticThreadProc,
-        this);
-
-    //cond->wait();
-    //pthread_attr_destroy(&attr);
+    threadRunner = std::make_unique<ThreadRunner>("UpdateThread", UpdateManager::staticThreadProc, this, config);
 }
 
 UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
@@ -85,10 +73,8 @@ void UpdateManager::shutdown()
     log_debug("signalling...");
     cond.notify_one();
     lock.unlock();
-    log_debug("waiting for thread");
-    if (updateThread)
-        pthread_join(updateThread, nullptr);
-    updateThread = 0;
+
+    threadRunner->join();
     log_debug("end");
 }
 

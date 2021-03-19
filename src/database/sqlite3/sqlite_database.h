@@ -41,6 +41,7 @@
 #include <unistd.h>
 
 #include "database/sql_database.h"
+#include "util/thread_executor.h"
 #include "util/timer.h"
 
 class Sqlite3Database;
@@ -184,12 +185,12 @@ private:
 
     std::string getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
 
+    std::unique_ptr<ThreadRunner> threadRunner;
     static void* staticThreadProc(void* arg);
     void threadProc();
 
     void addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty = false);
 
-    pthread_t sqliteThread;
     std::condition_variable cond;
     std::mutex sqliteMutex;
     using AutoLock = std::lock_guard<decltype(sqliteMutex)>;

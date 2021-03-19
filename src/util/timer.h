@@ -39,6 +39,7 @@
 #include <memory>
 
 #include "common.h"
+#include "thread_executor.h"
 #include "tools.h"
 
 class Timer {
@@ -74,7 +75,7 @@ public:
         virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
     };
 
-    Timer();
+    Timer(std::shared_ptr<Config> config);
     void run();
 
     virtual ~Timer() { log_debug("Timer destroyed"); }
@@ -144,7 +145,8 @@ protected:
 private:
     static void* staticThreadProc(void* arg);
     void threadProc();
-    pthread_t thread { 0 };
+    std::shared_ptr<Config> config;
+    std::unique_ptr<ThreadRunner> threadRunner;
 
     std::mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;

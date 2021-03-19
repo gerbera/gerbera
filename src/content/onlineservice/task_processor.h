@@ -10,8 +10,10 @@
 
 #include "common.h"
 #include "util/generic_task.h"
+#include "util/thread_executor.h"
 
 // forward declaration
+class Config;
 class ContentManager;
 class OnlineService;
 class Layout;
@@ -19,6 +21,11 @@ class Timer;
 
 class TaskProcessor {
 public:
+    TaskProcessor(std::shared_ptr<Config> config)
+        : config(std::move(config))
+    {
+    }
+
     void run();
     virtual ~TaskProcessor() = default;
     void shutdown();
@@ -29,7 +36,8 @@ public:
     void invalidateTask(unsigned int taskID);
 
 protected:
-    pthread_t taskThread { 0 };
+    std::shared_ptr<Config> config;
+    std::unique_ptr<ThreadRunner> threadRunner;
     std::condition_variable cond;
     std::mutex mutex;
     using AutoLock = std::lock_guard<decltype(mutex)>;

@@ -38,8 +38,10 @@
 #include <vector>
 
 #include "common.h"
+#include "util/thread_executor.h"
 
 // forward declaration
+class Config;
 class Database;
 class Server;
 
@@ -48,7 +50,7 @@ class Server;
 
 class UpdateManager {
 public:
-    UpdateManager(std::shared_ptr<Database> database, std::shared_ptr<Server> server);
+    UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database, std::shared_ptr<Server> server);
     void run();
     virtual ~UpdateManager();
     void shutdown();
@@ -57,10 +59,11 @@ public:
     void containersChanged(const std::vector<int>& objectIDs, int flushPolicy = FLUSH_SPEC);
 
 protected:
+    std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
     std::shared_ptr<Server> server;
 
-    pthread_t updateThread;
+    std::unique_ptr<ThreadRunner> threadRunner;
     std::condition_variable cond;
 
     std::mutex mutex;

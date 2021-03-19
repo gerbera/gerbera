@@ -45,6 +45,7 @@
 #include "common.h"
 #include "context.h"
 #include "util/generic_task.h"
+#include "util/thread_executor.h"
 #include "util/timer.h"
 
 #ifdef HAVE_JS
@@ -382,7 +383,7 @@ protected:
 
     void addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority = false);
 
-    pthread_t taskThread;
+    std::unique_ptr<ThreadRunner> threadRunner;
     std::condition_variable_any cond;
 
     bool working;

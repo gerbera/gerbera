@@ -35,7 +35,8 @@
 
 #include "config/config_manager.h"
 
-IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
+IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize)
+    : config(std::move(config))
 {
     if (bufSize == 0)
         throw_std_runtime_error("bufSize must be greater than 0");
@@ -187,11 +188,7 @@ void IOHandlerBufferHelper::close()
 
 void IOHandlerBufferHelper::startBufferThread()
 {
-    pthread_create(
-        &bufferThread,
-        nullptr, // attr
-        IOHandlerBufferHelper::staticThreadProc,
-        this);
+    threadRunner = std::make_unique<ThreadRunner>("BufferHelperThread", IOHandlerBufferHelper::staticThreadProc, this, config);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
@@ -201,14 +198,13 @@ void IOHandlerBufferHelper::stopBufferThread()
     cond.notify_one();
     lock.unlock();
 
-    if (bufferThread)
-        pthread_join(bufferThread, nullptr);
-    bufferThread = 0;
+    threadRunner->join();
+    threadRunner = nullptr;
 }
 
 void* IOHandlerBufferHelper::staticThreadProc(void* arg)
 {
     auto inst = static_cast<IOHandlerBufferHelper*>(arg);
     inst->threadProc();
-    pthread_exit(nullptr);
+    return nullptr;
 }

@@ -70,7 +70,7 @@ void Server::init()
 
     // initialize what is needed
     auto self = shared_from_this();
-    timer = std::make_shared<Timer>();
+    timer = std::make_shared<Timer>(config);
 
     clients = std::make_shared<Clients>(config);
     mime = std::make_shared<Mime>(config);
