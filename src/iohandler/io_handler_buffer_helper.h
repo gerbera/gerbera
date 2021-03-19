@@ -39,6 +39,9 @@
 
 #include "common.h"
 #include "io_handler.h"
+#include "util/thread_executor.h"
+
+class Config;
 
 /// \brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
@@ -51,7 +54,7 @@ public:
     /// \param initialFillSize the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
-    IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize);
+    IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize);
     virtual ~IOHandlerBufferHelper() noexcept override;
 
     // inherited from IOHandler
@@ -61,6 +64,7 @@ public:
     void close() override;
 
 protected:
+    std::shared_ptr<Config> config;
     size_t bufSize;
     size_t initialFillSize;
     char* buffer;
@@ -89,7 +93,7 @@ protected:
     static void* staticThreadProc(void* arg);
     virtual void threadProc() = 0;
 
-    pthread_t bufferThread;
+    std::unique_ptr<ThreadRunner> threadRunner;
     bool threadShutdown;
 
     std::condition_variable cond;

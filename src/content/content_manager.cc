@@ -87,9 +87,9 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     shutdownFlag = false;
     layout_enabled = false;
 
-    update_manager = std::make_shared<UpdateManager>(database, server);
+    update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES
-    task_processor = std::make_shared<TaskProcessor>();
+    task_processor = std::make_shared<TaskProcessor>(config);
 #endif
 #ifdef HAVE_JS
     scripting_runtime = std::make_shared<ScriptingRuntime>();
@@ -220,10 +220,9 @@ void ContentManager::run()
     initJS();
 #endif
 
-    int ret = pthread_create(&taskThread,
-        nullptr, //&attr, // attr
-        ContentManager::staticThreadProc, this);
-    if (ret != 0) {
+    threadRunner = std::make_unique<ThreadRunner>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
+
+    if (!threadRunner->isAlive()) {
         throw_std_runtime_error("Could not start task thread");
     }
 
@@ -344,9 +343,7 @@ void ContentManager::shutdown()
     lock.unlock();
     log_debug("waiting for thread...");
 
-    if (taskThread)
-        pthread_join(taskThread, nullptr);
-    taskThread = 0;
+    threadRunner->join();
 
 #ifdef HAVE_LASTFMLIB
     last_fm->shutdown();
@@ -1369,7 +1366,7 @@ void* ContentManager::staticThreadProc(void* arg)
 {
     auto inst = static_cast<ContentManager*>(arg);
     inst->threadProc();
-    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)

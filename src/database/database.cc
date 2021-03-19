@@ -32,8 +32,8 @@
 #include "database.h" // API
 
 #include "config/config_manager.h"
-#include "database//sqlite3/sqlite_database.h"
 #include "database/mysql/mysql_database.h"
+#include "database/sqlite3/sqlite_database.h"
 #include "util/tools.h"
 
 Database::Database(std::shared_ptr<Config> config)

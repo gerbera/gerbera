@@ -37,13 +37,10 @@
 
 void TaskProcessor::run()
 {
-    int ret;
-    ret = pthread_create(&taskThread, nullptr, TaskProcessor::staticThreadProc,
-        this);
+    threadRunner = std::make_unique<ThreadRunner>("TaskProcessorThread", TaskProcessor::staticThreadProc, this, config);
 
-    if (ret != 0) {
-        throw_std_runtime_error("Could not launch task processor thread");
-    }
+    if (!threadRunner->isAlive())
+        throw_std_runtime_error("Failed to task processor thread");
 }
 
 void TaskProcessor::shutdown()
@@ -51,16 +48,14 @@ void TaskProcessor::shutdown()
     log_debug("Shutting down TaskProcessor");
     shutdownFlag = true;
     cond.notify_one();
-    if (taskThread)
-        pthread_join(taskThread, nullptr);
-    taskThread = 0;
+    threadRunner->join();
 }
 
 void* TaskProcessor::staticThreadProc(void* arg)
 {
     auto inst = static_cast<TaskProcessor*>(arg);
     inst->threadProc();
-    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void TaskProcessor::threadProc()

@@ -33,22 +33,19 @@
 
 #include <cassert>
 
-Timer::Timer()
+Timer::Timer(std::shared_ptr<Config> config)
     : shutdownFlag(false)
+    , config(std::move(config))
 {
 }
 
 void Timer::run()
 {
     log_debug("Starting Timer thread...");
-    int ret = pthread_create(
-        &thread,
-        nullptr,
-        Timer::staticThreadProc,
-        this);
+    threadRunner = std::make_unique<ThreadRunner>("TimerThread", Timer::staticThreadProc, this, config);
 
-    if (ret)
-        throw_std_runtime_error("failed to start timer thread: {}", ret);
+    if (!threadRunner->isAlive())
+        throw_std_runtime_error("failed to start timer thread");
 }
 
 void* Timer::staticThreadProc(void* arg)
@@ -73,10 +70,12 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
 
     AutoLock lock(mutex);
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
-    bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](const auto& subscriber) { return subscriber == element; });
 
-    if (err) {
-        throw_std_runtime_error("Tried to add same timer twice");
+    if (!subscribers.empty()) {
+        bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](const auto& subscriber) { return subscriber == element; });
+        if (err) {
+            throw_std_runtime_error("Tried to add same timer twice");
+        }
     }
 
     subscribers.push_back(element);
@@ -141,23 +140,25 @@ void Timer::notify()
 
     std::list<TimerSubscriberElement> toNotify;
 
-    for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
-        TimerSubscriberElement& element = *it;
+    if (!subscribers.empty()) {
+        for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
+            TimerSubscriberElement& element = *it;
 
-        struct timespec now;
-        getTimespecNow(&now);
-        long wait = getDeltaMillis(&now, element.getNextNotify());
+            struct timespec now;
+            getTimespecNow(&now);
+            long wait = getDeltaMillis(&now, element.getNextNotify());
 
-        if (wait <= 0) {
-            toNotify.push_back(element);
-            if (element.isOnce()) {
-                it = subscribers.erase(it);
+            if (wait <= 0) {
+                toNotify.push_back(element);
+                if (element.isOnce()) {
+                    it = subscribers.erase(it);
+                } else {
+                    element.updateNextNotify();
+                    ++it;
+                }
             } else {
-                element.updateNextNotify();
                 ++it;
             }
-        } else {
-            ++it;
         }
     }
 
@@ -172,10 +173,12 @@ struct timespec* Timer::getNextNotifyTime()
 {
     AutoLock lock(mutex);
     struct timespec* nextTime = nullptr;
-    for (auto& subscriber : subscribers) {
-        struct timespec* nextNotify = subscriber.getNextNotify();
-        if (nextTime == nullptr || getDeltaMillis(nextTime, nextNotify) < 0) {
-            nextTime = nextNotify;
+    if (!subscribers.empty()) {
+        for (auto& subscriber : subscribers) {
+            struct timespec* nextNotify = subscriber.getNextNotify();
+            if (nextTime == nullptr || getDeltaMillis(nextTime, nextNotify) < 0) {
+                nextTime = nextNotify;
+            }
         }
     }
     return nextTime;
@@ -185,5 +188,5 @@ void Timer::shutdown()
 {
     shutdownFlag = true;
     cond.notify_all();
-    pthread_join(thread, nullptr);
+    threadRunner->join();
 }

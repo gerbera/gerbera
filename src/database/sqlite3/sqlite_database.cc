@@ -147,11 +147,6 @@ void Sqlite3Database::init()
     SQLDatabase::init();
 
     AutoLockU lock(sqliteMutex);
-    /*
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    */
 
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
     log_debug("SQLite path: {}", dbFilePath);
@@ -161,14 +156,9 @@ void Sqlite3Database::init()
         throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
+    threadRunner = std::make_unique<ThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
 
-    int ret = pthread_create(
-        &sqliteThread,
-        nullptr, //&attr,
-        Sqlite3Database::staticThreadProc,
-        this);
-
-    if (ret != 0) {
+    if (!threadRunner->isAlive()) {
         throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
     }
 
@@ -410,7 +400,7 @@ void* Sqlite3Database::staticThreadProc(void* arg)
     } catch (const std::runtime_error& e) {
         log_error("Sqlite3Database::staticThreadProc - aborting thread");
     }
-    pthread_exit(nullptr);
+    return nullptr;
 }
 
 void Sqlite3Database::threadProc()
@@ -497,9 +487,7 @@ void Sqlite3Database::shutdownDriver()
         cond.notify_one();
         lock.unlock();
         log_debug("waiting for thread");
-        if (sqliteThread)
-            pthread_join(sqliteThread, nullptr);
-        sqliteThread = 0;
+        threadRunner->join();
     }
     log_debug("end");
 }

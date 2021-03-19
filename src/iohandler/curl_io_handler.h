@@ -40,9 +40,11 @@
 #include "common.h"
 #include "io_handler_buffer_helper.h"
 
+class Config;
+
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
-    CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
+    CurlIOHandler(std::shared_ptr<Config> config, const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize);
 
     void open(enum UpnpOpenFileMode mode) override;
     void close() override;
