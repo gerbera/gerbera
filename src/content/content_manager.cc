@@ -625,25 +625,39 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         location = adir->getLocation();
     }
 
-    log_debug("Rescanning location: {}", location.c_str());
-
     if (location.empty()) {
         log_error("Container with ID {} has no location information", containerID);
         return;
     }
 
+    log_debug("Rescanning location: {}", location.c_str());
+
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    if (ec || !rootDir.exists(ec) || !rootDir.is_directory(ec)) {
-        log_warning("Could not open {}: {}", location.c_str(), ec.message());
+    fs::directory_iterator dIter;
+
+    if (!ec && rootDir.exists(ec) && rootDir.is_directory(ec)) {
+        dIter = fs::directory_iterator(location, ec);
+        if (ec) {
+            log_error("_rescanDirectory: Failed to iterate {}, {}", location.c_str(), ec.message());
+        }
+    } else {
+        log_error("Could not open {}: {}", location.c_str(), ec.message());
+    }
+    if (ec) {
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
-            adir->setObjectID(INVALID_OBJECT_ID);
-            database->updateAutoscanDirectory(adir);
+            if (location == adir->getLocation()) {
+                adir->setObjectID(INVALID_OBJECT_ID);
+                database->updateAutoscanDirectory(adir);
+            }
             return;
         }
-        removeObject(adir, containerID, false);
-        removeAutoscanDirectory(adir);
+
+        if (location == adir->getLocation()) {
+            removeObject(adir, containerID, false);
+            removeAutoscanDirectory(adir);
+        }
         return;
     }
 
@@ -653,6 +667,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
     asSetting.hidden = adir->getHidden();
     asSetting.mergeOptions(config, location);
+
     log_debug("Rescanning options {}: recursive={} hidden={} followSymlinks={}", location.c_str(), asSetting.recursive, asSetting.hidden, asSetting.followSymlinks);
 
     // request only items if non-recursive scan is wanted
@@ -668,11 +683,6 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     time_t last_modified_current_max = adir->getPreviousLMT(location);
     time_t last_modified_new_max = last_modified_current_max;
     adir->setCurrentLMT(location, 0);
-    auto dIter = fs::directory_iterator(location, ec);
-    if (ec) {
-        log_error("_rescanDirectory: Failed to iterate {}, {}", location.c_str(), ec.message());
-        return;
-    }
 
     for (const auto& dirEnt : dIter) {
         fs::path newPath = dirEnt.path();
@@ -869,9 +879,6 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         } catch (const std::runtime_error& ex) {
             log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
         }
-    }
-    if (ec) {
-        log_error("_rescanDirectory: Failed to read {}, {}", subDir.path().c_str(), ec.message());
     }
 
     finishScan(adir, subDir.path(), last_modified_new_max);
