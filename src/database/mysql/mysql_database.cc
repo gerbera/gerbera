@@ -209,10 +209,12 @@ void MySQLDatabase::init()
         log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
         auto sql = readTextFile(sqlFilePath);
 
-        for (const auto& statement : splitString(sql, ';')) {
+        for (auto& statement : splitString(sql, ';')) {
+            trimStringInPlace(statement);
             if (statement.empty()) {
                 continue;
             }
+            log_debug("executing statement: '{}'", statement);
             ret = mysql_real_query(&db, statement.c_str(), statement.size());
             if (ret) {
                 std::string myError = getError(&db);
