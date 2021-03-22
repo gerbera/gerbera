@@ -39,7 +39,7 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "online_service.h"
+#include "curl_online_service.h"
 
 // forward declaration
 class Config;
@@ -48,29 +48,15 @@ class Database;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class SopCastService : public OnlineService {
+class SopCastService : public CurlOnlineService {
 public:
     explicit SopCastService(std::shared_ptr<ContentManager> content);
-    ~SopCastService() override;
-
-    /// \brief Retrieves user specified content from the service and adds
-    /// the items to the database.
-    bool refreshServiceData(std::shared_ptr<Layout> layout) override;
 
     /// \brief Get the type of the service (i.e. SopCast, Shoutcast, etc.)
     service_type_t getServiceType() override;
 
-    /// \brief Get the human readable name for the service
-    std::string getServiceName() const override;
-
 protected:
-    // the handle *must never be used from multiple threads*
-    CURL* curl_handle;
-    // safeguard to ensure the above
-    pthread_t pid;
-
-    /// \brief This function will retrieve the XML according to the parametrs
-    std::unique_ptr<pugi::xml_document> getData();
+    std::unique_ptr<CurlContentHandler> getContentHandler() const override;
 };
 
 #endif //__ONLINE_SERVICE_H__

@@ -34,13 +34,12 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "curl_online_service.h"
 #include "metadata/metadata_handler.h"
-#include "online_service.h"
 #include "util/tools.h"
 
 SopCastContentHandler::SopCastContentHandler(const std::shared_ptr<Context>& context)
-    : config(context->getConfig())
-    , database(context->getDatabase())
+    : CurlContentHandler(context)
 {
 }
 

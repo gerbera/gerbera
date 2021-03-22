@@ -39,38 +39,24 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "online_service.h"
+#include "atrailers_content_handler.h"
+#include "curl_online_service.h"
 
 // forward declaration
 class ContentManager;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
-class ATrailersService : public OnlineService {
+class ATrailersService : public CurlOnlineService {
 public:
     explicit ATrailersService(std::shared_ptr<ContentManager> content);
-    ~ATrailersService() override;
-
-    /// \brief Retrieves user specified content from the service and adds
-    /// the items to the database.
-    bool refreshServiceData(std::shared_ptr<Layout> layout) override;
+    ~ATrailersService() override = default;
 
     /// \brief Get the type of the service (i.e. Weborama, Shoutcast, etc.)
     service_type_t getServiceType() override;
 
-    /// \brief Get the human readable name for the service
-    std::string getServiceName() const override;
-
 protected:
-    // the handle *must never be used from multiple threads*
-    CURL* curl_handle;
-    // safeguard to ensure the above
-    pthread_t pid;
-
-    std::string service_url;
-
-    /// \brief This function will retrieve the service XML
-    std::unique_ptr<pugi::xml_document> getData();
+    std::unique_ptr<CurlContentHandler> getContentHandler() const override;
 };
 
 #endif //__ONLINE_SERVICE_H__

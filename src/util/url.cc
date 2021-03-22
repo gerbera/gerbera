@@ -32,7 +32,6 @@
 #ifdef HAVE_CURL
 #include "url.h" // API
 
-#include <pthread.h>
 #include <sstream>
 
 #include "config/config_manager.h"

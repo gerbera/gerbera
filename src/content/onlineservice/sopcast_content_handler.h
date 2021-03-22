@@ -39,6 +39,7 @@
 #include <pugixml.hpp>
 
 #include "context.h"
+#include "curl_online_service.h"
 
 #define SOPCAST_SERVICE "SopCast"
 #define SOPCAST_SERVICE_ID "S"
@@ -54,13 +55,14 @@ class CdsObject;
 
 /// \brief this class is responsible for creating objects from the SopCast
 /// metadata XML.
-class SopCastContentHandler {
+class SopCastContentHandler : public CurlContentHandler {
 public:
     explicit SopCastContentHandler(const std::shared_ptr<Context>& context);
+    ~SopCastContentHandler() override = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    void setServiceContent(std::unique_ptr<pugi::xml_document>& service);
+    void setServiceContent(std::unique_ptr<pugi::xml_document>& service) override;
 
     /// \brief retrieves an object from the service.
     ///
@@ -69,7 +71,7 @@ public:
     /// this function will return nullptr.
     ///
     /// \return CdsObject or nullptr if there are no more objects to parse.
-    std::shared_ptr<CdsObject> getNextObject();
+    std::shared_ptr<CdsObject> getNextObject() override;
 
 protected:
     std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel) const;

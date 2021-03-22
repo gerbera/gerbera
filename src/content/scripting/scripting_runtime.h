@@ -34,7 +34,6 @@
 
 #include <duktape.h>
 #include <mutex>
-#include <pthread.h>
 
 #include "common.h"
 
