@@ -34,12 +34,11 @@
 
 #include <algorithm>
 #include <atomic>
-#include <condition_variable>
 #include <list>
 #include <memory>
 
 #include "common.h"
-#include "thread_executor.h"
+#include "thread_runner.h"
 #include "tools.h"
 
 class Timer {
@@ -91,7 +90,6 @@ public:
     void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
     void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter = nullptr, bool dontFail = false);
     void triggerWait();
-    void signal() { cond.notify_one(); }
 
 protected:
     class TimerSubscriberElement {
@@ -135,7 +133,6 @@ protected:
     };
 
     std::mutex waitMutex;
-    std::condition_variable cond;
     std::list<TimerSubscriberElement> subscribers;
     std::atomic_bool shutdownFlag;
 
@@ -146,10 +143,7 @@ private:
     static void* staticThreadProc(void* arg);
     void threadProc();
     std::shared_ptr<Config> config;
-    std::unique_ptr<ThreadRunner> threadRunner;
-
-    std::mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
+    std::unique_ptr<StdThreadRunner> threadRunner;
 };
 
 #endif // __TIMER_H__

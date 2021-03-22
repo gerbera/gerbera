@@ -32,13 +32,11 @@
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
-#include <condition_variable>
-#include <mutex>
 #include <upnp.h>
 
 #include "common.h"
 #include "io_handler.h"
-#include "util/thread_executor.h"
+#include "util/thread_runner.h"
 
 class Config;
 
@@ -92,11 +90,8 @@ protected:
     static void* staticThreadProc(void* arg);
     virtual void threadProc() = 0;
 
-    std::unique_ptr<ThreadRunner> threadRunner;
+    std::unique_ptr<StdThreadRunner> threadRunner;
     bool threadShutdown;
-
-    std::condition_variable cond;
-    std::mutex mutex;
 };
 
 #endif // __IO_HANDLER_BUFFER_HELPER_H__

@@ -215,6 +215,7 @@ add_library(libgerbera STATIC
         src/util/string_converter.h
         src/util/thread_executor.cc
         src/util/thread_executor.h
+        src/util/thread_runner.h
         src/util/timer.cc
         src/util/timer.h
         src/util/tools.cc

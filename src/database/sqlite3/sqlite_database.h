@@ -33,15 +33,13 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
-#include <condition_variable>
-#include <mutex>
 #include <queue>
 #include <sqlite3.h>
 #include <sstream>
 #include <unistd.h>
 
 #include "database/sql_database.h"
-#include "util/thread_executor.h"
+#include "util/thread_runner.h"
 #include "util/timer.h"
 
 class Sqlite3Database;
@@ -61,7 +59,7 @@ public:
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
     bool is_running() const;
 
-    /// \brief modify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
+    /// \brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal();
 
     void sendSignal(std::string error);
@@ -185,16 +183,11 @@ private:
 
     std::string getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
 
-    std::unique_ptr<ThreadRunner> threadRunner;
+    std::unique_ptr<StdThreadRunner> threadRunner;
     static void* staticThreadProc(void* arg);
     void threadProc();
 
     void addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty = false);
-
-    std::condition_variable cond;
-    std::mutex sqliteMutex;
-    using AutoLock = std::lock_guard<decltype(sqliteMutex)>;
-    using AutoLockU = std::unique_lock<decltype(sqliteMutex)>;
 
     std::shared_ptr<Timer> timer;
 

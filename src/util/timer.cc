@@ -42,10 +42,10 @@ Timer::Timer(std::shared_ptr<Config> config)
 void Timer::run()
 {
     log_debug("Starting Timer thread...");
-    threadRunner = std::make_unique<ThreadRunner>("TimerThread", Timer::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>("TimerThread", Timer::staticThreadProc, this, config);
 
     if (!threadRunner->isAlive())
-        throw_std_runtime_error("failed to start timer thread");
+        throw_std_runtime_error("Failed to start timer thread");
 }
 
 void* Timer::staticThreadProc(void* arg)
@@ -68,7 +68,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
     if (notifyInterval == 0)
         throw_std_runtime_error("Tried to add timer with illegal notifyInterval: {}", notifyInterval);
 
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
 
     if (!subscribers.empty()) {
@@ -79,19 +79,19 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
     }
 
     subscribers.push_back(element);
-    signal();
+    threadRunner->notify();
 }
 
 void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail)
 {
     log_debug("Removing subscriber...");
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     if (!subscribers.empty()) {
         TimerSubscriberElement element(timerSubscriber, 0, std::move(parameter));
         auto it = std::find(subscribers.begin(), subscribers.end(), element);
         if (it != subscribers.end()) {
             subscribers.erase(it);
-            signal();
+            threadRunner->notify();
             log_debug("Removed subscriber...");
             return;
         }
@@ -110,7 +110,7 @@ void Timer::triggerWait()
 
         if (subscribers.empty()) {
             log_debug("Nothing to do, sleeping...");
-            cond.wait(lock);
+            threadRunner->wait(lock);
             continue;
         }
 
@@ -120,7 +120,7 @@ void Timer::triggerWait()
 
         long wait = getDeltaMillis(&now, timeout);
         if (wait > 0) {
-            std::cv_status ret = cond.wait_for(lock, std::chrono::milliseconds(wait));
+            auto ret = threadRunner->waitFor(lock, wait);
             if (ret != std::cv_status::timeout) {
                 /*
                  * Some rude thread woke us!
@@ -135,7 +135,7 @@ void Timer::triggerWait()
 
 void Timer::notify()
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     assert(lock.owns_lock());
 
     std::list<TimerSubscriberElement> toNotify;
@@ -171,7 +171,7 @@ void Timer::notify()
 
 struct timespec* Timer::getNextNotifyTime()
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     struct timespec* nextTime = nullptr;
     if (!subscribers.empty()) {
         for (auto& subscriber : subscribers) {
@@ -187,6 +187,6 @@ struct timespec* Timer::getNextNotifyTime()
 void Timer::shutdown()
 {
     shutdownFlag = true;
-    cond.notify_all();
+    threadRunner->notifyAll();
     threadRunner->join();
 }

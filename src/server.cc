@@ -74,6 +74,7 @@ void Server::init()
 
     clients = std::make_shared<Clients>(config);
     mime = std::make_shared<Mime>(config);
+    timer->run();
     database = Database::createInstance(config, timer);
     config->updateConfigFromDatabase(database);
     session_manager = std::make_shared<web::SessionManager>(config, timer);

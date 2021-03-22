@@ -1150,6 +1150,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_UPNP_ALBUM_PROPERTIES);
     setOption(root, CFG_UPNP_ARTIST_PROPERTIES);
     setOption(root, CFG_UPNP_TITLE_PROPERTIES);
+    setOption(root, CFG_THREAD_SCOPE_SYSTEM);
 
     bool cl_en = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
     args["isEnabled"] = cl_en ? "true" : "false";
