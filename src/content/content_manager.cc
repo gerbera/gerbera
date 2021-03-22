@@ -99,6 +99,22 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #endif
 
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+}
+
+void ContentManager::run()
+{
+#ifdef ONLINE_SERVICES
+    task_processor->run();
+#endif
+    update_manager->run();
+#ifdef HAVE_LASTFMLIB
+    last_fm->run();
+#endif
+    threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
+
+    if (!threadRunner->isAlive()) {
+        throw_std_runtime_error("Could not start task thread");
+    }
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
     for (size_t i = 0; i < config_timed_list->size(); i++) {
@@ -113,18 +129,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 
     database->updateAutoscanList(ScanMode::Timed, config_timed_list);
     autoscan_timed = database->getAutoscanList(ScanMode::Timed);
-}
-
-void ContentManager::run()
-{
-    timer->run();
-#ifdef ONLINE_SERVICES
-    task_processor->run();
-#endif
-    update_manager->run();
-#ifdef HAVE_LASTFMLIB
-    last_fm->run();
-#endif
 
     auto self = shared_from_this();
 #ifdef HAVE_INOTIFY
@@ -220,12 +224,6 @@ void ContentManager::run()
     initJS();
 #endif
 
-    threadRunner = std::make_unique<ThreadRunner>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
-
-    if (!threadRunner->isAlive()) {
-        throw_std_runtime_error("Could not start task thread");
-    }
-
     autoscan_timed->notifyAll(this);
 
 #ifdef HAVE_INOTIFY
@@ -257,7 +255,7 @@ ContentManager::~ContentManager() { log_debug("ContentManager destroyed"); }
 
 void ContentManager::registerExecutor(const std::shared_ptr<Executor>& exec)
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard("registerExecutor");
     process_list.push_back(exec);
 }
 
@@ -272,7 +270,7 @@ void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
     if (shutdownFlag)
         return;
 
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard("unregisterExecutor");
 
     process_list.erase(std::remove_if(process_list.begin(), process_list.end(), [&](const auto& e) { return e == exec; }), process_list.end());
 }
@@ -301,7 +299,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 void ContentManager::shutdown()
 {
     log_debug("start");
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     log_debug("updating last_modified data for autoscan in database...");
     autoscan_timed->updateLMinDB();
 
@@ -339,7 +337,7 @@ void ContentManager::shutdown()
     }
 
     log_debug("signalling...");
-    signal();
+    threadRunner->notify();
     lock.unlock();
     log_debug("waiting for thread...");
 
@@ -364,7 +362,7 @@ void ContentManager::shutdown()
 
 std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard("getCurrentTask");
 
     auto task = currentTask;
     return task;
@@ -372,7 +370,7 @@ std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 
 std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard("getTasklist");
 
     std::deque<std::shared_ptr<GenericTask>> taskList;
 #ifdef ONLINE_SERVICES
@@ -760,7 +758,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // this lock will make sure that remove is not in the process of invalidating
                 // the AutocsanDirectories in the autoscan_timed list at the time when we
                 // are checking for validity.
-                AutoLock lock(mutex);
+                auto lock = threadRunner->lockGuard("addSubDirectory " + newPath.string());
 
                 // it is possible that someone hits remove while the container is being scanned
                 // in this case we will invalidate the autoscan entry
@@ -775,6 +773,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 asSetting.mergeOptions(config, newPath);
                 // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
                 addFileInternal(dirEnt, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
+                log_debug("addSubDirectory {} done", newPath.c_str());
             }
         }
         if (ec) {
@@ -1268,7 +1267,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 void ContentManager::initLayout()
 {
     if (layout == nullptr) {
-        AutoLock lock(mutex);
+        auto lock = threadRunner->lockGuard("initLayout");
         if (layout == nullptr) {
             std::string layout_type = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
             auto self = shared_from_this();
@@ -1325,7 +1324,7 @@ void ContentManager::reloadLayout()
 void ContentManager::threadProc()
 {
     std::shared_ptr<GenericTask> task;
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     working = true;
     while (!shutdownFlag) {
         currentTask = nullptr;
@@ -1342,7 +1341,7 @@ void ContentManager::threadProc()
         if (task == nullptr) {
             working = false;
             /* if nothing to do, sleep until awakened */
-            cond.wait(lock);
+            threadRunner->wait(lock);
             working = true;
             continue;
         }
@@ -1378,7 +1377,7 @@ void* ContentManager::staticThreadProc(void* arg)
 
 void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard("addTask");
 
     task->setID(taskID++);
 
@@ -1386,7 +1385,7 @@ void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowP
         taskQueue1.push_back(task);
     else
         taskQueue2.push_back(task);
-    signal();
+    threadRunner->notify();
 }
 
 int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
@@ -1482,7 +1481,7 @@ void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, co
 void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 {
     if (taskOwner == ContentManagerTask) {
-        AutoLock lock(mutex);
+        auto lock = threadRunner->lockGuard("invalidateTask");
         auto tc = getCurrentTask();
         if (tc != nullptr) {
             if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
@@ -1549,7 +1548,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
             }
 #endif
 
-            AutoLock lock(mutex);
+            auto lock = threadRunner->lockGuard("removeObject " + path.string());
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted

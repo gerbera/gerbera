@@ -4,13 +4,12 @@
 #ifndef __TASK_PROCESSOR_H__
 #define __TASK_PROCESSOR_H__
 
-#include <condition_variable>
 #include <deque>
 #include <memory>
 
 #include "common.h"
 #include "util/generic_task.h"
-#include "util/thread_executor.h"
+#include "util/thread_runner.h"
 
 // forward declaration
 class Config;
@@ -37,11 +36,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::unique_ptr<ThreadRunner> threadRunner;
-    std::condition_variable cond;
-    std::mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
-    using AutoLockU = std::unique_lock<decltype(mutex)>;
+    std::unique_ptr<StdThreadRunner> threadRunner;
 
     bool shutdownFlag { false };
     bool working { false };
@@ -50,7 +45,6 @@ protected:
     std::shared_ptr<GenericTask> currentTask;
 
     static void* staticThreadProc(void* arg);
-
     void threadProc();
 };
 

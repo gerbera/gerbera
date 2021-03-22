@@ -60,7 +60,7 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
 
 void UpdateManager::run()
 {
-    threadRunner = std::make_unique<ThreadRunner>("UpdateThread", UpdateManager::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>("UpdateThread", UpdateManager::staticThreadProc, this, config);
 }
 
 UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
@@ -68,10 +68,11 @@ UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
 void UpdateManager::shutdown()
 {
     log_debug("start");
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     shutdownFlag = true;
+
     log_debug("signalling...");
-    cond.notify_one();
+    threadRunner->notify();
     lock.unlock();
 
     threadRunner->join();
@@ -80,7 +81,7 @@ void UpdateManager::shutdown()
 
 void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flushPolicy)
 {
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     // signalling thread if it could have been idle, because
     // there were no unprocessed updates
     bool signal = (!haveUpdates());
@@ -101,7 +102,7 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
             if (split && objectIDHash->size() > MAX_OBJECT_IDS) {
                 while (objectIDHash->size() > MAX_OBJECT_IDS) {
                     log_debug("in-between signalling...");
-                    cond.notify_one();
+                    threadRunner->notify();
                     lock.unlock();
                     lock.lock();
                 }
@@ -112,7 +113,7 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
         signal = true;
     if (signal) {
         log_debug("signalling...");
-        cond.notify_one();
+        threadRunner->notify();
     }
 }
 
@@ -120,7 +121,9 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
     if (objectID == INVALID_OBJECT_ID)
         return;
-    AutoLock lock(mutex);
+
+    auto lock = threadRunner->lockGuard();
+
     if (objectID != lastContainerChanged || flushPolicy > this->flushPolicy) {
         // signalling thread if it could have been idle, because
         // there were no unprocessed updates
@@ -143,7 +146,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         }
         if (signal) {
             log_debug("signalling...");
-            cond.notify_one();
+            threadRunner->notify();
         }
     } else {
         log_debug("last container changed!");
@@ -157,7 +160,8 @@ void UpdateManager::threadProc()
     struct timespec lastUpdate;
     getTimespecNow(&lastUpdate);
 
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
+
     //cond.notify_one();
     while (!shutdownFlag) {
         if (haveUpdates()) {
@@ -177,9 +181,9 @@ void UpdateManager::threadProc()
             if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS) {
                 struct timespec timeout;
                 getTimespecAfterMillis(sleepMillis, &timeout, &now);
-                log_debug("threadProc: sleeping for {} millis", sleepMillis);
 
-                std::cv_status ret = cond.wait_for(lock, std::chrono::milliseconds(sleepMillis));
+                log_debug("threadProc: sleeping for {} millis", sleepMillis);
+                auto ret = threadRunner->waitFor(lock, sleepMillis);
 
                 if (!shutdownFlag) {
                     if (ret == std::cv_status::timeout)
@@ -220,7 +224,7 @@ void UpdateManager::threadProc()
             }
         } else {
             //nothing to do
-            cond.wait(lock);
+            threadRunner->wait(lock);
         }
     }
 

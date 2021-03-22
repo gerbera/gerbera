@@ -31,11 +31,9 @@
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
-#include <condition_variable>
 #include <deque>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -45,7 +43,7 @@
 #include "common.h"
 #include "context.h"
 #include "util/generic_task.h"
-#include "util/thread_executor.h"
+#include "util/thread_runner.h"
 #include "util/timer.h"
 
 #ifdef HAVE_JS
@@ -327,10 +325,6 @@ protected:
     std::shared_ptr<ScriptingRuntime> scripting_runtime;
     std::shared_ptr<LastFm> last_fm;
 
-    std::recursive_mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
-    using AutoLockU = std::unique_lock<decltype(mutex)>;
-
     std::map<std::string, std::string> mimetype_contenttype_map;
 
     std::shared_ptr<AutoscanList> autoscan_timed;
@@ -377,17 +371,14 @@ protected:
 
     bool layout_enabled;
 
-    void signal() { cond.notify_one(); }
     static void* staticThreadProc(void* arg);
     void threadProc();
 
     void addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority = false);
 
-    std::unique_ptr<ThreadRunner> threadRunner;
-    std::condition_variable_any cond;
+    std::unique_ptr<ThreadRunner<std::condition_variable_any, std::recursive_mutex>> threadRunner;
 
     bool working;
-
     bool shutdownFlag;
 
     std::deque<std::shared_ptr<GenericTask>> taskQueue1; // priority 1

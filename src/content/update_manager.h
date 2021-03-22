@@ -32,13 +32,12 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
-#include <condition_variable>
 #include <memory>
 #include <unordered_set>
 #include <vector>
 
 #include "common.h"
-#include "util/thread_executor.h"
+#include "util/thread_runner.h"
 
 // forward declaration
 class Config;
@@ -63,12 +62,7 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<Server> server;
 
-    std::unique_ptr<ThreadRunner> threadRunner;
-    std::condition_variable cond;
-
-    std::mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
-    using AutoLockU = std::unique_lock<decltype(mutex)>;
+    std::unique_ptr<StdThreadRunner> threadRunner;
 
     std::unique_ptr<std::unordered_set<int>> objectIDHash;
 

@@ -39,8 +39,6 @@
 #include "common.h"
 #include "executor.h"
 
-class Config;
-
 /// \brief an executor which runs a thread
 class ThreadExecutor : public Executor {
 public:
@@ -74,63 +72,6 @@ protected:
     bool threadShutdownCheck() const { return threadShutdown; }
 
 private:
-    static void* staticThreadProc(void* arg);
-};
-
-typedef void* (*ThreadProc)(void* target);
-
-class ThreadRunner : public ThreadExecutor {
-public:
-    ThreadRunner(const std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
-        : config(config)
-        , attr(nullptr)
-        , threadName(name)
-        , targetProc(targetProc)
-        , target(target)
-    {
-        ThreadRunner::startThread();
-    }
-
-    ~ThreadRunner() override
-    {
-        log_debug("ThreadExecutor destroying {}", threadName.c_str());
-        if (attr != nullptr) {
-            pthread_attr_destroy(attr);
-            delete attr;
-        }
-    }
-
-    void join();
-    /// \brief the exit status of the thread - needs to be overridden
-    int getStatus() override { return 0; };
-
-#ifdef TODO
-    using AutoLock = std::lock_guard<decltype(mutex)>;
-    using AutoLockU = std::unique_lock<decltype(mutex)>;
-    void lock() { }
-    void unlock() { }
-    void wait() { }
-    void notify() { cond.notify_one(); }
-#endif
-protected:
-    std::shared_ptr<Config> config;
-
-    /// \brief thread method is injected
-    void threadProc() override
-    {
-        targetProc(target);
-        log_debug("ThreadRunner terminating {}", threadName.c_str());
-    };
-
-    /// \brief start the thread
-    void startThread() override;
-
-private:
-    pthread_attr_t* attr;
-    std::string threadName;
-    ThreadProc targetProc;
-    void* target;
-
     static void* staticThreadProc(void* arg);
 };
 

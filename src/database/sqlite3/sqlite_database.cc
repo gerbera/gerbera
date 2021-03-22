@@ -146,8 +146,6 @@ void Sqlite3Database::init()
     dbInitDone = false;
     SQLDatabase::init();
 
-    AutoLockU lock(sqliteMutex);
-
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
     log_debug("SQLite path: {}", dbFilePath);
 
@@ -156,14 +154,15 @@ void Sqlite3Database::init()
         throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
-    threadRunner = std::make_unique<ThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
+    auto lock = threadRunner->uniqueLock();
 
     if (!threadRunner->isAlive()) {
         throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
     }
 
     // wait for sqlite3 thread to become ready
-    cond.wait(lock);
+    threadRunner->wait(lock);
     lock.unlock();
     if (!startupError.empty())
         throw DatabaseException("", startupError);
@@ -393,6 +392,7 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
 
 void* Sqlite3Database::staticThreadProc(void* arg)
 {
+    log_debug("Sqlite3Database::staticThreadProc - running thread");
     auto inst = static_cast<Sqlite3Database*>(arg);
     try {
         inst->threadProc();
@@ -415,9 +415,9 @@ void Sqlite3Database::threadProc()
         return;
     }
 
-    AutoLockU lock(sqliteMutex);
+    auto lock = threadRunner->uniqueLock();
     // tell init() that we are ready
-    cond.notify_one();
+    threadRunner->notify();
 
     while (!shutdownFlag) {
         while (!taskQueue.empty()) {
@@ -439,8 +439,9 @@ void Sqlite3Database::threadProc()
         }
 
         /* if nothing to do, sleep until awakened */
-        cond.wait(lock);
+        threadRunner->wait(lock);
     }
+    log_debug("Sqlite3Database::threadProc - exiting");
 
     taskQueueOpen = false;
     while (!taskQueue.empty()) {
@@ -464,27 +465,27 @@ void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDi
 {
     if (!taskQueueOpen)
         throw_std_runtime_error("sqlite3 task queue is already closed");
-    AutoLock lock(sqliteMutex);
+    auto lock = threadRunner->lockGuard();
     if (!taskQueueOpen) {
         throw_std_runtime_error("sqlite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
         taskQueue.push(task);
-        cond.notify_one();
+        threadRunner->notify();
     }
 }
 
 void Sqlite3Database::shutdownDriver()
 {
     log_debug("start");
-    AutoLockU lock(sqliteMutex);
+    auto lock = threadRunner->uniqueLock();
     if (!shutdownFlag) {
         shutdownFlag = true;
         if (hasBackupTimer) {
             timer->removeTimerSubscriber(this, nullptr);
         }
         log_debug("signalling...");
-        cond.notify_one();
+        threadRunner->notify();
         lock.unlock();
         log_debug("waiting for thread");
         threadRunner->join();
@@ -551,6 +552,7 @@ SLInitTask::SLInitTask(std::shared_ptr<Config> config)
 
 void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 {
+    log_debug("Running: init");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     sqlite3_close(*db);
@@ -591,6 +593,7 @@ SLSelectTask::SLSelectTask(const char* query)
 
 void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
 {
+    log_debug("Running: {}", query);
     pres = std::make_shared<Sqlite3Result>();
 
     char* err = nullptr;
@@ -626,7 +629,7 @@ SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
 
 void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
 {
-    log_debug("{}", query);
+    log_debug("Running: {}", query);
     char* err;
     int ret = sqlite3_exec(
         *db,
@@ -656,6 +659,7 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 
 void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
 {
+    log_debug("Running: backup");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     if (!restore) {

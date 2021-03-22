@@ -83,14 +83,14 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     // length must be positive
     assert(length > 0);
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
 
     while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {
         if (checkSocket) {
             checkSocket = false;
             return CHECK_SOCKET;
         }
-        cond.wait(lock);
+        threadRunner->wait(lock);
     }
 
     if (readError || threadShutdown)
@@ -123,7 +123,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     bool signalled = false;
     // was the buffer full or became it "full" while we read?
     if (signalAfterEveryRead || a == b) {
-        cond.notify_one();
+        threadRunner->notify();
         signalled = true;
     }
 
@@ -133,7 +133,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     if (a == b) {
         empty = true;
         if (!signalled)
-            cond.notify_one();
+            threadRunner->notify();
     }
 
     posRead += didRead;
@@ -157,7 +157,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     if (whence == SEEK_CUR && offset == 0)
         return;
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
 
     // if another seek isn't processed yet - well we don't care as this new seek
     // will change the position anyway
@@ -166,10 +166,10 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     seekWhence = whence;
 
     // tell the probably sleeping thread to process our seek
-    cond.notify_one();
+    threadRunner->notify();
 
     // wait until the seek has been processed
-    cond.wait(lock, [&]() {
+    threadRunner->wait(lock, [&]() {
         return !doSeek || threadShutdown || eof || readError;
     });
 }
@@ -188,14 +188,14 @@ void IOHandlerBufferHelper::close()
 
 void IOHandlerBufferHelper::startBufferThread()
 {
-    threadRunner = std::make_unique<ThreadRunner>("BufferHelperThread", IOHandlerBufferHelper::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>("BufferHelperThread", IOHandlerBufferHelper::staticThreadProc, this, config);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     threadShutdown = true;
-    cond.notify_one();
+    threadRunner->notify();
     lock.unlock();
 
     threadRunner->join();

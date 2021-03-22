@@ -55,13 +55,13 @@ Session::Session(long timeout)
 
 void Session::put(const std::string& key, std::string value)
 {
-    AutoLock lock(mutex);
+    AutoLockR lock(rmutex);
     dict[key] = std::move(value);
 }
 
 std::string Session::get(const std::string& key)
 {
-    AutoLock lock(mutex);
+    AutoLockR lock(rmutex);
     return getValueOrDefault(dict, key);
 }
 
@@ -70,7 +70,7 @@ void Session::containerChangedUI(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return;
     if (!updateAll) {
-        AutoLock lock(mutex);
+        AutoLockR lock(rmutex);
         if (!updateAll) {
             if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS) {
                 updateAll = true;
@@ -87,7 +87,7 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
         return;
 
     size_t arSize = objectIDs.size();
-    AutoLock lock(mutex);
+    AutoLockR lock(rmutex);
 
     if (updateAll)
         return;
@@ -106,7 +106,7 @@ std::string Session::getUIUpdateIDs()
 {
     if (!hasUIUpdateIDs())
         return "";
-    AutoLock lock(mutex);
+    AutoLockR lock(rmutex);
     if (updateAll) {
         updateAll = false;
         return "all";
@@ -128,7 +128,7 @@ bool Session::hasUIUpdateIDs() const
 void Session::clearUpdateIDs()
 {
     log_debug("clearing UI updateIDs");
-    AutoLock lock(mutex);
+    AutoLockR lock(rmutex);
     uiUpdateIDs->clear();
     updateAll = false;
 }

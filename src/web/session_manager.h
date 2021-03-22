@@ -98,8 +98,8 @@ protected:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
-    std::recursive_mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
+    std::recursive_mutex rmutex;
+    using AutoLockR = std::lock_guard<decltype(rmutex)>;
     std::map<std::string, std::string> dict;
 
     /// \brief True if the ui update id hash became to big and

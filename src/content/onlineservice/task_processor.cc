@@ -37,7 +37,7 @@
 
 void TaskProcessor::run()
 {
-    threadRunner = std::make_unique<ThreadRunner>("TaskProcessorThread", TaskProcessor::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>("TaskProcessorThread", TaskProcessor::staticThreadProc, this, config);
 
     if (!threadRunner->isAlive())
         throw_std_runtime_error("Failed to task processor thread");
@@ -47,7 +47,7 @@ void TaskProcessor::shutdown()
 {
     log_debug("Shutting down TaskProcessor");
     shutdownFlag = true;
-    cond.notify_one();
+    threadRunner->notify();
     threadRunner->join();
 }
 
@@ -61,7 +61,7 @@ void* TaskProcessor::staticThreadProc(void* arg)
 void TaskProcessor::threadProc()
 {
     std::shared_ptr<GenericTask> task;
-    AutoLockU lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     working = true;
 
     while (!shutdownFlag) {
@@ -75,7 +75,7 @@ void TaskProcessor::threadProc()
 
         if (task == nullptr) {
             working = false;
-            cond.wait(lock);
+            threadRunner->wait(lock);
             working = true;
             continue;
         }
@@ -100,25 +100,25 @@ void TaskProcessor::threadProc()
 
 void TaskProcessor::addTask(const std::shared_ptr<GenericTask>& task)
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
 
     task->setID(taskID++);
 
     taskQueue.push_back(task);
-    cond.notify_one();
+    threadRunner->notify();
 }
 
 std::shared_ptr<GenericTask> TaskProcessor::getCurrentTask()
 {
     std::shared_ptr<GenericTask> task;
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     task = currentTask;
     return task;
 }
 
 void TaskProcessor::invalidateTask(unsigned int taskID)
 {
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     auto tc = getCurrentTask();
     if (tc != nullptr) {
         if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
@@ -137,7 +137,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 {
     std::deque<std::shared_ptr<GenericTask>> taskList;
 
-    AutoLock lock(mutex);
+    auto lock = threadRunner->lockGuard();
     auto tc = getCurrentTask();
 
     // if there is no current task, then the queues are empty
