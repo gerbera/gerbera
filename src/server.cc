@@ -36,6 +36,14 @@
 #include <iostream>
 #endif
 
+#include <upnpconfig.h>
+#ifdef UPNP_HAVE_TOOLS
+#include <upnptools.h>
+#endif
+
+#include <chrono>
+#include <thread>
+
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
@@ -87,8 +95,7 @@ Server::~Server() { log_debug("Server destroyed"); }
 
 void Server::run()
 {
-    int ret = 0; // general purpose error code
-    log_debug("start");
+    log_debug("Starting...");
 
     std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
     std::string ip = config->getOption(CFG_SERVER_IP);
@@ -100,29 +107,36 @@ void Server::run()
         iface = ipToInterface(ip);
 
     if (!ip.empty() && iface.empty())
-        throw_std_runtime_error("Could not find ip: {}", ip.c_str());
+        throw_std_runtime_error("Could not find IP: {}", ip.c_str());
 
     auto port = in_port_t(config->getIntOption(CFG_SERVER_PORT));
 
-    log_info("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
-#if defined(USING_NPUPNP)
-    const char* IfName = iface.empty() ? "*" : iface.c_str();
-#else
+    log_info("Initialising libupnp with interface: {}, port: {}", iface.empty() ? "<unset>" : iface, port == 0 ? "<unset>" : fmt::to_string(port));
     const char* IfName = iface.empty() ? nullptr : iface.c_str();
+
+    int ret = UPNP_E_INIT_FAILED;
+    for (int attempt = 0; ret != UPNP_E_SUCCESS; attempt++) {
+        ret = UpnpInit2(IfName, port);
+        if (ret != UPNP_E_SUCCESS) {
+            if (attempt > 3) {
+                throw UpnpException(ret, "UpnpInit failed");
+            }
+#ifdef UPNP_HAVE_TOOLS
+            log_warning("UPnP Init failed: {} ({}). Retrying in {} seconds...", UpnpGetErrorMessage(ret), ret, attempt + 1);
+#else
+            log_warning("UPnP Init failed: ({}). Retrying in {} seconds...", ret, attempt + 1);
 #endif
-    ret = UpnpInit2(IfName, port);
-    if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpInit failed");
+            std::this_thread::sleep_for(std::chrono::seconds(attempt + 1));
+        }
     }
 
     port = UpnpGetServerPort();
-    log_info("Initialized port: {}", port);
+    /* The IP libupnp picks is not always the same as passed into config, as we map it to an interface */
+    ip = UpnpGetServerIpAddress();
 
-    if (ip.empty()) {
-        ip = UpnpGetServerIpAddress();
-    }
-
-    log_info("Server bound to: {}", ip.c_str());
+    log_info("IPv4: Server bound to: {}:{}", ip, port);
+    log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(), UpnpGetServerPort6());
+    log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
 
     virtualUrl = fmt::format("http://{}:{}/{}", ip, port, virtual_directory);
 
@@ -130,12 +144,12 @@ void Server::run()
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
 
     if (web_root.empty()) {
-        throw_std_runtime_error("invalid web server root directory");
+        throw_std_runtime_error("Invalid web server root directory");
     }
 
     ret = UpnpSetWebServerRootDir(web_root.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpSetWebServerRootDir failed");
+        throw UpnpException(ret, "UpnpSetWebServerRootDir failed");
     }
 
     log_debug("webroot: {}", web_root.c_str());
@@ -143,13 +157,13 @@ void Server::run()
     log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpAddVirtualDir failed");
+        throw UpnpException(ret, "UpnpAddVirtualDir failed");
     }
 
     ret = registerVirtualDirCallbacks();
 
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
+        throw UpnpException(ret, "UpnpSetVirtualDirCallbacks failed");
     }
 
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
@@ -225,7 +239,6 @@ void Server::run()
     }
     writeBookmark(url);
     log_info("The Web UI can be reached by following this link: {}/", url);
-    log_debug("end");
 }
 
 void Server::writeBookmark(const std::string& addr)

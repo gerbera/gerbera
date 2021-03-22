@@ -823,7 +823,8 @@ std::string ipToInterface(const std::string& ip)
         return "";
     }
 
-    log_debug("Looking for '{}'", ip.c_str());
+    log_warning("Please provide an interface name instead! LibUPnP does not support specifying an IP in current versions.");
+    log_info("Attempting to map {} to an interface", ip);
 
     struct ifaddrs *ifaddr, *ifa;
     int family, s, n;

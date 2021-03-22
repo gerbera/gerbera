@@ -340,7 +340,7 @@ if (WITH_NPUPNP)
     target_compile_definitions(libgerbera PUBLIC USING_NPUPNP)
     target_link_libraries(libgerbera PUBLIC ${NPUPNP_LIBRARIES})
 else()
-    set(REQ_UPNP_VERSION 1.12.1)
+    set(REQ_UPNP_VERSION 1.14.0)
     # LibUPnP official target since 1.16 (Lib version 18)
     # This will prefer the provided UPNPConfig.cmake if found, if not, it will fall back our FindUPNP.cmake
     find_package(UPNP ${REQ_UPNP_VERSION} QUIET)
@@ -383,6 +383,13 @@ else()
         message(WARNING [=[
     !! It is strongly recommended to build libupnp with --disable-blocking-tcp-connections !!
     Without this option non-responsive control points can cause libupnp to hang.]=])
+    endif()
+
+    check_cxx_symbol_exists(UPNP_HAVE_TOOLS "${UPNP_INCLUDE_DIR}/upnpconfig.h" UPNP_HAS_TOOLS)
+    if (NOT UPNP_HAS_TOOLS)
+        message(WARNING [=[
+    !! It is strongly recommended to build libupnp with --enable-tools !!
+        ]=])
     endif()
 
     target_link_libraries(libgerbera PUBLIC UPNP::UPNP)

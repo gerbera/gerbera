@@ -39,6 +39,11 @@
 #include <mutex>
 #include <spdlog/sinks/basic_file_sink.h>
 
+#include <upnpconfig.h>
+#ifdef UPNP_HAVE_TOOLS
+#include <upnptools.h>
+#endif
+
 #ifdef SOLARIS
 #include <iso/limits_iso.h>
 #endif
@@ -312,21 +317,23 @@ int main(int argc, char** argv, char** envp)
             server = std::make_shared<Server>(config);
             server->init();
             server->run();
-        } catch (const UpnpException& upnp_e) {
+        } catch (const UpnpException& ue) {
 
             sigemptyset(&mask_set);
             pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
-            if (upnp_e.getErrorCode() == UPNP_E_SOCKET_BIND) {
-                log_error("LibUPnP could not bind to socket.");
-                log_info("Please check if another instance of Gerbera or");
-                log_info("another application is running on port TCP {} or UDP 1900.", portnum.value());
-            } else if (upnp_e.getErrorCode() == UPNP_E_SOCKET_ERROR) {
-                log_error("LibUPnP Socket error.");
-                log_info("Please check if your network interface was configured for multicast!");
-                log_info("Refer to the README file for more information.");
+            if (ue.getErrorCode() == UPNP_E_SOCKET_BIND) {
+                log_error("LibUPnP could not bind to socket");
+                log_error("Please check if another instance of Gerbera or another application is running on port TCP {} or UDP 1900.", portnum.value());
+            } else if (ue.getErrorCode() == UPNP_E_SOCKET_ERROR) {
+                log_error("LibUPnP Socket error");
+                log_error("Please check if your network interface was configured for multicast!");
             } else {
-                log_error("LibUPnP error code: {}", upnp_e.getErrorCode());
+#ifdef UPNP_HAVE_TOOLS
+                log_error("Failed to start LibUPnP: {} error code: {}", UpnpGetErrorMessage(ue.getErrorCode()), ue.getErrorCode());
+#else
+                log_error("Failed to start LibUPnP: error code: {}", ue.getErrorCode());
+#endif
             }
 
             try {
