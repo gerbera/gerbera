@@ -39,6 +39,7 @@
 #include <pugixml.hpp>
 
 #include "context.h"
+#include "curl_online_service.h"
 
 // forward declaration
 class CdsObject;
@@ -50,13 +51,14 @@ class CdsObject;
 
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.
-class ATrailersContentHandler {
+class ATrailersContentHandler : public CurlContentHandler {
 public:
     explicit ATrailersContentHandler(const std::shared_ptr<Context>& context);
+    ~ATrailersContentHandler() override = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    void setServiceContent(std::unique_ptr<pugi::xml_document>& service);
+    void setServiceContent(std::unique_ptr<pugi::xml_document>& service) override;
 
     /// \brief retrieves an object from the service.
     ///
@@ -65,16 +67,11 @@ public:
     /// this function will return nullptr.
     ///
     /// \return CdsObject or nullptr if there are no more objects to parse.
-    std::shared_ptr<CdsObject> getNextObject();
+    std::shared_ptr<CdsObject> getNextObject() override;
 
 protected:
     std::shared_ptr<CdsObject> getObject(const pugi::xml_node& trailer) const;
 
-protected:
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
-
-    std::unique_ptr<pugi::xml_document> service_xml;
     pugi::xml_node_iterator trailer_it;
 
     std::string trailer_mimetype;

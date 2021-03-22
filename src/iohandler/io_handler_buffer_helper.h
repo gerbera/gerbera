@@ -34,7 +34,6 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <pthread.h>
 #include <upnp.h>
 
 #include "common.h"

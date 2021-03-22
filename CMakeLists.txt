@@ -93,6 +93,8 @@ add_library(libgerbera STATIC
         src/content/onlineservice/atrailers_content_handler.h
         src/content/onlineservice/atrailers_service.cc
         src/content/onlineservice/atrailers_service.h
+        src/content/onlineservice/curl_online_service.cc
+        src/content/onlineservice/curl_online_service.h
         src/content/onlineservice/lastfm_scrobbler.cc
         src/content/onlineservice/lastfm_scrobbler.h
         src/content/onlineservice/online_service.cc
