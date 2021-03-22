@@ -45,7 +45,7 @@ class GerberaConan(ConanFile):
         "libiconv/1.16",
         "sqlite3/3.31.1",
         "zlib/1.2.11",
-        "pupnp/1.12.1",
+        "pupnp/[>=1.14.0]",
     ]
 
     def configure(self):
