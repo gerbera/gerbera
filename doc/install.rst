@@ -23,19 +23,19 @@ Ubuntu/Mint
 
 We maintain a `Ubuntu Repository <https://bintray.com/gerbera/gerbera>`_.
 
-To install the latest tagged release (>=1.7.0):
+To install the latest tagged release (>=1.8.0):
 
 .. code-block:: sh
 
-    curl -fsSL https://gerbera.io/gpg | sudo apt-key add -
-    sudo apt-add-repository https://dl.bintray.com/gerbera/gerbera
+    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
+    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian
 
 Or for the latest code install git builds:
 
 .. code-block:: sh
 
-    curl -fsSL https://gerbera.io/gpg | sudo apt-key add -
-    sudo apt-add-repository https://dl.bintray.com/gerbera/gerbera-git
+    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
+    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian-git
 
 Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`_.
 
