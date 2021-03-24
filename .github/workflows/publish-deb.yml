@@ -17,7 +17,7 @@ jobs:
     container:
       image: "${{ matrix.os-ver }}"
       env:
-        BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+        ART_API_KEY: ${{ secrets.ART_API_KEY }}
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
     steps:

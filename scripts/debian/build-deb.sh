@@ -3,6 +3,7 @@
 set -Eeuo pipefail
 
 function install-gcc {
+  echo "::group::Installing GCC"
   if [[ "$lsb_codename" == "bionic" ]]; then
     sudo apt-get install gcc-8 g++-8 libstdc++-8-dev -y
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
@@ -10,9 +11,11 @@ function install-gcc {
   else
     sudo apt-get install g++ -y
   fi
+  echo "::endgroup::"
 }
 
 function install-cmake() {
+  echo "::group::Installing CMake"
   if [[ "$lsb_codename" == "bionic" ]]; then
     sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
     wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
@@ -20,9 +23,11 @@ function install-cmake() {
     sudo apt-get update -y
   fi
   sudo apt-get install cmake -y
+  echo "::endgroup::"
 }
 
 function install-fmt {
+    echo "::group::Installing fmt"
   if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
     git clone https://github.com/fmtlib/fmt
     pushd fmt
@@ -37,29 +42,28 @@ function install-fmt {
   else
      sudo apt-get install libfmt-dev -y
   fi
+  echo "::endgroup::"
 }
 
 function install-spdlog() {
+  echo "::group::Installing spdlog"
+
   if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
     sudo bash scripts/install-spdlog.sh
   else
     sudo apt-get install libspdlog-dev -y
   fi
+  echo "::endgroup::"
 }
 
-function upload_to_bintray() {
+function upload_to_artifactory() {
+
   target_path="pool/main/g/gerbera/$deb_name"
-  bintray_url="https://api.bintray.com/content/gerbera/$1/gerbera/$deb_version/$target_path"
+  bintray_url="https://gerbera.jfrog.io/artifactory/$1/$target_path;deb.distribution=$lsb_codename;deb.component=main;deb.architecture=$deb_arch"
 
   printf "Uploading %s to %s...\n" "$target_path" "$bintray_url"
 
-  curl \
-    -H "X-Bintray-Override: 1" \
-    -H "X-Bintray-Publish: 1" \
-    -H "X-Bintray-Debian-Architecture: $deb_arch" \
-    -H "X-Bintray-Debian-Distribution: $lsb_codename" \
-    -H "X-Bintray-Debian-Component: main" \
-    -T "$deb_name" -uwhyman:"${BINTRAY_API_KEY}" "$bintray_url"
+  curl -H "X-JFrog-Art-Api:$ART_API_KEY" -XPUT  -T "$deb_name" -uian@gerbera.io:"${ART_API_KEY}" "$bintray_url"
 }
 
 export DEBIAN_FRONTEND=noninteractive
@@ -84,6 +88,7 @@ fi
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
 
+  echo "::group::Installing dependencies"
   sudo apt-get update
   sudo apt-get install -y \
       dpkg-dev \
@@ -106,6 +111,7 @@ if [[ ! -d build-deb ]]; then
       libtag1-dev \
       uuid-dev
   sudo apt-get clean
+  echo "::endgroup::"
 fi
 
 if [[ "$lsb_codename" == "bionic" ]]; then
@@ -117,7 +123,9 @@ fi
 install-fmt
 install-spdlog
 
+echo "::group::Installing libupnp"
 sudo bash scripts/install-pupnp.sh
+echo "::endgroup::"
 
 cd build-deb
 
@@ -158,9 +166,9 @@ else
   printf "Deb already built!\n"
 fi
 
-if [[ "${BINTRAY_API_KEY:-}" ]]; then
+if [[ "${ART_API_KEY:-}" ]]; then
   # Tags only for main repo
-  [[ $is_tag == 1 ]] && upload_to_bintray gerbera
+  [[ $is_tag == 1 ]] && upload_to_artifactory debian
   # Git builds go to git
-  upload_to_bintray gerbera-git
+  upload_to_artifactory debian-git
 fi
