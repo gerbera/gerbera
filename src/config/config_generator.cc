@@ -186,8 +186,8 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     fs::path homepath = userHome / configDir;
     setValue(CFG_SERVER_HOME, homepath.string());
 
-    std::string webRoot = dataDir / DEFAULT_WEB_DIR;
-    setValue(CFG_SERVER_WEBROOT, webRoot);
+    fs::path webRoot = dataDir / DEFAULT_WEB_DIR;
+    setValue(CFG_SERVER_WEBROOT, webRoot.string());
 
     auto aliveinfo = server->append_child(pugi::node_comment);
     aliveinfo.set_value(fmt::format("\n\
