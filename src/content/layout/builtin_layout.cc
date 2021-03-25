@@ -80,7 +80,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         obj->setRefID(obj->getID());
     }
 
-    std::string dir;
+    fs::path dir;
     if (!rootpath.empty()) {
         // make location relative to rootpath: "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" -> "Action"
         dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
@@ -89,7 +89,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Video/Directories/{}", dir));
+        id = content->addContainerChain(fmt::format("/Video/Directories/{}", dir.string().c_str()));
         add(obj, id);
     }
 }
@@ -134,7 +134,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
         add(obj, id);
     }
 
-    std::string dir;
+    fs::path dir;
     if (!rootpath.empty()) {
         // make location relative to rootpath: "/home/.../Photos/Action/a.mkv" with rootpath "/home/.../Photos" -> "Action"
         dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
@@ -143,7 +143,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Photos/Directories/{}", dir));
+        id = content->addContainerChain(fmt::format("/Photos/Directories/{}", dir.string().c_str()));
         add(obj, id);
     }
 }
@@ -278,7 +278,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     add(obj, id);
 
     obj->setTitle(title);
-    std::string dir;
+    fs::path dir;
     if (!rootpath.empty()) {
         // make location relative to rootpath: "/home/.../Audio/Action/a.mp3" with rootpath "/home/.../Audio" -> "Action"
         dir = fs::relative(obj->getLocation().parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootpath.parent_path() : rootpath);
@@ -287,7 +287,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Audio/Directories/{}", dir));
+        id = content->addContainerChain(fmt::format("/Audio/Directories/{}", dir.string().c_str()));
         add(obj, id);
     }
 }

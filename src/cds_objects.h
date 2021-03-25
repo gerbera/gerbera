@@ -440,7 +440,7 @@ public:
     void setURL(const std::string& URL) { this->location = URL; }
 
     /// \brief Get the URL of the item.
-    std::string getURL() const { return location; }
+    std::string getURL() const { return location.string(); }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     //void copyTo(std::shared_ptr<CdsObject> obj) override;

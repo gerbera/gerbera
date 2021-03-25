@@ -1256,9 +1256,10 @@ void ConfigManager::load(const fs::path& userHome)
 
     temp = setOption(root, CFG_SERVER_APPEND_PRESENTATION_URL_TO)->getOption();
     if (((temp == "ip") || (temp == "port")) && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
-        throw std::runtime_error("Error in config file: \"append-to\" attribute "
-                                 "value in <presentationURL> tag is set to \""
-            + temp + "\" but no URL is specified");
+        throw_std_runtime_error("Error in config file: \"append-to\" attribute "
+                                "value in <presentationURL> tag is set to \"{}\""
+                                "but no URL is specified",
+            temp.c_str());
     }
 
 #ifdef HAVE_JS
