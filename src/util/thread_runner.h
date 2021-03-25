@@ -35,7 +35,7 @@
 
 typedef void* (*ThreadProc)(void* target);
 
-template<class Condition, class Mutex>
+template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
     ThreadRunner(const std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
@@ -153,7 +153,7 @@ protected:
             delete attr;
             attr = nullptr;
         }
-}
+    }
 
 private:
     pthread_attr_t* attr;
@@ -165,7 +165,7 @@ private:
 
     static void* staticThreadProc(void* arg)
     {
-        auto inst = static_cast<ThreadRunner<Condition,Mutex>*>(arg);
+        auto inst = static_cast<ThreadRunner<Condition, Mutex>*>(arg);
         inst->targetProc(inst->target);
         pthread_exit(nullptr);
     }
