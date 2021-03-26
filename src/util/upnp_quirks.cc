@@ -51,35 +51,10 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (!startswith(item->getMimeType(), "video"))
         return;
 
-#ifdef OLD_RESOURCE_FILE
-    std::string url;
-    if (!UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
-        constexpr auto exts = std::array {
-            ".srt",
-            ".ssa",
-            ".smi",
-            ".sub"
-        };
-
-        // remove .ext
-        fs::path path = item->getLocation();
-        std::string pathNoExt = path.parent_path() / path.stem();
-
-        auto it = std::find_if(exts.begin(), exts.end(), [=](const auto& ext) { std::string captionPath = pathNoExt + ext;
-              return access(captionPath.c_str(), R_OK) == 0; });
-
-        if (it == exts.end())
-            return;
-
-        url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + fmt::to_string(*it) });
-    }
-    headers->addHeader("CaptionInfo.sec", url);
-#else
     std::string url;
     if (UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
         headers->addHeader("CaptionInfo.sec", url);
     }
-#endif
 }
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
