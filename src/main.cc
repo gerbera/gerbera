@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     main.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -40,6 +40,7 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <grp.h>
 #include <unistd.h>
@@ -153,6 +154,7 @@ int main(int argc, char** argv, char** envp)
         ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
         ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u,user", "Drop privs to user", cxxopts::value<std::string>()) //
+        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<std::string>()) //
         ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
         ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
         ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
@@ -224,15 +226,15 @@ int main(int argc, char** argv, char** envp)
             home = opts["home"].as<std::string>();
         }
 
-        // are we requested to drop privs? 
+        // are we requested to drop privs?
         std::optional<std::string> user;
         if (opts.count("user") > 0) {
             user = opts["user"].as<std::string>();
 
-            // get actual euid/egid of process 
+            // get actual euid/egid of process
             uid_t  actual_euid = geteuid();
 
-            // get user info of requested user from passwd 
+            // get user info of requested user from passwd
             struct passwd *user_id =  getpwnam( user->c_str() );
 
             if ( user_id == NULL ) {
@@ -240,18 +242,18 @@ int main(int argc, char** argv, char** envp)
                 exit(EXIT_FAILURE);
             }
 
-            // set home according to /etc/passwd entry 
+            // set home according to /etc/passwd entry
             if (!home.has_value()) {
                 home = user_id->pw_dir;
             }
 
-            // we need to be euid root to become requested user/group 
+            // we need to be euid root to become requested user/group
             if ( actual_euid != 0 ) {
                 log_error("Need to be root to change user.");
                 exit(EXIT_FAILURE);
             }
 
-            // set all uids, gids and add. groups 
+            // set all uids, gids and add. groups
             if ( 0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) ||
                  0 != initgroups( user_id->pw_name, user_id->pw_gid )              ||
                  0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid) ) {
@@ -261,50 +263,94 @@ int main(int argc, char** argv, char** envp)
             log_info("Dropped to User: {}", user->c_str() );
         }
 
-        // are we requested to daemonize? 
+        // are we requested to daemonize?
         bool daemon = opts["daemon"].as<bool>();
         if (daemon) {
             pid_t pid;
 
-            // fork 
+            // fork
             pid = fork();
             if ( pid < 0 ) {
                 log_error("Unable to fork.");
                 exit(EXIT_FAILURE);
             }
 
-            // terminate parent 
+            // terminate parent
             if ( pid > 0) exit(EXIT_SUCCESS);
 
-            // become session leader 
+            // become session leader
             if (setsid() < 0) {
                 log_error("Unable to setsid.");
                 exit(EXIT_FAILURE);
             }
 
-            // second fork 
+            // second fork
             pid = fork();
             if ( pid < 0 ) {
                 log_error("Unable to fork.");
                 exit(EXIT_FAILURE);
             }
 
-            // terminate parent 
+            // terminate parent
             if ( pid > 0) exit(EXIT_SUCCESS);
 
-            // set new file permissions 
+            // set new file permissions
             umask(0);
 
-            // change dir to / 
+            // change dir to /
             if ( chdir("/") ) {
                 log_error("Unable to chdir to root dir.");
                 exit(EXIT_FAILURE);
             }
-            // close open filedescriptors belonging to a tty 
+            // close open filedescriptors belonging to a tty
             for ( int fd = sysconf(_SC_OPEN_MAX) ; fd>=0 ; fd-- ) {
                 if ( isatty(fd) ) close(fd);
             }
             log_info("Daemonized.");
+        }
+
+        // are we requested to write a pidfile ?
+        std::optional<std::string> pidfile;
+        if (opts.count("pidfile") > 0) {
+            pidfile = opts["pidfile"].as<std::string>();
+
+            // exit if the pidfile already exists
+            if ( -1 != open( pidfile->c_str() , 0) ) {
+                log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str() );
+                log_error("running or the file is a leftover from an unclean shutdown.");
+                log_error("In that case, remove the file before starting gerbera.");
+                exit(EXIT_FAILURE);
+            }
+
+            // get the pid of our process
+            pid_t pid = getpid();
+
+            // convert to a string
+            char pidstr[20];
+            if ( 0 > snprintf( pidstr, 20, "%d", pid) ) {
+                log_error("Could not determine pid of running process.");
+                exit(EXIT_FAILURE);
+            }
+
+            // add a newline
+            strcat(pidstr, "\n");
+
+            // open the pidfile
+            int pidfd = open( pidfile->c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
+            if ( -1 == pidfd ) {
+                log_error("Could not create pidfile {}.", pidfile->c_str() );
+                exit(EXIT_FAILURE);
+            }
+
+            // write pid to file
+            if ( (long int) strlen(pidstr) != write( pidfd, pidstr, strlen(pidstr) ) ) {
+                log_error("Could not write pidfile {}.", pidfile->c_str() );
+                exit(EXIT_FAILURE);
+            }
+            log_debug("Wrote pidfile {}.", pidfile->c_str() );
+
+            // close filedescriptor
+            close(pidfd);
         }
 
         std::optional<std::string> config_file;
@@ -528,6 +574,15 @@ int main(int argc, char** argv, char** envp)
         } catch (const std::runtime_error& e) {
             log_error("main: error {}", e.what());
             ret = EXIT_FAILURE;
+        }
+
+        // remove pidfile if one was written
+        if (opts.count("pidfile") > 0) {
+            if ( 0 == remove( pidfile->c_str() ) ) {
+                log_debug("Pidfile {} removed.", pidfile->c_str() );
+            } else {
+                log_info("Could not remove pidfile {}", pidfile->c_str() );
+            }
         }
 
         log_info("Gerbera exiting. Have a nice day.");
