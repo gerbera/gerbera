@@ -1134,7 +1134,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
 // Since the actual driver in use is determined at runtime, not build time, we check for sqlite3 and
 // only run when that's what we are using.
 #define MAX_ART_CONTAINERS 100
-
+#ifdef OLD_RESOURCE_FILE
 std::string SQLDatabase::findFolderImage(int id, std::string trackArtBase)
 {
     std::ostringstream q;
@@ -1195,6 +1195,7 @@ std::string SQLDatabase::findFolderImage(int id, std::string trackArtBase)
     }
     return "";
 }
+#endif
 
 std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, bool withoutContainer)
 {

@@ -54,6 +54,60 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
+#ifdef OLD_RESOURCE_FILE
+static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::map<std::string, std::string>& params, const std::string& rh)
+{
+    bool is_srt = false;
+
+    std::string ext = getValueOrDefault(params, URL_FILE_EXTENSION);
+    size_t edot = ext.rfind('.');
+    if (edot != std::string::npos)
+        ext = ext.substr(edot);
+    if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
+        // remove .ext
+        std::string pathNoExt = path.parent_path() / path.stem();
+        path = pathNoExt + ext;
+        mimeType = MIMETYPE_TEXT;
+
+        // reset resource id
+        res_id = 0;
+        is_srt = true;
+    }
+
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0 && !rh.empty()) {
+        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        ret = stat(path.c_str(), &statbuf);
+    }
+    if (ret != 0) {
+        if (is_srt)
+            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
+
+        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
+    }
+    return is_srt;
+}
+#else
+static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::map<std::string, std::string>&, const std::string& rh)
+{
+    bool is_srt = false;
+
+    if (!rh.empty()) {
+        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        mimeType = MIMETYPE_TEXT;
+        is_srt = true;
+    }
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        if (is_srt) {
+            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
+        }
+        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
+    }
+    return is_srt;
+}
+#endif
+
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
@@ -84,38 +138,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     fs::path path = item != nullptr ? item->getLocation() : "";
-    bool is_srt = false;
-
     std::string mimeType;
-
-    std::string ext = getValueOrDefault(params, "ext");
-    size_t edot = ext.rfind('.');
-    if (edot != std::string::npos)
-        ext = ext.substr(edot);
-
-    if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
-        // remove .ext
-        std::string pathNoExt = path.parent_path() / path.stem();
-        path = pathNoExt + ext;
-        mimeType = MIMETYPE_TEXT;
-
-        // reset resource id
-        res_id = 0;
-        is_srt = true;
-    }
-
     struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0 && !rh.empty()) {
-        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
-        ret = stat(path.c_str(), &statbuf);
-    }
-    if (ret != 0) {
-        if (is_srt)
-            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
-
-        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
-    }
+    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, params, rh);
 
     if (access(path.c_str(), R_OK) == 0) {
         UpnpFileInfo_set_IsReadable(info, 1);
@@ -252,35 +277,9 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     fs::path path = item != nullptr ? item->getLocation() : "";
-
-    bool is_srt = false;
-
-    std::string ext = getValueOrDefault(params, "ext");
-    size_t edot = ext.rfind('.');
-    if (edot != std::string::npos)
-        ext = ext.substr(edot);
-    if ((ext == ".srt") || (ext == ".ssa") || (ext == ".smi") || (ext == ".sub")) {
-        // remove .ext
-        std::string pathNoExt = path.parent_path() / path.stem();
-        path = pathNoExt + ext;
-
-        // reset resource id
-        res_id = 0;
-        is_srt = true;
-    }
-
+    std::string mimeType;
     struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0 && !rh.empty()) {
-        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
-        ret = stat(path.c_str(), &statbuf);
-    }
-    if (ret != 0) {
-        if (is_srt)
-            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
-
-        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
-    }
+    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, params, rh);
 
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);

@@ -209,9 +209,9 @@ public:
     /* utility methods */
     virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
-
+#ifdef OLD_RESOURCE_FILE
     virtual std::string findFolderImage(int id, std::string trackArtBase) = 0;
-
+#endif
     class ChangedContainers {
     public:
         // Signed because IDs start at -1.

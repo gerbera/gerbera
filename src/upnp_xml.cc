@@ -173,7 +173,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
                 return;
             }
-
+#ifdef OLD_RESOURCE_FILE
             std::string aa_id = database->findFolderImage(cont->getID(), std::string());
 
             if (!aa_id.empty()) {
@@ -209,6 +209,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                     }
                 }
             }
+#endif
         }
     }
     // log_debug("Rendered DIDL: {}", result->print().c_str());

@@ -51,6 +51,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     if (!startswith(item->getMimeType(), "video"))
         return;
 
+#ifdef OLD_RESOURCE_FILE
     std::string url;
     if (!UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
         constexpr auto exts = std::array {
@@ -73,6 +74,12 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
         url = context->getServer()->getVirtualUrl() + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item->getID()), URL_RESOURCE_ID, "0", URL_FILE_EXTENSION, "file" + fmt::to_string(*it) });
     }
     headers->addHeader("CaptionInfo.sec", url);
+#else
+    std::string url;
+    if (UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
+        headers->addHeader("CaptionInfo.sec", url);
+    }
+#endif
 }
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
