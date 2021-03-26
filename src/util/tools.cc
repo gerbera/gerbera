@@ -175,6 +175,16 @@ std::string& replaceString(std::string& str, std::string_view from, const std::s
     return str;
 }
 
+std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to)
+{
+    size_t start_pos = str.find(from);
+    while (start_pos != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos = str.find(from, start_pos + to.length());
+    }
+    return str;
+}
+
 time_t getLastWriteTime(const fs::path& path)
 {
     // in future with C+20 we can replace this function too:

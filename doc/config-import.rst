@@ -40,6 +40,16 @@ This tag defines the import section.
 
     This attribute defines if symbolic links should be treated as regular items and imported into the database (”yes”). This can cause duplicate entries if the link target is also scanned.
 
+    ::
+
+        readable-names="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed. This changes the title of the entry if no metadata is available
+
 **Child tags:**
 
 ``filesystem-charset``

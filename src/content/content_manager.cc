@@ -1237,7 +1237,12 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         }
 
         auto f2i = StringConverter::f2i(config);
-        obj->setTitle(f2i->convert(dirEnt.path().filename()));
+        auto title = dirEnt.path().filename().string();
+        if (config->getBoolOption(CFG_IMPORT_READABLE_NAMES) && upnp_class != UPNP_CLASS_ITEM) {
+            title = dirEnt.path().stem().string();
+            title = replaceAllString(title, "_", " ");
+        }
+        obj->setTitle(f2i->convert(title));
 
         MetadataHandler::setMetadata(context, item, dirEnt);
     } else if (dirEnt.is_directory(ec)) {
