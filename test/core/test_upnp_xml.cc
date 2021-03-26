@@ -56,17 +56,13 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setMetadata(M_CONDUCTOR, "Conductor");
     obj->setMetadata(M_ORCHESTRA, "Orchestra");
     obj->setMetadata(M_UPNP_DATE, "2001-01-01");
+
     // albumArtURI
-#ifdef OLD_RESOURCE_FILE
-    database->findFolderImageMap.clear();
-    database->findFolderImageMap[fmt::to_string(obj->getID())] = "10";
-#else
     auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(R_RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
     obj->addResource(resource);
-#endif
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -81,11 +77,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<upnp:conductor>Conductor</upnp:conductor>\n";
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
-#ifdef OLD_RESOURCE_FILE
-    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/10/res_id/0</upnp:albumArtURI>\n";
-#else
     expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0/rct/aa/rh/11</upnp:albumArtURI>\n";
-#endif
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
 

@@ -173,43 +173,6 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
                 return;
             }
-#ifdef OLD_RESOURCE_FILE
-            std::string aa_id = database->findFolderImage(cont->getID(), std::string());
-
-            if (!aa_id.empty()) {
-                log_debug("Using folder image as artwork for container");
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = aa_id;
-
-                url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, "0" });
-                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-
-            } else if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-                // try to find the first track and use its artwork
-                auto items = database->getObjects(cont->getID(), true);
-                if (items != nullptr) {
-
-                    for (const auto& id : *items) {
-                        auto objItem = database->loadObject(id);
-                        if (objItem->getClass() != UPNP_CLASS_MUSIC_TRACK)
-                            continue;
-
-                        auto item = std::static_pointer_cast<CdsItem>(objItem);
-
-                        auto resources = item->getResources();
-
-                        artAdded = std::any_of(resources.begin(), resources.end(),
-                            [](const auto& i) { return i->isMetaResource(ID3_ALBUM_ART); });
-
-                        if (artAdded) {
-                            url = getArtworkUrl(item);
-                            result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-                            break;
-                        }
-                    }
-                }
-            }
-#endif
         }
     }
     // log_debug("Rendered DIDL: {}", result->print().c_str());

@@ -123,9 +123,7 @@ public:
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override;
     std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override;
-#ifdef OLD_RESOURCE_FILE
-    std::string findFolderImage(int id, std::string trackArtBase) override;
-#endif
+
     /* accounting methods */
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override;
 

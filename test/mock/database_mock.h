@@ -36,15 +36,7 @@ public:
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
-#ifdef OLD_RESOURCE_FILE
-    std::string findFolderImage(int id, std::string trackArtBase) override
-    {
-        auto it = findFolderImageMap.find(fmt::format("{}{}", id, trackArtBase));
-        if (it != findFolderImageMap.end())
-            return it->second;
-        return "";
-    }
-#endif
+
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return nullptr; }
     std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override { return nullptr; }
     std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override { return nullptr; }
@@ -86,11 +78,6 @@ public:
 
 protected:
     std::shared_ptr<Database> getSelf() override { return nullptr; }
-#ifdef OLD_RESOURCE_FILE
-public:
-    // mock data
-    std::map<std::string, std::string> findFolderImageMap;
-#endif
 };
 
 #endif // __DATABASE_MOCK_H__
