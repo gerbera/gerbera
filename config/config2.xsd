@@ -84,6 +84,7 @@
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
                 <xs:element ref="upnp" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="system-threads" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
@@ -444,6 +445,7 @@
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
             <xs:attribute name="follow-symlinks" type="boolean" default="yes"/>
+            <xs:attribute name="readable-names" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

@@ -384,6 +384,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_FOLLOW_SYMLINKS,
         "/import/attribute::follow-symlinks", "config-import.html#import",
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_READABLE_NAMES,
+        "/import/attribute::readable-names", "config-import.html#import",
+        YES),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
         "/import/mappings/extension-mimetype", "config-import.html#extension-mimetype",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
@@ -1159,6 +1162,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     setOption(root, CFG_IMPORT_HIDDEN_FILES);
     setOption(root, CFG_IMPORT_FOLLOW_SYMLINKS);
+    setOption(root, CFG_IMPORT_READABLE_NAMES);
     setOption(root, CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
     bool csens = setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
     args["tolower"] = fmt::to_string(!csens);

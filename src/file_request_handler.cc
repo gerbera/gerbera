@@ -59,9 +59,12 @@ static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject
     bool is_srt = false;
 
     if (!rh.empty()) {
-        path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        auto res_path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
         mimeType = MIMETYPE_TEXT;
-        is_srt = true;
+        is_srt = !res_path.empty();
+        if (is_srt) {
+            path = res_path;
+        }
     }
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
