@@ -44,6 +44,9 @@
 #endif
 
 // those are needed for -P pidfile, -u user and -d daemonize options
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
