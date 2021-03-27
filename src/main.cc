@@ -263,7 +263,7 @@ int main(int argc, char** argv, char** envp)
 #ifdef __APPLE__
             if (0 != setgid(user_id->pw_gid) || 
                 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 
-                0 != setuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
+                0 != setuid(user_id->pw_uid)) {
 #else
             if (0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) || 
                 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 
