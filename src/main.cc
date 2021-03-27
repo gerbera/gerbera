@@ -328,7 +328,8 @@ int main(int argc, char** argv, char** envp)
             pidfile = opts["pidfile"].as<std::string>();
 
             // exit if the pidfile already exists
-            if (-1 != open(pidfile->c_str(), 0)) {
+            struct stat* s = NULL;
+            if (-1 != stat(pidfile->c_str(), s)) {
                 log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
                 log_error("running or the file is a leftover from an unclean shutdown.");
                 log_error("In that case, remove the file before starting gerbera.");
