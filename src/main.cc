@@ -329,7 +329,10 @@ int main(int argc, char** argv, char** envp)
 
             // exit if the pidfile already exists
             struct stat* s = NULL;
-            if (-1 != stat(pidfile->c_str(), s)) {
+            errno = 0;
+            // for pidfile to be not there stat needs to fail and it needs 
+            // to fail due to ENOENT (no such file or dir)
+            if (!(-1 == stat(pidfile->c_str(), s) && errno == ENOENT)) {
                 log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
                 log_error("running or the file is a leftover from an unclean shutdown.");
                 log_error("In that case, remove the file before starting gerbera.");
