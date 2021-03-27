@@ -35,6 +35,15 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
+#include <filesystem>
+#include <mutex>
+#include <spdlog/sinks/basic_file_sink.h>
+
+#ifdef SOLARIS
+#include <iso/limits_iso.h>
+#endif
+
+// those are needed for -P pidfile, -u user and -d daemonize options
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -44,13 +53,6 @@
 #include <pwd.h>
 #include <grp.h>
 #include <unistd.h>
-#include <filesystem>
-#include <mutex>
-#include <spdlog/sinks/basic_file_sink.h>
-
-#ifdef SOLARIS
-#include <iso/limits_iso.h>
-#endif
 
 #include "common.h"
 #include "config/config_generator.h"
