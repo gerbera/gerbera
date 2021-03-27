@@ -259,7 +259,16 @@ int main(int argc, char** argv, char** envp)
             }
 
             // set all uids, gids and add. groups
-            if (0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) || 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
+// mac os x does this differently
+#ifdef __APPLE__
+            if (0 != setgid(user_id->pw_gid) || 
+                0 != initgroups(user_id->pw_name, user_id->pw_gid) || 
+                0 != setuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
+#else
+            if (0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) || 
+                0 != initgroups(user_id->pw_name, user_id->pw_gid) || 
+                0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
+#endif                
                 log_error("Unable to change user.");
                 exit(EXIT_FAILURE);
             }
