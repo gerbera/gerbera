@@ -172,7 +172,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
                 mimeType += fmt::format(";channels={}", nrch);
         }
 
-        UpnpFileInfo_set_FileLength(info, -1);
+        UpnpFileInfo_set_FileLength(info, UPNP_USING_CHUNKED);
     } else if (item != nullptr) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
