@@ -278,7 +278,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT(""))));
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT())));
 
             duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
         }
@@ -427,6 +427,10 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (i != INVALID_OBJECT_ID) {
         obj->setParentID(i);
     }
+
+    i = getIntProperty("mtime", 0);
+    if (i > 0)
+        obj->setMTime(i);
 
     duk_get_prop_string(ctx, -1, "parent");
     if (duk_is_object(ctx, -1)) {

@@ -50,18 +50,15 @@
 #define MYSQL_UPDATE_1_2_3 "ALTER TABLE `mt_cds_object` CHANGE `auxdata` `auxdata` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_4 "ALTER TABLE `mt_cds_object` CHANGE `resources` `resources` BLOB NULL DEFAULT NULL"
 #define MYSQL_UPDATE_1_2_5 "ALTER TABLE `mt_autoscan` CHANGE `location` `location` BLOB NULL DEFAULT NULL"
-#define MYSQL_UPDATE_1_2_6 "UPDATE `mt_internal_setting` SET `value`='2' WHERE `key`='db_version'"
 
 // updates 2->3
 #define MYSQL_UPDATE_2_3_1 "ALTER TABLE `mt_autoscan` CHANGE `scan_mode` `scan_mode` ENUM( 'timed', 'inotify' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL"
 #define MYSQL_UPDATE_2_3_2 "ALTER TABLE `mt_autoscan` DROP INDEX `mt_autoscan_obj_id`, ADD UNIQUE `mt_autoscan_obj_id` ( `obj_id` )"
 #define MYSQL_UPDATE_2_3_3 "ALTER TABLE `mt_autoscan` ADD `path_ids` BLOB AFTER `location`"
-#define MYSQL_UPDATE_2_3_4 "UPDATE `mt_internal_setting` SET `value`='3' WHERE `key`='db_version' AND `value`='2'"
 
 // updates 3->4
 #define MYSQL_UPDATE_3_4_1 "ALTER TABLE `mt_cds_object` ADD `service_id` varchar(255) default NULL"
 #define MYSQL_UPDATE_3_4_2 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)"
-#define MYSQL_UPDATE_3_4_3 "UPDATE `mt_internal_setting` SET `value`='4' WHERE `key`='db_version' AND `value`='3'"
 
 // updates 4->5
 #define MYSQL_UPDATE_4_5_1 "CREATE TABLE `mt_metadata` ( \
@@ -73,7 +70,6 @@
   KEY `metadata_item_id` (`item_id`), \
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE \
 ) ENGINE=MyISAM CHARSET=utf8"
-#define MYSQL_UPDATE_4_5_2 "UPDATE `mt_internal_setting` SET `value`='5' WHERE `key`='db_version' AND `value`='4'"
 
 // updates 5->6: add config value table
 #define MYSQL_UPDATE_5_6_1 "CREATE TABLE `grb_config_value` ( \
@@ -83,21 +79,34 @@
   `status` varchar(20) NOT NULL) \
   ENGINE=MyISAM CHARSET=utf8"
 #define MYSQL_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
-#define MYSQL_UPDATE_5_6_3 "UPDATE `mt_internal_setting` SET `value`='6' WHERE `key`='db_version' AND `value`='5'"
 
 // updates 6->7
 #define MYSQL_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
-#define MYSQL_UPDATE_6_7_2 "UPDATE `mt_internal_setting` SET `value`='7' WHERE `key`='db_version' AND `value`='6'"
 
 // updates 7->8: part_number
 #define MYSQL_UPDATE_7_8_1 "ALTER TABLE `mt_cds_object` ADD `part_number` int(11) default NULL AFTER `flags`"
 #define MYSQL_UPDATE_7_8_2 "ALTER TABLE `mt_cds_object` DROP KEY `cds_object_track_number`"
 #define MYSQL_UPDATE_7_8_3 "ALTER TABLE `mt_cds_object` ADD KEY `cds_object_track_number` (`part_number`,`track_number`)"
-#define MYSQL_UPDATE_7_8_4 "UPDATE `mt_internal_setting` SET `value`='8' WHERE `key`='db_version' AND `value`='7'"
 
 // updates 8->9: bookmark_pos
 #define MYSQL_UPDATE_8_9_1 "ALTER TABLE `mt_cds_object` ADD `bookmark_pos` int(11) unsigned NOT NULL default '0' AFTER `service_id`"
-#define MYSQL_UPDATE_8_9_2 "UPDATE `mt_internal_setting` SET `value`='9' WHERE `key`='db_version' AND `value`='8'"
+
+// updates 9->10: last_modified
+#define MYSQL_UPDATE_9_10_1 "ALTER TABLE `mt_cds_object` ADD `last_modified` bigint(20) unsigned default NULL AFTER `bookmark_pos`"
+
+#define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
+
+static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
+    { MYSQL_UPDATE_1_2_1, MYSQL_UPDATE_1_2_2, MYSQL_UPDATE_1_2_3, MYSQL_UPDATE_1_2_4, MYSQL_UPDATE_1_2_5 },
+    { MYSQL_UPDATE_2_3_1, MYSQL_UPDATE_2_3_2, MYSQL_UPDATE_2_3_3 },
+    { MYSQL_UPDATE_3_4_1, MYSQL_UPDATE_3_4_2 },
+    { MYSQL_UPDATE_4_5_1 },
+    { MYSQL_UPDATE_5_6_1, MYSQL_UPDATE_5_6_2 },
+    { MYSQL_UPDATE_6_7_1 },
+    { MYSQL_UPDATE_7_8_1, MYSQL_UPDATE_7_8_2, MYSQL_UPDATE_7_8_3 },
+    { MYSQL_UPDATE_8_9_1 },
+    { MYSQL_UPDATE_9_10_1 },
+} };
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
@@ -232,81 +241,21 @@ void MySQLDatabase::init()
     log_debug("db_version: {}", dbVersion.c_str());
 
     /* --- database upgrades --- */
-    if (dbVersion == "1") {
-        log_info("Doing an automatic database upgrade from database version 1 to version 2...");
-        _exec(MYSQL_UPDATE_1_2_1);
-        _exec(MYSQL_UPDATE_1_2_2);
-        _exec(MYSQL_UPDATE_1_2_3);
-        _exec(MYSQL_UPDATE_1_2_4);
-        _exec(MYSQL_UPDATE_1_2_5);
-        _exec(MYSQL_UPDATE_1_2_6);
-        log_info("database upgrade successful.");
-        dbVersion = "2";
+    int version = 1;
+    for (const auto& upgrade : dbUpdates) {
+        if (dbVersion == fmt::to_string(version)) {
+            log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
+            for (const auto& upgradeCmd : upgrade) {
+                _exec(upgradeCmd);
+            }
+            _exec(fmt::format(MYSQL_UPDATE_VERSION, version, version + 1).c_str());
+            log_info("Database upgrade successful.");
+            dbVersion = fmt::to_string(version + 1);
+        }
+        version++;
     }
 
-    if (dbVersion == "2") {
-        log_info("Doing an automatic database upgrade from database version 2 to version 3...");
-        _exec(MYSQL_UPDATE_2_3_1);
-        _exec(MYSQL_UPDATE_2_3_2);
-        _exec(MYSQL_UPDATE_2_3_3);
-        _exec(MYSQL_UPDATE_2_3_4);
-        log_info("database upgrade successful.");
-        dbVersion = "3";
-    }
-
-    if (dbVersion == "3") {
-        log_info("Doing an automatic database upgrade from database version 3 to version 4...");
-        _exec(MYSQL_UPDATE_3_4_1);
-        _exec(MYSQL_UPDATE_3_4_2);
-        _exec(MYSQL_UPDATE_3_4_3);
-        log_info("database upgrade successful.");
-        dbVersion = "4";
-    }
-
-    if (dbVersion == "4") {
-        log_info("Doing an automatic database upgrade from database version 4 to version 5...");
-        _exec(MYSQL_UPDATE_4_5_1);
-        _exec(MYSQL_UPDATE_4_5_2);
-        log_info("database upgrade successful.");
-        dbVersion = "5";
-    }
-
-    if (dbVersion == "5") {
-        log_info("Doing an automatic database upgrade from database version 5 to version 6...");
-        _exec(MYSQL_UPDATE_5_6_1);
-        _exec(MYSQL_UPDATE_5_6_2);
-        _exec(MYSQL_UPDATE_5_6_3);
-        log_info("database upgrade successful.");
-        dbVersion = "6";
-    }
-
-    if (dbVersion == "6") {
-        log_info("Doing an automatic database upgrade from database version 6 to version 7...");
-        _exec(MYSQL_UPDATE_6_7_1);
-        _exec(MYSQL_UPDATE_6_7_2);
-        log_info("database upgrade successful.");
-        dbVersion = "7";
-    }
-
-    if (dbVersion == "7") {
-        log_info("Doing an automatic database upgrade from database version 7 to version 8...");
-        _exec(MYSQL_UPDATE_7_8_1);
-        _exec(MYSQL_UPDATE_7_8_2);
-        _exec(MYSQL_UPDATE_7_8_3);
-        _exec(MYSQL_UPDATE_7_8_4);
-        log_info("database upgrade successful.");
-        dbVersion = "8";
-    }
-
-    if (dbVersion == "8") {
-        log_info("Doing an automatic database upgrade from database version 8 to version 9...");
-        _exec(MYSQL_UPDATE_8_9_1);
-        _exec(MYSQL_UPDATE_8_9_2);
-        log_info("database upgrade successful.");
-        dbVersion = "9";
-    }
-
-    if (dbVersion != "9")
+    if (dbVersion != fmt::to_string(version))
         throw_std_runtime_error("The database seems to be from a newer version (database version {})", dbVersion);
 
     lock.unlock();

@@ -32,6 +32,7 @@
 #include "pages.h" // API
 
 #include <cstdio>
+#include <fmt/chrono.h>
 
 #include "cds_objects.h"
 #include "database/database.h"
@@ -71,6 +72,16 @@ void web::edit_load::process()
     auto classEl = item.append_child("class");
     classEl.append_attribute("value") = obj->getClass().c_str();
     classEl.append_attribute("editable") = true;
+
+    if (obj->getMTime() > 0) {
+        auto lmtEl = item.append_child("last_modified");
+        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime())).c_str();
+        lmtEl.append_attribute("editable") = false;
+    } else {
+        auto lmtEl = item.append_child("last_modified");
+        lmtEl.append_attribute("value") = "";
+        lmtEl.append_attribute("editable") = false;
+    }
 
     item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).c_str());
 

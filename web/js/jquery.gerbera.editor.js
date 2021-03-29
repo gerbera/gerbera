@@ -95,6 +95,7 @@
     modal.find('#editClass').val('').prop('disabled', false);
     modal.find('#editDesc').val('').prop('disabled', false);
     modal.find('#editMime').val('').prop('disabled', false);
+    modal.find('#editLmt').val('').prop('disabled', true);
     modal.find('#editProtocol').val('').prop('disabled', false);
     modal.find('#editSave').text('Save Item');
 
@@ -156,6 +157,11 @@
       modal.find('#editObjectType').prop('readonly', true);
       modal.find('#editdObjectIdTxt').text(item.object_id).closest('.form-group').show();
       modal.find('#objectId').val(item.object_id).prop('disabled', true);
+      if ('last_modified' in item && item.last_modified !== '') {
+        modal.find('#editLmt').val(item.last_modified).prop('disabled', true);
+      } else {
+        modal.find('#editLmt').text('').closest('.form-group').hide();
+      }
 
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
@@ -245,6 +251,18 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
+    if ('last_modified' in item && item['last_modified'].value !== '') {
+      modal.find('#editLmt')
+        .val(item['last_modified'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLmt')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+
     hideFields([
       modal.find('#editProtocol')
     ]);
@@ -260,6 +278,18 @@
       .val(item.class.value)
       .prop('disabled', true)
       .closest('.form-group').show();
+
+    if ('last_modified' in item && item['last_modified'].value !== '') {
+      modal.find('#editLmt')
+        .val(item['last_modified'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLmt')
+        .text('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
 
     hideFields([
       modal.find('#editLocation'),

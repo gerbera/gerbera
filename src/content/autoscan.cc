@@ -91,12 +91,20 @@ bool AutoscanDirectory::updateLMT()
     return result;
 }
 
-time_t AutoscanDirectory::getPreviousLMT(const std::string& loc) const
+time_t AutoscanDirectory::getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const
 {
     auto lmDir = lastModified.find(loc);
     if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > 0) {
         return lastModified.at(loc);
     }
+    if (parent && parent->getMTime() > 0) {
+        return parent->getMTime();
+    }
+    return last_mod_previous_scan;
+}
+
+time_t AutoscanDirectory::getPreviousLMT() const
+{
     return last_mod_previous_scan;
 }
 

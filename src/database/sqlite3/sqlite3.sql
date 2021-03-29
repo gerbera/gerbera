@@ -18,17 +18,18 @@ CREATE TABLE "mt_cds_object" (
   "track_number" integer default NULL,
   "service_id" varchar(255) default NULL,
   "bookmark_pos" integer unsigned NOT NULL default 0,
+  "last_modified" integer unsigned default NULL,
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0);
-INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0);
-INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0);
+INSERT INTO "mt_cds_object" VALUES(-1, NULL, -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0, NULL);
+INSERT INTO "mt_cds_object" VALUES(0, NULL, -1, 1, 'object.container', 'Root', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0, NULL);
+INSERT INTO "mt_cds_object" VALUES(1, NULL, 0, 1, 'object.container', 'PC Directory', NULL, NULL, NULL, NULL, NULL, 0, NULL, 9, NULL, NULL, NULL, 0, NULL);
 CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
 );
-INSERT INTO "mt_internal_setting" VALUES('db_version', '9');
+INSERT INTO "mt_internal_setting" VALUES('db_version', '10');
 CREATE TABLE "mt_autoscan" (
   "id" integer primary key,
   "obj_id" integer default NULL,
