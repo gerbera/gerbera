@@ -53,14 +53,14 @@ class PlaylistParserScript;
 #include "scripting/playlist_parser_script.h"
 #else
 class ScriptingRuntime;
-#endif
+#endif // HAVE_JS
 
 #include "layout/layout.h"
 
 #include "autoscan_list.h"
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h"
-#endif
+#endif // HAVE_INOTIFY
 
 #include "config/directory_tweak.h"
 #include "transcoding/transcoding.h"
@@ -71,11 +71,11 @@ class ScriptingRuntime;
 
 #include "util/executor.h"
 
-// forward declaration
-class Server;
-class Runtime;
-class LastFm;
+// forward declarations
 class ContentManager;
+class LastFm;
+class Runtime;
+class Server;
 class TaskProcessor;
 
 class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
@@ -351,7 +351,7 @@ protected:
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all);
-    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt);
+    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, std::shared_ptr<CdsContainer>& parent, time_t lmt);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
     void assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj);

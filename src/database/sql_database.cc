@@ -74,6 +74,7 @@ enum {
     _track_number,
     _service_id,
     _bookmark_pos,
+    _last_modified,
     _ref_upnp_class,
     _ref_location,
     _ref_metadata,
@@ -96,8 +97,8 @@ enum {
 #define SEL_EQ_SP_FQ_DT_BQ << QTE << ',' << TQ('f') << '.' << QTB <<
 #define SEL_EQ_SP_RFQ_DT_BQ << QTE << ',' << TQ("rf") << '.' << QTB <<
 
-#define SELECT_DATA_FOR_STRINGBUFFER                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      \
-    TQ('f') << '.' << QTB << "id" SEL_EQ_SP_FQ_DT_BQ "ref_id" SEL_EQ_SP_FQ_DT_BQ "parent_id" SEL_EQ_SP_FQ_DT_BQ "object_type" SEL_EQ_SP_FQ_DT_BQ "upnp_class" SEL_EQ_SP_FQ_DT_BQ "dc_title" SEL_EQ_SP_FQ_DT_BQ "location" SEL_EQ_SP_FQ_DT_BQ "location_hash" SEL_EQ_SP_FQ_DT_BQ "metadata" SEL_EQ_SP_FQ_DT_BQ "auxdata" SEL_EQ_SP_FQ_DT_BQ "resources" SEL_EQ_SP_FQ_DT_BQ "update_id" SEL_EQ_SP_FQ_DT_BQ "mime_type" SEL_EQ_SP_FQ_DT_BQ "flags" SEL_EQ_SP_FQ_DT_BQ "part_number" SEL_EQ_SP_FQ_DT_BQ "track_number" SEL_EQ_SP_FQ_DT_BQ "service_id" SEL_EQ_SP_FQ_DT_BQ "bookmark_pos" SEL_EQ_SP_RFQ_DT_BQ "upnp_class" SEL_EQ_SP_RFQ_DT_BQ "location" SEL_EQ_SP_RFQ_DT_BQ "metadata" SEL_EQ_SP_RFQ_DT_BQ "auxdata" SEL_EQ_SP_RFQ_DT_BQ "resources" SEL_EQ_SP_RFQ_DT_BQ "mime_type" SEL_EQ_SP_RFQ_DT_BQ "service_id" << QTE \
+#define SELECT_DATA_FOR_STRINGBUFFER                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         \
+    TQ('f') << '.' << QTB << "id" SEL_EQ_SP_FQ_DT_BQ "ref_id" SEL_EQ_SP_FQ_DT_BQ "parent_id" SEL_EQ_SP_FQ_DT_BQ "object_type" SEL_EQ_SP_FQ_DT_BQ "upnp_class" SEL_EQ_SP_FQ_DT_BQ "dc_title" SEL_EQ_SP_FQ_DT_BQ "location" SEL_EQ_SP_FQ_DT_BQ "location_hash" SEL_EQ_SP_FQ_DT_BQ "metadata" SEL_EQ_SP_FQ_DT_BQ "auxdata" SEL_EQ_SP_FQ_DT_BQ "resources" SEL_EQ_SP_FQ_DT_BQ "update_id" SEL_EQ_SP_FQ_DT_BQ "mime_type" SEL_EQ_SP_FQ_DT_BQ "flags" SEL_EQ_SP_FQ_DT_BQ "part_number" SEL_EQ_SP_FQ_DT_BQ "track_number" SEL_EQ_SP_FQ_DT_BQ "service_id" SEL_EQ_SP_FQ_DT_BQ "bookmark_pos" SEL_EQ_SP_FQ_DT_BQ "last_modified" SEL_EQ_SP_RFQ_DT_BQ "upnp_class" SEL_EQ_SP_RFQ_DT_BQ "location" SEL_EQ_SP_RFQ_DT_BQ "metadata" SEL_EQ_SP_RFQ_DT_BQ "auxdata" SEL_EQ_SP_RFQ_DT_BQ "resources" SEL_EQ_SP_RFQ_DT_BQ "mime_type" SEL_EQ_SP_RFQ_DT_BQ "service_id" << QTE \
             << ',' << TQD("as", "persistent")
 
 #define SQL_QUERY_FOR_STRINGBUFFER "SELECT " << SELECT_DATA_FOR_STRINGBUFFER << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('f') << " LEFT JOIN " \
@@ -199,7 +200,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef) {
         if (obj->isPureItem())
-            throw_std_runtime_error("tried to add pure item with PLAYLIST_REF flag set");
+            throw_std_runtime_error("Tried to add pure item with PLAYLIST_REF flag set");
         if (obj->getRefID() <= 0)
             throw_std_runtime_error("PLAYLIST_REF flag set but refId is <=0");
         refObj = loadObject(obj->getRefID());
@@ -209,7 +210,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         hasReference = true;
         refObj = checkRefID(obj);
         if (refObj == nullptr)
-            throw_std_runtime_error("tried to add or update a virtual object with illegal reference id and an illegal location");
+            throw_std_runtime_error("Tried to add or update a virtual object with illegal reference id and an illegal location");
     } else if (obj->getRefID() > 0) {
         if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
             hasReference = true;
@@ -267,10 +268,13 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
     cdsObjectSql["flags"] = quote(obj->getFlags());
+    if (obj->getMTime() > 0) {
+        cdsObjectSql["last_modified"] = quote(obj->getMTime());
+    } else {
+        cdsObjectSql["last_modified"] = SQL_NULL;
+    }
 
-    if (obj->isContainer()) {
-        if (!(op == Operation::Update && obj->isVirtual()))
-            throw_std_runtime_error("tried to add a container or tried to update a non-virtual container via _addUpdateObject; is this correct?");
+    if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql["location"] = quote(dbLocation);
         cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
@@ -350,12 +354,13 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             return returnVal;
     }
 
-    if (obj->getParentID() == INVALID_OBJECT_ID)
-        throw_std_runtime_error("tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
+    if (obj->getParentID() == INVALID_OBJECT_ID) {
+        throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
+    }
+
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
-    returnVal.push_back(
-        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
+    returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
@@ -899,6 +904,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setTitle(row->col(_dc_title));
     obj->setClass(fallbackString(row->col(_upnp_class), row->col(_ref_upnp_class)));
     obj->setFlags(std::stoi(row->col(_flags)));
+    obj->setMTime(stoulString(row->col(_last_modified)));
 
     auto meta = retrieveMetadataForObject(obj->getID());
     if (!meta.empty()) {
@@ -1793,7 +1799,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << mapBool(adir->getRecursive()) << ','
       << mapBool(adir->getHidden()) << ','
       << quote(adir->getInterval()) << ','
-      << quote(adir->getPreviousLMT("")) << ','
+      << quote(adir->getPreviousLMT()) << ','
       << mapBool(adir->persistent()) << ','
       << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
       << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
@@ -1826,8 +1832,8 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
       << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
       << ',' << TQ("hidden") << '=' << mapBool(adir->getHidden())
       << ',' << TQ("interval") << '=' << quote(adir->getInterval());
-    if (adir->getPreviousLMT("") > 0)
-        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT(""));
+    if (adir->getPreviousLMT() > 0)
+        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
     q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
       << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))

@@ -580,18 +580,16 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     fs::path rootpath = adir->getLocation();
 
     fs::path location;
-    std::shared_ptr<CdsObject> obj;
+    std::shared_ptr<CdsContainer> parentContainer;
 
     if (containerID != INVALID_OBJECT_ID) {
         try {
-            obj = database->loadObject(containerID);
-            if (!obj->isContainer()) {
-                throw_std_runtime_error("Not a container");
+            std::shared_ptr<CdsObject> obj = database->loadObject(containerID);
+            if (!obj || !obj->isContainer()) {
+                throw_std_runtime_error("Item {} is not a container", containerID);
             }
-            if (containerID == CDS_ID_FS_ROOT)
-                location = FS_ROOT_DIRECTORY;
-            else
-                location = obj->getLocation();
+            location = (containerID == CDS_ID_FS_ROOT) ? FS_ROOT_DIRECTORY : obj->getLocation();
+            parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
         } catch (const std::runtime_error& e) {
             if (adir->persistent()) {
                 containerID = INVALID_OBJECT_ID;
@@ -675,7 +673,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         thisTaskID = 0;
     }
 
-    time_t last_modified_current_max = adir->getPreviousLMT(location);
+    time_t last_modified_current_max = adir->getPreviousLMT(location, parentContainer);
     time_t last_modified_new_max = last_modified_current_max;
     adir->setCurrentLMT(location, 0);
 
@@ -693,7 +691,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         // in this case we will invalidate the autoscan entry
         if (adir->getScanID() == INVALID_SCAN_ID) {
             log_info("lost autoscan for {}", newPath.c_str());
-            finishScan(adir, location, last_modified_new_max);
+            finishScan(adir, location, parentContainer, last_modified_new_max);
             return;
         }
 
@@ -764,7 +762,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
                 // in this case we will invalidate the autoscan entry
                 if (adir->getScanID() == INVALID_SCAN_ID) {
                     log_info("lost autoscan for {}", newPath.c_str());
-                    finishScan(adir, location, last_modified_new_max);
+                    finishScan(adir, location, parentContainer, last_modified_new_max);
                     return;
                 }
                 // add directory, recursive, async, hidden flag, low priority
@@ -781,7 +779,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         }
     } // while
 
-    finishScan(adir, location, last_modified_new_max);
+    finishScan(adir, location, parentContainer, last_modified_new_max);
 
     if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
         return;
@@ -806,6 +804,18 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     int parentID = database->findObjectIDByPath(subDir.path());
+    std::shared_ptr<CdsContainer> parentContainer;
+
+    if (parentID != INVALID_OBJECT_ID) {
+        try {
+            std::shared_ptr<CdsObject> obj = database->loadObject(parentID);
+            if (!obj || !obj->isContainer()) {
+                throw_std_runtime_error("Item {} is not a container", parentID);
+            }
+            parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
+        } catch (const std::runtime_error& e) {
+        }
+    }
 
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
@@ -826,7 +836,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     time_t last_modified_current_max = 0;
     time_t last_modified_new_max = last_modified_current_max;
     if (adir != nullptr) {
-        last_modified_current_max = adir->getPreviousLMT(subDir.path());
+        last_modified_current_max = adir->getPreviousLMT(subDir.path(), parentContainer);
         last_modified_new_max = last_modified_current_max;
         adir->setCurrentLMT(subDir.path(), 0);
     }
@@ -877,13 +887,18 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     }
 
-    finishScan(adir, subDir.path(), last_modified_new_max);
+    finishScan(adir, subDir.path(), parentContainer, last_modified_new_max);
 }
 
-void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, time_t lmt)
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, std::shared_ptr<CdsContainer>& parent, time_t lmt)
 {
     if (adir != nullptr) {
         adir->setCurrentLMT(location, lmt > 0 ? lmt : (time_t)1);
+        if (parent && lmt > 0) {
+            parent->setMTime(lmt);
+            int changedContainer;
+            database->updateObject(parent, &changedContainer);
+        }
     }
 }
 
@@ -1253,6 +1268,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
          * this is a container
          */
         /*
+        cont->setMTime(to_time_t(dirEnt.last_write_time(ec)));
         cont->setLocation(path);
         auto f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));
@@ -1264,8 +1280,6 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
     if (ec) {
         log_error("File or directory cannot be read: {} ({})", dirEnt.path().c_str(), ec.message());
     }
-    //    auto f2i = StringConverter::f2i();
-    //    obj->setTitle(f2i->convert(filename));
     return obj;
 }
 

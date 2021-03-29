@@ -31,6 +31,7 @@
 
 #include "sqlite_database.h" // API
 
+#include <array>
 #include <zlib.h>
 
 #include "config/config_manager.h"
@@ -41,12 +42,10 @@
 #define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
 #define SQLITE3_UPDATE_1_2_2 "CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)"
 #define SQLITE3_UPDATE_1_2_3 "ALTER TABLE \"mt_autoscan\" ADD \"path_ids\" text"
-#define SQLITE3_UPDATE_1_2_4 "UPDATE \"mt_internal_setting\" SET \"value\"='2' WHERE \"key\"='db_version' AND \"value\"='1'"
 
 // updates 2->3
 #define SQLITE3_UPDATE_2_3_1 "ALTER TABLE \"mt_cds_object\" ADD \"service_id\" varchar(255) default NULL"
 #define SQLITE3_UPDATE_2_3_2 "CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)"
-#define SQLITE3_UPDATE_2_3_3 "UPDATE \"mt_internal_setting\" SET \"value\"='3' WHERE \"key\"='db_version' AND \"value\"='2'"
 
 // updates 3->4: Move to Metadata table
 #define SQLITE3_UPDATE_3_4_1 "CREATE TABLE \"mt_metadata\" ( \
@@ -57,7 +56,6 @@
   CONSTRAINT \"mt_metadata_idfk1\" FOREIGN KEY (\"item_id\") REFERENCES \"mt_cds_object\" (\"id\") \
   ON DELETE CASCADE ON UPDATE CASCADE )"
 #define SQLITE3_UPDATE_3_4_2 "CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)"
-#define SQLITE3_UPDATE_3_4_3 "UPDATE \"mt_internal_setting\" SET \"value\"='4' WHERE \"key\"='db_version' AND \"value\"='3'"
 
 // updates 4->5: Fix incorrect SQLite foreign key
 #define SQLITE3_UPDATE_4_5_1 "PRAGMA foreign_keys = OFF;  \
@@ -96,7 +94,6 @@ CREATE INDEX mt_location_parent ON mt_cds_object (location_hash, parent_id); \
 CREATE INDEX mt_object_type ON mt_cds_object (object_type); \
 CREATE INDEX mt_track_number on mt_cds_object (track_number); \
 PRAGMA foreign_keys = ON;"
-#define SQLITE3_UPDATE_4_5_2 "UPDATE mt_internal_setting SET value='5' WHERE key='db_version' AND value='4'"
 
 // updates 5->6: add config value table
 #define SQLITE3_UPDATE_5_6_1 "CREATE TABLE \"grb_config_value\" ( \
@@ -105,21 +102,34 @@ PRAGMA foreign_keys = ON;"
   \"item_value\" varchar(255) NOT NULL, \
   \"status\" varchar(20) NOT NULL)"
 #define SQLITE3_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
-#define SQLITE3_UPDATE_5_6_3 "UPDATE \"mt_internal_setting\" SET \"value\"='6' WHERE \"key\"='db_version' AND \"value\"='5'"
 
 // updates 6->7
 #define SQLITE3_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
-#define SQLITE3_UPDATE_6_7_2 "UPDATE \"mt_internal_setting\" SET \"value\"='7' WHERE \"key\"='db_version' AND \"value\"='6'"
 
 // updates 7->8: part_number
 #define SQLITE3_UPDATE_7_8_1 "ALTER TABLE \"mt_cds_object\" ADD \"part_number\" integer default NULL"
 #define SQLITE3_UPDATE_7_8_2 "DROP INDEX mt_track_number"
 #define SQLITE3_UPDATE_7_8_3 "CREATE INDEX \"grb_track_number\" ON mt_cds_object (part_number,track_number)"
-#define SQLITE3_UPDATE_7_8_4 "UPDATE \"mt_internal_setting\" SET \"value\"='8' WHERE \"key\"='db_version' AND \"value\"='7'"
 
 // updates 8->9: bookmark_pos
 #define SQLITE3_UPDATE_8_9_1 "ALTER TABLE \"mt_cds_object\" ADD \"bookmark_pos\" integer unsigned NOT NULL default 0"
-#define SQLITE3_UPDATE_8_9_2 "UPDATE \"mt_internal_setting\" SET \"value\"='9' WHERE \"key\"='db_version' AND \"value\"='8'"
+
+// updates 9->10: last_modified
+#define SQLITE3_UPDATE_9_10_1 "ALTER TABLE \"mt_cds_object\" ADD \"last_modified\" integer unsigned default NULL"
+
+#define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
+
+static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
+    { SQLITE3_UPDATE_1_2_1, SQLITE3_UPDATE_1_2_2, SQLITE3_UPDATE_1_2_3 },
+    { SQLITE3_UPDATE_2_3_1, SQLITE3_UPDATE_2_3_2 },
+    { SQLITE3_UPDATE_3_4_1, SQLITE3_UPDATE_3_4_2 },
+    { SQLITE3_UPDATE_4_5_1 },
+    { SQLITE3_UPDATE_5_6_1, SQLITE3_UPDATE_5_6_2 },
+    { SQLITE3_UPDATE_6_7_1 },
+    { SQLITE3_UPDATE_7_8_1, SQLITE3_UPDATE_7_8_2, SQLITE3_UPDATE_7_8_3 },
+    { SQLITE3_UPDATE_8_9_1 },
+    { SQLITE3_UPDATE_9_10_1 },
+} };
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
@@ -228,79 +238,21 @@ void Sqlite3Database::init()
         log_debug("db_version: {}", dbVersion.c_str());
 
         /* --- database upgrades --- */
-
-        if (dbVersion == "1") {
-            log_info("Running an automatic database upgrade from database version 1 to version 2...");
-            _exec(SQLITE3_UPDATE_1_2_1);
-            _exec(SQLITE3_UPDATE_1_2_2);
-            _exec(SQLITE3_UPDATE_1_2_3);
-            _exec(SQLITE3_UPDATE_1_2_4);
-            log_info("Database upgrade successful.");
-            dbVersion = "2";
+        int version = 1;
+        for (const auto& upgrade : dbUpdates) {
+            if (dbVersion == fmt::to_string(version)) {
+                log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
+                for (const auto& upgradeCmd : upgrade) {
+                    _exec(upgradeCmd);
+                }
+                _exec(fmt::format(SQLITE3_UPDATE_VERSION, version, version + 1).c_str());
+                log_info("Database upgrade successful.");
+                dbVersion = fmt::to_string(version + 1);
+            }
+            version++;
         }
 
-        if (dbVersion == "2") {
-            log_info("Running an automatic database upgrade from database version 2 to version 3...");
-            _exec(SQLITE3_UPDATE_2_3_1);
-            _exec(SQLITE3_UPDATE_2_3_2);
-            _exec(SQLITE3_UPDATE_2_3_3);
-            log_info("Database upgrade successful.");
-            dbVersion = "3";
-        }
-
-        if (dbVersion == "3") {
-            log_info("Running an automatic database upgrade from database version 3 to version 4...");
-            _exec(SQLITE3_UPDATE_3_4_1);
-            _exec(SQLITE3_UPDATE_3_4_2);
-            _exec(SQLITE3_UPDATE_3_4_3);
-            log_info("Database upgrade successful.");
-            dbVersion = "4";
-        }
-
-        if (dbVersion == "4") {
-            log_info("Running an automatic database upgrade from database version 4 to version 5...");
-            _exec(SQLITE3_UPDATE_4_5_1);
-            _exec(SQLITE3_UPDATE_4_5_2);
-            log_info("Database upgrade successful.");
-            dbVersion = "5";
-        }
-
-        if (dbVersion == "5") {
-            log_info("Running an automatic database upgrade from database version 5 to version 6...");
-            _exec(SQLITE3_UPDATE_5_6_1);
-            _exec(SQLITE3_UPDATE_5_6_2);
-            _exec(SQLITE3_UPDATE_5_6_3);
-            log_info("Database upgrade successful.");
-            dbVersion = "6";
-        }
-
-        if (dbVersion == "6") {
-            log_info("Running an automatic database upgrade from database version 6 to version 7...");
-            _exec(SQLITE3_UPDATE_6_7_1);
-            _exec(SQLITE3_UPDATE_6_7_2);
-            log_info("Database upgrade successful.");
-            dbVersion = "7";
-        }
-
-        if (dbVersion == "7") {
-            log_info("Running an automatic database upgrade from database version 7 to version 8...");
-            _exec(SQLITE3_UPDATE_7_8_1);
-            _exec(SQLITE3_UPDATE_7_8_2);
-            _exec(SQLITE3_UPDATE_7_8_3);
-            _exec(SQLITE3_UPDATE_7_8_4);
-            log_info("Database upgrade successful.");
-            dbVersion = "8";
-        }
-
-        if (dbVersion == "8") {
-            log_info("Running an automatic database upgrade from database version 8 to version 9...");
-            _exec(SQLITE3_UPDATE_8_9_1);
-            _exec(SQLITE3_UPDATE_8_9_2);
-            log_info("Database upgrade successful.");
-            dbVersion = "9";
-        }
-
-        if (dbVersion != "9")
+        if (dbVersion != fmt::to_string(version))
             throw_std_runtime_error("The database seems to be from a newer version");
 
         // add timer for backups

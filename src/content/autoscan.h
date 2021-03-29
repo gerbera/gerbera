@@ -39,9 +39,10 @@ namespace fs = std::filesystem;
 
 #include "util/timer.h"
 
-// forward declaration
-class Database;
+// forward declarations
 class AutoscanDirectory;
+class CdsContainer;
+class Database;
 
 #define INVALID_SCAN_ID (-1)
 
@@ -124,7 +125,8 @@ public:
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
     void setCurrentLMT(const std::string& location, time_t lmt);
-    time_t getPreviousLMT(const std::string& loc) const;
+    time_t getPreviousLMT() const;
+    time_t getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const;
     bool updateLMT();
     void resetLMT()
     {
