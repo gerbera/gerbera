@@ -138,7 +138,7 @@ void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
         std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
-        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_RESOURCE_FILE, path.string());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         obj->addResource(resource);
     } else {
@@ -199,7 +199,7 @@ void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
         std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
-        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_RESOURCE_FILE, path.string());
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         obj->addResource(resource);
     } else {
@@ -259,7 +259,7 @@ void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
         }
 
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
-        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_RESOURCE_FILE, path.string());
         resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
         resource->addParameter("type", type);
         obj->addResource(resource);
@@ -307,12 +307,12 @@ void ResourceHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
     auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(obj->getLocation());
     auto path = getContentPath(tweak == nullptr || !tweak->hasResourceFile() ? names : std::vector<std::string> { tweak->getResourceFile() }, obj, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
-    log_debug("Running resource handler check on {} -> {}", obj->getLocation().c_str(), path.c_str());
+    log_debug("Running resource handler check on {} -> {}", obj->getLocation().string().c_str(), path.string().c_str());
 
-    if (!path.empty() && toLower(path.c_str()) == toLower(obj->getLocation().c_str())) {
+    if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
         auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
-        resource->addAttribute(R_RESOURCE_FILE, path.c_str());
+        resource->addAttribute(R_RESOURCE_FILE, path.string());
         obj->addResource(resource);
     } else {
         obj->removeResource(CH_RESOURCE);
