@@ -176,13 +176,13 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
     if (rawCheck != nullptr && !rawCheck(optValue)) {
         return false;
     }
-    pathValue.assign(resolvePath(optValue));
+    pathValue.assign(resolvePath(optValue).string());
     return !(notEmpty && pathValue.empty());
 }
 
 bool ConfigPathSetup::checkAgentPath(std::string& optValue)
 {
-    std::string tmp_path;
+    fs::path tmp_path;
     if (fs::path(optValue).is_absolute()) {
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
@@ -882,7 +882,7 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
-            log_error("Could not add {}: {}", location.c_str(), e.what());
+            log_error("Could not add {}: {}", location.string().c_str(), e.what());
             return false;
         }
     }
