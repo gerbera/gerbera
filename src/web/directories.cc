@@ -40,8 +40,8 @@ web::directories::directories(std::shared_ptr<ContentManager> content)
 {
 }
 
-struct dirInfo {
-    std::string filename;
+using dirInfo = struct {
+    fs::path filename;
     bool hasContent;
 };
 
@@ -75,7 +75,7 @@ void web::directories::process()
     bool exclude_config_dirs = true;
 
     std::error_code ec;
-    std::map<std::string, struct dirInfo> filesMap;
+    std::map<std::string, dirInfo> filesMap;
 
     for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();

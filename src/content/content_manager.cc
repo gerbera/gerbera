@@ -678,8 +678,8 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     adir->setCurrentLMT(location, 0);
 
     for (const auto& dirEnt : dIter) {
-        fs::path newPath = dirEnt.path();
-        auto name = newPath.filename().string();
+        const auto& newPath = dirEnt.path();
+        const auto& name = newPath.filename().string();
         if (name[0] == '.' && !asSetting.hidden) {
             continue;
         }
@@ -848,8 +848,8 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
     bool firstChild = true;
     for (const auto& subDirEnt : dIter) {
-        fs::path newPath = subDirEnt.path();
-        auto name = newPath.filename().string();
+        const auto& newPath = subDirEnt.path();
+        const auto& name = newPath.filename().string();
         if (name[0] == '.' && !hidden) {
             continue;
         }
