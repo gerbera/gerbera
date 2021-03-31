@@ -39,8 +39,8 @@ public:
     static bool caseSensitive;
 
 protected:
-    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& item, bool isCaseSensitive, fs::path folder = "");
-    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& item);
+    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& obj, bool isCaseSensitive, fs::path folder = "");
+    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
