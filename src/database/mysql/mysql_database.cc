@@ -248,9 +248,9 @@ void MySQLDatabase::init()
             for (const auto& upgradeCmd : upgrade) {
                 _exec(upgradeCmd);
             }
-            _exec(fmt::format(MYSQL_UPDATE_VERSION, version, version + 1).c_str());
-            log_info("Database upgrade successful.");
+            _exec(fmt::format(MYSQL_UPDATE_VERSION, version + 1, version).c_str());
             dbVersion = fmt::to_string(version + 1);
+            log_info("Database upgrade to version {} successful.", dbVersion.c_str());
         }
         version++;
     }
