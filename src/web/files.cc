@@ -58,7 +58,7 @@ void web::files::process()
     bool exclude_config_files = true;
 
     std::error_code ec;
-    std::map<std::string, std::string> filesMap;
+    std::map<std::string, fs::path> filesMap;
 
     for (const auto& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();

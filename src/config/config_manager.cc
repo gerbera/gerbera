@@ -1117,7 +1117,8 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
         co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-        co->setDefaultValue(dataDir / "sqlite3.sql");
+        fs::path dir = dataDir / "sqlite3.sql";
+        co->setDefaultValue(dir.string());
         co->makeOption(root, self);
     }
 
