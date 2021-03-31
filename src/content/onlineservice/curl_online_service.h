@@ -72,7 +72,7 @@ protected:
 /// handles adding/refreshing content in the database.
 class CurlOnlineService : public OnlineService {
 public:
-    explicit CurlOnlineService(std::shared_ptr<ContentManager> content, const std::string& serviceName);
+    explicit CurlOnlineService(std::shared_ptr<ContentManager> content, std::string serviceName);
     ~CurlOnlineService() override;
 
     /// \brief Retrieves user specified content from the service and adds

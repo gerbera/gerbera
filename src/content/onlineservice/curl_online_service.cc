@@ -41,10 +41,10 @@ CurlContentHandler::CurlContentHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-CurlOnlineService::CurlOnlineService(std::shared_ptr<ContentManager> content, const std::string& serviceName)
+CurlOnlineService::CurlOnlineService(std::shared_ptr<ContentManager> content, std::string serviceName)
     : OnlineService(std::move(content))
     , pid(0)
-    , serviceName(serviceName)
+    , serviceName(std::move(serviceName))
 {
     curl_handle = curl_easy_init();
     if (!curl_handle)

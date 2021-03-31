@@ -1820,10 +1820,10 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 }
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
-    const fs::directory_entry& dirEnt, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable)
+    fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting& asSetting, bool cancellable)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
-    , dirEnt(dirEnt)
+    , dirEnt(std::move(dirEnt))
     , rootpath(std::move(rootpath))
     , asSetting(asSetting)
 {
