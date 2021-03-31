@@ -32,6 +32,8 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
+#include <fmt/chrono.h>
+
 web::clients::clients(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
@@ -41,11 +43,7 @@ static std::string steady_clock_to_string(std::chrono::steady_clock::time_point 
 {
     auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
         + std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()));
-    struct tm localSystime;
-    localtime_r(&systime, &localSystime);
-    char ascString[26];
-    asctime_r(&localSystime, ascString);
-    return trimString(ascString);
+    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(systime));
 }
 
 void web::clients::process()
