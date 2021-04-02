@@ -719,7 +719,7 @@ std::string escape(std::string string, char escape_char, char to_escape)
 
         if (next == std::string::npos)
             next = len;
-        int cpLen = next - last;
+        auto cpLen = int(next - last);
         if (cpLen > 0) {
             buf.write(&string[last], cpLen);
         }

@@ -85,7 +85,7 @@ void BufferedIOHandler::threadProc()
             getTimespecNow(&last_log);
             float percentFillLevel = 0;
             if (!empty) {
-                int currentFillSize = b - a;
+                auto currentFillSize = int(b - a);
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
                 percentFillLevel = (float(currentFillSize) / float(bufSize)) * 100;
@@ -97,11 +97,11 @@ void BufferedIOHandler::threadProc()
             a = b = 0;
 
         if (doSeek && !empty && (seekWhence == SEEK_SET || (seekWhence == SEEK_CUR && seekOffset > 0))) {
-            int currentFillSize = b - a;
+            auto currentFillSize = int(b - a);
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
 
-            int relSeek = seekOffset;
+            auto relSeek = int(seekOffset);
             if (seekWhence == SEEK_SET)
                 relSeek -= posRead;
 
@@ -159,7 +159,7 @@ void BufferedIOHandler::threadProc()
                     threadRunner->notify();
                 }
                 if (waitForInitialFillSize) {
-                    int currentFillSize = b - a;
+                    auto currentFillSize = int(b - a);
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
                     if (size_t(currentFillSize) >= initialFillSize) {

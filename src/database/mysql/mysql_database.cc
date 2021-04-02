@@ -277,7 +277,7 @@ std::string MySQLDatabase::quote(std::string value) const
      */
     auto q = new char[value.length() * 2 + 2];
     *q = '\'';
-    long size = mysql_real_escape_string(const_cast<MYSQL*>(&db), q + 1, value.c_str(), value.length());
+    auto size = mysql_real_escape_string(const_cast<MYSQL*>(&db), q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
     std::string ret(q, size + 2);
     delete[] q;

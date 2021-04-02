@@ -216,7 +216,7 @@ struct inotify_event* Inotify::nextEvent()
         bytes += this_bytes;
 
         ret = &event[0];
-        first_byte = sizeof(struct inotify_event) + ret->len;
+        first_byte = int(sizeof(struct inotify_event) + ret->len);
         assert(first_byte <= bytes);
 
         if (first_byte == bytes) {
