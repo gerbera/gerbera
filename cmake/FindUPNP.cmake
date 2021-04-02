@@ -32,27 +32,25 @@ if (STATIC_LIBUPNP)
 endif()
 
 if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
-    file (STRINGS ${UPNP_INCLUDE_DIR}/upnpconfig.h _UPNP_DEFS REGEX "^[ \t]*#define[ \t]+UPNP_VERSION_(MAJOR|MINOR|PATCH)")
-    string (REGEX REPLACE ".*UPNP_VERSION_MAJOR ([0-9]+).*" "\\1" UPNP_MAJOR_VERSION "${_UPNP_DEFS}")
-    string (REGEX REPLACE ".*UPNP_VERSION_MINOR ([0-9]+).*" "\\1" UPNP_MINOR_VERSION "${_UPNP_DEFS}")
-    string (REGEX REPLACE ".*UPNP_VERSION_PATCH ([0-9]+).*" "\\1" UPNP_PATCH_VERSION "${_UPNP_DEFS}")
-    set (pupnp_VERSION "${UPNP_MAJOR_VERSION}.${UPNP_MINOR_VERSION}.${UPNP_PATCH_VERSION}")
+    file (STRINGS ${UPNP_INCLUDE_DIR}/upnpconfig.h upnp_ver_str REGEX "^#define[ \t]+UPNP_VERSION_STRING[ \t]+\".+\"")
+    string(REGEX REPLACE "^#define[ \t]+UPNP_VERSION_STRING[ \t]+\"([^\"]+)\".*" "\\1" UPNP_VERSION "${upnp_ver_str}")
 endif()
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(pupnp
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(UPNP
     REQUIRED_VARS UPNP_UPNP_LIBRARY UPNP_INCLUDE_DIR
-    VERSION_VAR pupnp_VERSION)
+    VERSION_VAR UPNP_VERSION)
 
-if (pupnp_FOUND)
-    if(NOT TARGET pupnp::pupnp)
-        add_library(pupnp::pupnp SHARED IMPORTED)
-        set_target_properties(pupnp::pupnp PROPERTIES
+if (UPNP_FOUND)
+    if(NOT TARGET UPNP::UPNP)
+        add_library(UPNP::UPNP SHARED IMPORTED)
+        set_target_properties(UPNP::UPNP PROPERTIES
                 IMPORTED_LOCATION ${UPNP_UPNP_LIBRARY}
                 INTERFACE_INCLUDE_DIRECTORIES ${UPNP_INCLUDE_DIR}
                 INTERFACE_LINK_LIBRARIES ${UPNP_IXML_LIBRARY}
                 UPNP_ENABLE_IPV6 ${UPNP_HAS_IPV6}
                 UPNP_MINISERVER_REUSEADDR ${UPNP_HAS_REUSEADDR}
+                VERSION ${UPNP_VERSION}
         )
 
     endif()
