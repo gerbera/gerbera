@@ -264,7 +264,7 @@ void Server::emptyBookmark()
 std::string Server::getVirtualUrl()
 {
     auto cfgVirt = config->getOption(CFG_VIRTUAL_URL);
-    return cfgVirt.empty() ? virtualUrl : cfgVirt + "/" + virtual_directory;
+    return cfgVirt.empty() ? virtualUrl : fmt::format("{}/{}", cfgVirt, virtual_directory);
 }
 
 bool Server::getShutdownStatus() const
@@ -502,11 +502,12 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
         ret = std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
     } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
-        if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
-            ret = std::make_unique<ServeRequestHandler>(content);
-        else
+        if (config->getOption(CFG_SERVER_SERVEDIR).empty())
             throw_std_runtime_error("Serving directories is not enabled in configuration");
+
+        ret = std::make_unique<ServeRequestHandler>(content);
     }
+
 #if defined(HAVE_CURL)
     else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
         ret = std::make_unique<URLRequestHandler>(content);

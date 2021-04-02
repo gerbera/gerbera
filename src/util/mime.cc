@@ -60,15 +60,17 @@ Mime::Mime(const std::shared_ptr<Config>& config)
 #endif // HAVE_MAGIC
 }
 
+#ifdef HAVE_MAGIC
 Mime::~Mime()
 {
-#ifdef HAVE_MAGIC
     if (magicCookie) {
         magic_close(magicCookie);
         magicCookie = nullptr;
     }
-#endif
 }
+#else
+Mime::~Mime() = default;
+#endif
 
 #ifdef HAVE_MAGIC
 std::string Mime::fileToMimeType(const fs::path& path, const std::string& defval)

@@ -92,12 +92,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
-    size_t res_id = 0;
     auto res_id_it = params.find(URL_RESOURCE_ID);
-    if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
-        res_id = std::stoi(res_id_it->second);
-    else
-        res_id = std::numeric_limits<std::size_t>::max();
+    size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
@@ -171,9 +167,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             std::string freq = obj->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
             std::string nrch = obj->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
             if (!freq.empty())
-                mimeType = mimeType + ";rate=" + freq;
+                mimeType += fmt::format(";rate={}", freq);
             if (!nrch.empty())
-                mimeType = mimeType + ";channels=" + nrch;
+                mimeType += fmt::format(";channels={}", nrch);
         }
 
         UpnpFileInfo_set_FileLength(info, -1);
@@ -231,12 +227,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
-    size_t res_id = 0;
     auto res_id_it = params.find(URL_RESOURCE_ID);
-    if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
-        res_id = std::stoi(res_id_it->second);
-    else
-        res_id = std::numeric_limits<std::size_t>::max();
+    size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("requested object {} is not an item", filename);
@@ -264,13 +256,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
     if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
-        int res_handler;
-        if (!rh.empty())
-            res_handler = std::stoi(rh);
-        else {
-            auto resource = obj->getResource(res_id);
-            res_handler = resource->getHandlerType();
-        }
+        auto res_handler = int { !rh.empty() ? std::stoi(rh) : obj->getResource(res_id)->getHandlerType() };
 
         auto h = MetadataHandler::createHandler(context, res_handler);
         auto io_handler = h->serveContent(obj, res_id);

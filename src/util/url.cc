@@ -164,12 +164,11 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     }
 
     std::string used_url = c_url ? c_url : URL;
-    auto st = std::make_unique<Stat>(used_url, off_t(cl), mt);
 
     if (cleanup)
         curl_easy_cleanup(curl_handle);
 
-    return st;
+    return std::make_unique<Stat>(used_url, off_t(cl), mt);
 }
 
 size_t URL::dl(void* buf, size_t size, size_t nmemb, void* data)

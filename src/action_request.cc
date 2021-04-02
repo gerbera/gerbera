@@ -43,7 +43,7 @@ ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpAction
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
 {
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
+    auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
     quirks = std::make_shared<Quirks>(context, ctrlPtIPAddr, userAgent);
 }

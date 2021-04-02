@@ -48,12 +48,8 @@ void web::add::process()
 
     check_request();
 
-    fs::path path;
     std::string objID = param("object_id");
-    if (objID == "0")
-        path = FS_ROOT_DIRECTORY;
-    else
-        path = hexDecodeString(objID);
+    auto path = fs::path { (objID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(objID) };
     if (path.empty())
         throw_std_runtime_error("Illegal empty path");
 
