@@ -102,13 +102,13 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     lock.unlock();
 
     // we ensured with the while above that the buffer isn't empty
-    int currentFillSize = bLocal - a;
+    auto currentFillSize = int(bLocal - a);
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
-    size_t maxRead1 = (a < bLocal ? bLocal - a : bufSize - a);
-    size_t read1 = (maxRead1 > length ? length : maxRead1);
-    size_t maxRead2 = currentFillSize - read1;
-    size_t read2 = (read1 < length ? length - read1 : 0);
+    auto maxRead1 = size_t(a < bLocal ? bLocal - a : bufSize - a);
+    auto read1 = size_t(maxRead1 > length ? length : maxRead1);
+    auto maxRead2 = size_t(currentFillSize - read1);
+    auto read2 = size_t(read1 < length ? length - read1 : 0);
     if (read2 > maxRead2)
         read2 = maxRead2;
 

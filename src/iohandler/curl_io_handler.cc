@@ -156,11 +156,11 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
     int bufFree = 0;
     do {
         if (ego->doSeek && !ego->empty && (ego->seekWhence == SEEK_SET || (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0))) {
-            int currentFillSize = ego->b - ego->a;
+            auto currentFillSize = int(ego->b - ego->a);
             if (currentFillSize <= 0)
                 currentFillSize += ego->bufSize;
 
-            int relSeek = ego->seekOffset;
+            auto relSeek = int(ego->seekOffset);
             if (ego->seekWhence == SEEK_SET)
                 relSeek -= ego->posRead;
 
@@ -233,7 +233,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
         threadRunner->notify();
     }
     if (ego->waitForInitialFillSize) {
-        int currentFillSize = ego->b - ego->a;
+        auto currentFillSize = int(ego->b - ego->a);
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
         if (size_t(currentFillSize) >= ego->initialFillSize) {
