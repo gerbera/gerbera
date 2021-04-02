@@ -101,7 +101,7 @@ bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
 
     // compare all resources
     return std::equal(resources.begin(), resources.end(), obj->resources.begin(),
-        [](const auto& r1, const auto& r2) { return r1->equals(r2); });
+        [](auto&& r1, auto&& r2) { return r1->equals(r2); });
 }
 
 void CdsObject::validate()

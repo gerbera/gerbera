@@ -58,16 +58,14 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
-    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
-
+    auto len = fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_SERVE_HANDLER).length();
     if (len > url_path.length()) {
         throw_std_runtime_error("There is something wrong with the link {}", url_path.c_str());
     }
 
     url_path = urlUnescape(url_path);
 
-    std::string path = config->getOption(CFG_SERVER_SERVEDIR)
-        + url_path.substr(len, url_path.length()) + "/" + parameters;
+    auto path = fmt::format("{}{}/{}", config->getOption(CFG_SERVER_SERVEDIR), url_path.substr(len, url_path.length()), parameters);
 
     log_debug("Constructed new path: {}", path.c_str());
 
