@@ -28,6 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       # Alternatively: uses: docker://conanio/gcc9:latest
+      - name: Update package list
+        run: |
+          sudo apt-get update
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
