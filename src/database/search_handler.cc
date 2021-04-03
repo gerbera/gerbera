@@ -501,7 +501,7 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     } else if (lcOperator == "derivedfrom") {
         sqlFragment << "c.upnp_class "
                     << "like"
-                    << " lower('" << value << ".%')";
+                    << " lower('" << value << "%')";
     }
     return sqlFragment.str();
 }

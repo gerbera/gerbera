@@ -144,6 +144,10 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
 
     auto req = request->getRequest();
     auto req_root = req->document_element();
+
+    // for (const auto& child : req_root.children()) {
+    //     log_debug("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
+    // }
     std::string containerID = req_root.child("ContainerID").text().as_string();
     std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
     std::string startingIndex = req_root.child("StartingIndex").text().as_string();
@@ -169,13 +173,14 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     int numMatches = 0;
     try {
         results = database->search(searchParam, &numMatches);
+        log_debug("Found {}/{} items", results.size(), numMatches);
     } catch (const std::runtime_error& e) {
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
     for (const auto& cdsObject : results) {
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
+        if (cdsObject->isItem() && config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
                 title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
@@ -191,6 +196,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     std::ostringstream buf;
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
+    log_debug("didl {}", didl_lite_xml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();

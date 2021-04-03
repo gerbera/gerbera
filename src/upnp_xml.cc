@@ -171,11 +171,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             bool artAdded = renderContainerImage(virtualURL, cont, url);
             if (artAdded) {
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
-                return;
             }
         }
     }
-    // log_debug("Rendered DIDL: {}", result->print().c_str());
+    // std::ostringstream osr;
+    // result.print(osr, "  ");
+    // log_debug("Rendered DIDL: {}", osr.str());
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
