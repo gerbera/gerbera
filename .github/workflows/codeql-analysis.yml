@@ -25,7 +25,8 @@ jobs:
     - if: matrix.language == 'cpp'
       name: Install Deps
       run: |
-         sudo apt-get install libfmt-dev libpugixml-dev libsqlite3-dev libduktape205 duktape-dev libspdlog1 \
+         sudo apt-get update && \
+         sudo apt-get install -y libfmt-dev libpugixml-dev libsqlite3-dev libduktape205 duktape-dev libspdlog1 \
             libspdlog-dev libcurl4-openssl-dev libtag1-dev libmagic-dev libmatroska-dev libexif-dev
          sudo bash ./scripts/install-pupnp.sh
 
