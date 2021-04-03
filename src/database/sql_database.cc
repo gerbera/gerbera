@@ -607,7 +607,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
         throw_std_runtime_error("failed to generate SQL for search");
 
     std::ostringstream countSQL;
-    countSQL << "select count(*) " << searchSQL << ';';
+    countSQL << "select count(*) " << searchSQL;
     auto sqlResult = select(countSQL);
     std::unique_ptr<SQLRow> countRow = sqlResult->nextRow();
     if (countRow != nullptr) {
@@ -622,7 +622,6 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
                      << " limit " << (requestedCount == 0 ? 10000000000 : requestedCount)
                      << " offset " << startingIndex;
     }
-    retrievalSQL << ';';
 
     log_debug("Search resolves to SQL [{}]", retrievalSQL.str().c_str());
     sqlResult = select(retrievalSQL);
@@ -1036,7 +1035,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
         }
 
         item->setTrackNumber(stoiString(row->col(to_underlying(SearchCol::track_number))));
-    } else {
+    } else if (!obj->isContainer()) {
         throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
 

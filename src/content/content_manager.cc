@@ -1074,6 +1074,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             tree = std::regex_replace(tree, std::regex(key), val);
         }
         if (containerMap.find(tree) == containerMap.end()) {
+            item->setMetadata(M_TITLE, item->getTitle());
             database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
             containerMap[tree] = container;
@@ -1123,6 +1124,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
     if (containerMap.find(newChain) == containerMap.end()) {
+        lastMetadata[MetadataHandler::getMetaFieldName(M_TITLE)] = splitString(newChain, '/').back();
         database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 
         for (const auto& contId : updateID) {

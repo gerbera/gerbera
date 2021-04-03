@@ -86,6 +86,8 @@ Denon
 -  AVR-4308
 -  S-52
 -  ASD-3N
+-  RCD-N9
+-  HEOS Multiroom, all devices with buildin HEOS by Denon or Marantz
 
 D-Link
 ~~~~~~

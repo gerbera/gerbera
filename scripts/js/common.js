@@ -358,6 +358,7 @@ function addAudio(obj) {
     chain.album.meta[M_ALBUM] = album;
     chain.artist.meta[M_ARTIST] = artist;
     chain.artist.meta[M_ALBUMARTIST] = artist;
+    chain.genre.meta[M_GENRE] = genre;
     chain.year.meta[M_DATE] = date;
     chain.composer.meta[M_COMPOSER] = composer;
 
