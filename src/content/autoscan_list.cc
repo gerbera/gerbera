@@ -53,7 +53,7 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, size_t ind
     if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](const auto& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         dir->setOrig(true);
@@ -72,7 +72,7 @@ void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
     AutoLock lock(mutex);
 
     for (const auto& dir : list->list) {
-        _add(dir, SIZE_MAX);
+        _add(dir, std::numeric_limits<std::size_t>::max());
     }
 }
 

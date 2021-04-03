@@ -540,7 +540,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         bool doLimit = true;
         if (!count) {
             if (param->getStartingIndex())
-                count = INT_MAX;
+                count = std::numeric_limits<int>::max();
             else
                 doLimit = false;
         }

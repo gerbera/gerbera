@@ -136,7 +136,7 @@ void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>
 
 size_t ConfigSetup::extractIndex(const std::string& item)
 {
-    size_t i = SIZE_MAX;
+    size_t i = std::numeric_limits<std::size_t>::max();
     if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos) {
         auto startPos = item.find_first_of('[') + 1;
         auto endPos = item.find_first_of(']', startPos);
@@ -550,7 +550,7 @@ bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, const st
     auto index = getItemPath(i);
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
-        if (realIndex < SIZE_MAX) {
+        if (realIndex < std::numeric_limits<std::size_t>::max()) {
             const auto& array = value->getArrayOption();
             config->setOrigValue(index, array.size() > realIndex ? array[realIndex] : "");
             if (status == STATUS_REMOVED) {
@@ -570,7 +570,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<std::size_t>::max()) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
@@ -761,7 +761,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
 
         size_t i = extractIndex(optItem);
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<std::size_t>::max()) {
             if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
@@ -946,7 +946,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
         auto list = value->getAutoscanListOption();
         auto i = extractIndex(optItem);
 
-        if (i < SIZE_MAX) {
+        if (i < std::numeric_limits<std::size_t>::max()) {
             auto entry = list->get(i, true);
             std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
@@ -1492,7 +1492,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
         auto list = value->getClientConfigListOption();
         auto index = extractIndex(optItem);
 
-        if (index < SIZE_MAX) {
+        if (index < std::numeric_limits<std::size_t>::max()) {
             auto entry = list->get(index, true);
             std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
 
@@ -1720,7 +1720,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
         auto list = value->getDirectoryTweakOption();
         auto index = extractIndex(optItem);
 
-        if (index < SIZE_MAX) {
+        if (index < std::numeric_limits<std::size_t>::max()) {
             auto entry = list->get(index, true);
             std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
 
