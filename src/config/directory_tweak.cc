@@ -58,7 +58,7 @@ void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, size_t
 
 void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
 {
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         dir->setOrig(true);

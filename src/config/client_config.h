@@ -44,7 +44,7 @@ public:
     ///
     /// \param dir ClientConfig to add to the list.
     /// \return scanID of the newly added ClientConfig
-    void add(const std::shared_ptr<ClientConfig>& client, size_t index = SIZE_MAX);
+    void add(const std::shared_ptr<ClientConfig>& client, size_t index = std::numeric_limits<std::size_t>::max());
 
     std::shared_ptr<ClientConfig> get(size_t id, bool edit = false);
 

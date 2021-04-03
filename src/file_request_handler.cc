@@ -97,7 +97,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = SIZE_MAX;
+        res_id = std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
@@ -236,7 +236,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     if (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID)
         res_id = std::stoi(res_id_it->second);
     else
-        res_id = SIZE_MAX;
+        res_id = std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("requested object {} is not an item", filename);
@@ -252,10 +252,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!tr_profile.empty()) {
-        if (res_id != SIZE_MAX)
+        if (res_id != std::numeric_limits<std::size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     } else {
-        if (res_id == SIZE_MAX)
+        if (res_id == std::numeric_limits<std::size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     }
     log_debug("fetching resource id {}", res_id);

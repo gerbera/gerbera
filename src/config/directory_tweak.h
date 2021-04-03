@@ -56,7 +56,7 @@ public:
     ///
     /// \param dir DirectoryTweak to add to the list.
     /// \return scanID of the newly added DirectoryTweak
-    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = SIZE_MAX);
+    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = std::numeric_limits<std::size_t>::max());
 
     std::shared_ptr<DirectoryTweak> get(size_t id, bool edit = false);
 

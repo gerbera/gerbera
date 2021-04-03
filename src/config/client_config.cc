@@ -62,7 +62,7 @@ void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t i
 
 void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, size_t index)
 {
-    if (index == SIZE_MAX) {
+    if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         client->setOrig(true);
