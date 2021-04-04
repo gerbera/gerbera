@@ -136,12 +136,12 @@ public:
 
     bool hasOrigValue(const std::string& item) const override
     {
-        return origValues.find(item) != origValues.end();
+        return origValues.count(item);
     }
 
     std::string getOrigValue(const std::string& item) const override
     {
-        return (origValues.find(item) == origValues.end()) ? "" : origValues.at(item);
+        return origValues.count(item) ? origValues.at(item) : "";
     }
 
     void setOrigValue(const std::string& item, const std::string& value) override;

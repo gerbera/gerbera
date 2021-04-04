@@ -2055,14 +2055,14 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
         // get current metadata from DB: if only it really was a dictionary...
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
         for (const auto& [key, val] : dict) {
-            Operation operation = dbMetadata.find(key) == dbMetadata.end() ? Operation::Insert : Operation::Update;
+            Operation operation = dbMetadata.count(key) ? Operation::Update : Operation::Insert;
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
         for (const auto& [key, val] : dbMetadata) {
-            if (dict.find(key) == dict.end()) {
+            if (!dict.count(key)) {
                 // key in db metadata but not obj metadata, so needs a delete
                 std::map<std::string, std::string> metadataSql;
                 metadataSql["property_name"] = quote(key);

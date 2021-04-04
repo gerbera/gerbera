@@ -32,7 +32,7 @@
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
-    if (generated.find("") == generated.end()) {
+    if (!generated.count("")) {
         auto config = doc.append_child("config");
         generated[""] = std::make_shared<pugi::xml_node>(config);
     }
@@ -41,7 +41,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
 {
-    log_debug("reading '{}' -> {}", tag, generated.find(tag) == generated.end());
+    log_debug("reading '{}' -> {}", tag, !generated.count(tag));
     return generated[tag];
 }
 
@@ -56,7 +56,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
 
         for (const auto& part : split) {
             nodeKey += "/" + part;
-            if (generated.find(nodeKey) == generated.end()) {
+            if (!generated.count(nodeKey)) {
                 if (part.substr(0, ConfigSetup::ATTRIBUTE.size()) == ConfigSetup::ATTRIBUTE) {
                     attribute = part.substr(ConfigSetup::ATTRIBUTE.size()); // last attribute gets the value
                 } else {

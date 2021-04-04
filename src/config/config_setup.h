@@ -244,7 +244,7 @@ public:
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
     {
-        if (arguments != nullptr && arguments->find("notEmpty") != arguments->end()) {
+        if (arguments != nullptr && arguments->count("notEmpty")) {
             notEmpty = arguments->find("notEmpty")->second == "true";
         }
         newOption(ConfigSetup::getXmlContent(root, true));
@@ -253,7 +253,7 @@ public:
 
     bool checkEnumValue(const std::string& value, En& result) const
     {
-        if (valueMap.find(value) != valueMap.end()) {
+        if (valueMap.count(value)) {
             result = valueMap.at(value);
             return true;
         }
