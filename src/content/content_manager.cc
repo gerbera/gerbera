@@ -1073,7 +1073,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
         for (const auto& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
-        if (containerMap.find(tree) == containerMap.end()) {
+        if (!containerMap.count(tree)) {
             item->setMetadata(M_TITLE, item->getTitle());
             database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
@@ -1123,7 +1123,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
     }
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
-    if (containerMap.find(newChain) == containerMap.end()) {
+    if (!containerMap.count(newChain)) {
         lastMetadata[MetadataHandler::getMetaFieldName(M_TITLE)] = splitString(newChain, '/').back();
         database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 

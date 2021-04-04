@@ -64,7 +64,7 @@ void DictionaryOption::setKey(size_t keyIndex, const std::string& newKey)
             option[newKey] = oldValue;
         } else {
             for (size_t i = getEditSize() - 1; i >= origSize; i--) {
-                if (indexMap.find(i) != indexMap.end() && indexMap[keyIndex].empty()) {
+                if (indexMap.count(i) && indexMap[keyIndex].empty()) {
                     option.erase(indexMap[i]);
                 } else {
                     break;
@@ -103,7 +103,7 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
 void ArrayOption::setItem(size_t index, const std::string& value)
 {
     auto editSize = getEditSize();
-    if (indexMap.find(index) != indexMap.end() && value.empty()) {
+    if (indexMap.count(index) && value.empty()) {
         option.erase(option.begin() + indexMap[index]);
         indexMap[index] = SIZE_MAX;
         for (size_t i = index + 1; i < editSize; i++) {
@@ -118,7 +118,7 @@ void ArrayOption::setItem(size_t index, const std::string& value)
                 break;
             }
         }
-    } else if (indexMap.find(index) != indexMap.end()) {
+    } else if (indexMap.count(index)) {
         if (indexMap[index] == SIZE_MAX) {
             for (size_t i = editSize - 1; i > index; i--) {
                 if (indexMap[i] < SIZE_MAX) {
@@ -138,7 +138,7 @@ void ArrayOption::setItem(size_t index, const std::string& value)
             }
             option.insert(option.begin() + indexMap[index], value);
         } else {
-            if (indexMap.find(index) == indexMap.end() || indexMap[index] == SIZE_MAX || indexMap[index] >= option.size()) {
+            if (!indexMap.count(index) || indexMap[index] == SIZE_MAX || indexMap[index] >= option.size()) {
                 indexMap[index] = option.size();
                 option.push_back(value);
             } else {

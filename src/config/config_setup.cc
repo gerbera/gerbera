@@ -155,7 +155,7 @@ const std::string_view ConfigSetup::ATTRIBUTE = "attribute::";
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     bool trim = true;
-    if (arguments != nullptr && arguments->find("trim") != arguments->end()) {
+    if (arguments != nullptr && arguments->count("trim")) {
         trim = arguments->find("trim")->second == "true";
     }
     newOption(getXmlContent(root, trim));
@@ -244,16 +244,16 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
 void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr) {
-        if (arguments->find("isFile") != arguments->end()) {
+        if (arguments->count("isFile")) {
             isFile = arguments->find("isFile")->second == "true";
         }
-        if (arguments->find("mustExist") != arguments->end()) {
+        if (arguments->count("mustExist")) {
             mustExist = arguments->find("mustExist")->second == "true";
         }
-        if (arguments->find("notEmpty") != arguments->end()) {
+        if (arguments->count("notEmpty")) {
             notEmpty = arguments->find("notEmpty")->second == "true";
         }
-        if (arguments->find("resolveEmpty") != arguments->end()) {
+        if (arguments->count("resolveEmpty")) {
             resolveEmpty = arguments->find("resolveEmpty")->second == "true";
         }
     }
@@ -574,7 +574,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
-            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
             if (status == STATUS_REMOVED && updateItem(i, optItem, config, value, "", status)) {
                 return true;
             }
@@ -720,7 +720,7 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
 
 void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (arguments != nullptr && arguments->find("tolower") != arguments->end()) {
+    if (arguments != nullptr && arguments->count("tolower")) {
         tolower = arguments->find("tolower")->second == "true";
     }
     newOption(getXmlContent(getXmlElement(root)));
@@ -765,7 +765,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
             if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
-            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
             if (status == STATUS_REMOVED) {
                 if (updateItem(i, optItem, config, value, value->getKey(i), "", status)) {
                     return true;
@@ -948,7 +948,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 
         if (i < SIZE_MAX) {
             auto entry = list->get(i, true);
-            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<AutoscanDirectory>();
                 entry->setScanMode(scanMode);
@@ -977,7 +977,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 
 void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (arguments != nullptr && arguments->find("hiddenFiles") != arguments->end()) {
+    if (arguments != nullptr && arguments->count("hiddenFiles")) {
         hiddenFiles = arguments->find("hiddenFiles")->second == "true";
     }
     newOption(getXmlElement(root));
@@ -1133,7 +1133,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 
     auto tpl = result->getList();
     for (const auto& [key, val] : mt_mappings) {
-        if (tpl.find(key) == tpl.end()) {
+        if (!tpl.count(key)) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val.c_str(), key.c_str());
             if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
                 return false;
@@ -1145,7 +1145,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 
 void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (arguments != nullptr && arguments->find("isEnabled") != arguments->end()) {
+    if (arguments != nullptr && arguments->count("isEnabled")) {
         isEnabled = arguments->find("isEnabled")->second == "true";
     }
     newOption(getXmlElement(root));
@@ -1436,7 +1436,7 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
 
 void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (arguments != nullptr && arguments->find("isEnabled") != arguments->end()) {
+    if (arguments != nullptr && arguments->count("isEnabled")) {
         isEnabled = arguments->find("isEnabled")->second == "true";
     }
     newOption(getXmlElement(root));
@@ -1494,7 +1494,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
 
         if (index < SIZE_MAX) {
             auto entry = list->get(index, true);
-            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
 
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<ClientConfig>();
@@ -1722,7 +1722,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
 
         if (index < SIZE_MAX) {
             auto entry = list->get(index, true);
-            std::string status = arguments != nullptr && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+            std::string status = arguments != nullptr && arguments->count("status") ? arguments->at("status") : "";
 
             if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<DirectoryTweak>();

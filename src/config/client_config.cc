@@ -94,7 +94,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
 
         return list[id];
     }
-    if (indexMap.find(id) != indexMap.end()) {
+    if (indexMap.count(id)) {
         return indexMap[id];
     }
     return nullptr;
@@ -113,7 +113,7 @@ void ClientConfigList::remove(size_t id, bool edit)
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
     } else {
-        if (indexMap.find(id) == indexMap.end()) {
+        if (!indexMap.count(id)) {
             log_debug("No such index ID {}!", id);
             return;
         }

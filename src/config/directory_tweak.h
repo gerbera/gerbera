@@ -108,35 +108,35 @@ public:
     bool getOrig() const { return isOrig; }
 
     void setRecursive(bool recursive) { this->flags["Recursive"] = recursive; }
-    bool hasRecursive() const { return flags.find("Recursive") != flags.end(); }
+    bool hasRecursive() const { return flags.count("Recursive"); }
     bool getRecursive() const { return flags.at("Recursive"); }
 
     void setHidden(bool hidden) { this->flags["Hidden"] = hidden; }
-    bool hasHidden() const { return flags.find("Hidden") != flags.end(); }
+    bool hasHidden() const { return flags.count("Hidden"); }
     bool getHidden() const { return flags.at("Hidden"); }
 
     void setCaseSensitive(bool caseSensitive) { this->flags["CaseSens"] = caseSensitive; }
-    bool hasCaseSensitive() const { return flags.find("CaseSens") != flags.end(); }
+    bool hasCaseSensitive() const { return flags.count("CaseSens"); }
     bool getCaseSensitive() const { return flags.at("CaseSens"); }
 
     void setFollowSymlinks(bool followSymlinks) { this->flags["FollowSymlinks"] = followSymlinks; }
-    bool hasFollowSymlinks() const { return flags.find("FollowSymlinks") != flags.end(); }
+    bool hasFollowSymlinks() const { return flags.count("FollowSymlinks"); }
     bool getFollowSymlinks() const { return flags.at("FollowSymlinks"); }
 
     void setMetaCharset(const std::string& metaCharset) { this->resourceFiles["MetaCharset"] = metaCharset; }
-    bool hasMetaCharset() const { return resourceFiles.find("MetaCharset") != resourceFiles.end(); }
+    bool hasMetaCharset() const { return resourceFiles.count("MetaCharset"); }
     std::string getMetaCharset() const { return resourceFiles.at("MetaCharset"); }
 
     void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles["FanArt"] = fanArtFile; }
-    bool hasFanArtFile() const { return resourceFiles.find("FanArt") != resourceFiles.end(); }
+    bool hasFanArtFile() const { return resourceFiles.count("FanArt"); }
     std::string getFanArtFile() const { return resourceFiles.at("FanArt"); }
 
     void setSubTitleFile(const std::string& subTitleFile) { this->resourceFiles["SubTitle"] = subTitleFile; }
-    bool hasSubTitleFile() const { return resourceFiles.find("SubTitle") != resourceFiles.end(); }
+    bool hasSubTitleFile() const { return resourceFiles.count("SubTitle"); }
     std::string getSubTitleFile() const { return resourceFiles.at("SubTitle"); }
 
     void setResourceFile(const std::string& resourceFile) { this->resourceFiles["Resource"] = resourceFile; }
-    bool hasResourceFile() const { return resourceFiles.find("Resource") != resourceFiles.end(); }
+    bool hasResourceFile() const { return resourceFiles.count("Resource"); }
     std::string getResourceFile() const { return resourceFiles.at("Resource"); }
 
 protected:
