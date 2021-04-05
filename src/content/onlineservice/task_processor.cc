@@ -184,7 +184,7 @@ void TPFetchOnlineContentTask::run()
             log_debug("Scheduling another task for online service: {}",
                 service->getServiceName().c_str());
 
-            if ((service->getRefreshInterval() > 0) || unscheduled_refresh) {
+            if ((service->getRefreshInterval() > std::chrono::seconds::zero()) || unscheduled_refresh) {
                 auto t = std::make_shared<TPFetchOnlineContentTask>(
                     content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
                 task_processor->addTask(t);
@@ -197,7 +197,7 @@ void TPFetchOnlineContentTask::run()
     }
     service->decTaskCount();
     if (service->getTaskCount() == 0) {
-        if ((service->getRefreshInterval() > 0) && !unscheduled_refresh) {
+        if ((service->getRefreshInterval() > std::chrono::seconds::zero()) && !unscheduled_refresh) {
             timer->addTimerSubscriber(
                 content.get(),
                 service->getRefreshInterval(),

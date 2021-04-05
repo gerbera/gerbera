@@ -87,14 +87,14 @@ public:
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
-    void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
+    void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
     void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter = nullptr, bool dontFail = false);
     void triggerWait();
 
 protected:
     class TimerSubscriberElement {
     public:
-        TimerSubscriberElement(Subscriber* subscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
+        TimerSubscriberElement(Subscriber* subscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
             : subscriber(subscriber)
             , notifyInterval(notifyInterval)
             , parameter(std::move(parameter))
@@ -112,9 +112,9 @@ protected:
         }
         void updateNextNotify()
         {
-            getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
+            getTimespecAfterMillis(notifyInterval, nextNotify);
         }
-        struct timespec* getNextNotify() { return &nextNotify; }
+        std::chrono::milliseconds getNextNotify() { return nextNotify; }
 
         std::shared_ptr<Parameter> getParameter() const { return parameter; }
 
@@ -126,9 +126,9 @@ protected:
 
     protected:
         Subscriber* subscriber;
-        unsigned int notifyInterval;
+        std::chrono::milliseconds notifyInterval;
         std::shared_ptr<Parameter> parameter;
-        struct timespec nextNotify;
+        std::chrono::milliseconds nextNotify;
         bool once;
     };
 
@@ -137,7 +137,7 @@ protected:
     std::atomic_bool shutdownFlag;
 
     void notify();
-    struct timespec* getNextNotifyTime();
+    std::chrono::milliseconds getNextNotifyTime();
 
 private:
     static void* staticThreadProc(void* arg);

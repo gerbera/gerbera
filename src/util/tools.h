@@ -249,12 +249,14 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 
 std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array);
 
-void getTimespecNow(struct timespec* ts);
+void getTimespecNow(std::chrono::seconds& ts);
+std::chrono::seconds currentTime();
+std::chrono::milliseconds currentTimeMS();
 
-long getDeltaMillis(struct timespec* first);
-long getDeltaMillis(struct timespec* first, struct timespec* second);
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
-void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start = nullptr);
+void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::milliseconds& ret);
 
 /// \brief Finds the Interface with the specified IP address.
 /// \param ip i.e. 192.168.4.56.

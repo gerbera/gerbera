@@ -917,9 +917,9 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, fmt::format("{}", entry->getInterval()));
-        entry->setInterval(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval());
+            config->setOrigValue(index, fmt::format("{}", entry->getInterval().count()));
+        entry->setInterval(std::chrono::seconds(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval().count());
         return true;
     }
 

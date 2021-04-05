@@ -140,11 +140,6 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
             log_debug("Updating existing {} object", serviceName);
             obj->setID(old->getID());
             obj->setParentID(old->getParentID());
-            //            struct timespec oldt, newt;
-            //            oldt.tv_nsec = 0;
-            //            oldt.tv_sec = old->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
-            //            newt.tv_nsec = 0;
-            //            newt.tv_sec = obj->getAuxData(ONLINE_SERVICE_LAST_UPDATE).toLong();
             content->updateObject(obj);
         }
 

@@ -73,9 +73,9 @@ void web::edit_load::process()
     classEl.append_attribute("value") = obj->getClass().c_str();
     classEl.append_attribute("editable") = true;
 
-    if (obj->getMTime() > 0) {
+    if (obj->getMTime() > std::chrono::seconds::zero()) {
         auto lmtEl = item.append_child("last_modified");
-        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime())).c_str();
+        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime().count())).c_str();
         lmtEl.append_attribute("editable") = false;
     } else {
         auto lmtEl = item.append_child("last_modified");

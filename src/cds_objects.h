@@ -96,7 +96,7 @@ protected:
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    time_t mtime;
+    std::chrono::seconds mtime;
 
     /// \brief File size on disk (in bytes).
     off_t sizeOnDisk;
@@ -181,10 +181,10 @@ public:
     fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
-    void setMTime(time_t mtime) { this->mtime = mtime; }
+    void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
 
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
-    time_t getMTime() const { return mtime; }
+    std::chrono::seconds getMTime() const { return mtime; }
 
     /// \brief Set file size.
     void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
@@ -377,7 +377,7 @@ protected:
     /// \brief unique service ID
     std::string serviceID;
 
-    unsigned int bookMarkPos;
+    std::chrono::milliseconds bookMarkPos;
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
@@ -421,10 +421,10 @@ public:
     std::string getServiceID() const { return serviceID; }
 
     /// \brief Retrieve the last known bookmark position in milliseconds.
-    void setBookMarkPos(const unsigned int bookMarkPos) { this->bookMarkPos = bookMarkPos; }
+    void setBookMarkPos(std::chrono::milliseconds bookMarkPos) { this->bookMarkPos = bookMarkPos; }
 
     /// \brief Set the bookmark position in milliseconds.
-    unsigned int getBookMarkPos() const { return bookMarkPos; }
+    std::chrono::milliseconds getBookMarkPos() const { return bookMarkPos; }
 };
 
 /// \brief An item that is accessible via a URL.

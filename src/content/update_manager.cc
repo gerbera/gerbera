@@ -39,9 +39,8 @@
 #include "upnp_cds.h"
 #include "util/tools.h"
 
-/* following constants in milliseconds */
-#define SPEC_INTERVAL 2000
-#define MIN_SLEEP 1
+static constexpr auto SPEC_INTERVAL = std::chrono::seconds(2);
+static constexpr auto MIN_SLEEP = std::chrono::milliseconds(1);
 
 #define MAX_OBJECT_IDS 1000
 #define MAX_OBJECT_IDS_OVERLOAD 30
@@ -157,32 +156,29 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 
 void UpdateManager::threadProc()
 {
-    struct timespec lastUpdate;
-    getTimespecNow(&lastUpdate);
-
+    auto lastUpdate = currentTimeMS();
     auto lock = threadRunner->uniqueLock();
 
     //cond.notify_one();
     while (!shutdownFlag) {
         if (haveUpdates()) {
-            long sleepMillis = 0;
-            struct timespec now;
-            getTimespecNow(&now);
-            long timeDiff = getDeltaMillis(&lastUpdate, &now);
+            std::chrono::milliseconds sleepMillis {};
+            auto now = currentTimeMS();
+            auto timeDiff = getDeltaMillis(lastUpdate, now);
             switch (flushPolicy) {
             case FLUSH_SPEC:
                 sleepMillis = SPEC_INTERVAL - timeDiff;
                 break;
             case FLUSH_ASAP:
-                sleepMillis = 0;
+                sleepMillis = {};
                 break;
             }
             bool sendUpdates = true;
             if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS) {
-                struct timespec timeout;
-                getTimespecAfterMillis(sleepMillis, &timeout, &now);
+                std::chrono::milliseconds timeout;
+                getTimespecAfterMillis(sleepMillis, timeout);
 
-                log_debug("threadProc: sleeping for {} millis", sleepMillis);
+                log_debug("threadProc: sleeping for {} millis", sleepMillis.count());
                 auto ret = threadRunner->waitFor(lock, sleepMillis);
 
                 if (!shutdownFlag) {
@@ -211,7 +207,7 @@ void UpdateManager::threadProc()
                     try {
                         log_debug("updates sent: \"{}\"", updateString.c_str());
                         server->sendCDSSubscriptionUpdate(updateString);
-                        getTimespecNow(&lastUpdate);
+                        lastUpdate = currentTimeMS();
                     } catch (const std::runtime_error& e) {
                         log_error("Fatal error when sending updates: {}", e.what());
                         log_error("Forcing Gerbera shutdown.");

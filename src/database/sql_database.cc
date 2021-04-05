@@ -378,8 +378,8 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
     cdsObjectSql["flags"] = quote(obj->getFlags());
-    if (obj->getMTime() > 0) {
-        cdsObjectSql["last_modified"] = quote(obj->getMTime());
+    if (obj->getMTime() > std::chrono::seconds::zero()) {
+        cdsObjectSql["last_modified"] = quote(obj->getMTime().count());
     } else {
         cdsObjectSql["last_modified"] = SQL_NULL;
     }
@@ -422,7 +422,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 cdsObjectSql["track_number"] = SQL_NULL;
         }
 
-        cdsObjectSql["bookmark_pos"] = quote(item->getBookMarkPos());
+        cdsObjectSql["bookmark_pos"] = quote(item->getBookMarkPos().count());
 
         if (item->getPartNumber() > 0) {
             cdsObjectSql["part_number"] = quote(item->getPartNumber());
@@ -1054,7 +1054,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setTitle(getCol(row, BrowseCol::dc_title));
     obj->setClass(fallbackString(getCol(row, BrowseCol::upnp_class), getCol(row, BrowseCol::ref_upnp_class)));
     obj->setFlags(std::stoi(getCol(row, BrowseCol::flags)));
-    obj->setMTime(stoulString(getCol(row, BrowseCol::last_modified)));
+    obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_modified))));
 
     auto meta = retrieveMetadataForObject(obj->getID());
     if (!meta.empty()) {
@@ -1127,7 +1127,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         }
 
         item->setTrackNumber(stoiString(getCol(row, BrowseCol::track_number)));
-        item->setBookMarkPos(stoulString(getCol(row, BrowseCol::bookmark_pos)));
+        item->setBookMarkPos(std::chrono::milliseconds(stoulString(getCol(row, BrowseCol::bookmark_pos))));
         item->setPartNumber(stoiString(getCol(row, BrowseCol::part_number)));
 
         if (!getCol(row, BrowseCol::ref_service_id).empty())
@@ -1905,15 +1905,15 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     int interval = 0;
     if (mode == ScanMode::Timed)
         interval = std::stoi(row->col(6));
-    time_t last_modified = std::stol(row->col(7));
+    auto last_modified = std::chrono::seconds(std::stol(row->col(7)));
 
-    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > 0 ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified)) : "unset");
+    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified.count())) : "unset");
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", last_modified);
-    if (last_modified > 0) {
+    if (last_modified > std::chrono::seconds::zero()) {
         dir->setCurrentLMT(location, last_modified);
     }
     dir->updateLMT();
@@ -1956,8 +1956,8 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ','
       << mapBool(adir->getRecursive()) << ','
       << mapBool(adir->getHidden()) << ','
-      << quote(adir->getInterval()) << ','
-      << quote(adir->getPreviousLMT()) << ','
+      << quote(adir->getInterval().count()) << ','
+      << quote(adir->getPreviousLMT().count()) << ','
       << mapBool(adir->persistent()) << ','
       << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
       << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
@@ -1989,9 +1989,9 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
       << quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))
       << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
       << ',' << TQ("hidden") << '=' << mapBool(adir->getHidden())
-      << ',' << TQ("interval") << '=' << quote(adir->getInterval());
-    if (adir->getPreviousLMT() > 0)
-        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT());
+      << ',' << TQ("interval") << '=' << quote(adir->getInterval().count());
+    if (adir->getPreviousLMT() > std::chrono::seconds::zero())
+        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT().count());
     q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
       << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
       << ',' << TQ("path_ids") << '=' << (pathIds == nullptr ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))

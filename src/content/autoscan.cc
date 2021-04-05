@@ -52,21 +52,21 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
 {
 }
 
-void AutoscanDirectory::setCurrentLMT(const std::string& loc, time_t lmt)
+void AutoscanDirectory::setCurrentLMT(const std::string& loc, std::chrono::seconds lmt)
 {
     bool firstScan = false;
     bool activeScan = false;
     if (!loc.empty()) {
         auto lmDir = lastModified.find(loc);
-        if (lmDir == lastModified.end() || lastModified.at(loc) > 0) {
+        if (lmDir == lastModified.end() || lastModified.at(loc) > std::chrono::seconds::zero()) {
             firstScan = true;
         }
-        if (lmDir == lastModified.end() || lastModified.at(loc) == 0) {
+        if (lmDir == lastModified.end() || lastModified.at(loc) == std::chrono::seconds::zero()) {
             activeScan = true;
         }
         lastModified[loc] = lmt;
     }
-    if (lmt == 0) {
+    if (lmt == std::chrono::seconds::zero()) {
         if (firstScan) {
             activeScanCount++;
         }
@@ -86,24 +86,24 @@ bool AutoscanDirectory::updateLMT()
     if (result) {
         result = last_mod_previous_scan < last_mod_current_scan;
         last_mod_previous_scan = last_mod_current_scan;
-        log_debug("set autoscan lmt location: {}; last_modified: {}", location.c_str(), last_mod_current_scan);
+        log_debug("set autoscan lmt location: {}; last_modified: {}", location.c_str(), last_mod_current_scan.count());
     }
     return result;
 }
 
-time_t AutoscanDirectory::getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const
+std::chrono::seconds AutoscanDirectory::getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const
 {
     auto lmDir = lastModified.find(loc);
-    if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > 0) {
+    if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > std::chrono::seconds::zero()) {
         return lastModified.at(loc);
     }
-    if (parent && parent->getMTime() > 0) {
+    if (parent && parent->getMTime() > std::chrono::seconds::zero()) {
         return parent->getMTime();
     }
     return last_mod_previous_scan;
 }
 
-time_t AutoscanDirectory::getPreviousLMT() const
+std::chrono::seconds AutoscanDirectory::getPreviousLMT() const
 {
     return last_mod_previous_scan;
 }
