@@ -37,18 +37,18 @@
 #include "session_manager.h"
 #include "util/tools.h"
 
-#define LOGIN_TIMEOUT 10 // in seconds
+static constexpr auto LOGIN_TIMEOUT = std::chrono::seconds(10);
 
-static time_t get_time()
+static std::chrono::seconds get_time()
 {
-    return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
+    return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
 }
 
 static std::string generate_token()
 {
-    const time_t expiration = get_time() + LOGIN_TIMEOUT;
+    auto expiration = get_time() + LOGIN_TIMEOUT;
     std::string salt = generateRandomId();
-    return fmt::format("{}_{}", expiration, salt);
+    return fmt::format("{}_{}", expiration.count(), salt);
 }
 
 static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
@@ -56,7 +56,7 @@ static bool check_token(const std::string& token, const std::string& password, c
     std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
-    auto expiration = time_t(std::stol(parts[0]));
+    auto expiration = std::chrono::seconds(std::stol(parts[0]));
     if (expiration < get_time())
         return false;
     std::string checksum = hexStringMd5(token + password);
