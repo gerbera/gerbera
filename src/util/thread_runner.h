@@ -84,7 +84,7 @@ public:
         log_debug("ThreadRunner waiting for {}", threadName.c_str());
         cond.wait(lck, pred);
     }
-    std::cv_status waitFor(std::unique_lock<Mutex>& lck, long ms)
+    std::cv_status waitFor(std::unique_lock<Mutex>& lck, std::chrono::milliseconds ms)
     {
         log_debug("ThreadRunner waiting for {}", threadName.c_str());
         return cond.wait_for(lck, std::chrono::milliseconds(ms));

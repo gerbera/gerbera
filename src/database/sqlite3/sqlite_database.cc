@@ -257,7 +257,7 @@ void Sqlite3Database::init()
 
         // add timer for backups
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-            int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+            auto backupInterval = std::chrono::seconds(config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
             timer->addTimerSubscriber(this, backupInterval, nullptr);
             hasBackupTimer = true;
 

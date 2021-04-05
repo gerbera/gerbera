@@ -233,14 +233,13 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 
     AutoLock lock(mutex);
 
-    struct timespec now;
-    getTimespecNow(&now);
+    auto now = currentTimeMS();
 
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
         auto&& session = *it;
 
-        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout().count()) {
-            log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
+        if (getDeltaMillis(session->getLastAccessTime(), now) > session->getTimeout()) {
+            log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), now).count());
             it = sessions.erase(it);
             checkTimer();
         } else

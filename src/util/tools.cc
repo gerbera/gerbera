@@ -763,40 +763,36 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
     return array->empty() ? "" : join(*array, ",");
 }
 
-void getTimespecNow(struct timespec* ts)
+void getTimespecNow(std::chrono::seconds& ts)
 {
-    if (clock_gettime(CLOCK_REALTIME, ts) != 0)
-        throw_std_runtime_error("clock_gettime failed: {}", std::strerror(errno));
+    ts = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-long getDeltaMillis(struct timespec* first)
+std::chrono::seconds currentTime()
 {
-    struct timespec now;
-    getTimespecNow(&now);
-    return getDeltaMillis(first, &now);
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-long getDeltaMillis(struct timespec* first, struct timespec* second)
+std::chrono::milliseconds currentTimeMS()
 {
-    return (second->tv_sec - first->tv_sec) * 1000 + (second->tv_nsec - first->tv_nsec) / 1000000;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start)
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms)
 {
-    struct timespec now;
-    if (start == nullptr) {
-        getTimespecNow(&now);
-        start = &now;
-    }
-    ret->tv_sec = start->tv_sec + delta / 1000;
-    ret->tv_nsec = (start->tv_nsec + (delta % 1000) * 1000000);
-    if (ret->tv_nsec >= 1000000000) // >= 1 second
-    {
-        ret->tv_sec++;
-        ret->tv_nsec -= 1000000000;
-    }
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    return now - ms;
+}
 
-    // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second)
+{
+    return second - first;
+}
+
+void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::milliseconds& ret)
+{
+    auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    ret = start + delta;
 }
 
 std::string ipToInterface(const std::string& ip)

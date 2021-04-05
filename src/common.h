@@ -120,7 +120,7 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define DEFAULT_RESOURCES_CASE_SENSITIVE YES
 #define DEFAULT_UPNP_STRING_LIMIT (-1)
 #define DEFAULT_SESSION_TIMEOUT 30
-#define SESSION_TIMEOUT_CHECK_INTERVAL (5 * 60)
+static constexpr auto SESSION_TIMEOUT_CHECK_INTERVAL = std::chrono::minutes(5);
 #define DEFAULT_PRES_URL_APPENDTO_ATTR "none"
 #define DEFAULT_ITEMS_PER_PAGE_1 10
 #define DEFAULT_ITEMS_PER_PAGE_2 25
@@ -143,7 +143,7 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #endif
 
 #ifdef ONLINE_SERVICES
-#define CFG_DEFAULT_UPDATE_AT_START 10 // seconds
+static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 #endif
 
 #define DEFAULT_TRANSCODING_ENABLED NO

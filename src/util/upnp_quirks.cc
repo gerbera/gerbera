@@ -61,7 +61,7 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)
         return;
-    auto positionToRestore = item->getBookMarkPos();
+    auto positionToRestore = item->getBookMarkPos().count();
     if (positionToRestore > 10)
         positionToRestore -= 10;
     log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);

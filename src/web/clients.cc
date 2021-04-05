@@ -39,11 +39,10 @@ web::clients::clients(std::shared_ptr<ContentManager> content)
 {
 }
 
-static std::string steady_clock_to_string(std::chrono::steady_clock::time_point t)
+static std::string steady_clock_to_string(const std::chrono::steady_clock::time_point& t)
 {
-    auto systime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()
-        + std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()));
-    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(systime));
+    auto systime = std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()) + std::chrono::system_clock::now();
+    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(systime.time_since_epoch().count()));
 }
 
 void web::clients::process()
