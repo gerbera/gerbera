@@ -57,7 +57,7 @@ public:
     /// The session is created with a given timeout, each access to the session updates the
     /// last_access value, if last access lies further back than the timeout - the session will
     /// be deleted (will time out)
-    explicit Session(long timeout);
+    explicit Session(std::chrono::seconds timeout);
 
     void put(const std::string& key, std::string value);
     std::string get(const std::string& key);
@@ -66,7 +66,7 @@ public:
     /// \return pointer to a timespec
     struct timespec* getLastAccessTime() { return &last_access; }
 
-    long getTimeout() const { return timeout; }
+    std::chrono::seconds getTimeout() const { return timeout; }
 
     /// \brief Returns the session identifier.
     std::string getID() const { return sessionID; }
@@ -109,7 +109,7 @@ protected:
     std::shared_ptr<std::unordered_set<int>> uiUpdateIDs;
 
     /// \brief maximum time the session can be idle (starting from last_access)
-    long timeout;
+    std::chrono::seconds timeout;
 
     /// \brief time of last access to the session, returned by getLastAccessTime()
     struct timespec last_access;
@@ -145,7 +145,7 @@ public:
 
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
-    std::shared_ptr<Session> createSession(long timeout);
+    std::shared_ptr<Session> createSession(std::chrono::seconds timeout);
 
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.

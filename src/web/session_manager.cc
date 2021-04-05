@@ -43,7 +43,7 @@
 
 namespace web {
 
-Session::Session(long timeout)
+Session::Session(std::chrono::seconds timeout)
     : uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
 {
     this->timeout = timeout;
@@ -140,7 +140,7 @@ SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::share
     timerAdded = false;
 }
 
-std::shared_ptr<Session> SessionManager::createSession(long timeout)
+std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds timeout)
 {
     auto newSession = std::make_shared<Session>(timeout);
     AutoLock lock(mutex);
@@ -239,7 +239,7 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
         const auto& session = *it;
 
-        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout()) {
+        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout().count()) {
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
             it = sessions.erase(it);
             checkTimer();
