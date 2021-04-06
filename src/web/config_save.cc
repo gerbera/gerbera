@@ -112,7 +112,7 @@ void web::configSave::process()
                         success = true;
                     }
                 } else if (parStatus == STATUS_ADDED || parStatus == STATUS_MANUAL) {
-                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, STATUS_MANUAL);
+                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, std::string(STATUS_MANUAL));
                     log_debug("added {}", param(item));
                     success = false;
                     update = true;

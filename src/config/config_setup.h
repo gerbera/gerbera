@@ -56,13 +56,13 @@ public:
     std::string status;
 };
 
-constexpr std::string_view STATUS_REMOVED = "removed";
-constexpr std::string_view STATUS_RESET = "reset";
-constexpr std::string_view STATUS_ADDED = "added";
-constexpr std::string_view STATUS_CHANGED = "changed";
-constexpr std::string_view STATUS_UNCHANGED = "unchanged";
-constexpr std::string_view STATUS_KILLED = "killed";
-const std::string STATUS_MANUAL = "manual";
+static constexpr auto STATUS_REMOVED = std::string_view("removed");
+static constexpr auto STATUS_RESET = std::string_view("reset");
+static constexpr auto STATUS_ADDED = std::string_view("added");
+static constexpr auto STATUS_CHANGED = std::string_view("changed");
+static constexpr auto STATUS_UNCHANGED = std::string_view("unchanged");
+static constexpr auto STATUS_KILLED = std::string_view("killed");
+static constexpr auto STATUS_MANUAL = std::string_view("manual");
 
 class ConfigSetup {
 protected:
