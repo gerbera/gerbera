@@ -102,17 +102,12 @@ std::vector<std::string> splitString(const std::string& str, char sep, bool empt
 
 void leftTrimStringInPlace(std::string& str)
 {
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
-        return !std::isspace(ch);
-    }));
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](auto ch) { return !std::isspace(ch); }));
 }
 
 void rightTrimStringInPlace(std::string& str)
 {
-    str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
-        return !std::isspace(ch);
-    }).base(),
-        str.end());
+    str.erase(std::find_if(str.rbegin(), str.rend(), [](auto ch) { return !std::isspace(ch); }).base(), str.end());
 }
 
 void trimStringInPlace(std::string& str)
@@ -267,7 +262,7 @@ fs::path findInPath(const fs::path& exec)
 
     std::error_code ec;
     auto pathAr = splitString(PATH, ':');
-    for (auto& path : pathAr) {
+    for (auto&& path : pathAr) {
         fs::path check = fs::path(path) / exec;
         if (isRegularFile(check, ec))
             return check;
@@ -511,7 +506,7 @@ void dictDecodeSimple(const std::string& url, std::map<std::string, std::string>
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
     std::ostringstream buf;
-    for (const auto& mimeType : mimeTypes) {
+    for (auto&& mimeType : mimeTypes) {
         buf << "http-get:*:" << mimeType << ":*"
             << ",";
     }
@@ -879,7 +874,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
     if (in.empty() && out.empty())
         return params;
 
-    for (auto& param : params) {
+    for (auto&& param : params) {
         size_t inPos = param.find("%in");
         if (inPos != std::string::npos) {
             std::string newParam = param.replace(inPos, 3, in);

@@ -166,7 +166,7 @@ void web::configSave::process()
             }
         } else {
             auto autoScans = content->getAutoscanDirectories();
-            for (const auto& autoscan : autoScans) {
+            for (auto&& autoscan : autoScans) {
                 content->rescanDirectory(autoscan, autoscan->getObjectID());
                 log_info("Rescanning directory {}", autoscan->getLocation().c_str());
             }

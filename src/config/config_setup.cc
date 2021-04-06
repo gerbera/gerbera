@@ -526,7 +526,7 @@ bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
     if (element != nullptr) {
-        for (const auto& it : element.select_nodes(ConfigManager::mapConfigOption(nodeOption))) {
+        for (auto&& it : element.select_nodes(ConfigManager::mapConfigOption(nodeOption))) {
             const pugi::xml_node& child = it.node();
             std::string attrValue = attrOption != CFG_MAX ? child.attribute(removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
             if (itemNotEmpty && attrValue.empty()) {
@@ -551,7 +551,7 @@ bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, const st
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
         if (realIndex < std::numeric_limits<std::size_t>::max()) {
-            const auto& array = value->getArrayOption();
+            auto&& array = value->getArrayOption();
             config->setOrigValue(index, array.size() > realIndex ? array[realIndex] : "");
             if (status == STATUS_REMOVED) {
                 config->setOrigValue(optItem, array.size() > realIndex ? array[realIndex] : "");
@@ -617,7 +617,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
 
 bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std::string>& result) const
 {
-    for (auto& attrValue : splitString(value, ',')) {
+    for (auto&& attrValue : splitString(value, ',')) {
         attrValue = trimString(attrValue);
         if (itemNotEmpty && attrValue.empty()) {
             return false;
@@ -637,7 +637,7 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
 bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
     if (value != nullptr) {
-        for (const auto& it : value.select_nodes(node_name)) {
+        for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& content = it.node();
             std::string mark_content = content.text().as_string();
             if (mark_content.empty()) {
@@ -666,7 +666,7 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
         result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_4));
     } else {
         // create the array from either user settings
-        for (const auto& it : value.select_nodes(node_name)) {
+        for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& child = it.node();
             int i = child.text().as_int();
             if (i < 1) {
@@ -701,7 +701,7 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
         auto keyAttr = removeAttribute(keyOption);
         auto valAttr = removeAttribute(valOption);
 
-        for (const auto& it : dictNodes) {
+        for (auto&& it : dictNodes) {
             const pugi::xml_node child = it.node();
             std::string key = child.attribute(keyAttr.c_str()).as_string();
             std::string value = child.attribute(valAttr.c_str()).as_string();
@@ -779,7 +779,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         }
 
         i = 0;
-        for (const auto& [key, val] : value->getDictionaryOption()) {
+        for (auto&& [key, val] : value->getDictionaryOption()) {
             if (updateItem(i, optItem, config, value, key, optValue)) {
                 return true;
             }
@@ -812,7 +812,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
-        for (const auto& entry : defaultEntries) {
+        for (auto&& entry : defaultEntries) {
             result.emplace(entry.first, entry.second);
         }
     }
@@ -844,8 +844,8 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     if (element == nullptr)
         return true;
 
-    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
-    for (const auto& it : cs->getXmlTree(element)) {
+    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
+    for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
         fs::path location;
@@ -1024,7 +1024,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         return false;
     }
 
-    for (const auto& it : profileNodes) {
+    for (auto&& it : profileNodes) {
         const pugi::xml_node child = it.node();
         if (!findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
             continue;
@@ -1111,7 +1111,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         prof->setBufferOptions(buffer, chunk, fill);
 
         bool set = false;
-        for (const auto& [key, val] : mt_mappings) {
+        for (auto&& [key, val] : mt_mappings) {
             if (val == prof->getName()) {
                 result->add(key, prof);
                 set = true;
@@ -1127,7 +1127,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
     }
 
     auto tpl = result->getList();
-    for (const auto& [key, val] : mt_mappings) {
+    for (auto&& [key, val] : mt_mappings) {
         if (!tpl.count(key)) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val.c_str(), key.c_str());
             if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
@@ -1182,8 +1182,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
         std::map<std::string, int> profiles;
         int i = 0;
-        for (const auto& [key, val] : value->getTranscodingProfileListOption()->getList()) {
-            for (const auto& [a, name] : *val) {
+        for (auto&& [key, val] : value->getTranscodingProfileListOption()->getList()) {
+            for (auto&& [a, name] : *val) {
                 profiles[name->getName()] = i;
                 auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
                 if (optItem == index) {
@@ -1203,7 +1203,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
         }
         i = 0;
-        for (const auto& [key, val] : profiles) {
+        for (auto&& [key, val] : profiles) {
             auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
             auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
@@ -1365,7 +1365,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
-                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](const std::string& a, const std::string& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
+                config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
                 fcc_list.clear();
                 if (findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
                     set4cc = true;
@@ -1399,8 +1399,8 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
     if (element == nullptr)
         return true;
 
-    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
-    for (const auto& it : cs->getXmlTree(element)) {
+    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
+    for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
         auto flags = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
@@ -1408,8 +1408,7 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
         auto userAgent = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
 
         std::vector<std::string> flagsVector = splitString(flags, '|', false);
-        int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
-            { return flg | ClientConfig::remapFlag(i); });
+        int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
 
         auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
         try {
@@ -1442,8 +1441,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
         if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
             std::vector<std::string> flagsVector = splitString(optValue, '|', false);
-            int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](int flg, const auto& i) //
-                { return flg | ClientConfig::remapFlag(i); });
+            int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
             entry->setFlags(flag);
             log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
             return true;
@@ -1538,8 +1536,8 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
     if (element == nullptr)
         return true;
 
-    const auto& cs = findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
-    for (const auto& it : cs->getXmlTree(element)) {
+    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
+    for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
         fs::path location = findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
 

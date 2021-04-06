@@ -937,7 +937,7 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
 
 const char* ConfigManager::mapConfigOption(config_option_t option)
 {
-    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& c) { return c->option == option; });
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& c) { return c->option == option; });
     if (co != complexOptions.end()) {
         return (*co)->xpath;
     }
@@ -946,7 +946,7 @@ const char* ConfigManager::mapConfigOption(config_option_t option)
 
 std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t option, bool save)
 {
-    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->option == option; });
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->option == option; });
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
         return *co;
@@ -960,7 +960,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetup(config_option_t opti
 
 std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
 {
-    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == key; });
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == key; });
 
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
@@ -975,7 +975,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
         if (attrKey.find_first_of("attribute::") != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
         }
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](const auto& s) { return s->getUniquePath() == attrKey && (!parentOptions.count(s->option) || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&](const auto& o) { return o == s->option; })); });
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (!parentOptions.count(s->option) || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&](auto&& o) { return o == s->option; })); });
 
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
@@ -985,7 +985,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
 
     if (save) {
         co = std::find_if(complexOptions.begin(), complexOptions.end(),
-            [&](const auto& s) {
+            [&](auto&& s) {
                 auto uPath = s->getUniquePath();
                 size_t len = std::min(uPath.length(), key.length());
                 return key.substr(0, len) == uPath.substr(0, len);
@@ -1140,7 +1140,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now get the option list for the drop down menu
     auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](const auto& s) { return s == fmt::to_string(def_ipp); }))
+    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](auto&& s) { return s == fmt::to_string(def_ipp); }))
         throw std::runtime_error("Error in config file: at least one <option> "
                                  "under <items-per-page> must match the "
                                  "<items-per-page default=\"\" /> attribute");
@@ -1479,7 +1479,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
     origValues.clear();
     log_info("Loading {} configuration items from database", values.size());
 
-    for (const auto& cfgValue : values) {
+    for (auto&& cfgValue : values) {
         try {
             auto cs = ConfigManager::findConfigSetupByPath(cfgValue.key, true);
 

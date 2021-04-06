@@ -121,7 +121,7 @@ void web::items::process()
     items.append_attribute("protect_container") = protectContainer;
     items.append_attribute("protect_items") = protectItems;
 
-    for (const auto& arrayObj : arr) {
+    for (auto&& arrayObj : arr) {
         //if (arrayObj->isItem())
         //{
         auto item = items.append_child("item");

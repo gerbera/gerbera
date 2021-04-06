@@ -50,7 +50,7 @@ int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, size_t inde
 
 int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index)
 {
-    if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](const auto& item) { return loc == item->getLocation(); })) {
+    if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](auto&& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
     }
     if (index == std::numeric_limits<std::size_t>::max()) {
@@ -71,7 +71,7 @@ void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
 {
     AutoLock lock(mutex);
 
-    for (const auto& dir : list->list) {
+    for (auto&& dir : list->list) {
         _add(dir, std::numeric_limits<std::size_t>::max());
     }
 }
@@ -110,7 +110,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
     AutoLock lock(mutex);
 
-    auto it = std::find_if(list.begin(), list.end(), [=](const auto& item) { return objectID == item->getObjectID(); });
+    auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return objectID == item->getObjectID(); });
     return it != list.end() ? *it : nullptr;
 }
 
@@ -118,7 +118,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
 {
     AutoLock lock(mutex);
 
-    auto it = std::find_if(list.begin(), list.end(), [=](const auto& item) { return location == item->getLocation(); });
+    auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return location == item->getLocation(); });
     return it != list.end() ? *it : nullptr;
 }
 
@@ -141,8 +141,8 @@ void AutoscanList::remove(size_t id, bool edit)
             log_debug("No such index ID {}!", id);
             return;
         }
-        const auto& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [=](const auto& item) { return dir->getScanID() == item->getScanID(); });
+        auto&& dir = indexMap[id];
+        auto entry = std::find_if(list.begin(), list.end(), [=](auto&& item) { return dir->getScanID() == item->getScanID(); });
         dir->setScanID(INVALID_SCAN_ID);
         list.erase(entry);
 
@@ -188,7 +188,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
         return;
     AutoLock lock(mutex);
 
-    for (const auto& i : list) {
+    for (auto&& i : list) {
         sub->timerNotify(i->getTimerParameter());
     }
 }

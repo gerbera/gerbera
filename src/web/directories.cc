@@ -63,7 +63,7 @@ void web::directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    const auto& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
+    auto&& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
     // don't bother users with special or config directorties
     constexpr auto excludes_dirname = std::array {
         "lost+found",
@@ -73,7 +73,7 @@ void web::directories::process()
     std::error_code ec;
     std::map<std::string, dirInfo> filesMap;
 
-    for (const auto& it : fs::directory_iterator(path, ec)) {
+    for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
         if (!it.is_directory(ec))
@@ -84,8 +84,8 @@ void web::directories::process()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 
-        const auto& dir = fs::directory_iterator(filepath, ec);
-        bool hasContent = std::any_of(fs::begin(dir), fs::end(dir), [&](const auto& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
+        auto&& dir = fs::directory_iterator(filepath, ec);
+        bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
@@ -93,7 +93,7 @@ void web::directories::process()
     }
 
     auto f2i = StringConverter::f2i(config);
-    for (const auto& [key, val] : filesMap) {
+    for (auto&& [key, val] : filesMap) {
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
         ce.append_attribute("child_count") = val.hasContent;

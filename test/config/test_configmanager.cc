@@ -37,7 +37,7 @@ public:
             gerberaDir / "mysql.sql",
         };
         std::ofstream file;
-        for (const auto& mFile : mockFiles) {
+        for (auto&& mFile : mockFiles) {
             file.open(mFile);
             file.close();
         }

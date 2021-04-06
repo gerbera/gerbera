@@ -169,7 +169,7 @@ std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID
     if (doLock)
         lock.lock();
 
-    auto it = std::find_if(sessions.begin(), sessions.end(), [&](const auto& s) { return s->getID() == sessionID; });
+    auto it = std::find_if(sessions.begin(), sessions.end(), [&](auto&& s) { return s->getID() == sessionID; });
     return it != sessions.end() ? *it : nullptr;
 }
 
@@ -181,7 +181,7 @@ void SessionManager::removeSession(const std::string& sessionID)
 
     AutoLock lock(mutex);
 
-    auto sess = std::find_if(sessions.begin(), sessions.end(), [&](const auto& s) { return s->getID() == sessionID; });
+    auto sess = std::find_if(sessions.begin(), sessions.end(), [&](auto&& s) { return s->getID() == sessionID; });
     if (sess != sessions.end()) {
         sess = sessions.erase(sess);
         checkTimer();
@@ -199,7 +199,7 @@ void SessionManager::containerChangedUI(int objectID)
     if (sessions.empty())
         return;
     AutoLock lock(mutex);
-    for (const auto& session : sessions) {
+    for (auto&& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
     }
@@ -210,7 +210,7 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
     if (sessions.empty())
         return;
     AutoLock lock(mutex);
-    for (const auto& session : sessions) {
+    for (auto&& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectIDs);
     }
@@ -237,7 +237,7 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     getTimespecNow(&now);
 
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
-        const auto& session = *it;
+        auto&& session = *it;
 
         if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout().count()) {
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));

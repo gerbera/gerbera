@@ -218,7 +218,7 @@ void MySQLDatabase::init()
         log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
         auto sql = readTextFile(sqlFilePath);
 
-        for (auto& statement : splitString(sql, ';')) {
+        for (auto&& statement : splitString(sql, ';')) {
             trimStringInPlace(statement);
             if (statement.empty()) {
                 continue;
@@ -242,10 +242,10 @@ void MySQLDatabase::init()
 
     /* --- database upgrades --- */
     int version = 1;
-    for (const auto& upgrade : dbUpdates) {
+    for (auto&& upgrade : dbUpdates) {
         if (dbVersion == fmt::to_string(version)) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (const auto& upgradeCmd : upgrade) {
+            for (auto&& upgradeCmd : upgrade) {
                 _exec(upgradeCmd);
             }
             _exec(fmt::format(MYSQL_UPDATE_VERSION, version + 1, version).c_str());

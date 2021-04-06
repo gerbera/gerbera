@@ -109,7 +109,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
-    for (const auto& obj : arr) {
+    for (auto&& obj : arr) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = obj->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
@@ -145,7 +145,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     auto req = request->getRequest();
     auto req_root = req->document_element();
 
-    // for (const auto& child : req_root.children()) {
+    // for (auto&& child : req_root.children()) {
     //     log_debug("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     // }
     std::string containerID = req_root.child("ContainerID").text().as_string();
@@ -179,7 +179,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    for (const auto& cdsObject : results) {
+    for (auto&& cdsObject : results) {
         if (cdsObject->isItem() && config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
             std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))

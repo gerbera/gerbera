@@ -378,7 +378,7 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     bool withTrans = tables.size() > 1;
     if (withTrans)
         beginTransaction();
-    for (const auto& addUpdateTable : tables) {
+    for (auto&& addUpdateTable : tables) {
         auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb->str().c_str());
 
@@ -413,7 +413,7 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
     bool withTrans = data.size() > 1;
     if (withTrans)
         beginTransaction();
-    for (const auto& addUpdateTable : data) {
+    for (auto&& addUpdateTable : data) {
         Operation op = addUpdateTable->getOperation();
         std::unique_ptr<std::ostringstream> qb;
 
@@ -588,7 +588,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     res = nullptr;
 
     // update childCount fields
-    for (const auto& obj : arr) {
+    for (auto&& obj : arr) {
         if (obj->isContainer()) {
             auto cont = std::static_pointer_cast<CdsContainer>(obj);
             cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
@@ -787,7 +787,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     log_debug("Created object row, id: {}", newId);
 
     if (!itemMetadata.empty()) {
-        for (const auto& [key, val] : itemMetadata) {
+        for (auto&& [key, val] : itemMetadata) {
             std::ostringstream ib;
             ib << "INSERT INTO "
                << TQ(METADATA_TABLE)
@@ -932,7 +932,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         std::vector<std::string> resources = splitString(resources_str,
             RESOURCE_SEP);
         resource_zero_ok = !resources.empty();
-        for (const auto& resource : resources) {
+        for (auto&& resource : resources) {
             obj->addResource(CdsResource::decode(resource));
         }
     }
@@ -1017,7 +1017,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     if (!resources_str.empty()) {
         std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
         resource_zero_ok = !resources.empty();
-        for (const auto& resource : resources) {
+        for (auto&& resource : resources) {
             obj->addResource(CdsResource::decode(resource));
         }
     }
@@ -1096,7 +1096,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
     std::ostringstream inBuf;
 
     bool first = true;
-    for (const auto& id : *ids) {
+    for (auto&& id : *ids) {
         if (first) {
             inBuf << "IN (" << id;
             first = false;
@@ -2045,7 +2045,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
 {
     auto dict = obj->getMetadata();
     if (op == Operation::Insert) {
-        for (const auto& [key, val] : dict) {
+        for (auto&& [key, val] : dict) {
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
@@ -2054,14 +2054,14 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
     } else {
         // get current metadata from DB: if only it really was a dictionary...
         auto dbMetadata = retrieveMetadataForObject(obj->getID());
-        for (const auto& [key, val] : dict) {
+        for (auto&& [key, val] : dict) {
             Operation operation = dbMetadata.count(key) ? Operation::Update : Operation::Insert;
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
-        for (const auto& [key, val] : dbMetadata) {
+        for (auto&& [key, val] : dbMetadata) {
             if (!dict.count(key)) {
                 // key in db metadata but not obj metadata, so needs a delete
                 std::map<std::string, std::string> metadataSql;
@@ -2204,11 +2204,11 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", object->getID());
         std::map<std::string, std::string> metadataSQLVals;
-        for (const auto& [key, val] : dict) {
+        for (auto&& [key, val] : dict) {
             metadataSQLVals[quote(key)] = quote(val);
         }
 
-        for (const auto& [key, val] : metadataSQLVals) {
+        for (auto&& [key, val] : metadataSQLVals) {
             std::ostringstream fields, values;
             fields << TQ("item_id") << ','
                    << TQ("property_name") << ','

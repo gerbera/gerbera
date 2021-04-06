@@ -72,7 +72,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
     item.append_attribute("status") = "unchanged";
 
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
-    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](const auto& s) { return s.item == name; }) ? "database" : "config.xml";
+    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; }) ? "database" : "config.xml";
 }
 
 template <typename T>
@@ -111,7 +111,7 @@ void web::configLoad::process()
 
     auto meta = root.append_child("types");
     xml2JsonHints->setArrayName(meta, "item");
-    for (const auto& cs : ConfigManager::getOptionList()) {
+    for (auto&& cs : ConfigManager::getOptionList()) {
         addTypeMeta(meta, cs);
     }
 
@@ -225,8 +225,8 @@ void web::configLoad::process()
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
     std::map<std::string, int> profiles;
-    for (const auto& [key, val] : transcoding->getList()) {
-        for (const auto& [a, name] : *val) {
+    for (auto&& [key, val] : transcoding->getList()) {
+        for (auto&& [a, name] : *val) {
             auto item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
             setValue(item, key);
@@ -241,7 +241,7 @@ void web::configLoad::process()
     }
 
     pr = 0;
-    for (const auto& [key, val] : profiles) {
+    for (auto&& [key, val] : profiles) {
         auto entry = transcoding->getByName(key, true);
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
@@ -321,17 +321,17 @@ void web::configLoad::process()
             if (!fourCCList.empty()) {
                 item = values.append_child("item");
                 createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
-                setValue(item, std::accumulate(std::next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](const std::string& a, const std::string& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
+                setValue(item, std::accumulate(std::next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
             }
         }
         pr++;
     }
 
-    for (const auto& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
-            const auto& entry = autoscan->get(i);
-            const auto& adir = content->getAutoscanDirectory(entry->getLocation());
+            auto&& entry = autoscan->get(i);
+            auto&& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());
@@ -366,10 +366,10 @@ void web::configLoad::process()
         }
     }
 
-    for (const auto& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
-        for (const auto& [key, val] : dictionary) {
+        for (auto&& [key, val] : dictionary) {
             auto item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption);
             setValue(item, key.substr(5));
@@ -381,7 +381,7 @@ void web::configLoad::process()
         }
     }
 
-    for (const auto& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
@@ -391,7 +391,7 @@ void web::configLoad::process()
         }
     }
 
-    for (const auto& entry : dbEntries) {
+    for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
             auto item = exItem->second;
