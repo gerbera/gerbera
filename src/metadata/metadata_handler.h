@@ -118,7 +118,7 @@ enum metadata_fields_t {
     M_MAX
 };
 
-constexpr std::array<std::pair<metadata_fields_t, const char*>, M_MAX> mt_keys = { {
+static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const char*>, M_MAX> { {
     { M_TITLE, "dc:title" },
     { M_ARTIST, "upnp:artist" },
     { M_ALBUM, "upnp:album" },
@@ -161,7 +161,7 @@ enum resource_attributes_t {
     R_MAX
 };
 
-constexpr std::array<std::pair<resource_attributes_t, const char*>, R_MAX> res_keys = { {
+static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, const char*>, R_MAX> { {
     { R_SIZE, "size" },
     { R_DURATION, "duration" },
     { R_BITRATE, "bitrate" },
