@@ -46,7 +46,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     argv[0] = command.c_str();
     int apos = 0;
 
-    for (const auto& i : arglist) {
+    for (auto&& i : arglist) {
         argv[++apos] = i.c_str();
         if (apos >= MAX_ARGS - 2)
             break;

@@ -336,7 +336,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 
     std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     auto genreAr = splitString(temp, ',');
-    for (auto& genre : genreAr) {
+    for (auto&& genre : genreAr) {
         genre = trimString(genre);
         genre = mapGenre(genre);
         if (genre.empty())
@@ -371,7 +371,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
 
 std::string BuiltinLayout::mapGenre(const std::string& genre)
 {
-    for (const auto& [from, to] : genreMap) {
+    for (auto&& [from, to] : genreMap) {
         if (std::regex_match(genre, std::regex(from, std::regex::ECMAScript | std::regex::icase))) {
             return std::regex_replace(genre, std::regex(from, std::regex::ECMAScript | std::regex::icase), to);
         }

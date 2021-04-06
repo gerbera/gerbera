@@ -54,7 +54,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
         std::string nodeKey;
         std::string attribute;
 
-        for (const auto& part : split) {
+        for (auto&& part : split) {
             nodeKey += "/" + part;
             if (!generated.count(nodeKey)) {
                 if (part.substr(0, ConfigSetup::ATTRIBUTE.size()) == ConfigSetup::ATTRIBUTE) {
@@ -133,7 +133,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(config_option_t o
         return nullptr;
 
     auto nodeKey = ConfigManager::mapConfigOption(cs->nodeOption);
-    for (const auto& [key, value] : cs->getXmlContent({})) {
+    for (auto&& [key, value] : cs->getXmlContent({})) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
         setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->keyOption)), key);
         setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->valOption)), value);

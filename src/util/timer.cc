@@ -72,7 +72,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyI
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
 
     if (!subscribers.empty()) {
-        bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](const auto& subscriber) { return subscriber == element; });
+        bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](auto&& subscriber) { return subscriber == element; });
         if (err) {
             throw_std_runtime_error("Tried to add same timer twice");
         }
@@ -164,7 +164,7 @@ void Timer::notify()
 
     // Unlock before we notify so that other threads can modify the subscribers
     lock.unlock();
-    for (auto& element : toNotify) {
+    for (auto&& element : toNotify) {
         element.notify();
     }
 }
@@ -174,8 +174,8 @@ struct timespec* Timer::getNextNotifyTime()
     auto lock = threadRunner->lockGuard();
     struct timespec* nextTime = nullptr;
     if (!subscribers.empty()) {
-        for (auto& subscriber : subscribers) {
-            struct timespec* nextNotify = subscriber.getNextNotify();
+        for (auto&& subscriber : subscribers) {
+            auto nextNotify = subscriber.getNextNotify();
             if (nextTime == nullptr || getDeltaMillis(nextTime, nextNotify) < 0) {
                 nextTime = nextNotify;
             }

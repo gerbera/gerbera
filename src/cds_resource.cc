@@ -64,7 +64,7 @@ void CdsResource::removeAttribute(resource_attributes_t res)
 
 void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
 {
-    for (const auto& [key, val] : additional) {
+    for (auto&& [key, val] : additional) {
         attributes[key] = val;
     }
 }

@@ -122,7 +122,7 @@ void DukTestHelper::createObject(duk_context* ctx, std::map<std::string, std::st
     // obj
     {
         duk_push_object(ctx);
-        for (const auto& x : objectProps) {
+        for (auto&& x : objectProps) {
             duk_push_string(ctx, x.second.c_str());
             duk_put_prop_string(ctx, -2, x.first.c_str());
         }
@@ -131,7 +131,7 @@ void DukTestHelper::createObject(duk_context* ctx, std::map<std::string, std::st
     // obj.meta
     {
         duk_push_object(ctx);
-        for (const auto& x : metaProps) {
+        for (auto&& x : metaProps) {
             duk_push_string(ctx, x.second.c_str());
             duk_put_prop_string(ctx, -2, x.first.c_str());
         }

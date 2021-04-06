@@ -47,7 +47,7 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
         log_debug("Folder name: {}", folder.c_str());
 
         if (isCaseSensitive) {
-            for (const auto& name : names) {
+            for (auto&& name : names) {
                 auto found = folder / expandName(name, obj);
                 std::error_code ec;
                 bool exists = isRegularFile(found, ec); // no error throwing, please
@@ -60,13 +60,13 @@ fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& name
         } else {
             auto fileNames = std::map<std::string, fs::path>();
             std::error_code ec;
-            for (const auto& p : fs::directory_iterator(folder, ec))
+            for (auto&& p : fs::directory_iterator(folder, ec))
                 if (isRegularFile(p, ec))
                     fileNames[toLower(p.path().filename())] = p;
 
-            for (const auto& name : names) {
+            for (auto&& name : names) {
                 auto fileName = toLower(expandName(name, obj));
-                for (const auto& [f, s] : fileNames) {
+                for (auto&& [f, s] : fileNames) {
                     if (f == fileName) {
                         log_debug("{}: found", f.c_str());
                         return s;
@@ -91,7 +91,7 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
 {
     std::string copy(name);
 
-    for (const auto& [key, val] : metaTags)
+    for (auto&& [key, val] : metaTags)
         replaceString(copy, key, obj->getMetadata(val));
 
     if (obj->isItem()) {

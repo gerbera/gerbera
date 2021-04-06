@@ -272,7 +272,7 @@ void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
 
     auto lock = threadRunner->lockGuard("unregisterExecutor");
 
-    process_list.erase(std::remove_if(process_list.begin(), process_list.end(), [&](const auto& e) { return e == exec; }), process_list.end());
+    process_list.erase(std::remove_if(process_list.begin(), process_list.end(), [&](auto&& e) { return e == exec; }), process_list.end());
 }
 
 void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
@@ -340,7 +340,7 @@ void ContentManager::shutdown()
 
     shutdownFlag = true;
 
-    for (const auto& exec : process_list) {
+    for (auto&& exec : process_list) {
         if (exec != nullptr)
             exec->kill();
     }
@@ -393,9 +393,9 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
         return taskList;
 
     taskList.push_back(t);
-    std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
+    std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](auto&& task) { return task->isValid(); });
 
-    for (const auto& task : taskQueue2) {
+    for (auto&& task : taskQueue2) {
         if (task->isValid())
             taskList.clear();
     }
@@ -678,9 +678,9 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
     time_t last_modified_new_max = last_modified_current_max;
     adir->setCurrentLMT(location, 0);
 
-    for (const auto& dirEnt : dIter) {
-        const auto& newPath = dirEnt.path();
-        const auto& name = newPath.filename().string();
+    for (auto&& dirEnt : dIter) {
+        auto&& newPath = dirEnt.path();
+        auto&& name = newPath.filename().string();
         if (name[0] == '.' && !asSetting.hidden) {
             continue;
         }
@@ -848,9 +848,9 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     bool firstChild = true;
-    for (const auto& subDirEnt : dIter) {
-        const auto& newPath = subDirEnt.path();
-        const auto& name = newPath.filename().string();
+    for (auto&& subDirEnt : dIter) {
+        auto&& newPath = subDirEnt.path();
+        auto&& name = newPath.filename().string();
         if (name[0] == '.' && !hidden) {
             continue;
         }
@@ -1064,14 +1064,14 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     std::vector<int> createdIds;
     bool isNew = false;
 
-    for (const auto& item : chain) {
+    for (auto&& item : chain) {
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
             return { INVALID_OBJECT_ID, false };
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, item->getTitle());
         log_debug("Received chain item {}", tree);
-        for (const auto& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
+        for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
         if (!containerMap.count(tree)) {
@@ -1103,7 +1103,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         throw_std_runtime_error("addContainerChain() called with empty chain parameter");
 
     std::string newChain = chain;
-    for (const auto& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
+    for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
         newChain = std::regex_replace(newChain, std::regex(key), val);
     }
 
@@ -1116,7 +1116,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
     }
 
     constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
-    for (const auto& unw : unwanted) {
+    for (auto&& unw : unwanted) {
         const auto itm = lastMetadata.find(MetadataHandler::getMetaFieldName(unw));
         if (itm != lastMetadata.end()) {
             lastMetadata.erase(itm);
@@ -1128,7 +1128,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         lastMetadata[MetadataHandler::getMetaFieldName(M_TITLE)] = splitString(newChain, '/').back();
         database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 
-        for (const auto& contId : updateID) {
+        for (auto&& contId : updateID) {
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(contId));
             containerMap[container->getLocation()] = container;
             containerList.emplace_back(container);
@@ -1152,14 +1152,14 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
 {
     if (origObj != nullptr) {
         int count = 0;
-        for (auto& container : containerList) {
+        for (auto&& container : containerList) {
             const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
-            auto fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+            auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
             if (fanart == resources.end()) {
                 MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
                 int containerChanged = INVALID_OBJECT_ID;
                 database->updateObject(container, &containerChanged);
-                fanart = std::find_if(resources.begin(), resources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+                fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
             }
             auto location = container->getLocation().string();
             if (fanart != resources.end() && (*fanart)->getHandlerType() != CH_CONTAINERART) {
@@ -1176,7 +1176,7 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
             }
             if (fanart == resources.end() && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::count(location.begin(), location.end(), '/') > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
                 const std::vector<std::shared_ptr<CdsResource>>& origResources = origObj->getResources();
-                fanart = std::find_if(origResources.begin(), origResources.end(), [=](const auto& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+                fanart = std::find_if(origResources.begin(), origResources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
                 if (fanart != origResources.end()) {
                     if ((*fanart)->getAttribute(R_RESOURCE_FILE).empty()) {
                         (*fanart)->addAttribute(R_FANART_OBJ_ID, fmt::to_string(origObj->getID() != INVALID_OBJECT_ID ? origObj->getID() : origObj->getRefID()));
@@ -1511,13 +1511,13 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
             }
         }
 
-        for (const auto& t1 : taskQueue1) {
+        for (auto&& t1 : taskQueue1) {
             if ((t1->getID() == taskID) || (t1->getParentID() == taskID)) {
                 t1->invalidate();
             }
         }
 
-        for (const auto& t2 : taskQueue2) {
+        for (auto&& t2 : taskQueue2) {
             if ((t2->getID() == taskID) || (t2->getParentID() == taskID)) {
                 t2->invalidate();
             }
@@ -1574,11 +1574,11 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
 
             // we have to make sure that a currently running autoscan task will not
             // launch add tasks for directories that anyway are going to be deleted
-            for (const auto& t : taskQueue1) {
+            for (auto&& t : taskQueue1) {
                 invalidateAddTask(t, path);
             }
 
-            for (const auto& t : taskQueue2) {
+            for (auto&& t : taskQueue2) {
                 invalidateAddTask(t, path);
             }
 
@@ -1804,7 +1804,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string> mark_list = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
 
-        bool mark = std::any_of(mark_list.begin(), mark_list.end(), [&](const auto& i) { return startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i); });
+        bool mark = std::any_of(mark_list.begin(), mark_list.end(), [&](auto&& i) { return startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), i); });
         if (mark) {
             obj->setFlag(OBJECT_FLAG_PLAYED);
 

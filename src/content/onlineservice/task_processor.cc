@@ -126,7 +126,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
         }
     }
 
-    for (const auto& tq : taskQueue) {
+    for (auto&& tq : taskQueue) {
         if ((tq->getID() == taskID) || (tq->getParentID() == taskID)) {
             tq->invalidate();
         }
@@ -147,7 +147,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 
     taskList.push_back(tc);
 
-    std::copy_if(taskQueue.begin(), taskQueue.end(), std::back_inserter(taskList), [](const auto& task) { return task->isValid(); });
+    std::copy_if(taskQueue.begin(), taskQueue.end(), std::back_inserter(taskList), [](auto&& task) { return task->isValid(); });
 
     return taskList;
 }

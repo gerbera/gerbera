@@ -74,7 +74,7 @@ TEST_F(HeadersHelperTest, MultipleHeaders)
     expected["Accept-Ranges"] = "bytes";
 
     // act
-    for (const auto& add : expected) {
+    for (auto&& add : expected) {
         subject->addHeader(add.first, add.second);
     }
     subject->writeHeaders(info);
