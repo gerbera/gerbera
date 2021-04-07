@@ -184,7 +184,9 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
 {
     std::string tmp_path;
     if (fs::path(optValue).is_absolute()) {
-        if (!isRegularFile(optValue) && !fs::is_symlink(optValue)) {
+        std::error_code ec;
+        fs::directory_entry dirEnt(optValue, ec);
+        if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
             log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue.c_str());
             return false;
         }
@@ -225,16 +227,22 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
     std::error_code ec;
     if (isFile) {
         if (mustExist) {
-            if (!isRegularFile(path, ec) && !fs::is_symlink(path, ec))
+            fs::directory_entry dirEnt(path, ec);
+            if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
                 throw std::runtime_error("File '" + path.string() + "' does not exist");
+            }
         } else {
             std::string parent_path = path.parent_path();
-            if (!fs::is_directory(parent_path, ec) && !fs::is_symlink(path, ec))
+            fs::directory_entry dirEnt(parent_path, ec);
+            if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
                 throw std::runtime_error("Parent directory '" + path.string() + "' does not exist");
+            }
         }
     } else if (mustExist) {
-        if (!fs::is_directory(path, ec) && !fs::is_symlink(path, ec))
+        fs::directory_entry dirEnt(path, ec);
+        if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
             throw std::runtime_error("Directory '" + path.string() + "' does not exist");
+        }
     }
 
     log_debug("resolvePath {} = {}", xpath, path.string());
