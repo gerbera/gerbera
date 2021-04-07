@@ -1,5 +1,16 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.8.0
+- Significant improvement in import speeds with large collections
+- Handle Samsung X_SetBookmark action, for saving position of viewed media, when enabled by flag
+- New search support for containers, i.e. Albums, Artists and Genres
+- Extract metadata information from mp3 files with ID3v1 tags, not just v2
+- Added a retry when binding to interfaces, should make Gerbera much more reliable to start with slow network startup.
+- Hack around broken libstdc++ large file support on Debian 10 with 32-bit OS (mostly older ARM devices)
+- Fix build with GCC11
+- Fix Debian/Ubuntu packages to work out of the box
+- Beautify titles which are generated from file names
+
 ### v1.7.0
 
 - You can now use libnupnp instead of libupnp as the underlying UPnP library
