@@ -42,11 +42,11 @@ class ConfigOption;
 class DirectoryTweak;
 enum class ScanMode;
 
-typedef bool (*StringCheckFunction)(std::string& value);
-typedef bool (*ArrayInitFunction)(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
-typedef bool (*DictionaryInitFunction)(const pugi::xml_node& value, std::map<std::string, std::string>& result);
-typedef bool (*IntCheckFunction)(int value);
-typedef bool (*IntMinFunction)(int value, int minValue);
+using StringCheckFunction = bool (*)(std::string& value);
+using ArrayInitFunction = bool (*)(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
+using DictionaryInitFunction = bool (*)(const pugi::xml_node& value, std::map<std::string, std::string>& result);
+using IntCheckFunction = bool (*)(int value);
+using IntMinFunction = bool (*)(int value, int minValue);
 
 class ConfigValue {
 public:
