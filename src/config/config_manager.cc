@@ -701,8 +701,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "thumbnail", "config-transcode.html#profiles"),
     std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST,
         "first-resource", "config-transcode.html#profiles"),
-    std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC,
-        "use-chunked-encoding", "config-transcode.html#profiles"),
     std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG,
         "accept-ogg-theora", "config-transcode.html#profiles"),
     std::make_shared<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC,

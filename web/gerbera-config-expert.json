@@ -915,11 +915,6 @@
 							"editable": true
 						},
 						{
-							"item": "/transcoding/profiles/profile/attribute::use-chunked-encoding",
-							"caption": "use-chunked-encoding",
-							"editable": true
-						},
-						{
 							"item": "/transcoding/profiles/profile/attribute::accept-ogg-theora",
 							"caption": "accept-ogg-theora",
 							"editable": true

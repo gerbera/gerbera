@@ -344,16 +344,6 @@ This section defines the various transcoding profiles.
 
     .. code-block:: xml
 
-        <use-chunked-encoding>yes</use-chunked-encoding>
-
-    * Optional
-    * Default: **yes**
-
-    Specifies that the content should be sent out using chunked HTTP encoding, this is the default setting for
-    transcoded streams, because the content length of the data is not known.
-
-    .. code-block:: xml
-
         <sample-frequency>source</sample-frequency>
 
     * Optional

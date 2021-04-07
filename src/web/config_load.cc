@@ -292,10 +292,6 @@ void web::configLoad::process()
         setValue(item, entry->isTheora());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
-        setValue(item, entry->getChunked());
-
-        item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
         setValue(item, entry->getCommand());
 
