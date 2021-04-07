@@ -296,6 +296,14 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 #endif // ONLINE_SERVICES
 }
 
+template <typename TP>
+std::time_t to_time_t(TP tp)
+{
+    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
+        + std::chrono::system_clock::now());
+    return std::chrono::system_clock::to_time_t(asSystemTime);
+}
+
 void ContentManager::shutdown()
 {
     log_debug("start");
@@ -315,8 +323,9 @@ void ContentManager::shutdown()
             log_debug("AutoScanDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
             if (dir != nullptr) {
-                if (fs::is_directory(dir->getLocation())) {
-                    auto t = getLastWriteTime(dir->getLocation());
+                auto dirEnt = fs::directory_entry(dir->getLocation());
+                if (dirEnt.is_directory()) {
+                    auto t = to_time_t(dirEnt.last_write_time());
                     dir->setCurrentLMT(dir->getLocation(), t);
                 }
                 dir->updateLMT();
@@ -417,14 +426,6 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     }
 
     addObject(obj, true);
-}
-
-template <typename TP>
-std::time_t to_time_t(TP tp)
-{
-    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
-        + std::chrono::system_clock::now());
-    return std::chrono::system_clock::to_time_t(asSystemTime);
 }
 
 std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
