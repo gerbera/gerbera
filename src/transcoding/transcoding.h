@@ -172,10 +172,6 @@ public:
     void setEnabled(bool new_enabled) { enabled = new_enabled; }
     bool getEnabled() const { return enabled; }
 
-    /// \brief Send out the data in chunked encoding
-    void setChunked(bool chunked) { force_chunked = chunked; }
-    bool getChunked() const { return force_chunked; }
-
     /// \brief Sample frequency handling
     void setSampleFreq(int freq) { sample_frequency = freq; }
     int getSampleFreq() const { return sample_frequency; }

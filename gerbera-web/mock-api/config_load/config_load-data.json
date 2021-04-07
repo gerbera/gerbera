@@ -898,12 +898,6 @@
 							"editable": true
 						},
 						{
-							"item": "/transcoding/profiles/profile/attribute::use-chunked-encoding",
-							"caption": "use-chunked-encoding",
-							"type": "Boolean",
-							"editable": true
-						},
-						{
 							"item": "/transcoding/profiles/profile/attribute::accept-ogg-theora",
 							"caption": "accept-ogg-theora",
 							"type": "Boolean",
@@ -1618,12 +1612,6 @@
 			{
 				"item": "first-resource",
 				"id": "149",
-				"type": "Boolean",
-				"value": ""
-			},
-			{
-				"item": "use-chunked-encoding",
-				"id": "151",
 				"type": "Boolean",
 				"value": ""
 			},

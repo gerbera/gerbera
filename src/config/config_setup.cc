@@ -1085,11 +1085,6 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
                 prof->setFirstResource(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
-            if (cs->hasXmlElement(child))
-                prof->setChunked(cs->getXmlContent(child));
-        }
-        {
             auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
             if (cs->hasXmlElement(child))
                 prof->setTheora(cs->getXmlContent(child));
@@ -1299,13 +1294,6 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 config->setOrigValue(index, entry->isTheora());
                 entry->setTheora(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
-                return true;
-            }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC);
-            if (optItem == index) {
-                config->setOrigValue(index, entry->getChunked());
-                entry->setChunked(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_USECHUNKEDENC)->checkValue(optValue));
-                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getChunked());
                 return true;
             }
 

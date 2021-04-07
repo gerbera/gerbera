@@ -898,12 +898,6 @@
 							"editable": true
 						},
 						{
-							"item": "/transcoding/profiles/profile/attribute::use-chunked-encoding",
-							"caption": "use-chunked-encoding",
-							"type": "Boolean",
-							"editable": true
-						},
-						{
 							"item": "/transcoding/profiles/profile/attribute::accept-ogg-theora",
 							"caption": "accept-ogg-theora",
 							"type": "Boolean",
