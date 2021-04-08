@@ -246,13 +246,10 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
         ret = -1;
 
         if (mainProc != nullptr) {
-            if (!mainProc->isAlive()) {
-                if (mainProc->getStatus() == EXIT_SUCCESS)
-                    ret = 0;
-
-            } else {
+            if (mainProc->isAlive())
                 mainProc->kill();
-            }
+            if (mainProc->getStatus() == EXIT_SUCCESS)
+                ret = 0;
         } else
             ret = 0;
 
