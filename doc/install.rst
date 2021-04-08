@@ -21,7 +21,7 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-We maintain a `Ubuntu Repository <https://bintray.com/gerbera/gerbera>`_.
+We maintain a `Ubuntu Repository <https://gerbera.jfrog.io/>`_.
 
 To install the latest tagged release (>=1.8.0):
 
