@@ -87,17 +87,12 @@ std::string reduceString(std::string str, char ch);
 std::string& replaceString(std::string& str, std::string_view from, const std::string& to);
 std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to);
 
-/// \brief Get last write time of the specified file or path, if it does not exist it will throw an exception
-/// \param path file or directory to be checked.
-/// \return last modification time of the path or directory
-time_t getLastWriteTime(const fs::path& path);
-
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
-bool isRegularFile(const fs::path& path);
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
+bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept;
 
 /// \brief Returns file size of give file, if it does not exist it will throw an exception
-off_t getFileSize(const fs::path& path);
+off_t getFileSize(const fs::directory_entry& dirEnt);
 
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary

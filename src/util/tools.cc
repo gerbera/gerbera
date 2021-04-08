@@ -185,37 +185,6 @@ std::string& replaceAllString(std::string& str, std::string_view from, const std
     return str;
 }
 
-time_t getLastWriteTime(const fs::path& path)
-{
-    // in future with C+20 we can replace this function too:
-    // auto ftime = fs::last_write_time(p);
-    // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
-
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), path.c_str());
-    }
-
-    return statbuf.st_mtime;
-}
-
-bool isRegularFile(const fs::path& path)
-{
-    // unfortunately fs::is_regular_file(path) is broken with old libstdc++ on 32bit systems (see #737)
-#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), path.c_str());
-    }
-
-    return S_ISREG(statbuf.st_mode);
-#else
-    return fs::is_regular_file(path);
-#endif
-}
-
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 {
     // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
@@ -234,19 +203,37 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 #endif
 }
 
-off_t getFileSize(const fs::path& path)
+bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept
 {
-    // unfortunately fs::file_size(path) is broken with old libstdc++ on 32bit systems (see #737)
+    // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
 #if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
     struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
+    int ret = stat(dirEnt.c_str(), &statbuf);
+    if (ret != 0) {
+        ec = std::make_error_code(std::errc(errno));
+        return false;
+    }
+
+    ec.clear();
+    return S_ISREG(statbuf.st_mode);
+#else
+    return dirEnt.is_regular_file(ec);
+#endif
+}
+
+off_t getFileSize(const fs::directory_entry& dirEnt)
+{
+    // unfortunately fs::file_size() is broken with old libstdc++ on 32bit systems (see #737)
+#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
+    struct stat statbuf;
+    int ret = stat(dirEnt.path().c_str(), &statbuf);
     if (ret != 0) {
         throw_std_runtime_error("{}: {}", std::strerror(errno), path.c_str());
     }
 
     return statbuf.st_size;
 #else
-    return fs::file_size(path);
+    return dirEnt.file_size();
 #endif
 }
 
