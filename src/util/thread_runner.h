@@ -143,7 +143,7 @@ protected:
             this);
 
         if (ret != 0) {
-            log_error("Could not start thread {}: {}", threadName.c_str(), std::strerror(errno));
+            log_error("Could not start thread {}: {}", threadName.c_str(), std::strerror(ret));
         } else {
             threadRunning = true;
         }
