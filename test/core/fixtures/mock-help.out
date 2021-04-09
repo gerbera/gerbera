@@ -3,6 +3,10 @@ Usage:
   gerbera [OPTION...]
 
   -D, --debug          Enable debugging
+  -d, --daemon         Daemonize after startup
+  -u, --user arg       Drop privs to user
+  -P, --pidfile arg    Write a pidfile to the specified location, e.g.
+                       /run/gerbera.pid
   -e, --interface arg  Interface to bind with
   -p, --port arg       Port to bind with, must be >=49152
   -i, --ip arg         IP to bind with
