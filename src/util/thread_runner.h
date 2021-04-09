@@ -33,7 +33,7 @@
 #include "config/config.h"
 #include "thread_executor.h"
 
-typedef void* (*ThreadProc)(void* target);
+using ThreadProc = void* (*)(void* target);
 
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
@@ -171,6 +171,6 @@ private:
     }
 };
 
-typedef class ThreadRunner<std::condition_variable, std::mutex> StdThreadRunner;
+using StdThreadRunner = class ThreadRunner<std::condition_variable, std::mutex>;
 
 #endif // __THREAD_RUNNER_H__
