@@ -116,11 +116,16 @@ Using Commandline options
 
 
 If your system uses an old style system V init, commandline options are available to start gerbera as a Daemon:
+<<<<<<< HEAD
 
 --daemon or -d:  daemonize after startup.
 
 --user or -u:    when started by root, try to change to user USER after startup. All UIDs, GIDs and supplementary Groups will be set.
 
+=======
+--daemon or -d:  daemonize after startup.
+--user or -u:    when started by root, try to change to user USER after startup. All UIDs, GIDs and supplementary Groups will be set.
+>>>>>>> bc15d305... add -d -u and -P options
 --pidfile or -P: write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
 
 
