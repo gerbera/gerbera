@@ -170,6 +170,35 @@ Specify the server port that will be used for the web user interface, for servin
 minimum allowed value is ``49152``. If this option is omitted a default port will be chosen, however, in
 this case it is possible that the port will change upon server restart.
 
+Daemon
+------
+
+::
+
+    --daemon or -d
+    
+Daemonize after startup. This option is useful if your system does not use Systemd or similar
+mechanisms to start services. See also --user and --pidfile options, below.
+
+User
+----
+
+::
+
+    --user or -u
+    
+After startup when started by user root try to change all UIDs and GIDs to those belonging to user USER.
+Also supplementary GIDs will be set.
+
+Pidfile
+-------
+
+::
+
+    --pidfile or -P
+
+Write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
+
 Configuration File
 ------------------
 
