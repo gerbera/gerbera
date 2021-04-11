@@ -208,7 +208,7 @@ bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexc
     // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
 #if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
     struct stat statbuf;
-    int ret = stat(dirEnt.c_str(), &statbuf);
+    int ret = stat(dirEnt.path().c_str(), &statbuf);
     if (ret != 0) {
         ec = std::make_error_code(std::errc(errno));
         return false;
@@ -228,7 +228,7 @@ off_t getFileSize(const fs::directory_entry& dirEnt)
     struct stat statbuf;
     int ret = stat(dirEnt.path().c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), path.c_str());
+        throw_std_runtime_error("{}: {}", std::strerror(errno), dirEnt.path().c_str());
     }
 
     return statbuf.st_size;
