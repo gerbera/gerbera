@@ -34,6 +34,22 @@ $ docker run \
     -v /some/files:/content:ro \
      gerbera/gerbera:vX.X.X
 ```
+
+or for those that prefer docker-compose:
+
+```console
+---
+version: "2.1"
+services:
+  gerbera:
+    image: gerbera/gerbera
+    container_name: gerbera
+    network_mode: host
+    volumes:
+      - gerbera-config:/var/run/gerbera
+      - /some/files:/content:ro
+```
+
 The directory `/content` is automatically scanned for content by default.
 Host networking enables us to bypass issues with broadcast across docker bridges.
 
