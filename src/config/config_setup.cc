@@ -156,7 +156,7 @@ void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared
 {
     bool trim = true;
     if (arguments != nullptr && arguments->count("trim")) {
-        trim = arguments->find("trim")->second == "true";
+        trim = arguments->at("trim") == "true";
     }
     newOption(getXmlContent(root, trim));
     setOption(config);
@@ -184,7 +184,9 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
 {
     std::string tmp_path;
     if (fs::path(optValue).is_absolute()) {
-        if (!isRegularFile(optValue) && !fs::is_symlink(optValue)) {
+        std::error_code ec;
+        fs::directory_entry dirEnt(optValue, ec);
+        if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
             log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue.c_str());
             return false;
         }
@@ -225,16 +227,21 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
     std::error_code ec;
     if (isFile) {
         if (mustExist) {
-            if (!isRegularFile(path, ec) && !fs::is_symlink(path, ec))
-                throw std::runtime_error("File '" + path.string() + "' does not exist");
+            fs::directory_entry dirEnt(path, ec);
+            if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
+                throw_std_runtime_error("File '{}' does not exist", path.string());
+            }
         } else {
-            std::string parent_path = path.parent_path();
-            if (!fs::is_directory(parent_path, ec) && !fs::is_symlink(path, ec))
-                throw std::runtime_error("Parent directory '" + path.string() + "' does not exist");
+            fs::directory_entry dirEnt(path.parent_path(), ec);
+            if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
+                throw_std_runtime_error("Parent directory '{}' does not exist", path.string());
+            }
         }
     } else if (mustExist) {
-        if (!fs::is_directory(path, ec) && !fs::is_symlink(path, ec))
-            throw std::runtime_error("Directory '" + path.string() + "' does not exist");
+        fs::directory_entry dirEnt(path, ec);
+        if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
+            throw_std_runtime_error("Directory '{}' does not exist", path.string());
+        }
     }
 
     log_debug("resolvePath {} = {}", xpath, path.string());
@@ -245,16 +252,16 @@ void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* ar
 {
     if (arguments != nullptr) {
         if (arguments->count("isFile")) {
-            isFile = arguments->find("isFile")->second == "true";
+            isFile = arguments->at("isFile") == "true";
         }
         if (arguments->count("mustExist")) {
-            mustExist = arguments->find("mustExist")->second == "true";
+            mustExist = arguments->at("mustExist") == "true";
         }
         if (arguments->count("notEmpty")) {
-            notEmpty = arguments->find("notEmpty")->second == "true";
+            notEmpty = arguments->at("notEmpty") == "true";
         }
         if (arguments->count("resolveEmpty")) {
-            resolveEmpty = arguments->find("resolveEmpty")->second == "true";
+            resolveEmpty = arguments->at("resolveEmpty") == "true";
         }
     }
 }
@@ -721,7 +728,7 @@ bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optVa
 void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->count("tolower")) {
-        tolower = arguments->find("tolower")->second == "true";
+        tolower = arguments->at("tolower") == "true";
     }
     newOption(getXmlContent(getXmlElement(root)));
     setOption(config);
@@ -978,7 +985,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->count("hiddenFiles")) {
-        hiddenFiles = arguments->find("hiddenFiles")->second == "true";
+        hiddenFiles = arguments->at("hiddenFiles") == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);
@@ -1141,7 +1148,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->count("isEnabled")) {
-        isEnabled = arguments->find("isEnabled")->second == "true";
+        isEnabled = arguments->at("isEnabled") == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);
@@ -1415,7 +1422,7 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Could not add " + ip + " client: " + e.what());
+            throw_std_runtime_error("Could not add {} client: {}", ip, e.what());
         }
     }
 
@@ -1425,7 +1432,7 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
 void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (arguments != nullptr && arguments->count("isEnabled")) {
-        isEnabled = arguments->find("isEnabled")->second == "true";
+        isEnabled = arguments->at("isEnabled") == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);
@@ -1586,7 +1593,7 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Could not add " + location.string() + " directory: " + e.what());
+            throw_std_runtime_error("Could not add {} directory: {}", location.string(), e.what());
         }
     }
 
