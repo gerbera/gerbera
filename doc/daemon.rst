@@ -109,6 +109,20 @@ by starting gerbera from the shell
   2017-09-20 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
   2017-09-20 19:54:47    INFO: Checking configuration...
 
+.. index:: Commandline options
+
+Using Commandline options
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+If your system uses an old style system V init, commandline options are available to start gerbera as a Daemon:
+
+--daemon or -d:  daemonize after startup.
+
+--user or -u:    when started by root, try to change to user USER after startup. All UIDs, GIDs and supplementary Groups will be set.
+
+--pidfile or -P: write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
+
 
 .. index:: Solaris
 

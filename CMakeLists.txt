@@ -332,7 +332,7 @@ target_link_libraries(libgerbera PUBLIC ${LFS_LIBRARIES})
 
 if (WITH_NPUPNP)
     find_package(PkgConfig QUIET)
-    pkg_check_modules(NPUPNP QUIET libnpupnp>=4.0.11)
+    pkg_check_modules(NPUPNP QUIET libnpupnp>=4.1.2)
     if (NOT NPUPNP_FOUND)
         find_package(NPUPNP REQUIRED)
     endif()

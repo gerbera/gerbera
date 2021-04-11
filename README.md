@@ -46,8 +46,8 @@ sudo make install
 
 | Library      	| Min Version	| Required? | Note                 	     | Compile-time option | Default  |
 |--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| 1.12.1 	| XOR libnpupnp | [pupnp]                    |                     |          |
-| libnpupnp     | 4.0.11 	| XOR libupnp   | [npupnp]                   | WITH_NPUPNP         | Disabled |
+| libupnp      	| 1.14.0 	| XOR libnpupnp | [pupnp]                    |                     |          |
+| libnpupnp     | 4.1.2 	| XOR libupnp   | [npupnp]                   | WITH_NPUPNP         | Disabled |
 | libuuid      	|         	| Depends on OS | Not required on \*BSD      |                     |          |
 | pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
 | libiconv     	|         	| Required  	|                      	     |                     |          |
