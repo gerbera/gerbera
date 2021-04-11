@@ -229,19 +229,18 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
         if (mustExist) {
             fs::directory_entry dirEnt(path, ec);
             if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
-                throw std::runtime_error("File '" + path.string() + "' does not exist");
+                throw_std_runtime_error("File '{}' does not exist", path.string());
             }
         } else {
-            std::string parent_path = path.parent_path();
-            fs::directory_entry dirEnt(parent_path, ec);
+            fs::directory_entry dirEnt(path.parent_path(), ec);
             if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
-                throw std::runtime_error("Parent directory '" + path.string() + "' does not exist");
+                throw_std_runtime_error("Parent directory '{}' does not exist", path.string());
             }
         }
     } else if (mustExist) {
         fs::directory_entry dirEnt(path, ec);
         if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
-            throw std::runtime_error("Directory '" + path.string() + "' does not exist");
+            throw_std_runtime_error("Directory '{}' does not exist", path.string());
         }
     }
 
