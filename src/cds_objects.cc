@@ -66,7 +66,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
-    for (auto& resource : resources)
+    for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
 bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)

@@ -58,7 +58,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
 
 metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldName)
 {
-    for (const auto& [f, s] : mt_names) {
+    for (auto&& [f, s] : mt_names) {
         if (s == fieldName) {
             return f;
         }
@@ -111,7 +111,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         auto meta = obj->getMetadata();
         std::string upnp_class = obj->getClass();
 
-        for (const auto& [key, val] : meta) {
+        for (auto&& [key, val] : meta) {
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
                 tmp = val;
                 if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
@@ -128,7 +128,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
         const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
-        for (const auto& [tag, field] : titleProperties) {
+        for (auto&& [tag, field] : titleProperties) {
             auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
             if (!value.empty()) {
                 addField(result, tag, value);
@@ -151,7 +151,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             const auto albumProperties = config->getDictionaryOption(CFG_UPNP_ALBUM_PROPERTIES);
-            for (const auto& [tag, field] : albumProperties) {
+            for (auto&& [tag, field] : albumProperties) {
                 auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
                     addField(result, tag, value);
@@ -159,7 +159,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
             const auto artistProperties = config->getDictionaryOption(CFG_UPNP_ARTIST_PROPERTIES);
-            for (const auto& [tag, field] : artistProperties) {
+            for (auto&& [tag, field] : artistProperties) {
                 auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
                 if (!value.empty()) {
                     addField(result, tag, value);
@@ -232,7 +232,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
         { "UDN", CFG_SERVER_UDN },
     } };
-    for (const auto& [tag, field] : deviceProperties) {
+    for (auto&& [tag, field] : deviceProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
 
@@ -252,8 +252,8 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
         } };
 
-        for (const auto& [dim, depth] : iconDims) {
-            for (const auto& [mimetype, ext] : iconTypes) {
+        for (auto&& [dim, depth] : iconDims) {
+            for (auto&& [mimetype, ext] : iconTypes) {
                 auto icon = iconList.append_child("icon");
                 icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype);
                 icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim);
@@ -285,7 +285,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
         } };
 
-        for (auto const& s : services) {
+        for (auto&& s : services) {
             auto service = serviceList.append_child("service");
             service.append_child("serviceType").append_child(pugi::node_pcdata).set_value(s.serviceType);
             service.append_child("serviceId").append_child(pugi::node_pcdata).set_value(s.serviceId);
@@ -303,7 +303,7 @@ void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::
     auto res = parent->append_child("res");
     res.append_child(pugi::node_pcdata).set_value(URL.c_str());
 
-    for (const auto& [key, val] : attributes) {
+    for (auto&& [key, val] : attributes) {
         res.append_attribute(key.c_str()) = val.c_str();
     }
 }
@@ -367,10 +367,10 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
 {
     bool artAdded = false;
     int resIdx = 0;
-    for (const auto& res : cont->getResources()) {
+    for (auto&& res : cont->getResources()) {
         if (res->isMetaResource(ID3_ALBUM_ART)) {
-            const auto& resFile = res->getAttribute(R_RESOURCE_FILE);
-            const auto& resObj = res->getAttribute(R_FANART_OBJ_ID);
+            auto&& resFile = res->getAttribute(R_RESOURCE_FILE);
+            auto&& resObj = res->getAttribute(R_FANART_OBJ_ID);
             if (!resFile.empty()) {
                 // found, FanArtHandler deals already with file
                 std::map<std::string, std::string> dict;
@@ -405,7 +405,7 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
     bool artAdded = false;
     auto urlBase = getPathBase(item);
     int realCount = 0;
-    for (const auto& res : item->getResources()) {
+    for (auto&& res : item->getResources()) {
         if (res->isMetaResource(ID3_ALBUM_ART) //
             || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
             || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
@@ -433,7 +433,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
     bool srtAdded = false;
     auto urlBase = getPathBase(item);
     int realCount = 0;
-    for (const auto& res : item->getResources()) {
+    for (auto&& res : item->getResources()) {
         if (res->isMetaResource(VIDEO_SUB)) {
             auto res_attrs = res->getAttributes();
             auto res_params = res->getParameters();
@@ -502,7 +502,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto tp_mt = tlist->get(item->getMimeType());
     if (tp_mt != nullptr) {
-        for (const auto& [key, tp] : *tp_mt) {
+        for (auto&& [key, tp] : *tp_mt) {
             if (tp == nullptr)
                 throw_std_runtime_error("Invalid profile encountered");
 
@@ -533,7 +533,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                     // we have the current and hopefully valid fcc string
                     // let's have a look if it matches the list
                     else {
-                        bool fcc_match = std::any_of(fcc_list.begin(), fcc_list.end(), [&](const auto& f) { return current_fcc == f; });
+                        bool fcc_match = std::any_of(fcc_list.begin(), fcc_list.end(), [&](auto&& f) { return current_fcc == f; });
 
                         if (!fcc_match && (fcc_mode == FCC_Process))
                             continue;

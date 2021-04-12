@@ -138,7 +138,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
-    for (const auto& [f, s] : mt_keys) {
+    for (auto&& [f, s] : mt_keys) {
         if (f == field) {
             return s;
         }
@@ -148,7 +148,7 @@ std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 
 std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
 {
-    for (const auto& [f, s] : res_keys) {
+    for (auto&& [f, s] : res_keys) {
         if (f == attr) {
             return s;
         }

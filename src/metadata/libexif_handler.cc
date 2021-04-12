@@ -336,7 +336,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         }
 
         // if there are any auxilary tags that the user wants - add them
-        for (const auto& tmp : auxtags) {
+        for (auto&& tmp : auxtags) {
             if (!tmp.empty()) {
                 if (e->tag == getTagFromString(tmp)) {
                     value = const_cast<char*>(exif_egv(e));
@@ -371,7 +371,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
     }
 
     std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
-    for (const auto& i : ed->ifd) {
+    for (auto&& i : ed->ifd) {
         if (i)
             process_ifd(i, item, sc, aux);
     }

@@ -66,13 +66,13 @@ bool ProcListItem::abortOnDeath() const
 bool ProcessIOHandler::abort() const
 {
     return std::any_of(procList.begin(), procList.end(),
-        [=](const auto& proc) { auto exec = proc->getExecutor();
+        [=](auto&& proc) { auto exec = proc->getExecutor();
             return exec != nullptr && !exec->isAlive() && proc->abortOnDeath(); });
 }
 
 void ProcessIOHandler::killAll() const
 {
-    for (const auto& i : procList) {
+    for (auto&& i : procList) {
         auto exec = i->getExecutor();
         if (exec != nullptr)
             exec->kill();
@@ -84,7 +84,7 @@ void ProcessIOHandler::registerAll()
     if (mainProc != nullptr)
         content->registerExecutor(mainProc);
 
-    for (const auto& i : procList) {
+    for (auto&& i : procList) {
         auto exec = i->getExecutor();
         if (exec != nullptr)
             content->registerExecutor(exec);
@@ -96,7 +96,7 @@ void ProcessIOHandler::unregisterAll()
     if (mainProc != nullptr)
         content->unregisterExecutor(mainProc);
 
-    for (const auto& i : procList) {
+    for (auto&& i : procList) {
         auto exec = i->getExecutor();
         if (exec != nullptr)
             content->unregisterExecutor(exec);

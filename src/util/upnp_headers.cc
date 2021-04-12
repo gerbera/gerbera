@@ -107,7 +107,7 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     std::copy(headers->begin(), headers->end(), std::back_inserter(fileInfo->response_headers));
 #else
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    for (const auto& iter : *headers) {
+    for (auto&& iter : *headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
         UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));

@@ -509,7 +509,7 @@ int main(int argc, char** argv, char** envp)
 
         if (opts.count("add-file") > 0) {
             auto files = opts["add-file"].as<std::vector<std::string>>();
-            for (const auto& f : files) {
+            for (auto&& f : files) {
                 try {
                     std::error_code ec;
                     auto dirEnt = fs::directory_entry(f, ec);

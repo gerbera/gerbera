@@ -169,7 +169,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     duk_pop(ctx);
 
     /* initialize contstants */
-    for (const auto& [field, sym] : ot_names) {
+    for (auto&& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
         duk_put_global_string(ctx, sym);
     }
@@ -208,25 +208,25 @@ Script::Script(std::shared_ptr<ContentManager> content,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif //ONLINE_SERVICES
 
-    for (const auto& [field, sym] : mt_keys) {
+    for (auto&& [field, sym] : mt_keys) {
         duk_push_string(ctx, sym);
-        for (const auto& [f, s] : mt_names) {
+        for (auto&& [f, s] : mt_names) {
             if (f == field) {
                 duk_put_global_string(ctx, s);
             }
         }
     }
 
-    for (const auto& [field, sym] : res_keys) {
+    for (auto&& [field, sym] : res_keys) {
         duk_push_string(ctx, sym);
-        for (const auto& [f, s] : res_names) {
+        for (auto&& [f, s] : res_names) {
             if (f == field) {
                 duk_put_global_string(ctx, s);
             }
         }
     }
 
-    for (const auto& [field, sym] : upnp_classes) {
+    for (auto&& [field, sym] : upnp_classes) {
         duk_push_string(ctx, field);
         duk_put_global_string(ctx, sym);
     }
@@ -242,16 +242,16 @@ Script::Script(std::shared_ptr<ContentManager> content,
         }
     }
 
-    for (const auto& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
         duk_push_object(ctx);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
-        for (const auto& [key, val] : dictionary) {
+        for (auto&& [key, val] : dictionary) {
             setProperty(key.substr(5), val);
         }
         duk_put_prop_string(ctx, -2, dcs->getItemPath(-1).c_str());
     }
 
-    for (const auto& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto duk_array = duk_push_array(ctx);
         for (size_t i = 0; i < array.size(); i++) {
@@ -264,11 +264,11 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     duk_push_object(ctx); // autoscan
     std::string autoscanItemPath;
-    for (const auto& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
-            const auto& entry = autoscan->get(i);
-            const auto& adir = this->content->getAutoscanDirectory(entry->getLocation());
+            auto&& entry = autoscan->get(i);
+            auto&& adir = this->content->getAutoscanDirectory(entry->getLocation());
 
             duk_push_object(ctx);
             setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
@@ -469,7 +469,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         // only metadata enumerated in mt_keys is allowed
-        for (const auto& [sym, upnp] : mt_keys) {
+        for (auto&& [sym, upnp] : mt_keys) {
             val = getProperty(upnp);
             if (!val.empty()) {
                 if (sym == M_TRACKNUMBER) {
@@ -511,7 +511,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             auto keys = getPropertyNames();
 
             int resCount = 0;
-            for (const auto& sym : keys) {
+            for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
                     resCount = stoiString(sym);
                     i = getIntProperty(sym, -1);
@@ -522,9 +522,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 }
             }
             resCount = 0;
-            for (const auto& res : obj->getResources()) {
+            for (auto&& res : obj->getResources()) {
                 // only attribute enumerated in res_keys is allowed
-                for (const auto& [key, upnp] : res_keys) {
+                for (auto&& [key, upnp] : res_keys) {
                     val = getProperty(resCount == 0 ? upnp : fmt::format("{}-{}", resCount, upnp));
                     if (!val.empty()) {
                         val = sc->convert(val);
@@ -532,7 +532,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                     }
                 }
                 auto head = fmt::format("{}#", resCount);
-                for (const auto& sym : keys) {
+                for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
                         val = getProperty(sym);
@@ -540,7 +540,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                     }
                 }
                 head = fmt::format("{}%", resCount);
-                for (const auto& sym : keys) {
+                for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
                         val = getProperty(sym);
@@ -556,7 +556,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
             duk_to_object(ctx, -1);
             auto keys = getPropertyNames();
-            for (const auto& sym : keys) {
+            for (auto&& sym : keys) {
                 val = getProperty(sym);
                 if (!val.empty()) {
                     val = sc->convert(val);
@@ -707,7 +707,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         // stack: js meta_js
 
         auto meta = obj->getMetadata();
-        for (const auto& [key, val] : meta) {
+        for (auto&& [key, val] : meta) {
             setProperty(key, val);
         }
 
@@ -731,7 +731,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 
-        for (const auto& [key, val] : aux) {
+        for (auto&& [key, val] : aux) {
             setProperty(key, val);
         }
 
@@ -746,18 +746,18 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
         if (obj->getResourceCount() > 0) {
             int resCount = 0;
-            for (const auto& res : obj->getResources()) {
+            for (auto&& res : obj->getResources()) {
                 setProperty(fmt::format("{}:handlerType", resCount), fmt::format("{}", res->getHandlerType()));
                 auto attributes = res->getAttributes();
-                for (const auto& [key, val] : attributes) {
+                for (auto&& [key, val] : attributes) {
                     setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), val);
                 }
                 auto parameters = res->getParameters();
-                for (const auto& [key, val] : parameters) {
+                for (auto&& [key, val] : parameters) {
                     setProperty(fmt::format("{}#{}", resCount, key), val);
                 }
                 auto options = res->getOptions();
-                for (const auto& [key, val] : options) {
+                for (auto&& [key, val] : options) {
                     setProperty(fmt::format("{}%{}", resCount, key), val);
                 }
                 resCount++;

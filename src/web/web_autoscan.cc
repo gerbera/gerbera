@@ -35,11 +35,6 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 
-static bool WebAutoscanProcessListComparator(const std::shared_ptr<AutoscanDirectory>& a1, const std::shared_ptr<AutoscanDirectory>& a2)
-{
-    return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0;
-}
-
 web::autoscan::autoscan(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
@@ -125,13 +120,13 @@ void web::autoscan::process()
 
         // --- sorting autoscans
 
-        std::sort(autoscanList.begin(), autoscanList.end(), WebAutoscanProcessListComparator);
+        std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0; });
 
         // ---
 
         auto autoscansEl = root.append_child("autoscans");
         xml2JsonHints->setArrayName(autoscansEl, "autoscan");
-        for (const auto& autoscanDir : autoscanList) {
+        for (auto&& autoscanDir : autoscanList) {
             auto autoscanEl = autoscansEl.append_child("autoscan");
             autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
 

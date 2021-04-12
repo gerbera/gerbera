@@ -81,7 +81,7 @@ public:
     static std::vector<std::shared_ptr<CS>> getConfigSetupList()
     {
         std::vector<std::shared_ptr<CS>> result;
-        for (const auto& co : complexOptions) {
+        for (auto&& co : complexOptions) {
             std::shared_ptr<CS> tco = std::dynamic_pointer_cast<CS>(co);
             if (tco != nullptr && tco->getValue() != nullptr) {
                 result.emplace_back(tco);

@@ -199,7 +199,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    for (const auto& el : *info) {
+    for (auto&& el : *info) {
         if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxTitle::ClassInfos.GlobalId) {
             auto title_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxTitle*>(el);
             if (title_el == nullptr) {
@@ -242,7 +242,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
         }
 
         if (isCoverArt) {
-            const auto& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
+            auto&& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
 
             if (p_io_handler != nullptr) {

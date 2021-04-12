@@ -60,7 +60,7 @@ void web::files::process()
     std::error_code ec;
     std::map<std::string, fs::path> filesMap;
 
-    for (const auto& it : fs::directory_iterator(path, ec)) {
+    for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
         if (!isRegularFile(it, ec))
@@ -73,7 +73,7 @@ void web::files::process()
     }
 
     auto f2i = StringConverter::f2i(config);
-    for (const auto& [key, val] : filesMap) {
+    for (auto&& [key, val] : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = key.c_str();
         fe.append_attribute("filename") = f2i->convert(val).c_str();

@@ -145,7 +145,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
             std::string value;
             std::string auxtag;
 
-            for (const auto& j : aux) {
+            for (auto&& j : aux) {
                 value = "";
                 auxtag = j;
                 log_debug("auxtag: {} ", auxtag.c_str());
