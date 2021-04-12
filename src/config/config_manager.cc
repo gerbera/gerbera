@@ -592,10 +592,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         std::map<std::string, std::string>({ { "640", "640" }, { "720", "720p" }, { "720p", "720p" } })),
 #endif
 
+#ifdef HAVE_INOTIFY
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_AUTOSCAN_USE_INOTIFY,
         "/import/autoscan/attribute::use-inotify", "config-import.html#autoscan",
         "auto", ConfigBoolSetup::CheckInotifyValue),
-#ifdef HAVE_INOTIFY
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
         "/import/autoscan", "config-import.html#autoscan",
         ScanMode::INotify),
@@ -1322,12 +1322,12 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_SERVER_ALIVE_INTERVAL);
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
-    auto useInotify = setOption(root, CFG_IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
-
     args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";
     setOption(root, CFG_IMPORT_AUTOSCAN_TIMED_LIST, &args);
 
 #ifdef HAVE_INOTIFY
+    auto useInotify = setOption(root, CFG_IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
+
     if (useInotify) {
         setOption(root, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
     } else {

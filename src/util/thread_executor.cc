@@ -45,7 +45,7 @@ void ThreadExecutor::startThread()
         this);
 
     if (ret != 0) {
-        log_error("Could not start thread: {}", std::strerror(errno));
+        log_error("Could not start thread: {}", std::strerror(ret));
     } else {
         threadRunning = true;
     }
