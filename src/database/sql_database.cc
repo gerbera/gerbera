@@ -171,7 +171,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
         throw_std_runtime_error("checkRefID called for a non-virtual object");
 
     int refID = obj->getRefID();
-    std::string location = obj->getLocation();
+    fs::path location = obj->getLocation();
 
     if (location.empty())
         throw_std_runtime_error("tried to check refID without a location set");
@@ -275,7 +275,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
-        std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
+        fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql["location"] = quote(dbLocation);
         cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
     }
@@ -290,7 +290,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             if (obj->isPureItem()) {
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                 obj->setParentID(parentID);
-                std::string dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
+                fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
                 cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
             } else {

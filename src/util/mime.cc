@@ -92,7 +92,7 @@ std::string Mime::bufferToMimeType(const void* buffer, size_t length)
 
 std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
 {
-    std::string extension = path.extension();
+    std::string extension = path.extension().string();
     if (!extension.empty())
         extension.erase(0, 1); // remove leading .
 
