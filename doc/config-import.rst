@@ -749,7 +749,7 @@ Here is some information on the auxdata: UPnP defines certain tags to pass along
 (like title, artist, year, etc.), however some media provides more metadata and exceeds the scope of UPnP.
 This additional metadata can be used to fine tune the server layout, it allows the user to create a more
 complex container structure using a customized import script. The metadata that can be extracted depends on the
-library, currently we support **taglib** (or id3lib if absent), **ffmpeg and libexif** which provide a default set of keys 
+library, currently we support **taglib** (or id3lib if absent), **ffmpeg and libexif** and **libexiv2** (if compiled with WITH_EXIV2 enabled) which provide a default set of keys
 that can be passed in the options below. The data according to those keys will the be extracted from the media and imported 
 into the database along with the item. When processing the item, the import script will have full access to the gathered 
 metadata, thus allowing the user to organize the data with the use of the extracted information. A practical example would be: 
@@ -967,3 +967,62 @@ A sample configuration for the example described above would be:
       </auxdata>
   </ffmpeg>
 
+``exiv2``
+----------
+
+.. code-block:: xml
+
+  <exiv2>
+
+* Optional
+
+These options apply to exiv2 libraries.
+
+**Child tags:**
+
+``auxdata``
+-----------
+
+.. code-block:: xml
+
+     <auxdata>
+
+* Optional
+
+Currently only adding keywords to auxdata is supported. `This page <https://www.exiv2.org/metadata.html>`_
+documents all of the metadata keys that exiv2 honors, depending on the format being encoded.
+
+ **Child tags:**
+
+``add-data``
+------------
+
+.. code-block:: xml
+
+    <add-data tag="Exif.Image.Model"/>
+    <add-data tag="Exif.Photo.DateTimeOriginal"/>
+    <add-data tag="Exif.Image.Orientation"/>
+    <add-data tag="Exif.Image.Rating"/>
+    <add-data tag="Xmp.xmp.Rating" />
+    <add-data tag="Xmp.dc.subject"/>
+    ...
+
+* Optional
+
+If the library was able to extract the data according to the given keyword, it will be added to auxdata.
+You can then use that data in your import scripts.
+
+A sample configuration for the example described above would be:
+
+.. code-block:: xml
+
+  <exiv2>
+      <auxdata>
+          <add-data tag="Exif.Image.Model"/>
+          <add-data tag="Exif.Photo.DateTimeOriginal"/>
+          <add-data tag="Exif.Image.Orientation"/>
+          <add-data tag="Exif.Image.Rating"/>
+          <add-data tag="Xmp.xmp.Rating" />
+          <add-data tag="Xmp.dc.subject"/>
+      </auxdata>
+  </exiv2>
