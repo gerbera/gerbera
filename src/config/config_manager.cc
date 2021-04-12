@@ -592,10 +592,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         std::map<std::string, std::string>({ { "640", "640" }, { "720", "720p" }, { "720p", "720p" } })),
 #endif
 
+#ifdef HAVE_INOTIFY
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_AUTOSCAN_USE_INOTIFY,
         "/import/autoscan/attribute::use-inotify", "config-import.html#autoscan",
         "auto", ConfigBoolSetup::CheckInotifyValue),
-#ifdef HAVE_INOTIFY
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
         "/import/autoscan", "config-import.html#autoscan",
         ScanMode::INotify),
