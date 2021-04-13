@@ -128,6 +128,9 @@ protected:
     /// \brief start the thread
     void startThread() override
     {
+#ifndef SOLARIS
+        // default scoping on solaroid systems is in fact PTHREAD_SCOPE_SYSTEM
+        // plus, setting PTHREAD_EXPLICIT_SCHED requires elevated priveleges
         if (config->getBoolOption(CFG_THREAD_SCOPE_SYSTEM)) {
             attr = new pthread_attr_t;
             pthread_attr_init(attr);
@@ -135,6 +138,7 @@ protected:
             pthread_attr_setinheritsched(attr, PTHREAD_EXPLICIT_SCHED);
             pthread_attr_setscope(attr, PTHREAD_SCOPE_SYSTEM);
         }
+#endif
 
         int ret = pthread_create(
             &thread,
