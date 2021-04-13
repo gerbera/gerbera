@@ -748,6 +748,9 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
             }
             if (!firstObject && objectID > 0) {
                 firstObject = database->loadObject(objectID);
+                if (firstObject->getClass() != UPNP_CLASS_MUSIC_TRACK) {
+                    firstObject = nullptr;
+                }
             }
         } else if (dirEnt.is_directory(ec) && asSetting.recursive) {
             int objectID = database->findObjectIDByPath(newPath);
@@ -890,7 +893,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
                 }
                 if (obj->isItem()) {
                     parentID = obj->getParentID();
-                    if (!firstObject) {
+                    if (!firstObject && obj->getClass() == UPNP_CLASS_MUSIC_TRACK) {
                         firstObject = obj;
                     }
                 }
