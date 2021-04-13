@@ -448,9 +448,9 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
     std::string predicates = node->emit();
     if (predicates.length() > 0) {
         std::ostringstream sql;
-        sql << "from mt_cds_object c "
-            << "inner join mt_metadata m on c.id = m.item_id "
-            << "where "
+        sql << "FROM mt_cds_object c "
+            << "INNER JOIN mt_metadata m ON c.id = m.item_id "
+            << "WHERE "
             << predicates;
         return sql.str();
     }
