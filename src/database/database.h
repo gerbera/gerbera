@@ -63,17 +63,19 @@ protected:
 
     int startingIndex;
     int requestedCount;
+    std::string sortCrit;
 
     // output parameters
     int totalMatches;
 
 public:
     BrowseParam(int objectID, unsigned int flags)
+        : flags(flags)
+        , objectID(objectID)
+        , startingIndex(0)
+        , requestedCount(0)
+        , sortCrit("")
     {
-        this->objectID = objectID;
-        this->flags = flags;
-        startingIndex = 0;
-        requestedCount = 0;
     }
 
     int getFlags() const { return flags; }
@@ -106,10 +108,15 @@ public:
         this->requestedCount = requestedCount;
     }
 
+    void setSortCriteria(const std::string& sortCrit)
+    {
+        this->sortCrit = sortCrit;
+    }
+
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
-
     int getTotalMatches() const { return totalMatches; }
+    const std::string& getSortCriteria() const { return sortCrit; }
 
     void setTotalMatches(int totalMatches)
     {
@@ -121,14 +128,16 @@ class SearchParam {
 protected:
     std::string containerID;
     std::string searchCrit;
+    std::string sortCrit;
     int startingIndex;
     int requestedCount;
 
 public:
-    SearchParam(std::string containerID, std::string searchCriteria, int startingIndex,
+    SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
         int requestedCount)
         : containerID(std::move(containerID))
         , searchCrit(std::move(searchCriteria))
+        , sortCrit(std::move(sortCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
     {
@@ -136,6 +145,7 @@ public:
     const std::string& searchCriteria() const { return searchCrit; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
+    const std::string& getSortCriteria() const { return sortCrit; }
 };
 
 class Database {
