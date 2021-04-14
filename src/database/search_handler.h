@@ -3,7 +3,7 @@
 
   search_handler.h - this file is part of Gerbera.
 
-  Copyright (C) 2018 Gerbera Contributors
+  Copyright (C) 2018-2021 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -372,10 +372,18 @@ public:
         const std::string& lhs, const std::string& rhs) const = 0;
 
     virtual ~SQLEmitter() = default;
-    virtual char tableQuote() const = 0;
+    virtual std::string tableQuote() const = 0;
 };
 
 class DefaultSQLEmitter : public SQLEmitter {
+public:
+    DefaultSQLEmitter(const std::string& tabQuote, const std::string& tableAlias, const std::string& metaAlias)
+        : tabQuote(tabQuote)
+        , tableAlias(tableAlias)
+        , metaAlias(metaAlias)
+    {
+    }
+
     std::string emitSQL(const ASTNode* node) const override;
     std::string emit(const ASTAsterisk* node) const override { return "*"; }
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
@@ -389,7 +397,12 @@ class DefaultSQLEmitter : public SQLEmitter {
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
-    char tableQuote() const override { return '"'; }
+    std::string tableQuote() const override { return tabQuote; }
+
+private:
+    std::string tabQuote;
+    std::string tableAlias;
+    std::string metaAlias;
 };
 
 class SearchParser {
