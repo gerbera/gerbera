@@ -174,9 +174,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
     }
-    // std::ostringstream osr;
-    // result.print(osr, "  ");
-    // log_debug("Rendered DIDL: {}", osr.str());
+#ifdef DEBUG_UPNP
+    std::ostringstream osr;
+    result.print(osr, "  ");
+    log_debug("Rendered DIDL: {}", osr.str());
+#endif
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()

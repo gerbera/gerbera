@@ -164,6 +164,7 @@ public:
     int ensurePathExistence(fs::path path, int* changedContainer) override;
 
     std::string getFsRootName() override;
+    static std::string getSortCapabilities();
 
     void clearFlagInDB(int flag) override;
 

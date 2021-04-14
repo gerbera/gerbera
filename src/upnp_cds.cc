@@ -37,6 +37,7 @@
 
 #include "config/config_manager.h"
 #include "database/database.h"
+#include "database/sql_database.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
@@ -56,10 +57,11 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     auto req = request->getRequest();
     auto req_root = req->document_element();
-
+#ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
         log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     }
+#endif
     std::string objID = req_root.child("ObjectID").text().as_string();
     std::string browseFlag = req_root.child("BrowseFlag").text().as_string();
     //std::string Filter; // not yet supported
@@ -132,6 +134,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::ostringstream buf;
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
+    log_debug("didl {}", didl_lite_xml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
@@ -150,10 +153,11 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
 
     auto req = request->getRequest();
     auto req_root = req->document_element();
-
+#ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
         log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     }
+#endif
     std::string containerID = req_root.child("ContainerID").text().as_string();
     std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
     std::string startingIndex = req_root.child("StartingIndex").text().as_string();
@@ -234,7 +238,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("*");
+    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
     request->setResponse(response);
 
     log_debug("end");

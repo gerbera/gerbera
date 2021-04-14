@@ -97,7 +97,9 @@ enum class BrowseCol {
 #define REF_ALIAS "rf"
 #define AUS_ALIAS "as"
 #define SRC_ALIAS "c"
+#define MTA_ALIAS "m"
 
+// map ensures entries are in correct order, each value of BrowseCol must be present
 const static std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap = {
     { BrowseCol::id, { ITM_ALIAS, "id" } },
     { BrowseCol::ref_id, { ITM_ALIAS, "ref_id" } },
@@ -128,6 +130,8 @@ const static std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::as_persistent, { AUS_ALIAS, "persistent" } },
 };
 
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
 const static std::vector<std::pair<std::string, BrowseCol>> browseSortMap = {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::part_number },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::track_number },
@@ -151,6 +155,7 @@ enum class SearchCol {
     location
 };
 
+// map ensures entries are in correct order, each value of SearchCol must be present
 const static std::map<SearchCol, std::pair<std::string, std::string>> searchColMap = {
     { SearchCol::id, { SRC_ALIAS, "id" } },
     { SearchCol::ref_id, { SRC_ALIAS, "ref_id" } },
@@ -164,6 +169,16 @@ const static std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
     { SearchCol::track_number, { SRC_ALIAS, "track_number" } },
     { SearchCol::location, { SRC_ALIAS, "location" } },
+};
+
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+const static std::vector<std::pair<std::string, SearchCol>> searchSortMap = {
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::part_number },
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::track_number },
+    { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::dc_title },
+    { "upnp:class", SearchCol::upnp_class },
+    { "path", SearchCol::location },
 };
 
 template <typename E>
@@ -199,11 +214,11 @@ void SQLDatabase::init()
 
     std::ostringstream buf;
     buf << "SELECT ";
-    for (auto&& col : browseColMap) {
-        if (col.first > BrowseCol::id) {
+    for (auto&& [key, col] : browseColMap) {
+        if (key > BrowseCol::id) {
             buf << ", ";
         }
-        buf << TQD(col.second.first, col.second.second);
+        buf << TQD(col.first, col.second);
     }
     buf << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(ITM_ALIAS);
     buf << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(REF_ALIAS) << " ON " << TQBM(BrowseCol::ref_id) << "=" << TQD(REF_ALIAS, browseColMap.at(BrowseCol::id).second);
@@ -212,20 +227,31 @@ void SQLDatabase::init()
 
     buf.str("");
     buf << "SELECT DISTINCT ";
-    for (auto&& col : searchColMap) {
-        if (col.first > SearchCol::id) {
+    for (auto&& [key, col] : searchColMap) {
+        if (key > SearchCol::id) {
             buf << ", ";
         }
-        buf << TQD(col.second.first, col.second.second);
+        buf << TQD(col.first, col.second);
     }
     this->sql_search_query = buf.str();
 
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>();
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(fmt::format("{}", table_quote_begin), SRC_ALIAS, MTA_ALIAS);
 }
 
 void SQLDatabase::shutdown()
 {
     shutdownDriver();
+}
+
+std::string SQLDatabase::getSortCapabilities()
+{
+    auto sortKeys = std::vector<std::string>();
+    for (auto&& [key, col] : browseSortMap) {
+        if (std::find(sortKeys.begin(), sortKeys.end(), key) != sortKeys.end()) {
+            sortKeys.emplace_back(key);
+        }
+    }
+    return join(sortKeys, ',');
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObject>& obj)
@@ -554,7 +580,6 @@ std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const s
 {
     std::ostringstream sortSql;
     if (!sortCrit.empty()) {
-        sortSql << " ORDER BY ";
         bool firstEntry = true;
         for (auto&& seg : splitString(sortCrit, ',')) {
             if (firstEntry) {
@@ -624,7 +649,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         std::ostringstream orderQb;
         if (param->getFlag(BROWSE_TRACK_SORT)) {
             orderQb << TQBM(BrowseCol::part_number) << ',';
-            orderQb << TQBM(BrowseCol::track_number) << ',';
+            orderQb << TQBM(BrowseCol::track_number);
         } else {
             orderQb << parseSortStatement(param->getSortCriteria(), browseSortMap, browseColMap);
         }
@@ -717,10 +742,22 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     std::ostringstream retrievalSQL;
     retrievalSQL << sql_search_query << " " << searchSQL;
+
+    // order by code..
+    auto orderByCode = [&]() {
+        std::ostringstream orderQb;
+        orderQb << parseSortStatement(param->getSortCriteria(), searchSortMap, searchColMap);
+        if (orderQb.str().empty()) {
+            orderQb << TQSM(SearchCol::id);
+        }
+        return orderQb.str();
+    };
+
+    retrievalSQL << " ORDER BY " << orderByCode();
+
     int startingIndex = param->getStartingIndex(), requestedCount = param->getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
-        retrievalSQL << " ORDER BY c.id"
-                     << " LIMIT " << (requestedCount == 0 ? 10000000000 : requestedCount)
+        retrievalSQL << " LIMIT " << (requestedCount == 0 ? 10000000000 : requestedCount)
                      << " OFFSET " << startingIndex;
     }
 
@@ -801,8 +838,8 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
     qb << sql_browse_query
        << " WHERE " << TQBM(BrowseCol::location_hash) << '=' << quote(stringHash(dbLocation))
        << " AND " << TQBM(BrowseCol::location) << '=' << quote(dbLocation)
-       << " AND " << TQBM(BrowseCol::ref_id) << " IS NULL "
-                                                "LIMIT 1";
+       << " AND " << TQBM(BrowseCol::ref_id) << " IS NULL"
+                                                " LIMIT 1";
 
     auto res = select(qb);
     if (res == nullptr)
@@ -851,14 +888,6 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
             throw_std_runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
-
-    /*std::map<std::string,std::string> metadata;
-    if (!itemMetadata.empty()) {
-        if (upnpClass == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) {
-            metadata["artist"] = getValueOrDefault(itemMetadata, "artist");
-            metadata["date"] = getValueOrDefault(itemMetadata, "date");
-        }
-    }*/
 
     std::ostringstream qb;
     qb << "INSERT INTO "
