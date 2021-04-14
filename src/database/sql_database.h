@@ -182,6 +182,7 @@ protected:
 private:
     std::string sql_browse_query;
     std::string sql_search_query;
+    std::string sql_meta_query;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
