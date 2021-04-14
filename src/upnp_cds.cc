@@ -37,6 +37,7 @@
 
 #include "config/config_manager.h"
 #include "database/database.h"
+#include "database/sql_database.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
@@ -56,15 +57,20 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     auto req = request->getRequest();
     auto req_root = req->document_element();
+#ifdef DEBUG_UPNP
+    for (auto&& child : req_root.children()) {
+        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
+    }
+#endif
     std::string objID = req_root.child("ObjectID").text().as_string();
-    std::string BrowseFlag = req_root.child("BrowseFlag").text().as_string();
+    std::string browseFlag = req_root.child("BrowseFlag").text().as_string();
     //std::string Filter; // not yet supported
-    std::string StartingIndex = req_root.child("StartingIndex").text().as_string();
-    std::string RequestedCount = req_root.child("RequestedCount").text().as_string();
-    // std::string SortCriteria; // not yet supported
+    std::string startingIndex = req_root.child("StartingIndex").text().as_string();
+    std::string requestedCount = req_root.child("RequestedCount").text().as_string();
+    std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
 
-    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}]",
-        objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
+    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
+        objID.c_str(), browseFlag.c_str(), startingIndex.c_str(), requestedCount.c_str(), sortCriteria.c_str());
 
     int objectID;
     if (objID.empty())
@@ -74,14 +80,14 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
-    if (BrowseFlag == "BrowseDirectChildren")
+    if (browseFlag == "BrowseDirectChildren")
         flag |= BROWSE_DIRECT_CHILDREN;
-    else if (BrowseFlag != "BrowseMetadata")
+    else if (browseFlag != "BrowseMetadata")
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
-            "invalid browse flag: " + BrowseFlag);
+            "Invalid browse flag: " + browseFlag);
 
     auto parent = database->loadObject(objectID);
-    if ((parent->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
+    if (sortCriteria.empty() && (parent->getClass() == UPNP_CLASS_MUSIC_ALBUM || parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
@@ -89,13 +95,15 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     auto param = std::make_unique<BrowseParam>(objectID, flag);
 
-    param->setStartingIndex(stoiString(StartingIndex));
-    param->setRequestedCount(stoiString(RequestedCount));
+    param->setStartingIndex(stoiString(startingIndex));
+    param->setRequestedCount(stoiString(requestedCount));
+    param->setSortCriteria(trimString(sortCriteria));
 
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
         arr = database->browse(param);
     } catch (const std::runtime_error& e) {
+        log_error("No such object: {}", e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
@@ -126,6 +134,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::ostringstream buf;
     didl_lite.print(buf, "", 0);
     std::string didl_lite_xml = buf.str();
+    log_debug("didl {}", didl_lite_xml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto resp_root = response->document_element();
@@ -144,17 +153,19 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
 
     auto req = request->getRequest();
     auto req_root = req->document_element();
-
-    // for (auto&& child : req_root.children()) {
-    //     log_debug("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
-    // }
+#ifdef DEBUG_UPNP
+    for (auto&& child : req_root.children()) {
+        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
+    }
+#endif
     std::string containerID = req_root.child("ContainerID").text().as_string();
     std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
     std::string startingIndex = req_root.child("StartingIndex").text().as_string();
     std::string requestedCount = req_root.child("RequestedCount").text().as_string();
+    std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
 
-    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
-        containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
+        containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str(), requestedCount.c_str());
 
     pugi::xml_document didl_lite;
     auto decl = didl_lite.prepend_child(pugi::node_declaration);
@@ -166,7 +177,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
-    auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
+    auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount));
 
     std::vector<std::shared_ptr<CdsObject>> results;
@@ -227,7 +238,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("");
+    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
     request->setResponse(response);
 
     log_debug("end");

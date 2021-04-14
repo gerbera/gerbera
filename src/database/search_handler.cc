@@ -3,7 +3,7 @@
 
   search_handler.cc - this file is part of Gerbera.
 
-  Copyright (C) 2018 Gerbera Contributors
+  Copyright (C) 2018-2021 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -33,6 +33,11 @@
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "util/tools.h"
+
+/* table quote */
+#define TQ(data) this->tabQuote << (data) << this->tabQuote
+/* table quote with dot */
+#define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
 
 static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "(", TokenType::LPAREN },
@@ -448,9 +453,9 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
     std::string predicates = node->emit();
     if (predicates.length() > 0) {
         std::ostringstream sql;
-        sql << "from mt_cds_object c "
-            << "inner join mt_metadata m on c.id = m.item_id "
-            << "where "
+        sql << "FROM mt_cds_object " << TQ(tableAlias)
+            << " INNER JOIN mt_metadata " << TQ(metaAlias) << " ON " << TQD(tableAlias, "id") << " = " << TQD(metaAlias, "item_id")
+            << " WHERE "
             << predicates;
         return sql.str();
     }
@@ -469,11 +474,11 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
 {
     auto operatr = node->getValue();
     if (operatr != "=")
-        throw_std_runtime_error("operator not yet supported");
+        throw_std_runtime_error("operator {} not yet supported", operatr);
 
     std::ostringstream sqlFragment;
-    sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value)"
-                << operatr << "lower('" << value << "') and c.upnp_class is not null)";
+    sqlFragment << "(" << TQD(metaAlias, "property_name") << "='" << property << "' AND LOWER(" << TQD(metaAlias, "property_value") << ")"
+                << operatr << "LOWER('" << value << "') AND " << TQD(tableAlias, "upnp_class") << " IS NOT NULL)";
     return sqlFragment.str();
 }
 
@@ -483,25 +488,25 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     auto lcOperator = aslowercase(node->getValue());
     if (lcOperator != "contains" && lcOperator != "doesnotcontain" && lcOperator != "derivedfrom"
         && lcOperator != "startswith")
-        throw_std_runtime_error("operator not supported");
+        throw_std_runtime_error("operator {} not yet supported", lcOperator);
 
     std::ostringstream sqlFragment;
     if (lcOperator == "contains") {
-        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "like"
-                    << " lower('%" << value << "%') and c.upnp_class is not null)";
+        sqlFragment << "(" << TQD(metaAlias, "property_name") << "='" << property << "' AND LOWER(" << TQD(metaAlias, "property_value") << ") "
+                    << "LIKE"
+                    << " LOWER('%" << value << "%') AND " << TQD(tableAlias, "upnp_class") << " IS NOT NULL)";
     } else if (lcOperator == "doesnotcontain") {
-        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "not like"
-                    << " lower('%" << value << "%') and c.upnp_class is not null)";
+        sqlFragment << "(" << TQD(metaAlias, "property_name") << "='" << property << "' AND LOWER(" << TQD(metaAlias, "property_value") << ") "
+                    << "NOT LIKE"
+                    << " LOWER('%" << value << "%') AND " << TQD(tableAlias, "upnp_class") << " IS NOT NULL)";
     } else if (lcOperator == "startswith") {
-        sqlFragment << "(m.property_name='" << property << "' and lower(m.property_value) "
-                    << "like"
-                    << " lower('" << value << "%') and c.upnp_class is not null)";
+        sqlFragment << "(" << TQD(metaAlias, "property_name") << "='" << property << "' AND LOWER(" << TQD(metaAlias, "property_value") << ") "
+                    << "LIKE"
+                    << " LOWER('" << value << "%') AND " << TQD(tableAlias, "upnp_class") << " IS NOT NULL)";
     } else if (lcOperator == "derivedfrom") {
-        sqlFragment << "c.upnp_class "
-                    << "like"
-                    << " lower('" << value << "%')";
+        sqlFragment << TQD(tableAlias, "upnp_class")
+                    << " LIKE"
+                    << " LOWER('" << value << "%')";
     }
     return sqlFragment.str();
 }
@@ -512,13 +517,13 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
     std::ostringstream sqlFragment;
     std::string exists;
     if (value == "true") {
-        exists = "not null";
+        exists = "NOT NULL";
     } else if (value == "false") {
-        exists = "null";
+        exists = "NULL";
     } else {
         throw_std_runtime_error("invalid value on rhs of exists operator");
     }
-    sqlFragment << "(m.property_name='" << property << "' and m.property_value is " << exists << " and c.upnp_class is not null)";
+    sqlFragment << "(" << TQD(metaAlias, "property_name") << "='" << property << "' AND " << TQD(metaAlias, "property_value") << " IS " << exists << " AND " << TQD(tableAlias, "upnp_class") << " IS NOT NULL)";
     return sqlFragment.str();
 }
 
@@ -526,7 +531,7 @@ std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::strin
     const std::string& rhs) const
 {
     std::ostringstream sqlFragment;
-    sqlFragment << lhs << " and " << rhs;
+    sqlFragment << lhs << " AND " << rhs;
     return sqlFragment.str();
 }
 
@@ -534,6 +539,6 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
     const std::string& rhs) const
 {
     std::ostringstream sqlFragment;
-    sqlFragment << lhs << " or " << rhs;
+    sqlFragment << lhs << " OR " << rhs;
     return sqlFragment.str();
 }
