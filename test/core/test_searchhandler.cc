@@ -372,11 +372,19 @@ TEST(SearchParser, SearchCriteriaWithExtendsOperator)
     DefaultSQLEmitter sqlEmitter("", "c", "m");
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\"",
-        "c.upnp_class LIKE LOWER('object.item.audioItem%')"));
+        "(LOWER(c.upnp_class) LIKE LOWER('object.item.audioItem%'))"));
 
     // derivedfromOpExpr and (containsOpExpr or containsOpExpr)
-    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "c.upnp_class LIKE LOWER('object.item.audioItem%') AND ((m.property_name='dc:title' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL) OR (m.property_name='dc:creator' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL))"));
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "(LOWER(c.upnp_class) LIKE LOWER('object.item.audioItem%')) AND ((m.property_name='dc:title' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL) OR (m.property_name='dc:creator' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL))"));
 
     // derivedFromOpExpr and (containsOpExpr or containsOpExpr)
-    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedFrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "c.upnp_class LIKE LOWER('object.item.audioItem%') AND ((m.property_name='dc:title' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL) OR (m.property_name='dc:creator' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL))"));
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedFrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"", "(LOWER(c.upnp_class) LIKE LOWER('object.item.audioItem%')) AND ((m.property_name='dc:title' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL) OR (m.property_name='dc:creator' AND LOWER(m.property_value) LIKE LOWER('%britain%') AND c.upnp_class IS NOT NULL))"));
+}
+
+TEST(SearchParser, SearchCriteriaWindowMedia)
+{
+    DefaultSQLEmitter sqlEmitter("", "c", "m");
+    // derivedfromOpExpr
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.videoItem\" and @refID exists false",
+        "(LOWER(c.upnp_class) LIKE LOWER('object.item.videoItem%')) AND (c.ref_id IS NULL)"));
 }

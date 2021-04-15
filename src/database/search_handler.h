@@ -403,6 +403,8 @@ private:
     std::string tabQuote;
     std::string tableAlias;
     std::string metaAlias;
+
+    std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
 };
 
 class SearchParser {

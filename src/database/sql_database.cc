@@ -549,7 +549,6 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 {
     std::ostringstream qb;
-    //log_debug("sql_query = {}",sql_query.c_str());
 
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::id) << '=' << objectID;
 
@@ -558,6 +557,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     if (res != nullptr && (row = res->nextRow()) != nullptr) {
         return createObjectFromRow(row);
     }
+    log_debug("sql_query = {}", qb.str());
     throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
 }
 
@@ -696,7 +696,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         qb << TQBM(BrowseCol::parent_id) << '=' << objectID;
 
         if (objectID == CDS_ID_ROOT && hideFsRoot)
-            qb << " AND " << TQD('f', "id") << "!=" << quote(CDS_ID_FS_ROOT);
+            qb << " AND " << TQBM(BrowseCol::id) << "!=" << quote(CDS_ID_FS_ROOT);
 
         if (!getContainers && !getItems) {
             qb << " AND 0=1";
@@ -1439,16 +1439,19 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     bool all)
 {
     log_debug("start");
+    // select statements
     std::ostringstream itemsSql;
     itemsSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
-             << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("ref_id") << " IN (";
+             << " FROM " << TQ(CDS_OBJECT_TABLE)
+             << " WHERE " << TQ("ref_id") << " IN (";
 
     std::ostringstream containersSql;
-    containersSql << "SELECT DISTINCT " << TQ("id")
-                  << ',' << TQ("object_type");
-    if (all)
+    containersSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("object_type");
+    if (all) {
         containersSql << ',' << TQ("ref_id");
-    containersSql << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("parent_id") << " IN (";
+    }
+    containersSql << " FROM " << TQ(CDS_OBJECT_TABLE)
+                  << " WHERE " << TQ("parent_id") << " IN (";
 
     std::ostringstream parentsSql;
     parentsSql << "SELECT DISTINCT " << TQ("parent_id")
@@ -1465,13 +1468,14 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     std::vector<int32_t> parentIds(items);
     std::vector<int32_t> removeIds(containers);
 
+    // collect container for update signals
     if (!containers.empty()) {
         parentIds.insert(parentIds.end(), containers.begin(), containers.end());
         std::ostringstream sql;
         sql << parentsSql.str() << join(parentIds, ',') << ')';
         res = select(sql);
         if (res == nullptr)
-            throw DatabaseException("", "sql error");
+            throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
         parentIds.clear();
         while ((row = res->nextRow()) != nullptr) {
             changedContainers->ui.push_back(std::stoi(row->col(0)));
@@ -1480,6 +1484,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
     int count = 0;
     while (!itemIds.empty() || !parentIds.empty() || !containerIds.empty()) {
+        // collect child entries
         if (!parentIds.empty()) {
             // add ids to remove
             removeIds.insert(removeIds.end(), parentIds.begin(), parentIds.end());
@@ -1487,19 +1492,20 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             sql << parentsSql.str() << join(parentIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw DatabaseException("", std::string("sql error: ") + sql.str());
+                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             parentIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 changedContainers->upnp.push_back(std::stoi(row->col(0)));
             }
         }
 
+        // collect entries
         if (!itemIds.empty()) {
             std::ostringstream sql;
             sql << itemsSql.str() << join(itemIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw DatabaseException("", std::string("sql error: ") + sql.str());
+                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             itemIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 removeIds.push_back(std::stoi(row->col(0)));
@@ -1507,12 +1513,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             }
         }
 
+        // collect entries in container
         if (!containerIds.empty()) {
             std::ostringstream sql;
             sql << containersSql.str() << join(containerIds, ',') << ')';
             res = select(sql);
             if (res == nullptr)
-                throw DatabaseException("", std::string("sql error: ") + sql.str());
+                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             containerIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 int objectType = std::stoi(row->col(1));
@@ -1538,13 +1545,14 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             }
         }
 
+        // remove entries found
         if (removeIds.size() > MAX_REMOVE_SIZE) {
             _removeObjects(removeIds);
             removeIds.clear();
         }
 
         if (count++ > MAX_REMOVE_RECURSION)
-            throw_std_runtime_error("there seems to be an infinite loop...");
+            throw_std_runtime_error("There seems to be an infinite loop...");
     }
 
     if (!removeIds.empty())
