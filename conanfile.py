@@ -39,11 +39,11 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "fmt/7.0.1",
-        "spdlog/1.8.2",
+        "fmt/[>=7.1.3]",
+        "spdlog/[>=1.8.5]",
         "pugixml/1.10",
         "libiconv/1.16",
-        "sqlite3/3.31.1",
+        "sqlite3/[>3.31.1]",
         "zlib/1.2.11",
         "pupnp/[>=1.14.0]",
     ]
@@ -71,10 +71,9 @@ class GerberaConan(ConanFile):
             self.requires("duktape/2.5.0")
 
         if self.options.curl:
-            self.requires("libcurl/7.74.0")
+            self.requires("libcurl/[>=7.74.0]")
 
         if self.options.mysql:
-            self.requires("openssl/1.1.1i")
             self.requires("mariadb-connector-c/3.1.11")
 
         if not self._needs_system_uuid:
