@@ -42,8 +42,9 @@ MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
 fs::path MetacontentHandler::getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& obj, bool isCaseSensitive, fs::path folder)
 {
     if (!names.empty()) {
-        if (folder.empty())
-            folder = obj->getLocation().parent_path();
+        if (folder.empty()) {
+            folder = (obj->isContainer()) ? obj->getLocation() : obj->getLocation().parent_path();
+        }
         log_debug("Folder name: {}", folder.c_str());
 
         if (isCaseSensitive) {
@@ -99,8 +100,11 @@ std::string MetacontentHandler::expandName(const std::string& name, const std::s
         replaceString(copy, "%filename%", location.stem());
     }
     if (obj->isContainer()) {
-        auto location = obj->getTitle();
-        replaceString(copy, "%filename%", location);
+        auto title = obj->getTitle();
+        if (!title.empty())
+            replaceString(copy, "%filename%", title);
+        fs::path location = obj->getLocation();
+        replaceString(copy, "%filename%", location.filename());
     }
     return copy;
 }
@@ -189,9 +193,10 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
 
 void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
-    // auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(obj->getLocation());
-    // auto path = getContentPath(tweak == nullptr || !tweak->hasContainerArtFile() ? names : std::vector<std::string> { tweak->getContainerArtFile() }, obj, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
     auto path = getContentPath(names, obj, caseSensitive, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
+    if (path.empty()) {
+        path = getContentPath(names, obj, caseSensitive);
+    }
     log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
 
     if (!path.empty()) {
@@ -212,9 +217,10 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<Cds
 {
     fs::path path = obj->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
-        // auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(obj->getLocation());
-        // path = getContentPath(tweak == nullptr && !tweak->hasContainerArtFile() ? names : std::vector<std::string> { tweak->getContainerArtFile() }, obj, tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : caseSensitive);
         path = getContentPath(names, obj, caseSensitive, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
+        if (path.empty()) {
+            path = getContentPath(names, obj, caseSensitive);
+        }
     }
     log_debug("ContainerArt: Opening name: {}", path.c_str());
     struct stat statbuf;
