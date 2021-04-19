@@ -316,3 +316,47 @@ The Gerbera Team maintains a Homebrew Tap to build and install Gerbera Media Ser
 at the Homebrew formula to see an example of how to compile Gerbera on macOS.
 
 `homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`_
+
+
+
+.. index:: Build Docker Container On Ubuntu
+
+Build Docker Container On Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Install required tools in Ubuntu
+
+::
+
+  sudo apt-get install docker.io git
+
+Simplest way of building:
+
+::
+
+  sudo docker build https://github.com/gerbera/gerbera.git
+
+After successfull build you should get something like
+
+::
+
+  Successfully built a13ccc793373
+
+Afterwards start the container like described in the `Gerbera Docker <https://hub.docker.com/r/gerbera/gerbera>`_
+documentation while replacing "gerbera/gerbera:vX.X.X" with the unique ID reported at the end of the build.
+
+To change the compile options of Gerbera split up the process.
+Download the project:
+
+::
+
+  git clone https://github.com/gerbera/gerbera.git
+
+Then modify the compile parameter values in gerbera/Dockerfile. Also additional libraries might be required.
+E.g. to build a container with exiv2 support add the compile option "-DWITH_EXIV2=YES" and the library
+"exiv2-dev" in the first "RUN apk" command and "exiv2" in the second "RUN apk" command in the gerbera/Dockerfile.
+To start the build enter
+
+::
+
+  sudo docker build gerbera/
