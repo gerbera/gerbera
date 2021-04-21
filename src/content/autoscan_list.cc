@@ -142,7 +142,7 @@ void AutoscanList::remove(size_t id, bool edit)
             return;
         }
         auto&& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [=](auto&& item) { return dir->getScanID() == item->getScanID(); });
+        auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getScanID()](auto&& item) { return loc == item->getScanID(); });
         dir->setScanID(INVALID_SCAN_ID);
         list.erase(entry);
 

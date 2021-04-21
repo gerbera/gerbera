@@ -118,7 +118,7 @@ void ClientConfigList::remove(size_t id, bool edit)
             return;
         }
         auto&& client = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [&](auto&& item) { return client->getIp() == item->getIp() && client->getUserAgent() == item->getUserAgent(); });
+        auto entry = std::find_if(list.begin(), list.end(), [ip = client->getIp(), user = client->getUserAgent()](auto&& item) { return ip == item->getIp() && user == item->getUserAgent(); });
         list.erase(entry);
         if (id >= origSize) {
             indexMap.erase(id);
