@@ -122,7 +122,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             log_debug("Identified metadata album: {}", e->value);
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
-            if ((value.length() == 4) && std::all_of(value.begin(), value.end(), [](auto c) { return std::isdigit(c); }) && (std::stoi(value) > 0)) {
+            if ((value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
                 value.append("-01-01");
                 log_debug("Identified metadata date: {}", value.c_str());
             }

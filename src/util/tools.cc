@@ -102,12 +102,12 @@ std::vector<std::string> splitString(const std::string& str, char sep, bool empt
 
 void leftTrimStringInPlace(std::string& str)
 {
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](auto ch) { return !std::isspace(ch); }));
+    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));
 }
 
 void rightTrimStringInPlace(std::string& str)
 {
-    str.erase(std::find_if(str.rbegin(), str.rend(), [](auto ch) { return !std::isspace(ch); }).base(), str.end());
+    str.erase(std::find_if_not(str.rbegin(), str.rend(), ::isspace).base(), str.end());
 }
 
 void trimStringInPlace(std::string& str)
