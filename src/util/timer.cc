@@ -72,7 +72,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds
     TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
 
     if (!subscribers.empty()) {
-        bool err = std::any_of(subscribers.begin(), subscribers.end(), [&](auto&& subscriber) { return subscriber == element; });
+        bool err = std::find(subscribers.begin(), subscribers.end(), element) != subscribers.end();
         if (err) {
             throw_std_runtime_error("Tried to add same timer twice");
         }
