@@ -666,7 +666,7 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
 bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
     // create default structure
-    if (std::distance(value.begin(), value.end()) == 0) {
+    if (value.empty()) {
         result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_1));
         result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_2));
         result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_3));
