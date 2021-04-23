@@ -113,16 +113,16 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
         default:
             if (inQuotes) {
                 auto quotedStr = getQuotedValue(input);
-                if (quotedStr.length())
+                if (!quotedStr.empty())
                     return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
             }
             if (std::isspace(ch)) {
                 currentPos++;
             } else {
                 auto tokenStr = nextStringToken(input);
-                if (tokenStr.length()) {
+                if (!tokenStr.empty()) {
                     std::unique_ptr<SearchToken> token = makeToken(tokenStr);
-                    if (token->getValue().length())
+                    if (!token->getValue().empty())
                         return token;
                 }
             }
@@ -451,7 +451,7 @@ std::string ASTOrOperator::emit() const
 std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
     std::string predicates = node->emit();
-    if (predicates.length() > 0) {
+    if (!predicates.empty()) {
         std::ostringstream sql;
         sql << "FROM " << TQ(CDS_OBJECT_TABLE) << " " << TQ(tableAlias)
             << " INNER JOIN " << TQ(METADATA_TABLE) << " " << TQ(metaAlias) << " ON " << TQD(tableAlias, "id") << " = " << TQD(metaAlias, "item_id")
