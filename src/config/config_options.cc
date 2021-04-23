@@ -88,13 +88,14 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     if (!forEdit)
         return option;
 
-    std::vector<std::string> editOption;
     auto editSize = getEditSize();
+    std::vector<std::string> editOption;
+    editOption.reserve(editSize);
     for (size_t i = 0; i < editSize; i++) {
         if (indexMap.at(i) < std::numeric_limits<std::size_t>::max()) {
-            editOption.emplace_back(option[indexMap.at(i)]);
+            editOption.push_back(option[indexMap.at(i)]);
         } else {
-            editOption.emplace_back("");
+            editOption.push_back("");
         }
     }
     return editOption;
