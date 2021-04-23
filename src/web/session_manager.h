@@ -80,7 +80,7 @@ public:
 
     void logOut() { loggedIn = false; }
 
-    void access() { getTimespecNow(last_access); }
+    void access() { last_access = currentTime(); }
 
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the database for the ids

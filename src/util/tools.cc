@@ -763,11 +763,6 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
     return array->empty() ? "" : join(*array, ",");
 }
 
-void getTimespecNow(std::chrono::seconds& ts)
-{
-    ts = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
-}
-
 std::chrono::seconds currentTime()
 {
     return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());

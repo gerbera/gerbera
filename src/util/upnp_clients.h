@@ -74,8 +74,8 @@ struct ClientInfo {
 struct ClientCacheEntry {
     struct sockaddr_storage addr;
     std::string userAgent;
-    std::chrono::time_point<std::chrono::steady_clock> last;
-    std::chrono::time_point<std::chrono::steady_clock> age;
+    std::chrono::seconds last;
+    std::chrono::seconds age;
     const struct ClientInfo* pInfo;
 };
 

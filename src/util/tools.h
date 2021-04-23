@@ -249,7 +249,6 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 
 std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array);
 
-void getTimespecNow(std::chrono::seconds& ts);
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();
 

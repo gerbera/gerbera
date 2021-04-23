@@ -39,10 +39,9 @@ web::clients::clients(std::shared_ptr<ContentManager> content)
 {
 }
 
-static std::string steady_clock_to_string(const std::chrono::steady_clock::time_point& t)
+static std::string seconds_to_string(const std::chrono::seconds& t)
 {
-    auto systime = std::chrono::duration_cast<std::chrono::system_clock::duration>(t - std::chrono::steady_clock::now()) + std::chrono::system_clock::now();
-    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(systime.time_since_epoch().count()));
+    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));
 }
 
 void web::clients::process()
@@ -60,8 +59,8 @@ void web::clients::process()
         item.append_attribute("ip") = ip.c_str();
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&obj.addr));
         item.append_attribute("host") = hostName.c_str();
-        item.append_attribute("time") = steady_clock_to_string(obj.age).c_str();
-        item.append_attribute("last") = steady_clock_to_string(obj.last).c_str();
+        item.append_attribute("time") = seconds_to_string(obj.age).c_str();
+        item.append_attribute("last") = seconds_to_string(obj.last).c_str();
         item.append_attribute("userAgent") = obj.userAgent.c_str();
         item.append_attribute("name") = obj.pInfo->name.c_str();
         item.append_attribute("match") = obj.pInfo->match.c_str();
