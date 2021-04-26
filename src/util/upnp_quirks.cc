@@ -57,6 +57,35 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_pt
     }
 }
 
+void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const
+{
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+        return;
+
+    log_debug("Call for Samsung extension: X_GetFeatureList");
+
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto features = response->append_child("FeatureList").append_child("Features").append_child("Feature");
+    features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
+    features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
+    features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
+    auto feature = features.append_child("Feature");
+    feature.append_attribute("name") = "samsung.com_BASICVIEW";
+    feature.append_attribute("version") = "1";
+    feature.append_attribute("version") = "1";
+    constexpr auto containers = std::array<std::pair<std::string_view, std::string_view>, 3> { {
+        { "object.item.audioItem", "0" },
+        { "object.item.videoItem", "0" },
+        { "object.item.imageItem", "0" },
+    } };
+    for (auto&& [type, id] : containers) {
+        auto container = feature.append_child("container");
+        container.append_attribute("id") = id.data();
+        container.append_attribute("type") = type.data();
+    }
+    request->setResponse(response);
+}
+
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)

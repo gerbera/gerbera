@@ -265,6 +265,15 @@ void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequ
     log_debug("end");
 }
 
+void ContentDirectoryService::doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungFeatureList(request);
+
+    log_debug("end");
+}
+
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
@@ -281,11 +290,12 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
         doSearch(request);
     } else if (request->getActionName() == "X_SetBookmark") {
         doSamsungBookmark(request);
+    } else if (request->getActionName() == "X_GetFeatureList") {
+        doSamsungFeatureList(request);
     } else {
         // invalid or unsupported action
         log_warning("Unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("ContentDirectoryService::processActionRequest: end");
