@@ -975,7 +975,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
         if (attrKey.find_first_of("attribute::") != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
         }
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (!parentOptions.count(s->option) || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&](auto&& o) { return o == s->option; })); });
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
 
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
@@ -1510,7 +1510,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
 {
-    if (!origValues.count(item)) {
+    if (origValues.find(item) == origValues.end()) {
         log_debug("Caching {}='{}'", item, value);
         origValues[item] = value;
     }

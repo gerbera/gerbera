@@ -515,7 +515,7 @@ const static std::map<std::string, std::string> logicOperator = {
 std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
     if (property[0] == '@' || property.substr(0, 3) == "res") {
-        if (propertyStatement.count(property) && propertyLowerStatement.count(property)) {
+        if (propertyStatement.find(property) != propertyStatement.end() && propertyLowerStatement.find(property) != propertyLowerStatement.end()) {
             return {
                 fmt::format(propertyStatement.at(property), tabQuote, metaAlias, tableAlias, property),
                 fmt::format(propertyLowerStatement.at(property), tabQuote, metaAlias, tableAlias, property)
@@ -544,7 +544,7 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
 std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property, const std::string& value) const
 {
     auto stringOperator = aslowercase(node->getValue());
-    if (!logicOperator.count(stringOperator)) {
+    if (logicOperator.find(stringOperator) == logicOperator.end()) {
         throw_std_runtime_error("Operation '{}' not yet supported", stringOperator);
     }
     auto prpStmnt = getPropertyStatement(property);
