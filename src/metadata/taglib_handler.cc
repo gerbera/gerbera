@@ -445,7 +445,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (textFrame == nullptr)
                     continue;
-                TagLib::String frameContents = textFrame->toString();
+                TagLib::String frameContents = textFrame->fieldList().toString(entrySeparator);
                 if (!value.empty())
                     value += entrySeparator;
                 if (!legacyEntrySeparator.empty())
@@ -466,12 +466,21 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (textFrame == nullptr)
                     continue;
-                const TagLib::String frameContents = textFrame->toString();
-                std::string value(frameContents.toCString(true));
-
-                size_t subTagEnd = value.find(']');
-                std::string subTag = value.substr(1, subTagEnd - 1); // Cut out brackets
-                std::string content = value.substr(subTagEnd + 2); // Skip bracket and space
+                std::string content = "";
+                std::string subTag = "";
+                TagLib::StringList fieldList = textFrame->fieldList();
+                for(TagLib::StringList::ConstIterator idx = fieldList.begin(); idx != fieldList.end(); ++idx) {
+                    if (idx == fieldList.begin()){
+                        // first element is subTag name
+                        subTag = (*idx).toCString(true);
+                    } else {
+                        content += (*idx).toCString(true) + entrySeparator;
+                    }
+                }
+        
+                // remove entrySeparator at the end again
+                if (content.length() - entrySeparator.length() > 0)
+                    content = content.substr(0, content.length() - entrySeparator.length());
                 // log_debug("TXXX Tag: {}", subTag.c_str());
 
                 if (desiredSubTag == subTag) {
