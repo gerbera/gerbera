@@ -468,18 +468,17 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                     continue;
                 std::string content = "";
                 std::string subTag = "";
-                TagLib::StringList fieldList = textFrame->fieldList();
-                for(TagLib::StringList::ConstIterator idx = fieldList.begin(); idx != fieldList.end(); ++idx) {
-                    if (idx == fieldList.begin()){
+                for (auto&& item : textFrame->fieldList()) {
+                    if (content.empty()) {
                         // first element is subTag name
-                        subTag = (*idx).toCString(true);
+                        subTag = item.toCString(true);
                     } else {
-                        content += (*idx).toCString(true) + entrySeparator;
+                        content = fmt::format("{}{}{}", content, item.toCString(true), entrySeparator);
                     }
                 }
-        
+
                 // remove entrySeparator at the end again
-                if (content.length() - entrySeparator.length() > 0)
+                if (content.length() > entrySeparator.length())
                     content = content.substr(0, content.length() - entrySeparator.length());
                 // log_debug("TXXX Tag: {}", subTag.c_str());
 
