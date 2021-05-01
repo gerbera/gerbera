@@ -52,7 +52,7 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
 {
 }
 
-void AutoscanDirectory::setCurrentLMT(const std::string& loc, std::chrono::seconds lmt)
+void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds lmt)
 {
     bool firstScan = false;
     bool activeScan = false;
@@ -91,7 +91,7 @@ bool AutoscanDirectory::updateLMT()
     return result;
 }
 
-std::chrono::seconds AutoscanDirectory::getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const
+std::chrono::seconds AutoscanDirectory::getPreviousLMT(const fs::path& loc, const std::shared_ptr<CdsContainer>& parent) const
 {
     auto lmDir = lastModified.find(loc);
     if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > std::chrono::seconds::zero()) {

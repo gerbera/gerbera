@@ -274,7 +274,7 @@ public:
     /// \brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir);
 
-    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath = "", bool cancellable = true);
+    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true);
 
     /// \brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -350,8 +350,8 @@ protected:
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task);
-    bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all);
-    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
+    bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::string& parentPath, bool all);
+    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
     void assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj);
