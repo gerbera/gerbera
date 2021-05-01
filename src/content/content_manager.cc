@@ -484,13 +484,13 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
 
     if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
         auto parentPath = dirEnt.path().parent_path().string();
-        updateAttachedResources(asSetting.adir, obj->getLocation().c_str(), parentPath, true);
+        updateAttachedResources(asSetting.adir, obj->getLocation(), parentPath, true);
     }
 
     return obj->getID();
 }
 
-bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all)
+bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::string& parentPath, bool all)
 {
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
@@ -511,7 +511,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
-            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location);
+            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location.string().c_str());
             parentRemoved = true;
         } else {
             log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
@@ -534,7 +534,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
         auto obj = database->loadObject(objectID);
         if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path().string();
-            parentRemoved = updateAttachedResources(adir, obj->getLocation().c_str(), parentPath, all);
+            parentRemoved = updateAttachedResources(adir, obj->getLocation(), parentPath, all);
         }
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
@@ -912,7 +912,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     finishScan(adir, subDir.path(), parentContainer, last_modified_new_max, firstObject);
 }
 
-void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
 {
     if (adir != nullptr) {
         adir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));
@@ -1617,7 +1617,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
     }
 }
 
-void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath, bool cancellable)
+void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
 {
     // building container path for the description
     auto self = shared_from_this();
@@ -1628,7 +1628,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
     if (descPath.empty())
         descPath = adir->getLocation();
 
-    task->setDescription("Scan: " + descPath);
+    task->setDescription("Scan: " + descPath.string());
     addTask(task, true); // adding with low priority
 }
 

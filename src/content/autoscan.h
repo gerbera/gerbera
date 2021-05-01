@@ -124,9 +124,9 @@ public:
     /// the last modification time of the starting point but we may not
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
-    void setCurrentLMT(const std::string& location, std::chrono::seconds lmt);
+    void setCurrentLMT(const fs::path& location, std::chrono::seconds lmt);
     std::chrono::seconds getPreviousLMT() const;
-    std::chrono::seconds getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const;
+    std::chrono::seconds getPreviousLMT(const fs::path& loc, const std::shared_ptr<CdsContainer>& parent) const;
     bool updateLMT();
     void resetLMT()
     {
