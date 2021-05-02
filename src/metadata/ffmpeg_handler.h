@@ -40,6 +40,7 @@
 
 #include <filesystem>
 namespace fs = std::filesystem;
+#include <optional>
 
 #include "iohandler/io_handler.h"
 #include "metadata_handler.h"
