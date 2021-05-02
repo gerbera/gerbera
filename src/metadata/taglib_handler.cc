@@ -466,8 +466,8 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (textFrame == nullptr)
                     continue;
-                std::string content = "";
-                std::string subTag = "";
+                std::string content;
+                std::string subTag;
                 for (auto&& field : textFrame->fieldList()) {
                     if (subTag.empty()) {
                         // first element is subTag name
@@ -483,7 +483,10 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 // log_debug("TXXX Tag: {}", subTag.c_str());
 
                 if (desiredSubTag == subTag) {
-                    log_debug("Adding auxdata: {} with value {}", desiredFrame.c_str(), content.c_str());
+                    if (content.substr(0, subTag.length()) == subTag)
+                        content = content.substr(subTag.length() + 1); // Avoid leading tag for options unknown to taglib
+
+                    log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, content);
                     item->setAuxData(desiredFrame, content);
                     break;
                 }

@@ -32,7 +32,6 @@
 #include "sqlite_database.h" // API
 
 #include <array>
-#include <zlib.h>
 
 #include "config/config_manager.h"
 
