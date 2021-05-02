@@ -93,7 +93,14 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     std::string ret_str;
 
     auto input = str.c_str();
-    auto output = new char[str.length() * 4];
+    size_t length = str.length();
+    if (length < (std::numeric_limits<size_t>::max() / 4)) {
+        length *= 4;
+    } else {
+        log_debug("Could not determine memory for string conversion!");
+        throw_std_runtime_error("Could not determine memory for string conversion");
+    }
+    auto output = new char[length];
     if (!output) {
         log_debug("Could not allocate memory for string conversion!");
         throw_std_runtime_error("Could not allocate memory for string conversion");
@@ -106,7 +113,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     char** output_ptr = &output_copy;
 
     auto input_bytes = size_t(str.length());
-    auto output_bytes = size_t(str.length() * 4);
+    auto output_bytes = length;
 
     int ret;
 
