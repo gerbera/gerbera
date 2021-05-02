@@ -113,7 +113,7 @@ void ContentManager::run()
     threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
 
     if (!threadRunner->isAlive()) {
-        throw_std_runtime_error("Could not start task thread");
+        throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
@@ -840,17 +840,27 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     }
 #endif
+    if (adir == nullptr) {
+        for (size_t i = 0; i < autoscan_timed->size(); i++) {
+            log_debug("Timed AutoscanDir {}", i);
+            std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
+            if (dir != nullptr && startswith(dir->getLocation(), subDir.path()) && fs::is_directory(dir->getLocation())) {
+                adir = dir;
+            }
+        }
+    }
+    auto dIter = fs::directory_iterator(subDir, ec);
+    if (ec) {
+        log_error("addRecursive: Failed to iterate {}, {}", subDir.path().c_str(), ec.message());
+        return;
+    }
+
     auto last_modified_current_max = std::chrono::seconds::zero();
     auto last_modified_new_max = last_modified_current_max;
     if (adir != nullptr) {
         last_modified_current_max = adir->getPreviousLMT(subDir.path(), parentContainer);
         last_modified_new_max = last_modified_current_max;
         adir->setCurrentLMT(subDir.path(), std::chrono::seconds::zero());
-    }
-    auto dIter = fs::directory_iterator(subDir, ec);
-    if (ec) {
-        log_error("addRecursive: Failed to iterate {}, {}", subDir.path().c_str(), ec.message());
-        return;
     }
 
     bool firstChild = true;
@@ -1091,7 +1101,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             log_error("Received chain item without title");
             return { INVALID_OBJECT_ID, false };
         }
-        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, item->getTitle());
+        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received chain item {}", tree);
         for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);

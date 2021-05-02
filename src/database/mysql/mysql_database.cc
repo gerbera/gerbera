@@ -35,7 +35,6 @@
 #include <cstdlib>
 
 #include <netinet/in.h>
-#include <zlib.h>
 
 #include "config/config_manager.h"
 #include "util/tools.h"
