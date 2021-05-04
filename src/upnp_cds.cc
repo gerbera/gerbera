@@ -310,7 +310,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     auto obj = database->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", +cont->getUpdateID()).c_str());
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);

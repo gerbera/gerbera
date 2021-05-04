@@ -73,6 +73,8 @@ public:
 
     virtual ~SLTask() = default;
 
+    virtual std::string_view taskType() const = 0;
+
 protected:
     /// \brief true as long as the task is not finished
     ///
@@ -98,6 +100,8 @@ public:
     explicit SLInitTask(std::shared_ptr<Config> config);
     void run(sqlite3** db, Sqlite3Database* sl) override;
 
+    std::string_view taskType() const override { return "InitTask"; }
+
 protected:
     std::shared_ptr<Config> config;
 };
@@ -110,6 +114,8 @@ public:
     explicit SLSelectTask(const char* query);
     void run(sqlite3** db, Sqlite3Database* sl) override;
     [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
+
+    std::string_view taskType() const override { return "SelectTask"; }
 
 protected:
     /// \brief The SQL query string
@@ -127,6 +133,8 @@ public:
     void run(sqlite3** db, Sqlite3Database* sl) override;
     int getLastInsertId() const { return lastInsertId; }
 
+    std::string_view taskType() const override { return "ExecTask"; }
+
 protected:
     /// \brief The SQL query string
     const char* query;
@@ -141,6 +149,8 @@ public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<Config> config, bool restore);
     void run(sqlite3** db, Sqlite3Database* sl) override;
+
+    std::string_view taskType() const override { return "BackupTask"; }
 
 protected:
     std::shared_ptr<Config> config;

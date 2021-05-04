@@ -101,6 +101,10 @@ static void signalHandler(int signum)
         return;
     }
 
+    if (signum == SIGSEGV) {
+        log_error("This should never happen {}:{}, killing Gerbera!", errno, std::strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         _ctx.shutdown_flag++;
         if (_ctx.shutdown_flag == 1) {
@@ -126,6 +130,10 @@ static void installSignalHandler()
     action.sa_handler = signalHandler;
     action.sa_flags = 0;
     sigfillset(&action.sa_mask);
+    if (sigaction(SIGSEGV, &action, nullptr) < 0) {
+        log_error("Could not register SIGSEGV handler!");
+    }
+
     if (sigaction(SIGINT, &action, nullptr) < 0) {
         log_error("Could not register SIGINT handler!");
     }
