@@ -34,20 +34,23 @@
 
 #include "util/process_executor.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 class TranscodingProcessExecutor : public ProcessExecutor {
 public:
     TranscodingProcessExecutor(const std::string& command,
         const std::vector<std::string>& arglist);
     /// \brief This function adds a filename to a list, files in that list
     /// will be removed once the class is destroyed.
-    void removeFile(const std::string& filename);
+    void removeFile(const fs::path& filename);
 
     ~TranscodingProcessExecutor() override;
 
 protected:
     /// \brief The files in this list will be removed once the class is no
     /// longer in use.
-    std::vector<std::string> file_list;
+    std::vector<fs::path> file_list;
 };
 
 #endif // __TRANSCODING_PROCESS_EXECUTOR_H__

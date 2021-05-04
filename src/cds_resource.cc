@@ -162,6 +162,5 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size >= 4)
         dictDecode(parts[3], &opt);
 
-    auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
-    return resource;
+    return std::make_shared<CdsResource>(handlerType, attr, par, opt);
 }

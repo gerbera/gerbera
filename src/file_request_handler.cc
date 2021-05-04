@@ -106,11 +106,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     struct stat statbuf;
     bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
 
-    if (access(path.c_str(), R_OK) == 0) {
-        UpnpFileInfo_set_IsReadable(info, 1);
-    } else {
-        UpnpFileInfo_set_IsReadable(info, 0);
-    }
+    UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
     std::string header;
     log_debug("path: {}", path.c_str());

@@ -882,7 +882,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription(fmt::format("Importing: {}", newPath.c_str()));
+            task->setDescription(fmt::format("Importing: {}", newPath.string().c_str()));
         }
 
         try {
@@ -1470,7 +1470,7 @@ int ContentManager::addFileInternal(
     if (async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
-        task->setDescription(fmt::format("Importing: {}", dirEnt.path().c_str()));
+        task->setDescription(fmt::format("Importing: {}", dirEnt.path().string().c_str()));
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1491,7 +1491,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
 
     auto self = shared_from_this();
     auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
-    task->setDescription("Updating content from " + service->getServiceName());
+    task->setDescription(fmt::format("Updating content from {}", service->getServiceName()));
     task->setParentID(parentTaskID);
     service->incTaskCount();
     addTask(task, lowPriority);
@@ -1646,7 +1646,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
     if (descPath.empty())
         descPath = adir->getLocation();
 
-    task->setDescription("Scan: " + descPath.string());
+    task->setDescription(fmt::format("Scan: {}", descPath.string().c_str()));
     addTask(task, true); // adding with low priority
 }
 

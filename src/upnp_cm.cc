@@ -73,8 +73,7 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
 
-    std::vector<std::string> mimeTypes = database->getMimeTypes();
-    std::string CSV = mimeTypesToCsv(mimeTypes);
+    const auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
 
     auto root = response->document_element();
     root.append_child("Source").append_child(pugi::node_pcdata).set_value(CSV.c_str());
@@ -108,8 +107,7 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
 
 void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    std::vector<std::string> mimeTypes = database->getMimeTypes();
-    std::string CSV = mimeTypesToCsv(mimeTypes);
+    const auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
