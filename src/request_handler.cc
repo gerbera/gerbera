@@ -77,7 +77,7 @@ std::map<std::string, std::string> RequestHandler::parseParameters(const char* f
 {
     std::map<std::string, std::string> params;
 
-    std::string parameters = (filename + strlen(baseLink));
+    const auto parameters = std::string(filename + strlen(baseLink));
     dictDecodeSimple(parameters, &params);
     log_debug("filename: {} -> parameters: {}", filename, parameters.c_str());
 

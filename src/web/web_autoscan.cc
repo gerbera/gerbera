@@ -120,7 +120,7 @@ void web::autoscan::process()
 
         // --- sorting autoscans
 
-        std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return strcmp(a1->getLocation().c_str(), a2->getLocation().c_str()) < 0; });
+        std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return a1->getLocation().compare(a2->getLocation()) < 0; });
 
         // ---
 

@@ -161,7 +161,7 @@ protected:
     std::chrono::seconds last_mod_previous_scan {};
     std::chrono::seconds last_mod_current_scan {};
     std::shared_ptr<Timer::Parameter> timer_parameter;
-    std::map<std::string, std::chrono::seconds> lastModified;
+    std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount { 0 };
 };
 

@@ -92,13 +92,9 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     case M_DATE:
     case M_UPNP_DATE:
         i = tag->year();
-        if (i > 0) {
-            value = fmt::to_string(i);
-
-            if (!value.empty())
-                value = value + "-01-01";
-        } else
+        if (i == 0)
             return;
+        value = fmt::format("{}-01-01", i);
         break;
     case M_GENRE:
         val = tag->genre();
@@ -110,11 +106,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         break;
     case M_TRACKNUMBER:
         i = tag->track();
-        if (i > 0) {
-            value = fmt::to_string(i);
-            item->setTrackNumber(int(i));
-        } else
+        if (i == 0)
             return;
+        value = fmt::to_string(i);
+        item->setTrackNumber(int(i));
         break;
     case M_PARTNUMBER:
         list = file.properties()["DISCNUMBER"];
@@ -123,12 +118,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
             item->setPartNumber(stoiString(value));
         } else {
             list = file.properties()["TPOS"];
-            if (!list.isEmpty()) {
-                value = list[0].toCString(true);
-                item->setPartNumber(stoiString(value));
-            } else {
+            if (list.isEmpty())
                 return;
-            }
+            value = list[0].toCString(true);
+            item->setPartNumber(stoiString(value));
         }
         break;
     case M_ALBUMARTIST:
@@ -136,31 +129,27 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         // because the latter returns incomplete properties
         // https://mail.kde.org/pipermail/taglib-devel/2015-May/002729.html
         list = file.properties()["ALBUMARTIST"];
-        if (!list.isEmpty())
-            val = list.toString(entrySeparator);
-        else
+        if (list.isEmpty())
             return;
+        val = list.toString(entrySeparator);
         break;
     case M_COMPOSER:
         list = file.properties()["COMPOSER"];
-        if (!list.isEmpty())
-            val = list.toString(entrySeparator);
-        else
+        if (list.isEmpty())
             return;
+        val = list.toString(entrySeparator);
         break;
     case M_CONDUCTOR:
         list = file.properties()["CONDUCTOR"];
-        if (!list.isEmpty())
-            val = list.toString(entrySeparator);
-        else
+        if (list.isEmpty())
             return;
+        val = list.toString(entrySeparator);
         break;
     case M_ORCHESTRA:
         list = file.properties()["ORCHESTRA"];
-        if (!list.isEmpty())
-            val = list.toString(entrySeparator);
-        else
+        if (list.isEmpty())
             return;
+        val = list.toString(entrySeparator);
         break;
     default:
         return;
@@ -186,8 +175,8 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
         return;
 
     const TagLib::Tag* tag = file.tag();
-    for (size_t i = 0; i < mt_keys.size(); i++)
-        addField(metadata_fields_t(i), file, tag, item);
+    for (auto&& key : mt_keys)
+        addField(key.first, file, tag, item);
 
     const TagLib::AudioProperties* audioProps = file.audioProperties();
     if (!audioProps)
@@ -259,13 +248,14 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
-    std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = mime->bufferToMimeType(data.data(), data.size());
+    const auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
     if (art_mimetype.empty())
         return MIMETYPE_DEFAULT;
-#endif
     return art_mimetype;
+#else
+    return MIMETYPE_DEFAULT;
+#endif
 }
 
 void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype)
@@ -309,8 +299,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
 
         auto art = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
 
-        auto h = std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
-        return h;
+        return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
     }
     if (content_type == CONTENT_TYPE_FLAC) {
         TagLib::FLAC::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
@@ -324,8 +313,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         TagLib::FLAC::Picture* pic = f.pictureList().front();
         const TagLib::ByteVector& data = pic->data();
 
-        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
-        return h;
+        return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_MP4) {
         TagLib::MP4::File f(&roStream);
@@ -353,8 +341,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         const TagLib::MP4::CoverArt& coverArt = coverArtList.front();
         const TagLib::ByteVector& data = coverArt.data();
 
-        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
-        return h;
+        return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_WMA) {
         TagLib::ASF::File f(&roStream);
@@ -376,8 +363,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
 
         const TagLib::ByteVector& data = wmpic.picture();
 
-        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
-        return h;
+        return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_OGG) {
         TagLib::Ogg::Vorbis::File f(&roStream);
@@ -392,8 +378,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
 
-        auto h = std::make_unique<MemIOHandler>(data.data(), data.size());
-        return h;
+        return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
 
     throw_std_runtime_error("Unsupported content_type: {}", content_type.c_str());
