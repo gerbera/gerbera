@@ -103,14 +103,17 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 
 void ContentManager::run()
 {
+    update_manager->run();
 #ifdef ONLINE_SERVICES
     task_processor->run();
 #endif
-    update_manager->run();
 #ifdef HAVE_LASTFMLIB
     last_fm->run();
 #endif
     threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
+
+    // wait for ContentTaskThread to become ready
+    threadRunner->waitForReady();
 
     if (!threadRunner->isAlive()) {
         throw_std_runtime_error("Could not start ContentTaskThread thread");
@@ -1379,7 +1382,12 @@ void ContentManager::reloadLayout()
 void ContentManager::threadProc()
 {
     std::shared_ptr<GenericTask> task;
-    auto lock = threadRunner->uniqueLock();
+    ThreadRunner<std::condition_variable_any, std::recursive_mutex>::waitFor("ContentManager", [this] { return threadRunner != nullptr; });
+    auto lock = threadRunner->uniqueLockS("threadProc");
+
+    // tell run() that we are ready
+    threadRunner->setReady();
+
     working = true;
     while (!shutdownFlag) {
         currentTask = nullptr;

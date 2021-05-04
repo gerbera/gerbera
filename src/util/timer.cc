@@ -44,6 +44,9 @@ void Timer::run()
     log_debug("Starting Timer thread...");
     threadRunner = std::make_unique<StdThreadRunner>("TimerThread", Timer::staticThreadProc, this, config);
 
+    // wait for TimerThread to become ready
+    threadRunner->waitForReady();
+
     if (!threadRunner->isAlive())
         throw_std_runtime_error("Failed to start timer thread");
 }
@@ -103,7 +106,11 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
 
 void Timer::triggerWait()
 {
+    StdThreadRunner::waitFor("Timer", [this] { return threadRunner != nullptr; });
     std::unique_lock<std::mutex> lock(waitMutex);
+
+    // tell run() that we are ready
+    threadRunner->setReady();
 
     while (!shutdownFlag) {
         log_debug("triggerWait. - {} subscriber(s)", subscribers.size());

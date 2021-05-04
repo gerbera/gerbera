@@ -60,6 +60,8 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
 void UpdateManager::run()
 {
     threadRunner = std::make_unique<StdThreadRunner>("UpdateThread", UpdateManager::staticThreadProc, this, config);
+    // wait for thread to become ready
+    threadRunner->waitForReady();
 }
 
 UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
@@ -156,10 +158,13 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 
 void UpdateManager::threadProc()
 {
-    auto lastUpdate = currentTimeMS();
-    auto lock = threadRunner->uniqueLock();
+    StdThreadRunner::waitFor("UpdateManager", [this] { return threadRunner != nullptr; });
 
-    //cond.notify_one();
+    auto lock = threadRunner->uniqueLockS("threadProc");
+    // tell run() that we are ready
+    threadRunner->setReady();
+
+    auto lastUpdate = currentTimeMS();
     while (!shutdownFlag) {
         if (haveUpdates()) {
             std::chrono::milliseconds sleepMillis {};
