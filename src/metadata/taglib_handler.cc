@@ -90,25 +90,6 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         checkLegacy = false;
         break;
     case M_DATE:
-        i = tag->year();
-        if (i > 0) {
-            value = fmt::to_string(i);
-
-            if (!value.empty())
-                value = value + "-01-01";
-        } else
-            return;
-        break;
-    case M_CREATION_DATE:
-        i = tag->year();
-        if (i > 0) {
-            value = fmt::to_string(i);
-
-            if (!value.empty())
-                value = value + "-01-01";
-        } else
-            return;
-        break;
     case M_UPNP_DATE:
         i = tag->year();
         if (i > 0) {
