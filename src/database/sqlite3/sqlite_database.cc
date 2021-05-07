@@ -295,19 +295,19 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-void Sqlite3Database::beginTransaction()
+void Sqlite3Database::beginTransaction(const std::string_view& tName)
 {
     if (use_transaction)
         _exec("BEGIN TRANSACTION");
 }
 
-void Sqlite3Database::rollback()
+void Sqlite3Database::rollback(const std::string_view& tName)
 {
     if (use_transaction)
         _exec("ROLLBACK");
 }
 
-void Sqlite3Database::commit()
+void Sqlite3Database::commit(const std::string_view& tName)
 {
     if (use_transaction)
         _exec("COMMIT");
@@ -324,7 +324,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
-            rollback();
+            rollback("");
             shutdown();
         }
         throw_std_runtime_error(e.what());
@@ -342,7 +342,7 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
-            rollback();
+            rollback("");
             shutdown();
         }
         throw_std_runtime_error(e.what());

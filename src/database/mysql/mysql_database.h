@@ -64,9 +64,9 @@ private:
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
 
-    void beginTransaction() override;
-    void rollback() override;
-    void commit() override;
+    void beginTransaction(const std::string_view& tName) override;
+    void rollback(const std::string_view& tName) override;
+    void commit(const std::string_view& tName) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
@@ -75,6 +75,7 @@ private:
     MYSQL db;
 
     bool mysql_connection;
+    bool inTransaction;
 
     static std::string getError(MYSQL* db);
 
