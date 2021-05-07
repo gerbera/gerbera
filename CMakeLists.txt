@@ -43,8 +43,14 @@ set(STATIC_LIBUPNP 0 CACHE BOOL "Link to libupnp statically")
 # Leverage a modern C++
 # Set defaults here before we create targets
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(CMAKE_CXX_EXTENSIONS NO)
+# Cygwin requires extensions for a lot of the networking stuff.
+if(CYGWIN)
+	set(CMAKE_CXX_STANDARD_REQUIRED NO)
+	set(CMAKE_CXX_EXTENSIONS YES)
+else(CYGWIN)
+	set(CMAKE_CXX_STANDARD_REQUIRED YES)
+	set(CMAKE_CXX_EXTENSIONS NO)
+endif(CYGWIN)
 
 add_library(libgerbera STATIC
         src/action_request.cc
