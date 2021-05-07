@@ -65,6 +65,7 @@ private:
     int exec(const char* query, int length, bool getLastInsertId = false) override;
 
     void beginTransaction() override;
+    void rollback() override;
     void commit() override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;

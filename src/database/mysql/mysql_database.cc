@@ -154,32 +154,22 @@ void MySQLDatabase::init()
     SQLDatabase::init();
 
     std::unique_lock<decltype(mysqlMutex)> lock(mysqlMutex);
-    int ret;
 
     if (!mysql_thread_safe()) {
         throw_std_runtime_error("mysql library is not thread safe");
     }
 
     /// \todo write destructor function
-    ret = pthread_key_create(&mysql_init_key, nullptr);
+    int ret = pthread_key_create(&mysql_init_key, nullptr);
     if (ret) {
         throw_std_runtime_error("could not create pthread_key");
     }
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1));
 
-    std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
-    std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
-    std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-    auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
-    std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
-    std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
-
-    MYSQL* res_mysql;
-
-    res_mysql = mysql_init(&db);
+    MYSQL* res_mysql = mysql_init(&db);
     if (!res_mysql) {
-        throw_std_runtime_error("mysql_init failed");
+        throw_std_runtime_error("mysql_init() failed");
     }
 
     mysql_init_key_initialized = true;
@@ -188,6 +178,13 @@ void MySQLDatabase::init()
 
     bool my_bool_var = true;
     mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
+
+    std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
+    std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+    std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+    auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
+    std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+    std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
     res_mysql = mysql_real_connect(&db,
         dbHost.c_str(),
@@ -199,7 +196,7 @@ void MySQLDatabase::init()
         0 // flags
     );
     if (!res_mysql) {
-        throw_std_runtime_error("The connection to the MySQL database has failed: {}", getError(&db));
+        throw_std_runtime_error("Connecting to database {}:{}/{} failed: {}", dbHost, dbPort, dbName, getError(&db));
     }
 
     mysql_connection = true;
@@ -285,21 +282,27 @@ std::string MySQLDatabase::quote(std::string value) const
 
 std::string MySQLDatabase::getError(MYSQL* db)
 {
-    std::ostringstream err_buf;
-    err_buf << "mysql_error (" << mysql_errno(db);
-    err_buf << "): \"" << mysql_error(db) << "\"";
-    log_debug("{}", err_buf.str().c_str());
-    return err_buf.str();
+    auto res = fmt::format("mysql_error ({}): \"{}\"", mysql_errno(db), mysql_error(db));
+    log_debug("{}", res);
+    return res;
 }
 
 void MySQLDatabase::beginTransaction()
 {
-    _exec("START TRANSACTION");
+    if (use_transaction)
+        _exec("START TRANSACTION");
+}
+
+void MySQLDatabase::rollback()
+{
+    if (use_transaction)
+        _exec("ROLLBACK");
 }
 
 void MySQLDatabase::commit()
 {
-    _exec("COMMIT");
+    if (use_transaction)
+        _exec("COMMIT");
 }
 
 std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
@@ -309,21 +312,20 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
     print_backtrace();
 #endif
 
-    int res;
-
     checkMysqlThreadInit();
     AutoLock lock(mysqlMutex);
-    res = mysql_real_query(&db, query, length);
+    auto res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw DatabaseException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        rollback();
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
 
-    MYSQL_RES* mysql_res;
-    mysql_res = mysql_store_result(&db);
+    MYSQL_RES* mysql_res = mysql_store_result(&db);
     if (!mysql_res) {
         std::string myError = getError(&db);
-        throw DatabaseException(myError, "Mysql: mysql_store_result() failed: " + myError + "; query: " + query);
+        rollback();
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_store_result() failed: {}; query: {}", myError, query));
     }
 
     return std::static_pointer_cast<SQLResult>(std::make_shared<MysqlResult>(mysql_res));
@@ -336,14 +338,13 @@ int MySQLDatabase::exec(const char* query, int length, bool getLastInsertId)
     print_backtrace();
 #endif
 
-    int res;
-
     checkMysqlThreadInit();
     AutoLock lock(mysqlMutex);
-    res = mysql_real_query(&db, query, length);
+    auto res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        throw DatabaseException(myError, "Mysql: mysql_real_query() failed: " + myError + "; query: " + query);
+        rollback();
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
     int insert_id = -1;
     if (getLastInsertId)
@@ -371,7 +372,7 @@ void MySQLDatabase::_exec(const char* query, int length)
 {
     if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
         std::string myError = getError(&db);
-        throw DatabaseException(myError, "Mysql: error while updating db: " + myError);
+        throw DatabaseException(myError, fmt::format("Mysql: error while updating db: {}; query: {}", myError, query));
     }
 }
 

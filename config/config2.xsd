@@ -300,6 +300,7 @@
                 <xs:element ref="sqlite3" minOccurs="0"/>
                 <xs:element ref="mysql" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="use-transactions" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

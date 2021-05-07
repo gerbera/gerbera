@@ -297,12 +297,20 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
 
 void Sqlite3Database::beginTransaction()
 {
-    _exec("BEGIN TRANSACTION");
+    if (use_transaction)
+        _exec("BEGIN TRANSACTION");
+}
+
+void Sqlite3Database::rollback()
+{
+    if (use_transaction)
+        _exec("ROLLBACK");
 }
 
 void Sqlite3Database::commit()
 {
-    _exec("COMMIT");
+    if (use_transaction)
+        _exec("COMMIT");
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
@@ -316,6 +324,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
+            rollback();
             shutdown();
         }
         throw_std_runtime_error(e.what());
@@ -333,6 +342,7 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
+            rollback();
             shutdown();
         }
         throw_std_runtime_error(e.what());

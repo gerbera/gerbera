@@ -470,7 +470,7 @@ Note:
 
 .. code-block:: xml
 
-    <storage caching="yes">
+    <storage>
 
 * Required
 
@@ -480,13 +480,13 @@ Each storage driver has it's own configuration parameters.
     **Child Tags**
     ::
 
-        caching="yes"
+        use-transactions="yes"
 
     * Optional
 
     * Default: **yes**
 
-    Enables caching, this feature should improve the overall import speed.
+    Enables use-transactions, this feature should improve the overall import speed.
 
     .. code-block:: xml
 
