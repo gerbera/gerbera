@@ -91,6 +91,7 @@ public:
     virtual std::string quote(long long val) const = 0;
 
     virtual void beginTransaction() = 0;
+    virtual void rollback() = 0;
     virtual void commit() = 0;
 
     virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
@@ -179,6 +180,7 @@ protected:
 
     char table_quote_begin;
     char table_quote_end;
+    bool use_transaction;
 
 private:
     std::string sql_browse_query;

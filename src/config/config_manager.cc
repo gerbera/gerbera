@@ -263,6 +263,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE,
         "/server/storage", "config-server.html#storage",
         true),
+    std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_USE_TRANSACTIONS,
+        "/server/storage/attribute::use-transactions", "config-server.html#storage",
+        "yes"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL,
         "/server/storage/mysql", "config-server.html#storage"),
 #ifdef HAVE_MYSQL
@@ -1069,6 +1072,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     co = findConfigSetup(CFG_SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
+    setOption(root, CFG_SERVER_STORAGE_USE_TRANSACTIONS);
 
     co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {

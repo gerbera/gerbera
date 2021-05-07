@@ -210,6 +210,8 @@ SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';
+
+    use_transaction = this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS);
 }
 
 void SQLDatabase::init()
@@ -934,6 +936,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     }
     qb << ')';
 
+    beginTransaction();
     int newId = exec(qb.str(), true); // true = get last id#
     log_debug("Created object row, id: {}", newId);
 
@@ -954,6 +957,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         }
         log_debug("Wrote metadata for cds_object {}", newId);
     }
+    commit();
 
     return newId;
 }
@@ -1246,6 +1250,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
         return "";
     std::ostringstream inBuf;
 
+    beginTransaction();
     bool first = true;
     for (auto&& id : *ids) {
         if (first) {
@@ -1278,6 +1283,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
         s << row->col(0) << ',' << row->col(1);
         rows.emplace_back(s.str());
     }
+    commit();
     if (rows.empty())
         return "";
     return join(rows, ",");
@@ -1357,6 +1363,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
 
     log_debug("{}", sel.str());
 
+    beginTransaction();
     auto res = select(sel);
     if (res != nullptr) {
         log_debug("relevant autoscans!");
@@ -1394,6 +1401,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
             << " WHERE " << TQ("id")
             << " IN (" << objectIdsStr << ')';
     exec(qObject.str());
+    commit();
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
@@ -1776,7 +1784,6 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
 {
-
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
     std::ostringstream update;
     update << "UPDATE " << TQ(AUTOSCAN_TABLE)
@@ -1785,6 +1792,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
            << TQ("persistent") << '=' << mapBool(true)
            << " AND " << TQ("scan_mode") << '='
            << quote(AutoscanDirectory::mapScanmode(scanmode));
+    beginTransaction();
     exec(update.str());
 
     size_t listSize = list->size();
@@ -1815,8 +1823,10 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
             q << TQ("obj_id") << '=' << quote(objectID);
         q << " LIMIT 1";
         auto res = select(q);
-        if (res == nullptr)
+        if (res == nullptr) {
+            rollback();
             throw DatabaseException("", "query error while selecting from autoscan list");
+        }
 
         std::unique_ptr<SQLRow> row;
         if ((row = res->nextRow()) != nullptr) {
@@ -1832,6 +1842,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
         << " AND " << TQ("scan_mode") << '='
         << quote(AutoscanDirectory::mapScanmode(scanmode));
     exec(del.str());
+    commit();
 }
 
 std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
