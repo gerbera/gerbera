@@ -37,6 +37,7 @@
 #include <netinet/in.h>
 
 #include "config/config_manager.h"
+#include "util/thread_runner.h"
 #include "util/tools.h"
 
 //#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
@@ -109,12 +110,14 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
+    , mysql_connection(false)
+    , inTransaction(false)
+    , mysql_init_key_initialized(false)
 {
-    mysql_init_key_initialized = false;
-    mysql_connection = false;
     table_quote_begin = '`';
     table_quote_end = '`';
 }
+
 MySQLDatabase::~MySQLDatabase()
 {
     AutoLock lock(mysqlMutex); // just to ensure, that we don't close while another thread
@@ -287,22 +290,37 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return res;
 }
 
-void MySQLDatabase::beginTransaction()
+void MySQLDatabase::beginTransaction(const std::string_view& tName)
 {
+    log_debug("START TRANSACTION {} {}", tName, inTransaction);
+    StdThreadRunner::waitFor(
+        "MySqlDatabase", [this] { return inTransaction == false; }, 100);
+    inTransaction = true;
+    AutoLock lock(mysqlMutex);
+    log_debug("START TRANSACTION {}", tName);
     if (use_transaction)
         _exec("START TRANSACTION");
 }
 
-void MySQLDatabase::rollback()
+void MySQLDatabase::rollback(const std::string_view& tName)
 {
-    if (use_transaction)
-        _exec("ROLLBACK");
+    log_debug("ROLLBACK {}", tName);
+    if (use_transaction && mysql_rollback(&db)) {
+        std::string myError = getError(&db);
+        throw DatabaseException(myError, fmt::format("Mysql: error while rolling back db: {}", myError));
+    }
+    inTransaction = false;
 }
 
-void MySQLDatabase::commit()
+void MySQLDatabase::commit(const std::string_view& tName)
 {
-    if (use_transaction)
-        _exec("COMMIT");
+    log_debug("COMMIT {}", tName);
+    AutoLock lock(mysqlMutex);
+    if (use_transaction && mysql_commit(&db)) {
+        std::string myError = getError(&db);
+        throw DatabaseException(myError, fmt::format("Mysql: error while commiting db: {}", myError));
+    }
+    inTransaction = false;
 }
 
 std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
@@ -314,18 +332,26 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
 
     checkMysqlThreadInit();
     AutoLock lock(mysqlMutex);
+    bool myTransaction = false;
+    if (!inTransaction) { // protect calls outside transactions
+        inTransaction = true;
+        myTransaction = true;
+    }
     auto res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        rollback();
+        rollback("");
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
 
     MYSQL_RES* mysql_res = mysql_store_result(&db);
-    if (!mysql_res) {
+    if (!mysql_res && mysql_field_count(&db)) {
         std::string myError = getError(&db);
-        rollback();
+        rollback("");
         throw DatabaseException(myError, fmt::format("Mysql: mysql_store_result() failed: {}; query: {}", myError, query));
+    }
+    if (myTransaction) {
+        inTransaction = false;
     }
 
     return std::static_pointer_cast<SQLResult>(std::make_shared<MysqlResult>(mysql_res));
@@ -343,7 +369,7 @@ int MySQLDatabase::exec(const char* query, int length, bool getLastInsertId)
     auto res = mysql_real_query(&db, query, length);
     if (res) {
         std::string myError = getError(&db);
-        rollback();
+        rollback("");
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
     int insert_id = -1;

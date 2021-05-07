@@ -90,9 +90,9 @@ public:
     virtual std::string quote(char val) const = 0;
     virtual std::string quote(long long val) const = 0;
 
-    virtual void beginTransaction() = 0;
-    virtual void rollback() = 0;
-    virtual void commit() = 0;
+    virtual void beginTransaction(const std::string_view& tName) = 0;
+    virtual void rollback(const std::string_view& tName) = 0;
+    virtual void commit(const std::string_view& tName) = 0;
 
     virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
     virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;

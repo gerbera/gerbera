@@ -150,10 +150,10 @@ public:
         return AutoLockU(mutex, tag);
     }
     template <class Predicate>
-    static void waitFor(const std::string_view& threadName, Predicate pred)
+    static void waitFor(const std::string_view& threadName, Predicate pred, int max_count = 10)
     {
         int count = 0;
-        while (!(pred()) && count < 10) {
+        while (!(pred()) && count < max_count) {
             log_debug("ThreadRunner: wait for pred {}", threadName);
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             count++;
