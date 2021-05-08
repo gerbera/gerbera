@@ -139,7 +139,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             // convert UTC to local time
             utc_time = timegm(&tm_work);
             if (utc_time == (time_t)-1) {
-                  continue;
+                continue;
             }
             localtime_r(&utc_time, &tm_work);
             if (strftime(m_date, sizeof(m_date), "%F", &tm_work) == 0) {
