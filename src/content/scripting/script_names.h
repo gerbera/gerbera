@@ -49,6 +49,7 @@ static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const c
     { M_ARTIST, "M_ARTIST" },
     { M_ALBUM, "M_ALBUM" },
     { M_DATE, "M_DATE" },
+    { M_CREATION_DATE, "M_CREATION_DATE" },
     { M_UPNP_DATE, "M_UPNP_DATE" },
     { M_GENRE, "M_GENRE" },
     { M_DESCRIPTION, "M_DESCRIPTION" },
