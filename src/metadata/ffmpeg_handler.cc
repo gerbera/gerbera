@@ -130,7 +130,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             field = M_DATE;
         } else if (strcmp(e->key, "creation_time") == 0) {
             log_debug("Identified metadata creation_time: {}", e->value);
-            field = M_DATE;
+            field = M_CREATION_DATE;
             struct tm tm_work;
             char m_date[] = "YYYY-mm-dd";
             if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
