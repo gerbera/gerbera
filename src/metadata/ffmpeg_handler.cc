@@ -128,6 +128,25 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             }
             /// \toto parse possible ISO8601 timestamp
             field = M_DATE;
+        } else if (strcmp(e->key, "creation_time") == 0) {
+            log_debug("Identified metadata creation_time: {}", e->value);
+            struct tm tm_work;
+            time_t utc_time;
+            char m_date[] = "YYYY-mm-dd";
+            if (!strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
+                continue;
+            }
+            // convert UTC to local time
+            utc_time = timegm(&tm_work);
+            if (utc_time == (time_t)-1) {
+                  continue;
+            }
+            localtime_r(&utc_time, &tm_work);
+            if (strftime(m_date, sizeof(m_date), "%F", &tm_work) == 0) {
+                continue;
+            }
+            value = m_date;
+            field = M_DATE;
         } else if (strcmp(e->key, "genre") == 0) {
             log_debug("Identified metadata genre: {}", e->value);
             field = M_GENRE;
