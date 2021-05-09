@@ -80,6 +80,33 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         obj->setRefID(obj->getID());
     }
 
+    auto meta = obj->getMetadata();
+
+    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CREATION_DATE));
+    if (!date.empty()) {
+        std::string year, month;
+        size_t m = -1;
+        size_t y = date.find('-');
+        if (y != std::string::npos) {
+            year = date.substr(0, y);
+            month = date.substr(y + 1);
+            m = month.find('-');
+            if (m != std::string::npos)
+                month = month.substr(0, m);
+        }
+
+        std::string chain;
+        if ((y > 0) && (m > 0)) {
+            chain = fmt::format("/Video/Year/{}/{}", esc(year), esc(month));
+            id = content->addContainerChain(chain);
+            add(obj, id);
+        }
+
+        chain = fmt::format("/Video/Date/{}", esc(date));
+        id = content->addContainerChain(chain);
+        add(obj, id);
+    }
+
     fs::path dir;
     if (!rootpath.empty()) {
         // make location relative to rootpath: "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" -> "Action"
