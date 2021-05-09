@@ -124,7 +124,7 @@ static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const ch
     { M_ARTIST, "upnp:artist" },
     { M_ALBUM, "upnp:album" },
     { M_DATE, "dc:date" },
-    { M_CREATION_DATE, "dc:date" },
+    { M_CREATION_DATE, "dc:created" },
     { M_UPNP_DATE, "upnp:date" },
     { M_GENRE, "upnp:genre" },
     { M_DESCRIPTION, "dc:description" },
