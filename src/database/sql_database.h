@@ -181,6 +181,7 @@ protected:
     char table_quote_begin;
     char table_quote_end;
     bool use_transaction;
+    bool inTransaction;
 
 private:
     std::string sql_browse_query;
