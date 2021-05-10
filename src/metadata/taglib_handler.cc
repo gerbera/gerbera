@@ -99,6 +99,16 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         } else
             return;
         break;
+    case M_CREATION_DATE:
+        i = tag->year();
+        if (i > 0) {
+            value = fmt::to_string(i);
+
+            if (!value.empty())
+                value = value + "-01-01";
+        } else
+            return;
+        break;
     case M_UPNP_DATE:
         i = tag->year();
         if (i > 0) {
@@ -175,7 +185,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         return;
     }
 
-    if ((field != M_DATE) && (field != M_TRACKNUMBER) && (field != M_PARTNUMBER)) {
+    if ((field != M_DATE) && (field != M_CREATION_DATE) && (field != M_TRACKNUMBER) && (field != M_PARTNUMBER)) {
         if (!legacyEntrySeparator.empty() && checkLegacy)
             val = val.split(legacyEntrySeparator).toString(entrySeparator);
         value = val.toCString(true);

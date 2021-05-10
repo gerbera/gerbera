@@ -602,11 +602,28 @@ function addVideo(obj) {
     const chain = {
         video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
+        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+
+        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id }
     };
     var container = addContainerTree([chain.video, chain.allVideo]);
     addCdsObject(obj, container);
+    var date = obj.meta[M_CREATION_DATE];
+    if (date) {
+        var dateParts = date.split('-');
+        if (dateParts.length > 1) {
+            chain.year.title = dateParts[0];
+            chain.month.title = dateParts[1];
+            addCdsObject(obj, addContainerTree([chain.video, chain.allYears, chain.year, chain.month]));
+        }
 
+        chain.date.title = date;
+        addCdsObject(obj, addContainerTree([chain.video, chain.allDates, chain.date]));
+    }
     if (dir.length > 0) {
         var tree = [chain.video, chain.allDirectories];
         for (var i = 0; i < dir.length; i++) {

@@ -44,11 +44,12 @@ static constexpr auto res_names = std::array<std::pair<resource_attributes_t, co
     { R_TYPE, "R_TYPE" },
 } };
 
-static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, 22> { {
+static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, 23> { {
     { M_TITLE, "M_TITLE" },
     { M_ARTIST, "M_ARTIST" },
     { M_ALBUM, "M_ALBUM" },
     { M_DATE, "M_DATE" },
+    { M_CREATION_DATE, "M_CREATION_DATE" },
     { M_UPNP_DATE, "M_UPNP_DATE" },
     { M_GENRE, "M_GENRE" },
     { M_DESCRIPTION, "M_DESCRIPTION" },
