@@ -57,9 +57,18 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit)
     std::string output = exec(cmd.c_str());
 
     ASSERT_THAT(output, HasSubstr("Compile info\n-------------\nWITH_"));
-    ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
-    ASSERT_THAT(output, HasSubstr("Git Branch: "));
-    ASSERT_THAT(output, HasSubstr("Git Commit: "));
+    if (strlen(GIT_BRANCH) > 0) {
+        ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
+        ASSERT_THAT(output, HasSubstr("Git Branch: "));
+    } else {
+        ASSERT_THAT(output, Not(HasSubstr("Git info:\n-------------\n")));
+        ASSERT_THAT(output, Not(HasSubstr("Git Branch: ")));
+    }
+    if (strlen(GIT_COMMIT_HASH) > 0) {
+        ASSERT_THAT(output, HasSubstr("Git Commit: "));
+    } else {
+        ASSERT_THAT(output, Not(HasSubstr("Git Commit: ")));
+    }
 }
 
 TEST_F(ServerTest, GeneratesFullConfigFromServerCommand)
