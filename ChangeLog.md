@@ -1,5 +1,51 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.8.1
+- Mysql transactions
+- Support creation_time on FFmpeg handler.
+- Bump lodash from 4.17.19 to 4.17.21 in /gerbera-web
+- Synchronize threads properly
+- add missing optional header for GCC11
+- Misc improvements
+- remove several implicit fs::path conversions
+- Concatenate multivalue field with entrySeparator
+- Revert "replace find() end() comparisons with count()"
+- remove push_back branch
+- change some size_t to bool
+- remove some pointless lambdas
+- remove std::distance where empty is sufficient
+- Implement SAMSUNG X_GetFeatureList
+- More chrono optimizations
+- CI: FreeBSD: Add Sqlite3 package
+- algorithm cleanups
+- Added documentation how to build the docker container
+- Determine container art image from files
+- massive std::chrono conversion
+- string_view conversions
+- Add support for Windows Media Player
+- Conan: Tidy up CMake conan integration
+- Implement UPnP SortCriteria
+- Avoid needless process elevation requirement on illumos
+- cmake: Remove unused vars
+- Only use music tracks as container art source
+- Work around undefined syscalls on solaroid systems
+- Documentation for exiv2 meta data usage
+- Clean compilation and errno fix
+- Enable ContainerArt for PC Directory
+- auto&& conversions
+- Docker.md: add docker-compose instructions
+- fs::path conversions
+- Fix debian buster compilation
+- Cleanup path handling
+- add -d, -u and -P commandline options to docs
+- Fixed required versions of libupnp and libnpupnp.
+- fix UPNP_USING_CHUNKED breaks npupnp compatibility
+- clang-tidy: replace typedef with using
+- Add cmdline options -u, -d and -P
+- Fix transcoded media ends before file is complete
+- Documentation still points to bintray.com
+- Bump master post release
+
 ### v1.8.0
 - Significant improvement in import speeds with large collections
 - Handle Samsung X_SetBookmark action, for saving position of viewed media, when enabled by flag
@@ -37,39 +83,39 @@
 In order to benefit from all these improvements it is recommended to clear your database and rescan your media library.
 
 ### v1.6.4
-- Fix regression introduced in 1.6.2 in SQL generation (#1007), thanks @KarlStraussberger
+- Fix regression introduced in 1.6.2 in SQL generation
 
 ### v1.6.3
-- Fix a regression introduced in 1.6.2 when adding resources (#1004), thanks @KarlStraussberger
+- Fix a regression introduced in 1.6.2 when adding resources
 
 ### v1.6.2
-- Fixed a regression where some files could be removed from the library on a restart due to a race, thanks @phi-whiterabbit
-- Fixed a crash in ffmpeg hander where metadata date field was non-numeric, thanks @KarlStraussberger
-- Add Samsung X_SetBookmark stub (#996), thanks @whyman
-- Bump jimp (fixes vuln jpeg-js) (#990), thanks @whyman
-- UI: Dont update mimetype to empty (#989), thanks @whyman
-- Fix tests with npupnp (#988), thanks @medoc92
-- fix compilation with libcxx (#983), thanks @neheb
-- libevix2 fixes (#976), thanks @neheb
-- npupnp changes (#952), thanks @neheb
-- doc: add OpenWrt section (#975), thanks @neheb
-- clang-tidy fixes (#973), thanks @neheb
-- cxxopts: update to 2.2.1 (#974), thanks @neheb
-- Update README badges (#972), thanks @whyman
+- Fixed a regression where some files could be removed from the library on a restart due to a race
+- Fixed a crash in ffmpeg hander where metadata date field was non-numeric
+- Add Samsung X_SetBookmark stub
+- Bump jimp (fixes vuln jpeg-js)
+- UI: Dont update mimetype to empty
+- Fix tests with npupnp
+- fix compilation with libcxx
+- libevix2 fixes
+- npupnp changes
+- doc: add OpenWrt section
+- clang-tidy fixes
+- cxxopts: update to 2.2.1
+- Update README badges
 
 
 ### v1.6.1
-- fixed mime type retrieval for symlinks with libmagic (#970), thanks @cdbrendel
-- Drop travis (#968), thanks @whyman
-- Actions: Run docker build on tags too (#967), thanks @whyman
-- Bump js stuff to fix security warnings (#966), thanks @whyman
-- Color folders with children instead of badges saying true (#957), thanks @whyman
-- Improve Resource Handling (#963), thanks @KarlStraussberger
-- Add subtitle as resource and update entries with resources attached, improve ContentHandler (#959), thanks @KarlStraussberger
-- Bump elliptic from 6.5.2 to 6.5.3 in /gerbera-web (#958), thanks @dependabot
-- fix upnp header include (#955), thanks @neheb
-- Build fixes (#954), thanks @ytimenkov
-- std::algorithm conversions (#882), thanks @neheb
+- fixed mime type retrieval for symlinks with libmagic
+- Drop travis
+- Actions: Run docker build on tags too
+- Bump js stuff to fix security warnings
+- Color folders with children instead of badges saying true
+- Improve Resource Handling
+- Add subtitle as resource and update entries with resources attached, improve ContentHandler
+- Bump elliptic from 6.5.2 to 6.5.3 in /gerbera-web
+- fix upnp header include
+- Build fixes
+- std::algorithm conversions
 
 
 ### v1.6.0
@@ -93,63 +139,63 @@ In order to benefit from all these improvements it is recommended to clear your 
 - The latest 1.12.1 version of libupnp is now required.
 
 ### v1.4.0
-- Metadata MKV support via libmatroska (#540), thanks @pamapa
-- SQLite: Add migration to v5 schema (#546), thanks @whyman
-- Update web modules (#544), thanks @elmodaddyb
-- Dockerfile: Add MKV support (#543), thanks @whyman
-- README update, minor doc tidy (#537), thanks @whyman
-- Docs: Scripting - tidy (#536), thanks @whyman
-- install-pupnp: Bump to 1.8.6, fix #534 (#535), thanks @whyman
-- remove not used variables (#533), thanks @pamapa
-- Docs: Scripting: remove docs for removed code, fix Note formatting (#527), thanks @whyman
-- Minor UI improvements (#526), thanks @whyman
+- Metadata MKV support via libmatroska
+- SQLite: Add migration to v5 schema
+- Update web modules
+- Dockerfile: Add MKV support
+- README update, minor doc tidy
+- Docs: Scripting - tidy
+- install-pupnp: Bump to 1.8.6, fix #534
+- remove not used variables
+- Docs: Scripting: remove docs for removed code, fix Note formatting
+- Minor UI improvements
 
 ### v1.3.4/5
-- Fix the build with LibUPnP 1.10 (#523), thanks @whyman
-- Build against libupnp 1.8.5 (#519), thanks @whyman
-- Fedora installation. (#518), thanks @limburgher
-- UI e2e: Bump chromedriver (#515), thanks @whyman
+- Fix the build with LibUPnP 1.10
+- Build against libupnp 1.8.5
+- Fedora installation.
+- UI e2e: Bump chromedriver
 
 ### v1.3.3
-- Remove Storage Cache (#509), thanks @whyman
-- my_bool is not defined with mysql-connector-c 8.0 (#508), thanks @whyman
-- Update config.xml (#507), thanks @1rover1
-- Support inotify kernel driver on illumos/OmniOS (#506), thanks @whorfin
-- Fix up docs and start script now that -P/--pidfile is removed (#502), thanks @whorfin
-- Set language to support xenial & latest chrome (#503), thanks @elmodaddyb
-- Correct add file docs (#501), thanks @whyman
-- Update Web Development Dependencies (#497), thanks @elmodaddyb
-- Dockerfile created (#409), thanks @nemoload
-- SQLite: Turn on foreign key support at runtime (#491), thanks @whyman
-- Fix error in sqlite schema (#490), thanks @whyman
-- Add DeviceDescriptionHandler (#482), thanks @whyman
-- Update lodash (#484), thanks @elmodaddyb
-- Rename handlers to util (#481), thanks @whyman
-- Convert Gerbera UI to ES6 (#472), thanks @elmodaddyb
+- Remove Storage Cache
+- my_bool is not defined with mysql-connector-c 8.0
+- Update config.xml
+- Support inotify kernel driver on illumos/OmniOS
+- Fix up docs and start script now that -P/--pidfile is removed
+- Set language to support xenial & latest chrome
+- Correct add file docs
+- Update Web Development Dependencies
+- Dockerfile created
+- SQLite: Turn on foreign key support at runtime
+- Fix error in sqlite schema
+- Add DeviceDescriptionHandler
+- Update lodash
+- Rename handlers to util
+- Convert Gerbera UI to ES6
 
 ### v1.3.2
-- Allow to set the manufacturer and the modelURL via config file (#477), thanks @joerg-krause
-- Fix find_program taglib-config when cross-compiling (#476), thanks @joerg-krause
-- Update config-import.rst (#475), thanks @ghlupe2
-- Add Gerbera version to UI (#469), thanks @elmodaddyb
-- cmake/FindFFMPEG: do not quieten messages when using pkg-config (#466), thanks @joerg-krause
-- Fixture upgrade (#465), thanks @elmodaddyb
-- Update js cookie (#464), thanks @elmodaddyb
-- Add virtualUrl to AlbumArt resource for consistent resource URIs (#460), thanks @elmodaddyb
-- Use exiv2 header that include all headers (#457), thanks @nicolas-s
-- Update vendor dependencies (#455), thanks @elmodaddyb
-- Docs: Bump version (#452), thanks @v00d00
-- feat: provide a way to toggle DLNA-seeking with a config (#450), thanks @rtm-ctrlz
-- main: bugfix `interface` CLI option (#451), thanks @edzius
-- Generate config.xml with XML Declaration (#447), thanks @elmodaddyb
+- Allow to set the manufacturer and the modelURL via config file
+- Fix find_program taglib-config when cross-compiling
+- Update config-import.rst
+- Add Gerbera version to UI
+- cmake/FindFFMPEG: do not quieten messages when using pkg-config
+- Fixture upgrade
+- Update js cookie
+- Add virtualUrl to AlbumArt resource for consistent resource URIs
+- Use exiv2 header that include all headers
+- Update vendor dependencies
+- Docs: Bump version
+- feat: provide a way to toggle DLNA-seeking with a config
+- main: bugfix `interface` CLI option
+- Generate config.xml with XML Declaration
 
 
 ### v1.3.1
-- Build system improvements, thanks @ffontaine
+- Build system improvements
 - Fixes for DLNA Headers handling
 - Add support for TXXX AuxData extraction from MP3
-- Fix External URL resource generation, thanks @elmodaddyb
-- Latest NPM Updates, thanks @elmodaddyb
+- Fix External URL resource generation
+- Latest NPM Updates
 
 ### v1.3.0
 - C++17 is now required to build (clang, gcc-7, gcc-8)
