@@ -75,7 +75,6 @@ private:
     MYSQL db;
 
     bool mysql_connection;
-    bool inTransaction;
 
     static std::string getError(MYSQL* db);
 

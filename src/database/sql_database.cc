@@ -207,6 +207,7 @@ constexpr auto to_underlying(E e) noexcept
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
     : Database(std::move(config))
+    , inTransaction(false)
 {
     table_quote_begin = '\0';
     table_quote_end = '\0';

@@ -111,7 +111,6 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
     , mysql_connection(false)
-    , inTransaction(false)
     , mysql_init_key_initialized(false)
 {
     table_quote_begin = '`';
@@ -305,7 +304,7 @@ void MySQLDatabase::beginTransaction(const std::string_view& tName)
 void MySQLDatabase::rollback(const std::string_view& tName)
 {
     log_debug("ROLLBACK {}", tName);
-    if (use_transaction && mysql_rollback(&db)) {
+    if (use_transaction && inTransaction && mysql_rollback(&db)) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while rolling back db: {}", myError));
     }
@@ -316,7 +315,7 @@ void MySQLDatabase::commit(const std::string_view& tName)
 {
     log_debug("COMMIT {}", tName);
     AutoLock lock(mysqlMutex);
-    if (use_transaction && mysql_commit(&db)) {
+    if (use_transaction && inTransaction && mysql_commit(&db)) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while commiting db: {}", myError));
     }
