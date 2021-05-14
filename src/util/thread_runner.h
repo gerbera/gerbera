@@ -158,6 +158,9 @@ public:
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             count++;
         }
+        if (count >= max_count) {
+            log_error("ThreadRunner: broke lock for {}", threadName);
+        }
     }
 
 protected:

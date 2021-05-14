@@ -78,9 +78,6 @@ private:
 
     static std::string getError(MYSQL* db);
 
-    std::recursive_mutex mysqlMutex;
-    using AutoLock = std::lock_guard<decltype(mysqlMutex)>;
-
     void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }
 

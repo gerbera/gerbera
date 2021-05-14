@@ -148,6 +148,11 @@
 					"editable": false
 				},
 				{
+					"item": "/server/storage/attribute::use-transactions",
+					"caption": "Transactions",
+					"editable": false
+				},
+				{
 					"item": "/server/storage/sqlite3",
 					"caption": "SQLite",
 					"type": "Element",

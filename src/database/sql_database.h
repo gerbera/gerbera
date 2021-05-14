@@ -183,6 +183,9 @@ protected:
     bool use_transaction;
     bool inTransaction;
 
+    std::recursive_mutex sqlMutex;
+    using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
+
 private:
     std::string sql_browse_query;
     std::string sql_search_query;
