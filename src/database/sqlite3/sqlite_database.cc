@@ -297,9 +297,11 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
 
 void Sqlite3Database::beginTransaction(const std::string_view& tName)
 {
-    StdThreadRunner::waitFor(
-        "SqliteDatabase", [this] { return inTransaction == false; }, 100);
     if (use_transaction) {
+        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        SqlAutoLock lock(sqlMutex);
+        StdThreadRunner::waitFor(
+            fmt::format("SqliteDatabase.begin {}", tName), [this] { return inTransaction == false; }, 100);
         inTransaction = true;
         _exec("BEGIN TRANSACTION");
     }
@@ -308,16 +310,18 @@ void Sqlite3Database::beginTransaction(const std::string_view& tName)
 void Sqlite3Database::rollback(const std::string_view& tName)
 {
     if (use_transaction && inTransaction) {
-        inTransaction = false;
+        log_debug("ROLLBACK {} {}", tName, inTransaction);
         _exec("ROLLBACK");
+        inTransaction = false;
     }
 }
 
 void Sqlite3Database::commit(const std::string_view& tName)
 {
     if (use_transaction && inTransaction) {
-        inTransaction = false;
+        log_debug("COMMIT {} {}", tName, inTransaction);
         _exec("COMMIT");
+        inTransaction = false;
     }
 }
 
