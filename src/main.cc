@@ -242,7 +242,7 @@ int main(int argc, char** argv, char** envp)
             // get user info of requested user from passwd
             struct passwd* user_id = getpwnam(user->c_str());
 
-            if (user_id == NULL) {
+            if (user_id == nullptr) {
                 log_error("Invalid user requested.");
                 exit(EXIT_FAILURE);
             }
@@ -361,7 +361,7 @@ int main(int argc, char** argv, char** envp)
             }
 
             // write pid to file
-            if ((long int)strlen(pidstr) != write(pidfd, pidstr, strlen(pidstr))) {
+            if (ssize_t(strlen(pidstr)) != write(pidfd, pidstr, strlen(pidstr))) {
                 log_error("Could not write pidfile {}.", pidfile->c_str());
                 exit(EXIT_FAILURE);
             }

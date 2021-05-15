@@ -171,7 +171,7 @@ protected:
     {
         targetProc(target);
         log_debug("ThreadRunner: Terminating {}", threadName.c_str());
-    };
+    }
 
     /// \brief start the thread
     void startThread() override
