@@ -124,7 +124,7 @@ public:
     /// \brief Sets the "purge after" interval in seconds
     void setItemPurgeInterval(std::chrono::seconds interval) { purge_interval = interval; }
 
-    /// \brieg Retrieves the "purge after" interval in seconds
+    /// \brief Retrieves the "purge after" interval in seconds
     std::chrono::seconds getItemPurgeInterval() const { return purge_interval; }
 
 protected:

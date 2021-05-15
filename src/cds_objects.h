@@ -220,10 +220,10 @@ public:
     /// \brief Set flags for the object.
     void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
 
-    /// \biref Set a flag of the object.
+    /// \brief Set a flag of the object.
     void setFlag(unsigned int mask) { objectFlags |= mask; }
 
-    /// \biref Set a flag of the object.
+    /// \brief Set a flag of the object.
     void changeFlag(unsigned int mask, bool value)
     {
         if (value)
@@ -232,7 +232,7 @@ public:
             clearFlag(mask);
     }
 
-    /// \biref Clears a flag of the object.
+    /// \brief Clears a flag of the object.
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
