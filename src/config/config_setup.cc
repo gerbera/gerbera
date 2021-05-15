@@ -149,9 +149,6 @@ size_t ConfigSetup::extractIndex(const std::string& item)
     return i;
 }
 
-const std::string_view ConfigSetup::ROOT_NAME = "config";
-const std::string_view ConfigSetup::ATTRIBUTE = "attribute::";
-
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     bool trim = true;
