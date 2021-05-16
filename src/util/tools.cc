@@ -1058,11 +1058,9 @@ std::string getDLNAprofileString(const std::string& contentType)
         profile = UPNP_DLNA_PROFILE_MP3;
     else if (contentType == CONTENT_TYPE_PCM)
         profile = UPNP_DLNA_PROFILE_LPCM;
-    else
-        profile = "";
 
     if (!profile.empty())
-        profile = std::string(UPNP_DLNA_PROFILE) + "=" + profile;
+        profile = fmt::format("{}={}", UPNP_DLNA_PROFILE, profile);
     return profile;
 }
 

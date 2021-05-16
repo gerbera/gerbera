@@ -104,7 +104,7 @@ void web::configSave::process()
                         success = false;
                         update = true;
                     } else if (param(item).substr(param(item).length() - 1) == "]") {
-                        parValue = "";
+                        parValue.clear();
                         log_debug("dropping {}", param(item));
                         success = false;
                         update = true;

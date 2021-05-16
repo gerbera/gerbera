@@ -59,7 +59,7 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
 
     if (i1 == std::string::npos) {
         path = url_s;
-        parameters = "";
+        parameters.clear();
     } else {
         parameters = url_s.substr(i1 + 1);
         path = url_s.substr(0, i1);
