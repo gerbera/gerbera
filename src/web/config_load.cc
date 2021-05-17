@@ -63,16 +63,18 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
     info.append_attribute("help") = cs->getHelp();
 }
 
-void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid)
+void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
 {
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("aid") = fmt::format("{:02d}", aid).c_str();
-    item.append_attribute("status") = "unchanged";
+    item.append_attribute("status") = cs == nullptr || !cs->isDefaultValueUsed() ? "unchanged" : "default";
 
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
-    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; }) ? "database" : "config.xml";
+    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; }) //
+        ? "database" //
+        : (cs == nullptr || !cs->isDefaultValueUsed() ? "config.xml" : "default");
 }
 
 template <typename T>
@@ -147,7 +149,7 @@ void web::configLoad::process()
     for (int i = 0; i < int(CFG_MAX); i++) {
         auto scs = ConfigManager::findConfigSetup(config_option_t(i));
         auto item = values.append_child("item");
-        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i));
+        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i), scs);
 
         try {
             log_debug("    Option {:03d} {} = {}", i, scs->getItemPath(), scs->getCurrentValue().c_str());
@@ -163,15 +165,15 @@ void web::configLoad::process()
         auto client = clientConfig->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS), cs->option, ATTR_CLIENTS_CLIENT_FLAGS);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS), cs->option, ATTR_CLIENTS_CLIENT_FLAGS, cs);
         setValue(item, ClientConfig::mapFlags(client->getFlags()));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_IP), cs->option, ATTR_CLIENTS_CLIENT_IP);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_IP), cs->option, ATTR_CLIENTS_CLIENT_IP, cs);
         setValue(item, client->getIp());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, cs);
         setValue(item, client->getUserAgent());
     }
 
@@ -228,11 +230,11 @@ void web::configLoad::process()
     for (auto&& [key, val] : transcoding->getList()) {
         for (auto&& [a, name] : *val) {
             auto item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
+            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
             setValue(item, key);
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
+            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
             setValue(item, name->getName());
             profiles[name->getName()] = pr;
 
@@ -371,11 +373,11 @@ void web::configLoad::process()
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
             auto item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption);
+            createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption, dcs);
             setValue(item, key.substr(5));
 
             item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption);
+            createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption, dcs);
             setValue(item, val);
             i++;
         }
@@ -386,7 +388,7 @@ void web::configLoad::process()
         for (size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
             auto item = values.append_child("item");
-            createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption);
+            createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption, acs);
             setValue(item, entry);
         }
     }

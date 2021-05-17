@@ -69,6 +69,7 @@ protected:
     std::shared_ptr<ConfigOption> optionValue;
     std::string cpath;
     bool required = false;
+    bool useDefault = false;
     StringCheckFunction rawCheck;
     std::string defaultValue;
     const char* help;
@@ -116,6 +117,7 @@ public:
     ConfigSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
         : cpath(buildCpath(xpath))
         , required(required)
+        , useDefault(false)
         , rawCheck(nullptr)
         , defaultValue(defaultValue)
         , help(help)
@@ -127,6 +129,7 @@ public:
     ConfigSetup(config_option_t option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
         : cpath(buildCpath(xpath))
         , required(required)
+        , useDefault(false)
         , rawCheck(check)
         , defaultValue(defaultValue)
         , help(help)
@@ -144,6 +147,10 @@ public:
     std::string getDefaultValue() const
     {
         return this->defaultValue;
+    }
+    bool isDefaultValueUsed() const
+    {
+        return this->useDefault;
     }
 
     bool checkValue(std::string& optValue) const
@@ -165,7 +172,7 @@ public:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getXmlContent(const pugi::xml_node& root, bool trim = true) const;
+    std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
 
     virtual void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr);
 
@@ -258,7 +265,7 @@ public:
         return false;
     }
 
-    En getXmlContent(const pugi::xml_node& root) const
+    En getXmlContent(const pugi::xml_node& root)
     {
         std::string optValue = ConfigSetup::getXmlContent(root, true);
         log_debug("Config: option: '{}' value: '{}'", xpath, optValue.c_str());
@@ -390,7 +397,7 @@ public:
 
     void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    int getXmlContent(const pugi::xml_node& root) const;
+    int getXmlContent(const pugi::xml_node& root);
 
     std::shared_ptr<ConfigOption> newOption(int optValue);
 
@@ -441,7 +448,7 @@ public:
 
     void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool getXmlContent(const pugi::xml_node& root) const;
+    bool getXmlContent(const pugi::xml_node& root);
 
     bool checkValue(std::string& optValue, const std::string& pathName = "") const;
 
@@ -484,10 +491,12 @@ public:
     config_option_t nodeOption;
     config_option_t attrOption = CFG_MAX;
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption,
+        ArrayInitFunction init = nullptr, bool notEmpty = false, const std::vector<std::string_view>& defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
+        , defaultEntries(defaultEntries)
         , nodeOption(nodeOption)
     {
     }
@@ -517,7 +526,7 @@ public:
         return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
     }
 
-    std::vector<std::string> getXmlContent(const pugi::xml_node& optValue) const;
+    std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
 
     bool checkArrayValue(const std::string& value, std::vector<std::string>& result) const;
 
@@ -593,7 +602,7 @@ public:
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
-    std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue) const;
+    std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue);
 
     std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
 

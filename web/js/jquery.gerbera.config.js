@@ -513,6 +513,14 @@ $.widget('grb.config', {
             itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); };
             link.click(itemValue, itemValue.resetEntry);
             link.appendTo(itemLine);
+          } else if (itemValue.source === 'default') {
+            const link = $('<a>', {"title": "copy", "style": "margin-left: 20px"});
+            if (itemValue.origValue !== '') {
+                link.append(` default value is "${itemValue.origValue}"`);
+            } else {
+                link.append(' default value');
+            }
+            link.appendTo(itemLine);
           } else if (itemValue.status !== 'unchanged') {
             const link = $('<a>', {"title": "reset", "style": "margin-left: 20px"});
             if (itemValue.origValue !== '') {

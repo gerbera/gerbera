@@ -62,6 +62,7 @@ add_library(libgerbera STATIC
         src/common.h
         src/config/client_config.h
         src/config/client_config.cc
+        src/config/config_defaults.cc
         src/config/config_generator.h
         src/config/config_generator.cc
         src/config/config_manager.cc

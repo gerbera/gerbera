@@ -68,7 +68,7 @@ bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
 /// The xpath parameter has XPath syntax:
 /// "/path/to/option" will return the text value of the given "option" element
 /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) const
+std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
 
@@ -111,6 +111,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue.c_str());
 
+    useDefault = true;
     return defaultValue;
 }
 
@@ -341,7 +342,7 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
     }
 }
 
-int ConfigIntSetup::getXmlContent(const pugi::xml_node& root) const
+int ConfigIntSetup::getXmlContent(const pugi::xml_node& root)
 {
     std::string sVal = ConfigSetup::getXmlContent(root, true);
     log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal.c_str());
@@ -430,7 +431,7 @@ void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Con
     setOption(config);
 }
 
-bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root) const
+bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root)
 {
     std::string optValue = ConfigSetup::getXmlContent(root, true);
     return checkValue(optValue, root.path());
@@ -597,7 +598,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     return false;
 }
 
-std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue) const
+std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue)
 {
     std::vector<std::string> result;
     if (initArray != nullptr) {
@@ -611,6 +612,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        useDefault = true;
         result.assign(defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
@@ -640,17 +642,19 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
 
 bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
-    if (value != nullptr) {
+    if (value != nullptr && !value.empty()) {
         for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& content = it.node();
             std::string mark_content = content.text().as_string();
             if (mark_content.empty()) {
-                log_error("error in configuration, <mark-played-items>, empty <content> parameter");
+                log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), node_name);
                 return false;
             }
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE)) {
-                log_error(R"(error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are "video", "audio", "image")");
+                log_error("(error in configuration, <{}>, invalid <{}> parameter! Allowed values are '{}', '{}', '{}')",
+                    value.name(), node_name,
+                    DEFAULT_MARK_PLAYED_CONTENT_VIDEO, DEFAULT_MARK_PLAYED_CONTENT_AUDIO, DEFAULT_MARK_PLAYED_CONTENT_IMAGE);
                 return false;
             }
 
@@ -662,19 +666,13 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
 
 bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
-    // create default structure
-    if (value.empty()) {
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_1));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_2));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_3));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_4));
-    } else {
-        // create the array from either user settings
+    if (value != nullptr && !value.empty()) {
+        // create the array from user settings
         for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& child = it.node();
             int i = child.text().as_int();
             if (i < 1) {
-                log_error("Error in config file: incorrect <option> value for <items-per-page>");
+                log_error("Error in config file: incorrect <{}> value for <{}>", node_name, value.name());
                 return false;
             }
             result.emplace_back(child.text().as_string());
@@ -802,7 +800,7 @@ std::string ConfigDictionarySetup::getItemPath(int index, config_option_t propOp
         : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
 }
 
-std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue) const
+std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue)
 {
     std::map<std::string, std::string> result;
     if (initDict != nullptr) {
@@ -816,6 +814,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        useDefault = true;
         for (auto&& entry : defaultEntries) {
             result.insert(entry); // this should be an insert without a loop, but Debian 10 doesn't compile.
         }
