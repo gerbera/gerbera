@@ -208,8 +208,10 @@ $.widget('grb.config', {
         let childValue = listValue.parentItem.childList[child];
         if (childValue &&  childValue.length > 0) {
           childValue.forEach((j) => {
-            j.status = listValue.status;
-            this.options.addResultItem(j);
+            if (!j.item || j.item.startsWith(listValue.item)) {
+                j.status = listValue.status;
+                this.options.addResultItem(j);
+            }
           });
         }
       });
@@ -247,6 +249,7 @@ $.widget('grb.config', {
 
   createSection: function (list, xpath, section, values, level, parentItem, status = 'unchanged') {
     parentItem.childList = {};
+    parentItem.subList = [];
     parentItem.childList[0] = [];
 
     this.meta.forEach((m) => {
@@ -351,7 +354,7 @@ $.widget('grb.config', {
             if (xpathList === null || xpathList.length === 0) {
               line = $('<li></li>');
               line.attr('style', 'padding-top: 20px');
-              line.attr('id', "line_" + item.item.replace("RegExp('/','g')","_"));
+              line.attr('id', "line_" + item.item.replace(RegExp('/','g'),"_"));
               list.removeClass('fa-ul');
               list.addClass('fa-ul');
               let symbol = $('<span></span>').addClass('fa-li');
@@ -367,7 +370,7 @@ $.widget('grb.config', {
                 parentItem: parentItem,
                 editable: parentItem.editable};
               parentItem.childList[count] = [];
-              values.filter((v) => { return v.item == listValue.item; }).forEach((v) => {
+              values.filter((v) => { return v.item === listValue.item || v.item === listValue.item + item.item.replace(xpath,''); }).forEach((v) => {
                 listValue.status = v.status;
                 listValue.id = v.id;
               });
@@ -383,13 +386,14 @@ $.widget('grb.config', {
                 }
                 listValue.editor.addClass(listValue.status);
                 listValue.removeItemClicked = function(event) {
-                  listValue.target.removeItemClicked (listValue, event);
+                  listValue.target.removeItemClicked(listValue, event);
                 };
                 symbol.off('click').on('click', listValue.removeItemClicked);
               } else {
                 icon.removeClass('fa-ban');
                 icon.addClass('fa-circle');
               }
+              parentItem.subList[count] = listValue;
               //let text = $('<span></span>');
               //text.text(count).appendTo(line);
               //text.attr('title', item.item);
@@ -431,6 +435,7 @@ $.widget('grb.config', {
           });
           parentItem.childList[count].push(itemValue);
           itemValue.status = lineStatus;
+          itemValue.parentItem = parentItem;
           itemLine.addClass(itemValue.status);
 
           if(item.editable) {
@@ -510,7 +515,12 @@ $.widget('grb.config', {
             } else {
                 link.append(' reset');
             }
-            itemValue.resetEntry = function (event) { itemValue.target.resetEntry(itemValue, event); };
+            itemValue.resetEntry = function (event) {
+                if (itemValue.parentItem.children.length > 1)
+                    itemValue.target.resetEntry(itemValue, event);
+                else
+                    itemValue.target.removeItemClicked(itemValue.parentItem.subList[count], event);
+            };
             link.click(itemValue, itemValue.resetEntry);
             link.appendTo(itemLine);
           } else if (itemValue.source === 'default') {
