@@ -586,6 +586,10 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
             if (status == STATUS_RESET && updateItem(i, optItem, config, value, config->getOrigValue(optItem), status)) {
                 return true;
             }
+            // new entry has parent xpath, value is in other entry
+            if (status == STATUS_ADDED) {
+                return true;
+            }
         }
 
         auto editSize = value->getEditSize();
@@ -777,6 +781,10 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
                 if (updateItem(i, optItem, config, value, optValue, optValue, status)) {
                     return true;
                 }
+            }
+            // new entry has parent xpath, value is in other entry
+            if (status == STATUS_ADDED) {
+                return true;
             }
         }
 

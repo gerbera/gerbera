@@ -158,7 +158,7 @@ const saveConfig = () => {
     };
     changedKeys.forEach((key) => {
       let i = current_config.changedItems[key];
-      if (i.item) {
+      if (i.item && i.item !== '') {
         saveData.data.push({
           item: i.item,
           id: i.id,

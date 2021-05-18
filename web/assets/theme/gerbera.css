@@ -356,6 +356,13 @@ body,
     background-color: lightyellow;
 }
 
+#configgrid .default {
+    color: darkgray;
+}
+#configgrid .default input {
+    color: darkgray;
+}
+
 #configgrid .reset {
     background-color: lightgreen;
 }
