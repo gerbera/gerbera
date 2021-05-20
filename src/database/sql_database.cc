@@ -2329,11 +2329,14 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
         *qb << TQ(it->first) << '='
             << it->second;
     }
-    *qb << " WHERE " << TQ("id") << " = " << obj->getID();
 
     // relying on only one element when tableName is mt_metadata
-    if (tableName == METADATA_TABLE)
+    if (tableName == METADATA_TABLE) {
+        *qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
         *qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
+    } else {
+        *qb << " WHERE " << TQ("id") << " = " << obj->getID();
+    }
 
     return qb;
 }
@@ -2348,12 +2351,15 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_
     auto dict = addUpdateTable->getDict();
 
     auto qb = std::make_unique<std::ostringstream>();
-    *qb << "DELETE FROM " << TQ(tableName)
-        << " WHERE " << TQ("id") << " = " << obj->getID();
+    *qb << "DELETE FROM " << TQ(tableName);
 
     // relying on only one element when tableName is mt_metadata
-    if (tableName == METADATA_TABLE)
+    if (tableName == METADATA_TABLE) {
+        *qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
         *qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
+    } else {
+        *qb << " WHERE " << TQ("id") << " = " << obj->getID();
+    }
 
     return qb;
 }
