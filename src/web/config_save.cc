@@ -128,7 +128,7 @@ void web::configSave::process()
                         success = true;
                     } else {
                         if (!cs->updateDetail(param(item), parValue, config, &arguments)) {
-                            log_error("unhandled option {} != {}", param(item), cs->getUniquePath());
+                            log_error("unhandled {} option {} != {}", parStatus, param(item), cs->getUniquePath());
                         } else {
                             success = true;
                         }

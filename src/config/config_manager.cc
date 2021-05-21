@@ -1512,12 +1512,12 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
                     std::string parValue = cfgValue.value;
                     if (cfgValue.status == STATUS_CHANGED || cfgValue.status == STATUS_UNCHANGED) {
                         if (!cs->updateDetail(cfgValue.item, parValue, self)) {
-                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                            log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);
                         }
                     } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
                         std::map<std::string, std::string> arguments = { { "status", cfgValue.status } };
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
-                            log_error("unhandled option {} != {}", cfgValue.item, cs->xpath);
+                            log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);
                         }
                     }
                 }

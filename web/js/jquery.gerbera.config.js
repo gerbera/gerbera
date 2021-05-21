@@ -511,33 +511,43 @@ $.widget('grb.config', {
             const icon = $('<i></i>', {"class": "fa " + "fa-undo" });
             link.append(icon);
             if (itemValue.origValue !== '') {
-                link.append(` reset to ${itemValue.origValue}`);
+              link.append(` reset to ${itemValue.origValue}`);
             } else {
-                link.append(' reset');
+              link.append(' reset');
+            }
+            if (itemValue.defaultValue && itemValue.defaultValue !== '') {
+              link.append(` default value is "${itemValue.defaultValue}"`);
             }
             itemValue.resetEntry = function (event) {
-                if (itemValue.parentItem.children.length > 1)
-                    itemValue.target.resetEntry(itemValue, event);
-                else
-                    itemValue.target.removeItemClicked(itemValue.parentItem.subList[count], event);
+              if (itemValue.parentItem.children.length > 1)
+                itemValue.target.resetEntry(itemValue, event);
+              else
+                itemValue.target.removeItemClicked(itemValue.parentItem.subList[count], event);
             };
             link.click(itemValue, itemValue.resetEntry);
             link.appendTo(itemLine);
           } else if (itemValue.source === 'default') {
             const link = $('<a>', {"title": "copy", "style": "margin-left: 20px"});
-            if (itemValue.origValue !== '') {
-                link.append(` default value is "${itemValue.origValue}"`);
+            if (itemValue.defaultValue && itemValue.defaultValue !== '') {
+              link.append(` default value is "${itemValue.defaultValue}"`);
             } else {
-                link.append(' default value');
+              link.append(' default value');
             }
             link.appendTo(itemLine);
           } else if (itemValue.status !== 'unchanged') {
             const link = $('<a>', {"title": "reset", "style": "margin-left: 20px"});
             if (itemValue.origValue !== '') {
-                link.append(` config.xml value is "${itemValue.origValue}"`);
+              link.append(` config.xml value is "${itemValue.origValue}"`);
             } else {
-                link.append(' no config.xml entry');
+              link.append(' no config.xml entry');
             }
+            if (itemValue.defaultValue && itemValue.defaultValue !== '') {
+              link.append(` default value is "${itemValue.defaultValue}"`);
+            }
+            link.appendTo(itemLine);
+          } else if (itemValue.defaultValue && itemValue.defaultValue !== '') {
+            const link = $('<a>', {"title": "copy", "style": "margin-left: 20px"});
+            link.append(` default value is "${itemValue.defaultValue}"`);
             link.appendTo(itemLine);
           }
         }

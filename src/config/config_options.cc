@@ -45,7 +45,7 @@ std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool fo
     auto editSize = getEditSize();
     for (size_t i = 0; i < editSize; i++) {
         // add index in front of key to get items correct sorting in map
-        if (!indexMap.at(i).empty()) {
+        if (indexMap.find(i) != indexMap.end() && !indexMap.at(i).empty()) {
             editOption[fmt::format("{:05d}{}", i, indexMap.at(i))] = option.at(indexMap.at(i));
         } else {
             editOption[fmt::format("{:05d}", i)] = "";
@@ -92,7 +92,7 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     std::vector<std::string> editOption;
     editOption.reserve(editSize);
     for (size_t i = 0; i < editSize; i++) {
-        editOption.push_back(indexMap.at(i) < std::numeric_limits<std::size_t>::max() ? option[indexMap.at(i)] : "");
+        editOption.push_back((indexMap.find(i) != indexMap.end() && indexMap.at(i) < std::numeric_limits<std::size_t>::max()) ? option[indexMap.at(i)] : "");
     }
     return editOption;
 }
