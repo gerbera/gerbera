@@ -1300,8 +1300,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 
         MetadataHandler::setMetadata(context, item, dirEnt);
     } else if (dirEnt.is_directory(ec)) {
-        auto cont = std::make_shared<CdsContainer>();
-        obj = cont;
+        obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
          * this exists only to inform the caller that
          * this is a container

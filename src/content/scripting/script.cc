@@ -516,7 +516,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                     resCount = stoiString(sym);
                     i = getIntProperty(sym, -1);
                     if (i >= 0) {
-                        std::shared_ptr<CdsResource> res = std::make_shared<CdsResource>(i);
+                        auto res = std::make_shared<CdsResource>(i);
                         obj->addResource(res);
                     }
                 }
