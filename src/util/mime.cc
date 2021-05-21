@@ -68,8 +68,6 @@ Mime::~Mime()
         magicCookie = nullptr;
     }
 }
-#else
-Mime::~Mime() = default;
 #endif
 
 #ifdef HAVE_MAGIC

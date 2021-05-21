@@ -120,11 +120,10 @@ protected:
     /// \brief reference to parent, transporting details from import script
     std::shared_ptr<CdsObject> parent;
 
-    virtual ~CdsObject() = default;
-
 public:
     /// \brief Constructor. Sets the default values.
     explicit CdsObject();
+    virtual ~CdsObject() = default;
 
     /// \brief Set the object ID.
     ///
