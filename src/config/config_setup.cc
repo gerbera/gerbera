@@ -990,7 +990,7 @@ void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shar
 
 std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_node& optValue)
 {
-    std::shared_ptr<AutoscanList> result = std::make_shared<AutoscanList>(nullptr);
+    auto result = std::make_shared<AutoscanList>(nullptr);
     if (!createAutoscanListFromNode(optValue, result)) {
         throw_std_runtime_error("Init {} autoscan failed '{}'", xpath, optValue);
     }
@@ -1387,7 +1387,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
 
 std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_node& optValue)
 {
-    std::shared_ptr<TranscodingProfileList> result = std::make_shared<TranscodingProfileList>();
+    auto result = std::make_shared<TranscodingProfileList>();
 
     if (!createTranscodingProfileListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
         throw_std_runtime_error("Init {} transcoding failed '{}'", xpath, optValue);
@@ -1513,7 +1513,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
 
 std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node& optValue)
 {
-    std::shared_ptr<ClientConfigList> result = std::make_shared<ClientConfigList>();
+    auto result = std::make_shared<ClientConfigList>();
 
     if (!createClientConfigListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
         throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue);
@@ -1741,7 +1741,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
 
 std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_node& optValue)
 {
-    std::shared_ptr<DirectoryConfigList> result = std::make_shared<DirectoryConfigList>();
+    auto result = std::make_shared<DirectoryConfigList>();
 
     if (!createDirectoryTweakListFromNode(optValue, result)) {
         throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue);

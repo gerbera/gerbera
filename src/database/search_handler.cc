@@ -299,8 +299,8 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
     if (currentToken->getType() != TokenType::PROPERTY)
         throw_std_runtime_error("Failed to parse search criteria - expecting a property name");
 
-    std::shared_ptr<ASTNode> relationshipExpr = nullptr;
-    std::shared_ptr<ASTProperty> property = std::make_shared<ASTProperty>(sqlEmitter, currentToken->getValue());
+    auto relationshipExpr = std::shared_ptr<ASTNode>(nullptr);
+    auto property = std::make_shared<ASTProperty>(sqlEmitter, currentToken->getValue());
 
     getNextToken();
     if (currentToken->getType() == TokenType::COMPAREOP) {
