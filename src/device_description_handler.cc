@@ -56,5 +56,5 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
 
     auto t = std::make_unique<MemIOHandler>(deviceDescription);
     t->open(mode);
-    return t;
+    return std::move(t);
 }

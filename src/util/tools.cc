@@ -568,7 +568,7 @@ std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
 
     result.resize(size);
 
-    return result;
+    return std::move(result);
 }
 
 void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size)

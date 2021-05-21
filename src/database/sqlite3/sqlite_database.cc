@@ -688,8 +688,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            auto p = std::make_unique<Sqlite3Row>(row);
-            return p;
+            return std::make_unique<Sqlite3Row>(row);
         }
         return nullptr;
     }
