@@ -47,7 +47,7 @@ class StringConverter;
 /// \brief This class is responsible for reading exif header metadata via the
 /// libexif library
 class LibExifHandler : public MetadataHandler {
-protected:
+private:
     // image resolution in pixels
     // the problem is that I do not know when I encounter the
     // tags for X and Y, so I have to save the information
