@@ -165,7 +165,7 @@ std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID
         return nullptr;
     }
 
-    std::unique_lock lock(mutex, std::defer_lock);
+    auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
 

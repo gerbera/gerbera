@@ -393,7 +393,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
         }
     }
 
-    std::scoped_lock thumb_lock { thumb_mutex };
+    auto thumb_lock = std::scoped_lock<std::mutex>(thumb_mutex);
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     auto th = wrap_unique_ptr<create_thumbnailer, destroy_thumbnailer>();
