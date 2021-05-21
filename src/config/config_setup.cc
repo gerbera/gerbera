@@ -587,7 +587,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
                 return true;
             }
             // new entry has parent xpath, value is in other entry
-            if (status == STATUS_ADDED) {
+            if (status == STATUS_ADDED || status == STATUS_MANUAL) {
                 return true;
             }
         }
@@ -783,7 +783,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
                 }
             }
             // new entry has parent xpath, value is in other entry
-            if (status == STATUS_ADDED) {
+            if (status == STATUS_ADDED || status == STATUS_MANUAL) {
                 return true;
             }
         }

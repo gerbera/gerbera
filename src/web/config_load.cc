@@ -77,6 +77,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
         item.append_attribute("source") = cs == nullptr || !cs->isDefaultValueUsed() ? "config.xml" : "default";
     }
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
+    item.append_attribute("defaultValue") = cs != nullptr ? cs->getDefaultValue().c_str() : "";
 }
 
 template <typename T>
