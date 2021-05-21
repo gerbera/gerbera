@@ -165,8 +165,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject
         log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    return io_handler;
+    return std::make_unique<FileIOHandler>(path);
 }
 
 std::vector<std::string> ContainerArtHandler::names = {
@@ -229,8 +228,7 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<Cds
         log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    return io_handler;
+    return std::make_unique<FileIOHandler>(path);
 }
 
 std::vector<std::string> SubtitleHandler::names = {
@@ -289,8 +287,7 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsObje
         log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    return io_handler;
+    return std::make_unique<FileIOHandler>(path);
 }
 
 std::vector<std::string> ResourceHandler::names = {
@@ -340,6 +337,5 @@ std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsObje
         log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
         return nullptr;
     }
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    return io_handler;
+    return std::make_unique<FileIOHandler>(path);
 }

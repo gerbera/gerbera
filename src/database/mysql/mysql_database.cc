@@ -427,8 +427,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
     MYSQL_ROW mysql_row;
     mysql_row = mysql_fetch_row(mysql_res);
     if (mysql_row) {
-        auto p = std::make_unique<MysqlRow>(mysql_row);
-        return p;
+        return std::make_unique<MysqlRow>(mysql_row);
     }
     nullRead = true;
     mysql_free_result(mysql_res);
