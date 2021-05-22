@@ -102,7 +102,7 @@ void CurlIOHandler::threadProc()
     //proxy..
 
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)this);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, reinterpret_cast<void*>(this));
 
     auto lock = threadRunner->uniqueLock(std::defer_lock);
     do {
