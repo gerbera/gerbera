@@ -52,8 +52,10 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
 {
     const auto url_s = std::string { url };
     const auto i1 = size_t { [=]() {
-        if (separator == '/' || separator == '?')
+        if (separator == '/')
             return url_s.rfind(separator);
+        if (separator == '?')
+            return url_s.find(separator);
         throw_std_runtime_error("Forbidden separator: {}", separator);
     }() };
 
