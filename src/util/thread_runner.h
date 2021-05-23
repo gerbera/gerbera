@@ -43,11 +43,9 @@ class ThreadRunner : public ThreadExecutor {
 public:
     ThreadRunner(const std::string& name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
         : config(config)
-        , attr(nullptr)
         , threadName(name)
         , targetProc(targetProc)
         , target(target)
-        , isReady(false)
     {
         log_debug("ThreadRunner: Creating {}", this->threadName);
         try {
@@ -202,13 +200,13 @@ protected:
     }
 
 private:
-    pthread_attr_t* attr;
+    pthread_attr_t* attr {};
     std::string threadName;
     ThreadProc targetProc;
     void* target;
     Condition cond;
     Mutex mutex;
-    bool isReady;
+    bool isReady {};
 
     static void* staticThreadProc(void* arg)
     {

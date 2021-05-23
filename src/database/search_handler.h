@@ -77,8 +77,6 @@ class SearchLexer {
 public:
     explicit SearchLexer(const std::string& input)
         : input(input)
-        , currentPos(0)
-        , inQuotes(false)
     {
     }
     virtual ~SearchLexer() = default;
@@ -87,8 +85,8 @@ public:
 
     SearchLexer& operator=(const SearchLexer&) = delete;
     SearchLexer(const SearchLexer&) = delete;
-    SearchLexer& operator=(const SearchLexer&&) = delete;
-    SearchLexer(const SearchLexer&&) = delete;
+    SearchLexer& operator=(SearchLexer&&) = delete;
+    SearchLexer(SearchLexer&&) = delete;
 
 protected:
     std::string nextStringToken(const std::string& input);
@@ -96,8 +94,8 @@ protected:
     std::string getQuotedValue(const std::string& input);
 
     const std::string& input;
-    unsigned currentPos;
-    bool inQuotes;
+    unsigned currentPos {};
+    bool inQuotes {};
 };
 
 // NOTES
