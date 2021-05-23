@@ -71,28 +71,6 @@ public:
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
-    static const std::vector<std::shared_ptr<ConfigSetup>>& getOptionList()
-    {
-        return complexOptions;
-    }
-
-    static const char* mapConfigOption(config_option_t option);
-
-    static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
-    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
-    template <class CS>
-    static std::vector<std::shared_ptr<CS>> getConfigSetupList()
-    {
-        std::vector<std::shared_ptr<CS>> result;
-        for (auto&& co : complexOptions) {
-            std::shared_ptr<CS> tco = std::dynamic_pointer_cast<CS>(co);
-            if (tco != nullptr && tco->getValue() != nullptr) {
-                result.emplace_back(tco);
-            }
-        }
-        return result;
-    }
-
     void load(const fs::path& userHome);
     void updateConfigFromDatabase(std::shared_ptr<Database> database) override;
 
@@ -155,9 +133,6 @@ public:
     fs::path getDataDir() const override { return dataDir; }
 
 protected:
-    static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
-    static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
-
     fs::path filename;
     fs::path dataDir;
     fs::path magicFile;

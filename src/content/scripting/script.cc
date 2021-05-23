@@ -35,6 +35,7 @@
 #include <fmt/chrono.h>
 
 #include "cds_objects.h"
+#include "config/config_definition.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
 #include "content/content_manager.h"
@@ -230,7 +231,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     duk_push_object(ctx); // config
     for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigManager::findConfigSetup(config_option_t(i), true);
+        auto scs = ConfigDefinition::findConfigSetup(config_option_t(i), true);
         if (scs == nullptr)
             continue;
         auto value = scs->getCurrentValue();
@@ -239,7 +240,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
         }
     }
 
-    for (auto&& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
         duk_push_object(ctx);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
@@ -248,7 +249,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
         duk_put_prop_string(ctx, -2, dcs->getItemPath(-1).c_str());
     }
 
-    for (auto&& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto duk_array = duk_push_array(ctx);
         for (size_t i = 0; i < array.size(); i++) {
@@ -261,21 +262,21 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     duk_push_object(ctx); // autoscan
     std::string autoscanItemPath;
-    for (auto&& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             auto&& entry = autoscan->get(i);
             auto&& adir = this->content->getAutoscanDirectory(entry->getLocation());
 
             duk_push_object(ctx);
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
+            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
             duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
         }

@@ -3,6 +3,7 @@
     Gerbera - https://gerbera.io/
 
     config_setup.h - this file is part of Gerbera.
+
     Copyright (C) 2020-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
@@ -20,10 +21,10 @@
     $Id$
 */
 
-/// \file config_defaults.cc
+/// \file config_definition.cc
 ///\brief Definitions of default values and setup for configuration.
 
-#include "config_manager.h" // API
+#include "config_definition.h" // API
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
@@ -215,7 +216,7 @@ static const std::map<std::string_view, std::string_view> upnp_artist_prop_defau
     { "upnp:genre", "M_GENRE" },
 };
 
-const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = {
+const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
         "/server/port", "config-server.html#port",
         0, ConfigIntSetup::CheckPortValue),
@@ -897,7 +898,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
         "upnp-property", ""),
 };
 
-const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::parentOptions = {
+const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::parentOptions = {
     { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
@@ -960,3 +961,64 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigManager::par
     { ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE, { CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS } },
 #endif
 };
+
+const char* ConfigDefinition::mapConfigOption(config_option_t option)
+{
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& c) { return c->option == option; });
+    if (co != complexOptions.end()) {
+        return (*co)->xpath;
+    }
+    return "";
+}
+
+std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetup(config_option_t option, bool save)
+{
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->option == option; });
+    if (co != complexOptions.end()) {
+        log_debug("Config: option found: '{}'", (*co)->xpath);
+        return *co;
+    }
+
+    if (save)
+        return nullptr;
+
+    throw_std_runtime_error("Error in config code: {} tag not found", option);
+}
+
+std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
+{
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == key; });
+
+    if (co != complexOptions.end()) {
+        log_debug("Config: option found: '{}'", (*co)->xpath);
+        return *co;
+    }
+
+    if (parent != nullptr) {
+        auto attrKey = key.substr(parent->getUniquePath().length());
+        if (attrKey.find_first_of(']') != std::string::npos) {
+            attrKey = attrKey.substr(attrKey.find_first_of(']') + 1);
+        }
+        if (attrKey.find_first_of("attribute::") != std::string::npos) {
+            attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
+        }
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
+
+        if (co != complexOptions.end()) {
+            log_debug("Config: attribute option found: '{}'", (*co)->xpath);
+            return *co;
+        }
+    }
+
+    if (save) {
+        co = std::find_if(complexOptions.begin(), complexOptions.end(),
+            [&](auto&& s) {
+                auto uPath = s->getUniquePath();
+                size_t len = std::min(uPath.length(), key.length());
+                return key.substr(0, len) == uPath.substr(0, len);
+            });
+        return (co != complexOptions.end()) ? *co : nullptr;
+    }
+
+    throw_std_runtime_error("Error in config code: {} tag not found", key);
+}

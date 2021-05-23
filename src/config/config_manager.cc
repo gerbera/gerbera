@@ -48,6 +48,7 @@
 #endif
 
 #include "client_config.h"
+#include "config_definition.h"
 #include "config_options.h"
 #include "config_setup.h"
 #include "content/autoscan.h"
@@ -1017,7 +1018,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
 
 std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments)
 {
-    auto co = findConfigSetup(option);
+    auto co = ConfigDefinition::findConfigSetup(option);
     auto self = getSelf();
     co->makeOption(root, self, arguments);
     log_debug("Config: option set: '{}'", co->xpath);
@@ -1062,7 +1063,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now go through the mandatory parameters, if something is missing
     // we will not start the server
-    co = findConfigSetup(CFG_SERVER_HOME);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
     if (!userHome.empty()) {
         // respect command line; ignore xml value
         temp = userHome;
@@ -1086,16 +1087,16 @@ void ConfigManager::load(const fs::path& userHome)
     bool mysql_en = false;
     bool sqlite3_en = false;
 
-    co = findConfigSetup(CFG_SERVER_STORAGE);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
     setOption(root, CFG_SERVER_STORAGE_USE_TRANSACTIONS);
 
-    co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
         mysql_en = setOption(root, CFG_SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
     }
 
-    co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE);
     if (co->hasXmlElement(root)) {
         sqlite3_en = setOption(root, CFG_SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
@@ -1117,7 +1118,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_PASSWORD);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
         co->makeOption(root, self);
     }
@@ -1136,7 +1137,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
-        co = findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         fs::path dir = dataDir / "sqlite3.sql";
         co->setDefaultValue(dir.string());
         co->makeOption(root, self);
@@ -1148,7 +1149,7 @@ void ConfigManager::load(const fs::path& userHome)
     if (mysql_en)
         dbDriver = "mysql";
 
-    co = findConfigSetup(CFG_SERVER_STORAGE_DRIVER);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_DRIVER);
     co->makeOption(dbDriver, self);
 
     // now go through the optional settings and fix them if anything is missing
@@ -1203,7 +1204,7 @@ void ConfigManager::load(const fs::path& userHome)
     temp = DEFAULT_FILESYSTEM_CHARSET;
 #endif
     // check if the one we take as default is actually available
-    co = findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
     try {
         auto conv = std::make_unique<StringConverter>(temp,
             DEFAULT_INTERNAL_CHARSET);
@@ -1221,7 +1222,7 @@ void ConfigManager::load(const fs::path& userHome)
     log_debug("Setting filesystem import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
-    co = findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
     co->setDefaultValue(temp);
     charset = co->getXmlContent(root);
     try {
@@ -1232,7 +1233,7 @@ void ConfigManager::load(const fs::path& userHome)
     log_debug("Setting metadata import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
-    co = findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
     co->setDefaultValue(temp);
     charset = co->getXmlContent(root);
     try {
@@ -1245,7 +1246,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     setOption(root, CFG_SERVER_HIDE_PC_DIRECTORY);
 
-    co = findConfigSetup(CFG_SERVER_NETWORK_INTERFACE);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_NETWORK_INTERFACE);
     if (interface.empty()) {
         temp = co->getXmlContent(root);
     } else {
@@ -1253,7 +1254,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
     co->makeOption(temp, self);
 
-    co = findConfigSetup(CFG_SERVER_IP);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_IP);
     if (ip.empty()) {
         temp = co->getXmlContent(root); // bind to any IP address
     } else {
@@ -1286,15 +1287,15 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
 #ifdef HAVE_JS
-    co = findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     co->makeOption(root, self);
 
-    co = findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     co->makeOption(root, self);
 
-    co = findConfigSetup(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
     args["resolveEmpty"] = "false";
     co->makeOption(root, self, &args);
     args.clear();
@@ -1326,7 +1327,7 @@ void ConfigManager::load(const fs::path& userHome)
         }
     }
 
-    co = findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
     args["mustExist"] = fmt::to_string(layoutType == "js");
     args["notEmpty"] = fmt::to_string(layoutType == "js");
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
@@ -1335,7 +1336,7 @@ void ConfigManager::load(const fs::path& userHome)
     auto script_path = co->getValue()->getOption();
 
 #endif
-    co = findConfigSetup(CFG_SERVER_PORT);
+    co = ConfigDefinition::findConfigSetup(CFG_SERVER_PORT);
     // 0 means, that the SDK will any free port itself
     co->makeOption((port == 0) ? co->getXmlContent(root) : fmt::to_string(port), self);
 
@@ -1437,7 +1438,7 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
 #ifdef HAVE_MAGIC
-    co = findConfigSetup(CFG_IMPORT_MAGIC_FILE);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_MAGIC_FILE);
     args["isFile"] = "true";
     args["resolveEmpty"] = "false";
     co->makeOption(!magicFile.empty() ? magicFile.string() : co->getXmlContent(root), self, &args);
@@ -1476,7 +1477,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
     int atrailers_refresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
-    co = findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
+    co = ConfigDefinition::findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
     co->makeOption(fmt::to_string(atrailers_refresh), self);
 
     setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
@@ -1502,7 +1503,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 
     for (auto&& cfgValue : values) {
         try {
-            auto cs = ConfigManager::findConfigSetupByPath(cfgValue.key, true);
+            auto cs = ConfigDefinition::findConfigSetupByPath(cfgValue.key, true);
 
             if (cs != nullptr) {
                 if (cfgValue.item == cs->xpath) {
