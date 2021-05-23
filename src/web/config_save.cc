@@ -29,6 +29,7 @@
 
 #include "config/client_config.h"
 #include "config/config.h"
+#include "config/config_definition.h"
 #include "config/config_manager.h"
 #include "config/config_options.h"
 #include "config/config_setup.h"
@@ -76,9 +77,9 @@ void web::configSave::process()
             if (!param(key).empty() && param(key) != "-1") {
                 config_option_t option = CFG_MAX;
                 option = config_option_t(std::stoi(param(key)));
-                cs = ConfigManager::findConfigSetup(option, true);
+                cs = ConfigDefinition::findConfigSetup(option, true);
             } else if (!param(item).empty()) {
-                cs = ConfigManager::findConfigSetupByPath(param(item), true);
+                cs = ConfigDefinition::findConfigSetupByPath(param(item), true);
             } else {
                 log_error("{} has empty value", item);
                 continue;

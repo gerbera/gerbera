@@ -93,24 +93,9 @@ protected:
 
 public:
     static constexpr auto ROOT_NAME = std::string_view("config");
-    static constexpr auto ATTRIBUTE = std::string_view("attribute::");
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
-    static std::string ensureAttribute(config_option_t option, bool check = true)
-    {
-        auto attr = std::string(ConfigManager::mapConfigOption(option));
-        if (attr.substr(0, ATTRIBUTE.size()) != ATTRIBUTE && check)
-            attr.insert(0, ATTRIBUTE);
-        return attr;
-    }
-    static std::string removeAttribute(config_option_t option)
-    {
-        auto attr = std::string(ConfigManager::mapConfigOption(option));
-        if (attr.size() > ATTRIBUTE.size() && attr.substr(0, ATTRIBUTE.size()) == ATTRIBUTE)
-            attr = attr.substr(ATTRIBUTE.size());
-        return attr;
-    }
     config_option_t option;
     const char* xpath;
 
@@ -184,20 +169,6 @@ public:
 
     virtual std::string getUniquePath() const { return xpath; }
     virtual std::string getCurrentValue() const { return optionValue == nullptr ? "" : optionValue->getOption(); }
-
-    template <class CS>
-    static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
-    {
-        std::shared_ptr<ConfigSetup> base = ConfigManager::findConfigSetup(option, save);
-        if (base == nullptr && save)
-            return nullptr;
-
-        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(base);
-        if (result == nullptr) {
-            throw_std_runtime_error("Error in config code: {} has wrong class", option);
-        }
-        return result;
-    }
 };
 
 class ConfigStringSetup : public ConfigSetup {
@@ -524,13 +495,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        if (index < 0) {
-            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
-        }
-        return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
     std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
 

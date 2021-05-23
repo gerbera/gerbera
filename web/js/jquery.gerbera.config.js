@@ -562,7 +562,7 @@ $.widget('grb.config', {
 
   addNewListItemBlock: function (list, item, parentItem, itemCount, xpath, itemId) {
     let lineNew = $('<li></li>');
-    lineNew.attr('id', "line_" + item.item.replace("RegExp('/','g')","_"));
+    lineNew.attr('id', "line_" + item.item.replace(RegExp('/','g'),"_"));
     let textNew = $('<span></span>');
     let symbolNew = $('<span></span>').addClass('fa-li');
     $('<i class="fa"></i>').addClass('fa-plus').appendTo(symbolNew);

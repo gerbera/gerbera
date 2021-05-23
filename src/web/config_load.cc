@@ -29,6 +29,7 @@
 #include <numeric>
 
 #include "config/client_config.h"
+#include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
 #include "content/autoscan.h"
@@ -116,7 +117,7 @@ void web::configLoad::process()
 
     auto meta = root.append_child("types");
     xml2JsonHints->setArrayName(meta, "item");
-    for (auto&& cs : ConfigManager::getOptionList()) {
+    for (auto&& cs : ConfigDefinition::getOptionList()) {
         addTypeMeta(meta, cs);
     }
 
@@ -150,7 +151,7 @@ void web::configLoad::process()
     }
 
     for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigManager::findConfigSetup(config_option_t(i));
+        auto scs = ConfigDefinition::findConfigSetup(config_option_t(i));
         auto item = values.append_child("item");
         createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i), scs);
 
@@ -162,7 +163,7 @@ void web::configLoad::process()
     }
 
     std::shared_ptr<ConfigSetup> cs;
-    cs = ConfigManager::findConfigSetup(CFG_CLIENTS_LIST);
+    cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
     for (size_t i = 0; i < clientConfig->size(); i++) {
         auto client = clientConfig->get(i);
@@ -180,7 +181,7 @@ void web::configLoad::process()
         setValue(item, client->getUserAgent());
     }
 
-    cs = ConfigManager::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
+    cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
     for (size_t i = 0; i < directoryConfig->size(); i++) {
         auto dir = directoryConfig->get(i);
@@ -226,7 +227,7 @@ void web::configLoad::process()
         setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
     }
 
-    cs = ConfigManager::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
+    cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
     std::map<std::string, int> profiles;
@@ -332,7 +333,7 @@ void web::configLoad::process()
         pr++;
     }
 
-    for (auto&& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             auto&& entry = autoscan->get(i);
@@ -371,7 +372,7 @@ void web::configLoad::process()
         }
     }
 
-    for (auto&& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
@@ -386,7 +387,7 @@ void web::configLoad::process()
         }
     }
 
-    for (auto&& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
@@ -403,8 +404,8 @@ void web::configLoad::process()
             item->attribute("source") = "database";
             item->attribute("status") = entry.status.c_str();
         } else {
-            auto cs = ConfigManager::findConfigSetupByPath(entry.item, true);
-            auto acs = ConfigManager::findConfigSetupByPath(entry.item, true, cs);
+            auto cs = ConfigDefinition::findConfigSetupByPath(entry.item, true);
+            auto acs = ConfigDefinition::findConfigSetupByPath(entry.item, true, cs);
             if (cs != nullptr) {
                 auto item = values.append_child("item");
                 createItem(item, entry.item, cs->option, acs != nullptr ? acs->option : CFG_MAX);
