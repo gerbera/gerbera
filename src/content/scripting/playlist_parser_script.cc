@@ -48,6 +48,9 @@ static duk_ret_t
 js_readln(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    if (self == nullptr) {
+        return 0;
+    }
 
     std::string line;
 
