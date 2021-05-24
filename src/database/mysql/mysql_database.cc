@@ -413,8 +413,7 @@ MysqlResult::~MysqlResult()
 {
     if (mysql_res) {
         if (!nullRead) {
-            MYSQL_ROW mysql_row;
-            while ((mysql_row = mysql_fetch_row(mysql_res)) != nullptr)
+            while ((mysql_fetch_row(mysql_res)) != nullptr)
                 ; // read out data
         }
         mysql_free_result(mysql_res);
