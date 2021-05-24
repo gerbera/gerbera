@@ -249,7 +249,7 @@ bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
 #ifdef HAVE_MAGIC
-    const auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
+    auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
     if (art_mimetype.empty())
         return MIMETYPE_DEFAULT;
     return art_mimetype;
