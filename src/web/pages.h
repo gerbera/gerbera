@@ -163,7 +163,7 @@ public:
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<ContentManager>& content,
+    std::shared_ptr<ContentManager> content,
     const std::string& page);
 
 /// \brief Browse clients list

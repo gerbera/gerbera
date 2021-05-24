@@ -174,7 +174,7 @@ public:
     std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(fs::path location) { this->location = std::move(location); }
+    void setLocation(const fs::path& location) { this->location = location; }
 
     /// \brief Retrieve media location.
     fs::path getLocation() const { return location; }

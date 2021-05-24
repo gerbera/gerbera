@@ -375,10 +375,10 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(const std::string& tabQuote, const std::string& tableAlias, const std::string& metaAlias)
-        : tabQuote(tabQuote)
-        , tableAlias(tableAlias)
-        , metaAlias(metaAlias)
+    DefaultSQLEmitter(std::string tabQuote, std::string tableAlias, std::string metaAlias)
+        : tabQuote(std::move(tabQuote))
+        , tableAlias(std::move(tableAlias))
+        , metaAlias(std::move(metaAlias))
     {
     }
 

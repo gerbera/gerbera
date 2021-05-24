@@ -498,11 +498,11 @@ public:
     }
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
-        bool notEmpty = false, bool itemNotEmpty = false, const std::vector<std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string_view> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , defaultEntries(defaultEntries)
+        , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
         , attrOption(attrOption)
     {

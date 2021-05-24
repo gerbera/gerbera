@@ -108,9 +108,9 @@ std::chrono::seconds AutoscanDirectory::getPreviousLMT() const
     return last_mod_previous_scan;
 }
 
-void AutoscanDirectory::setLocation(fs::path location)
+void AutoscanDirectory::setLocation(const fs::path& location)
 {
-    this->location = std::move(location);
+    this->location = location;
 }
 
 void AutoscanDirectory::setScanID(int id)

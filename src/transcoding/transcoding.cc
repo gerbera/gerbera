@@ -52,9 +52,9 @@ TranscodingProfile::TranscodingProfile()
 }
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name)
+    : name(std::move(name))
+    , tr_type(tr_type)
 {
-    this->name = std::move(name);
-    this->tr_type = tr_type;
     enabled = true;
     theora = false;
     first_resource = false;

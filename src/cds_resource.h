@@ -64,9 +64,9 @@ public:
     /// \param handler_type id of the associated handler
     explicit CdsResource(int handlerType);
     CdsResource(int handlerType,
-        const std::map<std::string, std::string>& attributes,
-        const std::map<std::string, std::string>& parameters,
-        const std::map<std::string, std::string>& options);
+        std::map<std::string, std::string> attributes,
+        std::map<std::string, std::string> parameters,
+        std::map<std::string, std::string> options);
 
     /// \brief Adds a resource attribute.
     ///
