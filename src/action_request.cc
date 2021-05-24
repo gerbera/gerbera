@@ -36,7 +36,7 @@
 #include "util/tools.h"
 #include "util/upnp_quirks.h"
 
-ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnp_request)
+ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest* upnp_request)
     : upnp_request(upnp_request)
     , errCode(UPNP_E_SUCCESS)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnp_request))
@@ -45,7 +45,7 @@ ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpAction
 {
     auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
-    quirks = std::make_shared<Quirks>(context, ctrlPtIPAddr, userAgent);
+    quirks = std::make_shared<Quirks>(std::move(context), ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const

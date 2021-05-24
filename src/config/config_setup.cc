@@ -130,7 +130,7 @@ void ConfigSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<C
 
 void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    optionValue = std::make_shared<Option>(optValue);
+    optionValue = std::make_shared<Option>(std::move(optValue));
     setOption(config);
 }
 

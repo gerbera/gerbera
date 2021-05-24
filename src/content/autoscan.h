@@ -71,7 +71,7 @@ public:
     int getDatabaseID() const { return databaseID; }
 
     /// \brief The location can only be set once!
-    void setLocation(fs::path location);
+    void setLocation(const fs::path& location);
     fs::path getLocation() const { return location; }
 
     void setScanMode(ScanMode mode) { this->mode = mode; }
