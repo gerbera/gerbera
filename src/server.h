@@ -232,7 +232,7 @@ protected:
     void emptyBookmark();
 
     std::string getPresentationUrl();
-    int startupInterface(std::string iface, in_port_t port);
+    int startupInterface(const std::string& iface, in_port_t port);
 };
 
 #endif // __SERVER_H__

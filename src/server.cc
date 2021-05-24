@@ -209,7 +209,7 @@ void Server::run()
     log_info("The Web UI can be reached by following this link: {}/", url);
 }
 
-int Server::startupInterface(std::string iface, in_port_t inPort)
+int Server::startupInterface(const std::string& iface, in_port_t inPort)
 {
     log_info("Initialising UPnP with interface: {}, port: {}",
         iface.empty() ? "<unset>" : iface, inPort == 0 ? "<unset>" : fmt::to_string(inPort));
