@@ -513,7 +513,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             int resCount = 0;
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
-                    resCount = stoiString(sym);
                     i = getIntProperty(sym, -1);
                     if (i >= 0) {
                         auto res = std::make_shared<CdsResource>(i);
