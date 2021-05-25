@@ -100,12 +100,14 @@ void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
     item.append_attribute("value") = value.c_str();
 }
 
+/// \brief: process config_load request
 void web::configLoad::process()
 {
     check_request();
     auto root = xmlDoc->document_element();
     auto values = root.append_child("values");
 
+    // set handling of json properties
     xml2JsonHints->setArrayName(values, "item");
     xml2JsonHints->setFieldType("item", "string");
     xml2JsonHints->setFieldType("id", "string");
@@ -115,12 +117,14 @@ void web::configLoad::process()
 
     log_debug("Sending Config to web!");
 
+    // generate meta info for ui
     auto meta = root.append_child("types");
     xml2JsonHints->setArrayName(meta, "item");
     for (auto&& cs : ConfigDefinition::getOptionList()) {
         addTypeMeta(meta, cs);
     }
 
+    // write database status
     {
         auto item = values.append_child("item");
         createItem(item, "/status/attribute::total", CFG_MAX, CFG_MAX);
@@ -150,6 +154,7 @@ void web::configLoad::process()
         setValue(item, database->getTotalFiles(true, "image"));
     }
 
+    // write all values with simple type (string, int, bool)
     for (int i = 0; i < int(CFG_MAX); i++) {
         auto scs = ConfigDefinition::findConfigSetup(config_option_t(i));
         auto item = values.append_child("item");
@@ -162,6 +167,7 @@ void web::configLoad::process()
         }
     }
 
+    // write client configuration
     std::shared_ptr<ConfigSetup> cs;
     cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
@@ -181,6 +187,7 @@ void web::configLoad::process()
         setValue(item, client->getUserAgent());
     }
 
+    // write import tweaks
     cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
     for (size_t i = 0; i < directoryConfig->size(); i++) {
@@ -227,6 +234,7 @@ void web::configLoad::process()
         setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
     }
 
+    // write transconding configuration
     cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
@@ -333,6 +341,7 @@ void web::configLoad::process()
         pr++;
     }
 
+    // write autoscan configuration
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
@@ -372,6 +381,7 @@ void web::configLoad::process()
         }
     }
 
+    // write content of all dictionaries
     for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
@@ -387,6 +397,7 @@ void web::configLoad::process()
         }
     }
 
+    // write content of all arrays
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (size_t i = 0; i < array.size(); i++) {
@@ -397,6 +408,7 @@ void web::configLoad::process()
         }
     }
 
+    // update entries with datebase values
     for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {

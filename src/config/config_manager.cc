@@ -1076,6 +1076,7 @@ void ConfigManager::load(const fs::path& userHome)
     co->makeOption(temp, self);
     ConfigPathSetup::Home = temp;
 
+    // read root options
     setOption(root, CFG_SERVER_WEBROOT);
     setOption(root, CFG_SERVER_TMPDIR);
     setOption(root, CFG_SERVER_SERVEDIR);
@@ -1110,6 +1111,7 @@ void ConfigManager::load(const fs::path& userHome)
                                  "one database driver must be active");
 
 #ifdef HAVE_MYSQL
+    // read mysql options
     if (mysql_en) {
         setOption(root, CFG_SERVER_STORAGE_MYSQL_HOST);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_DATABASE);
@@ -1167,9 +1169,12 @@ void ConfigManager::load(const fs::path& userHome)
                                  "under <items-per-page> must match the "
                                  "<items-per-page default=\"\" /> attribute");
 
+    // read account options
     setOption(root, CFG_SERVER_UI_ACCOUNTS_ENABLED);
     setOption(root, CFG_SERVER_UI_ACCOUNT_LIST);
     setOption(root, CFG_SERVER_UI_SESSION_TIMEOUT);
+
+    // read upnp options
     setOption(root, CFG_UPNP_ALBUM_PROPERTIES);
     setOption(root, CFG_UPNP_ARTIST_PROPERTIES);
     setOption(root, CFG_UPNP_TITLE_PROPERTIES);
@@ -1265,6 +1270,7 @@ void ConfigManager::load(const fs::path& userHome)
     if (!getOption(CFG_SERVER_NETWORK_INTERFACE).empty() && !getOption(CFG_SERVER_IP).empty())
         throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time");
 
+    // read server options
     setOption(root, CFG_SERVER_BOOKMARK_FILE);
     setOption(root, CFG_SERVER_NAME);
     setOption(root, CFG_SERVER_MODEL_NAME);
@@ -1287,6 +1293,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
 #ifdef HAVE_JS
+    // read javascript options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     co->makeOption(root, self);
@@ -1317,6 +1324,7 @@ void ConfigManager::load(const fs::path& userHome)
                                  "however you specified \"js\" to be used for the "
                                  "virtual-layout.");
 #else
+    // read more javascript options
     charset = setOption(root, CFG_IMPORT_SCRIPTING_CHARSET)->getOption();
     if (layoutType == "js") {
         try {
@@ -1371,6 +1379,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif //HAVE_CURL
 
+    // read import options
     setOption(root, CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
     setOption(root, CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
     setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
@@ -1387,6 +1396,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
     args.clear();
 
+    // read library options
 #ifdef HAVE_LIBEXIF
     setOption(root, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     setOption(root, CFG_IMPORT_LIBOPTS_EXIF_CHARSET);
@@ -1459,6 +1469,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
 
+    // read online content options
 #ifdef SOPCAST
     setOption(root, CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
 
