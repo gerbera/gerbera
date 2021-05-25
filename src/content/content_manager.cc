@@ -299,6 +299,14 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 #endif // ONLINE_SERVICES
 }
 
+template <typename TP>
+std::chrono::seconds to_seconds(TP tp)
+{
+    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
+        + std::chrono::system_clock::now());
+    return std::chrono::seconds(std::chrono::system_clock::to_time_t(asSystemTime));
+}
+
 void ContentManager::shutdown()
 {
     log_debug("start");
@@ -320,7 +328,7 @@ void ContentManager::shutdown()
             if (dir != nullptr) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
-                    auto t = std::chrono::duration_cast<std::chrono::seconds>(dirEnt.last_write_time().time_since_epoch());
+                    auto t = to_seconds(dirEnt.last_write_time());
                     dir->setCurrentLMT(dir->getLocation(), t);
                 }
                 dir->updateLMT();
@@ -713,7 +721,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = adir->getHidden();
         asSetting.mergeOptions(config, location);
-        auto lwt = std::chrono::duration_cast<std::chrono::seconds>(dirEnt.last_write_time(ec).time_since_epoch());
+        auto lwt = to_seconds(dirEnt.last_write_time(ec));
 
         if (isRegularFile(dirEnt, ec)) {
             int objectID = database->findObjectIDByPath(newPath);
@@ -892,7 +900,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
             if (obj != nullptr) {
                 firstChild = false;
-                auto lwt = std::chrono::duration_cast<std::chrono::seconds>(subDirEnt.last_write_time(ec).time_since_epoch());
+                auto lwt = to_seconds(subDirEnt.last_write_time(ec));
                 if (last_modified_current_max < lwt) {
                     last_modified_new_max = lwt;
                 }
@@ -1280,7 +1288,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         auto item = std::make_shared<CdsItem>();
         obj = item;
         item->setLocation(dirEnt.path());
-        item->setMTime(std::chrono::duration_cast<std::chrono::seconds>(dirEnt.last_write_time(ec).time_since_epoch()));
+        item->setMTime(to_seconds(dirEnt.last_write_time(ec)));
         item->setSizeOnDisk(getFileSize(dirEnt));
 
         if (!mimetype.empty()) {
