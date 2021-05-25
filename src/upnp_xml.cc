@@ -340,17 +340,18 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
 
 std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item)
 {
-    std::string result;
     auto urlBase = getPathBase(item);
 
     if (item->isExternalItem() && !urlBase->addResID) { // a remote resource
-        result = urlBase->pathBase;
-    } else if (urlBase->addResID) { // a proxy, remote, resource
-        result = fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase.c_str());
-    } else { // a local resource
-        result = fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase.c_str());
+        return urlBase->pathBase;
     }
-    return result;
+
+    if (urlBase->addResID) { // a proxy, remote, resource
+        return fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase.c_str());
+    }
+
+    // a local resource
+    return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase.c_str());
 }
 
 std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) const
@@ -460,8 +461,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     std::string ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
-        ext = ext + "." + contentType;
-        return ext;
+        return fmt::format("{}.{}", ext, contentType);
     }
 
     if (!location.empty()) {
@@ -470,8 +470,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
             std::string extension = location.substr(dot);
             // make sure that the extension does not contain the separator character
             if (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) {
-                ext = ext + extension;
-                return ext;
+                return ext + extension;
             }
         }
     }
