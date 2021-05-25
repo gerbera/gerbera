@@ -345,25 +345,25 @@
       case 'item': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val()
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val())
         };
         break;
       }
       case 'container': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val()
+          title: encodeURIComponent(editTitle.val())
         };
         break;
       }
       case 'external_url': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val()),
+          location: encodeURIComponent(editLocation.val()),
+          'mime-type': encodeURIComponent(editMime.val()),
           protocol: editProtocol.val()
         };
         break;
@@ -389,9 +389,9 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val(),
-          location: editLocation.val(),
-          description: editDesc.val()
+          title: encodeURIComponent(editTitle.val()),
+          location: encodeURIComponent(editLocation.val()),
+          description: encodeURIComponent(editDesc.val())
         };
         break;
       }
@@ -400,7 +400,7 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val()
+          title: encodeURIComponent(editTitle.val())
         };
         break;
       }
@@ -409,10 +409,10 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val()),
+          location: encodeURIComponent(editLocation.val()),
+          'mime-type': encodeURIComponent(editMime.val()),
           protocol: editProtocol.val()
         };
         break;

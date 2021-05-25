@@ -546,7 +546,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
-            reqHandler->getInfo(link.c_str(), info);
+            reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
             return 0;
         } catch (const ServerShutdownException& se) {
             return -1;
@@ -566,7 +566,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
-            auto ioHandler = reqHandler->open(link.c_str(), mode);
+            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
             auto ioPtr = UpnpWebFileHandle(ioHandler.release());
             //log_debug("{} open({})", ioPtr, filename);
             return ioPtr;
