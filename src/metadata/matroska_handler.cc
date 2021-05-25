@@ -176,7 +176,7 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, E
     if (!el_l1->IsMaster())
         return;
     auto master = dynamic_cast<EbmlMaster*>(el_l1);
-    if (!master) {
+    if (master == nullptr) {
         log_debug("dynamic_cast unexpectedly returned nullptr, seems to be broken");
         return;
     }
@@ -234,12 +234,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
         std::string fileName(UTFstring(GetChild<LIBMATROSKA_NAMESPACE::KaxFileName>(*attachedFile)).GetUTF8());
         // printf("KaxFileName = %s\n", fileName.c_str());
 
-        bool isCoverArt = false;
         if (startswith(fileName, "cover")) {
-            isCoverArt = true;
-        }
-
-        if (isCoverArt) {
             auto&& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
 
