@@ -371,7 +371,7 @@ describe('Gerbera Items', () => {
         req_type: 'edit_save',
         object_id: '39479',
         title: 'Test.mp4',
-        description: 'A description',
+        description: 'A%20description',
         updates: 'check'
       });
       editModal.remove();
@@ -391,7 +391,7 @@ describe('Gerbera Items', () => {
         sid: 'SESSION_ID',
         req_type: 'edit_save',
         object_id: '1471',
-        title: 'container title',
+        title: 'container%20title',
         updates: 'check'
       });
       editModal.remove();
@@ -412,9 +412,9 @@ describe('Gerbera Items', () => {
         req_type: 'edit_save',
         object_id: '1469',
         title: 'title',
-        location: 'http://localhost',
+        location: 'http%3A%2F%2Flocalhost',
         description: 'description',
-        'mime-type': 'video/ts',
+        'mime-type': 'video%2Fts',
         protocol: 'http-get',
         updates: 'check'
       });

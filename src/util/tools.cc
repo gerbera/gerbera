@@ -442,7 +442,7 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
     return dictEncode(dict, '/', '/');
 }
 
-void dictDecode(const std::string& url, std::map<std::string, std::string>* dict)
+void dictDecode(const std::string& url, std::map<std::string, std::string>* dict, bool unEscape)
 {
     auto data = url.c_str();
     auto dataEnd = data + url.length();
@@ -455,8 +455,10 @@ void dictDecode(const std::string& url, std::map<std::string, std::string>* dict
         if (eqPos && eqPos < ampPos) {
             std::string key(data, eqPos - data);
             std::string value(eqPos + 1, ampPos - eqPos - 1);
-            key = urlUnescape(key);
-            value = urlUnescape(value);
+            if (unEscape) {
+                key = urlUnescape(key);
+                value = urlUnescape(value);
+            }
 
             dict->insert(std::pair(key, value));
         }

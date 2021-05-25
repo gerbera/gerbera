@@ -238,7 +238,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '39479',
         title: 'Test.mp4',
-        description: 'A description'
+        description: 'A%20description'
       });
     });
 
@@ -250,7 +250,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       expect(result).toEqual({
         object_id: '1471',
-        title: 'container title'
+        title: 'container%20title'
       });
     });
 
@@ -263,9 +263,9 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '1469',
         title: 'title',
-        location: 'http://localhost',
+        location: 'http%3A%2F%2Flocalhost',
         description: 'description',
-        'mime-type': 'video/ts',
+        'mime-type': 'video%2Fts',
         protocol: 'http-get'
       });
     });
