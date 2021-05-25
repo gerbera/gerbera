@@ -1024,6 +1024,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 
     const pugi::xml_node& root = element.root();
 
+    // initialize mapping dictionary
     std::map<std::string, std::string> mt_mappings;
     {
         auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
@@ -1044,6 +1045,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         return false;
     }
 
+    // go through profiles
     for (auto&& it : profileNodes) {
         const pugi::xml_node child = it.node();
         if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
@@ -1064,6 +1066,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
             }
         }
 
+        // read 4cc options
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC);
             if (cs->hasXmlElement(child)) {
@@ -1074,6 +1077,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
                 }
             }
         }
+        // read profile options
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
             if (cs->hasXmlElement(child))
@@ -1110,10 +1114,12 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
                 prof->setTheora(cs->getXmlContent(child));
         }
 
+        // read agent options
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
         prof->setCommand(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
         prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
 
+        // set buffer options
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
         size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
         size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
@@ -1146,6 +1152,7 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         }
     }
 
+    // validate profiles
     auto tpl = result->getList();
     for (auto&& [key, val] : mt_mappings) {
         if (tpl.find(key) == tpl.end()) {
@@ -1202,6 +1209,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
         std::map<std::string, int> profiles;
         int i = 0;
+
+        // update properties in profile part
         for (auto&& [key, val] : value->getTranscodingProfileListOption()->getList()) {
             for (auto&& [a, name] : *val) {
                 profiles[name->getName()] = i;
@@ -1223,13 +1232,13 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
         }
         i = 0;
+
+        // update properties in transcoding part
         for (auto&& [key, val] : profiles) {
             auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
             auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
-                //value->setKey(key, optValue);
-                //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                 return false;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
@@ -1258,6 +1267,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
+
+            // update profile options
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
@@ -1317,6 +1328,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 return true;
             }
 
+            // update buffer options
             size_t buffer = entry->getBufferSize();
             size_t chunk = entry->getBufferChunkSize();
             size_t fill = entry->getBufferInitialFillSize();
@@ -1354,6 +1366,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 return true;
             }
 
+            // update agent options
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
@@ -1373,6 +1386,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 }
             }
 
+            // update 4cc options
             avi_fourcc_listmode_t fcc_mode = entry->getAVIFourCCListMode();
             auto fcc_list = entry->getAVIFourCCList();
             bool set4cc = false;
