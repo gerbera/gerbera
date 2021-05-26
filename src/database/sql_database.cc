@@ -613,7 +613,7 @@ std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const s
     std::vector<std::string> sort;
     for (auto&& seg : splitString(sortCrit, ',')) {
         seg = trimString(seg);
-        bool desc = (seg[0] == '-') ? true : false;
+        bool desc = (seg[0] == '-');
         if (seg[0] == '-' || seg[0] == '+') {
             seg = seg.substr(1);
         } else {

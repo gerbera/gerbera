@@ -293,7 +293,7 @@ void MySQLDatabase::beginTransaction(const std::string_view& tName)
 {
     log_debug("START TRANSACTION {} {}", tName, inTransaction);
     StdThreadRunner::waitFor(
-        "MySqlDatabase", [this] { return inTransaction == false; }, 100);
+        "MySqlDatabase", [this] { return !inTransaction; }, 100);
     inTransaction = true;
     log_debug("START TRANSACTION {}", tName);
     SqlAutoLock lock(sqlMutex);
