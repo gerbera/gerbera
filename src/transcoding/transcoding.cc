@@ -33,41 +33,10 @@
 
 #include "util/tools.h"
 
-TranscodingProfile::TranscodingProfile()
-{
-    enabled = true;
-    first_resource = false;
-    buffer_size = 0;
-    chunk_size = 0;
-    initial_fill_size = 0;
-    tr_type = TR_None;
-    theora = false;
-    accept_url = true;
-    force_chunked = true;
-    hide_orig_res = false;
-    thumbnail = false;
-    sample_frequency = SOURCE; // keep original
-    number_of_channels = SOURCE;
-    fourcc_mode = FCC_None;
-}
-
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name)
     : name(std::move(name))
     , tr_type(tr_type)
 {
-    enabled = true;
-    theora = false;
-    first_resource = false;
-    accept_url = true;
-    force_chunked = true;
-    hide_orig_res = false;
-    thumbnail = false;
-    sample_frequency = SOURCE; // keep original
-    number_of_channels = SOURCE;
-    buffer_size = 0;
-    chunk_size = 0;
-    initial_fill_size = 0;
-    fourcc_mode = FCC_None;
 }
 
 void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)

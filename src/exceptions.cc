@@ -35,6 +35,6 @@
 
 UpnpException::UpnpException(int errCode, const std::string& message)
     : std::runtime_error(message)
+    , errCode(errCode)
 {
-    this->errCode = errCode;
 }

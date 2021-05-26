@@ -141,16 +141,13 @@ void Script::setIntProperty(const std::string& name, int value)
 
 Script::Script(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name)
-    : config(content->getContext()->getConfig())
+    : gc_counter(0)
+    , config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(std::move(content))
     , runtime(runtime)
     , name(name)
 {
-    gc_counter = 0;
-
-    this->runtime = runtime;
-
     /* create a context and associate it with the JS run time */
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);

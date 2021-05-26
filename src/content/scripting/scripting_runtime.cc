@@ -39,9 +39,10 @@
 }
 
 ScriptingRuntime::ScriptingRuntime()
+    : ctx(duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler))
 {
-    ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler);
 }
+
 ScriptingRuntime::~ScriptingRuntime()
 {
     duk_destroy_heap(ctx);

@@ -207,12 +207,11 @@ constexpr auto to_underlying(E e) noexcept
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
     : Database(std::move(config))
+    , table_quote_begin('\0')
+    , table_quote_end('\0')
+    , use_transaction(this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
     , inTransaction(false)
 {
-    table_quote_begin = '\0';
-    table_quote_end = '\0';
-
-    use_transaction = this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS);
 }
 
 void SQLDatabase::init()
