@@ -221,6 +221,54 @@ Below are the available scripting options:
 
                 Target genre value.
 
+        ::
+
+            <structured-layout skip-chars="" album-box="6" artist-box="9" genre-box="6" track-box="6" div-char="-" />
+
+        * Optional
+
+        Adjust layout of boxes for large collections in structured layout. Set audio-layout to **Structured** and choose values best for your media library.
+
+            ::
+
+                div-char="-"
+
+            * Optional
+            * Default: **-**
+
+            Symbols to use around the box text.
+
+            ::
+
+                skip-chars="-"
+
+            * Optional
+
+            Special characters in the beginning of a title that are not used for building a box.
+
+            ::
+
+                album-box="6"
+                artist-box="9"
+                genre-box="6"
+                track-box="6"
+
+            * Optional
+            * Default: see above values
+
+            Type of the box. The following values are supported
+
+            -  **1**: One large box
+            -  **2**: Two boxes with 13 items each
+            -  **3**: Boxes with 8, 9, 9 letters
+            -  **4**: Boxes with 7, 6, 7, 6 letters
+            -  **5**: Boxes with 5, 5, 5, 6, 5 letters
+            -  **6**: Boxes with 4, 5, 4, 4, 5, 4 letters
+            -  **7**: Boxes with 4, 3, 4, 4, 4, 3, 4 letters
+            -  **9**: Boxes with 5, 5, 5, 4, 1, 6 letters; a large box for T
+            -  **13**: Boxes with 2 letters each
+            -  **26**: A speparate box for each letter
+
 
 ``common-script``
 ~~~~~~~~~~~~~~~~~

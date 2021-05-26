@@ -10,6 +10,8 @@ namespace fs = std::filesystem;
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+#include "mock/script_test_fixture.h"
+
 using namespace ::testing;
 
 class CommonScriptTest : public ::testing::Test {
@@ -37,6 +39,8 @@ public:
 
     std::string invokeABCBOX(duk_context* ctx, std::string input, int boxType, std::string divChar)
     {
+        ScriptTestFixture::addConfig(ctx, { { "/import/scripting/virtual-layout/abcBox/skipChars", "" } });
+
         duk_get_global_string(ctx, "abcbox");
         duk_push_string(ctx, input.c_str());
         duk_push_int(ctx, boxType);
@@ -64,6 +68,30 @@ TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForSlash)
     std::string result = duk_to_string(ctx, -1);
 
     EXPECT_STREQ(result.c_str(), "some\\/path\\/to\\/escape");
+}
+
+TEST_F(CommonScriptTest, mapInitial_Latin)
+{
+    duk_get_global_string(ctx, "mapInitial");
+    duk_push_string(ctx, "a");
+
+    duk_pcall(ctx, 1);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "A");
+}
+
+TEST_F(CommonScriptTest, mapInitial_Umlaut)
+{
+    duk_get_global_string(ctx, "mapInitial");
+    duk_push_string(ctx, "ä");
+
+    duk_pcall(ctx, 1);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "A");
 }
 
 TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForBackSlash)
@@ -361,6 +389,36 @@ TEST_F(CommonScriptTest, abcbox_BoxType9_ReturnsCorrectBoxBasedOnCharacter)
 
     result = this->invokeABCBOX(ctx, "Xi", boxType, divChar);
     EXPECT_STREQ(result.c_str(), "-UVWXYZ-");
+}
+
+TEST_F(CommonScriptTest, abcbox_BoxType26_ReturnsCorrectBoxBasedOnCharacter)
+{
+    int boxType = 26;
+    std::string divChar = "-";
+
+    std::string result = this->invokeABCBOX(ctx, "Alpha", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-A-");
+
+    result = this->invokeABCBOX(ctx, "Gamma", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-G-");
+
+    result = this->invokeABCBOX(ctx, "Kappa", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-K-");
+
+    result = this->invokeABCBOX(ctx, "Phi", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-P-");
+
+    result = this->invokeABCBOX(ctx, "Tau", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-T-");
+
+    result = this->invokeABCBOX(ctx, "Xi", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-X-");
+
+    result = this->invokeABCBOX(ctx, "2L", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-0-9-");
+
+    result = this->invokeABCBOX(ctx, "#x", boxType, divChar);
+    EXPECT_STREQ(result.c_str(), "-^&#'-");
 }
 
 TEST_F(CommonScriptTest, abcbox_BoxTypeDefault_ReturnsCorrectBoxBasedOnCharacter)

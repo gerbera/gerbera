@@ -61,7 +61,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/-Artist-/-ABCD-/A/Artist/-all-", "47" },
         { "/-Artist-/-ABCD-/A/Artist/Album (2018)", "48" },
         { "/-Genre-/Genre/--all--", "49" },
-        { "/-Genre-/Genre/-ABCD-/A/Album - Artist", "50" },
+        { "/-Genre-/Genre/-A-/Album - Artist", "50" },
         { "/-Track-/-ABCD-/A", "51" },
         { "/-Track-/--all--", "52" },
         { "/-Year-/2010 - 2019/-all-", "53" },
@@ -240,8 +240,8 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "--all--"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "49", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, abcBox(Eq("Artist"), Eq(6), Eq("-"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "-ABCD-", "A", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, abcBox(Eq("Artist"), Eq(26), Eq("-"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "-A-", "Album - Artist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "50", UNDEFINED)).WillOnce(Return(0));
 
     // TRACKS //
@@ -262,7 +262,8 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "Artist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "55", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout",  audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "26" } } );
+
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
     executeScript(ctx);
 }

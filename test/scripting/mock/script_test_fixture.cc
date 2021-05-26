@@ -128,7 +128,7 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, string title, str
     return 0;
 }
 
-void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs)
+void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
 {
     for (auto&& entry : mt_keys) {
         duk_push_string(ctx, entry.second);
@@ -154,10 +154,11 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
         duk_put_global_string(ctx, sym);
     }
 
-    duk_push_object(ctx); // config
-    duk_push_string(ctx, audioLayout.c_str());
-    duk_put_prop_string(ctx, -2, "/import/scripting/virtual-layout/attribute::audio-layout");
-    duk_put_global_string(ctx, "config");
+    if (config.empty()) {
+        addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout",  audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } } );
+    } else {
+        addConfig(ctx, config);
+    }
 
     duk_push_int(ctx, 0);
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
@@ -173,6 +174,16 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
     duk_push_global_object(ctx);
     duk_put_function_list(ctx, -1, funcs);
     duk_pop(ctx);
+}
+
+void ScriptTestFixture::addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config)
+{
+    duk_push_object(ctx); // config
+    for (auto&& [key, value] : config) {
+      duk_push_string(ctx, value.data());
+      duk_put_prop_string(ctx, -2, key.data());
+    }
+    duk_put_global_string(ctx, "config");
 }
 
 void ScriptTestFixture::executeScript(duk_context* ctx)
@@ -320,7 +331,7 @@ abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
     params.boxType = boxType;
     params.divChar = divChar;
 
-    duk_push_string(ctx, "-ABCD-");
+    duk_push_string(ctx, boxType == 26 ? "-A-" : "-ABCD-");
     return params;
 }
 
