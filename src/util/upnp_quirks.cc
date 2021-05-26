@@ -83,7 +83,7 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
         container.append_attribute("id") = id.data();
         container.append_attribute("type") = type.data();
     }
-    request->setResponse(response);
+    request->setResponse(std::move(response));
 }
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
@@ -122,5 +122,5 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
         content->updateObject(stoiString(objectID), m);
     }
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    request->setResponse(response);
+    request->setResponse(std::move(response));
 }
