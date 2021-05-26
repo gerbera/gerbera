@@ -110,9 +110,13 @@ function getRootPath(rootpath, location)
 // -^&#'!-
 function abcbox(stringtobox, boxtype, divchar)
 {
+    var boxReplace = stringFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::skip-chars', '');
+    if (boxReplace !== '') {
+        stringtobox = stringtobox.replace(RegExp('^[' + boxReplace + ']', 'i'), "");
+    }
     // get ascii value of first character
-    var intchar = stringtobox.toUpperCase().charCodeAt(0);
-
+    var firstChar = mapInitial(stringtobox.charAt(0));
+    var intchar = firstChar.charCodeAt(0);
     // check for numbers
     if ( (intchar >= 48) && (intchar <= 57) )
     {
@@ -154,6 +158,12 @@ function abcbox(stringtobox, boxtype, divchar)
     case 9:
         boxwidth = new Array(5,5,5,4,1,6);        // When T is a large box...
         break;
+    case 13:
+        boxwidth = new Array(2,2,2,2,2,2,2,2,2,2,2,2,2);
+        break;
+    case 26:
+        boxwidth = new Array(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1);
+        break;
     default:
         boxwidth = new Array(5,5,5,6,5);
         break;
@@ -191,6 +201,35 @@ function abcbox(stringtobox, boxtype, divchar)
     output = output + divchar;
     return output;
 }
+
+// doc-map-initial-begin
+function mapInitial(firstChar) {
+    firstChar = firstChar.toUpperCase();
+    // map character to latin version
+    const charTable = [
+        ["ÄÁÀÂÆààáâãäåæ", "A"],
+        ["Çç", "C"],
+        ["Ðð", "D"],
+        ["ÉÈÊÈÉÊËèéêë", "E"],
+        ["ÍÌÎÏìíîï", "I"],
+        ["Ññ", "N"],
+        ["ÕÖÓÒÔØòóôõöøœ", "O"],
+        ["Š", "S"],
+        ["ÜÚÙÛùúûü", "U"],
+        ["Ýýÿ", "Y"],
+        ["Žž", "Z"],
+    ];
+    for (var idx = 0; idx < charTable.length; idx++) {
+        var re = new RegExp('[' + charTable[idx][0] + ']', 'i');
+        var match = re.exec(firstChar);
+        if (match) {
+            firstChar = charTable[idx][1];
+            break;
+        }
+    }
+    return firstChar;
+}
+// doc-map-initial-end
 
 function mapGenre(genre) {
     const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
@@ -405,6 +444,26 @@ function addAudio(obj) {
 }
 // doc-add-audio-end
 
+// doc-map-int-config-begin
+function intFromConfig(entry, defValue) {
+    if (entry in config) {
+        var value = config[entry];
+        return parseInt(value.toString());
+    }
+    return defValue;
+}
+// doc-map-int-config-end
+
+// doc-map-string-config-begin
+function stringFromConfig(entry, defValue) {
+    if (entry in config) {
+        var value = config[entry];
+        return value.toString();
+    }
+    return defValue;
+}
+// doc-map-string-config-end
+
 function addAudioStructured(obj) {
     var desc = '';
     var artist_full;
@@ -494,6 +553,15 @@ function addAudioStructured(obj) {
         }
     }
 
+    const boxConfig = {
+        album: intFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::album-box', 6),
+        artist: intFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::artist-box', 9),
+        genre: intFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::genre-box', 6),
+        track: intFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::track-box', 6),
+        divChar: stringFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::div-char', '-'),
+    };
+    boxConfig.singleLetterBoxSize = 2 * boxConfig.divChar.length + 1;
+
     const chain = {
         allArtists: { title: '-Artist-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allGenres: { title: '-Genre-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -501,8 +569,8 @@ function addAudioStructured(obj) {
         allTracks: { title: '-Track-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allYears: { title: '-Year-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        abc: { title: abcbox(album, 6, '-'), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        init: { title: album.charAt(0).toUpperCase(), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        abc: { title: abcbox(album, boxConfig.album, boxConfig.divChar), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+        init: { title: mapInitial(album.charAt(0)), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         artist: { title: artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
         album_artist: { title: album_artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
         album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, meta: {}, res: obj.res, aux: obj.aux, refID: obj.id },
@@ -521,9 +589,10 @@ function addAudioStructured(obj) {
     chain.artist.meta[M_ALBUMARTIST] = artist;
     chain.album_artist.meta[M_ARTIST] = album_artist;
     chain.album_artist.meta[M_ALBUMARTIST] = album_artist;
+    var isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
 
     obj.title = tracktitle;
-    var container = addContainerTree([chain.allAlbums, chain.abc, chain.init, chain.album_artist]);
+    var container = addContainerTree(isSingleCharBox ? [chain.allAlbums, chain.abc, chain.album_artist] : [chain.allAlbums, chain.abc, chain.init, chain.album_artist]);
     addCdsObject(obj, container);
 
     container = addContainerTree([chain.allAlbums, chain.abc, chain.entryAll, chain.album_artist]);
@@ -538,20 +607,21 @@ function addAudioStructured(obj) {
     container = addContainerTree([chain.allArtists, chain.entryAll, chain.artist]);
     addCdsObject(obj, container);
 
-    chain.abc.title = abcbox(artist, 9, '-');
+    chain.abc.title = abcbox(artist, boxConfig.artist, boxConfig.divChar);
+    isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
     chain.entryAll.title = '-all-';
     container = addContainerTree([chain.allArtists, chain.abc, chain.entryAll, chain.artist]);
     addCdsObject(obj, container);
 
     obj.title = title + ' (' + album + ', ' + date + ')';
-    chain.init.title = artist.charAt(0).toUpperCase();
+    chain.init.title = mapInitial(artist.charAt(0));
     chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
-    container = addContainerTree([chain.allArtists, chain.abc, chain.init, chain.artist, chain.entryAll]);
+    container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.entryAll] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.entryAll]);
     addCdsObject(obj, container);
 
     obj.title = tracktitle;
     chain.album.title = album + ' (' + date + ')';
-    container = addContainerTree([chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
+    container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
     addCdsObject(obj, container);
 
     // Genre
@@ -562,17 +632,19 @@ function addAudioStructured(obj) {
     container = addContainerTree([chain.allGenres, chain.genre, chain.entryAll]);
     addCdsObject(obj, container);
 
-    chain.abc.title = abcbox(artist, 6, '-');
-    container = addContainerTree([chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
+    chain.abc.title = abcbox(artist, boxConfig.genre, boxConfig.divChar);
+    isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
+    container = addContainerTree(isSingleCharBox ? [chain.allGenres, chain.genre, chain.abc, chain.album_artist] : [chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
     addCdsObject(obj, container);
 
     // Tracks
 
     obj.title = title + ' - ' + artist + ' (' + album + ', ' + date + ')';
-    chain.abc.title = abcbox(title, 6, '-');
-    chain.init.title = title.charAt(0).toUpperCase();
+    chain.abc.title = abcbox(title, boxConfig.track, boxConfig.divChar);
+    isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
+    chain.init.title = mapInitial(title.charAt(0));
     chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
-    container = addContainerTree([chain.allTracks, chain.abc, chain.init]);
+    container = addContainerTree(isSingleCharBox ? [chain.allTracks, chain.abc] : [chain.allTracks, chain.abc, chain.init]);
     addCdsObject(obj, container);
 
     obj.title = title + ' - ' + artist_full;

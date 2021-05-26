@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="1.8.2"
+VERSION="1.8.5"
 UNAME=$(uname)
 
 if ! [ "$(id -u)" = 0 ]; then
