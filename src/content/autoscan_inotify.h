@@ -103,9 +103,9 @@ private:
     public:
         WatchAutoscan(bool startPoint, std::shared_ptr<AutoscanDirectory> adir)
             : Watch(WatchType::Autoscan)
+            , adir(std::move(adir))
+            , startPoint(startPoint)
         {
-            this->adir = std::move(adir);
-            this->startPoint = startPoint;
         }
         std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() const { return adir; }
         bool isStartPoint() const { return startPoint; }
@@ -128,8 +128,8 @@ private:
     public:
         explicit WatchMove(int removeWd)
             : Watch(WatchType::Move)
+            , removeWd(removeWd)
         {
-            this->removeWd = removeWd;
         }
         int getRemoveWd() const { return removeWd; }
 
@@ -141,10 +141,10 @@ private:
     public:
         Wd(fs::path path, int wd, int parentWd)
             : wdWatches(std::make_shared<std::vector<std::shared_ptr<Watch>>>())
+            , path(std::move(path))
+            , parentWd(parentWd)
+            , wd(wd)
         {
-            this->path = std::move(path);
-            this->wd = wd;
-            this->parentWd = parentWd;
         }
         fs::path getPath() const { return path; }
         int getWd() const { return wd; }

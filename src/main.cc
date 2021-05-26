@@ -101,6 +101,10 @@ static void signalHandler(int signum)
         return;
     }
 
+    if (signum == SIGSEGV) {
+        log_error("This should never happen {}:{}, killing Gerbera!", errno, std::strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         _ctx.shutdown_flag++;
         if (_ctx.shutdown_flag == 1) {
@@ -126,6 +130,10 @@ static void installSignalHandler()
     action.sa_handler = signalHandler;
     action.sa_flags = 0;
     sigfillset(&action.sa_mask);
+    if (sigaction(SIGSEGV, &action, nullptr) < 0) {
+        log_error("Could not register SIGSEGV handler!");
+    }
+
     if (sigaction(SIGINT, &action, nullptr) < 0) {
         log_error("Could not register SIGINT handler!");
     }
@@ -234,7 +242,7 @@ int main(int argc, char** argv, char** envp)
             // get user info of requested user from passwd
             struct passwd* user_id = getpwnam(user->c_str());
 
-            if (user_id == NULL) {
+            if (user_id == nullptr) {
                 log_error("Invalid user requested.");
                 exit(EXIT_FAILURE);
             }
@@ -254,7 +262,7 @@ int main(int argc, char** argv, char** envp)
 // mac os x does this differently, setgid and setuid are basically doing the same
 // as setresuid and setresgid on linux: setting all of real{u,g}id, effective{u,g}id and saved-set{u,g}id
 // Solaroid systems are likewise missing setresgid and setresuid
-#if defined(__APPLE__) || defined(SOLARIS)
+#if defined(__APPLE__) || defined(SOLARIS) || defined(__CYGWIN__)
             // set group-ids, then add. groups, last user-ids, all need to succeed
             if (0 != setgid(user_id->pw_gid) || 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 0 != setuid(user_id->pw_uid)) {
 #else
@@ -353,7 +361,7 @@ int main(int argc, char** argv, char** envp)
             }
 
             // write pid to file
-            if ((long int)strlen(pidstr) != write(pidfd, pidstr, strlen(pidstr))) {
+            if (ssize_t(strlen(pidstr)) != write(pidfd, pidstr, strlen(pidstr))) {
                 log_error("Could not write pidfile {}.", pidfile->c_str());
                 exit(EXIT_FAILURE);
             }

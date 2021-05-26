@@ -79,6 +79,7 @@ public:
 class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
+    virtual std::string quote(std::string_view str) const = 0;
     virtual std::string quote(std::string str) const = 0;
     virtual std::string quote(const char* str) const = 0;
     virtual std::string quote(int val) const = 0;
@@ -89,8 +90,9 @@ public:
     virtual std::string quote(char val) const = 0;
     virtual std::string quote(long long val) const = 0;
 
-    virtual void beginTransaction() = 0;
-    virtual void commit() = 0;
+    virtual void beginTransaction(const std::string_view& tName) = 0;
+    virtual void rollback(const std::string_view& tName) = 0;
+    virtual void commit(const std::string_view& tName) = 0;
 
     virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
     virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
@@ -178,6 +180,11 @@ protected:
 
     char table_quote_begin;
     char table_quote_end;
+    bool use_transaction;
+    bool inTransaction;
+
+    std::recursive_mutex sqlMutex;
+    using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
 
 private:
     std::string sql_browse_query;

@@ -133,7 +133,7 @@ protected:
     /// \return true if accounts are enabled, false if not
     bool accountsEnabled() const { return config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED); }
 
-    static std::string mapAutoscanType(int type);
+    static std::string_view mapAutoscanType(int type);
 
 public:
     /// \brief Constructor, currently empty.

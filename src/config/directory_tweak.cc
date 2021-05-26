@@ -63,7 +63,7 @@ void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_
         origSize = list.size() + 1;
         dir->setOrig(true);
     }
-    if (std::any_of(list.begin(), list.end(), [&](auto&& d) { return (d->getLocation() == dir->getLocation()); })) {
+    if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](auto&& d) { return d->getLocation() == loc; })) {
         log_error("Duplicate tweak entry[{}] {}", index, dir->getLocation().string());
         return;
     }
@@ -94,7 +94,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(size_t id, bool edit)
 
         return list[id];
     }
-    if (indexMap.count(id)) {
+    if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
     return nullptr;
@@ -126,12 +126,12 @@ void DirectoryConfigList::remove(size_t id, bool edit)
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
     } else {
-        if (!indexMap.count(id)) {
+        if (indexMap.find(id) == indexMap.end()) {
             log_debug("No such index ID {}!", id);
             return;
         }
         auto&& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [&](auto&& item) { return dir->getLocation() == item->getLocation(); });
+        auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getLocation()](auto&& item) { return loc == item->getLocation(); });
         list.erase(entry);
         if (id >= origSize) {
             indexMap.erase(id);

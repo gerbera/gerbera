@@ -32,7 +32,6 @@
 #include "sqlite_database.h" // API
 
 #include <array>
-#include <zlib.h>
 
 #include "config/config_manager.h"
 
@@ -165,15 +164,13 @@ void Sqlite3Database::init()
 
     taskQueueOpen = true;
     threadRunner = std::make_unique<StdThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
-    auto lock = threadRunner->uniqueLock();
 
     if (!threadRunner->isAlive()) {
         throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
     }
 
     // wait for sqlite3 thread to become ready
-    threadRunner->wait(lock);
-    lock.unlock();
+    threadRunner->waitForReady();
     if (!startupError.empty())
         throw DatabaseException("", startupError);
 
@@ -255,16 +252,16 @@ void Sqlite3Database::init()
         if (dbVersion != fmt::to_string(version))
             throw_std_runtime_error("The database seems to be from a newer version");
 
-        // add timer for backups
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
-            int backupInterval = config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
-            timer->addTimerSubscriber(this, backupInterval, nullptr);
-            hasBackupTimer = true;
-
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);
             this->addTask(btask);
             btask->waitForTask();
+
+            // add timer for backups
+            auto backupInterval = std::chrono::seconds(config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
+            timer->addTimerSubscriber(this, backupInterval, nullptr);
+            hasBackupTimer = true;
         }
         dbInitDone = true;
     } catch (const std::runtime_error& e) {
@@ -298,14 +295,34 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-void Sqlite3Database::beginTransaction()
+void Sqlite3Database::beginTransaction(const std::string_view& tName)
 {
-    _exec("BEGIN TRANSACTION");
+    if (use_transaction) {
+        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        SqlAutoLock lock(sqlMutex);
+        StdThreadRunner::waitFor(
+            fmt::format("SqliteDatabase.begin {}", tName), [this] { return inTransaction == false; }, 100);
+        inTransaction = true;
+        _exec("BEGIN TRANSACTION");
+    }
 }
 
-void Sqlite3Database::commit()
+void Sqlite3Database::rollback(const std::string_view& tName)
 {
-    _exec("COMMIT");
+    if (use_transaction && inTransaction) {
+        log_debug("ROLLBACK {} {}", tName, inTransaction);
+        _exec("ROLLBACK");
+        inTransaction = false;
+    }
+}
+
+void Sqlite3Database::commit(const std::string_view& tName)
+{
+    if (use_transaction && inTransaction) {
+        log_debug("COMMIT {} {}", tName, inTransaction);
+        _exec("COMMIT");
+        inTransaction = false;
+    }
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
@@ -319,6 +336,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
+            rollback("");
             shutdown();
         }
         throw_std_runtime_error(e.what());
@@ -336,6 +354,7 @@ int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
     } catch (const std::runtime_error& e) {
         if (dbInitDone) {
             log_error("prematurely shutting down.");
+            rollback("");
             shutdown();
         }
         throw_std_runtime_error(e.what());
@@ -367,9 +386,10 @@ void Sqlite3Database::threadProc()
         return;
     }
 
-    auto lock = threadRunner->uniqueLock();
+    StdThreadRunner::waitFor("Sqlite3Database", [this] { return threadRunner != nullptr; });
+    auto lock = threadRunner->uniqueLockS("threadProc");
     // tell init() that we are ready
-    threadRunner->notify();
+    threadRunner->setReady();
 
     while (!shutdownFlag) {
         while (!taskQueue.empty()) {
@@ -415,9 +435,12 @@ void Sqlite3Database::threadProc()
 
 void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty)
 {
-    if (!taskQueueOpen)
+    if (!taskQueueOpen) {
         throw_std_runtime_error("sqlite3 task queue is already closed");
-    auto lock = threadRunner->lockGuard();
+    }
+
+    auto lock = threadRunner->lockGuard(fmt::format("addTask {}", task->taskType()));
+
     if (!taskQueueOpen) {
         throw_std_runtime_error("sqlite3 task queue is already closed");
     }
@@ -430,7 +453,7 @@ void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDi
 void Sqlite3Database::shutdownDriver()
 {
     log_debug("start");
-    auto lock = threadRunner->uniqueLock();
+    auto lock = threadRunner->uniqueLockS("shutdown");
     if (!shutdownFlag) {
         shutdownFlag = true;
         if (hasBackupTimer) {
@@ -469,9 +492,11 @@ bool SLTask::is_running() const
 
 void SLTask::sendSignal()
 {
-    std::lock_guard<decltype(mutex)> lock(mutex);
-    running = false;
-    cond.notify_one();
+    if (is_running()) { // we check before we lock first, because there is no need to lock then
+        std::lock_guard<decltype(mutex)> lock(mutex);
+        running = false;
+        cond.notify_one();
+    }
 }
 
 void SLTask::sendSignal(std::string error)
@@ -663,8 +688,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         row += ncolumn;
         cur_row++;
         if (cur_row <= nrow) {
-            auto p = std::make_unique<Sqlite3Row>(row);
-            return p;
+            return std::make_unique<Sqlite3Row>(row);
         }
         return nullptr;
     }

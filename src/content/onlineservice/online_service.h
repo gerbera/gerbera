@@ -116,16 +116,16 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter() const { return timer_parameter; }
 
     /// \brief Sets the service refresh interval in seconds
-    void setRefreshInterval(int interval) { refresh_interval = interval; }
+    void setRefreshInterval(std::chrono::seconds interval) { refresh_interval = interval; }
 
     /// \brief Retrieves the service refresh interval in seconds
-    int getRefreshInterval() const { return refresh_interval; }
+    std::chrono::seconds getRefreshInterval() const { return refresh_interval; }
 
     /// \brief Sets the "purge after" interval in seconds
-    void setItemPurgeInterval(int interval) { purge_interval = interval; }
+    void setItemPurgeInterval(std::chrono::seconds interval) { purge_interval = interval; }
 
-    /// \brieg Retrieves the "purte after" interval in seconds
-    int getItemPurgeInterval() const { return purge_interval; }
+    /// \brief Retrieves the "purge after" interval in seconds
+    std::chrono::seconds getItemPurgeInterval() const { return purge_interval; }
 
 protected:
     std::shared_ptr<Config> config;
@@ -133,8 +133,8 @@ protected:
     std::shared_ptr<ContentManager> content;
 
     int taskCount;
-    int refresh_interval;
-    int purge_interval;
+    std::chrono::seconds refresh_interval;
+    std::chrono::seconds purge_interval;
     std::shared_ptr<Timer::Parameter> timer_parameter;
 };
 

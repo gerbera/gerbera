@@ -106,9 +106,25 @@ std::shared_ptr<Config> ConfigManager::getSelf()
     return shared_from_this();
 }
 
-static const std::vector<std::string_view> excludes_fullpath = { "/bin", "/boot", "/dev", "/etc", "/lib", "/lib32", "/lib64", "/libx32", "/proc", "/run", "/sbin", "/sys", "/tmp", "/usr", "/var" };
+static std::vector<std::string_view> excludes_fullpath {
+    "/bin",
+    "/boot",
+    "/dev",
+    "/etc",
+    "/lib",
+    "/lib32",
+    "/lib64",
+    "/libx32",
+    "/proc",
+    "/run",
+    "/sbin",
+    "/sys",
+    "/tmp",
+    "/usr",
+    "/var",
+};
 
-static const std::map<std::string_view, std::string_view> mt_ct_defaults = {
+static std::map<std::string_view, std::string_view> mt_ct_defaults {
     { "audio/mpeg", CONTENT_TYPE_MP3 },
     { "application/ogg", CONTENT_TYPE_OGG },
     { "audio/ogg", CONTENT_TYPE_OGG },
@@ -129,14 +145,14 @@ static const std::map<std::string_view, std::string_view> mt_ct_defaults = {
     { "audio/x-dsd", CONTENT_TYPE_DSD },
 };
 
-static const std::map<std::string_view, std::string_view> mt_upnp_defaults = {
+static std::map<std::string_view, std::string_view> mt_upnp_defaults {
     { "audio/*", UPNP_CLASS_MUSIC_TRACK },
     { "video/*", UPNP_CLASS_VIDEO_ITEM },
     { "image/*", UPNP_CLASS_IMAGE_ITEM },
     { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
 };
 
-static const std::map<std::string_view, std::string_view> ext_mt_defaults = {
+static std::map<std::string_view, std::string_view> ext_mt_defaults {
     { "asf", "video/x-ms-asf" },
     { "asx", "video/x-ms-asf" },
     { "dff", "audio/x-dsd" },
@@ -166,13 +182,13 @@ static const std::map<std::string_view, std::string_view> ext_mt_defaults = {
     { "wvx", "video/x-ms-wvx" },
 };
 
-static const std::map<std::string_view, std::string_view> tr_mt_defaults = {
+static std::map<std::string_view, std::string_view> tr_mt_defaults {
     { "video/x-flv", "vlcmpeg" },
     { "application/ogg", "vlcmpeg" },
     { "audio/ogg", "ogg2mp3" },
 };
 
-static const std::map<std::string_view, std::string_view> upnp_album_prop_defaults = {
+static std::map<std::string_view, std::string_view> upnp_album_prop_defaults {
     { "dc:creator", "M_ALBUMARTIST" },
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
@@ -186,7 +202,7 @@ static const std::map<std::string_view, std::string_view> upnp_album_prop_defaul
     { "upnp:genre", "M_GENRE" },
 };
 
-static const std::map<std::string_view, std::string_view> upnp_artist_prop_defaults = {
+static std::map<std::string_view, std::string_view> upnp_artist_prop_defaults {
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
     { "upnp:genre", "M_GENRE" },
@@ -263,6 +279,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE,
         "/server/storage", "config-server.html#storage",
         true),
+    std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_USE_TRANSACTIONS,
+        "/server/storage/attribute::use-transactions", "config-server.html#storage",
+        "yes"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL,
         "/server/storage/mysql", "config-server.html#storage"),
 #ifdef HAVE_MYSQL
@@ -390,7 +409,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
         "/import/mappings/extension-mimetype", "config-import.html#extension-mimetype",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, true, ext_mt_defaults),
+        false, false, true, std::move(ext_mt_defaults)),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
         "/import/mappings/extension-mimetype/attribute::ignore-unknown", "config-import.html#extension-mimetype",
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS),
@@ -400,11 +419,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         "/import/mappings/mimetype-upnpclass", "config-import.html#mime-type-upnpclass",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, true, mt_upnp_defaults),
+        false, false, true, std::move(mt_upnp_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
         "/import/mappings/mimetype-contenttype", "config-import.html#mime-type-upnpclass",
         ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
-        false, false, true, mt_ct_defaults),
+        false, false, true, std::move(mt_ct_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LAYOUT_MAPPING,
         "/import/layout", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
@@ -504,7 +523,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, true, true,
-        excludes_fullpath),
+        std::move(excludes_fullpath)),
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
@@ -724,7 +743,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP,
         "/transcoding/mimetype-profile-mappings", "config-transcode.html#profiles",
         ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING,
-        false, false, false, tr_mt_defaults),
+        false, false, false, std::move(tr_mt_defaults)),
     std::make_shared<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE,
         "/transcoding/profiles/profile", "config-server.html#ui",
         ""),
@@ -828,11 +847,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigManager::complexOptions = 
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_PROPERTIES,
         "/server/upnp/album-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, upnp_album_prop_defaults),
+        false, false, true, std::move(upnp_album_prop_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ARTIST_PROPERTIES,
         "/server/upnp/artist-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, upnp_artist_prop_defaults),
+        false, false, true, std::move(upnp_artist_prop_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_PROPERTIES,
         "/server/upnp/title-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
@@ -975,7 +994,7 @@ std::shared_ptr<ConfigSetup> ConfigManager::findConfigSetupByPath(const std::str
         if (attrKey.find_first_of("attribute::") != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
         }
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (!parentOptions.count(s->option) || parentOptions.at(s->option).end() != std::find_if(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), [&](auto&& o) { return o == s->option; })); });
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
 
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
@@ -1069,6 +1088,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     co = findConfigSetup(CFG_SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
+    setOption(root, CFG_SERVER_STORAGE_USE_TRANSACTIONS);
 
     co = findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
@@ -1141,7 +1161,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now get the option list for the drop down menu
     auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::none_of(menu_opts.begin(), menu_opts.end(), [=](auto&& s) { return s == fmt::to_string(def_ipp); }))
+    if (std::find(menu_opts.begin(), menu_opts.end(), fmt::to_string(def_ipp)) == menu_opts.end())
         throw std::runtime_error("Error in config file: at least one <option> "
                                  "under <items-per-page> must match the "
                                  "<items-per-page default=\"\" /> attribute");
@@ -1510,7 +1530,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
 {
-    if (!origValues.count(item)) {
+    if (origValues.find(item) == origValues.end()) {
         log_debug("Caching {}='{}'", item, value);
         origValues[item] = value;
     }

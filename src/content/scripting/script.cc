@@ -272,13 +272,13 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
             duk_push_object(ctx);
             setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
-            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval());
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
+            setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
             setIntProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT())));
+            setProperty(ConfigSetup::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
             duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
         }
@@ -430,7 +430,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
     i = getIntProperty("mtime", 0);
     if (i > 0)
-        obj->setMTime(i);
+        obj->setMTime(std::chrono::seconds(i));
 
     duk_get_prop_string(ctx, -1, "parent");
     if (duk_is_object(ctx, -1)) {
@@ -513,11 +513,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             int resCount = 0;
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
-                    resCount = stoiString(sym);
                     i = getIntProperty(sym, -1);
                     if (i >= 0) {
-                        std::shared_ptr<CdsResource> res = std::make_shared<CdsResource>(i);
-                        obj->addResource(res);
+                        obj->addResource(std::make_shared<CdsResource>(i));
                     }
                 }
             }
@@ -680,7 +678,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     if (!val.empty())
         setProperty("location", val);
 
-    setIntProperty("mtime", int(obj->getMTime()));
+    setIntProperty("mtime", int(obj->getMTime().count()));
     setIntProperty("sizeOnDisk", int(obj->getSizeOnDisk()));
     setIntProperty("flags", obj->getFlags());
 
@@ -803,9 +801,10 @@ std::string Script::convertToCharset(const std::string& str, charset_convert_t c
         return _f2i->convert(str);
     case J2I:
         return _j2i->convert(str);
-    default:
+    case I2I:
         return _i2i->convert(str);
     }
+    throw_std_runtime_error("Illegal charset given to convertToCharset(): {}", chr);
 }
 
 std::shared_ptr<CdsObject> Script::getProcessedObject()

@@ -51,6 +51,7 @@ private:
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;
 
+    std::string quote(std::string_view str) const override { return quote(std::string(str)); }
     std::string quote(std::string value) const override;
     std::string quote(const char* str) const override { return quote(std::string(str)); }
     std::string quote(int val) const override { return fmt::to_string(val); }
@@ -63,8 +64,9 @@ private:
     std::shared_ptr<SQLResult> select(const char* query, int length) override;
     int exec(const char* query, int length, bool getLastInsertId = false) override;
 
-    void beginTransaction() override;
-    void commit() override;
+    void beginTransaction(const std::string_view& tName) override;
+    void rollback(const std::string_view& tName) override;
+    void commit(const std::string_view& tName) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
@@ -75,9 +77,6 @@ private:
     bool mysql_connection;
 
     static std::string getError(MYSQL* db);
-
-    std::recursive_mutex mysqlMutex;
-    using AutoLock = std::lock_guard<decltype(mysqlMutex)>;
 
     void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }

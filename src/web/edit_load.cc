@@ -73,9 +73,9 @@ void web::edit_load::process()
     classEl.append_attribute("value") = obj->getClass().c_str();
     classEl.append_attribute("editable") = true;
 
-    if (obj->getMTime() > 0) {
+    if (obj->getMTime() > std::chrono::seconds::zero()) {
         auto lmtEl = item.append_child("last_modified");
-        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime())).c_str();
+        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime().count())).c_str();
         lmtEl.append_attribute("editable") = false;
     } else {
         auto lmtEl = item.append_child("last_modified");
@@ -83,7 +83,7 @@ void web::edit_load::process()
         lmtEl.append_attribute("editable") = false;
     }
 
-    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).c_str());
+    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).data());
 
     auto metaData = item.append_child("metadata");
     xml2JsonHints->setArrayName(metaData, "metadata");
@@ -153,10 +153,7 @@ void web::edit_load::process()
 
         auto location = item.append_child("location");
         location.append_attribute("value") = objItem->getLocation().c_str();
-        if (obj->isPureItem() || !obj->isVirtual())
-            location.append_attribute("editable") = false;
-        else
-            location.append_attribute("editable") = true;
+        location.append_attribute("editable") = !(obj->isPureItem() || !obj->isVirtual());
 
         auto mimeType = item.append_child("mime-type");
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();

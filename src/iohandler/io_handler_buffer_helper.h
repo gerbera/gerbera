@@ -52,7 +52,7 @@ public:
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize);
-    virtual ~IOHandlerBufferHelper() noexcept override;
+    ~IOHandlerBufferHelper() noexcept override;
 
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;

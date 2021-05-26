@@ -101,6 +101,9 @@ protected:
     std::shared_ptr<Timer> timer;
     std::shared_ptr<ContentManager> content;
 
+    std::string ip;
+    in_port_t port;
+
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag;
 
@@ -227,6 +230,9 @@ protected:
     /// instance
     void writeBookmark(const std::string& addr);
     void emptyBookmark();
+
+    std::string getPresentationUrl();
+    int startupInterface(const std::string& iface, in_port_t port);
 };
 
 #endif // __SERVER_H__

@@ -122,12 +122,30 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             log_debug("Identified metadata album: {}", e->value);
             field = M_ALBUM;
         } else if (strcmp(e->key, "date") == 0) {
-            if ((value.length() == 4) && std::all_of(value.begin(), value.end(), [](auto c) { return std::isdigit(c); }) && (std::stoi(value) > 0)) {
+            if ((value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
                 value.append("-01-01");
                 log_debug("Identified metadata date: {}", value.c_str());
             }
             /// \toto parse possible ISO8601 timestamp
             field = M_DATE;
+        } else if (strcmp(e->key, "creation_time") == 0) {
+            log_debug("Identified metadata creation_time: {}", e->value);
+            field = M_CREATION_DATE;
+            struct tm tm_work;
+            char m_date[] = "YYYY-mm-dd";
+            if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
+                time_t utc_time;
+                // convert creation_time to local time
+                utc_time = timegm(&tm_work);
+                if (utc_time == time_t(-1)) {
+                    continue;
+                }
+                localtime_r(&utc_time, &tm_work);
+            } else if (!strptime(e->value, "%Y-%m-%d", &tm_work)) { // use creation_time as is
+                continue;
+            }
+            strftime(m_date, sizeof(m_date), "%F", &tm_work);
+            value = m_date;
         } else if (strcmp(e->key, "genre") == 0) {
             log_debug("Identified metadata genre: {}", e->value);
             field = M_GENRE;
@@ -375,7 +393,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
         }
     }
 
-    std::scoped_lock thumb_lock { thumb_mutex };
+    auto thumb_lock = std::scoped_lock<std::mutex>(thumb_mutex);
 
 #ifdef FFMPEGTHUMBNAILER_OLD_API
     auto th = wrap_unique_ptr<create_thumbnailer, destroy_thumbnailer>();

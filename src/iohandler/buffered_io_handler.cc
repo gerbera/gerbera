@@ -71,7 +71,7 @@ void BufferedIOHandler::threadProc()
     size_t maxWrite;
 
 #ifdef TOMBDEBUG
-    struct timespec last_log;
+    std::chrono::milliseconds last_log;
     bool first_log = true;
 #endif
 
@@ -79,10 +79,10 @@ void BufferedIOHandler::threadProc()
     do {
 
 #ifdef TOMBDEBUG
-        if (first_log || getDeltaMillis(&last_log) > 1000) {
+        if (first_log || getDeltaMillis(last_log) > std::chrono::seconds(1)) {
             if (first_log)
                 first_log = false;
-            getTimespecNow(&last_log);
+            last_log = currentTimeMS();
             float percentFillLevel = 0;
             if (!empty) {
                 auto currentFillSize = int(b - a);

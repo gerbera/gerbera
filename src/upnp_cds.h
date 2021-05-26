@@ -97,6 +97,11 @@ protected:
     ///
     static void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request);
 
+    /// \brief Samsung Extension X_GetFeatureListResponse
+    /// \param request Incoming ActionRequest.
+    ///
+    static void doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request);
+
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
@@ -108,7 +113,7 @@ public:
     /// in internal variables.
     explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
-    ~ContentDirectoryService() = default;
+    virtual ~ContentDirectoryService() = default;
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.

@@ -61,8 +61,8 @@ protected:
     unsigned int flags;
     int objectID;
 
-    int startingIndex;
-    int requestedCount;
+    int startingIndex {};
+    int requestedCount {};
     std::string sortCrit;
 
     // output parameters
@@ -72,9 +72,6 @@ public:
     BrowseParam(int objectID, unsigned int flags)
         : flags(flags)
         , objectID(objectID)
-        , startingIndex(0)
-        , requestedCount(0)
-        , sortCrit("")
     {
     }
 

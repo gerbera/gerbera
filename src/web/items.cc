@@ -117,7 +117,7 @@ void web::items::process()
     }
 #endif
     items.append_attribute("autoscan_mode") = autoscanMode.c_str();
-    items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).c_str();
+    items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
     items.append_attribute("protect_container") = protectContainer;
     items.append_attribute("protect_items") = protectItems;
 

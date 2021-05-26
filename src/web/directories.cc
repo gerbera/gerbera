@@ -78,9 +78,9 @@ void web::directories::process()
 
         if (!it.is_directory(ec))
             continue;
-        if (std::count(excludes_fullpath.begin(), excludes_fullpath.end(), filepath))
+        if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
             continue;
-        if (std::count(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename())
+        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
             || (exclude_config_dirs && startswith(filepath.filename(), ".")))
             continue;
 

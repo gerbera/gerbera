@@ -103,17 +103,20 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 
 void ContentManager::run()
 {
+    update_manager->run();
 #ifdef ONLINE_SERVICES
     task_processor->run();
 #endif
-    update_manager->run();
 #ifdef HAVE_LASTFMLIB
     last_fm->run();
 #endif
     threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
 
+    // wait for ContentTaskThread to become ready
+    threadRunner->waitForReady();
+
     if (!threadRunner->isAlive()) {
-        throw_std_runtime_error("Could not start task thread");
+        throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
@@ -169,10 +172,10 @@ void ContentManager::run()
         try {
             auto sc = std::make_shared<SopCastService>(self);
 
-            int i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH);
+            auto i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH));
             sc->setRefreshInterval(i);
 
-            i = config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER);
+            i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER));
             sc->setItemPurgeInterval(i);
 
             if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
@@ -181,7 +184,7 @@ void ContentManager::run()
             auto sc_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_SopCast);
             sc->setTimerParameter(sc_param);
             online_services->registerService(sc);
-            if (i > 0) {
+            if (i > std::chrono::seconds::zero()) {
                 timer->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
             }
         } catch (const std::runtime_error& ex) {
@@ -195,10 +198,10 @@ void ContentManager::run()
         try {
             auto at = std::make_shared<ATrailersService>(self);
 
-            int i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
+            auto i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH));
             at->setRefreshInterval(i);
 
-            i = config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
+            i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER));
             at->setItemPurgeInterval(i);
             if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
@@ -206,7 +209,7 @@ void ContentManager::run()
             auto at_param = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_ATrailers);
             at->setTimerParameter(at_param);
             online_services->registerService(at);
-            if (i > 0) {
+            if (i > std::chrono::seconds::zero()) {
                 timer->addTimerSubscriber(this, i, at->getTimerParameter(), true);
             }
         } catch (const std::runtime_error& ex) {
@@ -238,7 +241,7 @@ void ContentManager::run()
             inotify->monitor(adir);
             auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
             log_debug("Adding one-shot inotify scan");
-            timer->addTimerSubscriber(this, 60, param, true);
+            timer->addTimerSubscriber(this, std::chrono::minutes(1), param, true);
         }
     }
 #endif
@@ -246,7 +249,7 @@ void ContentManager::run()
     for (size_t i = 0; i < autoscan_timed->size(); i++) {
         std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(i);
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
-        log_debug("Adding timed scan with interval {}", adir->getInterval());
+        log_debug("Adding timed scan with interval {}", adir->getInterval().count());
         timer->addTimerSubscriber(this, adir->getInterval(), param, false);
     }
 }
@@ -297,11 +300,11 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 }
 
 template <typename TP>
-std::time_t to_time_t(TP tp)
+std::chrono::seconds to_seconds(TP tp)
 {
     auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
         + std::chrono::system_clock::now());
-    return std::chrono::system_clock::to_time_t(asSystemTime);
+    return std::chrono::seconds(std::chrono::system_clock::to_time_t(asSystemTime));
 }
 
 void ContentManager::shutdown()
@@ -325,7 +328,7 @@ void ContentManager::shutdown()
             if (dir != nullptr) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
-                    auto t = to_time_t(dirEnt.last_write_time());
+                    auto t = to_seconds(dirEnt.last_write_time());
                     dir->setCurrentLMT(dir->getLocation(), t);
                 }
                 dir->updateLMT();
@@ -492,13 +495,13 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
 
     if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
         auto parentPath = dirEnt.path().parent_path().string();
-        updateAttachedResources(asSetting.adir, obj->getLocation().c_str(), parentPath, true);
+        updateAttachedResources(asSetting.adir, obj->getLocation(), parentPath, true);
     }
 
     return obj->getID();
 }
 
-bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const char* location, const std::string& parentPath, bool all)
+bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::string& parentPath, bool all)
 {
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
@@ -508,7 +511,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         // in order to rescan whole directory we have to set lmt to a very small value
         AutoScanSetting asSetting;
         asSetting.adir = adir;
-        adir->setCurrentLMT(parentPath, time_t(1));
+        adir->setCurrentLMT(parentPath, std::chrono::seconds(1));
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
         asSetting.recursive = true;
@@ -519,7 +522,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
-            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location);
+            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location.string().c_str());
             parentRemoved = true;
         } else {
             log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
@@ -542,7 +545,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
         auto obj = database->loadObject(objectID);
         if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path().string();
-            parentRemoved = updateAttachedResources(adir, obj->getLocation().c_str(), parentPath, all);
+            parentRemoved = updateAttachedResources(adir, obj->getLocation(), parentPath, all);
         }
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
@@ -680,9 +683,9 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         thisTaskID = 0;
     }
 
-    time_t last_modified_current_max = adir->getPreviousLMT(location, parentContainer);
-    time_t last_modified_new_max = last_modified_current_max;
-    adir->setCurrentLMT(location, 0);
+    auto last_modified_current_max = adir->getPreviousLMT(location, parentContainer);
+    auto last_modified_new_max = last_modified_current_max;
+    adir->setCurrentLMT(location, std::chrono::seconds::zero());
 
     std::shared_ptr<CdsObject> firstObject = nullptr;
     for (auto&& dirEnt : dIter) {
@@ -718,7 +721,7 @@ void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, 
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = adir->getHidden();
         asSetting.mergeOptions(config, location);
-        auto lwt = to_time_t(dirEnt.last_write_time(ec));
+        auto lwt = to_seconds(dirEnt.last_write_time(ec));
 
         if (isRegularFile(dirEnt, ec)) {
             int objectID = database->findObjectIDByPath(newPath);
@@ -848,17 +851,27 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     }
 #endif
-    time_t last_modified_current_max = 0;
-    time_t last_modified_new_max = last_modified_current_max;
-    if (adir != nullptr) {
-        last_modified_current_max = adir->getPreviousLMT(subDir.path(), parentContainer);
-        last_modified_new_max = last_modified_current_max;
-        adir->setCurrentLMT(subDir.path(), 0);
+    if (adir == nullptr) {
+        for (size_t i = 0; i < autoscan_timed->size(); i++) {
+            log_debug("Timed AutoscanDir {}", i);
+            std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
+            if (dir != nullptr && startswith(dir->getLocation(), subDir.path()) && fs::is_directory(dir->getLocation())) {
+                adir = dir;
+            }
+        }
     }
     auto dIter = fs::directory_iterator(subDir, ec);
     if (ec) {
         log_error("addRecursive: Failed to iterate {}, {}", subDir.path().c_str(), ec.message());
         return;
+    }
+
+    auto last_modified_current_max = std::chrono::seconds::zero();
+    auto last_modified_new_max = last_modified_current_max;
+    if (adir != nullptr) {
+        last_modified_current_max = adir->getPreviousLMT(subDir.path(), parentContainer);
+        last_modified_new_max = last_modified_current_max;
+        adir->setCurrentLMT(subDir.path(), std::chrono::seconds::zero());
     }
 
     bool firstChild = true;
@@ -877,7 +890,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
         // For the Web UI
         if (task != nullptr) {
-            task->setDescription(fmt::format("Importing: {}", newPath.c_str()));
+            task->setDescription(fmt::format("Importing: {}", newPath.string().c_str()));
         }
 
         try {
@@ -887,7 +900,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
             if (obj != nullptr) {
                 firstChild = false;
-                auto lwt = to_time_t(subDirEnt.last_write_time(ec));
+                auto lwt = to_seconds(subDirEnt.last_write_time(ec));
                 if (last_modified_current_max < lwt) {
                     last_modified_new_max = lwt;
                 }
@@ -920,11 +933,11 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     finishScan(adir, subDir.path(), parentContainer, last_modified_new_max, firstObject);
 }
 
-void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const std::string& location, std::shared_ptr<CdsContainer>& parent, time_t lmt, const std::shared_ptr<CdsObject>& firstObject)
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
 {
     if (adir != nullptr) {
-        adir->setCurrentLMT(location, lmt > 0 ? lmt : (time_t)1);
-        if (parent && lmt > 0) {
+        adir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));
+        if (parent && lmt > std::chrono::seconds::zero()) {
             parent->setMTime(lmt);
             int changedContainer;
             database->updateObject(parent, &changedContainer);
@@ -1003,7 +1016,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
     auto cloned_item = std::static_pointer_cast<CdsItem>(clone);
 
     if (!bookmarkpos.empty())
-        cloned_item->setBookMarkPos(stoiString(bookmarkpos));
+        cloned_item->setBookMarkPos(std::chrono::milliseconds(stoiString(bookmarkpos)));
     if (!mimetype.empty() && !protocol.empty()) {
         cloned_item->setMimeType(mimetype);
         auto resource = cloned_item->getResource(0);
@@ -1099,12 +1112,12 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             log_error("Received chain item without title");
             return { INVALID_OBJECT_ID, false };
         }
-        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, item->getTitle());
+        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received chain item {}", tree);
         for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
-        if (!containerMap.count(tree)) {
+        if (containerMap.find(tree) == containerMap.end()) {
             item->setMetadata(M_TITLE, item->getTitle());
             database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
@@ -1154,7 +1167,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
     }
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
-    if (!containerMap.count(newChain)) {
+    if (containerMap.find(newChain) == containerMap.end()) {
         lastMetadata[MetadataHandler::getMetaFieldName(M_TITLE)] = splitString(newChain, '/').back();
         database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 
@@ -1275,7 +1288,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         auto item = std::make_shared<CdsItem>();
         obj = item;
         item->setLocation(dirEnt.path());
-        item->setMTime(to_time_t(dirEnt.last_write_time(ec)));
+        item->setMTime(to_seconds(dirEnt.last_write_time(ec)));
         item->setSizeOnDisk(getFileSize(dirEnt));
 
         if (!mimetype.empty()) {
@@ -1295,8 +1308,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 
         MetadataHandler::setMetadata(context, item, dirEnt);
     } else if (dirEnt.is_directory(ec)) {
-        auto cont = std::make_shared<CdsContainer>();
-        obj = cont;
+        obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
          * this exists only to inform the caller that
          * this is a container
@@ -1377,7 +1389,12 @@ void ContentManager::reloadLayout()
 void ContentManager::threadProc()
 {
     std::shared_ptr<GenericTask> task;
-    auto lock = threadRunner->uniqueLock();
+    ThreadRunner<std::condition_variable_any, std::recursive_mutex>::waitFor("ContentManager", [this] { return threadRunner != nullptr; });
+    auto lock = threadRunner->uniqueLockS("threadProc");
+
+    // tell run() that we are ready
+    threadRunner->setReady();
+
     working = true;
     while (!shutdownFlag) {
         currentTask = nullptr;
@@ -1460,7 +1477,7 @@ int ContentManager::addFileInternal(
     if (async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
-        task->setDescription(fmt::format("Importing: {}", dirEnt.path().c_str()));
+        task->setDescription(fmt::format("Importing: {}", dirEnt.path().string().c_str()));
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1481,7 +1498,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
 
     auto self = shared_from_this();
     auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
-    task->setDescription("Updating content from " + service->getServiceName());
+    task->setDescription(fmt::format("Updating content from {}", service->getServiceName()));
     task->setParentID(parentTaskID);
     service->incTaskCount();
     addTask(task, lowPriority);
@@ -1491,11 +1508,11 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
 {
     log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
 
-    if (service->getItemPurgeInterval() > 0) {
+    if (service->getItemPurgeInterval() > std::chrono::seconds::zero()) {
         auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
 
-        auto current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        int64_t last = 0;
+        auto current = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
+        std::chrono::seconds last = {};
         std::string temp;
 
         for (int object_id : *ids) {
@@ -1507,9 +1524,9 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
             if (temp.empty())
                 continue;
 
-            last = std::stoll(temp);
+            last = std::chrono::seconds(std::stoll(temp));
 
-            if ((service->getItemPurgeInterval() > 0) && ((current - last) > service->getItemPurgeInterval())) {
+            if ((service->getItemPurgeInterval() > std::chrono::seconds::zero()) && ((current - last) > service->getItemPurgeInterval())) {
                 log_debug("Purging old online service object {}", obj->getTitle().c_str());
                 removeObject(nullptr, object_id, false);
             }
@@ -1625,7 +1642,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
     }
 }
 
-void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, std::string descPath, bool cancellable)
+void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
 {
     // building container path for the description
     auto self = shared_from_this();
@@ -1636,7 +1653,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
     if (descPath.empty())
         descPath = adir->getLocation();
 
-    task->setDescription("Scan: " + descPath);
+    task->setDescription(fmt::format("Scan: {}", descPath.string().c_str()));
     addTask(task, true); // adding with low priority
 }
 

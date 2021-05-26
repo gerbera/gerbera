@@ -15,6 +15,7 @@ packages:
   - libexif
   - libmatroska
   - libiconv
+  - sqlite3
 sources:
   - https://github.com/gerbera/gerbera
 tasks:

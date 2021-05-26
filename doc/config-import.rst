@@ -510,6 +510,7 @@ Defines various resource options for file based resources. Older versions of Ger
         * Optional
 
         Path to the directory containing the images to load. Relative paths are assumed to be under the server's home.
+        If the image is not found in that location, it is also searched in the physical folder itself
 
         ::
 

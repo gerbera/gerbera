@@ -52,9 +52,9 @@ TranscodingProfile::TranscodingProfile()
 }
 
 TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name)
+    : name(std::move(name))
+    , tr_type(tr_type)
 {
-    this->name = std::move(name);
-    this->tr_type = tr_type;
     enabled = true;
     theora = false;
     first_resource = false;
@@ -100,13 +100,12 @@ std::vector<std::string> TranscodingProfile::getAVIFourCCList() const
 
 void TranscodingProfileList::add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof)
 {
-    std::shared_ptr<TranscodingProfileMap> inner;
-
     auto it = list.find(sourceMimeType);
-    if (it != list.end())
-        inner = it->second;
-    else
-        inner = std::make_shared<TranscodingProfileMap>();
+    auto inner = [this, it] {
+        if (it != list.end())
+            return it->second;
+        return std::make_shared<TranscodingProfileMap>();
+    }();
 
     inner->insert(std::pair<std::string, std::shared_ptr<TranscodingProfile>>(prof->getName(), prof));
     list[sourceMimeType] = inner;
@@ -139,7 +138,6 @@ std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)
         return "ignore";
     case FCC_Process:
         return "process";
-    default:
-        return "disabled";
     }
+    return "disabled";
 }

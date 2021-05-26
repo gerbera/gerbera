@@ -83,7 +83,7 @@ public:
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(fs::path command) { this->command = std::move(command); }
+    void setCommand(const fs::path& command) { this->command = command; }
 
     /// \brief gets the transcoders program name
     fs::path getCommand() const { return command; }

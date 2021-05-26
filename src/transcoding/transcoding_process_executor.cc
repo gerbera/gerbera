@@ -38,7 +38,7 @@ TranscodingProcessExecutor::TranscodingProcessExecutor(const std::string& comman
 {
 }
 
-void TranscodingProcessExecutor::removeFile(const std::string& filename)
+void TranscodingProcessExecutor::removeFile(const fs::path& filename)
 {
     file_list.push_back(filename);
 }

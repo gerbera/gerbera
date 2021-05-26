@@ -172,6 +172,12 @@ Medion
 
 -  MD 85651
 
+Microsoft
+~~~~~~~~~
+
+-  Windows Explorer (Browse in directory and play with selectable player)
+-  Windows MediaPlayer 12 (downloads all item info and builds up cache)
+
 NeoDigits
 ~~~~~~~~~
 

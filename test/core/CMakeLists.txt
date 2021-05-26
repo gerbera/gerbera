@@ -1,4 +1,5 @@
 include(GoogleTest)
+generate_compile_info()
 
 add_executable(testcore
     main.cc
@@ -18,6 +19,9 @@ add_custom_command(TARGET testcore POST_BUILD
         COMMENT "Copying Fixtures"
 )
 target_compile_definitions(testcore PRIVATE CMAKE_BINARY_DIR="$<TARGET_FILE_DIR:gerbera>")
+target_compile_definitions(testcore PRIVATE COMPILE_INFO="${COMPILE_INFO}")
+target_compile_definitions(testcore PRIVATE GIT_BRANCH="${GIT_BRANCH}")
+target_compile_definitions(testcore PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 include(GoogleTest)
 gtest_discover_tests(testcore)

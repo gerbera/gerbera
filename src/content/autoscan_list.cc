@@ -100,7 +100,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id, bool edit)
 
         return list[id];
     }
-    if (indexMap.count(id)) {
+    if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
     return nullptr;
@@ -137,12 +137,12 @@ void AutoscanList::remove(size_t id, bool edit)
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
     } else {
-        if (!indexMap.count(id)) {
+        if (indexMap.find(id) == indexMap.end()) {
             log_debug("No such index ID {}!", id);
             return;
         }
         auto&& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [=](auto&& item) { return dir->getScanID() == item->getScanID(); });
+        auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getScanID()](auto&& item) { return loc == item->getScanID(); });
         dir->setScanID(INVALID_SCAN_ID);
         list.erase(entry);
 

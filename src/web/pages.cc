@@ -34,43 +34,43 @@
 namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<ContentManager>& content,
+    std::shared_ptr<ContentManager> content,
     const std::string& page)
 {
     if (page == "add")
-        return std::make_unique<web::add>(content);
+        return std::make_unique<web::add>(std::move(content));
     if (page == "remove")
-        return std::make_unique<web::remove>(content);
+        return std::make_unique<web::remove>(std::move(content));
     if (page == "add_object")
-        return std::make_unique<web::addObject>(content);
+        return std::make_unique<web::addObject>(std::move(content));
     if (page == "auth")
-        return std::make_unique<web::auth>(content);
+        return std::make_unique<web::auth>(std::move(content));
     if (page == "containers")
-        return std::make_unique<web::containers>(content);
+        return std::make_unique<web::containers>(std::move(content));
     if (page == "directories")
-        return std::make_unique<web::directories>(content);
+        return std::make_unique<web::directories>(std::move(content));
     if (page == "files")
-        return std::make_unique<web::files>(content);
+        return std::make_unique<web::files>(std::move(content));
     if (page == "items")
-        return std::make_unique<web::items>(content);
+        return std::make_unique<web::items>(std::move(content));
     if (page == "edit_load")
-        return std::make_unique<web::edit_load>(content);
+        return std::make_unique<web::edit_load>(std::move(content));
     if (page == "edit_save")
-        return std::make_unique<web::edit_save>(content);
+        return std::make_unique<web::edit_save>(std::move(content));
     if (page == "autoscan")
-        return std::make_unique<web::autoscan>(content);
+        return std::make_unique<web::autoscan>(std::move(content));
     if (page == "void")
-        return std::make_unique<web::voidType>(content);
+        return std::make_unique<web::voidType>(std::move(content));
     if (page == "tasks")
-        return std::make_unique<web::tasks>(content);
+        return std::make_unique<web::tasks>(std::move(content));
     if (page == "action")
-        return std::make_unique<web::action>(content);
+        return std::make_unique<web::action>(std::move(content));
     if (page == "clients")
-        return std::make_unique<web::clients>(content);
+        return std::make_unique<web::clients>(std::move(content));
     if (page == "config_load")
-        return std::make_unique<web::configLoad>(content);
+        return std::make_unique<web::configLoad>(std::move(content));
     if (page == "config_save")
-        return std::make_unique<web::configSave>(content);
+        return std::make_unique<web::configSave>(std::move(content));
 
     throw_std_runtime_error("Unknown page: {}", page.c_str());
 }

@@ -38,18 +38,18 @@
 #define RESOURCE_PART_SEP '~'
 
 CdsResource::CdsResource(int handlerType)
+    : handlerType(handlerType)
 {
-    this->handlerType = handlerType;
 }
 CdsResource::CdsResource(int handlerType,
-    const std::map<std::string, std::string>& attributes,
-    const std::map<std::string, std::string>& parameters,
-    const std::map<std::string, std::string>& options)
+    std::map<std::string, std::string> attributes,
+    std::map<std::string, std::string> parameters,
+    std::map<std::string, std::string> options)
+    : handlerType(handlerType)
+    , attributes(std::move(attributes))
+    , parameters(std::move(parameters))
+    , options(std::move(options))
 {
-    this->handlerType = handlerType;
-    this->attributes = attributes;
-    this->parameters = parameters;
-    this->options = options;
 }
 
 void CdsResource::addAttribute(resource_attributes_t res, std::string value)
@@ -162,6 +162,5 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size >= 4)
         dictDecode(parts[3], &opt);
 
-    auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
-    return resource;
+    return std::make_shared<CdsResource>(handlerType, attr, par, opt);
 }

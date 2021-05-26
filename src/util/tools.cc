@@ -102,12 +102,12 @@ std::vector<std::string> splitString(const std::string& str, char sep, bool empt
 
 void leftTrimStringInPlace(std::string& str)
 {
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](auto ch) { return !std::isspace(ch); }));
+    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));
 }
 
 void rightTrimStringInPlace(std::string& str)
 {
-    str.erase(std::find_if(str.rbegin(), str.rend(), [](auto ch) { return !std::isspace(ch); }).base(), str.end());
+    str.erase(std::find_if_not(str.rbegin(), str.rend(), ::isspace).base(), str.end());
 }
 
 void trimStringInPlace(std::string& str)
@@ -442,7 +442,7 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
     return dictEncode(dict, '/', '/');
 }
 
-void dictDecode(const std::string& url, std::map<std::string, std::string>* dict)
+void dictDecode(const std::string& url, std::map<std::string, std::string>* dict, bool unEscape)
 {
     auto data = url.c_str();
     auto dataEnd = data + url.length();
@@ -455,8 +455,10 @@ void dictDecode(const std::string& url, std::map<std::string, std::string>* dict
         if (eqPos && eqPos < ampPos) {
             std::string key(data, eqPos - data);
             std::string value(eqPos + 1, ampPos - eqPos - 1);
-            key = urlUnescape(key);
-            value = urlUnescape(value);
+            if (unEscape) {
+                key = urlUnescape(key);
+                value = urlUnescape(value);
+            }
 
             dict->insert(std::pair(key, value));
         }
@@ -568,7 +570,7 @@ std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
 
     result.resize(size);
 
-    return result;
+    return std::move(result);
 }
 
 void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size)
@@ -763,40 +765,31 @@ std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
     return array->empty() ? "" : join(*array, ",");
 }
 
-void getTimespecNow(struct timespec* ts)
+std::chrono::seconds currentTime()
 {
-    if (clock_gettime(CLOCK_REALTIME, ts) != 0)
-        throw_std_runtime_error("clock_gettime failed: {}", std::strerror(errno));
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-long getDeltaMillis(struct timespec* first)
+std::chrono::milliseconds currentTimeMS()
 {
-    struct timespec now;
-    getTimespecNow(&now);
-    return getDeltaMillis(first, &now);
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-long getDeltaMillis(struct timespec* first, struct timespec* second)
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms)
 {
-    return (second->tv_sec - first->tv_sec) * 1000 + (second->tv_nsec - first->tv_nsec) / 1000000;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    return now - ms;
 }
 
-void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start)
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second)
 {
-    struct timespec now;
-    if (start == nullptr) {
-        getTimespecNow(&now);
-        start = &now;
-    }
-    ret->tv_sec = start->tv_sec + delta / 1000;
-    ret->tv_nsec = (start->tv_nsec + (delta % 1000) * 1000000);
-    if (ret->tv_nsec >= 1000000000) // >= 1 second
-    {
-        ret->tv_sec++;
-        ret->tv_nsec -= 1000000000;
-    }
+    return second - first;
+}
 
-    // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
+void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::milliseconds& ret)
+{
+    auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    ret = start + delta;
 }
 
 std::string ipToInterface(const std::string& ip)
@@ -1067,11 +1060,9 @@ std::string getDLNAprofileString(const std::string& contentType)
         profile = UPNP_DLNA_PROFILE_MP3;
     else if (contentType == CONTENT_TYPE_PCM)
         profile = UPNP_DLNA_PROFILE_LPCM;
-    else
-        profile = "";
 
     if (!profile.empty())
-        profile = std::string(UPNP_DLNA_PROFILE) + "=" + profile;
+        profile = fmt::format("{}={}", UPNP_DLNA_PROFILE, profile);
     return profile;
 }
 

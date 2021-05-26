@@ -96,7 +96,7 @@ protected:
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    time_t mtime;
+    std::chrono::seconds mtime;
 
     /// \brief File size on disk (in bytes).
     off_t sizeOnDisk;
@@ -120,11 +120,10 @@ protected:
     /// \brief reference to parent, transporting details from import script
     std::shared_ptr<CdsObject> parent;
 
-    virtual ~CdsObject() = default;
-
 public:
     /// \brief Constructor. Sets the default values.
     explicit CdsObject();
+    virtual ~CdsObject() = default;
 
     /// \brief Set the object ID.
     ///
@@ -175,16 +174,16 @@ public:
     std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(fs::path location) { this->location = std::move(location); }
+    void setLocation(const fs::path& location) { this->location = location; }
 
     /// \brief Retrieve media location.
     fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
-    void setMTime(time_t mtime) { this->mtime = mtime; }
+    void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
 
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
-    time_t getMTime() const { return mtime; }
+    std::chrono::seconds getMTime() const { return mtime; }
 
     /// \brief Set file size.
     void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
@@ -220,10 +219,10 @@ public:
     /// \brief Set flags for the object.
     void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
 
-    /// \biref Set a flag of the object.
+    /// \brief Set a flag of the object.
     void setFlag(unsigned int mask) { objectFlags |= mask; }
 
-    /// \biref Set a flag of the object.
+    /// \brief Set a flag of the object.
     void changeFlag(unsigned int mask, bool value)
     {
         if (value)
@@ -232,7 +231,7 @@ public:
             clearFlag(mask);
     }
 
-    /// \biref Clears a flag of the object.
+    /// \brief Clears a flag of the object.
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
@@ -359,7 +358,7 @@ public:
 
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
-    static std::string mapObjectType(unsigned int objectType);
+    static std::string_view mapObjectType(unsigned int objectType);
 };
 
 /// \brief An Item in the content directory.
@@ -377,7 +376,7 @@ protected:
     /// \brief unique service ID
     std::string serviceID;
 
-    unsigned int bookMarkPos;
+    std::chrono::milliseconds bookMarkPos;
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
@@ -421,10 +420,10 @@ public:
     std::string getServiceID() const { return serviceID; }
 
     /// \brief Retrieve the last known bookmark position in milliseconds.
-    void setBookMarkPos(const unsigned int bookMarkPos) { this->bookMarkPos = bookMarkPos; }
+    void setBookMarkPos(std::chrono::milliseconds bookMarkPos) { this->bookMarkPos = bookMarkPos; }
 
     /// \brief Set the bookmark position in milliseconds.
-    unsigned int getBookMarkPos() const { return bookMarkPos; }
+    std::chrono::milliseconds getBookMarkPos() const { return bookMarkPos; }
 };
 
 /// \brief An item that is accessible via a URL.

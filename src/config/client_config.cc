@@ -94,7 +94,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
 
         return list[id];
     }
-    if (indexMap.count(id)) {
+    if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
     return nullptr;
@@ -113,12 +113,12 @@ void ClientConfigList::remove(size_t id, bool edit)
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
     } else {
-        if (!indexMap.count(id)) {
+        if (indexMap.find(id) == indexMap.end()) {
             log_debug("No such index ID {}!", id);
             return;
         }
         auto&& client = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [&](auto&& item) { return client->getIp() == item->getIp() && client->getUserAgent() == item->getUserAgent(); });
+        auto entry = std::find_if(list.begin(), list.end(), [ip = client->getIp(), user = client->getUserAgent()](auto&& item) { return ip == item->getIp() && user == item->getUserAgent(); });
         list.erase(entry);
         if (id >= origSize) {
             indexMap.erase(id);
@@ -127,57 +127,40 @@ void ClientConfigList::remove(size_t id, bool edit)
     }
 }
 
-std::string ClientConfig::mapClientType(ClientType clientType)
+std::string_view ClientConfig::mapClientType(ClientType clientType)
 {
-    std::string clientType_str;
     switch (clientType) {
     case ClientType::Unknown:
-        clientType_str = "None";
-        break;
+        return "None";
     case ClientType::BubbleUPnP:
-        clientType_str = "BubbleUPnP";
-        break;
+        return "BubbleUPnP";
     case ClientType::SamsungAllShare:
-        clientType_str = "SamsungAllShare";
-        break;
+        return "SamsungAllShare";
     case ClientType::SamsungSeriesQ:
-        clientType_str = "SamsungSeriesQ";
-        break;
+        return "SamsungSeriesQ";
     case ClientType::SamsungBDP:
-        clientType_str = "SamsungBDP";
-        break;
+        return "SamsungBDP";
     case ClientType::SamsungSeriesCDE:
-        clientType_str = "SamsungSeriesCDE";
-        break;
+        return "SamsungSeriesCDE";
     case ClientType::SamsungBDJ5500:
-        clientType_str = "SamsungBDJ5500";
-        break;
+        return "SamsungBDJ5500";
     case ClientType::StandardUPnP:
-        clientType_str = "StandardUPnP";
-        break;
-    default:
-        throw_std_runtime_error("illegal clientType given to mapClientType()");
+        return "StandardUPnP";
     }
-    return clientType_str;
+    throw_std_runtime_error("illegal clientType given to mapClientType()");
 }
 
-std::string ClientConfig::mapMatchType(ClientMatchType matchType)
+std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
 {
-    std::string matchType_str;
     switch (matchType) {
     case ClientMatchType::None:
-        matchType_str = "None";
-        break;
+        return "None";
     case ClientMatchType::UserAgent:
-        matchType_str = "UserAgent";
-        break;
+        return "UserAgent";
     case ClientMatchType::IP:
-        matchType_str = "IP";
-        break;
-    default:
-        throw_std_runtime_error("illegal matchType given to mapMatchType()");
+        return "IP";
     }
-    return matchType_str;
+    throw_std_runtime_error("illegal matchType given to mapMatchType()");
 }
 
 ClientType ClientConfig::remapClientType(const std::string& clientType)

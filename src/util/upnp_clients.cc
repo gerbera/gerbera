@@ -259,7 +259,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
     AutoLock lock(mutex);
 
     // house cleaning, remove old entries
-    auto now = std::chrono::steady_clock::now();
+    auto now = currentTime();
     cache->erase(std::remove_if(cache->begin(), cache->end(),
                      [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
         cache->end());

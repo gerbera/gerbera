@@ -26,8 +26,11 @@
 #ifndef __THREAD_RUNNER_H__
 #define __THREAD_RUNNER_H__
 
+#include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <thread>
+
 #include <pthread.h>
 
 #include "config/config.h"
@@ -38,19 +41,23 @@ using ThreadProc = void* (*)(void* target);
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
-    ThreadRunner(const std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
-        : config(config)
-        , attr(nullptr)
-        , threadName(name)
+    ThreadRunner(std::string name, ThreadProc targetProc, void* target, std::shared_ptr<Config> config)
+        : config(std::move(config))
+        , threadName(std::move(name))
         , targetProc(targetProc)
         , target(target)
     {
-        ThreadRunner::startThread();
+        log_debug("ThreadRunner: Creating {}", this->threadName);
+        try {
+            ThreadRunner::startThread();
+        } catch (const std::runtime_error& ex) {
+            log_error("{}", ex.what());
+        }
     }
 
     ~ThreadRunner() override
     {
-        log_debug("ThreadRunner destroying {}", threadName.c_str());
+        log_debug("ThreadRunner: Destroying {}", threadName.c_str());
         if (attr != nullptr) {
             pthread_attr_destroy(attr);
             delete attr;
@@ -59,7 +66,7 @@ public:
 
     void join()
     {
-        log_debug("Waiting for thread {}", threadName.c_str());
+        log_debug("ThreadRunner: Waiting for join {}", threadName);
         if (thread) {
             pthread_join(thread, nullptr);
         }
@@ -71,48 +78,87 @@ public:
     using AutoLockU = std::unique_lock<Mutex>;
 
     /// \brief the exit status of the thread - needs to be overridden
-    int getStatus() override { return 0; };
+    int getStatus() override { return 0; }
+
+    void setReady()
+    {
+        log_debug("ThreadRunner: Setting {} ready", threadName);
+        isReady = true;
+        cond.notify_one();
+    }
 
     void wait(std::unique_lock<Mutex>& lck)
     {
-        log_debug("ThreadRunner waiting for {}", threadName.c_str());
+        log_debug("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck);
+    }
+    void waitForReady()
+    {
+        auto lck = AutoLockU(mutex);
+        log_debug("ThreadRunner: Waiting for {} to become ready", threadName);
+        cond.wait(lck, [this] { return isReady; });
+        lck.unlock();
+        isReady = false;
     }
     template <class Predicate>
     void wait(std::unique_lock<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner waiting for {}", threadName.c_str());
+        log_debug("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck, pred);
     }
-    std::cv_status waitFor(std::unique_lock<Mutex>& lck, long ms)
+    template <class Predicate>
+    void wait(std::lock_guard<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner waiting for {}", threadName.c_str());
+        log_debug("ThreadRunner: Waiting for {}", threadName);
+        cond.wait(lck, pred);
+    }
+    std::cv_status waitFor(std::unique_lock<Mutex>& lck, std::chrono::milliseconds ms)
+    {
+        log_debug("ThreadRunner: Waiting for {}", threadName);
         return cond.wait_for(lck, std::chrono::milliseconds(ms));
     }
     void notify()
     {
-        log_debug("ThreadRunner notifying {}", threadName.c_str());
+        log_debug("ThreadRunner: Notifying {}", threadName);
         cond.notify_one();
     }
     void notifyAll()
     {
-        log_debug("ThreadRunner notifying all {}", threadName.c_str());
+        log_debug("ThreadRunner: Notifying all {}", threadName);
         cond.notify_all();
     }
     AutoLock lockGuard(const std::string& loc = "")
     {
-        log_debug("ThreadRunner guard for {} - {}", threadName.c_str(), loc.c_str());
+        log_debug("ThreadRunner: Guard for {} - {}", threadName, loc);
         return AutoLock(mutex);
+    }
+    AutoLockU uniqueLockS(const std::string& loc = "")
+    {
+        log_debug("ThreadRunner: Lock {} - {}", threadName, loc);
+        return AutoLockU(mutex);
     }
     AutoLockU uniqueLock()
     {
-        log_debug("ThreadRunner lock {}", threadName.c_str());
+        log_debug("ThreadRunner: Lock {}", threadName);
         return AutoLockU(mutex);
     }
     AutoLockU uniqueLock(std::defer_lock_t tag)
     {
-        log_debug("ThreadRunner lock with tag {}", threadName.c_str());
+        log_debug("ThreadRunner: Lock with tag {}", threadName);
         return AutoLockU(mutex, tag);
+    }
+    template <class Predicate>
+    static void waitFor(const std::string_view& threadName, Predicate pred, int max_count = 10)
+    {
+        int count = 0;
+        while (!(pred()) && count < max_count) {
+            log_debug("ThreadRunner: wait for pred {}", threadName);
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            count++;
+        }
+        if (count >= max_count) {
+            log_error("ThreadRunner: broke lock for {}", threadName);
+        }
     }
 
 protected:
@@ -122,8 +168,8 @@ protected:
     void threadProc() override
     {
         targetProc(target);
-        log_debug("ThreadRunner terminating {}", threadName.c_str());
-    };
+        log_debug("ThreadRunner: Terminating {}", threadName.c_str());
+    }
 
     /// \brief start the thread
     void startThread() override
@@ -151,21 +197,16 @@ protected:
         } else {
             threadRunning = true;
         }
-
-        if (attr != nullptr) {
-            pthread_attr_destroy(attr);
-            delete attr;
-            attr = nullptr;
-        }
     }
 
 private:
-    pthread_attr_t* attr;
+    pthread_attr_t* attr {};
     std::string threadName;
     ThreadProc targetProc;
     void* target;
     Condition cond;
     Mutex mutex;
+    bool isReady {};
 
     static void* staticThreadProc(void* arg)
     {

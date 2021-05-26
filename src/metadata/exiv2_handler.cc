@@ -146,7 +146,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
             std::string auxtag;
 
             for (auto&& j : aux) {
-                value = "";
+                value.clear();
                 auxtag = j;
                 log_debug("auxtag: {} ", auxtag.c_str());
                 if (auxtag.substr(0, 4) == "Exif") {

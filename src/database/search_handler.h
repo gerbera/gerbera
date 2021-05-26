@@ -77,8 +77,6 @@ class SearchLexer {
 public:
     explicit SearchLexer(const std::string& input)
         : input(input)
-        , currentPos(0)
-        , inQuotes(false)
     {
     }
     virtual ~SearchLexer() = default;
@@ -87,8 +85,8 @@ public:
 
     SearchLexer& operator=(const SearchLexer&) = delete;
     SearchLexer(const SearchLexer&) = delete;
-    SearchLexer& operator=(const SearchLexer&&) = delete;
-    SearchLexer(const SearchLexer&&) = delete;
+    SearchLexer& operator=(SearchLexer&&) = delete;
+    SearchLexer(SearchLexer&&) = delete;
 
 protected:
     std::string nextStringToken(const std::string& input);
@@ -96,8 +94,8 @@ protected:
     std::string getQuotedValue(const std::string& input);
 
     const std::string& input;
-    unsigned currentPos;
-    bool inQuotes;
+    unsigned currentPos {};
+    bool inQuotes {};
 };
 
 // NOTES
@@ -377,10 +375,10 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(const std::string& tabQuote, const std::string& tableAlias, const std::string& metaAlias)
-        : tabQuote(tabQuote)
-        , tableAlias(tableAlias)
-        , metaAlias(metaAlias)
+    DefaultSQLEmitter(std::string tabQuote, std::string tableAlias, std::string metaAlias)
+        : tabQuote(std::move(tabQuote))
+        , tableAlias(std::move(tableAlias))
+        , metaAlias(std::move(metaAlias))
     {
     }
 
@@ -403,6 +401,8 @@ private:
     std::string tabQuote;
     std::string tableAlias;
     std::string metaAlias;
+
+    std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
 };
 
 class SearchParser {

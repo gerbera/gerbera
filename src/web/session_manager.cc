@@ -134,8 +134,8 @@ void Session::clearUpdateIDs()
 }
 
 SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer)
+    : timer(std::move(timer))
 {
-    this->timer = std::move(timer);
     accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
     timerAdded = false;
 }
@@ -165,7 +165,7 @@ std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID
         return nullptr;
     }
 
-    std::unique_lock lock(mutex, std::defer_lock);
+    auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
 
@@ -233,14 +233,13 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 
     AutoLock lock(mutex);
 
-    struct timespec now;
-    getTimespecNow(&now);
+    auto now = currentTimeMS();
 
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
         auto&& session = *it;
 
-        if (getDeltaMillis(session->getLastAccessTime(), &now) > 1000 * session->getTimeout().count()) {
-            log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), &now));
+        if (getDeltaMillis(session->getLastAccessTime(), now) > session->getTimeout()) {
+            log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), now).count());
             it = sessions.erase(it);
             checkTimer();
         } else

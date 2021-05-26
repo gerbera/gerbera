@@ -115,18 +115,19 @@ void CdsObject::validate()
 
 std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
-    std::shared_ptr<CdsObject> obj;
-
     if (IS_CDS_CONTAINER(objectType)) {
-        obj = std::make_shared<CdsContainer>();
-    } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemExternalURL>();
-    } else if (IS_CDS_ITEM(objectType)) {
-        obj = std::make_shared<CdsItem>();
-    } else {
-        throw_std_runtime_error("invalid object type: {}", objectType);
+        return std::make_shared<CdsContainer>();
     }
-    return obj;
+
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+        return std::make_shared<CdsItemExternalURL>();
+    }
+
+    if (IS_CDS_ITEM(objectType)) {
+        return std::make_shared<CdsItem>();
+    }
+
+    throw_std_runtime_error("invalid object type: {}", objectType);
 }
 
 /* CdsItem */
@@ -236,7 +237,7 @@ void CdsContainer::validate()
         throw_std_runtime_error("validation failed"); */
 }
 
-std::string CdsObject::mapObjectType(unsigned int type)
+std::string_view CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;

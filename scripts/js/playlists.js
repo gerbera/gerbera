@@ -27,10 +27,6 @@ const playlistLocation = playlist.location.substring(0, playlist.location.lastIn
 // the function getPlaylistType is defined in common.js
 const type = getPlaylistType(playlist.mimetype);
 var playlist_title = playlist.title;
-const dot_index = playlist_title.lastIndexOf('.');
-if (dot_index > 1) {
-    playlist_title = playlist_title.substring(0, dot_index);
-}
 var last_path = getLastPath(playlist.location);
 
 const chain = {

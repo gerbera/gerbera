@@ -148,6 +148,11 @@
 					"editable": false
 				},
 				{
+					"item": "/server/storage/attribute::use-transactions",
+					"caption": "Transactions",
+					"editable": false
+				},
+				{
 					"item": "/server/storage/sqlite3",
 					"caption": "SQLite",
 					"type": "Element",
@@ -346,6 +351,21 @@
 							"item": "/import/autoscan/timed/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
 							"editable": true
+						},
+						{
+							"item": "/import/autoscan/timed/directory/attribute::scan-count",
+							"caption": "Active Scan Count",
+							"editable": false
+						},
+						{
+							"item": "/import/autoscan/timed/directory/attribute::task-count",
+							"caption": "Active Task Count",
+							"editable": false
+						},
+						{
+							"item": "/import/autoscan/timed/directory/attribute::last-modified",
+							"caption": "Last Modified",
+							"editable": false
 						}
 					]
 				},

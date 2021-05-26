@@ -91,8 +91,8 @@ protected:
     }
 
 public:
-    static const std::string_view ROOT_NAME;
-    static const std::string_view ATTRIBUTE;
+    static constexpr auto ROOT_NAME = std::string_view("config");
+    static constexpr auto ATTRIBUTE = std::string_view("attribute::");
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
@@ -244,7 +244,7 @@ public:
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
     {
-        if (arguments != nullptr && arguments->count("notEmpty")) {
+        if (arguments != nullptr && arguments->find("notEmpty") != arguments->end()) {
             notEmpty = arguments->find("notEmpty")->second == "true";
         }
         newOption(ConfigSetup::getXmlContent(root, true));
@@ -253,7 +253,7 @@ public:
 
     bool checkEnumValue(const std::string& value, En& result) const
     {
-        if (valueMap.count(value)) {
+        if (valueMap.find(value) != valueMap.end()) {
             result = valueMap.at(value);
             return true;
         }
@@ -498,11 +498,11 @@ public:
     }
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
-        bool notEmpty = false, bool itemNotEmpty = false, const std::vector<std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string_view> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , defaultEntries(defaultEntries)
+        , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
         , attrOption(attrOption)
     {

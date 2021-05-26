@@ -71,7 +71,7 @@ public:
     int getDatabaseID() const { return databaseID; }
 
     /// \brief The location can only be set once!
-    void setLocation(fs::path location);
+    void setLocation(const fs::path& location);
     fs::path getLocation() const { return location; }
 
     void setScanMode(ScanMode mode) { this->mode = mode; }
@@ -86,8 +86,8 @@ public:
     void setHidden(bool hidden) { this->hidden = hidden; }
     bool getHidden() const { return hidden; }
 
-    void setInterval(unsigned int interval) { this->interval = interval; }
-    unsigned int getInterval() const { return interval; }
+    void setInterval(std::chrono::seconds interval) { this->interval = interval; }
+    std::chrono::seconds getInterval() const { return interval; }
 
     /// \brief Increments the task count.
     ///
@@ -124,15 +124,15 @@ public:
     /// the last modification time of the starting point but we may not
     /// overwrite it until we are done.
     /// The time will be only set if it is higher than the previous value!
-    void setCurrentLMT(const std::string& location, time_t lmt);
-    time_t getPreviousLMT() const;
-    time_t getPreviousLMT(const std::string& loc, const std::shared_ptr<CdsContainer>& parent) const;
+    void setCurrentLMT(const fs::path& location, std::chrono::seconds lmt);
+    std::chrono::seconds getPreviousLMT() const;
+    std::chrono::seconds getPreviousLMT(const fs::path& loc, const std::shared_ptr<CdsContainer>& parent) const;
     bool updateLMT();
     void resetLMT()
     {
         lastModified.clear();
-        last_mod_previous_scan = 0;
-        last_mod_current_scan = 0;
+        last_mod_previous_scan = {};
+        last_mod_current_scan = {};
     }
     int getActiveScanCount() const { return activeScanCount; }
 
@@ -143,7 +143,7 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter();
 
     /* helpers for autoscan stuff */
-    static std::string mapScanmode(ScanMode scanmode);
+    static std::string_view mapScanmode(ScanMode scanmode);
     static ScanMode remapScanmode(const std::string& scanmode);
 
 protected:
@@ -153,15 +153,15 @@ protected:
     bool recursive;
     bool hidden;
     bool persistent_flag;
-    unsigned int interval { 0 };
+    std::chrono::seconds interval {};
     int taskCount { 0 };
     int scanID { INVALID_SCAN_ID };
     int objectID { INVALID_OBJECT_ID };
     int databaseID { INVALID_OBJECT_ID };
-    time_t last_mod_previous_scan { 0 };
-    time_t last_mod_current_scan { 0 };
+    std::chrono::seconds last_mod_previous_scan {};
+    std::chrono::seconds last_mod_current_scan {};
     std::shared_ptr<Timer::Parameter> timer_parameter;
-    std::map<std::string, time_t> lastModified;
+    std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount { 0 };
 };
 

@@ -64,7 +64,7 @@ void DictionaryOption::setKey(size_t keyIndex, const std::string& newKey)
             option[newKey] = oldValue;
         } else {
             for (size_t i = getEditSize() - 1; i >= origSize; i--) {
-                if (indexMap.count(i) && indexMap[keyIndex].empty()) {
+                if (indexMap.find(i) != indexMap.end() && indexMap[keyIndex].empty()) {
                     option.erase(indexMap[i]);
                 } else {
                     break;
@@ -88,14 +88,11 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     if (!forEdit)
         return option;
 
-    std::vector<std::string> editOption;
     auto editSize = getEditSize();
+    std::vector<std::string> editOption;
+    editOption.reserve(editSize);
     for (size_t i = 0; i < editSize; i++) {
-        if (indexMap.at(i) < std::numeric_limits<std::size_t>::max()) {
-            editOption.emplace_back(option[indexMap.at(i)]);
-        } else {
-            editOption.emplace_back("");
-        }
+        editOption.push_back(indexMap.at(i) < std::numeric_limits<std::size_t>::max() ? option[indexMap.at(i)] : "");
     }
     return editOption;
 }
@@ -103,7 +100,7 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
 void ArrayOption::setItem(size_t index, const std::string& value)
 {
     auto editSize = getEditSize();
-    if (indexMap.count(index) && value.empty()) {
+    if (indexMap.find(index) != indexMap.end() && value.empty()) {
         option.erase(option.begin() + indexMap[index]);
         indexMap[index] = std::numeric_limits<std::size_t>::max();
         for (size_t i = index + 1; i < editSize; i++) {
@@ -118,7 +115,7 @@ void ArrayOption::setItem(size_t index, const std::string& value)
                 break;
             }
         }
-    } else if (indexMap.count(index)) {
+    } else if (indexMap.find(index) != indexMap.end()) {
         if (indexMap[index] == std::numeric_limits<std::size_t>::max()) {
             for (size_t i = editSize - 1; i > index; i--) {
                 if (indexMap[i] < std::numeric_limits<std::size_t>::max()) {
@@ -138,7 +135,7 @@ void ArrayOption::setItem(size_t index, const std::string& value)
             }
             option.insert(option.begin() + indexMap[index], value);
         } else {
-            if (!indexMap.count(index) || indexMap[index] == std::numeric_limits<std::size_t>::max() || indexMap[index] >= option.size()) {
+            if (indexMap.find(index) == indexMap.end() || indexMap[index] == std::numeric_limits<std::size_t>::max() || indexMap[index] >= option.size()) {
                 indexMap[index] = option.size();
                 option.push_back(value);
             } else {

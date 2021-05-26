@@ -93,7 +93,14 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     std::string ret_str;
 
     auto input = str.c_str();
-    auto output = new char[str.length() * 4];
+    size_t length = str.length();
+    if (length < (std::numeric_limits<size_t>::max() / 4)) {
+        length *= 4;
+    } else {
+        log_debug("Could not determine memory for string conversion!");
+        throw_std_runtime_error("Could not determine memory for string conversion");
+    }
+    auto output = new char[length];
     if (!output) {
         log_debug("Could not allocate memory for string conversion!");
         throw_std_runtime_error("Could not allocate memory for string conversion");
@@ -106,7 +113,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     char** output_ptr = &output_copy;
 
     auto input_bytes = size_t(str.length());
-    auto output_bytes = size_t(str.length() * 4);
+    auto output_bytes = length;
 
     int ret;
 
@@ -179,16 +186,14 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 /// \todo iconv caching
 std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET));
     //        INTERNAL_CHARSET, cm->getFilesystemCharset()));
-    return conv;
 }
 std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm)
 {
@@ -211,27 +216,24 @@ std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, co
 #ifdef HAVE_JS
 std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 
 std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 #endif
 
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
 std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET,
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 #endif

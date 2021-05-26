@@ -63,8 +63,8 @@ public:
     std::string get(const std::string& key);
 
     /// \brief Returns the time of last access to the session.
-    /// \return pointer to a timespec
-    struct timespec* getLastAccessTime() { return &last_access; }
+    /// \return std::chrono::seconds
+    std::chrono::seconds getLastAccessTime() { return last_access; }
 
     std::chrono::seconds getTimeout() const { return timeout; }
 
@@ -80,7 +80,7 @@ public:
 
     void logOut() { loggedIn = false; }
 
-    void access() { getTimespecNow(&last_access); }
+    void access() { last_access = currentTime(); }
 
     /// \brief Returns the updateIDs, collected for the sessions,
     /// and flushes the database for the ids
@@ -112,7 +112,7 @@ protected:
     std::chrono::seconds timeout;
 
     /// \brief time of last access to the session, returned by getLastAccessTime()
-    struct timespec last_access;
+    std::chrono::seconds last_access;
 
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
     std::string sessionID;

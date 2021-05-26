@@ -10,23 +10,14 @@ project(Gerbera
         HOMEPAGE_URL "https://gerbera.io"
         LANGUAGES CXX C)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# If Conan stuff is present, load it
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake OPTIONAL)
-if(CONAN_EXPORTED)
-    conan_message(STATUS "Conan: called by CMake conan helper")
-    # Propagate variables set by the helper
-    # Normally conan_basic_setup should be called, but we rely
-    # on cmake_find_package generator.
-    # Do only some checks and setup here.
-    conan_set_std()
-    conan_set_fpic()
-    conan_check_compiler()
-    conan_set_libcxx()
-    conan_set_vs_runtime()
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_BINARY_DIR}/")
-else()
-    list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+if(COMMAND conan_basic_setup)
+    # Prefer the conan FindModules
+    list(PREPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+    conan_basic_setup(TARGETS)
 endif()
 
 set(WITH_NPUPNP            NO  CACHE BOOL "Use npupnp instead of libupnp")
@@ -52,8 +43,14 @@ set(STATIC_LIBUPNP 0 CACHE BOOL "Link to libupnp statically")
 # Leverage a modern C++
 # Set defaults here before we create targets
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(CMAKE_CXX_EXTENSIONS NO)
+# Cygwin requires extensions for a lot of the networking stuff.
+if(CYGWIN)
+	set(CMAKE_CXX_STANDARD_REQUIRED NO)
+	set(CMAKE_CXX_EXTENSIONS YES)
+else(CYGWIN)
+	set(CMAKE_CXX_STANDARD_REQUIRED YES)
+	set(CMAKE_CXX_EXTENSIONS NO)
+endif(CYGWIN)
 
 add_library(libgerbera STATIC
         src/action_request.cc
@@ -405,12 +402,7 @@ find_package(pugixml REQUIRED)
 target_link_libraries(libgerbera PUBLIC pugixml::pugixml)
 
 find_package(SQLite3 3.7.0 REQUIRED)
-# Unfortunately Conan and CMake Find module produce slightly different targets.
-if(TARGET SQLite::SQLite3)
-    target_link_libraries(libgerbera PUBLIC SQLite::SQLite3)
-else()
-    target_link_libraries(libgerbera PUBLIC SQLite3::SQLite3)
-endif()
+target_link_libraries(libgerbera PUBLIC SQLite::SQLite3)
 
 # We should probably move these two out to their own FindLocale
 include(CheckFunctionExists)

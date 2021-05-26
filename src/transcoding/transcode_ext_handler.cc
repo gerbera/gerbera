@@ -194,8 +194,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     content->triggerPlayHook(obj);
 
     std::unique_ptr<IOHandler> u_ioh = std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list);
-    auto io_handler = std::make_unique<BufferedIOHandler>(
+    return std::make_unique<BufferedIOHandler>(
         config, u_ioh,
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
-    return io_handler;
 }

@@ -52,14 +52,16 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
 {
     const auto url_s = std::string { url };
     const auto i1 = size_t { [=]() {
-        if (separator == '/' || separator == '?')
+        if (separator == '/')
             return url_s.rfind(separator);
+        if (separator == '?')
+            return url_s.find(separator);
         throw_std_runtime_error("Forbidden separator: {}", separator);
     }() };
 
     if (i1 == std::string::npos) {
         path = url_s;
-        parameters = "";
+        parameters.clear();
     } else {
         parameters = url_s.substr(i1 + 1);
         path = url_s.substr(0, i1);
@@ -77,7 +79,7 @@ std::map<std::string, std::string> RequestHandler::parseParameters(const char* f
 {
     std::map<std::string, std::string> params;
 
-    std::string parameters = (filename + strlen(baseLink));
+    const auto parameters = std::string(filename + strlen(baseLink));
     dictDecodeSimple(parameters, &params);
     log_debug("filename: {} -> parameters: {}", filename, parameters.c_str());
 

@@ -39,6 +39,9 @@ void TaskProcessor::run()
 {
     threadRunner = std::make_unique<StdThreadRunner>("TaskProcessorThread", TaskProcessor::staticThreadProc, this, config);
 
+    // wait for thread to become ready
+    threadRunner->waitForReady();
+
     if (!threadRunner->isAlive())
         throw_std_runtime_error("Failed to task processor thread");
 }
@@ -60,8 +63,12 @@ void* TaskProcessor::staticThreadProc(void* arg)
 
 void TaskProcessor::threadProc()
 {
+    StdThreadRunner::waitFor("TaskProcessor", [this] { return threadRunner != nullptr; });
+
     std::shared_ptr<GenericTask> task;
-    auto lock = threadRunner->uniqueLock();
+    auto lock = threadRunner->uniqueLockS("threadProc");
+    // tell run() that we are ready
+    threadRunner->setReady();
     working = true;
 
     while (!shutdownFlag) {
@@ -184,7 +191,7 @@ void TPFetchOnlineContentTask::run()
             log_debug("Scheduling another task for online service: {}",
                 service->getServiceName().c_str());
 
-            if ((service->getRefreshInterval() > 0) || unscheduled_refresh) {
+            if ((service->getRefreshInterval() > std::chrono::seconds::zero()) || unscheduled_refresh) {
                 auto t = std::make_shared<TPFetchOnlineContentTask>(
                     content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
                 task_processor->addTask(t);
@@ -197,7 +204,7 @@ void TPFetchOnlineContentTask::run()
     }
     service->decTaskCount();
     if (service->getTaskCount() == 0) {
-        if ((service->getRefreshInterval() > 0) && !unscheduled_refresh) {
+        if ((service->getRefreshInterval() > std::chrono::seconds::zero()) && !unscheduled_refresh) {
             timer->addTimerSubscriber(
                 content.get(),
                 service->getRefreshInterval(),
