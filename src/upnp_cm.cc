@@ -52,7 +52,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<A
     auto root = response->document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
-    request->setResponse(response);
+    request->setResponse(std::move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
@@ -73,13 +73,13 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
 
-    const auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
+    auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
 
     auto root = response->document_element();
     root.append_child("Source").append_child(pugi::node_pcdata).set_value(CSV.c_str());
     root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
 
-    request->setResponse(response);
+    request->setResponse(std::move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
@@ -107,7 +107,7 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
 
 void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
 {
-    const auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
+    auto CSV = std::string { mimeTypesToCsv(database->getMimeTypes()) };
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();

@@ -102,7 +102,7 @@ public:
 
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
-    void setResponse(std::unique_ptr<pugi::xml_document>& response);
+    void setResponse(std::unique_ptr<pugi::xml_document> response);
 
     /// \brief Set the error code for the SDK.
     /// \param errCode UPnP error code.
