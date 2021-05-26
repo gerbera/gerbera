@@ -203,7 +203,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
                 continue;
             }
             std::string title(UTFstring(*title_el).GetUTF8());
-            // printf("KaxTitle = %s\n", title.c_str());
+            log_debug("KaxTitle = {}", title);
             item->setMetadata(M_TITLE, sc->convert(title));
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
             auto date_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
@@ -213,7 +213,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             }
             auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(date_el->GetEpochDate()));
             if (!f_date.empty()) {
-                // fmt::print("KaxDateUTC = %s\n", f_date.c_str());
+                log_debug("KaxDateUTC = {}", f_date);
                 item->setMetadata(M_DATE, sc->convert(f_date));
             }
         }
@@ -230,11 +230,11 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
     auto attachedFile = FindChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
         std::string fileName(UTFstring(GetChild<LIBMATROSKA_NAMESPACE::KaxFileName>(*attachedFile)).GetUTF8());
-        // printf("KaxFileName = %s\n", fileName.c_str());
+        log_debug("KaxFileName = {}", fileName);
 
         if (startswith(fileName, "cover")) {
             auto&& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
-            // printf("KaxFileData (size=%ld)\n", fileData.GetSize());
+            log_debug("KaxFileData (size={})", fileData.GetSize());
 
             if (p_io_handler != nullptr) {
                 // serveContent

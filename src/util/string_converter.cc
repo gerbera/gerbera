@@ -187,7 +187,6 @@ std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Conf
 {
     return std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET));
-    //        INTERNAL_CHARSET, cm->getFilesystemCharset()));
 }
 std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
 {
@@ -206,10 +205,7 @@ std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, co
         log_debug("Using charset {} for {}", charset, location.string());
     }
 
-    auto conv = std::make_unique<StringConverter>(
-        charset,
-        DEFAULT_INTERNAL_CHARSET);
-    return conv;
+    return std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
 }
 
 #ifdef HAVE_JS
