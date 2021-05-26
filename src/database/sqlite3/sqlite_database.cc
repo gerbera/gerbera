@@ -301,7 +301,7 @@ void Sqlite3Database::beginTransaction(const std::string_view& tName)
         log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
         SqlAutoLock lock(sqlMutex);
         StdThreadRunner::waitFor(
-            fmt::format("SqliteDatabase.begin {}", tName), [this] { return inTransaction == false; }, 100);
+            fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
         _exec("BEGIN TRANSACTION");
     }
