@@ -300,7 +300,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 }
 
 template <typename TP>
-std::chrono::seconds to_seconds(TP tp)
+static std::chrono::seconds to_seconds(TP tp)
 {
     auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
         + std::chrono::system_clock::now());
