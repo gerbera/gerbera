@@ -39,6 +39,7 @@
 #include "process.h"
 
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
+    : exit_status(0)
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];
@@ -53,10 +54,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     }
     argv[++apos] = nullptr;
 
-    exit_status = 0;
-
     process_id = fork();
-
     switch (process_id) {
     case -1:
         throw_std_runtime_error("Failed to launch process {}", command.c_str());

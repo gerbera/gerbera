@@ -49,8 +49,8 @@
 
 ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
     : executor(std::move(exec))
+    , abort(abortOnDeath)
 {
-    abort = abortOnDeath;
 }
 
 std::shared_ptr<Executor> ProcListItem::getExecutor()
@@ -108,13 +108,12 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Executor>& mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
+    : content(std::move(content))
+    , procList(std::move(procList))
+    , mainProc(mainProc)
+    , filename(filename)
+    , ignoreSeek(ignoreSeek)
 {
-    this->content = std::move(content);
-    this->filename = filename;
-    this->procList = std::move(procList);
-    this->mainProc = mainProc;
-    this->ignoreSeek = ignoreSeek;
-
     if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
         killAll();
         throw_std_runtime_error("process terminated early");

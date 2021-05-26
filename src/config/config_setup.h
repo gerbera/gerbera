@@ -227,16 +227,16 @@ protected:
 public:
     ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
+        , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))
     {
-        this->notEmpty = notEmpty;
     }
 
     ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, defaultValue)
+        , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))
     {
-        this->notEmpty = notEmpty;
     }
 
     ~ConfigEnumSetup() override = default;

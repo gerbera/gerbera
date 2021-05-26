@@ -133,13 +133,13 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
     , timer(std::move(timer))
+    , shutdownFlag(false)
+    , dirty(false)
+    , dbInitDone(false)
+    , hasBackupTimer(false)
 {
-    shutdownFlag = false;
     table_quote_begin = '"';
     table_quote_end = '"';
-    dirty = false;
-    dbInitDone = false;
-    hasBackupTimer = false;
 }
 
 void Sqlite3Database::prepare()
@@ -479,10 +479,10 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
 
 /* SLTask */
 SLTask::SLTask()
+    : running(true)
+    , contamination(false)
+    , decontamination(false)
 {
-    running = true;
-    contamination = false;
-    decontamination = false;
 }
 
 bool SLTask::is_running() const
@@ -564,8 +564,8 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 
 SLSelectTask::SLSelectTask(const char* query)
     : SLTask()
+    , query(query)
 {
-    this->query = query;
 }
 
 void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
@@ -599,9 +599,9 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
 
 SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
     : SLTask()
+    , query(query)
+    , getLastInsertIdFlag(getLastInsertId)
 {
-    this->query = query;
-    this->getLastInsertIdFlag = getLastInsertId;
 }
 
 void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
@@ -672,8 +672,8 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
 /* Sqlite3Result */
 
 Sqlite3Result::Sqlite3Result()
+    : table(nullptr)
 {
-    table = nullptr;
 }
 Sqlite3Result::~Sqlite3Result()
 {
@@ -698,8 +698,8 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 /* Sqlite3Row */
 
 Sqlite3Row::Sqlite3Row(char** row)
+    : row(row)
 {
-    this->row = row;
 }
 
 /* Sqlite3BackupTimerSubscriber */

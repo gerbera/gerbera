@@ -32,11 +32,11 @@
 #include "subscription_request.h" // API
 
 SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnp_request)
-    : serviceID(UpnpSubscriptionRequest_get_ServiceId_cstr(upnp_request))
+    : upnp_request(upnp_request)
+    , serviceID(UpnpSubscriptionRequest_get_ServiceId_cstr(upnp_request))
     , UDN(UpnpSubscriptionRequest_get_UDN_cstr(upnp_request))
     , sID(UpnpSubscriptionRequest_get_SID_cstr(upnp_request))
 {
-    this->upnp_request = upnp_request;
 }
 
 std::string SubscriptionRequest::getServiceID() const

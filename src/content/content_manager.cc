@@ -81,12 +81,11 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , session_manager(context->getSessionManager())
     , context(context)
     , timer(std::move(timer))
+    , layout_enabled(false)
+    , working(false)
+    , shutdownFlag(false)
+    , taskID(1)
 {
-    taskID = 1;
-    working = false;
-    shutdownFlag = false;
-    layout_enabled = false;
-
     update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>(config);
@@ -1955,9 +1954,9 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
     , timer(std::move(timer))
     , service(std::move(service))
     , layout(std::move(layout))
+    , unscheduled_refresh(unscheduled_refresh)
 {
     this->cancellable = cancellable;
-    this->unscheduled_refresh = unscheduled_refresh;
     this->taskType = FetchOnlineContent;
 }
 

@@ -187,23 +187,23 @@ protected:
     std::string tm;
     fs::path command;
     std::string args;
-    bool enabled;
-    bool first_resource;
-    bool theora;
-    bool accept_url;
-    bool hide_orig_res;
-    bool thumbnail;
-    bool force_chunked;
-    size_t buffer_size;
-    size_t chunk_size;
-    size_t initial_fill_size;
+    bool enabled { true };
+    bool first_resource { false };
+    bool theora { false };
+    bool accept_url { true };
+    bool hide_orig_res { false };
+    bool thumbnail { false };
+    bool force_chunked { true };
+    size_t buffer_size {};
+    size_t chunk_size {};
+    size_t initial_fill_size {};
     transcoding_type_t tr_type;
-    int number_of_channels;
-    int sample_frequency;
+    int number_of_channels { SOURCE };
+    int sample_frequency { SOURCE };
     std::map<std::string, std::string> attributes;
     std::vector<std::string> fourcc_list;
-    avi_fourcc_listmode_t fourcc_mode;
-    TranscodingProfile();
+    avi_fourcc_listmode_t fourcc_mode { FCC_None };
+    TranscodingProfile() = default;
 };
 
 /// \brief this class allows access to available transcoding profiles.
