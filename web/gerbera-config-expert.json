@@ -552,7 +552,12 @@
 				{
 					"item": "/import/scripting/virtual-layout/attribute::type",
 					"caption": "Virtual Layout Type",
-					"editable": false
+					"editable": true
+				},
+				{
+					"item": "/import/scripting/virtual-layout/attribute::audio-layout",
+					"caption": "Audio Layout Type",
+					"editable": true
 				},
 				{
 					"item": "/import/scripting/playlist-script/attribute::create-link",
@@ -588,6 +593,44 @@
 						{
 							"item": "/import/scripting/virtual-layout/import-script/script-option/option/attribute::value",
 							"caption": "Value",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/scripting/virtual-layout/structured-layout",
+					"caption": "Structured Layout Settings",
+					"type": "Element",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars",
+							"caption": "Initial Characters to skip",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::album-box",
+							"caption": "Album Box Type",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::artist-box",
+							"caption": "Artist Box Type",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::genre-box",
+							"caption": "Genre Box Type",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::track-box",
+							"caption": "Track Box Type",
+							"editable": true
+						},
+						{
+							"item": "/import/scripting/virtual-layout/structured-layout/attribute::div-char",
+							"caption": "Surrounding Char",
 							"editable": true
 						}
 					]
