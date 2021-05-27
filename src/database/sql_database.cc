@@ -619,7 +619,7 @@ std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const s
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        auto it =  std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == seg; });
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == seg; });
         if (it != keyMap.end()) {
             std::ostringstream sortSql;
             sortSql << TQD(colMap.at(it->second).first, colMap.at(it->second).second) << (desc ? " DESC" : "");
