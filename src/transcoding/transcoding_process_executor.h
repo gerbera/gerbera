@@ -39,8 +39,7 @@ namespace fs = std::filesystem;
 
 class TranscodingProcessExecutor : public ProcessExecutor {
 public:
-    TranscodingProcessExecutor(const std::string& command,
-        const std::vector<std::string>& arglist);
+    TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist);
     /// \brief This function adds a filename to a list, files in that list
     /// will be removed once the class is destroyed.
     void removeFile(const fs::path& filename);
