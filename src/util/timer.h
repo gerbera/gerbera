@@ -74,7 +74,7 @@ public:
         virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
     };
 
-    Timer(std::shared_ptr<Config> config);
+    explicit Timer(std::shared_ptr<Config> config);
     void run();
 
     virtual ~Timer() { log_debug("Timer destroyed"); }
