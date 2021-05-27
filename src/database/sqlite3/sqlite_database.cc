@@ -477,14 +477,6 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
     SQLDatabase::exec(q.str());
 }
 
-/* SLTask */
-SLTask::SLTask()
-    : running(true)
-    , contamination(false)
-    , decontamination(false)
-{
-}
-
 bool SLTask::is_running() const
 {
     return running;
@@ -522,8 +514,7 @@ void SLTask::waitForTask()
 
 /* SLInitTask */
 SLInitTask::SLInitTask(std::shared_ptr<Config> config)
-    : SLTask()
-    , config(std::move(config))
+    : config(std::move(config))
 {
 }
 
@@ -563,8 +554,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 /* SLSelectTask */
 
 SLSelectTask::SLSelectTask(const char* query)
-    : SLTask()
-    , query(query)
+    : query(query)
 {
 }
 
@@ -598,8 +588,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
 /* SLExecTask */
 
 SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
-    : SLTask()
-    , query(query)
+    : query(query)
     , getLastInsertIdFlag(getLastInsertId)
 {
 }
@@ -671,10 +660,6 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
 
 /* Sqlite3Result */
 
-Sqlite3Result::Sqlite3Result()
-    : table(nullptr)
-{
-}
 Sqlite3Result::~Sqlite3Result()
 {
     if (table) {
