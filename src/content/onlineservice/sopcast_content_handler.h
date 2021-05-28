@@ -74,7 +74,7 @@ public:
     std::shared_ptr<CdsObject> getNextObject() override;
 
 protected:
-    std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel) const;
+    static std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel);
 
 protected:
     std::shared_ptr<Config> config;
