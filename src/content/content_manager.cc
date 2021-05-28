@@ -375,8 +375,7 @@ std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 {
     auto lock = threadRunner->lockGuard("getCurrentTask");
 
-    auto task = currentTask;
-    return task;
+    return currentTask;
 }
 
 std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
@@ -1688,13 +1687,15 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const
 {
+#if HAVE_INOTIFY
     auto all = autoscan_timed->getArrayCopy();
 
-#if HAVE_INOTIFY
     auto ino = autoscan_inotify->getArrayCopy();
     std::copy(ino.begin(), ino.end(), std::back_inserter(all));
-#endif
     return all;
+#else
+    return autoscan_timed->getArrayCopy();
+#endif
 }
 
 void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
