@@ -78,7 +78,7 @@ public:
 
     static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, const std::string& separator = _URL_PARAM_SEPARATOR);
 
-    std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
+    static std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
     std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params);
 
     virtual ~RequestHandler() = default;
