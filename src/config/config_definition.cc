@@ -1040,7 +1040,6 @@ std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetup(config_option_t o
 std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::string& key, bool save, const std::shared_ptr<ConfigSetup>& parent)
 {
     auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == key; });
-
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
         return *co;
@@ -1054,8 +1053,8 @@ std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::
         if (attrKey.find_first_of("attribute::") != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
         }
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
 
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
             return *co;
