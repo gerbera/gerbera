@@ -1000,7 +1000,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
         return "";
 
     char prefix;
-    fs::path path = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title), &prefix);
+    auto path = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title), &prefix);
     if (prefix != LOC_VIRT_PREFIX)
         throw_std_runtime_error("Tried to build a virtual container path with an non-virtual parentID");
 
@@ -1050,12 +1050,12 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
     updateID.emplace(updateID.begin(), *containerID);
 }
 
-std::string SQLDatabase::addLocationPrefix(char prefix, const std::string& path)
+std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
 {
-    return std::string(1, prefix) + path;
+    return fmt::format("{}{}", prefix, path.string().c_str());
 }
 
-fs::path SQLDatabase::stripLocationPrefix(std::string dbLocation, char* prefix)
+fs::path SQLDatabase::stripLocationPrefix(const std::string& dbLocation, char* prefix)
 {
     if (dbLocation.empty()) {
         if (prefix)
@@ -1397,11 +1397,11 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
         while ((row = res->nextRow()) != nullptr) {
             bool persistent = remapBool(row->col(1));
             if (persistent) {
-                std::string location = stripLocationPrefix(row->col(2));
+                auto location = stripLocationPrefix(row->col(2));
                 std::ostringstream u;
                 u << "UPDATE " << TQ(AUTOSCAN_TABLE)
                   << " SET " << TQ("obj_id") << "=" SQL_NULL
-                  << ',' << TQ("location") << '=' << quote(location)
+                  << ',' << TQ("location") << '=' << quote(location.string())
                   << " WHERE " << TQ("id") << '=' << quote(row->col(0));
                 exec(u.str());
             } else {
