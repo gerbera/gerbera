@@ -87,7 +87,7 @@ public:
         return attr;
     }
 
-protected:
+private:
     static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
     static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
 };
