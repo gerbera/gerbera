@@ -205,6 +205,9 @@ constexpr auto to_underlying(E e) noexcept
 
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 
+static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
+static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
+
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
     : Database(std::move(config))
     , inTransaction(false)
@@ -219,6 +222,9 @@ void SQLDatabase::init()
 {
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
+
+    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(fmt::format("{}", table_quote_begin), browseSortMap, browseColMap);
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(fmt::format("{}", table_quote_begin), searchSortMap, searchColMap);
 
     // Statement for UPnP browse
     std::ostringstream buf;
@@ -604,33 +610,6 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
     return objectIDs;
 }
 
-template <class En>
-std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
-{
-    if (sortCrit.empty()) {
-        return "";
-    }
-    std::vector<std::string> sort;
-    for (auto&& seg : splitString(sortCrit, ',')) {
-        seg = trimString(seg);
-        bool desc = (seg[0] == '-') ? true : false;
-        if (seg[0] == '-' || seg[0] == '+') {
-            seg = seg.substr(1);
-        } else {
-            log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
-        }
-        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == seg; });
-        if (it != keyMap.end()) {
-            std::ostringstream sortSql;
-            sortSql << TQD(colMap.at(it->second).first, colMap.at(it->second).second) << (desc ? " DESC" : "");
-            sort.emplace_back(sortSql.str());
-        } else {
-            log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
-        }
-    }
-    return join(sort, ", ");
-}
-
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
 {
     int objectID;
@@ -675,7 +654,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             orderQb << TQBM(BrowseCol::part_number) << ',';
             orderQb << TQBM(BrowseCol::track_number);
         } else {
-            orderQb << parseSortStatement(param->getSortCriteria(), browseSortMap, browseColMap);
+            SortParser sortParser(browseColumnMapper.get(), param->getSortCriteria());
+            orderQb << sortParser.parse();
         }
         if (orderQb.str().empty()) {
             orderQb << TQBM(BrowseCol::dc_title);
@@ -774,7 +754,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     // order by code..
     auto orderByCode = [&]() {
         std::ostringstream orderQb;
-        orderQb << parseSortStatement(param->getSortCriteria(), searchSortMap, searchColMap);
+        SortParser sortParser(searchColumnMapper.get(), param->getSortCriteria());
+        orderQb << sortParser.parse();
         if (orderQb.str().empty()) {
             orderQb << TQSM(SearchCol::id);
         }
