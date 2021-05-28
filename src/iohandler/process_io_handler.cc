@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "content/content_manager.h"
 #include "util/process.h"
@@ -162,7 +161,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         killAll();
         if (mainProc != nullptr)
             mainProc->kill();
-        unlink(filename.c_str());
+        fs::remove(filename);
         throw_std_runtime_error("open: failed to open: {}", filename.c_str());
     }
 }
@@ -370,7 +369,7 @@ void ProcessIOHandler::close()
 
     ::close(fd);
 
-    unlink(filename.c_str());
+    fs::remove(filename);
 
     if (!ret)
         throw_std_runtime_error("failed to kill process");
