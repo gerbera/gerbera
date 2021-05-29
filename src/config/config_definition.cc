@@ -524,6 +524,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#scripting",
         ""),
 #endif // JS
+
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
         "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_GENRE, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
