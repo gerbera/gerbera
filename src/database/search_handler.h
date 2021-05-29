@@ -432,13 +432,15 @@ private:
 class ColumnMapper {
 public:
     virtual std::string mapQuoted(const std::string& tag) const = 0;
+    virtual ~ColumnMapper() = default;
 };
 
 template <class En>
 class EnumColumnMapper : public ColumnMapper {
 public:
-    EnumColumnMapper(const std::string& tabQuote, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
-        : tabQuote(tabQuote)
+    explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
+        : table_quote_begin(tabQuoteBegin)
+        , table_quote_end(tabQuoteEnd)
         , keyMap(keyMap)
         , colMap(colMap)
     {
@@ -447,28 +449,29 @@ public:
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
-            return fmt::format("{0}{1}{0}.{0}{2}{0}", tabQuote, colMap.at(it->second).first, colMap.at(it->second).second);
+            return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
         return "";
     }
 
 private:
-    const std::string& tabQuote;
+    const char table_quote_begin;
+    const char table_quote_end;
     const std::vector<std::pair<std::string, En>>& keyMap;
     const std::map<En, std::pair<std::string, std::string>>& colMap;
 };
 
 class SortParser {
 public:
-    SortParser(ColumnMapper* colMapper, const std::string& sortCriteria)
-        : colMapper(colMapper)
+    SortParser(std::shared_ptr<ColumnMapper> colMapper, const std::string& sortCriteria)
+        : colMapper(std::move(colMapper))
         , sortCrit(sortCriteria)
     {
     }
     std::string parse();
 
 private:
-    ColumnMapper* colMapper;
+    std::shared_ptr<ColumnMapper> colMapper;
     std::string sortCrit;
 };
 #endif // __SEARCH_HANDLER_H__

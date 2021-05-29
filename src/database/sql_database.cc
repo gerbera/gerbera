@@ -222,8 +222,8 @@ void SQLDatabase::init()
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
 
-    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(fmt::format("{}", table_quote_begin), browseSortMap, browseColMap);
-    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(fmt::format("{}", table_quote_begin), searchSortMap, searchColMap);
+    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, browseSortMap, browseColMap);
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, searchSortMap, searchColMap);
 
     // Statement for UPnP browse
     std::ostringstream buf;
@@ -653,7 +653,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             orderQb << TQBM(BrowseCol::part_number) << ',';
             orderQb << TQBM(BrowseCol::track_number);
         } else {
-            SortParser sortParser(browseColumnMapper.get(), param->getSortCriteria());
+            SortParser sortParser(browseColumnMapper, param->getSortCriteria());
             orderQb << sortParser.parse();
         }
         if (orderQb.str().empty()) {
@@ -753,7 +753,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     // order by code..
     auto orderByCode = [&]() {
         std::ostringstream orderQb;
-        SortParser sortParser(searchColumnMapper.get(), param->getSortCriteria());
+        SortParser sortParser(searchColumnMapper, param->getSortCriteria());
         orderQb << sortParser.parse();
         if (orderQb.str().empty()) {
             orderQb << TQSM(SearchCol::id);
