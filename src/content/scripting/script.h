@@ -64,6 +64,9 @@ class Script {
 public:
     virtual ~Script();
 
+    Script(const Script&) = delete;
+    Script& operator=(const Script&) = delete;
+
     std::string getProperty(const std::string& name);
     int getBoolProperty(const std::string& name);
     int getIntProperty(const std::string& name, int def);

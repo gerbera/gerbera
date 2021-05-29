@@ -73,9 +73,7 @@ public:
     }
 
     file_io_callback(const file_io_callback&) = delete;
-    file_io_callback& operator=(const file_io_callback&& rhs) = delete;
     file_io_callback& operator=(const file_io_callback&) = delete;
-    file_io_callback(const file_io_callback&& rhs) = delete;
 
     uint32 read(void* buffer, size_t size) override
     {

@@ -85,8 +85,6 @@ public:
 
     SearchLexer& operator=(const SearchLexer&) = delete;
     SearchLexer(const SearchLexer&) = delete;
-    SearchLexer& operator=(SearchLexer&&) = delete;
-    SearchLexer(SearchLexer&&) = delete;
 
 protected:
     std::string nextStringToken(const std::string& input);

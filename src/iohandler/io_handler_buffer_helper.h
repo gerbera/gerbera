@@ -54,6 +54,9 @@ public:
     IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize);
     ~IOHandlerBufferHelper() noexcept override;
 
+    IOHandlerBufferHelper(const IOHandlerBufferHelper&) = delete;
+    IOHandlerBufferHelper& operator=(const IOHandlerBufferHelper&) = delete;
+
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;
     size_t read(char* buf, size_t length) override;

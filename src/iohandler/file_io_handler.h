@@ -52,6 +52,9 @@ public:
     explicit FileIOHandler(fs::path filename);
     ~FileIOHandler() override;
 
+    FileIOHandler(const FileIOHandler&) = delete;
+    FileIOHandler& operator=(const FileIOHandler&) = delete;
+
     /// \brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;
 

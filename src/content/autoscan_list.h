@@ -35,6 +35,7 @@ class AutoscanDirectory;
 class AutoscanList {
 public:
     explicit AutoscanList(std::shared_ptr<Database> database);
+    virtual ~AutoscanList() = default;
 
     /// \brief Adds a new AutoscanDirectory to the list.
     ///
