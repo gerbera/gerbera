@@ -203,7 +203,6 @@ protected:
     std::map<std::string, std::string> attributes;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode { FCC_None };
-    TranscodingProfile() = default;
 };
 
 /// \brief this class allows access to available transcoding profiles.

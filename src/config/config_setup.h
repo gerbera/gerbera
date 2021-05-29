@@ -210,7 +210,6 @@ public:
     {
     }
 
-    ~ConfigStringSetup() override = default;
     std::string getTypeString() const override { return "String"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -239,7 +238,6 @@ public:
     {
     }
 
-    ~ConfigEnumSetup() override = default;
     std::string getTypeString() const override { return "Enum"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
@@ -314,7 +312,6 @@ public:
     {
     }
 
-    ~ConfigPathSetup() override = default;
     std::string getTypeString() const override { return "Path"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -387,7 +384,6 @@ public:
     {
     }
 
-    ~ConfigIntSetup() override = default;
     std::string getTypeString() const override { return "Number"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -439,7 +435,6 @@ public:
         this->defaultValue = defaultValue ? YES : NO;
     }
 
-    ~ConfigBoolSetup() override = default;
     std::string getTypeString() const override { return "Boolean"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -508,7 +503,6 @@ public:
     {
     }
 
-    ~ConfigArraySetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -591,7 +585,6 @@ public:
     {
     }
 
-    ~ConfigDictionarySetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -626,7 +619,6 @@ public:
     {
     }
 
-    ~ConfigAutoscanSetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -657,7 +649,6 @@ public:
     {
     }
 
-    ~ConfigTranscodingSetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -687,7 +678,6 @@ public:
     {
     }
 
-    ~ConfigClientSetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
@@ -715,7 +705,6 @@ public:
     {
     }
 
-    ~ConfigDirectorySetup() override = default;
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;

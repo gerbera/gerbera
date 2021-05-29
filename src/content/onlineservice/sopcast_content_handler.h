@@ -58,7 +58,6 @@ class CdsObject;
 class SopCastContentHandler : public CurlContentHandler {
 public:
     explicit SopCastContentHandler(const std::shared_ptr<Context>& context);
-    ~SopCastContentHandler() override = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
