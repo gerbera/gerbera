@@ -382,6 +382,7 @@
                 <xs:element ref="import-script" minOccurs="0"/>
                 <xs:element ref="script-options" minOccurs="0"/>
                 <xs:element ref="genre-map" minOccurs="0"/>
+                <xs:element ref="structured-layout " minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -442,6 +443,17 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="structured-layout">
+        <xs:complexType>
+            <xs:attribute name="skip-chars" type="xs:string"/>
+            <xs:attribute name="album-box" type="xs:string" default="6"/>
+            <xs:attribute name="artist-box" type="xs:string" default="9"/>
+            <xs:attribute name="genre-box" type="xs:string" default="6"/>
+            <xs:attribute name="track-box" type="xs:string" default="6"/>
+            <xs:attribute name="div-char" type="xs:string" default="-"/>
         </xs:complexType>
     </xs:element>
 

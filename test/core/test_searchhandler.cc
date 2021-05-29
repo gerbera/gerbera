@@ -108,8 +108,8 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
     const std::string expectedOutput)
 {
     try {
-        auto columnMapper = EnumColumnMapper<TestCol>("", testSortMap, testColMap);
-        auto parser = SortParser(&columnMapper, input);
+        auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', testSortMap, testColMap);
+        auto parser = SortParser(columnMapper, input);
         auto output = parser.parse();
         if (output.empty())
             return ::testing::AssertionFailure() << "Failed to parse";
@@ -432,17 +432,17 @@ TEST(SearchParser, SearchCriteriaWindowMedia)
 TEST(SortParser, SortCriteria)
 {
     EXPECT_TRUE(executeSortParserTest("+id,-name,+val",
-        "t.id ASC, t.property_name DESC, t.property_value ASC"));
+        "_t_._id_ ASC, _t_._property_name_ DESC, _t_._property_value_ ASC"));
 }
 
 TEST(SortParser, SortCriteriaNoDir)
 {
     EXPECT_TRUE(executeSortParserTest("+id,name,+val",
-        "t.id ASC, t.property_name ASC, t.property_value ASC"));
+        "_t_._id_ ASC, _t_._property_name_ ASC, _t_._property_value_ ASC"));
 }
 
 TEST(SortParser, SortCriteriaError)
 {
     EXPECT_TRUE(executeSortParserTest("+id,nme,+val",
-        "t.id ASC, t.property_value ASC"));
+        "_t_._id_ ASC, _t_._property_value_ ASC"));
 }
