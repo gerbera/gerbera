@@ -81,12 +81,11 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , session_manager(context->getSessionManager())
     , context(context)
     , timer(std::move(timer))
+    , layout_enabled(false)
+    , working(false)
+    , shutdownFlag(false)
+    , taskID(1)
 {
-    taskID = 1;
-    working = false;
-    shutdownFlag = false;
-    layout_enabled = false;
-
     update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>(config);
@@ -376,8 +375,7 @@ std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
 {
     auto lock = threadRunner->lockGuard("getCurrentTask");
 
-    auto task = currentTask;
-    return task;
+    return currentTask;
 }
 
 std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
@@ -1689,13 +1687,15 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const
 {
+#if HAVE_INOTIFY
     auto all = autoscan_timed->getArrayCopy();
 
-#if HAVE_INOTIFY
     auto ino = autoscan_inotify->getArrayCopy();
     std::copy(ino.begin(), ino.end(), std::back_inserter(all));
-#endif
     return all;
+#else
+    return autoscan_timed->getArrayCopy();
+#endif
 }
 
 void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -1955,9 +1955,9 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
     , timer(std::move(timer))
     , service(std::move(service))
     , layout(std::move(layout))
+    , unscheduled_refresh(unscheduled_refresh)
 {
     this->cancellable = cancellable;
-    this->unscheduled_refresh = unscheduled_refresh;
     this->taskType = FetchOnlineContent;
 }
 

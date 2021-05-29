@@ -45,6 +45,9 @@ public:
     Inotify();
     virtual ~Inotify();
 
+    Inotify(const Inotify&) = delete;
+    Inotify& operator=(const Inotify&) = delete;
+
     /// \brief Puts a file or directory on the inotify watch list.
     /// \param path file or directory to monitor.
     /// \param events inotify event mask

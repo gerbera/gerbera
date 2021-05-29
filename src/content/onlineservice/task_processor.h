@@ -20,7 +20,7 @@ class Timer;
 
 class TaskProcessor {
 public:
-    TaskProcessor(std::shared_ptr<Config> config)
+    explicit TaskProcessor(std::shared_ptr<Config> config)
         : config(std::move(config))
     {
     }

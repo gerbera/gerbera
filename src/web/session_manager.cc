@@ -44,12 +44,11 @@
 namespace web {
 
 Session::Session(std::chrono::seconds timeout)
-    : uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
+    : updateAll(false)
+    , uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
+    , timeout(timeout)
+    , loggedIn(false)
 {
-    this->timeout = timeout;
-    loggedIn = false;
-    //(new DBRHash<int>(UI_UPDATE_ID_HASH_SIZE, MAX_UI_UPDATE_IDS + 5, INVALID_OBJECT_ID, INVALID_OBJECT_ID_2));
-    updateAll = false;
     access();
 }
 
@@ -135,9 +134,9 @@ void Session::clearUpdateIDs()
 
 SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer)
     : timer(std::move(timer))
+    , timerAdded(false)
 {
     accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
-    timerAdded = false;
 }
 
 std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds timeout)

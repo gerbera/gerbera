@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <sys/select.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 #include "content/content_manager.h"
 #include "util/process.h"
@@ -49,8 +48,8 @@
 
 ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
     : executor(std::move(exec))
+    , abort(abortOnDeath)
 {
-    abort = abortOnDeath;
 }
 
 std::shared_ptr<Executor> ProcListItem::getExecutor()
@@ -104,17 +103,16 @@ void ProcessIOHandler::unregisterAll()
 }
 
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
-    const fs::path& filename,
+    fs::path filename,
     const std::shared_ptr<Executor>& mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
+    : content(std::move(content))
+    , procList(std::move(procList))
+    , mainProc(mainProc)
+    , filename(std::move(filename))
+    , ignoreSeek(ignoreSeek)
 {
-    this->content = std::move(content);
-    this->filename = filename;
-    this->procList = std::move(procList);
-    this->mainProc = mainProc;
-    this->ignoreSeek = ignoreSeek;
-
     if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
         killAll();
         throw_std_runtime_error("process terminated early");
@@ -163,7 +161,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         killAll();
         if (mainProc != nullptr)
             mainProc->kill();
-        unlink(filename.c_str());
+        fs::remove(filename);
         throw_std_runtime_error("open: failed to open: {}", filename.c_str());
     }
 }
@@ -371,7 +369,7 @@ void ProcessIOHandler::close()
 
     ::close(fd);
 
-    unlink(filename.c_str());
+    fs::remove(filename);
 
     if (!ret)
         throw_std_runtime_error("failed to kill process");

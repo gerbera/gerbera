@@ -56,12 +56,12 @@ private:
 
 public:
     explicit file_io_callback(const char* path)
-    {
 #ifdef __linux__
-        file = ::fopen(path, "rbe");
+        : file(::fopen(path, "rbe"))
 #else
-        file = ::fopen(path, "rb");
+        : file(fopen(path, "rb"))
 #endif
+    {
         if (file == nullptr) {
             throw_std_runtime_error("Could not fopen {}", path);
         }
@@ -73,9 +73,7 @@ public:
     }
 
     file_io_callback(const file_io_callback&) = delete;
-    file_io_callback& operator=(const file_io_callback&& rhs) = delete;
     file_io_callback& operator=(const file_io_callback&) = delete;
-    file_io_callback(const file_io_callback&& rhs) = delete;
 
     uint32 read(void* buffer, size_t size) override
     {

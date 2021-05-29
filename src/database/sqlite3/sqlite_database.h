@@ -49,7 +49,7 @@ class Sqlite3Result;
 class SLTask {
 public:
     /// \brief Instantiate a task
-    SLTask();
+    SLTask() = default;
 
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Database to do the queries with.
@@ -79,13 +79,13 @@ protected:
     /// \brief true as long as the task is not finished
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
-    bool running;
+    bool running { true };
 
     /// \brief true if this task has changed the db (in comparison to the backup)
-    bool contamination;
+    bool contamination { false };
 
     /// \brief true if this task has backuped the db
-    bool decontamination;
+    bool decontamination { false };
 
     std::condition_variable cond;
     std::mutex mutex;
@@ -227,14 +227,17 @@ private:
 /// \brief Represents a result of a sqlite3 select
 class Sqlite3Result : public SQLResult {
 public:
-    Sqlite3Result();
+    Sqlite3Result() = default;
     ~Sqlite3Result() override;
+
+    Sqlite3Result(const Sqlite3Result&) = delete;
+    Sqlite3Result& operator=(const Sqlite3Result&) = delete;
 
 private:
     std::unique_ptr<SQLRow> nextRow() override;
     [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }
 
-    char** table;
+    char** table { nullptr };
     char** row;
 
     int cur_row;

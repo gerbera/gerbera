@@ -75,6 +75,9 @@ public:
     explicit CurlOnlineService(std::shared_ptr<ContentManager> content, std::string serviceName);
     ~CurlOnlineService() override;
 
+    CurlOnlineService(const CurlOnlineService&) = delete;
+    CurlOnlineService& operator=(const CurlOnlineService&) = delete;
+
     /// \brief Retrieves user specified content from the service and adds
     /// the items to the database.
     bool refreshServiceData(std::shared_ptr<Layout> layout) override;

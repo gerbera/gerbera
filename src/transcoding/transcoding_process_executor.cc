@@ -31,8 +31,6 @@
 
 #include "transcoding_process_executor.h" // API
 
-#include <unistd.h>
-
 TranscodingProcessExecutor::TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
     : ProcessExecutor(command, arglist)
 {
@@ -46,8 +44,7 @@ void TranscodingProcessExecutor::removeFile(const fs::path& filename)
 TranscodingProcessExecutor::~TranscodingProcessExecutor()
 {
     kill();
-
     for (auto&& name : file_list) {
-        unlink(name.c_str());
+        fs::remove(name);
     }
 }

@@ -52,7 +52,7 @@ void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& re
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
-    request->setResponse(response);
+    request->setResponse(std::move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
@@ -75,7 +75,7 @@ void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& req
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
-    request->setResponse(response);
+    request->setResponse(std::move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
