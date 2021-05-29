@@ -54,7 +54,6 @@ class CdsObject;
 class ATrailersContentHandler : public CurlContentHandler {
 public:
     explicit ATrailersContentHandler(const std::shared_ptr<Context>& context);
-    ~ATrailersContentHandler() override = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.

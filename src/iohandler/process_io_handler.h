@@ -65,9 +65,13 @@ public:
     /// \param procList associated processes that will be terminated once
     /// they are no longer needed
     ProcessIOHandler(std::shared_ptr<ContentManager> content,
-        const fs::path& filename, const std::shared_ptr<Executor>& mainProc,
+        fs::path filename, const std::shared_ptr<Executor>& mainProc,
         std::vector<std::shared_ptr<ProcListItem>> procList = std::vector<std::shared_ptr<ProcListItem>>(),
         bool ignoreSeek = false);
+    ~ProcessIOHandler() override;
+
+    ProcessIOHandler(const ProcessIOHandler&) = delete;
+    ProcessIOHandler& operator=(const ProcessIOHandler&) = delete;
 
     /// \brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;
@@ -94,8 +98,6 @@ public:
 
     /// \brief Close a previously opened file and kills the kill_pid process
     void close() override;
-
-    ~ProcessIOHandler() override;
 
 protected:
     std::shared_ptr<ContentManager> content;

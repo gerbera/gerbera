@@ -48,6 +48,9 @@ public:
 #ifdef HAVE_MAGIC
     virtual ~Mime();
 
+    Mime(const Mime&) = delete;
+    Mime& operator=(const Mime&) = delete;
+
     /// \brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, size_t length);
 #else

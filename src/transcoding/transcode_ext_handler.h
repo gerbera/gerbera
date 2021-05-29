@@ -45,7 +45,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
-        const std::string& range) override;
+        std::string range) override;
 };
 
 #endif // __TRANSCODE_EXTERNAL_HANDLER_H__

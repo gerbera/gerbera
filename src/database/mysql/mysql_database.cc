@@ -293,7 +293,7 @@ void MySQLDatabase::beginTransaction(const std::string_view& tName)
 {
     log_debug("START TRANSACTION {} {}", tName, inTransaction);
     StdThreadRunner::waitFor(
-        "MySqlDatabase", [this] { return inTransaction == false; }, 100);
+        "MySqlDatabase", [this] { return !inTransaction; }, 100);
     inTransaction = true;
     log_debug("START TRANSACTION {}", tName);
     SqlAutoLock lock(sqlMutex);
@@ -404,9 +404,9 @@ void MySQLDatabase::_exec(const char* query, int length)
 /* MysqlResult */
 
 MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
+    : nullRead(false)
+    , mysql_res(mysql_res)
 {
-    this->mysql_res = mysql_res;
-    nullRead = false;
 }
 
 MysqlResult::~MysqlResult()
@@ -435,8 +435,8 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
 /* MysqlRow */
 
 MysqlRow::MysqlRow(MYSQL_ROW mysql_row)
+    : mysql_row(mysql_row)
 {
-    this->mysql_row = mysql_row;
 }
 
 #endif // HAVE_MYSQL

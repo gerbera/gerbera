@@ -67,7 +67,7 @@ TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ContentManage
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_ptr<TranscodingProfile> profile,
     std::string location,
     std::shared_ptr<CdsObject> obj,
-    const std::string& range)
+    std::string range)
 {
     log_debug("Start transcoding file: {}", location.c_str());
 

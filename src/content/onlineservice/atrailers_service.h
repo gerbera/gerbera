@@ -50,7 +50,6 @@ class ContentManager;
 class ATrailersService : public CurlOnlineService {
 public:
     explicit ATrailersService(std::shared_ptr<ContentManager> content);
-    ~ATrailersService() override = default;
 
     /// \brief Get the type of the service (i.e. Weborama, Shoutcast, etc.)
     service_type_t getServiceType() override;

@@ -58,7 +58,6 @@ class CdsObject;
 class SopCastContentHandler : public CurlContentHandler {
 public:
     explicit SopCastContentHandler(const std::shared_ptr<Context>& context);
-    ~SopCastContentHandler() override = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
@@ -74,7 +73,7 @@ public:
     std::shared_ptr<CdsObject> getNextObject() override;
 
 protected:
-    std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel) const;
+    static std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel);
 
 protected:
     std::shared_ptr<Config> config;

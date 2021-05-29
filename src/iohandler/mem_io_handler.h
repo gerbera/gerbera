@@ -52,6 +52,9 @@ public:
     explicit MemIOHandler(const std::string& str);
     ~MemIOHandler() override;
 
+    MemIOHandler(const MemIOHandler&) = delete;
+    MemIOHandler& operator=(const MemIOHandler&) = delete;
+
     ///
     void open(enum UpnpOpenFileMode mode) override;
     size_t read(char* buf, size_t length) override;

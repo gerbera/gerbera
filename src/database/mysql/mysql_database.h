@@ -46,6 +46,9 @@ public:
     explicit MySQLDatabase(std::shared_ptr<Config> config);
     ~MySQLDatabase() override;
 
+    MySQLDatabase(const MySQLDatabase&) = delete;
+    MySQLDatabase& operator=(const MySQLDatabase&) = delete;
+
 private:
     void init() override;
     void shutdownDriver() override;
@@ -91,6 +94,9 @@ class MysqlResult : public SQLResult {
 public:
     explicit MysqlResult(MYSQL_RES* mysql_res);
     ~MysqlResult() override;
+
+    MysqlResult(const MysqlResult&) = delete;
+    MysqlResult& operator=(const MysqlResult&) = delete;
 
 private:
     int nullRead;

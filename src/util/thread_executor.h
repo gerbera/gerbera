@@ -42,7 +42,12 @@
 /// \brief an executor which runs a thread
 class ThreadExecutor : public Executor {
 public:
+    ThreadExecutor() = default;
     ~ThreadExecutor() override;
+
+    ThreadExecutor(const ThreadExecutor&) = delete;
+    ThreadExecutor& operator=(const ThreadExecutor&) = delete;
+
     bool isAlive() override { return threadRunning; }
 
     /// \brief kill the thread (pthread_join)

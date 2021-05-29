@@ -64,6 +64,9 @@ public:
         }
     }
 
+    ThreadRunner(const ThreadRunner&) = delete;
+    ThreadRunner& operator=(const ThreadRunner&) = delete;
+
     void join()
     {
         log_debug("ThreadRunner: Waiting for join {}", threadName);
