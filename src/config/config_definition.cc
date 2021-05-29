@@ -320,7 +320,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         true),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_USE_TRANSACTIONS,
         "/server/storage/attribute::use-transactions", "config-server.html#storage",
-        "yes"),
+        NO),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL,
         "/server/storage/mysql", "config-server.html#storage"),
 #ifdef HAVE_MYSQL

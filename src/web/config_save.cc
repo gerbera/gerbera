@@ -30,7 +30,6 @@
 #include "config/client_config.h"
 #include "config/config.h"
 #include "config/config_definition.h"
-#include "config/config_manager.h"
 #include "config/config_options.h"
 #include "config/config_setup.h"
 #include "content/autoscan.h"
