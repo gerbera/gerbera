@@ -75,8 +75,8 @@ protected:
 
 class SearchLexer {
 public:
-    explicit SearchLexer(const std::string& input)
-        : input(input)
+    explicit SearchLexer(std::string input)
+        : input(std::move(input))
     {
     }
     virtual ~SearchLexer() = default;
@@ -91,7 +91,7 @@ protected:
     static std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
     std::string getQuotedValue(const std::string& input);
 
-    const std::string& input;
+    std::string input;
     unsigned currentPos {};
     bool inQuotes {};
 };
