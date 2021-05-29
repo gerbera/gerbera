@@ -817,7 +817,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         for (auto&& entry : defaultEntries) {
-            result.emplace(entry.first, entry.second);
+            result.insert(entry); // this should be an insert without a loop, but Debian 10 doesn't compile.
         }
     }
     if (notEmpty && result.empty()) {
