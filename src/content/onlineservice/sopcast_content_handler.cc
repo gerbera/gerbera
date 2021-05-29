@@ -118,7 +118,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
     return nullptr;
 }
 
-std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& groupName, const pugi::xml_node& channel) const
+std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& groupName, const pugi::xml_node& channel)
 {
     auto item = std::make_shared<CdsItemExternalURL>();
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);

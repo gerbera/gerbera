@@ -65,6 +65,9 @@ public:
         bool debug);
     ~ConfigManager() override;
 
+    ConfigManager(const ConfigManager&) = delete;
+    ConfigManager& operator=(const ConfigManager&) = delete;
+
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 

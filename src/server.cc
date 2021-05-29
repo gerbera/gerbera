@@ -61,8 +61,8 @@
 
 Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
+    , server_shutdown_flag(false)
 {
-    server_shutdown_flag = false;
 }
 
 void Server::init()

@@ -54,6 +54,9 @@ public:
     explicit AutoscanInotify(std::shared_ptr<ContentManager> content);
     ~AutoscanInotify();
 
+    AutoscanInotify(const AutoscanInotify&) = delete;
+    AutoscanInotify& operator=(const AutoscanInotify&) = delete;
+
     void run();
 
     /// \brief Start monitoring a directory

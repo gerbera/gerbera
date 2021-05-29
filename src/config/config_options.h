@@ -210,7 +210,7 @@ private:
 class ClientConfigListOption : public ConfigOption {
 public:
     explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
-        : option(option)
+        : option(std::move(option))
     {
     }
     std::shared_ptr<ClientConfigList> getClientConfigListOption() const override { return option; }
@@ -221,8 +221,8 @@ private:
 
 class DirectoryTweakOption : public ConfigOption {
 public:
-    explicit DirectoryTweakOption(const std::shared_ptr<DirectoryConfigList>& option)
-        : option(option)
+    explicit DirectoryTweakOption(std::shared_ptr<DirectoryConfigList> option)
+        : option(std::move(option))
     {
     }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const override { return option; }
@@ -233,8 +233,8 @@ protected:
 
 class TranscodingProfileListOption : public ConfigOption {
 public:
-    explicit TranscodingProfileListOption(const std::shared_ptr<TranscodingProfileList>& option)
-        : option(option)
+    explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
+        : option(std::move(option))
     {
     }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const override

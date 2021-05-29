@@ -38,7 +38,7 @@
 class Exiv2Handler : public MetadataHandler {
 public:
     explicit Exiv2Handler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
+    void fillMetadata(std::shared_ptr<CdsObject> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 };
 

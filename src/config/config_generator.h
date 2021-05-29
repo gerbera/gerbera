@@ -35,8 +35,6 @@ namespace fs = std::filesystem;
 
 class ConfigGenerator {
 public:
-    ~ConfigGenerator() = default;
-
     std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile);
 
     void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
@@ -64,7 +62,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& key, const std::string& value);
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value);
 
-    std::shared_ptr<pugi::xml_node> setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
 };
 
 #endif //GERBERA_CONFIG_GENERATOR_H

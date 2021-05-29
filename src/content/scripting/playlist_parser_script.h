@@ -46,7 +46,6 @@ class PlaylistParserScript : public Script {
 public:
     PlaylistParserScript(std::shared_ptr<ContentManager> content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
-    ~PlaylistParserScript() override = default;
 
     std::string readln();
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task);

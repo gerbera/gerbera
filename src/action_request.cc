@@ -85,7 +85,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
     return request;
 }
 
-void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document>& response)
+void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document> response)
 {
     this->response = std::move(response);
 }
