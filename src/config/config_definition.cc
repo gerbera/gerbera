@@ -130,7 +130,7 @@
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING "*"
 
 /// \brief default values for CFG_IMPORT_SYSTEM_DIRECTORIES
-static std::vector<std::string_view> excludes_fullpath {
+static std::vector<std::string> excludes_fullpath {
     "/bin",
     "/boot",
     "/dev",
@@ -149,15 +149,15 @@ static std::vector<std::string_view> excludes_fullpath {
 };
 
 /// \brief default values for CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
-static std::vector<std::string_view> defaultItemsPerPage {
+static std::vector<std::string> defaultItemsPerPage {
     "10",
     "25",
     "50",
-    "100"
+    "100",
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
-static std::map<std::string_view, std::string_view> mt_ct_defaults {
+static std::map<std::string, std::string> mt_ct_defaults {
     { "audio/mpeg", CONTENT_TYPE_MP3 },
     { "application/ogg", CONTENT_TYPE_OGG },
     { "audio/ogg", CONTENT_TYPE_OGG },
@@ -179,7 +179,7 @@ static std::map<std::string_view, std::string_view> mt_ct_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
-static std::map<std::string_view, std::string_view> mt_upnp_defaults {
+static std::map<std::string, std::string> mt_upnp_defaults {
     { "audio/*", UPNP_CLASS_MUSIC_TRACK },
     { "video/*", UPNP_CLASS_VIDEO_ITEM },
     { "image/*", UPNP_CLASS_IMAGE_ITEM },
@@ -187,7 +187,7 @@ static std::map<std::string_view, std::string_view> mt_upnp_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
-static std::map<std::string_view, std::string_view> ext_mt_defaults {
+static std::map<std::string, std::string> ext_mt_defaults {
     { "asf", "video/x-ms-asf" },
     { "asx", "video/x-ms-asf" },
     { "dff", "audio/x-dsd" },
@@ -218,14 +218,14 @@ static std::map<std::string_view, std::string_view> ext_mt_defaults {
 };
 
 /// \brief default values for ATTR_TRANSCODING_MIMETYPE_PROF_MAP
-static std::map<std::string_view, std::string_view> tr_mt_defaults {
+static std::map<std::string, std::string> tr_mt_defaults {
     { "video/x-flv", "vlcmpeg" },
     { "application/ogg", "vlcmpeg" },
     { "audio/ogg", "ogg2mp3" },
 };
 
 /// \brief default values for CFG_UPNP_ALBUM_PROPERTIES
-static std::map<std::string_view, std::string_view> upnp_album_prop_defaults {
+static std::map<std::string, std::string> upnp_album_prop_defaults {
     { "dc:creator", "M_ALBUMARTIST" },
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
@@ -240,7 +240,7 @@ static std::map<std::string_view, std::string_view> upnp_album_prop_defaults {
 };
 
 /// \brief default values for CFG_UPNP_ARTIST_PROPERTIES
-static std::map<std::string_view, std::string_view> upnp_artist_prop_defaults {
+static std::map<std::string, std::string> upnp_artist_prop_defaults {
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
     { "upnp:genre", "M_GENRE" },
