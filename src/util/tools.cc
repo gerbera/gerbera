@@ -549,7 +549,7 @@ std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
 
     std::ifstream file { path, std::ios::in | std::ios::binary };
     if (!file)
-        return {};
+        return std::nullopt;
 
     auto& fb = *file.rdbuf();
 
