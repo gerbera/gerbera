@@ -487,7 +487,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
     * Optional
 
-    * Default: **yes**
+    * Default: **no**
 
     Enables transactions, this feature should improve the overall import speed and avoid race-conditions on import.
     In rare situations it has to be set to **no**.

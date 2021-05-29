@@ -609,7 +609,6 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
     return objectIDs;
 }
 
-
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
 {
     int objectID;
