@@ -439,7 +439,7 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
-    std::vector<std::string_view> defaultEntries = {};
+    std::vector<std::string> defaultEntries = {};
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -463,7 +463,7 @@ public:
     config_option_t attrOption = CFG_MAX;
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption,
-        ArrayInitFunction init = nullptr, bool notEmpty = false, const std::vector<std::string_view>& defaultEntries = {})
+        ArrayInitFunction init = nullptr, bool notEmpty = false, const std::vector<std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
@@ -473,7 +473,7 @@ public:
     }
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
-        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string_view> defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -510,7 +510,7 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     bool tolower = false;
-    std::map<std::string_view, std::string_view> defaultEntries = {};
+    std::map<std::string, std::string> defaultEntries = {};
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -537,7 +537,7 @@ public:
     config_option_t valOption;
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -548,7 +548,7 @@ public:
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help,
         config_option_t nodeOption, config_option_t keyOption, config_option_t valOption,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
