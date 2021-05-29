@@ -608,33 +608,6 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
     return std::make_unique<std::vector<int>>(objectIDs);
 }
 
-template <class En>
-std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
-{
-    if (sortCrit.empty()) {
-        return "";
-    }
-    std::vector<std::string> sort;
-    for (auto&& seg : splitString(sortCrit, ',')) {
-        seg = trimString(seg);
-        bool desc = (seg[0] == '-');
-        if (seg[0] == '-' || seg[0] == '+') {
-            seg = seg.substr(1);
-        } else {
-            log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
-        }
-        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == seg; });
-        if (it != keyMap.end()) {
-            std::ostringstream sortSql;
-            sortSql << TQD(colMap.at(it->second).first, colMap.at(it->second).second) << (desc ? " DESC" : "");
-            sort.emplace_back(sortSql.str());
-        } else {
-            log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
-        }
-    }
-    return join(sort, ", ");
-}
-
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
 {
     int objectID;
