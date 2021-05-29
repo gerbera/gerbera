@@ -143,6 +143,9 @@ public:
     SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer);
     ~SessionManager() override { log_debug("SessionManager destroyed"); }
 
+    SessionManager(const SessionManager&) = delete;
+    SessionManager& operator=(const SessionManager&) = delete;
+
     /// \brief Creates a Session with a given timeout.
     /// \param timeout Session timeout in milliseconds.
     std::shared_ptr<Session> createSession(std::chrono::seconds timeout);

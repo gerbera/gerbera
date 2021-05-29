@@ -230,6 +230,9 @@ public:
     Sqlite3Result() = default;
     ~Sqlite3Result() override;
 
+    Sqlite3Result(const Sqlite3Result&) = delete;
+    Sqlite3Result& operator=(const Sqlite3Result&) = delete;
+
 private:
     std::unique_ptr<SQLRow> nextRow() override;
     [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }

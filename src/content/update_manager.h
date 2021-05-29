@@ -50,8 +50,12 @@ class Server;
 class UpdateManager {
 public:
     UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database, std::shared_ptr<Server> server);
-    void run();
     virtual ~UpdateManager();
+
+    UpdateManager(const UpdateManager&) = delete;
+    UpdateManager& operator=(const UpdateManager&) = delete;
+
+    void run();
     void shutdown();
 
     void containerChanged(int objectID, int flushPolicy = FLUSH_SPEC);
