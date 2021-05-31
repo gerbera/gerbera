@@ -67,7 +67,7 @@ class WebRequestHandler : public RequestHandler {
 protected:
     std::shared_ptr<web::SessionManager> sessionManager;
 
-    bool checkRequestCalled;
+    bool checkRequestCalled { false };
 
     /// \brief Decoded URL parameters are stored as a dictionary.
     std::map<std::string, std::string> params;

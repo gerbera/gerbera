@@ -39,7 +39,6 @@
 #include "process.h"
 
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
-    : exit_status(0)
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];

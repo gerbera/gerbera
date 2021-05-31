@@ -77,13 +77,13 @@ static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type 
 class CdsObject {
 protected:
     /// \brief ID of the object in the content directory
-    int id;
+    int id { INVALID_OBJECT_ID };
 
     /// \brief ID of the referenced object
-    int refID;
+    int refID { INVALID_OBJECT_ID };
 
     /// \brief ID of the object's parent
-    int parentID;
+    int parentID { INVALID_OBJECT_ID };
 
     /// \brief dc:title
     std::string title;
@@ -96,22 +96,22 @@ protected:
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    std::chrono::seconds mtime;
+    std::chrono::seconds mtime {};
 
     /// \brief File size on disk (in bytes).
-    off_t sizeOnDisk;
+    off_t sizeOnDisk { 0 };
 
     /// \brief virtual object flag
-    bool virt;
+    bool virt { false };
 
     /// \brief type of the object: item, container, etc.
     unsigned int objectType;
 
     /// \brief field which can hold various flags for the object
-    unsigned int objectFlags;
+    unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
 
     /// \brief flag that allows to sort objects within a container
-    int sortPriority;
+    int sortPriority { 0 };
 
     std::map<std::string, std::string> metadata;
     std::map<std::string, std::string> auxdata;
@@ -121,8 +121,6 @@ protected:
     std::shared_ptr<CdsObject> parent;
 
 public:
-    /// \brief Constructor. Sets the default values.
-    explicit CdsObject();
     virtual ~CdsObject() = default;
 
     /// \brief Set the object ID.
@@ -365,18 +363,18 @@ public:
 class CdsItem : public CdsObject {
 protected:
     /// \brief mime-type of the media.
-    std::string mimeType;
+    std::string mimeType { MIMETYPE_DEFAULT };
 
     /// \brief number of part, e.g. disk or season
-    int partNumber;
+    int partNumber { 0 };
 
     /// \brief number of track e.g. track on disk or episode of season
-    int trackNumber;
+    int trackNumber { 0 };
 
     /// \brief unique service ID
     std::string serviceID;
 
-    std::chrono::milliseconds bookMarkPos;
+    std::chrono::milliseconds bookMarkPos {};
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
@@ -457,13 +455,13 @@ public:
 class CdsContainer final : public CdsObject {
 protected:
     /// \brief container update id.
-    int updateID;
+    int updateID { 0 };
 
     /// \brief childCount attribute
-    int childCount;
+    int childCount { -1 };
 
     /// \brief whether this container is an autoscan start point.
-    int autoscanType;
+    int autoscanType { OBJECT_AUTOSCAN_NONE };
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.

@@ -66,7 +66,7 @@ protected:
     std::string sortCrit;
 
     // output parameters
-    int totalMatches;
+    int totalMatches {};
 
 public:
     BrowseParam(int objectID, unsigned int flags)
