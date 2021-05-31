@@ -140,7 +140,7 @@ protected:
 
 class OnlineServiceList {
 public:
-    OnlineServiceList();
+    OnlineServiceList() = default;
 
     /// \brief Adds a service to the service list.
     void registerService(const std::shared_ptr<OnlineService>& service);
@@ -149,7 +149,7 @@ public:
     std::shared_ptr<OnlineService> getService(service_type_t service);
 
 protected:
-    std::vector<std::shared_ptr<OnlineService>> service_list;
+    std::vector<std::shared_ptr<OnlineService>> service_list { OS_Max };
 };
 
 #endif //__ONLINE_SERVICE_H__
