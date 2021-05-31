@@ -1,5 +1,39 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.8.2
+
+- Disable transactions by default
+- Refactor sort parsing to make it testable
+- Support configuration of structured layout
+- Factor out handling of config definitions into separate class
+- Display default config values on Web UI
+- initialize several unique_ptrs
+- move resize option to constructor
+- string_view to string conversions
+- pass SearchLexer by value
+- return std::nullopt for std::optional
+- remove pointless const_cast
+- Improve handling of default config values
+- several clang-tidy and manual cleanups
+- Fix parseSortStatement
+- mostly pass by value changes
+- Revert last_write_time to seconds since 1970
+- Encoding of web editor arguments
+- clang-analyzer and misc
+- Search query sign from beginning
+- use C++ cast
+- manual destructor changes
+- Fix double truncation of playlist name
+- clang: add missing moves
+- clang: remove CTAD in some places
+- Generate correct statement for metadata table
+- clang fixes
+- Make transactions for SQLite thread safe
+- CI: Bump Clang version
+- random stuff
+- add support for Cygwin
+- Enable tests for non-git-builds
+
 ### v1.8.1
 - Mysql transactions
 - Support creation_time on FFmpeg handler.
