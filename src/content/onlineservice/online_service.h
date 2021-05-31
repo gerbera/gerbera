@@ -140,6 +140,8 @@ protected:
 
 class OnlineServiceList {
 public:
+    OnlineServiceList() = default;
+
     /// \brief Adds a service to the service list.
     void registerService(const std::shared_ptr<OnlineService>& service);
 
