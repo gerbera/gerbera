@@ -129,7 +129,7 @@ void ConfigManager::load(const fs::path& userHome)
     std::shared_ptr<ConfigSetup> co;
 
     log_info("Loading configuration from: {}", filename.c_str());
-    pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
+    auto result = xmlDoc->load_file(filename.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());
     }
