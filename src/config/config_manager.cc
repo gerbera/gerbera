@@ -72,11 +72,9 @@ ConfigManager::ConfigManager(fs::path filename,
     , interface(std::move(interface))
     , port(port)
     , xmlDoc(std::make_unique<pugi::xml_document>())
-    , options(std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>())
+    , options(std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>(CFG_MAX))
 {
     ConfigManager::debug = debug;
-
-    options->resize(CFG_MAX);
 
     if (this->filename.empty()) {
         // No config file path provided, so lets find one.
