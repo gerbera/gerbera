@@ -49,11 +49,11 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
 {
-    pugi::xml_document response;
-    auto root = response.append_child(fmt::format("u:{}Response", actionName.c_str()).c_str());
+    auto response = std::make_unique<pugi::xml_document>();
+    auto root = response->append_child(fmt::format("u:{}Response", actionName.c_str()).c_str());
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
-    return std::make_unique<pugi::xml_document>(std::move(response));
+    return response;
 }
 
 metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldName)
@@ -183,24 +183,25 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
 {
-    pugi::xml_document doc;
+    auto doc = std::make_unique<pugi::xml_document>();
 
-    auto propset = doc.append_child("e:propertyset");
+    auto propset = doc->append_child("e:propertyset");
     propset.append_attribute("xmlns:e") = "urn:schemas-upnp-org:event-1-0";
+
     propset.append_child("e:property");
 
-    return std::make_unique<pugi::xml_document>(std::move(doc));
+    return doc;
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
 {
-    pugi::xml_document doc;
+    auto doc = std::make_unique<pugi::xml_document>();
 
-    auto decl = doc.prepend_child(pugi::node_declaration);
+    auto decl = doc->prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
 
-    auto root = doc.append_child("root");
+    auto root = doc->append_child("root");
     root.append_attribute("xmlns") = UPNP_DESC_DEVICE_NAMESPACE;
 
     auto specVersion = root.append_child("specVersion");
@@ -296,7 +297,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         }
     }
 
-    return std::make_unique<pugi::xml_document>(std::move(doc));
+    return doc;
 }
 
 void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent)
