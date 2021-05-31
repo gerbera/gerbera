@@ -85,14 +85,14 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
         return nullptr;
 
     log_debug("GOT BUFFER{}", buffer.c_str());
-    auto doc = std::make_unique<pugi::xml_document>();
-    pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
+    pugi::xml_document doc;
+    auto result = doc.load_string(sc->convert(buffer).c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         log_error("Error parsing {} XML: {}", serviceName, result.description());
         return nullptr;
     }
 
-    return doc;
+    return std::make_unique<pugi::xml_document>(std::move(doc));
 }
 
 bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
