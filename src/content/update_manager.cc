@@ -50,7 +50,7 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
     : config(std::move(config))
     , database(std::move(database))
     , server(std::move(server))
-    , objectIDHash(std::make_unique<std::unordered_set<int>>(MAX_OBJECT_IDS - 1))
+    , objectIDHash(std::make_unique<std::unordered_set<int>>())
     , shutdownFlag(false)
     , flushPolicy(FLUSH_SPEC)
     , lastContainerChanged(INVALID_OBJECT_ID)
