@@ -37,7 +37,6 @@
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
-    , dirty(false)
 {
     if (!cd) {
         cd = {};

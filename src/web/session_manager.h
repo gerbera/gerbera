@@ -104,7 +104,7 @@ protected:
 
     /// \brief True if the ui update id hash became to big and
     /// the UI shall update every container
-    bool updateAll;
+    bool updateAll { false };
 
     std::shared_ptr<std::unordered_set<int>> uiUpdateIDs;
 
@@ -117,7 +117,7 @@ protected:
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
     std::string sessionID;
 
-    bool loggedIn;
+    bool loggedIn { false };
 
     friend class SessionManager;
 };

@@ -39,18 +39,6 @@
 static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
 
-CdsObject::CdsObject()
-    : id(INVALID_OBJECT_ID)
-    , refID(INVALID_OBJECT_ID)
-    , parentID(INVALID_OBJECT_ID)
-    , mtime(0)
-    , sizeOnDisk(0)
-    , virt(false)
-    , objectFlags(OBJECT_FLAG_RESTRICTED)
-    , sortPriority(0)
-{
-}
-
 void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     obj->setID(id);
@@ -133,11 +121,6 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 /* CdsItem */
 
 CdsItem::CdsItem()
-    : CdsObject()
-    , mimeType(MIMETYPE_DEFAULT)
-    , partNumber(0)
-    , trackNumber(0)
-    , bookMarkPos(0)
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
@@ -190,7 +173,6 @@ CdsItemExternalURL::CdsItemExternalURL()
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
     upnpClass = UPNP_CLASS_ITEM;
-    mimeType = MIMETYPE_DEFAULT;
 }
 
 void CdsItemExternalURL::validate()
@@ -205,11 +187,6 @@ void CdsItemExternalURL::validate()
 //---------
 
 CdsContainer::CdsContainer()
-    : CdsObject()
-    , updateID(0)
-    // searchable = 0; is now in objectFlags; by default all flags (except "restricted") are not set
-    , childCount(-1)
-    , autoscanType(OBJECT_AUTOSCAN_NONE)
 {
     objectType = OBJECT_TYPE_CONTAINER;
     upnpClass = UPNP_CLASS_CONTAINER;
