@@ -27,6 +27,7 @@
 
 #include <string>
 
+#include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "util/tools.h"
 
@@ -57,8 +58,8 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
         for (auto&& part : split) {
             nodeKey += "/" + part;
             if (generated.find(nodeKey) == generated.end()) {
-                if (part.substr(0, ConfigSetup::ATTRIBUTE.size()) == ConfigSetup::ATTRIBUTE) {
-                    attribute = part.substr(ConfigSetup::ATTRIBUTE.size()); // last attribute gets the value
+                if (part.substr(0, ConfigDefinition::ATTRIBUTE.size()) == ConfigDefinition::ATTRIBUTE) {
+                    attribute = part.substr(ConfigDefinition::ATTRIBUTE.size()); // last attribute gets the value
                 } else {
                     auto newNode = generated[parent]->append_child(part.c_str());
                     generated[nodeKey] = std::make_shared<pugi::xml_node>(newNode);
@@ -91,15 +92,15 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& value)
 {
-    auto cs = ConfigManager::findConfigSetup(option);
+    auto cs = ConfigDefinition::findConfigSetup(option);
     return setValue(cs->xpath, value.empty() ? cs->getDefaultValue() : value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value)
 {
-    auto cs = std::string(ConfigManager::mapConfigOption(option));
-    if (cs.substr(0, ConfigSetup::ATTRIBUTE.size()) == ConfigSetup::ATTRIBUTE) {
-        cs = ConfigSetup::removeAttribute(option);
+    auto cs = std::string(ConfigDefinition::mapConfigOption(option));
+    if (cs.substr(0, ConfigDefinition::ATTRIBUTE.size()) == ConfigDefinition::ATTRIBUTE) {
+        cs = ConfigDefinition::removeAttribute(option);
         parent->append_attribute(cs.c_str()) = value.c_str();
     } else {
         parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
@@ -109,42 +110,42 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(std::shared_ptr<pugi::
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t attr, const std::string& value)
 {
-    auto cs = ConfigManager::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}", cs->xpath, ConfigManager::mapConfigOption(attr)), value);
+    auto cs = ConfigDefinition::findConfigSetup(option);
+    return setValue(fmt::format("{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(attr)), value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& key, const std::string& value)
 {
-    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigManager::findConfigSetup(option));
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
     if (cs == nullptr)
         return nullptr;
 
-    auto nodeKey = ConfigManager::mapConfigOption(cs->nodeOption);
+    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
     setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->keyOption)), key);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->valOption)), value);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
     return generated[cs->xpath];
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(config_option_t option)
 {
-    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigManager::findConfigSetup(option));
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
     if (cs == nullptr)
         return nullptr;
 
-    auto nodeKey = ConfigManager::mapConfigOption(cs->nodeOption);
+    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
     for (auto&& [key, value] : cs->getXmlContent({})) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->keyOption)), key);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigSetup::ensureAttribute(cs->valOption)), value);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
     }
     return generated[cs->xpath];
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value)
 {
-    auto cs = ConfigManager::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigManager::mapConfigOption(dict), ConfigSetup::ensureAttribute(attr)), value);
+    auto cs = ConfigDefinition::findConfigSetup(option);
+    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(dict), ConfigDefinition::ensureAttribute(attr)), value);
 }
 
 std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile)
@@ -318,7 +319,7 @@ void ConfigGenerator::generateTranscoding()
     auto transcoding = setValue(CFG_TRANSCODING_TRANSCODING_ENABLED);
     setDictionary(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
 
-    const auto profileTag = ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);
+    const auto profileTag = ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);
 
     auto oggmp3 = setValue(fmt::format("{}/", profileTag), "", true);
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
@@ -329,11 +330,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
 
-    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
-    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
@@ -347,11 +348,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
 
-    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
     setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit");
 
-    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigManager::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));

@@ -581,3 +581,27 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
     sqlFragment << lhs << " OR " << rhs;
     return sqlFragment.str();
 }
+
+std::string SortParser::parse()
+{
+    if (sortCrit.empty()) {
+        return "";
+    }
+    std::vector<std::string> sort;
+    for (auto&& seg : splitString(sortCrit, ',')) {
+        seg = trimString(seg);
+        bool desc = (seg[0] == '-');
+        if (seg[0] == '-' || seg[0] == '+') {
+            seg = seg.substr(1);
+        } else {
+            log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
+        }
+        auto sortSql = colMapper != nullptr ? colMapper->mapQuoted(seg) : "";
+        if (!sortSql.empty()) {
+            sort.emplace_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
+        } else {
+            log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
+        }
+    }
+    return join(sort, ", ");
+}

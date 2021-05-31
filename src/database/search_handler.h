@@ -28,6 +28,9 @@
 #ifndef __SEARCH_HANDLER_H__
 #define __SEARCH_HANDLER_H__
 
+#include <algorithm>
+#include <fmt/core.h>
+#include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -75,8 +78,8 @@ protected:
 
 class SearchLexer {
 public:
-    explicit SearchLexer(const std::string& input)
-        : input(input)
+    explicit SearchLexer(std::string input)
+        : input(std::move(input))
     {
     }
     virtual ~SearchLexer() = default;
@@ -91,7 +94,7 @@ protected:
     static std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
     std::string getQuotedValue(const std::string& input);
 
-    const std::string& input;
+    std::string input;
     unsigned currentPos {};
     bool inQuotes {};
 };
@@ -424,5 +427,51 @@ private:
     std::shared_ptr<SearchToken> currentToken;
     std::shared_ptr<SearchLexer> lexer;
     const SQLEmitter& sqlEmitter;
+};
+
+class ColumnMapper {
+public:
+    virtual std::string mapQuoted(const std::string& tag) const = 0;
+    virtual ~ColumnMapper() = default;
+};
+
+template <class En>
+class EnumColumnMapper : public ColumnMapper {
+public:
+    explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
+        : table_quote_begin(tabQuoteBegin)
+        , table_quote_end(tabQuoteEnd)
+        , keyMap(keyMap)
+        , colMap(colMap)
+    {
+    }
+    std::string mapQuoted(const std::string& tag) const override
+    {
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != keyMap.end()) {
+            return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
+        }
+        return "";
+    }
+
+private:
+    const char table_quote_begin;
+    const char table_quote_end;
+    const std::vector<std::pair<std::string, En>>& keyMap;
+    const std::map<En, std::pair<std::string, std::string>>& colMap;
+};
+
+class SortParser {
+public:
+    SortParser(std::shared_ptr<ColumnMapper> colMapper, const std::string& sortCriteria)
+        : colMapper(std::move(colMapper))
+        , sortCrit(sortCriteria)
+    {
+    }
+    std::string parse();
+
+private:
+    std::shared_ptr<ColumnMapper> colMapper;
+    std::string sortCrit;
 };
 #endif // __SEARCH_HANDLER_H__

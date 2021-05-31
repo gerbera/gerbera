@@ -69,6 +69,7 @@ protected:
     std::shared_ptr<ConfigOption> optionValue;
     std::string cpath;
     bool required = false;
+    bool useDefault = false;
     StringCheckFunction rawCheck;
     std::string defaultValue;
     const char* help;
@@ -92,24 +93,9 @@ protected:
 
 public:
     static constexpr auto ROOT_NAME = std::string_view("config");
-    static constexpr auto ATTRIBUTE = std::string_view("attribute::");
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
-    static std::string ensureAttribute(config_option_t option, bool check = true)
-    {
-        auto attr = std::string(ConfigManager::mapConfigOption(option));
-        if (attr.substr(0, ATTRIBUTE.size()) != ATTRIBUTE && check)
-            attr.insert(0, ATTRIBUTE);
-        return attr;
-    }
-    static std::string removeAttribute(config_option_t option)
-    {
-        auto attr = std::string(ConfigManager::mapConfigOption(option));
-        if (attr.size() > ATTRIBUTE.size() && attr.substr(0, ATTRIBUTE.size()) == ATTRIBUTE)
-            attr = attr.substr(ATTRIBUTE.size());
-        return attr;
-    }
     config_option_t option;
     const char* xpath;
 
@@ -145,6 +131,10 @@ public:
     {
         return this->defaultValue;
     }
+    bool isDefaultValueUsed() const
+    {
+        return this->useDefault;
+    }
 
     bool checkValue(std::string& optValue) const
     {
@@ -165,7 +155,7 @@ public:
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-    std::string getXmlContent(const pugi::xml_node& root, bool trim = true) const;
+    std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
 
     virtual void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr);
 
@@ -177,20 +167,6 @@ public:
 
     virtual std::string getUniquePath() const { return xpath; }
     virtual std::string getCurrentValue() const { return optionValue == nullptr ? "" : optionValue->getOption(); }
-
-    template <class CS>
-    static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
-    {
-        std::shared_ptr<ConfigSetup> base = ConfigManager::findConfigSetup(option, save);
-        if (base == nullptr && save)
-            return nullptr;
-
-        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(base);
-        if (result == nullptr) {
-            throw_std_runtime_error("Error in config code: {} has wrong class", option);
-        }
-        return result;
-    }
 };
 
 class ConfigStringSetup : public ConfigSetup {
@@ -258,7 +234,7 @@ public:
         return false;
     }
 
-    En getXmlContent(const pugi::xml_node& root) const
+    En getXmlContent(const pugi::xml_node& root)
     {
         std::string optValue = ConfigSetup::getXmlContent(root, true);
         log_debug("Config: option: '{}' value: '{}'", xpath, optValue.c_str());
@@ -390,7 +366,7 @@ public:
 
     void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    int getXmlContent(const pugi::xml_node& root) const;
+    int getXmlContent(const pugi::xml_node& root);
 
     std::shared_ptr<ConfigOption> newOption(int optValue);
 
@@ -441,7 +417,7 @@ public:
 
     void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool getXmlContent(const pugi::xml_node& root) const;
+    bool getXmlContent(const pugi::xml_node& root);
 
     bool checkValue(std::string& optValue, const std::string& pathName = "") const;
 
@@ -461,7 +437,7 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
-    std::vector<std::string_view> defaultEntries = {};
+    std::vector<std::string> defaultEntries = {};
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -484,16 +460,18 @@ public:
     config_option_t nodeOption;
     config_option_t attrOption = CFG_MAX;
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, ArrayInitFunction init = nullptr, bool notEmpty = false)
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption,
+        ArrayInitFunction init = nullptr, bool notEmpty = false, const std::vector<std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
+        , defaultEntries(defaultEntries)
         , nodeOption(nodeOption)
     {
     }
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
-        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string_view> defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -509,15 +487,9 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override
-    {
-        if (index < 0) {
-            return fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
-        }
-        return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigManager::mapConfigOption(nodeOption), index);
-    }
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
-    std::vector<std::string> getXmlContent(const pugi::xml_node& optValue) const;
+    std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
 
     bool checkArrayValue(const std::string& value, std::vector<std::string>& result) const;
 
@@ -536,7 +508,7 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     bool tolower = false;
-    std::map<std::string_view, std::string_view> defaultEntries = {};
+    std::map<std::string, std::string> defaultEntries = {};
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -563,7 +535,7 @@ public:
     config_option_t valOption;
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -574,7 +546,7 @@ public:
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help,
         config_option_t nodeOption, config_option_t keyOption, config_option_t valOption,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string_view, std::string_view>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -593,7 +565,7 @@ public:
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 
-    std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue) const;
+    std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue);
 
     std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
 

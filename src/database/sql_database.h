@@ -195,9 +195,6 @@ private:
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
 
-    template <class En>
-    std::string parseSortStatement(const std::string& sortCrit, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap);
-
     enum class Operation {
         Insert,
         Update,

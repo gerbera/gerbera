@@ -29,7 +29,7 @@
 
 #include "config/client_config.h"
 #include "config/config.h"
-#include "config/config_manager.h"
+#include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_setup.h"
 #include "content/autoscan.h"
@@ -45,6 +45,7 @@ web::configSave::configSave(std::shared_ptr<ContentManager> content)
 {
 }
 
+/// \brief: process config_save request
 void web::configSave::process()
 {
     check_request();
@@ -65,6 +66,7 @@ void web::configSave::process()
         return;
     }
 
+    // go through all config items from UI
     for (int i = 0; i < count; i++) {
         try {
             auto key = fmt::format("data[{}][{}]", i, "id");
@@ -76,9 +78,9 @@ void web::configSave::process()
             if (!param(key).empty() && param(key) != "-1") {
                 config_option_t option = CFG_MAX;
                 option = config_option_t(std::stoi(param(key)));
-                cs = ConfigManager::findConfigSetup(option, true);
+                cs = ConfigDefinition::findConfigSetup(option, true);
             } else if (!param(item).empty()) {
-                cs = ConfigManager::findConfigSetupByPath(param(item), true);
+                cs = ConfigDefinition::findConfigSetupByPath(param(item), true);
             } else {
                 log_error("{} has empty value", item);
                 continue;
@@ -97,6 +99,7 @@ void web::configSave::process()
                 bool update = param(status) == STATUS_CHANGED;
                 std::map<std::string, std::string> arguments = { { "status", parStatus } };
                 if (parStatus == STATUS_RESET || parStatus == STATUS_KILLED) {
+                    // remove value and restore original
                     database->removeConfigValue(param(item));
                     if (config->hasOrigValue(param(item))) {
                         parValue = config->getOrigValue(param(item));
@@ -112,23 +115,26 @@ void web::configSave::process()
                         success = true;
                     }
                 } else if (parStatus == STATUS_ADDED || parStatus == STATUS_MANUAL) {
+                    // add new value
                     database->updateConfigValue(cs->getUniquePath(), param(item), parValue, std::string(STATUS_MANUAL));
                     log_debug("added {}", param(item));
                     success = false;
                     update = true;
                 } else if (parStatus == STATUS_REMOVED) {
+                    // remove value
                     cs->updateDetail(param(item), parValue, config, &arguments);
                     database->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
                     log_debug("removed {}", param(item));
                     success = true;
                 }
                 if (update) {
+                    // save option to database
                     if (param(item) == cs->xpath) {
                         cs->makeOption(parValue, config);
                         success = true;
                     } else {
                         if (!cs->updateDetail(param(item), parValue, config, &arguments)) {
-                            log_error("unhandled option {} != {}", param(item), cs->getUniquePath());
+                            log_error("unhandled {} option {} != {}", parStatus, param(item), cs->getUniquePath());
                         } else {
                             success = true;
                         }
@@ -146,6 +152,7 @@ void web::configSave::process()
         taskEl.append_attribute("text") = fmt::format("Successfully updated {} items", count).c_str();
     }
 
+    // trigger rescan of database after update
     std::string target = param("target");
     if (action == "rescan" && !target.empty()) {
         if (target != "--all") {

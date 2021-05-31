@@ -48,7 +48,7 @@ jobs:
           context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm/v7,linux/arm64
-          push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
+          push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
 

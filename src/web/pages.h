@@ -178,7 +178,7 @@ class configLoad : public WebRequestHandler {
 protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, pugi::xml_node*> allItems;
-    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid);
+    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
     template <typename T>
     static void setValue(pugi::xml_node& item, const T& value);
 

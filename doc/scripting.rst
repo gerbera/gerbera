@@ -572,6 +572,44 @@ They can be used by the import and by the playlist script.
             return genre;
         }
 
+.. js:function:: mapInitial(firstChar)
+
+    Map character to uppercase latin version
+
+    :param string: Source character
+    :returns: string - Modified value of the character
+
+    .. literalinclude:: ../scripts/js/common.js
+        :start-after: // doc-map-initial-begin
+        :end-before: // doc-map-initial-end
+        :language: js
+
+.. js:function:: intFromConfig(entry, defValue)
+
+    Read integer config value or use default
+
+    :param string entry: Config Entry
+    :param int defValue: Config Entry
+    :returns: int - value from config or default
+
+    .. literalinclude:: ../scripts/js/common.js
+        :start-after: // doc-map-int-config-begin
+        :end-before: // doc-map-int-config-end
+        :language: js
+
+.. js:function:: stringFromConfig(entry, defValue)
+
+    Read string config value or use default
+
+    :param string entry: Config Entry
+    :param string defValue: Config Entry
+    :returns: string - value from config or default
+
+    .. literalinclude:: ../scripts/js/common.js
+        :start-after: // doc-map-string-config-begin
+        :end-before: // doc-map-string-config-end
+        :language: js
+
 .. js:function:: getYear(date)
 
     :param string: A date formatted in ``yyyy-mm-dd``

@@ -29,6 +29,7 @@
 #include <numeric>
 
 #include "config/client_config.h"
+#include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
 #include "content/autoscan.h"
@@ -63,16 +64,21 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
     info.append_attribute("help") = cs->getHelp();
 }
 
-void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid)
+void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
 {
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
     item.append_attribute("aid") = fmt::format("{:02d}", aid).c_str();
-    item.append_attribute("status") = "unchanged";
-
+    if (std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; })) {
+        item.append_attribute("status") = "unchanged";
+        item.append_attribute("source") = "database";
+    } else {
+        item.append_attribute("status") = cs == nullptr || !cs->isDefaultValueUsed() ? "unchanged" : "default";
+        item.append_attribute("source") = cs == nullptr || !cs->isDefaultValueUsed() ? "config.xml" : "default";
+    }
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
-    item.append_attribute("source") = std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; }) ? "database" : "config.xml";
+    item.append_attribute("defaultValue") = cs != nullptr ? cs->getDefaultValue().c_str() : "";
 }
 
 template <typename T>
@@ -94,12 +100,14 @@ void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
     item.append_attribute("value") = value.c_str();
 }
 
+/// \brief: process config_load request
 void web::configLoad::process()
 {
     check_request();
     auto root = xmlDoc->document_element();
     auto values = root.append_child("values");
 
+    // set handling of json properties
     xml2JsonHints->setArrayName(values, "item");
     xml2JsonHints->setFieldType("item", "string");
     xml2JsonHints->setFieldType("id", "string");
@@ -109,12 +117,14 @@ void web::configLoad::process()
 
     log_debug("Sending Config to web!");
 
+    // generate meta info for ui
     auto meta = root.append_child("types");
     xml2JsonHints->setArrayName(meta, "item");
-    for (auto&& cs : ConfigManager::getOptionList()) {
+    for (auto&& cs : ConfigDefinition::getOptionList()) {
         addTypeMeta(meta, cs);
     }
 
+    // write database status
     {
         auto item = values.append_child("item");
         createItem(item, "/status/attribute::total", CFG_MAX, CFG_MAX);
@@ -144,10 +154,11 @@ void web::configLoad::process()
         setValue(item, database->getTotalFiles(true, "image"));
     }
 
+    // write all values with simple type (string, int, bool)
     for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigManager::findConfigSetup(config_option_t(i));
+        auto scs = ConfigDefinition::findConfigSetup(config_option_t(i));
         auto item = values.append_child("item");
-        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i));
+        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i), scs);
 
         try {
             log_debug("    Option {:03d} {} = {}", i, scs->getItemPath(), scs->getCurrentValue().c_str());
@@ -156,26 +167,28 @@ void web::configLoad::process()
         }
     }
 
+    // write client configuration
     std::shared_ptr<ConfigSetup> cs;
-    cs = ConfigManager::findConfigSetup(CFG_CLIENTS_LIST);
+    cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
     for (size_t i = 0; i < clientConfig->size(); i++) {
         auto client = clientConfig->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS), cs->option, ATTR_CLIENTS_CLIENT_FLAGS);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS), cs->option, ATTR_CLIENTS_CLIENT_FLAGS, cs);
         setValue(item, ClientConfig::mapFlags(client->getFlags()));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_IP), cs->option, ATTR_CLIENTS_CLIENT_IP);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_IP), cs->option, ATTR_CLIENTS_CLIENT_IP, cs);
         setValue(item, client->getIp());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT);
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, cs);
         setValue(item, client->getUserAgent());
     }
 
-    cs = ConfigManager::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
+    // write import tweaks
+    cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
     for (size_t i = 0; i < directoryConfig->size(); i++) {
         auto dir = directoryConfig->get(i);
@@ -221,18 +234,19 @@ void web::configLoad::process()
         setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
     }
 
-    cs = ConfigManager::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
+    // write transconding configuration
+    cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
     std::map<std::string, int> profiles;
     for (auto&& [key, val] : transcoding->getList()) {
         for (auto&& [a, name] : *val) {
             auto item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
+            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
             setValue(item, key);
 
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
+            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
             setValue(item, name->getName());
             profiles[name->getName()] = pr;
 
@@ -327,7 +341,8 @@ void web::configLoad::process()
         pr++;
     }
 
-    for (auto&& ascs : ConfigManager::getConfigSetupList<ConfigAutoscanSetup>()) {
+    // write autoscan configuration
+    for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (size_t i = 0; i < autoscan->size(); i++) {
             auto&& entry = autoscan->get(i);
@@ -366,31 +381,34 @@ void web::configLoad::process()
         }
     }
 
-    for (auto&& dcs : ConfigManager::getConfigSetupList<ConfigDictionarySetup>()) {
+    // write content of all dictionaries
+    for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
             auto item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption);
+            createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption, dcs);
             setValue(item, key.substr(5));
 
             item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption);
+            createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption, dcs);
             setValue(item, val);
             i++;
         }
     }
 
-    for (auto&& acs : ConfigManager::getConfigSetupList<ConfigArraySetup>()) {
+    // write content of all arrays
+    for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
             auto item = values.append_child("item");
-            createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption);
+            createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption, acs);
             setValue(item, entry);
         }
     }
 
+    // update entries with datebase values
     for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
@@ -398,8 +416,8 @@ void web::configLoad::process()
             item->attribute("source") = "database";
             item->attribute("status") = entry.status.c_str();
         } else {
-            auto cs = ConfigManager::findConfigSetupByPath(entry.item, true);
-            auto acs = ConfigManager::findConfigSetupByPath(entry.item, true, cs);
+            auto cs = ConfigDefinition::findConfigSetupByPath(entry.item, true);
+            auto acs = ConfigDefinition::findConfigSetupByPath(entry.item, true, cs);
             if (cs != nullptr) {
                 auto item = values.append_child("item");
                 createItem(item, entry.item, cs->option, acs != nullptr ? acs->option : CFG_MAX);

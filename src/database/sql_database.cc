@@ -205,6 +205,9 @@ constexpr auto to_underlying(E e) noexcept
 
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 
+static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
+static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
+
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
     : Database(std::move(config))
     , table_quote_begin('\0')
@@ -218,6 +221,9 @@ void SQLDatabase::init()
 {
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
+
+    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, browseSortMap, browseColMap);
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, searchSortMap, searchColMap);
 
     // Statement for UPnP browse
     std::ostringstream buf;
@@ -581,8 +587,6 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
 
 std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
-    auto objectIDs = std::make_unique<std::vector<int>>();
-
     std::ostringstream qb;
     qb << "SELECT " << TQ("id")
        << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -595,39 +599,13 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
     if (res == nullptr)
         throw_std_runtime_error("db error");
 
+    std::vector<int> objectIDs;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        objectIDs->push_back(std::stoi(row->col(0)));
+        objectIDs.push_back(std::stoi(row->col(0)));
     }
 
-    return objectIDs;
-}
-
-template <class En>
-std::string SQLDatabase::parseSortStatement(const std::string& sortCrit, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
-{
-    if (sortCrit.empty()) {
-        return "";
-    }
-    std::vector<std::string> sort;
-    for (auto&& seg : splitString(sortCrit, ',')) {
-        seg = trimString(seg);
-        bool desc = (seg[0] == '-');
-        if (seg[0] == '-' || seg[0] == '+') {
-            seg = seg.substr(1);
-        } else {
-            log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
-        }
-        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == seg; });
-        if (it != keyMap.end()) {
-            std::ostringstream sortSql;
-            sortSql << TQD(colMap.at(it->second).first, colMap.at(it->second).second) << (desc ? " DESC" : "");
-            sort.emplace_back(sortSql.str());
-        } else {
-            log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
-        }
-    }
-    return join(sort, ", ");
+    return std::make_unique<std::vector<int>>(objectIDs);
 }
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
@@ -674,7 +652,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             orderQb << TQBM(BrowseCol::part_number) << ',';
             orderQb << TQBM(BrowseCol::track_number);
         } else {
-            orderQb << parseSortStatement(param->getSortCriteria(), browseSortMap, browseColMap);
+            SortParser sortParser(browseColumnMapper, param->getSortCriteria());
+            orderQb << sortParser.parse();
         }
         if (orderQb.str().empty()) {
             orderQb << TQBM(BrowseCol::dc_title);
@@ -773,7 +752,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     // order by code..
     auto orderByCode = [&]() {
         std::ostringstream orderQb;
-        orderQb << parseSortStatement(param->getSortCriteria(), searchSortMap, searchColMap);
+        SortParser sortParser(searchColumnMapper, param->getSortCriteria());
+        orderQb << sortParser.parse();
         if (orderQb.str().empty()) {
             orderQb << TQSM(SearchCol::id);
         }
@@ -1328,12 +1308,12 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     if (res->getNumRows() == 0)
         return nullptr;
 
-    auto ret = std::make_unique<std::unordered_set<int>>();
+    std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow()) != nullptr) {
-        ret->insert(std::stoi(row->col(0)));
+        ret.insert(std::stoi(row->col(0)));
     }
-    return ret;
+    return std::make_unique<std::unordered_set<int>>(ret);
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
@@ -1491,7 +1471,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                << " FROM " << TQ(CDS_OBJECT_TABLE)
                << " WHERE " << TQ("id") << " IN (";
 
-    auto changedContainers = std::make_unique<ChangedContainers>();
+    ChangedContainers changedContainers;
 
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
@@ -1511,7 +1491,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
         parentIds.clear();
         while ((row = res->nextRow()) != nullptr) {
-            changedContainers->ui.push_back(std::stoi(row->col(0)));
+            changedContainers.ui.push_back(std::stoi(row->col(0)));
         }
     }
 
@@ -1528,7 +1508,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             parentIds.clear();
             while ((row = res->nextRow()) != nullptr) {
-                changedContainers->upnp.push_back(std::stoi(row->col(0)));
+                changedContainers.upnp.push_back(std::stoi(row->col(0)));
             }
         }
 
@@ -1542,7 +1522,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             itemIds.clear();
             while ((row = res->nextRow()) != nullptr) {
                 removeIds.push_back(std::stoi(row->col(0)));
-                changedContainers->upnp.push_back(std::stoi(row->col(1)));
+                changedContainers.upnp.push_back(std::stoi(row->col(1)));
             }
         }
 
@@ -1591,7 +1571,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     if (!removeIds.empty())
         _removeObjects(removeIds);
     log_debug("end");
-    return changedContainers;
+    return std::make_unique<ChangedContainers>(changedContainers);
 }
 
 std::string SQLDatabase::toCSV(const std::vector<int>& input)
@@ -1604,9 +1584,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     log_debug("start upnp: {}; ui: {}",
         join(maybeEmpty->upnp, ',').c_str(),
         join(maybeEmpty->ui, ',').c_str());
-    auto changedContainers = std::make_unique<ChangedContainers>();
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
-        return changedContainers;
+        return nullptr;
 
     std::ostringstream selectSql;
     selectSql << "SELECT " << TQD('a', "id")
@@ -1630,6 +1609,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     std::vector<int32_t> selUi;
     std::vector<int32_t> selUpnp;
 
+    ChangedContainers changedContainers;
+
     auto& uiV = maybeEmpty->ui;
     selUi.insert(selUi.end(), uiV.begin(), uiV.end());
     auto& upnpV = maybeEmpty->upnp;
@@ -1651,7 +1632,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow()) != nullptr) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers->upnp.push_back(std::stoi(row->col(0)));
+                    changedContainers.upnp.push_back(std::stoi(row->col(0)));
                 else if (row->col(1) == "0") {
                     del.push_back(std::stoi(row->col(0)));
                     selUi.push_back(std::stoi(row->col(2)));
@@ -1672,8 +1653,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow()) != nullptr) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers->ui.push_back(std::stoi(row->col(0)));
-                    changedContainers->upnp.push_back(std::stoi(row->col(0)));
+                    changedContainers.ui.push_back(std::stoi(row->col(0)));
+                    changedContainers.upnp.push_back(std::stoi(row->col(0)));
                 } else if (row->col(1) == "0") {
                     del.push_back(std::stoi(row->col(0)));
                     selUi.push_back(std::stoi(row->col(2)));
@@ -1694,8 +1675,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             throw_std_runtime_error("there seems to be an infinite loop...");
     } while (again);
 
-    auto& changedUi = changedContainers->ui;
-    auto& changedUpnp = changedContainers->upnp;
+    auto& changedUi = changedContainers.ui;
+    auto& changedUpnp = changedContainers.upnp;
     if (!selUi.empty()) {
         changedUi.insert(changedUi.end(), selUi.begin(), selUi.end());
         changedUpnp.insert(changedUpnp.end(), selUi.begin(), selUi.end());
@@ -1708,7 +1689,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
-    return changedContainers;
+    return std::make_unique<ChangedContainers>(changedContainers);
 }
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)
@@ -2185,16 +2166,15 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return nullptr;
 
-    auto pathIDs = std::make_unique<std::vector<int>>();
-
     std::ostringstream sel;
     sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
     sel << TQ("id") << '=';
 
+    std::vector<int> pathIDs;
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
     while (objectID != CDS_ID_ROOT) {
-        pathIDs->push_back(objectID);
+        pathIDs.push_back(objectID);
         std::ostringstream q;
         q << sel.str() << quote(objectID) << " LIMIT 1";
         res = select(q);
@@ -2202,7 +2182,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
             break;
         objectID = std::stoi(row->col(0));
     }
-    return pathIDs;
+    return std::make_unique<std::vector<int>>(pathIDs);
 }
 
 std::string SQLDatabase::getFsRootName()
@@ -2298,10 +2278,10 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
         values << "," << obj->getID();
     }
 
-    auto qb = std::make_unique<std::ostringstream>();
-    *qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
+    std::ostringstream qb;
+    qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
 
-    return qb;
+    return std::make_unique<std::ostringstream>(std::move(qb));
 }
 
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2313,24 +2293,24 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    auto qb = std::make_unique<std::ostringstream>();
-    *qb << "UPDATE " << TQ(tableName) << " SET ";
+    std::ostringstream qb;
+    qb << "UPDATE " << TQ(tableName) << " SET ";
     for (auto it = dict.begin(); it != dict.end(); it++) {
         if (it != dict.begin())
-            *qb << ',';
-        *qb << TQ(it->first) << '='
-            << it->second;
+            qb << ',';
+        qb << TQ(it->first) << '='
+           << it->second;
     }
 
     // relying on only one element when tableName is mt_metadata
     if (tableName == METADATA_TABLE) {
-        *qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
-        *qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
+        qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
+        qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
     } else {
-        *qb << " WHERE " << TQ("id") << " = " << obj->getID();
+        qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return qb;
+    return std::make_unique<std::ostringstream>(std::move(qb));
 }
 
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2342,18 +2322,18 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    auto qb = std::make_unique<std::ostringstream>();
-    *qb << "DELETE FROM " << TQ(tableName);
+    std::ostringstream qb;
+    qb << "DELETE FROM " << TQ(tableName);
 
     // relying on only one element when tableName is mt_metadata
     if (tableName == METADATA_TABLE) {
-        *qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
-        *qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
+        qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
+        qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
     } else {
-        *qb << " WHERE " << TQ("id") << " = " << obj->getID();
+        qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return qb;
+    return std::make_unique<std::ostringstream>(std::move(qb));
 }
 
 void SQLDatabase::doMetadataMigration()

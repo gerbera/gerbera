@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 
 #include "client_config.h"
-#include "config_manager.h"
+#include "config_definition.h"
 #include "config_options.h"
 #include "config_setup.h"
 #include "content/autoscan.h"
@@ -68,7 +68,7 @@ bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
 /// The xpath parameter has XPath syntax:
 /// "/path/to/option" will return the text value of the given "option" element
 /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
-std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) const
+std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
 
@@ -88,7 +88,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
         return optValue;
     }
 
-    auto xAttr = removeAttribute(option);
+    auto xAttr = ConfigDefinition::removeAttribute(option);
 
     if (root.attribute(xAttr.c_str()) != nullptr) {
         std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();
@@ -111,6 +111,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim) co
 
     log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue.c_str());
 
+    useDefault = true;
     return defaultValue;
 }
 
@@ -341,7 +342,7 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
     }
 }
 
-int ConfigIntSetup::getXmlContent(const pugi::xml_node& root) const
+int ConfigIntSetup::getXmlContent(const pugi::xml_node& root)
 {
     std::string sVal = ConfigSetup::getXmlContent(root, true);
     log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal.c_str());
@@ -430,7 +431,7 @@ void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Con
     setOption(config);
 }
 
-bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root) const
+bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root)
 {
     std::string optValue = ConfigSetup::getXmlContent(root, true);
     return checkValue(optValue, root.path());
@@ -530,9 +531,9 @@ bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
     if (element != nullptr) {
-        for (auto&& it : element.select_nodes(ConfigManager::mapConfigOption(nodeOption))) {
+        for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
             const pugi::xml_node& child = it.node();
-            std::string attrValue = attrOption != CFG_MAX ? child.attribute(removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
+            std::string attrValue = attrOption != CFG_MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
             if (itemNotEmpty && attrValue.empty()) {
                 throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
             }
@@ -585,6 +586,10 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
             if (status == STATUS_RESET && updateItem(i, optItem, config, value, config->getOrigValue(optItem), status)) {
                 return true;
             }
+            // new entry has parent xpath, value is in other entry
+            if (status == STATUS_ADDED || status == STATUS_MANUAL) {
+                return true;
+            }
         }
 
         auto editSize = value->getEditSize();
@@ -597,11 +602,19 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     return false;
 }
 
-std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue) const
+std::string ConfigArraySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    if (index < 0) {
+        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    }
+    return attrOption != CFG_MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, ConfigDefinition::ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(nodeOption), index);
+}
+
+std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue)
 {
     std::vector<std::string> result;
     if (initArray != nullptr) {
-        if (!initArray(optValue, result, ConfigManager::mapConfigOption(nodeOption))) {
+        if (!initArray(optValue, result, ConfigDefinition::mapConfigOption(nodeOption))) {
             throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     } else {
@@ -611,6 +624,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        useDefault = true;
         result.assign(defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
@@ -640,17 +654,19 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
 
 bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
-    if (value != nullptr) {
+    if (value != nullptr && !value.empty()) {
         for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& content = it.node();
             std::string mark_content = content.text().as_string();
             if (mark_content.empty()) {
-                log_error("error in configuration, <mark-played-items>, empty <content> parameter");
+                log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), node_name);
                 return false;
             }
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE)) {
-                log_error(R"(error in configuration, <mark-played-items>, invalid <content> parameter! Allowed values are "video", "audio", "image")");
+                log_error("(error in configuration, <{}>, invalid <{}> parameter! Allowed values are '{}', '{}', '{}')",
+                    value.name(), node_name,
+                    DEFAULT_MARK_PLAYED_CONTENT_VIDEO, DEFAULT_MARK_PLAYED_CONTENT_AUDIO, DEFAULT_MARK_PLAYED_CONTENT_IMAGE);
                 return false;
             }
 
@@ -662,19 +678,13 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
 
 bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
 {
-    // create default structure
-    if (value.empty()) {
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_1));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_2));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_3));
-        result.emplace_back(fmt::to_string(DEFAULT_ITEMS_PER_PAGE_4));
-    } else {
-        // create the array from either user settings
+    if (value != nullptr && !value.empty()) {
+        // create the array from user settings
         for (auto&& it : value.select_nodes(node_name)) {
             const pugi::xml_node& child = it.node();
             int i = child.text().as_int();
             if (i < 1) {
-                log_error("Error in config file: incorrect <option> value for <items-per-page>");
+                log_error("Error in config file: incorrect <{}> value for <{}>", node_name, value.name());
                 return false;
             }
             result.emplace_back(child.text().as_string());
@@ -701,9 +711,9 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
 bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
 {
     if (optValue != nullptr) {
-        const auto dictNodes = optValue.select_nodes(ConfigManager::mapConfigOption(nodeOption));
-        auto keyAttr = removeAttribute(keyOption);
-        auto valAttr = removeAttribute(valOption);
+        const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
+        auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
+        auto valAttr = ConfigDefinition::removeAttribute(valOption);
 
         for (auto&& it : dictNodes) {
             const pugi::xml_node child = it.node();
@@ -780,6 +790,10 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
                     return true;
                 }
             }
+            // new entry has parent xpath, value is in other entry
+            if (status == STATUS_ADDED || status == STATUS_MANUAL) {
+                return true;
+            }
         }
 
         i = 0;
@@ -795,14 +809,14 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
 
 std::string ConfigDictionarySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
-    auto opt = ensureAttribute(propOption);
+    auto opt = ConfigDefinition::ensureAttribute(propOption);
 
     return index >= 0 //
-        ? fmt::format("{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(nodeOption), index, opt) //
-        : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(nodeOption));
+        ? fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt) //
+        : fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
 }
 
-std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue) const
+std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue)
 {
     std::map<std::string, std::string> result;
     if (initDict != nullptr) {
@@ -816,6 +830,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        useDefault = true;
         for (auto&& entry : defaultEntries) {
             result.insert(entry); // this should be an insert without a loop, but Debian 10 doesn't compile.
         }
@@ -835,9 +850,9 @@ std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<st
 std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     return index >= 0 //
-        ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ensureAttribute(propOption)) //
-        : index > -2 ? fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY)) //
-                     : fmt::format("{}/{}", xpath, ConfigManager::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+        ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption)) //
+        : index > -2 ? fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY)) //
+                     : fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
 }
 
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -848,19 +863,19 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
     if (element == nullptr)
         return true;
 
-    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
+    auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
     for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
         fs::path location;
         try {
-            location = findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child);
+            location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child);
         } catch (const std::runtime_error& e) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;
         }
 
-        ScanMode mode = findConfigSetup<ConfigEnumSetup<ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
+        ScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
 
         if (mode != scanMode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
@@ -868,11 +883,11 @@ bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& eleme
 
         unsigned int interval = 0;
         if (mode == ScanMode::Timed) {
-            interval = findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
+            interval = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }
 
-        bool recursive = findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
-        auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+        bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
+        auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
 
         auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, INVALID_SCAN_ID, interval, hidden);
@@ -898,7 +913,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation().string());
         auto pathValue = optValue;
-        if (findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
         }
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getLocation().string());
@@ -915,7 +930,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, fmt::format("{}", entry->getInterval().count()));
-        entry->setInterval(std::chrono::seconds(findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
+        entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval().count());
         return true;
     }
@@ -924,7 +939,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
-        entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
+        entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
         return true;
     }
@@ -933,7 +948,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
-        entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
+        entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());
         return true;
     }
@@ -1008,38 +1023,40 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
 
     const pugi::xml_node& root = element.root();
 
+    // initialize mapping dictionary
     std::map<std::string, std::string> mt_mappings;
     {
-        auto cs = findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
+        auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
         if (cs->hasXmlElement(root)) {
             mt_mappings = cs->getXmlContent(cs->getXmlElement(root));
         }
     }
 
-    auto cs = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE);
+    auto cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE);
     const auto profileNodes = cs->getXmlTree(element);
     if (profileNodes.empty())
         return true;
 
-    bool allow_unused_profiles = !findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
+    bool allow_unused_profiles = !ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
     if (!allow_unused_profiles && mt_mappings.empty()) {
         log_error("error in configuration: transcoding "
                   "profiles exist, but no mimetype to profile mappings specified");
         return false;
     }
 
+    // go through profiles
     for (auto&& it : profileNodes) {
         const pugi::xml_node child = it.node();
-        if (!findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
+        if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
             continue;
 
         auto prof = std::make_shared<TranscodingProfile>(
-            findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
-            findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
-        prof->setTargetMimeType(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
+            ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
+            ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
+        prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
 
         pugi::xml_node sub;
-        sub = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
+        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
         if (sub != nullptr) {
             std::string param = sub.text().as_string();
             if (!param.empty()) {
@@ -1048,60 +1065,64 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
             }
         }
 
+        // read 4cc options
         {
-            auto cs = findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC);
             if (cs->hasXmlElement(child)) {
                 sub = cs->getXmlElement(child);
-                avi_fourcc_listmode_t fcc_mode = findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
+                avi_fourcc_listmode_t fcc_mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
                 if (fcc_mode != FCC_None) {
                     prof->setAVIFourCCList(cs->getXmlContent(sub), fcc_mode);
                 }
             }
         }
+        // read profile options
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
             if (cs->hasXmlElement(child))
                 prof->setAcceptURL(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
             if (cs->hasXmlElement(child))
                 prof->setSampleFreq(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
             if (cs->hasXmlElement(child))
                 prof->setNumChannels(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
             if (cs->hasXmlElement(child))
                 prof->setHideOriginalResource(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
             if (cs->hasXmlElement(child))
                 prof->setThumbnail(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
             if (cs->hasXmlElement(child))
                 prof->setFirstResource(cs->getXmlContent(child));
         }
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
             if (cs->hasXmlElement(child))
                 prof->setTheora(cs->getXmlContent(child));
         }
 
-        sub = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
-        prof->setCommand(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
-        prof->setArguments(findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
+        // read agent options
+        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
+        prof->setCommand(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
+        prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
 
-        sub = findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
-        size_t buffer = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
-        size_t chunk = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
-        size_t fill = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
+        // set buffer options
+        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
+        size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
+        size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
+        size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
 
         if (chunk > buffer) {
             log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName().c_str());
@@ -1130,11 +1151,12 @@ bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xm
         }
     }
 
+    // validate profiles
     auto tpl = result->getList();
     for (auto&& [key, val] : mt_mappings) {
         if (tpl.find(key) == tpl.end()) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val.c_str(), key.c_str());
-            if (!findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
+            if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
                 return false;
             }
         }
@@ -1157,26 +1179,26 @@ std::string ConfigTranscodingSetup::getItemPath(int index, config_option_t propO
         return fmt::format("{}", xpath);
     }
 
-    auto opt2 = ensureAttribute(propOption2, propOption3 == CFG_MAX);
-    auto opt3 = ensureAttribute(propOption3, propOption4 == CFG_MAX);
-    auto opt4 = ensureAttribute(propOption4, propOption4 != CFG_MAX);
+    auto opt2 = ConfigDefinition::ensureAttribute(propOption2, propOption3 == CFG_MAX);
+    auto opt3 = ConfigDefinition::ensureAttribute(propOption3, propOption4 == CFG_MAX);
+    auto opt4 = ConfigDefinition::ensureAttribute(propOption4, propOption4 != CFG_MAX);
 
     if (propOption == ATTR_TRANSCODING_PROFILES_PROFLE) {
         if (propOption3 == CFG_MAX) {
-            return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(propOption), index, opt2);
+            return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), index, opt2);
         }
-        return fmt::format("{}[{}]/{}/{}", ConfigManager::mapConfigOption(propOption), index, opt2, opt3);
+        return fmt::format("{}[{}]/{}/{}", ConfigDefinition::mapConfigOption(propOption), index, opt2, opt3);
     }
     if (propOption == ATTR_TRANSCODING_MIMETYPE_PROF_MAP) {
         if (propOption4 == CFG_MAX) {
-            return fmt::format("{}/{}[{}]/{}", ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3);
+            return fmt::format("{}/{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3);
         }
-        return fmt::format("{}/{}[{}]/{}/{}", ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3, opt4);
+        return fmt::format("{}/{}[{}]/{}/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3, opt4);
     }
     if (propOption4 == CFG_MAX) {
-        return fmt::format("{}/{}/{}[{}]/{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3);
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3);
     }
-    return fmt::format("{}/{}/{}[{}]/{}/{}", xpath, ConfigManager::mapConfigOption(propOption), ConfigManager::mapConfigOption(propOption2), index, opt3, opt4);
+    return fmt::format("{}/{}/{}[{}]/{}/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3, opt4);
 }
 
 bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -1186,6 +1208,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
         std::map<std::string, int> profiles;
         int i = 0;
+
+        // update properties in profile part
         for (auto&& [key, val] : value->getTranscodingProfileListOption()->getList()) {
             for (auto&& [a, name] : *val) {
                 profiles[name->getName()] = i;
@@ -1207,26 +1231,26 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
         }
         i = 0;
+
+        // update properties in transcoding part
         for (auto&& [key, val] : profiles) {
             auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
             auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
-                //value->setKey(key, optValue);
-                //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                 return false;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getEnabled());
-                entry->setEnabled(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
+                entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
             if (optItem == index) {
                 transcoding_type_t type;
-                if (findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
+                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
                     config->setOrigValue(index, entry->getType());
                     entry->setType(type);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getType());
@@ -1235,16 +1259,18 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
             if (optItem == index) {
-                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getTargetMimeType());
                     entry->setTargetMimeType(optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getTargetMimeType());
                     return true;
                 }
             }
+
+            // update profile options
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
             if (optItem == index) {
-                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
                     entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)] = optValue;
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
@@ -1254,53 +1280,54 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
             if (optItem == index) {
                 config->setOrigValue(index, entry->acceptURL());
-                entry->setAcceptURL(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
+                entry->setAcceptURL(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getSampleFreq());
-                entry->setSampleFreq(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
+                entry->setSampleFreq(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getNumChannels());
-                entry->setNumChannels(findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
+                entry->setNumChannels(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->hideOriginalResource());
-                entry->setHideOriginalResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
+                entry->setHideOriginalResource(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_THUMB);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isThumbnail());
-                entry->setThumbnail(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
+                entry->setThumbnail(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST);
             if (optItem == index) {
                 config->setOrigValue(index, entry->firstResource());
-                entry->setFirstResource(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
+                entry->setFirstResource(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->firstResource());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG);
             if (optItem == index) {
                 config->setOrigValue(index, entry->isTheora());
-                entry->setTheora(findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
+                entry->setTheora(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isTheora());
                 return true;
             }
 
+            // update buffer options
             size_t buffer = entry->getBufferSize();
             size_t chunk = entry->getBufferChunkSize();
             size_t fill = entry->getBufferInitialFillSize();
@@ -1308,19 +1335,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
             if (optItem == index) {
                 config->setOrigValue(index, int(buffer));
-                buffer = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
+                buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
                 setBuffer = true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
             if (optItem == index) {
                 config->setOrigValue(index, int(chunk));
-                chunk = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
+                chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
                 setBuffer = true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
             if (optItem == index) {
                 config->setOrigValue(index, int(fill));
-                fill = findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
+                fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
                 setBuffer = true;
             }
             if (setBuffer && chunk > buffer) {
@@ -1338,9 +1365,10 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 return true;
             }
 
+            // update agent options
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             if (optItem == index) {
-                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getCommand().string());
                     entry->setCommand(optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getCommand().string());
@@ -1349,7 +1377,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
             if (optItem == index) {
-                if (findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getArguments());
                     entry->setArguments(optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getArguments());
@@ -1357,13 +1385,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 }
             }
 
+            // update 4cc options
             avi_fourcc_listmode_t fcc_mode = entry->getAVIFourCCListMode();
             auto fcc_list = entry->getAVIFourCCList();
             bool set4cc = false;
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             if (optItem == index) {
                 config->setOrigValue(index, TranscodingProfile::mapFourCcMode(fcc_mode));
-                if (findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fcc_mode)) {
+                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fcc_mode)) {
                     set4cc = true;
                 }
             }
@@ -1371,7 +1400,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             if (optItem == index) {
                 config->setOrigValue(index, std::accumulate(std::next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
                 fcc_list.clear();
-                if (findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
+                if (ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
                     set4cc = true;
                 }
             }
@@ -1403,13 +1432,13 @@ bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& ele
     if (element == nullptr)
         return true;
 
-    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
+    auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
     for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto flags = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
-        auto ip = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
-        auto userAgent = findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
+        auto flags = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
+        auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
+        auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
 
         std::vector<std::string> flagsVector = splitString(flags, '|', false);
         int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
@@ -1443,7 +1472,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
             std::vector<std::string> flagsVector = splitString(optValue, '|', false);
             int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
             entry->setFlags(flag);
@@ -1455,7 +1484,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getIp());
-        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
             entry->setIp(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
             return true;
@@ -1465,7 +1494,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getUserAgent());
-        if (findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
             entry->setUserAgent(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
             return true;
@@ -1525,12 +1554,12 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
 std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index < 0) {
-        return fmt::format("{}", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        return fmt::format("{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT));
     }
     if (propOption != CFG_MAX) {
-        return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ensureAttribute(propOption));
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOption));
     }
-    return fmt::format("{}[{}]", ConfigManager::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
+    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
 }
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
@@ -1540,47 +1569,47 @@ bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node
     if (element == nullptr)
         return true;
 
-    auto&& cs = findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
+    auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
     for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        fs::path location = findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
+        fs::path location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
 
-        auto inherit = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child);
+        auto inherit = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child);
 
         auto dir = std::make_shared<DirectoryTweak>(location, inherit);
 
         {
-            auto cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE);
             if (cs->hasXmlElement(child)) {
                 dir->setRecursive(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN);
+            cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN);
             if (cs->hasXmlElement(child)) {
                 dir->setHidden(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE);
+            cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE);
             if (cs->hasXmlElement(child)) {
                 dir->setCaseSensitive(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
+            cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
             if (cs->hasXmlElement(child)) {
                 dir->setFollowSymlinks(cs->getXmlContent(child));
             }
         }
         {
-            auto cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET);
             if (cs->hasXmlElement(child)) {
                 dir->setMetaCharset(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE);
             if (cs->hasXmlElement(child)) {
                 dir->setFanArtFile(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
             if (cs->hasXmlElement(child)) {
                 dir->setSubTitleFile(cs->getXmlContent(child));
             }
-            cs = findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
             if (cs->hasXmlElement(child)) {
                 dir->setResourceFile(cs->getXmlContent(child));
             }
@@ -1612,7 +1641,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation().string());
         auto pathValue = optValue;
-        if (findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
             return true;
@@ -1622,7 +1651,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getInherit());
-        entry->setInherit(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->checkValue(optValue));
+        entry->setInherit(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT)->checkValue(optValue));
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
         return true;
     }
@@ -1630,7 +1659,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
-        entry->setRecursive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->checkValue(optValue));
+        entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_RECURSIVE)->checkValue(optValue));
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
         return true;
     }
@@ -1638,7 +1667,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
-        entry->setHidden(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->checkValue(optValue));
+        entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_HIDDEN)->checkValue(optValue));
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
         return true;
     }
@@ -1646,7 +1675,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getCaseSensitive());
-        entry->setCaseSensitive(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->checkValue(optValue));
+        entry->setCaseSensitive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE)->checkValue(optValue));
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
         return true;
     }
@@ -1654,7 +1683,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFollowSymlinks());
-        entry->setFollowSymlinks(findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->checkValue(optValue));
+        entry->setFollowSymlinks(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->checkValue(optValue));
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
         return true;
     }
@@ -1662,7 +1691,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasMetaCharset() ? entry->getMetaCharset() : "");
-        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET)->checkValue(optValue)) {
             entry->setMetaCharset(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getMetaCharset());
             return true;
@@ -1672,7 +1701,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasFanArtFile() ? entry->getFanArtFile() : "");
-        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
             entry->setFanArtFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
             return true;
@@ -1682,7 +1711,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasResourceFile() ? entry->getResourceFile() : "");
-        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
             entry->setResourceFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
             return true;
@@ -1692,7 +1721,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasSubTitleFile() ? entry->getSubTitleFile() : "");
-        if (findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
             entry->setSubTitleFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
             return true;
@@ -1753,10 +1782,10 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
 std::string ConfigDirectorySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index < 0) {
-        return fmt::format("{}", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
+        return fmt::format("{}", ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
     }
     if (propOption != CFG_MAX) {
-        return fmt::format("{}[{}]/{}", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ensureAttribute(propOption));
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigDefinition::ensureAttribute(propOption));
     }
-    return fmt::format("{}[{}]", ConfigManager::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
+    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index);
 }

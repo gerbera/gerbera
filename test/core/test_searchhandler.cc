@@ -42,6 +42,27 @@ decltype(auto) getAllTokens(const std::string& input)
     return searchTokens;
 }
 
+enum class TestCol {
+    id = 0,
+    item_id,
+    property_name,
+    property_value
+};
+
+const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
+    { TestCol::id, { "t", "id" } },
+    { TestCol::item_id, { "t", "item_id" } },
+    { TestCol::property_name, { "t", "property_name" } },
+    { TestCol::property_value, { "t", "property_value" } },
+};
+
+const std::vector<std::pair<std::string, TestCol>> testSortMap = {
+    { "id", TestCol::id },
+    { "item", TestCol::item_id },
+    { "name", TestCol::property_name },
+    { "val", TestCol::property_value },
+};
+
 ::testing::AssertionResult executeSearchLexerTest(const std::string& input,
     const std::vector<std::pair<std::string, TokenType>>& expectedTokens)
 {
@@ -74,6 +95,25 @@ decltype(auto) getAllTokens(const std::string& input)
             return ::testing::AssertionFailure() << "Failed to create AST";
 
         auto output = rootNode->emit();
+        if (output != expectedOutput)
+            return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
+
+        return ::testing::AssertionSuccess();
+    } catch (const std::runtime_error& e) {
+        return ::testing::AssertionFailure() << e.what();
+    }
+}
+
+::testing::AssertionResult executeSortParserTest(const std::string& input,
+    const std::string expectedOutput)
+{
+    try {
+        auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', testSortMap, testColMap);
+        auto parser = SortParser(columnMapper, input);
+        auto output = parser.parse();
+        if (output.empty())
+            return ::testing::AssertionFailure() << "Failed to parse";
+
         if (output != expectedOutput)
             return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
 
@@ -387,4 +427,22 @@ TEST(SearchParser, SearchCriteriaWindowMedia)
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.videoItem\" and @refID exists false",
         "(LOWER(c.upnp_class) LIKE LOWER('object.item.videoItem%')) AND (c.ref_id IS NULL)"));
+}
+
+TEST(SortParser, SortCriteria)
+{
+    EXPECT_TRUE(executeSortParserTest("+id,-name,+val",
+        "_t_._id_ ASC, _t_._property_name_ DESC, _t_._property_value_ ASC"));
+}
+
+TEST(SortParser, SortCriteriaNoDir)
+{
+    EXPECT_TRUE(executeSortParserTest("+id,name,+val",
+        "_t_._id_ ASC, _t_._property_name_ ASC, _t_._property_value_ ASC"));
+}
+
+TEST(SortParser, SortCriteriaError)
+{
+    EXPECT_TRUE(executeSortParserTest("+id,nme,+val",
+        "_t_._id_ ASC, _t_._property_value_ ASC"));
 }

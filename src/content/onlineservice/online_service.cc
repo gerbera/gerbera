@@ -42,11 +42,6 @@
 // NEW SERVICES!
 static constexpr auto service_prefixes = std::array { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
-OnlineServiceList::OnlineServiceList()
-{
-    service_list.resize(OS_Max);
-}
-
 void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& service)
 {
     if (service == nullptr)
