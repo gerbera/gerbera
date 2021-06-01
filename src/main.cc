@@ -316,7 +316,7 @@ int main(int argc, char** argv, char** envp)
                 exit(EXIT_FAILURE);
             }
             // close open filedescriptors belonging to a tty
-            for (int fd = sysconf(_SC_OPEN_MAX); fd >= 0; fd--) {
+            for (auto fd = int(sysconf(_SC_OPEN_MAX)); fd >= 0; fd--) {
                 if (isatty(fd))
                     close(fd);
             }
