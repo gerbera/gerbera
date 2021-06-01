@@ -50,7 +50,7 @@ class SessionManager;
 /// \brief Authentication handler (used over AJAX)
 class auth : public WebRequestHandler {
 protected:
-    std::chrono::seconds timeout;
+    std::chrono::seconds timeout {};
 
 public:
     explicit auth(std::shared_ptr<ContentManager> content);

@@ -73,7 +73,7 @@ public:
     std::vector<std::shared_ptr<DirectoryTweak>> getArrayCopy();
 
 protected:
-    size_t origSize;
+    size_t origSize {};
     std::map<size_t, std::shared_ptr<DirectoryTweak>> indexMap;
 
     std::recursive_mutex mutex;

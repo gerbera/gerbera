@@ -59,7 +59,7 @@ public:
     std::vector<std::shared_ptr<ClientConfig>> getArrayCopy();
 
 protected:
-    size_t origSize;
+    size_t origSize {};
     std::map<size_t, std::shared_ptr<ClientConfig>> indexMap;
 
     std::recursive_mutex mutex;

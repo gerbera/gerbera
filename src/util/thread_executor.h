@@ -60,7 +60,7 @@ public:
 protected:
     bool threadShutdown { false };
     /// \brief if the thread is currently running
-    bool threadRunning;
+    bool threadRunning {};
 
     std::condition_variable cond;
     std::mutex mutex;
