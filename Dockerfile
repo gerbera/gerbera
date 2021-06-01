@@ -48,4 +48,4 @@ EXPOSE 49494
 EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
-CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
+CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/.config/gerbera/config.xml"]
