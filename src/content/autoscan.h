@@ -148,11 +148,11 @@ public:
 
 protected:
     fs::path location;
-    ScanMode mode;
+    ScanMode mode {};
     bool isOrig { false };
-    bool recursive;
-    bool hidden;
-    bool persistent_flag;
+    bool recursive {};
+    bool hidden {};
+    bool persistent_flag {};
     std::chrono::seconds interval {};
     int taskCount { 0 };
     int scanID { INVALID_SCAN_ID };

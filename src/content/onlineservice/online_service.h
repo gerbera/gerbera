@@ -132,9 +132,9 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
 
-    int taskCount;
-    std::chrono::seconds refresh_interval;
-    std::chrono::seconds purge_interval;
+    int taskCount {};
+    std::chrono::seconds refresh_interval {};
+    std::chrono::seconds purge_interval {};
     std::shared_ptr<Timer::Parameter> timer_parameter;
 };
 

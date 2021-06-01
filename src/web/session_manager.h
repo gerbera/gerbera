@@ -112,7 +112,7 @@ protected:
     std::chrono::seconds timeout;
 
     /// \brief time of last access to the session, returned by getLastAccessTime()
-    std::chrono::seconds last_access;
+    std::chrono::seconds last_access {};
 
     /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
     std::string sessionID;

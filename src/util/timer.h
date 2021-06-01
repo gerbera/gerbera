@@ -135,7 +135,7 @@ protected:
         Subscriber* subscriber;
         std::chrono::milliseconds notifyInterval;
         std::shared_ptr<Parameter> parameter;
-        std::chrono::milliseconds nextNotify;
+        std::chrono::milliseconds nextNotify {};
         bool once;
     };
 

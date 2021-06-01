@@ -66,10 +66,7 @@ OnlineService::OnlineService(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(std::move(content))
-    , taskCount(0)
 {
-    refresh_interval = {};
-    purge_interval = {};
 }
 
 char OnlineService::getDatabasePrefix(service_type_t service)
