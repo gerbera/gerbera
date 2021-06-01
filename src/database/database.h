@@ -75,7 +75,7 @@ public:
     {
     }
 
-    int getFlags() const { return flags; }
+    unsigned int getFlags() const { return flags; }
     unsigned int getFlag(unsigned int mask) const { return flags & mask; }
     void setFlags(unsigned int flags) { this->flags = flags; }
     void setFlag(unsigned int mask) { flags |= mask; }

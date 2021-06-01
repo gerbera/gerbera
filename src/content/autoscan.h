@@ -134,7 +134,7 @@ public:
         last_mod_previous_scan = {};
         last_mod_current_scan = {};
     }
-    int getActiveScanCount() const { return activeScanCount; }
+    unsigned int getActiveScanCount() const { return activeScanCount; }
 
     /// \brief copies all properties to another object
     void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;
