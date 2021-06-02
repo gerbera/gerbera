@@ -463,9 +463,9 @@ private:
 
 class SortParser {
 public:
-    SortParser(std::shared_ptr<ColumnMapper> colMapper, const std::string& sortCriteria)
+    SortParser(std::shared_ptr<ColumnMapper> colMapper, std::string sortCriteria)
         : colMapper(std::move(colMapper))
-        , sortCrit(sortCriteria)
+        , sortCrit(std::move(sortCriteria))
     {
     }
     std::string parse();

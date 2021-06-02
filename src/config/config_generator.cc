@@ -96,7 +96,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
     return setValue(cs->xpath, value.empty() ? cs->getDefaultValue() : value);
 }
 
-std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value)
 {
     auto cs = std::string(ConfigDefinition::mapConfigOption(option));
     if (cs.substr(0, ConfigDefinition::ATTRIBUTE.size()) == ConfigDefinition::ATTRIBUTE) {
