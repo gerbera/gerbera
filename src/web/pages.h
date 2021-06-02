@@ -121,8 +121,8 @@ public:
 
 protected:
     void addContainer(int parentID);
-    std::shared_ptr<CdsObject> addItem(int parentID, std::shared_ptr<CdsItem> item);
-    std::shared_ptr<CdsObject> addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol);
+    std::shared_ptr<CdsObject> addItem(int parentID, const std::shared_ptr<CdsItem>& item);
+    std::shared_ptr<CdsObject> addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol);
 };
 
 /// \brief autoscan add and remove
