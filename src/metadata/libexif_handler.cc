@@ -385,7 +385,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 
     if (ed->size) {
         try {
-            std::unique_ptr<IOHandler> io_h(new MemIOHandler(ed->data, ed->size));
+            std::unique_ptr<IOHandler> io_h = std::make_unique<MemIOHandler>(ed->data, ed->size);
             io_h->open(UPNP_READ);
             std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: {}", th_resolution.c_str());
