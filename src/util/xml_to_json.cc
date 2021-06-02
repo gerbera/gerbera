@@ -120,7 +120,7 @@ std::string Xml2Json::getAsString(const char* str)
 std::string Xml2Json::getValue(const std::string& name, const char* text, const Hints& hints)
 {
     std::string str = text;
-    auto& hintsType = hints.asType;
+    auto&& hintsType = hints.asType;
 
     auto hint = hintsType.find(name);
 
@@ -151,7 +151,7 @@ std::string Xml2Json::getValue(const std::string& name, const char* text, const 
 
 bool Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName)
 {
-    auto& hintsArray = hints.asArray;
+    auto&& hintsArray = hints.asArray;
     auto hint = hintsArray.find(node);
 
     if (hint == hintsArray.end()) {
