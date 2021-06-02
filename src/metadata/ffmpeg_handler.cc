@@ -328,7 +328,7 @@ void FfmpegHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
 
-fs::path getThumbnailCacheBasePath(Config& config)
+fs::path getThumbnailCacheBasePath(const Config& config)
 {
     if (auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
         !configuredDir.empty()) {

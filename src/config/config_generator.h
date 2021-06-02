@@ -62,7 +62,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& key, const std::string& value);
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value);
 
-    static std::shared_ptr<pugi::xml_node> setValue(std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
 };
 
 #endif //GERBERA_CONFIG_GENERATOR_H
