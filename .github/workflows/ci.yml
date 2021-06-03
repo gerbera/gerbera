@@ -82,7 +82,7 @@ jobs:
         run: |
           pip install -U --no-cache-dir conan
           conan profile new default --detect
-          conan profile update settings.compiler.libcxx=libstdc++11 default
+          conan profile update settings.compiler.libcxx=libstdc++ default
       - name: Cache conan dependencies
         uses: actions/cache@v2
         with:
