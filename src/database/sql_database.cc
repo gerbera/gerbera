@@ -60,8 +60,8 @@
 #define TQ(data) QTB << (data) << QTE
 /* table quote with dot */
 #define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
-#define TQBM(data) TQD(browseColMap.at((data)).first, browseColMap.at((data)).second)
-#define TQSM(data) TQD(searchColMap.at((data)).first, searchColMap.at((data)).second)
+#define TQBM(data) browseColumnMapper->mapQuoted((data))
+#define TQSM(data) searchColumnMapper->mapQuoted((data))
 
 #define ITM_ALIAS "f"
 #define REF_ALIAS "rf"
@@ -69,7 +69,8 @@
 #define SRC_ALIAS "c"
 #define MTA_ALIAS "m"
 
-/* enum for createObjectFromRow's mode parameter */
+/// \brief browse column ids
+/// enum for createObjectFromRow's mode parameter
 enum class BrowseCol {
     id = 0,
     ref_id,
@@ -100,6 +101,7 @@ enum class BrowseCol {
     as_persistent
 };
 
+/// \brief search column ids
 enum class SearchCol {
     id = 0,
     ref_id,
@@ -115,6 +117,7 @@ enum class SearchCol {
     location
 };
 
+/// \brief meta column ids
 enum class MetadataCol {
     id = 0,
     item_id,
@@ -122,6 +125,7 @@ enum class MetadataCol {
     property_value
 };
 
+/// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 const static std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap = {
     { BrowseCol::id, { ITM_ALIAS, "id" } },
@@ -153,6 +157,7 @@ const static std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::as_persistent, { AUS_ALIAS, "persistent" } },
 };
 
+/// \brief Map search oolumn ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
 const static std::map<SearchCol, std::pair<std::string, std::string>> searchColMap = {
     { SearchCol::id, { SRC_ALIAS, "id" } },
@@ -169,6 +174,7 @@ const static std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::location, { SRC_ALIAS, "location" } },
 };
 
+/// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
 const static std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap = {
     { MetadataCol::id, { MTA_ALIAS, "id" } },
@@ -177,24 +183,42 @@ const static std::map<MetadataCol, std::pair<std::string, std::string>> metaColM
     { MetadataCol::property_value, { MTA_ALIAS, "property_value" } },
 };
 
+/// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 const static std::vector<std::pair<std::string, BrowseCol>> browseSortMap = {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::part_number },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::track_number },
     { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::dc_title },
-    { "upnp:class", BrowseCol::upnp_class },
-    { "path", BrowseCol::location },
+    { UPNP_SEARCH_CLASS, BrowseCol::upnp_class },
+    { UPNP_SEARCH_PATH, BrowseCol::location },
+    { UPNP_SEARCH_REFID, BrowseCol::ref_id },
+    { UPNP_SEARCH_PARENTID, BrowseCol::parent_id },
+    { UPNP_SEARCH_ID, BrowseCol::id },
 };
 
+/// \brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 const static std::vector<std::pair<std::string, SearchCol>> searchSortMap = {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::part_number },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::track_number },
     { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::dc_title },
-    { "upnp:class", SearchCol::upnp_class },
-    { "path", SearchCol::location },
+    { UPNP_SEARCH_CLASS, SearchCol::upnp_class },
+    { UPNP_SEARCH_PATH, SearchCol::location },
+    { UPNP_SEARCH_REFID, SearchCol::ref_id },
+    { UPNP_SEARCH_PARENTID, SearchCol::parent_id },
+    { UPNP_SEARCH_ID, SearchCol::id },
+};
+
+/// \brief Map meta search keys to column ids
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+const static std::vector<std::pair<std::string, MetadataCol>> metaTagMap = {
+    { "id", MetadataCol::id },
+    { UPNP_SEARCH_ID, MetadataCol::item_id },
+    { META_NAME, MetadataCol::property_name },
+    { META_VALUE, MetadataCol::property_value },
 };
 
 template <typename E>
@@ -207,6 +231,7 @@ constexpr auto to_underlying(E e) noexcept
 
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
+static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
     : Database(std::move(config))
@@ -222,8 +247,9 @@ void SQLDatabase::init()
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
 
-    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, browseSortMap, browseColMap);
-    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, searchSortMap, searchColMap);
+    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchSortMap, searchColMap);
+    metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
 
     // Statement for UPnP browse
     std::ostringstream buf;
@@ -234,7 +260,7 @@ void SQLDatabase::init()
         }
         buf << TQD(col.first, col.second);
     }
-    buf << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(ITM_ALIAS);
+    buf << " FROM " << browseColumnMapper->tableQuoted();
     buf << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(REF_ALIAS) << " ON " << TQBM(BrowseCol::ref_id) << "=" << TQD(REF_ALIAS, browseColMap.at(BrowseCol::id).second);
     buf << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' << TQ(AUS_ALIAS) << " ON " << TQD(AUS_ALIAS, "obj_id") << "=" << TQBM(BrowseCol::id);
     buf << " ";
@@ -264,7 +290,7 @@ void SQLDatabase::init()
     buf << " ";
     this->sql_meta_query = buf.str();
 
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>(fmt::format("{}", table_quote_begin), SRC_ALIAS, MTA_ALIAS);
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper);
 }
 
 void SQLDatabase::shutdown()
@@ -281,6 +307,18 @@ std::string SQLDatabase::getSortCapabilities()
         }
     }
     return join(sortKeys, ',');
+}
+
+std::string SQLDatabase::getSearchCapabilities()
+{
+    auto searchKeys = std::vector<std::string> {
+        MetadataHandler::getMetaFieldName(M_TITLE),
+        UPNP_SEARCH_CLASS,
+        MetadataHandler::getMetaFieldName(M_ARTIST),
+        MetadataHandler::getMetaFieldName(M_ALBUM),
+        MetadataHandler::getMetaFieldName(M_GENRE)
+    };
+    return join(searchKeys, ',');
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObject>& obj)

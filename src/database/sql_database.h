@@ -167,6 +167,7 @@ public:
 
     std::string getFsRootName() override;
     static std::string getSortCapabilities();
+    static std::string getSearchCapabilities();
 
     void clearFlagInDB(int flag) override;
 

@@ -36,6 +36,14 @@
 #include <unordered_map>
 #include <vector>
 
+#define UPNP_SEARCH_CLASS "upnp:class"
+#define UPNP_SEARCH_ID "@id"
+#define UPNP_SEARCH_REFID "@refID"
+#define UPNP_SEARCH_PARENTID "@parentID"
+#define UPNP_SEARCH_PATH "path"
+#define META_NAME "name"
+#define META_VALUE "value"
+
 class SearchParam;
 
 enum class TokenType {
@@ -371,15 +379,22 @@ public:
         const std::string& lhs, const std::string& rhs) const = 0;
 
     virtual ~SQLEmitter() = default;
-    virtual std::string tableQuote() const = 0;
+};
+
+class ColumnMapper {
+public:
+    virtual ~ColumnMapper() = default;
+    virtual bool hasEntry(const std::string& tag) const = 0;
+    virtual std::string tableQuoted() const = 0;
+    virtual std::string mapQuoted(const std::string& tag) const = 0;
+    virtual std::string mapQuotedLower(const std::string& tag) const = 0;
 };
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(std::string tabQuote, std::string tableAlias, std::string metaAlias)
-        : tabQuote(std::move(tabQuote))
-        , tableAlias(std::move(tableAlias))
-        , metaAlias(std::move(metaAlias))
+    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper)
+        : colMapper(colMapper)
+        , metaMapper(metaMapper)
     {
     }
 
@@ -396,12 +411,9 @@ public:
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
-    std::string tableQuote() const override { return tabQuote; }
-
 private:
-    std::string tabQuote;
-    std::string tableAlias;
-    std::string metaAlias;
+    std::shared_ptr<ColumnMapper> colMapper;
+    std::shared_ptr<ColumnMapper> metaMapper;
 
     std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
 };
@@ -429,22 +441,37 @@ private:
     const SQLEmitter& sqlEmitter;
 };
 
-class ColumnMapper {
-public:
-    virtual std::string mapQuoted(const std::string& tag) const = 0;
-    virtual ~ColumnMapper() = default;
-};
-
 template <class En>
 class EnumColumnMapper : public ColumnMapper {
 public:
-    explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
+    explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, std::string tableAlias, std::string tableName,
+        const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
         : table_quote_begin(tabQuoteBegin)
         , table_quote_end(tabQuoteEnd)
+        , tableAlias(std::move(tableAlias))
+        , tableName(std::move(tableName))
         , keyMap(keyMap)
         , colMap(colMap)
     {
     }
+    bool hasEntry(const std::string& tag) const override
+    {
+        return std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; }) != keyMap.end();
+    }
+    std::string mapQuoted(En tag) const
+    {
+        auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != colMap.end()) {
+            return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(tag).first, colMap.at(tag).second, table_quote_end);
+        }
+        return "";
+    }
+
+    std::string tableQuoted() const override
+    {
+        return fmt::format("{0}{1}{3} {0}{2}{3}", table_quote_begin, tableName, tableAlias, table_quote_end);
+    }
+
     std::string mapQuoted(const std::string& tag) const override
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
@@ -453,10 +480,20 @@ public:
         }
         return "";
     }
+    std::string mapQuotedLower(const std::string& tag) const override
+    {
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != keyMap.end()) {
+            return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
+        }
+        return "";
+    }
 
 private:
     const char table_quote_begin;
     const char table_quote_end;
+    std::string tableAlias;
+    std::string tableName;
     const std::vector<std::pair<std::string, En>>& keyMap;
     const std::map<En, std::pair<std::string, std::string>>& colMap;
 };
