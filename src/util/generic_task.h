@@ -23,12 +23,12 @@ enum task_owner_t {
 class GenericTask {
 protected:
     std::string description;
-    task_type_t taskType;
+    task_type_t taskType { Invalid };
     task_owner_t taskOwner;
-    unsigned int parentTaskID;
-    unsigned int taskID;
-    bool valid;
-    bool cancellable;
+    unsigned int parentTaskID { 0 };
+    unsigned int taskID { 0 };
+    bool valid { true };
+    bool cancellable { true };
 
 public:
     explicit GenericTask(task_owner_t taskOwner);

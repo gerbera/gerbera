@@ -461,11 +461,11 @@ public:
     config_option_t attrOption = CFG_MAX;
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption,
-        ArrayInitFunction init = nullptr, bool notEmpty = false, const std::vector<std::string>& defaultEntries = {})
+        ArrayInitFunction init = nullptr, bool notEmpty = false, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
-        , defaultEntries(defaultEntries)
+        , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
     {
     }

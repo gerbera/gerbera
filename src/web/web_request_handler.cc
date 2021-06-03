@@ -46,7 +46,6 @@ namespace web {
 WebRequestHandler::WebRequestHandler(std::shared_ptr<ContentManager> content)
     : RequestHandler(std::move(content))
     , sessionManager(this->content->getContext()->getSessionManager())
-    , checkRequestCalled(false)
 {
 }
 

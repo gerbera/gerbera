@@ -141,7 +141,7 @@ protected:
 
     std::mutex waitMutex;
     std::list<TimerSubscriberElement> subscribers;
-    std::atomic_bool shutdownFlag;
+    std::atomic_bool shutdownFlag { false };
 
     void notify();
     std::chrono::milliseconds getNextNotifyTime();

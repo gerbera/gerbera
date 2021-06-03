@@ -54,7 +54,7 @@ public:
 
 protected:
     pid_t process_id;
-    int exit_status;
+    int exit_status { 0 };
 };
 
 #endif // __PROCESS_EXECUTOR_H__

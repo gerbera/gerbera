@@ -572,7 +572,7 @@ int ContentManager::ensurePathExistence(fs::path path)
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start");
 
@@ -1968,8 +1968,7 @@ void CMFetchOnlineContentTask::run()
         return;
     }
     try {
-        std::shared_ptr<GenericTask> t(
-            new TPFetchOnlineContentTask(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh));
+        std::shared_ptr<GenericTask> t = std::make_shared<TPFetchOnlineContentTask>(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
         task_processor->addTask(t);
     } catch (const std::runtime_error& ex) {
         log_error("{}", ex.what());

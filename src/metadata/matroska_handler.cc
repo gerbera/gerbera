@@ -135,13 +135,13 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObje
     if (item == nullptr)
         return nullptr;
 
-    MemIOHandler* io_handler = nullptr;
+    std::unique_ptr<MemIOHandler> io_handler;
     parseMKV(item, &io_handler);
 
-    return std::unique_ptr<IOHandler>(io_handler);
+    return io_handler;
 }
 
-void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler) const
+void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const
 {
     file_io_callback ebml_file(item->getLocation().c_str());
     EbmlStream ebml_stream(ebml_file);
@@ -168,7 +168,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandle
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, MemIOHandler** p_io_handler) const
+void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, std::unique_ptr<MemIOHandler>* p_io_handler) const
 {
     // Looking at just at EbmlId is not reliable since it can be a dummy element.
     if (!el_l1->IsMaster())
@@ -220,7 +220,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     }
 }
 
-void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, MemIOHandler** p_io_handler) const
+void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* p_io_handler) const
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
@@ -238,7 +238,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
 
             if (p_io_handler != nullptr) {
                 // serveContent
-                *p_io_handler = new MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
+                *p_io_handler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
             } else {
                 // fillMetadata
                 std::string art_mimetype = getContentTypeFromByteVector(&fileData);

@@ -34,8 +34,7 @@
 #include <cassert>
 
 Timer::Timer(std::shared_ptr<Config> config)
-    : shutdownFlag(false)
-    , config(std::move(config))
+    : config(std::move(config))
 {
 }
 

@@ -32,11 +32,6 @@
 #include "generic_task.h" // API
 
 GenericTask::GenericTask(task_owner_t taskOwner)
-    : taskType(Invalid)
-    , taskOwner(taskOwner)
-    , parentTaskID(0)
-    , taskID(0)
-    , valid(true)
-    , cancellable(true)
+    : taskOwner(taskOwner)
 {
 }

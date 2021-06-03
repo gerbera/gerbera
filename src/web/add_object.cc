@@ -50,7 +50,7 @@ void web::addObject::addContainer(int parentID)
     content->addContainer(parentID, param("title"), param("class"));
 }
 
-std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr<CdsItem> item)
+std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, const std::shared_ptr<CdsItem>& item)
 {
     item->setParentID(parentID);
 
@@ -70,10 +70,10 @@ std::shared_ptr<CdsObject> web::addObject::addItem(int parentID, std::shared_ptr
 
     item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
-    return std::move(item);
+    return item;
 }
 
-std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol)
+std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol)
 {
     std::string protocolInfo;
 
@@ -106,7 +106,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, std::shared_ptr<
     resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
     item->addResource(resource);
 
-    return std::move(item);
+    return item;
 }
 
 void web::addObject::process()
