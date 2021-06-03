@@ -501,10 +501,10 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     if (operatr != "=")
         throw_std_runtime_error("Operator '{}' not yet supported", operatr);
 
-    auto prpStmnt = getPropertyStatement(property);
-    auto clsStmnt = getPropertyStatement(UPNP_SEARCH_CLASS);
-    return fmt::format(logicOperator.at((property[0] == '@') ? "@compare" : "compare"), clsStmnt.first,
-        fmt::format("{}{}", prpStmnt.first, operatr), fmt::format("{}{}", prpStmnt.second, operatr), value);
+    auto&& [prpUpper, prpLower] = getPropertyStatement(property);
+    auto&& [clsUpper, clcLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    return fmt::format(logicOperator.at((property[0] == '@') ? "@compare" : "compare"), clsUpper,
+        fmt::format("{}{}", prpUpper, operatr), fmt::format("{}{}", prpLower, operatr), value);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property, const std::string& value) const
@@ -513,9 +513,9 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     if (logicOperator.find(stringOperator) == logicOperator.end()) {
         throw_std_runtime_error("Operation '{}' not yet supported", stringOperator);
     }
-    auto prpStmnt = getPropertyStatement(property);
-    auto clsStmnt = getPropertyStatement(UPNP_SEARCH_CLASS);
-    return fmt::format(logicOperator.at(stringOperator), clsStmnt.first, prpStmnt.first, prpStmnt.second, value);
+    auto&& [prpUpper, prpLower] = getPropertyStatement(property);
+    auto&& [clsUpper, clsLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    return fmt::format(logicOperator.at(stringOperator), clsUpper, prpUpper, prpLower, value);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property, const std::string& value) const
@@ -528,9 +528,9 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
     } else {
         throw_std_runtime_error("Invalid value '{}' on rhs of 'exists' operator", value);
     }
-    auto prpStmnt = getPropertyStatement(property);
-    auto clsStmnt = getPropertyStatement(UPNP_SEARCH_CLASS);
-    return fmt::format(logicOperator.at((property[0] == '@') ? "@exists" : "exists"), clsStmnt.first, prpStmnt.first, prpStmnt.second, exists);
+    auto&& [prpUpper, prpLower] = getPropertyStatement(property);
+    auto&& [clsUpper, clsLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    return fmt::format(logicOperator.at((property[0] == '@') ? "@exists" : "exists"), clsUpper, prpUpper, prpLower, exists);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,
