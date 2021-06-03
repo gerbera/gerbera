@@ -21,6 +21,7 @@ jobs:
           - name: clang 11
             cc: clang-11
             cxx: clang++-11
+            libcxx: libstdc++
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
