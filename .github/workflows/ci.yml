@@ -94,7 +94,7 @@ jobs:
         run: |
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
-          conan remove 'gerbera/*' --force
+          # conan remove 'gerbera/*' --force
           conan create -pr ./conan/dev --build=force . gerbera/dev@
       - name: cleanup
         # Remove build directories before creating a cache.
