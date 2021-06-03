@@ -62,9 +62,9 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - name: clang 12
-            cc: clang-12
-            cxx: clang++-12
+          - name: clang 11
+            cc: clang-11
+            cxx: clang++-11
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
@@ -95,7 +95,7 @@ jobs:
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' --force
-          conan create -pr ./conan/dev --build=missing . gerbera/dev@
+          conan create -pr ./conan/dev --build=force . gerbera/dev@
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |
