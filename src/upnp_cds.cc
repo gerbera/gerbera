@@ -226,7 +226,7 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value("dc:title,upnp:class,upnp:artist,upnp:album");
+    root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
     request->setResponse(std::move(response));
 
     log_debug("end");
