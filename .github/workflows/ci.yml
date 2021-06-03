@@ -8,10 +8,8 @@ on:
 
 jobs:
   cpp:
-    # ubuntu-latest is not latest....
-    # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
-    # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
-    runs-on: ubuntu-20.04
+    # Conan packages are build on 18.04...
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         compiler:
