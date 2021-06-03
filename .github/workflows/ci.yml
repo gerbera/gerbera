@@ -18,14 +18,56 @@ jobs:
           - name: gcc 9
             cc: gcc-9
             cxx: g++-9
-          - name: clang 11
-            cc: clang-11
-            cxx: clang++-11
-            libcxx: libstdc++
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
+    steps:
+      - uses: actions/checkout@v1
+      # Alternatively: uses: docker://conanio/gcc9:latest
+      - name: Update package list
+        run: |
+          sudo apt-get update
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+      - name: Install conan
+        run: |
+          pip install -U --no-cache-dir conan
+          conan profile new default --detect
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+      - name: Cache conan dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.conan/data
+          key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
+      - name: build and test
+        run: |
+          # Remove existing package if it comes from the cache, otherwise
+          # Conan will skip building it (due to --build=missing policy)
+          conan remove 'gerbera/*' --force
+          conan create -pr ./conan/dev --build=missing . gerbera/dev@
+      - name: cleanup
+        # Remove build directories before creating a cache.
+        run: |
+          conan remove '*' --force --builds --system-reqs
+  cpp2:
+    # ubuntu-latest is not latest....
+    # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
+    # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        compiler:
+          - name: clang 11
+            cc: clang-11
+            cxx: clang++-11
+    env:
+      CC: ${{ matrix.compiler.cc }}
+      CXX: ${{ matrix.compiler.cxx }}
     steps:
       - uses: actions/checkout@v1
       # Alternatively: uses: docker://conanio/gcc9:latest
