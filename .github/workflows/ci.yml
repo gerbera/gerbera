@@ -54,7 +54,7 @@ jobs:
           conan remove 'gerbera/*' --force
           conan remove 'spdlog/*' --force
           conan remove 'fmt/*' --force
-          conan create -pr ./conan/dev --build=missing . gerbera/dev@
+          conan create -pr ./conan/dev --build=always . gerbera/dev@
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |
