@@ -62,9 +62,9 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - name: clang 11
-            cc: clang-11
-            cxx: clang++-11
+          - name: clang 12
+            cc: clang-12
+            cxx: clang++-12
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
@@ -82,7 +82,7 @@ jobs:
         run: |
           pip install -U --no-cache-dir conan
           conan profile new default --detect
-          conan profile update settings.compiler.libcxx=libstdc++ default
+          conan profile update settings.compiler.libcxx=libstdc++11 default
       - name: Cache conan dependencies
         uses: actions/cache@v2
         with:
