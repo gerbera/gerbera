@@ -43,7 +43,7 @@ Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* 
     this->context->getClients()->getInfo(addr, userAgent, &pClientInfo);
 }
 
-void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, std::unique_ptr<Headers>& headers) const
+void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Headers>& headers) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;

@@ -118,7 +118,7 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
     }
 
     auto sc = getContentHandler();
-    sc->setServiceContent(reply);
+    sc->setServiceContent(std::move(reply));
 
     std::shared_ptr<CdsObject> obj;
     do {
