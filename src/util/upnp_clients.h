@@ -97,7 +97,7 @@ private:
     bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
     void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
 
-    static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml);
+    static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document> xml);
 
 private:
     std::mutex mutex;

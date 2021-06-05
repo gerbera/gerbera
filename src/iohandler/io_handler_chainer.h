@@ -50,7 +50,7 @@ public:
     /// \param writeTo the IOHandler to write to
     /// \param chunkSize the amount of bytes to read/write at once. a buffer of
     /// this size will be allocated
-    IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize);
+    IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize);
     ~IOHandlerChainer() override
     {
         if (buf != nullptr) {

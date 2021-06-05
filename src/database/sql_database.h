@@ -238,7 +238,7 @@ private:
         const std::vector<int32_t>& items,
         const std::vector<int32_t>& containers, bool all);
 
-    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty);
+    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty);
 
     /* helpers for autoscan */
     void _removeAutoscanDirectory(int autoscanID);

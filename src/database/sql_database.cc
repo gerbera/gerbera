@@ -1617,7 +1617,7 @@ std::string SQLDatabase::toCSV(const std::vector<int>& input)
     return join(input, ",");
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(std::unique_ptr<ChangedContainers>& maybeEmpty)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
     log_debug("start upnp: {}; ui: {}",
         join(maybeEmpty->upnp, ',').c_str(),

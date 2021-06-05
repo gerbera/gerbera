@@ -43,7 +43,7 @@ SopCastContentHandler::SopCastContentHandler(const std::shared_ptr<Context>& con
 {
 }
 
-void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document>& service)
+void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
     service_xml = std::move(service);
     auto root = service_xml->document_element();
