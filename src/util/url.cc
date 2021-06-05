@@ -173,12 +173,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
 
 size_t URL::dl(void* buf, size_t size, size_t nmemb, void* data)
 {
-    auto& oss = *reinterpret_cast<std::ostringstream*>(data);
-
-    size_t s = size * nmemb;
-    oss << std::string(reinterpret_cast<const char*>(buf), s);
-
-    return s;
+    return size * nmemb;
 }
 
 #endif //HAVE_CURL

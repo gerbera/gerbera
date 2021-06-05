@@ -1677,7 +1677,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int obje
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
 {
     // \todo change this when more scanmodes become available
-    std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
+    auto adir = autoscan_timed->get(location);
 #if HAVE_INOTIFY
     if (adir == nullptr)
         adir = autoscan_inotify->get(location);
