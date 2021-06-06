@@ -64,7 +64,7 @@ public:
 
     /// \brief Returns the time of last access to the session.
     /// \return std::chrono::seconds
-    std::chrono::seconds getLastAccessTime() { return last_access; } const
+    std::chrono::seconds getLastAccessTime() const { return last_access; }
 
     std::chrono::seconds getTimeout() const { return timeout; }
 
@@ -158,7 +158,7 @@ public:
     /// \brief Removes a session
     void removeSession(const std::string& sessionID);
 
-    std::string getUserPassword(const std::string& user);
+    std::string getUserPassword(const std::string& user) const;
 
     /// \brief Is called whenever a container changed in a way,
     /// so that it needs to be redrawn in the tree of the UI.

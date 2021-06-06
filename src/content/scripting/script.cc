@@ -66,7 +66,7 @@ static constexpr std::array<duk_function_list_entry, 9> js_global_functions = { 
     { nullptr, nullptr, 0 },
 } };
 
-std::string Script::getProperty(const std::string& name)
+std::string Script::getProperty(const std::string& name) const
 {
     std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -81,7 +81,7 @@ std::string Script::getProperty(const std::string& name)
     return ret;
 }
 
-int Script::getBoolProperty(const std::string& name)
+int Script::getBoolProperty(const std::string& name) const
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -96,7 +96,7 @@ int Script::getBoolProperty(const std::string& name)
     return ret;
 }
 
-int Script::getIntProperty(const std::string& name, int def)
+int Script::getIntProperty(const std::string& name, int def) const
 {
     int ret;
     if (!duk_is_object_coercible(ctx, -1))
@@ -111,7 +111,7 @@ int Script::getIntProperty(const std::string& name, int def)
     return ret;
 }
 
-std::vector<std::string> Script::getPropertyNames()
+std::vector<std::string> Script::getPropertyNames() const
 {
     std::vector<std::string> keys;
     duk_enum(ctx, -1, 0);

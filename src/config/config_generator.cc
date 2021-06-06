@@ -40,10 +40,10 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
     return generated[""];
 }
 
-std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag) const
 {
     log_debug("reading '{}' -> {}", tag, generated.find(tag) == generated.end());
-    return generated[tag];
+    return generated.at(tag);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::string& value, bool makeLastChild)
