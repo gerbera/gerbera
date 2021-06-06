@@ -44,20 +44,18 @@ Database::Database(std::shared_ptr<Config> config)
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
 {
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
-    std::shared_ptr<Database> database;
-
-    if (type == "sqlite3") {
-        database = std::static_pointer_cast<Database>(std::make_shared<Sqlite3Database>(config, timer));
-    }
+    auto database = [&]() -> std::shared_ptr<Database> {
+        if (type == "sqlite3") {
+            return std::make_shared<Sqlite3Database>(config, timer);
+        }
 #ifdef HAVE_MYSQL
-    else if (type == "mysql") {
-        database = std::static_pointer_cast<Database>(std::make_shared<MySQLDatabase>(config));
-    }
+        if (type == "mysql") {
+            return std::make_shared<MySQLDatabase>(config);
+        }
 #endif
-    else {
         // other database types...
         throw_std_runtime_error("Unknown database type: {}", type.c_str());
-    }
+    }();
 
     database->init();
     database->doMetadataMigration();
