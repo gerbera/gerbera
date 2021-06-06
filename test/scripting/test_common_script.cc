@@ -97,7 +97,7 @@ TEST_F(CommonScriptTest, mapInitial_Umlaut)
 TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForBackSlash)
 {
     duk_get_global_string(ctx, "escapeSlash");
-    duk_push_string(ctx, "some\\path\\to\\escape");
+    duk_push_string(ctx, R"(some\path\to\escape)");
 
     duk_pcall(ctx, 1);
 
