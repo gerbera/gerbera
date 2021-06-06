@@ -37,15 +37,14 @@ std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_id
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx); // item
                 break;
-            } else {
-                //duk_to_object(ctx, -1);
-                duk_get_prop_string(ctx, -1, "title");
-                if (!duk_is_null_or_undefined(ctx, -1)) {
-                    std::string val = duk_to_string(ctx, -1);
-                    vctr.push_back(val);
-                }
-                duk_pop(ctx); // title
             }
+            //duk_to_object(ctx, -1);
+            duk_get_prop_string(ctx, -1, "title");
+            if (!duk_is_null_or_undefined(ctx, -1)) {
+                std::string val = duk_to_string(ctx, -1);
+                vctr.push_back(val);
+            }
+            duk_pop(ctx); // title
         }
         duk_pop(ctx); // item
     }
