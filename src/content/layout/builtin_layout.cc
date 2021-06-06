@@ -389,8 +389,8 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     : Layout(std::move(content))
+    , genreMap(config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
-    genreMap = config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP);
 #ifdef ENABLE_PROFILING
     PROF_INIT_GLOBAL(layout_profiling, "builtin layout");
 #endif

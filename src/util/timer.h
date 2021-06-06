@@ -54,9 +54,9 @@ public:
         };
 
         Parameter(timer_param_t param, int id)
+            : param(param)
+            , id(id)
         {
-            this->param = param;
-            this->id = id;
         }
 
         timer_param_t whoami() const { return param; }

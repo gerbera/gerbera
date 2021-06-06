@@ -52,11 +52,11 @@ public:
         ///
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
-        Stat(const std::string& url, off_t size, const std::string& mimetype)
+        Stat(std::string url, off_t size, std::string mimetype)
+            : url(std::move(url))
+            , size(size)
+            , mimetype(std::move(mimetype))
         {
-            this->url = url;
-            this->size = size;
-            this->mimetype = mimetype;
         }
 
         std::string getURL() const { return url; }

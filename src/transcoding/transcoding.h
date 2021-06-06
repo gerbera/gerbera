@@ -231,10 +231,10 @@ protected:
 
 class TranscodingProcess {
 public:
-    TranscodingProcess(pid_t pid, const std::string& fname)
+    TranscodingProcess(pid_t pid, std::string fname)
+        : pid(pid)
+        , fname(std::move(fname))
     {
-        this->pid = pid;
-        this->fname = fname;
     }
 
     pid_t getPID() const { return pid; }
