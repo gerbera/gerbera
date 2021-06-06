@@ -29,7 +29,7 @@ public:
         delete subject;
     };
 
-    std::string mockConfigXml(std::string mockFile)
+    std::string mockConfigXml(const std::string& mockFile)
     {
         std::ifstream t(mockFile);
         std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());

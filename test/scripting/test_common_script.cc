@@ -36,7 +36,7 @@ public:
         duk_destroy_heap(ctx);
     }
 
-    std::string invokeABCBOX(duk_context* ctx, std::string input, int boxType, std::string divChar)
+    std::string invokeABCBOX(duk_context* ctx, const std::string& input, int boxType, const std::string& divChar)
     {
         ScriptTestFixture::addConfig(ctx, { { "/import/scripting/virtual-layout/abcBox/skipChars", "" } });
 

@@ -92,7 +92,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 }
 
 ::testing::AssertionResult executeSearchParserTest(const SQLEmitter& emitter, const std::string& input,
-    const std::string expectedOutput)
+    const std::string& expectedOutput)
 {
     try {
         auto parser = SearchParser(emitter, input);
@@ -111,7 +111,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 }
 
 ::testing::AssertionResult executeSortParserTest(const std::string& input,
-    const std::string expectedOutput)
+    const std::string& expectedOutput)
 {
     try {
         auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
