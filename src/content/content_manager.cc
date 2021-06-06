@@ -1968,7 +1968,7 @@ void CMFetchOnlineContentTask::run()
         return;
     }
     try {
-        std::shared_ptr<GenericTask> t = std::make_shared<TPFetchOnlineContentTask>(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
+        auto t = std::static_pointer_cast<GenericTask>(std::make_shared<TPFetchOnlineContentTask>(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh));
         task_processor->addTask(t);
     } catch (const std::runtime_error& ex) {
         log_error("{}", ex.what());
