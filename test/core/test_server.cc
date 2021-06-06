@@ -12,13 +12,13 @@ using namespace ::testing;
 class ServerTest : public ::testing::Test {
 public:
     ServerTest() {};
-    virtual ~ServerTest() {};
+    ~ServerTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
     }
 
-    virtual void TearDown() {};
+    void TearDown() override {};
 
     std::string exec(const char* cmd)
     {
