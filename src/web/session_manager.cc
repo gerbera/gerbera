@@ -185,7 +185,7 @@ void SessionManager::removeSession(const std::string& sessionID)
     }
 }
 
-std::string SessionManager::getUserPassword(const std::string& user)
+std::string SessionManager::getUserPassword(const std::string& user) const
 {
     return getValueOrDefault(accounts, user);
 }

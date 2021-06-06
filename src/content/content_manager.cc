@@ -1884,9 +1884,9 @@ CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
         this->asSetting.adir->incTaskCount();
 }
 
-fs::path CMAddFileTask::getPath() { return dirEnt.path(); }
+fs::path CMAddFileTask::getPath() const { return dirEnt.path(); }
 
-fs::path CMAddFileTask::getRootPath() { return rootpath; }
+fs::path CMAddFileTask::getRootPath() const { return rootpath; }
 
 void CMAddFileTask::run()
 {

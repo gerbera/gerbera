@@ -88,8 +88,8 @@ protected:
 public:
     CMAddFileTask(std::shared_ptr<ContentManager> content,
         fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable = true);
-    fs::path getPath();
-    fs::path getRootPath();
+    fs::path getPath() const;
+    fs::path getRootPath() const;
     void run() override;
 };
 

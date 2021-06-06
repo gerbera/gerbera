@@ -36,7 +36,7 @@ class ConfigDefinition {
 public:
     static constexpr auto ATTRIBUTE = std::string_view("attribute::");
 
-    static const std::vector<std::shared_ptr<ConfigSetup>>& getOptionList()
+    static std::vector<std::shared_ptr<ConfigSetup>> getOptionList()
     {
         return complexOptions;
     }

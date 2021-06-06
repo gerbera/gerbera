@@ -140,7 +140,7 @@ public:
     void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;
 
     /// \brief Get the timer notify parameter associated with this directory.
-    std::shared_ptr<Timer::Parameter> getTimerParameter();
+    std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
     /* helpers for autoscan stuff */
     static std::string_view mapScanmode(ScanMode scanmode);

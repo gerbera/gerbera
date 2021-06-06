@@ -345,14 +345,14 @@ public:
     /// The difference between setting this flag to true or false is following:
     /// exactly=true checks all fields, also internal ones, exactly=false checks
     /// only the fields that will be visible in DIDL-Lite
-    virtual bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false);
+    virtual bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const;
 
     /// \brief Checks if current object has the same resources as obj
     /// \param obj object to check against
-    bool resourcesEqual(const std::shared_ptr<CdsObject>& obj);
+    bool resourcesEqual(const std::shared_ptr<CdsObject>& obj) const;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    virtual void validate();
+    virtual void validate() const;
 
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
@@ -406,10 +406,10 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() override;
+    void validate() const override;
 
     /// \brief Set the unique service ID.
     void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
@@ -448,7 +448,7 @@ public:
     //int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() override;
+    void validate() const override;
 };
 
 /// \brief A container in the content directory.
@@ -499,10 +499,10 @@ public:
     /// \brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
-    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) override;
+    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() override;
+    void validate() const override;
 };
 
 #endif // __CDS_OBJECTS_H__

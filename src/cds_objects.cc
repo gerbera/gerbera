@@ -57,7 +57,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
-bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     if (!(id == obj->getID()
             && parentID == obj->getParentID()
@@ -82,7 +82,7 @@ bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
             && objectFlags == obj->getFlags()));
 }
 
-bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
+bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj) const
 {
     if (resources.size() != obj->resources.size())
         return false;
@@ -92,7 +92,7 @@ bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
         [](auto&& r1, auto&& r2) { return r1->equals(r2); });
 }
 
-void CdsObject::validate()
+void CdsObject::validate() const
 {
     if (this->title.empty())
         throw_std_runtime_error("Object validation failed: missing title");
@@ -139,7 +139,7 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     item->setServiceID(serviceID);
     item->setBookMarkPos(bookMarkPos);
 }
-bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
@@ -147,7 +147,7 @@ bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
     return (mimeType == item->getMimeType() && partNumber == item->getPartNumber() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID() && bookMarkPos == item->getBookMarkPos());
 }
 
-void CdsItem::validate()
+void CdsItem::validate() const
 {
     CdsObject::validate();
     //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
@@ -175,7 +175,7 @@ CdsItemExternalURL::CdsItemExternalURL()
     upnpClass = UPNP_CLASS_ITEM;
 }
 
-void CdsItemExternalURL::validate()
+void CdsItemExternalURL::validate() const
 {
     CdsItem::validate();
     if (this->mimeType.empty())
@@ -200,13 +200,13 @@ void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
 }
-bool CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     return CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable();
 }
 
-void CdsContainer::validate()
+void CdsContainer::validate() const
 {
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database

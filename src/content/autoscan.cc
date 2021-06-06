@@ -157,7 +157,7 @@ void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) c
     copy->timer_parameter = timer_parameter;
 }
 
-std::shared_ptr<Timer::Parameter> AutoscanDirectory::getTimerParameter()
+std::shared_ptr<Timer::Parameter> AutoscanDirectory::getTimerParameter() const
 {
     return timer_parameter;
 }
