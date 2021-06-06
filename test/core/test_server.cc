@@ -20,7 +20,7 @@ public:
 
     void TearDown() override {}
 
-    std::string exec(const char* cmd)
+    static std::string exec(const char* cmd)
     {
         std::array<char, 128> buffer;
         std::string result;
@@ -34,7 +34,7 @@ public:
         return result;
     }
 
-    std::string mockText(const std::string& mockFile)
+    static std::string mockText(const std::string& mockFile)
     {
         std::ifstream t(mockFile);
         std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());

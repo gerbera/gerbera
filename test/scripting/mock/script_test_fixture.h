@@ -55,12 +55,12 @@ public:
     void TearDown() override;
 
     // Creates a mock item(orig) global object in Duktape context
-    duk_ret_t dukMockItem(duk_context* ctx, const string& mimetype, const string& id, int theora, const string& title,
+    static duk_ret_t dukMockItem(duk_context* ctx, const string& mimetype, const string& id, int theora, const string& title,
         const map<string, string>& meta, const map<string, string>& aux, const map<string, string>& res,
         const string& location, int online_service);
 
     // Creates a mock playlist global object in Duktape context
-    duk_ret_t dukMockPlaylist(duk_context* ctx, const string& title, const string& location, const string& mimetype);
+    static duk_ret_t dukMockPlaylist(duk_context* ctx, const string& title, const string& location, const string& mimetype);
 
     // Add global Duktape methods to proxy into c++ layer
     void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {});
@@ -69,7 +69,7 @@ public:
     static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config);
 
     // Access the global object(script) by name, and execute
-    void executeScript(duk_context* ctx);
+    static void executeScript(duk_context* ctx);
 
     // Proxy the common.js script with `createContainerChain`
     // Mimics the creation of a directory chain
