@@ -136,7 +136,7 @@ protected:
     std::map<std::string, std::string> accounts;
 
     void checkTimer();
-    bool timerAdded;
+    bool timerAdded {};
 
 public:
     /// \brief Constructor, initializes the array.

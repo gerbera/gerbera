@@ -81,6 +81,12 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , session_manager(context->getSessionManager())
     , context(context)
     , timer(std::move(timer))
+#ifdef HAVE_JS
+    , scripting_runtime(std::make_shared<ScriptingRuntime>())
+#endif
+#ifdef HAVE_LASTFMLIB
+    , last_fm(std::make_shared<LastFm>(context))
+#endif
     , layout_enabled(false)
     , working(false)
     , shutdownFlag(false)
@@ -89,12 +95,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>(config);
-#endif
-#ifdef HAVE_JS
-    scripting_runtime = std::make_shared<ScriptingRuntime>();
-#endif
-#ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>(context);
 #endif
 
     mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
