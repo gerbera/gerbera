@@ -13,9 +13,9 @@ class ConfigManagerTest : public ::testing::Test {
 public:
     ConfigManagerTest() {};
 
-    virtual ~ConfigManagerTest() {};
+    ~ConfigManagerTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         gerberaDir = createTempPath();
 
@@ -77,7 +77,7 @@ public:
         return configGenerator.generate(home, confdir, prefix, magic);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         if (subject)
             delete subject;

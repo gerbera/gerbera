@@ -15,9 +15,9 @@ class UpnpXmlTest : public ::testing::Test {
 
 public:
     UpnpXmlTest() {};
-    virtual ~UpnpXmlTest() {};
+    ~UpnpXmlTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<ConfigMock>();
 
@@ -29,7 +29,7 @@ public:
         subject = new UpnpXMLBuilder(context, virtualDir, presentationURl);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         delete subject;
     };

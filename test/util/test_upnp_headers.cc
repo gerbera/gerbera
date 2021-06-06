@@ -16,7 +16,7 @@ public:
         info = UpnpFileInfo_new();
 #endif
     };
-    virtual ~HeadersHelperTest() override
+    ~HeadersHelperTest() override
     {
 #if defined(USING_NPUPNP)
         delete info;

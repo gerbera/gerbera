@@ -19,9 +19,9 @@ class CommonScriptTest : public ::testing::Test {
 public:
     CommonScriptTest() {};
 
-    virtual ~CommonScriptTest() {};
+    ~CommonScriptTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
@@ -32,7 +32,7 @@ public:
         duk_call(ctx, 0);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         duk_destroy_heap(ctx);
     }

@@ -54,10 +54,10 @@ class ScriptTestFixture : public ::testing::Test {
 public:
     // Builds up the Duktape context
     // Reads in the script under test
-    virtual void SetUp();
+    void SetUp() override;
 
     // Destroys the Duktape context
-    virtual void TearDown();
+    void TearDown() override;
 
     // Creates a mock item(orig) global object in Duktape context
     duk_ret_t dukMockItem(duk_context* ctx, string mimetype, string id, int theora, string title,

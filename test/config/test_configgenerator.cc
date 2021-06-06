@@ -12,9 +12,9 @@ class ConfigGeneratorTest : public ::testing::Test {
 
 public:
     ConfigGeneratorTest() {};
-    virtual ~ConfigGeneratorTest() {};
+    ~ConfigGeneratorTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         subject = new ConfigGenerator();
         subject->init();
@@ -24,7 +24,7 @@ public:
         magicFile = "magic.file";
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         delete subject;
     };

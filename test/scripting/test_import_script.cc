@@ -25,7 +25,7 @@ public:
         scriptName = "import.js";
     };
 
-    virtual ~ImportScriptTest()
+    ~ImportScriptTest() override
     {
         commonScriptMock.reset();
     };

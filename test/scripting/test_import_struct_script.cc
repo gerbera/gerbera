@@ -26,7 +26,7 @@ public:
         audioLayout = "Structured";
     };
 
-    virtual ~ImportStructuredScriptTest()
+    ~ImportStructuredScriptTest() override
     {
         commonScriptMock.reset();
     };

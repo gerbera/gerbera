@@ -32,7 +32,7 @@ public:
         scriptName = "playlists.js";
     };
 
-    virtual ~InternalUrlM3UPlaylistTest()
+    ~InternalUrlM3UPlaylistTest() override
     {
         commonScriptMock.reset();
     };

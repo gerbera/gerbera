@@ -18,9 +18,9 @@ public:
 class UpnpClientsTest : public ::testing::Test {
 public:
     UpnpClientsTest() {};
-    virtual ~UpnpClientsTest() {};
+    ~UpnpClientsTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<MyConfigMock>();
 
@@ -30,7 +30,7 @@ public:
         subject = new Clients(config);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         delete subject;
     };
