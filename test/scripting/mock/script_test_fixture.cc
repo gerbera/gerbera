@@ -363,7 +363,7 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
     for (size_t i = 0; i < dirs.size(); i++) {
         string dir = dirs.at(i);
         duk_push_string(ctx, dir.c_str());
-        duk_put_prop_index(ctx, arr_idx, (int)i);
+        duk_put_prop_index(ctx, arr_idx, static_cast<int>(i));
     }
 
     getRootPathParams params;
