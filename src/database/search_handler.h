@@ -393,8 +393,8 @@ public:
 class DefaultSQLEmitter : public SQLEmitter {
 public:
     DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper)
-        : colMapper(colMapper)
-        , metaMapper(metaMapper)
+        : colMapper(std::move(colMapper))
+        , metaMapper(std::move(metaMapper))
     {
     }
 
