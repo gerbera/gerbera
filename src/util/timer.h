@@ -121,7 +121,7 @@ protected:
         {
             getTimespecAfterMillis(notifyInterval, nextNotify);
         }
-        std::chrono::milliseconds getNextNotify() { return nextNotify; }
+        std::chrono::milliseconds getNextNotify() { return nextNotify; } const
 
         std::shared_ptr<Parameter> getParameter() const { return parameter; }
 

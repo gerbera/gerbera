@@ -64,7 +64,7 @@ public:
 
     /// \brief Returns the time of last access to the session.
     /// \return std::chrono::seconds
-    std::chrono::seconds getLastAccessTime() { return last_access; }
+    std::chrono::seconds getLastAccessTime() { return last_access; } const
 
     std::chrono::seconds getTimeout() const { return timeout; }
 
