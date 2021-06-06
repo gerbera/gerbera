@@ -80,8 +80,7 @@ public:
 
     void TearDown() override
     {
-        if (subject)
-            delete subject;
+        delete subject;
         fs::remove_all(gerberaDir);
     };
 
