@@ -11,14 +11,14 @@ using namespace ::testing;
 
 class ServerTest : public ::testing::Test {
 public:
-    ServerTest() {};
-    ~ServerTest() override {};
+    ServerTest() = default;
+    ~ServerTest() override = default;
 
     void SetUp() override
     {
     }
 
-    void TearDown() override {};
+    void TearDown() override {}
 
     std::string exec(const char* cmd)
     {

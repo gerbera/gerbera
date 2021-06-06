@@ -12,7 +12,7 @@ using namespace std;
 // Expectations can be decided by each test for the given scenario.
 class CommonScriptInterface {
 public:
-    virtual ~CommonScriptInterface() { }
+    virtual ~CommonScriptInterface() = default;
     virtual duk_ret_t getPlaylistType(string type) = 0;
     virtual duk_ret_t print(string text) = 0;
     virtual duk_ret_t addContainerTree(vector<string> tree) = 0;

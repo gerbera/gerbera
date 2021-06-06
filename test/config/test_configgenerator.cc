@@ -11,8 +11,8 @@ using namespace ::testing;
 class ConfigGeneratorTest : public ::testing::Test {
 
 public:
-    ConfigGeneratorTest() {};
-    ~ConfigGeneratorTest() override {};
+    ConfigGeneratorTest() = default;
+    ~ConfigGeneratorTest() override = default;
 
     void SetUp() override
     {
