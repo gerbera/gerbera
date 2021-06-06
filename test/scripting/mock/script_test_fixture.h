@@ -14,35 +14,30 @@
 using namespace ::testing;
 using namespace std;
 
-struct _addCdsObjectParams {
+struct addCdsObjectParams {
     map<string, string> objectValues;
     string containerChain;
     string objectType;
 };
-typedef struct _addCdsObjectParams addCdsObjectParams;
 
-struct _abcBoxParams {
+struct abcBoxParams {
     string inputValue;
     int boxType;
     string divChar;
 };
-typedef struct _abcBoxParams abcBoxParams;
 
-struct _getRootPathParams {
+struct getRootPathParams {
     string objScriptPath;
     string origObjLocation;
 };
-typedef struct _getRootPathParams getRootPathParams;
 
-struct _copyObjectParams {
+struct copyObjectParams {
     bool isObject;
 };
-typedef struct _copyObjectParams copyObjectParams;
 
-struct _getCdsObjectParams {
+struct getCdsObjectParams {
     string location;
 };
-typedef struct _getCdsObjectParams getCdsObjectParams;
 
 // The class provides a way to test the Duktape scripts
 // providing various c++ translations of script functions
