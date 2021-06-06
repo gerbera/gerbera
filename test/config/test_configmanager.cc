@@ -1,8 +1,9 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <array>
 #include <fstream>
 #include <ftw.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <memory>
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
@@ -95,7 +96,7 @@ public:
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
-    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
@@ -119,7 +120,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
     config_file = "";
 
     try {
-        auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false));
+        auto shared = std::make_shared<ConfigManager>(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
         shared->load(notExistsDir);
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
@@ -129,7 +130,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
     config_file = "";
-    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
