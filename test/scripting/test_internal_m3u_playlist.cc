@@ -28,7 +28,7 @@ public:
 
     InternalUrlM3UPlaylistTest()
     {
-        commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
+        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
     };
 

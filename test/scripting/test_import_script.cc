@@ -21,7 +21,7 @@ class ImportScriptTest : public ScriptTestFixture {
 public:
     ImportScriptTest()
     {
-        commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
+        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "import.js";
     };
 
