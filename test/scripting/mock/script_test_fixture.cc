@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
+#include <utility>
 namespace fs = std::filesystem;
 
 #include "cds_objects.h"
@@ -56,9 +57,9 @@ void ScriptTestFixture::loadCommon(duk_context* ctx)
     }
 }
 
-duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, string mimetype, string id, int theora, string title,
-    map<string, string> meta, map<string, string> aux, map<string, string> res,
-    string location, int online_service)
+duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const string& mimetype, const string& id, int theora, const string& title,
+    const map<string, string>& meta, const map<string, string>& aux, const map<string, string>& res,
+    const string& location, int online_service)
 {
     duk_idx_t orig_idx;
     duk_idx_t meta_idx;
@@ -114,7 +115,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, string mimetype, stri
     return 0;
 }
 
-duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, string title, string location, string mimetype)
+duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const string& title, const string& location, const string& mimetype)
 {
     const string OBJECT_NAME = "playlist";
     duk_push_object(ctx);
@@ -272,7 +273,7 @@ vector<string> ScriptTestFixture::addContainerTree(duk_context* ctx, map<string,
     return array;
 }
 
-addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, vector<string> keys)
+addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const vector<string>& keys)
 {
     string containerChain;
     string objContainer;
@@ -292,26 +293,26 @@ addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, vector<stri
     return params;
 }
 
-copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, map<string, string> obj, map<string, string> meta)
+copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta)
 {
     duk_bool_t isObjectParam = duk_is_object(ctx, 0);
     copyObjectParams params;
     params.isObject = isObjectParam;
 
     DukTestHelper dukHelper;
-    dukHelper.createObject(ctx, std::move(obj), std::move(meta));
+    dukHelper.createObject(ctx, obj, meta);
 
     return params;
 }
 
-getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, map<string, string> obj, map<string, string> meta)
+getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta)
 {
     string location = duk_to_string(ctx, 0);
     getCdsObjectParams params;
     params.location = location;
 
     DukTestHelper dukHelper;
-    dukHelper.createObject(ctx, std::move(obj), std::move(meta));
+    dukHelper.createObject(ctx, obj, meta);
 
     return params;
 }

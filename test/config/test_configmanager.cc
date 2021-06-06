@@ -65,7 +65,7 @@ public:
         return ss;
     }
 
-    void create_directory(fs::path dir)
+    void create_directory(const fs::path& dir)
     {
         if (mkdir(dir.c_str(), 0777) < 0) {
             throw_std_runtime_error("Failed to create test_config temporary directory for testing: {}", dir.c_str());

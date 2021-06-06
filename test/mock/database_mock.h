@@ -12,7 +12,7 @@ using namespace ::testing;
 class DatabaseMock : public Database {
 public:
     DatabaseMock(std::shared_ptr<Config> config)
-        : Database(config)
+        : Database(std::move(config))
     {
     }
 
