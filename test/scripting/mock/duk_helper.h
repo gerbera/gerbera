@@ -14,8 +14,8 @@
 // data into c++ types
 class DukTestHelper {
 public:
-    DukTestHelper();
-    ~DukTestHelper();
+    DukTestHelper() = default;
+    ~DukTestHelper() = default;
 
     // Convert an array at the top of the stack
     // to a c++ vector of strings

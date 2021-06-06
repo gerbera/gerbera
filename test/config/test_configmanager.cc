@@ -11,9 +11,9 @@
 class ConfigManagerTest : public ::testing::Test {
 
 public:
-    ConfigManagerTest() {};
+    ConfigManagerTest() = default;
 
-    ~ConfigManagerTest() override {};
+    ~ConfigManagerTest() override = default;
 
     void SetUp() override
     {

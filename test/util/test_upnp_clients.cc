@@ -17,8 +17,8 @@ public:
 
 class UpnpClientsTest : public ::testing::Test {
 public:
-    UpnpClientsTest() {};
-    ~UpnpClientsTest() override {};
+    UpnpClientsTest() = default;
+    ~UpnpClientsTest() override = default;
 
     void SetUp() override
     {

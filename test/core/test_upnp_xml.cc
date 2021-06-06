@@ -14,8 +14,8 @@ using namespace ::testing;
 class UpnpXmlTest : public ::testing::Test {
 
 public:
-    UpnpXmlTest() {};
-    ~UpnpXmlTest() override {};
+    UpnpXmlTest() = default;
+    ~UpnpXmlTest() override = default;
 
     void SetUp() override
     {
@@ -32,7 +32,7 @@ public:
     void TearDown() override
     {
         delete subject;
-    };
+    }
 
     UpnpXMLBuilder* subject;
     std::shared_ptr<ConfigMock> config;

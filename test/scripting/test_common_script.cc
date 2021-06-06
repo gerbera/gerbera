@@ -17,9 +17,8 @@ using namespace ::testing;
 class CommonScriptTest : public ::testing::Test {
 
 public:
-    CommonScriptTest() {};
-
-    ~CommonScriptTest() override {};
+    CommonScriptTest() = default;
+    ~CommonScriptTest() override = default;
 
     void SetUp() override
     {

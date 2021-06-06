@@ -5,9 +5,6 @@
 #include <duktape.h>
 #include <regex>
 
-DukTestHelper::DukTestHelper() = default;
-DukTestHelper::~DukTestHelper() = default;
-
 std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_t idx)
 {
     duk_size_t i, n;
