@@ -134,7 +134,7 @@ public:
         last_mod_previous_scan = {};
         last_mod_current_scan = {};
     }
-    int getActiveScanCount() const { return activeScanCount; }
+    unsigned int getActiveScanCount() const { return activeScanCount; }
 
     /// \brief copies all properties to another object
     void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;
@@ -148,11 +148,11 @@ public:
 
 protected:
     fs::path location;
-    ScanMode mode;
+    ScanMode mode {};
     bool isOrig { false };
-    bool recursive;
-    bool hidden;
-    bool persistent_flag;
+    bool recursive {};
+    bool hidden {};
+    bool persistent_flag {};
     std::chrono::seconds interval {};
     int taskCount { 0 };
     int scanID { INVALID_SCAN_ID };

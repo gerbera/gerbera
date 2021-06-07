@@ -305,7 +305,7 @@ class ConfigIntSetup : public ConfigSetup {
 protected:
     IntCheckFunction valueCheck = nullptr;
     IntMinFunction minCheck = nullptr;
-    int minValue;
+    int minValue {};
 
 public:
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help)
@@ -530,9 +530,9 @@ protected:
     bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
-    config_option_t nodeOption;
-    config_option_t keyOption;
-    config_option_t valOption;
+    config_option_t nodeOption {};
+    config_option_t keyOption {};
+    config_option_t valOption {};
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
         bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})

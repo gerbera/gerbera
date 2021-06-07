@@ -139,7 +139,7 @@ protected:
     /// \brief The SQL query string
     const char* query;
 
-    int lastInsertId;
+    int lastInsertId {};
     bool getLastInsertIdFlag;
 };
 
@@ -208,7 +208,7 @@ private:
 
     /// \brief the tasks to be done by the sqlite3 thread
     std::queue<std::shared_ptr<SLTask>> taskQueue;
-    bool taskQueueOpen;
+    bool taskQueueOpen {};
 
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }
@@ -216,7 +216,7 @@ private:
     bool dirty;
     bool dbInitDone;
     bool hasBackupTimer;
-    int sqliteStatus;
+    int sqliteStatus {};
 
     friend class SLSelectTask;
     friend class SLExecTask;

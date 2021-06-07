@@ -61,7 +61,7 @@ public:
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    void setServiceContent(std::unique_ptr<pugi::xml_document>& service) override;
+    void setServiceContent(std::unique_ptr<pugi::xml_document> service) override;
 
     /// \brief retrieves an object from the service.
     ///

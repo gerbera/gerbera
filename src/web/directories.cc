@@ -40,10 +40,7 @@ web::directories::directories(std::shared_ptr<ContentManager> content)
 {
 }
 
-using dirInfo = struct {
-    fs::path filename;
-    bool hasContent;
-};
+using dirInfo = std::pair<fs::path, bool>;
 
 void web::directories::process()
 {
@@ -94,10 +91,11 @@ void web::directories::process()
 
     auto f2i = StringConverter::f2i(config);
     for (auto&& [key, val] : filesMap) {
+        auto&& [file, has] = val;
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
-        ce.append_attribute("child_count") = val.hasContent;
+        ce.append_attribute("child_count") = has;
 
-        ce.append_attribute("title") = f2i->convert(val.filename).c_str();
+        ce.append_attribute("title") = f2i->convert(file).c_str();
     }
 }

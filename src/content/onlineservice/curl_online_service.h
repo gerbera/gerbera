@@ -50,7 +50,7 @@ public:
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
-    virtual void setServiceContent(std::unique_ptr<pugi::xml_document>& service) = 0;
+    virtual void setServiceContent(std::unique_ptr<pugi::xml_document> service) = 0;
 
     /// \brief retrieves an object from the service.
     ///

@@ -44,29 +44,31 @@ sudo make install
 
 ## Dependencies
 
-| Library      	| Min Version	| Required? | Note                 	     | Compile-time option | Default  |
-|--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| 1.14.0 	| XOR libnpupnp | [pupnp]                    |                     |          |
-| libnpupnp     | 4.1.2 	| XOR libupnp   | [npupnp]                   | WITH_NPUPNP         | Disabled |
-| libuuid      	|         	| Depends on OS | Not required on \*BSD      |                     |          |
-| pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
-| libiconv     	|         	| Required  	|                      	     |                     |          |
-| sqlite3      	| 3.7.0  	| Required  	| Database storage     	     |                     |          |
-| zlib          |        	| Required  	|                            |                     |          |
-| fmtlib        | 5.3    	| Required  	|                            |                     |          |
-| spdlog        |        	| Required  	|                            |                     |          |
-| duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
-| mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
-| curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
-| [taglib]      | 1.11.1  	| Optional  	| Audio tag support          | WITH_TAGLIB         | Enabled  |
-| libmagic     	|         	| Optional  	| File type detection  	     | WITH_MAGIC          | Enabled  |
-| libmatroska 	|         	| Optional  	| MKV metadata               | WITH_MATROSKA       | Enabled  |
-| ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Disabled |
-| libexif      	|         	| Optional  	| JPEG Exif metadata         | WITH_EXIF           | Enabled  |
-| libexiv2    	|         	| Optional  	| Exif, IPTC, XMP metadata   | WITH_EXIV2          | Disabled |
-| lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
-| ffmpegthumbnailer |           | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
-| inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY      | Enabled |
+| Library       | Min Version   | Required?     | Note                       | Compile-time option    | Default  | Script             |
+|---------------|---------------|---------------|----------------------------|------------------------|----------|--------------------|
+| libupnp       | 1.14.0        | XOR libnpupnp | [pupnp]                    |                        |          | install-pupnp.sh   |
+| libnpupnp     | 4.1.2         | XOR libupnp   | [npupnp]                   | WITH_NPUPNP            | Disabled |                    |
+| libuuid       |               | Depends on OS | Not required on \*BSD      |                        |          |                    |
+| [pugixml]     |               | Required      | XML file and data support  |                        |          | install-pugixml.sh |
+| libiconv      |               | Required      | Charset conversion         |                        |          |                    |
+| sqlite3       | 3.7.0         | Required      | Database storage           |                        |          |                    |
+| zlib          |               | Required      | Data compression           |                        |          |                    |
+| [fmtlib]      | 5.3           | Required      | Fast string formatting     |                        |          | install-fmt.sh     |
+| [spdlog]      |               | Required      | Runtime logging            |                        |          | install-spdlog.sh  |
+| [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  | install-duktape.sh |
+| mysql         |               | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |                    |
+| curl          |               | Optional      | Enables web services       | WITH_CURL              | Enabled  |                    |
+| [taglib]      | 1.11.1        | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  | install-taglib.sh  |
+| libmagic      |               | Optional      | File type detection        | WITH_MAGIC             | Enabled  |                    |
+| libmatroska   |               | Optional      | MKV metadata               | WITH_MATROSKA          | Enabled  |                    |
+| ffmpeg/libav  |               | Optional      | File metadata              | WITH_AVCODEC           | Disabled |                    |
+| libexif       |               | Optional      | JPEG Exif metadata         | WITH_EXIF              | Enabled  |                    |
+| libexiv2      |               | Optional      | Exif, IPTC, XMP metadata   | WITH_EXIV2             | Disabled |                    |
+| lastfmlib     | 0.4.0         | Optional      | Enables scrobbling         | WITH_LASTFM            | Disabled | install-lastfm.sh  |
+| [ffmpegthumbnailer] |         | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |                    |
+| inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY           | Enabled  |                    |
+
+Scripts for installation of (build) dependencies from source can be found under `scripts`.
 
 ## Licence
 
@@ -84,9 +86,12 @@ sudo make install
     Copyright (C) 2016-2021
         Gerbera Contributors
 
-[pupnp]: https://github.com/pupnp/pupnp
+[Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
+[duktape]: http://duktape.org
+[ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
+[fmtlib]: https://github.com/fmtlib/fmt
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml
+[pupnp]: https://github.com/pupnp/pupnp
+[spdlog]: https://github.com/gabime/spdlog
 [taglib]: http://taglib.org/
-[duktape]: http://duktape.org
-[Docker Hub]: https://hub.docker.com/r/gerbera/gerbera

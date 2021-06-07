@@ -286,7 +286,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
     }
 }
 
-bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document>& xml)
+bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document> xml)
 {
 #if defined(USING_NPUPNP)
     std::string description, ct;

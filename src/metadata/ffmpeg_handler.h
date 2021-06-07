@@ -68,7 +68,7 @@ private:
     void writeThumbnailCacheFile(const fs::path& movie_filename, const std::byte* data, std::size_t size) const;
 };
 
-fs::path getThumbnailCacheBasePath(Config& config);
+fs::path getThumbnailCacheBasePath(const Config& config);
 fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
 
 #endif //__FFMPEG_HANDLER_H__

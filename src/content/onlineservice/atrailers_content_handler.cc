@@ -43,7 +43,7 @@ ATrailersContentHandler::ATrailersContentHandler(const std::shared_ptr<Context>&
 {
 }
 
-void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document>& service)
+void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
     service_xml = std::move(service);
     auto root = service_xml->document_element();
