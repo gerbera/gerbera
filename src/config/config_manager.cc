@@ -266,6 +266,7 @@ void ConfigManager::load(const fs::path& userHome)
     // read upnp options
     setOption(root, CFG_UPNP_ALBUM_PROPERTIES);
     setOption(root, CFG_UPNP_ARTIST_PROPERTIES);
+    setOption(root, CFG_UPNP_GENRE_PROPERTIES);
     setOption(root, CFG_UPNP_TITLE_PROPERTIES);
     setOption(root, CFG_THREAD_SCOPE_SYSTEM);
 
