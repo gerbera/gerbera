@@ -180,7 +180,7 @@ protected:
 #if !defined(SOLARIS) && !defined(__HAIKU__)
         // default scoping on solaroid systems is in fact PTHREAD_SCOPE_SYSTEM
         // plus, setting PTHREAD_EXPLICIT_SCHED requires elevated priveleges
-		// while Haiku doesn't implements pthread_attr_setinheritsched yet
+        // while Haiku doesn't implements pthread_attr_setinheritsched yet
         if (config->getBoolOption(CFG_THREAD_SCOPE_SYSTEM)) {
             attr = new pthread_attr_t;
             pthread_attr_init(attr);
