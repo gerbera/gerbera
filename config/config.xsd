@@ -271,6 +271,7 @@
             <xs:all>
                 <xs:element ref="album-properties" minOccurs="0"/>
                 <xs:element ref="artist-properties" minOccurs="0"/>
+                <xs:element ref="genre-properties" minOccurs="0"/>
                 <xs:element ref="title-properties" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
@@ -285,6 +286,14 @@
     </xs:element>
 
     <xs:element name="artist-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre-properties">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="upnp-property" minOccurs="0"/>

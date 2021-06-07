@@ -246,6 +246,11 @@ static std::map<std::string, std::string> upnp_artist_prop_defaults {
     { "upnp:genre", "M_GENRE" },
 };
 
+/// \brief default values for CFG_UPNP_GENRE_PROPERTIES
+static std::map<std::string, std::string> upnp_genre_prop_defaults {
+    { "upnp:genre", "M_GENRE" },
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -524,6 +529,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#scripting",
         ""),
 #endif // JS
+
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
         "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_GENRE, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
@@ -911,6 +917,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/upnp/artist-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
         false, false, true, std::move(upnp_artist_prop_defaults)),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_GENRE_PROPERTIES,
+        "/server/upnp/genre-properties", "config-server.html#upnp",
+        ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
+        false, false, true, std::move(upnp_genre_prop_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_PROPERTIES,
         "/server/upnp/title-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
@@ -955,9 +965,9 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
 
-    { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
-    { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
-    { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
 
     { ATTR_AUTOSCAN_DIRECTORY_LOCATION, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
