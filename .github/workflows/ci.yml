@@ -18,9 +18,9 @@ jobs:
           - name: gcc 9
             cc: gcc-9
             cxx: g++-9
-#          - name: clang 11
-#            cc: clang-11
-#            cxx: clang++-11
+          - name: clang 11
+            cc: clang-11
+            cxx: clang++-11
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
