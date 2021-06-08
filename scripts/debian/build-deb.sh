@@ -30,16 +30,7 @@ function install-cmake() {
 function install-fmt {
     echo "::group::Installing fmt"
   if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
-    git clone https://github.com/fmtlib/fmt
-    pushd fmt
-    git checkout 7.1.3
-    popd
-    mkdir fmt-build
-    pushd fmt-build
-    cmake ../fmt -DBUILD_SHARED_LIBS=NO -DFMT_TEST=NO
-    make
-    sudo make install
-    popd
+    sudo bash scripts/install-fmt.sh static
   else
      sudo apt-get install libfmt-dev -y
   fi
