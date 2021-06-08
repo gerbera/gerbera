@@ -60,6 +60,9 @@ Reverse Proxy Setup
 
 If you want to access the web interface from other sources or use a ssl certificate it is recommended to hide gerbera UI behind a reverse proxy.
 
+* Set virtualURL in config.xml to point to ``https://gerbera.DOMAINNAME``
+* Add ``gerbera`` to your DNS and have it point to the server
+
 Apache
 ------
 
@@ -68,14 +71,20 @@ Apache
 ::
     $ sudo a2enmod proxy proxy_http ssl
 
-* Set virtualURL in config.xml to point to ``https://gerbera.DOMAINNAME``
-* Add ``gerbera`` to your DNS and have it point to the server
-* Add virtual host to your apache and modify according to your settings
+* Add virtual host to your apache config (``/etc/apache2/vhosts.d/``) and modify according to your settings
 
     .. literalinclude:: ../scripts/apache/gerbera.conf
-        :language: console
 
 * Restart apache service
+
+Nginx
+-----
+
+* Add server config to your nginx config (``/etc/nginx/vhosts.d/``) and modify according to your settings
+
+    .. literalinclude:: ../scripts/nginx/gerbera.conf
+
+* Restart Nginx service
 
 .. index:: Sqlite
 
