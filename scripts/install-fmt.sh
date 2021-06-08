@@ -10,18 +10,24 @@ if ! [ "$(id -u)" = 0 ]; then
 fi
 set -ex
 
+BUILD_SHARED=YES
+
+if { "$1" = "static" ]; then
+    BUILD_SHARED=NO
+fi
+
 unamestr=$(uname)
 if [ ! -f fmt-$VERSION.tgz ]; then
-	wget https://github.com/fmtlib/fmt/archive/refs/tags/$VERSION.tar.gz -O fmt-$VERSION.tgz
+    wget https://github.com/fmtlib/fmt/archive/refs/tags/$VERSION.tar.gz -O fmt-$VERSION.tgz
 fi
 tar -xzvf fmt-$VERSION.tgz
 cd fmt-$VERSION
 if [ -d fmtbuild ]; then
-	rm -R fmtbuild
+    rm -R fmtbuild
 fi
 mkdir fmtbuild
 cd fmtbuild
-cmake .. -DBUILD_SHARED_LIBS=YES -DFMT_TEST=NO
+cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DFMT_TEST=NO
 
 if command -v nproc >/dev/null 2>&1; then
     make "-j$(nproc)"
