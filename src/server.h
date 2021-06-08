@@ -105,7 +105,7 @@ protected:
     in_port_t port;
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
-    bool server_shutdown_flag;
+    bool server_shutdown_flag {};
 
     /// \brief Handle for our upnp callbacks.
     UpnpDevice_Handle rootDeviceHandle;
