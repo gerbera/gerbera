@@ -373,7 +373,7 @@ protected:
     std::unique_ptr<PlaylistParserScript> playlist_parser_script;
 #endif
 
-    bool layout_enabled;
+    bool layout_enabled {};
 
     static void* staticThreadProc(void* arg);
     void threadProc();
@@ -382,14 +382,14 @@ protected:
 
     std::unique_ptr<ThreadRunner<std::condition_variable_any, std::recursive_mutex>> threadRunner;
 
-    bool working;
-    bool shutdownFlag;
+    bool working {};
+    bool shutdownFlag {};
 
     std::deque<std::shared_ptr<GenericTask>> taskQueue1; // priority 1
     std::deque<std::shared_ptr<GenericTask>> taskQueue2; // priority 2
     std::shared_ptr<GenericTask> currentTask;
 
-    unsigned int taskID;
+    unsigned int taskID { 1 };
 
     friend void CMAddFileTask::run();
     friend void CMRemoveObjectTask::run();
