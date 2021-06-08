@@ -173,7 +173,7 @@ public:
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
     virtual void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
-        std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
+        std::vector<int>* updateID, const std::map<std::string, std::string>& lastMetadata)
         = 0;
 
     /// \brief Builds the container path. Fetches the path of the
@@ -305,7 +305,7 @@ public:
 
 protected:
     /* helper for addContainerChain */
-    static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
+    static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string* first, std::string* last);
 
     static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer);
     friend class Server;

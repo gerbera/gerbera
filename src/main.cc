@@ -529,7 +529,7 @@ int main(int argc, char** argv, char** envp)
                         asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
                         asSetting.rescanResource = false;
                         asSetting.mergeOptions(configManager, f);
-                        server->getContent()->addFile(dirEnt, asSetting, true);
+                        server->getContent()->addFile(dirEnt, &asSetting, true);
                     } else {
                         log_error("Failed to read {}: {}", f.c_str(), ec.message());
                     }

@@ -519,7 +519,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
-        generateMetadataDBOperations(obj, op, returnVal);
+        generateMetadataDBOperations(obj, op, &returnVal);
     }
 
     return returnVal;
@@ -1025,7 +1025,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
+void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::vector<int>* updateID, const std::map<std::string, std::string>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
@@ -1056,7 +1056,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
 
     int parentContainerID = 0;
     std::string newpath, container, newClass;
-    stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
+    stripAndUnescapeVirtualContainerFromPath(virtualPath, &newpath, &container);
     auto classes = splitString(lastClass, '/');
     if (!classes.empty()) {
         newClass = classes.back();
@@ -1065,7 +1065,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
     addContainerChain(newpath, classes.empty() ? "" : join(classes, '/'), INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
 
     *containerID = createContainer(parentContainerID, container, virtualPath, true, newClass, lastRefID, lastMetadata);
-    updateID.emplace(updateID.begin(), *containerID);
+    updateID->emplace(updateID->begin(), *containerID);
 }
 
 std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
@@ -2258,7 +2258,7 @@ void SQLDatabase::clearFlagInDB(int flag)
 }
 
 void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
+    std::vector<std::shared_ptr<AddUpdateTable>>* operations)
 {
     auto dict = obj->getMetadata();
     if (op == Operation::Insert) {
@@ -2266,7 +2266,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, op));
+            operations->push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, op));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
@@ -2276,7 +2276,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
+            operations->push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
         }
         for (auto&& [key, val] : dbMetadata) {
             if (dict.find(key) == dict.end()) {
@@ -2284,7 +2284,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
                 std::map<std::string, std::string> metadataSql;
                 metadataSql["property_name"] = quote(key);
                 metadataSql["property_value"] = quote(val);
-                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, Operation::Delete));
+                operations->push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, Operation::Delete));
             }
         }
     }

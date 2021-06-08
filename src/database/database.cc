@@ -65,15 +65,15 @@ std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>
     return database;
 }
 
-void Database::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last)
+void Database::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string* first, std::string* last)
 {
     if (virtualPath.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
         throw_std_runtime_error("Got non-absolute virtual path {}; needs to start with: {}", virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
     }
     size_t sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {
-        first = "/";
-        last = virtualPath.substr(1);
+        *first = "/";
+        *last = virtualPath.substr(1);
     } else {
         while (sep != std::string::npos) {
             char beforeSep = virtualPath.at(sep - 1);
@@ -83,10 +83,10 @@ void Database::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath,
             sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR, sep - 1);
         }
         if (sep == 0) {
-            first = "/";
+            *first = "/";
         } else {
-            first = virtualPath.substr(0, sep);
+            *first = virtualPath.substr(0, sep);
         }
-        last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
+        *last = unescape(virtualPath.substr(sep + 1), VIRTUAL_CONTAINER_ESCAPE);
     }
 }

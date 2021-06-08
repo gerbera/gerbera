@@ -174,7 +174,7 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
+    int addFile(const fs::directory_entry& dirEnt, AutoScanSetting* asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
@@ -186,7 +186,7 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
+    int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting* asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(fs::path path);
@@ -340,12 +340,12 @@ protected:
     std::vector<std::shared_ptr<Executor>> process_list;
 
     int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
-        AutoScanSetting& asSetting,
+        AutoScanSetting* asSetting,
         bool async = true,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
+    int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting* asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
     void _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);

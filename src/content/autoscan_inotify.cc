@@ -238,7 +238,7 @@ void AutoscanInotify::threadProc()
                             asSetting.rescanResource = true;
                             asSetting.mergeOptions(config, path);
                             // path, recursive, async, hidden, rescanResource, low priority, cancellable
-                            content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
+                            content->addFile(dirEnt, adir->getLocation(), &asSetting, true, true, false);
                             if (mask & IN_ISDIR) {
                                 monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
                             }
