@@ -55,6 +55,28 @@ You should also make sure that your firewall is not blocking port UDP port ``190
 port of Gerbera. By default Gerbera will select a free port starting with ``49152``, however you can specify a port
 of your choice in the configuration file.
 
+Reverse Proxy Setup
+~~~~~~~~~~~~~~~~~~~
+
+If you want to access the web interface from other sources or use a ssl certificate it is recommended to hide gerbera UI behind a reverse proxy.
+
+Apache
+------
+
+* Enable Apache modules
+
+::
+    $ sudo a2enmod proxy proxy_http ssl
+
+* Set virtualURL in config.xml to point to ``https://gerbera.DOMAINNAME``
+* Add ``gerbera`` to your DNS and have it point to the server
+* Add virtual host to your apache and modify according to your settings
+
+    .. literalinclude:: ../scripts/apache/gerbera.conf
+        :language: console
+
+* Restart apache service
+
 .. index:: Sqlite
 
 Using Sqlite Database (Default)
