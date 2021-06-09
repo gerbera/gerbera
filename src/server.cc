@@ -502,7 +502,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::string link = urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
-    std::unique_ptr<RequestHandler> ret = nullptr;
+    std::unique_ptr<RequestHandler> ret;
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
         ret = std::make_unique<FileRequestHandler>(content, xmlbuilder.get());

@@ -49,7 +49,7 @@ LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
 static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
 {
     try {
-        std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
+        auto fio_h = std::unique_ptr<IOHandler>(std::make_unique<FileIOHandler>(item->getLocation()));
         fio_h->open(UPNP_READ);
         std::string resolution = get_jpeg_resolution(fio_h);
 
@@ -385,7 +385,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 
     if (ed->size) {
         try {
-            std::unique_ptr<IOHandler> io_h = std::make_unique<MemIOHandler>(ed->data, ed->size);
+            auto io_h = std::unique_ptr<IOHandler>(std::make_unique<MemIOHandler>(ed->data, ed->size));
             io_h->open(UPNP_READ);
             std::string th_resolution = get_jpeg_resolution(io_h);
             log_debug("RESOLUTION: {}", th_resolution.c_str());

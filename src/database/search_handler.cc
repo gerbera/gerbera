@@ -113,7 +113,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             } else {
                 auto tokenStr = nextStringToken(input);
                 if (!tokenStr.empty()) {
-                    std::unique_ptr<SearchToken> token = makeToken(tokenStr);
+                    auto token = makeToken(tokenStr);
                     if (!token->getValue().empty())
                         return token;
                 }
