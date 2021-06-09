@@ -2,7 +2,6 @@
 set -Eeuo pipefail
 
 VERSION="7.1.3"
-UNAME=$(uname)
 
 if ! [ "$(id -u)" = 0 ]; then
     echo "Please run this script with superuser access!"
@@ -18,7 +17,6 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-unamestr=$(uname)
 if [ ! -f fmt-$VERSION.tgz ]; then
     wget https://github.com/fmtlib/fmt/archive/refs/tags/$VERSION.tar.gz -O fmt-$VERSION.tgz
 fi
@@ -36,5 +34,4 @@ if command -v nproc >/dev/null 2>&1; then
 else
     make
 fi
-
 make install
