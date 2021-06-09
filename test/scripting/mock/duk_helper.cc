@@ -5,9 +5,6 @@
 #include <duktape.h>
 #include <regex>
 
-DukTestHelper::DukTestHelper() = default;
-DukTestHelper::~DukTestHelper() = default;
-
 std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_t idx)
 {
     duk_size_t i, n;
@@ -40,15 +37,14 @@ std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_id
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx); // item
                 break;
-            } else {
-                //duk_to_object(ctx, -1);
-                duk_get_prop_string(ctx, -1, "title");
-                if (!duk_is_null_or_undefined(ctx, -1)) {
-                    std::string val = duk_to_string(ctx, -1);
-                    vctr.push_back(val);
-                }
-                duk_pop(ctx); // title
             }
+            //duk_to_object(ctx, -1);
+            duk_get_prop_string(ctx, -1, "title");
+            if (!duk_is_null_or_undefined(ctx, -1)) {
+                std::string val = duk_to_string(ctx, -1);
+                vctr.push_back(val);
+            }
+            duk_pop(ctx); // title
         }
         duk_pop(ctx); // item
     }
@@ -56,12 +52,12 @@ std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_id
     return vctr;
 }
 
-std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx, std::vector<std::string> keys, duk_idx_t idx)
+std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx, const std::vector<std::string>& keys, duk_idx_t idx)
 {
     std::map<std::string, std::string> objValues;
     std::string val;
     std::tuple<std::string, std::string> complexValue;
-    for (auto key : keys) {
+    for (const auto& key : keys) {
         if (this->isArrayNotation(key)) {
             complexValue = this->extractObjectValues(ctx, key, idx);
             val = std::get<1>(complexValue);
@@ -79,13 +75,13 @@ std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx
     return objValues;
 }
 
-bool DukTestHelper::isArrayNotation(std::string key)
+bool DukTestHelper::isArrayNotation(const std::string& key)
 {
     std::regex associative_array_reg("^.*\\['.*'\\]$");
     return regex_match(key, associative_array_reg);
 }
 
-std::tuple<std::string, std::string> DukTestHelper::extractObjectValues(duk_context* ctx, std::string key, duk_idx_t idx)
+std::tuple<std::string, std::string> DukTestHelper::extractObjectValues(duk_context* ctx, const std::string& key, duk_idx_t idx)
 {
     std::regex associative_array_reg("^(.*)\\['(.*)'\\]$");
     std::cmatch pieces;
@@ -117,7 +113,7 @@ std::tuple<std::string, std::string> DukTestHelper::extractObjectValues(duk_cont
     return make_tuple(key, std::string(""));
 }
 
-void DukTestHelper::createObject(duk_context* ctx, std::map<std::string, std::string> objectProps, std::map<std::string, std::string> metaProps)
+void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, std::string>& objectProps, const std::map<std::string, std::string>& metaProps)
 {
     // obj
     {

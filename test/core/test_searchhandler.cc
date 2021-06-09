@@ -92,7 +92,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 }
 
 ::testing::AssertionResult executeSearchParserTest(const SQLEmitter& emitter, const std::string& input,
-    const std::string expectedOutput)
+    const std::string& expectedOutput)
 {
     try {
         auto parser = SearchParser(emitter, input);
@@ -111,7 +111,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 }
 
 ::testing::AssertionResult executeSortParserTest(const std::string& input,
-    const std::string expectedOutput)
+    const std::string& expectedOutput)
 {
     try {
         auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
@@ -249,7 +249,7 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
-    input = "dc:creator = \"some band with \\\"a double-quote\"";
+    input = R"(dc:creator = "some band with \"a double-quote")";
     expectedTokens = {
         { "dc:creator", TokenType::PROPERTY },
         { "=", TokenType::COMPAREOP },
@@ -259,7 +259,7 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
-    input = "dc:creator = \"some band with \\\"a double-quote\\\"\"";
+    input = R"(dc:creator = "some band with \"a double-quote\"")";
     expectedTokens = {
         { "dc:creator", TokenType::PROPERTY },
         { "=", TokenType::COMPAREOP },
@@ -269,7 +269,7 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
-    input = "upnp:class derivedfrom \"object.item.audioItem\" and upnp:artist=\"King Krule\"";
+    input = R"(upnp:class derivedfrom "object.item.audioItem" and upnp:artist="King Krule")";
     expectedTokens = {
         { "upnp:class", TokenType::PROPERTY },
         { "derivedfrom", TokenType::STRINGOP },
@@ -285,7 +285,7 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
-    input = "upnp:class derivedfrom \"object.item.audioItem\" and (upnp:artist=\"King Krule\" or dc:title=\"Heartattack and Vine\")";
+    input = R"(upnp:class derivedfrom "object.item.audioItem" and (upnp:artist="King Krule" or dc:title="Heartattack and Vine"))";
     expectedTokens = {
         { "upnp:class", TokenType::PROPERTY },
         { "derivedfrom", TokenType::STRINGOP },

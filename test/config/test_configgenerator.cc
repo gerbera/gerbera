@@ -11,10 +11,10 @@ using namespace ::testing;
 class ConfigGeneratorTest : public ::testing::Test {
 
 public:
-    ConfigGeneratorTest() {};
-    virtual ~ConfigGeneratorTest() {};
+    ConfigGeneratorTest() = default;
+    ~ConfigGeneratorTest() override = default;
 
-    virtual void SetUp()
+    void SetUp() override
     {
         subject = new ConfigGenerator();
         subject->init();
@@ -24,12 +24,12 @@ public:
         magicFile = "magic.file";
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         delete subject;
     };
 
-    std::string mockConfigXml(std::string mockFile)
+    static std::string mockConfigXml(const std::string& mockFile)
     {
         std::ifstream t(mockFile);
         std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());

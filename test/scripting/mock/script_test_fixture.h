@@ -14,35 +14,30 @@
 using namespace ::testing;
 using namespace std;
 
-struct _addCdsObjectParams {
+struct addCdsObjectParams {
     map<string, string> objectValues;
     string containerChain;
     string objectType;
 };
-typedef struct _addCdsObjectParams addCdsObjectParams;
 
-struct _abcBoxParams {
+struct abcBoxParams {
     string inputValue;
     int boxType;
     string divChar;
 };
-typedef struct _abcBoxParams abcBoxParams;
 
-struct _getRootPathParams {
+struct getRootPathParams {
     string objScriptPath;
     string origObjLocation;
 };
-typedef struct _getRootPathParams getRootPathParams;
 
-struct _copyObjectParams {
+struct copyObjectParams {
     bool isObject;
 };
-typedef struct _copyObjectParams copyObjectParams;
 
-struct _getCdsObjectParams {
+struct getCdsObjectParams {
     string location;
 };
-typedef struct _getCdsObjectParams getCdsObjectParams;
 
 // The class provides a way to test the Duktape scripts
 // providing various c++ translations of script functions
@@ -54,18 +49,18 @@ class ScriptTestFixture : public ::testing::Test {
 public:
     // Builds up the Duktape context
     // Reads in the script under test
-    virtual void SetUp();
+    void SetUp() override;
 
     // Destroys the Duktape context
-    virtual void TearDown();
+    void TearDown() override;
 
     // Creates a mock item(orig) global object in Duktape context
-    duk_ret_t dukMockItem(duk_context* ctx, string mimetype, string id, int theora, string title,
-        map<string, string> meta, map<string, string> aux, map<string, string> res,
-        string location, int online_service);
+    static duk_ret_t dukMockItem(duk_context* ctx, const string& mimetype, const string& id, int theora, const string& title,
+        const map<string, string>& meta, const map<string, string>& aux, const map<string, string>& res,
+        const string& location, int online_service);
 
     // Creates a mock playlist global object in Duktape context
-    duk_ret_t dukMockPlaylist(duk_context* ctx, string title, string location, string mimetype);
+    static duk_ret_t dukMockPlaylist(duk_context* ctx, const string& title, const string& location, const string& mimetype);
 
     // Add global Duktape methods to proxy into c++ layer
     void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {});
@@ -74,7 +69,7 @@ public:
     static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config);
 
     // Access the global object(script) by name, and execute
-    void executeScript(duk_context* ctx);
+    static void executeScript(duk_context* ctx);
 
     // Proxy the common.js script with `createContainerChain`
     // Mimics the creation of a directory chain
@@ -107,7 +102,7 @@ public:
 
     // Proxy the Duktape script with `addCdsObject` global function.
     // Translates the Duktape value stack to c++
-    static addCdsObjectParams addCdsObject(duk_context* ctx, vector<string> objectKeys);
+    static addCdsObjectParams addCdsObject(duk_context* ctx, const vector<string>& objectKeys);
 
     // Proxy the Duktape script with `addContainerTree` C function.
     // Translates the Duktape value stack to c++
@@ -120,10 +115,10 @@ public:
     static getRootPathParams getRootPath(duk_context* ctx);
 
     // Proxy the Duktape script with `copyObject` global function
-    static copyObjectParams copyObject(duk_context* ctx, map<string, string> obj, map<string, string> meta);
+    static copyObjectParams copyObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta);
 
     // Proxy the Duktape script with `copyObject` global function
-    static getCdsObjectParams getCdsObject(duk_context* ctx, map<string, string> obj, map<string, string> meta);
+    static getCdsObjectParams getCdsObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta);
 
     // Script file name under test
     // System defaults to known project path `/scripts/js/<scriptName>`

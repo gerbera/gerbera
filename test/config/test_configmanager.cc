@@ -1,8 +1,9 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <array>
 #include <fstream>
 #include <ftw.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <memory>
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
@@ -11,11 +12,11 @@
 class ConfigManagerTest : public ::testing::Test {
 
 public:
-    ConfigManagerTest() {};
+    ConfigManagerTest() = default;
 
-    virtual ~ConfigManagerTest() {};
+    ~ConfigManagerTest() override = default;
 
-    virtual void SetUp()
+    void SetUp() override
     {
         gerberaDir = createTempPath();
 
@@ -64,7 +65,7 @@ public:
         return ss;
     }
 
-    void create_directory(fs::path dir)
+    static void create_directory(const fs::path& dir)
     {
         if (mkdir(dir.c_str(), 0777) < 0) {
             throw_std_runtime_error("Failed to create test_config temporary directory for testing: {}", dir.c_str());
@@ -77,10 +78,9 @@ public:
         return configGenerator.generate(home, confdir, prefix, magic);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
-        if (subject)
-            delete subject;
+        delete subject;
         fs::remove_all(gerberaDir);
     };
 
@@ -95,7 +95,7 @@ public:
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
-    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
@@ -119,7 +119,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
     config_file = "";
 
     try {
-        auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false));
+        auto shared = std::make_shared<ConfigManager>(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
         shared->load(notExistsDir);
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
@@ -129,7 +129,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
     config_file = "";
-    auto shared = std::shared_ptr<ConfigManager>(new ConfigManager(config_file, home, confdir, prefix, magic, "", "", 0, false));
+    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
