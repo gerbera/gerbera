@@ -42,6 +42,7 @@
 #include <taglib/tiostream.h>
 
 #include "metadata_handler.h"
+#include "util/string_converter.h"
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {
@@ -57,6 +58,7 @@ private:
     void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
 
     void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
+    void populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const;
     static bool isValidArtworkContentType(const std::string& art_mimetype);
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);

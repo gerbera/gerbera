@@ -28,11 +28,11 @@ public:
 
     InternalUrlPLSPlaylistTest()
     {
-        commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
+        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
     };
 
-    virtual ~InternalUrlPLSPlaylistTest()
+    ~InternalUrlPLSPlaylistTest() override
     {
         commonScriptMock.reset();
     };

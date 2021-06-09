@@ -24,7 +24,7 @@
 
 TEST_F(RuntimeTest, CheckTestCodeLinksAgainstDependencies)
 {
-    ScriptingRuntime* runtime = new ScriptingRuntime();
-    duk_context* ctx = runtime->createContext("testCtx");
+    auto runtime = new ScriptingRuntime();
+    auto ctx = runtime->createContext("testCtx");
     EXPECT_NE(ctx, nullptr);
 }

@@ -11,16 +11,16 @@ using namespace ::testing;
 
 class ServerTest : public ::testing::Test {
 public:
-    ServerTest() {};
-    virtual ~ServerTest() {};
+    ServerTest() = default;
+    ~ServerTest() override = default;
 
-    virtual void SetUp()
+    void SetUp() override
     {
     }
 
-    virtual void TearDown() {};
+    void TearDown() override {}
 
-    std::string exec(const char* cmd)
+    static std::string exec(const char* cmd)
     {
         std::array<char, 128> buffer;
         std::string result;
@@ -34,7 +34,7 @@ public:
         return result;
     }
 
-    std::string mockText(std::string mockFile)
+    static std::string mockText(const std::string& mockFile)
     {
         std::ifstream t(mockFile);
         std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
@@ -75,7 +75,7 @@ TEST_F(ServerTest, GeneratesFullConfigFromServerCommand)
 {
     // simple check to ensure complete generation from server
     // rely on ConfigGeneratorTest for validation.
-    std::string topOutput = "<config version=\"2\" xmlns=\"http://mediatomb.cc/config/2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd\">";
+    std::string topOutput = R"(<config version="2" xmlns="http://mediatomb.cc/config/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd">)";
     std::string bottomOutput = "</profile>\n    </profiles>\n  </transcoding>\n</config>";
 
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --create-config 2>&1";

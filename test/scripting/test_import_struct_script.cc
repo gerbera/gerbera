@@ -21,12 +21,12 @@ class ImportStructuredScriptTest : public ScriptTestFixture {
 public:
     ImportStructuredScriptTest()
     {
-        commonScriptMock.reset(new ::testing::NiceMock<CommonScriptMock>());
+        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "import.js";
         audioLayout = "Structured";
     };
 
-    virtual ~ImportStructuredScriptTest()
+    ~ImportStructuredScriptTest() override
     {
         commonScriptMock.reset();
     };

@@ -51,7 +51,6 @@
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
-#include "util/string_converter.h"
 #include "util/tools.h"
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
@@ -203,6 +202,31 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     temp = audioProps->channels();
     if (temp > 0) {
         res->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(temp));
+    }
+}
+
+void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const
+{
+    std::vector<std::string> aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    for (auto&& desiredTag : aux_tags_list) {
+
+        if (desiredTag.empty()) {
+            continue;
+        }
+
+        if (propertyMap.contains(desiredTag.c_str())) {
+            const auto property = propertyMap[desiredTag.c_str()];
+            if (property.isEmpty())
+                continue;
+
+            auto val = property.toString(entrySeparator);
+            if (!legacyEntrySeparator.empty())
+                val = val.split(legacyEntrySeparator).toString(entrySeparator);
+            std::string value(val.toCString(true));
+            value = sc->convert(value);
+            log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
+            item->setAuxData(desiredTag, value);
+        }
     }
 }
 
@@ -497,6 +521,10 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     if (!vorbis.tag())
         return;
 
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = vorbis.properties();
+    populateAuxTags(item, propertyMap, sc);
+
     // Vorbis uses the FLAC binary picture structure...
     // https://wiki.xiph.org/VorbisComment#Cover_art
     // The unofficial COVERART field is not supported.
@@ -507,7 +535,6 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
-    auto sc = StringConverter::i2i(config);
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
@@ -524,6 +551,10 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
         return;
     }
     populateGenericTags(item, asf);
+
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = asf.properties();
+    populateAuxTags(item, propertyMap, sc);
 
     auto audioProps = asf.audioProperties();
     auto temp = audioProps->bitsPerSample();
@@ -542,7 +573,6 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
         if (!wmpic.isValid())
             return;
 
-        auto sc = StringConverter::i2i(config);
         std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
@@ -562,30 +592,8 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     populateGenericTags(item, flac);
 
     auto sc = StringConverter::i2i(config);
-
-    std::vector<std::string> aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (auto&& desiredTag : aux_tags_list) {
-
-        if (desiredTag.empty()) {
-            continue;
-        }
-
-        auto propertyMap = flac.properties();
-
-        if (propertyMap.contains(desiredTag.c_str())) {
-            const auto property = propertyMap[desiredTag.c_str()];
-            if (property.isEmpty())
-                continue;
-
-            auto val = property.toString(entrySeparator);
-            if (!legacyEntrySeparator.empty())
-                val = val.split(legacyEntrySeparator).toString(entrySeparator);
-            std::string value(val.toCString(true));
-            value = sc->convert(value);
-            log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
-            item->setAuxData(desiredTag, value);
-        }
-    }
+    auto propertyMap = flac.properties();
+    populateAuxTags(item, propertyMap, sc);
 
     if (flac.pictureList().isEmpty()) {
         log_debug("TagLibHandler: flac resource has no picture information");
@@ -618,6 +626,10 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     }
     populateGenericTags(item, ape);
 
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = ape.properties();
+    populateAuxTags(item, propertyMap, sc);
+
     auto audioProps = ape.audioProperties();
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
@@ -635,6 +647,10 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
         return;
     }
     populateGenericTags(item, wavpack);
+
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = wavpack.properties();
+    populateAuxTags(item, propertyMap, sc);
 
     auto audioProps = wavpack.audioProperties();
     auto temp = audioProps->bitsPerSample();
@@ -660,6 +676,10 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         return;
     }
 
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = mp4.tag()->properties();
+    populateAuxTags(item, propertyMap, sc);
+
     auto audioProps = mp4.audioProperties();
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
@@ -677,8 +697,8 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         }
 
         auto& coverArt = coverArtList.front();
-        if (auto art_mimetype = getContentTypeFromByteVector(coverArt.data());
-            !art_mimetype.empty()) {
+        auto art_mimetype = getContentTypeFromByteVector(coverArt.data());
+        if (!art_mimetype.empty()) {
             addArtworkResource(item, art_mimetype);
         }
     } else {
@@ -696,6 +716,10 @@ void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_pt
         return;
     }
     populateGenericTags(item, aiff);
+
+    auto sc = StringConverter::i2i(config);
+    auto propertyMap = aiff.properties();
+    populateAuxTags(item, propertyMap, sc);
 
     auto audioProps = aiff.audioProperties();
     auto temp = audioProps->bitsPerSample();

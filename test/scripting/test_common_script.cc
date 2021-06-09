@@ -17,11 +17,10 @@ using namespace ::testing;
 class CommonScriptTest : public ::testing::Test {
 
 public:
-    CommonScriptTest() {};
+    CommonScriptTest() = default;
+    ~CommonScriptTest() override = default;
 
-    virtual ~CommonScriptTest() {};
-
-    virtual void SetUp()
+    void SetUp() override
     {
         ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
@@ -32,12 +31,12 @@ public:
         duk_call(ctx, 0);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         duk_destroy_heap(ctx);
     }
 
-    std::string invokeABCBOX(duk_context* ctx, std::string input, int boxType, std::string divChar)
+    static std::string invokeABCBOX(duk_context* ctx, const std::string& input, int boxType, const std::string& divChar)
     {
         ScriptTestFixture::addConfig(ctx, { { "/import/scripting/virtual-layout/abcBox/skipChars", "" } });
 
@@ -97,7 +96,7 @@ TEST_F(CommonScriptTest, mapInitial_Umlaut)
 TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForBackSlash)
 {
     duk_get_global_string(ctx, "escapeSlash");
-    duk_push_string(ctx, "some\\path\\to\\escape");
+    duk_push_string(ctx, R"(some\path\to\escape)");
 
     duk_pcall(ctx, 1);
 

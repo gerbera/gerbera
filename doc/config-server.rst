@@ -678,6 +678,7 @@ This section defines sets the properties which are send to UPnP clients as part 
 
         <album-properties>...</album-properties>
         <artist-properties>...</artist-properties>
+        <genre-properties>...</genre-properties>
         <title-properties>...</title-properties>
 
     * Optional
@@ -714,6 +715,8 @@ This section defines sets the properties which are send to UPnP clients as part 
         M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION, 
         M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
         M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
+
+        Instead of metadata you may also use auxdata entries as defined in ``library-options``.
 
     **Defaults:**
 

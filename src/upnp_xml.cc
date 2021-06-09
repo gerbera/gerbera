@@ -66,6 +66,18 @@ metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldNam
     return M_MAX;
 }
 
+void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData,
+    const std::map<std::string, std::string>& propertyMap)
+{
+    for (auto&& [tag, field] : propertyMap) {
+        auto metaField = remapMetaDataField(field);
+        auto value = (metaField != M_MAX) ? getValueOrDefault(meta, MetadataHandler::getMetaFieldName(metaField)) : getValueOrDefault(auxData, field);
+        if (!value.empty()) {
+            addField(result, tag, value);
+        }
+    }
+}
+
 void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
 {
     // e.g. used for M_ALBUMARTIST
@@ -98,9 +110,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
         tmp = tmp + "...";
     }
-    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(tmp.c_str());
 
+    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(tmp.c_str());
     result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(obj->getClass().c_str());
+
+    auto auxData = obj->getAuxData();
 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -128,13 +142,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
         const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
-        for (auto&& [tag, field] : titleProperties) {
-            auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
-            if (!value.empty()) {
-                addField(result, tag, value);
-            }
-        }
-
+        addPropertyList(result, meta, auxData, titleProperties);
         addResources(item, &result);
 
         result.set_name("item");
@@ -151,20 +159,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             const auto albumProperties = config->getDictionaryOption(CFG_UPNP_ALBUM_PROPERTIES);
-            for (auto&& [tag, field] : albumProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
-                if (!value.empty()) {
-                    addField(result, tag, value);
-                }
-            }
+            addPropertyList(result, meta, auxData, albumProperties);
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
             const auto artistProperties = config->getDictionaryOption(CFG_UPNP_ARTIST_PROPERTIES);
-            for (auto&& [tag, field] : artistProperties) {
-                auto value = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(remapMetaDataField(field)));
-                if (!value.empty()) {
-                    addField(result, tag, value);
-                }
-            }
+            addPropertyList(result, meta, auxData, artistProperties);
+        } else if (upnp_class == UPNP_CLASS_MUSIC_GENRE) {
+            const auto genreProperties = config->getDictionaryOption(CFG_UPNP_GENRE_PROPERTIES);
+            addPropertyList(result, meta, auxData, genreProperties);
         }
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER) {
             std::string url;
