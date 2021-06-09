@@ -4,6 +4,7 @@ set -Eeuo pipefail
 
 function install-gcc {
   echo "::group::Installing GCC"
+  # bionic defaults to gcc-7
   if [[ "$lsb_codename" == "bionic" ]]; then
     sudo apt-get install gcc-8 g++-8 libstdc++-8-dev -y
     sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
@@ -29,16 +30,7 @@ function install-cmake() {
 function install-fmt {
     echo "::group::Installing fmt"
   if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
-    git clone https://github.com/fmtlib/fmt
-    pushd fmt
-    git checkout 7.0.0
-    popd
-    mkdir fmt-build
-    pushd fmt-build
-    cmake ../fmt -DBUILD_SHARED_LIBS=NO -DFMT_TEST=NO
-    make
-    sudo make install
-    popd
+    sudo bash scripts/install-fmt.sh static
   else
      sudo apt-get install libfmt-dev -y
   fi
@@ -82,7 +74,10 @@ fi
 
 libmysqlclient="libmysqlclient-dev"
 if [ "$lsb_distro" == "Debian" ]; then
-    libmysqlclient="libmariadb-dev-compat"
+  libmysqlclient="libmariadb-dev-compat"
+fi
+if [[ "$lsb_codename" == "hirsute" ]]; then
+  libmysqlclient="libmysql++-dev"
 fi
 
 if [[ ! -d build-deb ]]; then

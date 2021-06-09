@@ -573,7 +573,6 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
         if (!wmpic.isValid())
             return;
 
-        auto sc = StringConverter::i2i(config);
         std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
