@@ -12,8 +12,10 @@ set -ex
 
 BUILD_SHARED=YES
 
-if { "$1" = "static" ]; then
-    BUILD_SHARED=NO
+if [ $# -gt 0 ]; then
+    if [ "$1" = "static" ]; then
+        BUILD_SHARED=NO
+    fi
 fi
 
 unamestr=$(uname)
