@@ -68,6 +68,7 @@
         <map from="flv" to="video/x-flv" />
         <map from="m2ts" to="video/mp2t" />
         <map from="m3u" to="audio/x-mpegurl" />
+        <map from="m4a" to="audio/mp4" />
         <map from="mka" to="audio/x-matroska" />
         <map from="mkv" to="video/x-matroska" />
         <map from="mp3" to="audio/mpeg" />
