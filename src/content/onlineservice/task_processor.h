@@ -26,7 +26,6 @@ public:
     }
 
     void run();
-    virtual ~TaskProcessor() = default;
     void shutdown();
 
     void addTask(const std::shared_ptr<GenericTask>& task);

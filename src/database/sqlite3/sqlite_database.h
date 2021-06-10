@@ -71,8 +71,6 @@ public:
 
     std::string getError() const { return error; }
 
-    virtual ~SLTask() = default;
-
     virtual std::string_view taskType() const = 0;
 
 protected:

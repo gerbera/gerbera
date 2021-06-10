@@ -56,8 +56,6 @@ public:
         std::string range)
         = 0;
 
-    virtual ~TranscodeHandler() = default;
-
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<ContentManager> content;

@@ -41,8 +41,6 @@ JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
 {
 }
 
-JSLayout::~JSLayout() = default;
-
 void JSLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
 {
     if (import_script == nullptr)

@@ -113,7 +113,6 @@ public:
     /// in internal variables.
     explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
-    virtual ~ContentDirectoryService() = default;
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.

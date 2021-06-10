@@ -44,8 +44,6 @@ public:
     bool isCancellable() const { return cancellable; }
     void invalidate() { valid = false; }
     task_owner_t getOwner() const { return taskOwner; }
-
-    virtual ~GenericTask() = default;
 };
 
 #endif //__GENERIC_TASK_H__

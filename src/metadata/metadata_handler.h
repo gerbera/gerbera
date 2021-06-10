@@ -201,8 +201,6 @@ public:
     virtual std::string getMimeType();
 
     static const char* mapContentHandler2String(int ch);
-
-    virtual ~MetadataHandler() = default;
 };
 
 #endif // __METADATA_HANDLER_H__
