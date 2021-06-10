@@ -42,6 +42,7 @@ web::items::items(std::shared_ptr<ContentManager> content)
 {
 }
 
+/// \brief orocess request for item list in ui
 void web::items::process()
 {
     check_request();
@@ -54,8 +55,8 @@ void web::items::process()
     if (count < 0)
         throw_std_runtime_error("illegal count parameter");
 
+    // set result options
     auto root = xmlDoc->document_element();
-
     auto items = root.append_child("items");
     xml2JsonHints->setArrayName(items, "item");
     xml2JsonHints->setFieldType("title", "string");
@@ -68,9 +69,9 @@ void web::items::process()
     if ((container->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (container->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         param->setFlag(BROWSE_TRACK_SORT);
 
+    // get contents of request
     auto arr = database->browse(param);
     items.append_attribute("virtual") = container->isVirtual();
-
     items.append_attribute("start") = start;
     //items.append_attribute("returned") = arr->size();
     items.append_attribute("total_matches") = param->getTotalMatches();
@@ -88,6 +89,7 @@ void web::items::process()
 
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        // check for inotify mode
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
             auto pathIDs = database->getPathIDs(parentID);
@@ -121,15 +123,12 @@ void web::items::process()
     items.append_attribute("protect_container") = protectContainer;
     items.append_attribute("protect_items") = protectItems;
 
+    // ouput objects of container
     for (auto&& arrayObj : arr) {
-        //if (arrayObj->isItem())
-        //{
         auto item = items.append_child("item");
         item.append_attribute("id") = arrayObj->getID();
         item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
-        /// \todo clean this up, should have more generic options for online
-        /// services
-        // FIXME
+
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
@@ -138,7 +137,5 @@ void web::items::process()
         if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }
-        //item.append_attribute("virtual") = arrayObj->isVirtual();
-        //}
     }
 }
