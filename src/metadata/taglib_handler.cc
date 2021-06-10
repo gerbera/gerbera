@@ -274,9 +274,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 {
 #ifdef HAVE_MAGIC
     auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
-    if (art_mimetype.empty())
-        return MIMETYPE_DEFAULT;
-    return art_mimetype;
+    return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
 #else
     return MIMETYPE_DEFAULT;
 #endif

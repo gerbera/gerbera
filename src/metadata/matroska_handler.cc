@@ -253,14 +253,12 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
 
 std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const
 {
-    std::string art_mimetype = MIMETYPE_DEFAULT;
 #ifdef HAVE_MAGIC
-    art_mimetype = mime->bufferToMimeType(data->GetBuffer(), data->GetSize());
-    if (art_mimetype.empty()) {
-        return MIMETYPE_DEFAULT;
-    }
+    auto art_mimetype = mime->bufferToMimeType(data->GetBuffer(), data->GetSize());
+    return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
+#else
+    return MIMETYPE_DEFAULT;
 #endif
-    return art_mimetype;
 }
 
 void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype)
