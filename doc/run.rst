@@ -46,8 +46,8 @@ you should try the following settings
 
 .. code-block:: console
 
-    # route add -net 239.0.0.0 netmask 255.0.0.0 eth1
-    # ifconfig eth1 allmulti
+    $ route add -net 239.0.0.0 netmask 255.0.0.0 eth1
+    $ ifconfig eth1 allmulti
 
 Those settings will be applied automatically by the init.d startup script.
 
@@ -69,6 +69,7 @@ Apache
 * Enable Apache modules
 
 ::
+
     $ sudo a2enmod proxy proxy_http ssl
 
 * Add virtual host to your apache config (``/etc/apache2/vhosts.d/``) and modify according to your settings

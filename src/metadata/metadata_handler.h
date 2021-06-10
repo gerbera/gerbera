@@ -196,7 +196,14 @@ public:
     static std::string getResAttrName(resource_attributes_t attr);
     static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
 
+    /// \brief read metadata from file and add to object
+    /// \param obj Object to handle
     virtual void fillMetadata(std::shared_ptr<CdsObject> obj) = 0;
+
+    /// \brief stream content of object or resource to client
+    /// \param obj Object to stream
+    /// \param resNum number of resource
+    /// \return iohandler to stream to client
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) = 0;
     virtual std::string getMimeType();
 
