@@ -353,7 +353,7 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
         inTransaction = false;
     }
 
-    return std::static_pointer_cast<SQLResult>(std::make_shared<MysqlResult>(mysql_res));
+    return std::make_shared<MysqlResult>(mysql_res);
 }
 
 int MySQLDatabase::exec(const char* query, int length, bool getLastInsertId)
