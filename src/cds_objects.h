@@ -121,8 +121,6 @@ protected:
     std::shared_ptr<CdsObject> parent;
 
 public:
-    virtual ~CdsObject() = default;
-
     /// \brief Set the object ID.
     ///
     /// ID is the object ID that is used by the UPnP Content Directory service.

@@ -90,8 +90,6 @@ public:
     {
         throw std::runtime_error("Wrong option type directory list");
     }
-
-    virtual ~ConfigOption() = default;
 };
 
 class Option : public ConfigOption {

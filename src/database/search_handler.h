@@ -69,7 +69,6 @@ public:
         , value(std::move(value))
     {
     }
-    virtual ~SearchToken() = default;
 
     const TokenType& getType() const { return type; }
     std::string getValue() const { return value; }
@@ -90,12 +89,8 @@ public:
         : input(std::move(input))
     {
     }
-    virtual ~SearchLexer() = default;
 
     std::unique_ptr<SearchToken> nextToken();
-
-    SearchLexer& operator=(const SearchLexer&) = delete;
-    SearchLexer(const SearchLexer&) = delete;
 
 protected:
     std::string nextStringToken(const std::string& input);
@@ -118,8 +113,6 @@ class ASTNode {
 public:
     std::string emitSQL() const;
     virtual std::string emit() const = 0;
-
-    virtual ~ASTNode() = default;
 
 protected:
     explicit ASTNode(const SQLEmitter& emitter)
@@ -377,13 +370,10 @@ public:
         const std::string& lhs, const std::string& rhs) const = 0;
     virtual std::string emit(const ASTOrOperator* node,
         const std::string& lhs, const std::string& rhs) const = 0;
-
-    virtual ~SQLEmitter() = default;
 };
 
 class ColumnMapper {
 public:
-    virtual ~ColumnMapper() = default;
     virtual bool hasEntry(const std::string& tag) const = 0;
     virtual std::string tableQuoted() const = 0;
     virtual std::string mapQuoted(const std::string& tag) const = 0;

@@ -34,12 +34,8 @@
 
 #include <memory>
 
+#include "content/scripting/import_script.h"
 #include "layout.h"
-
-// forward declaration
-class ContentManager;
-class ImportScript;
-class ScriptingRuntime;
 
 class JSLayout : public Layout {
 protected:
@@ -49,10 +45,6 @@ protected:
 public:
     JSLayout(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
-    ~JSLayout() override;
-
-    JSLayout(const JSLayout&) = delete;
-    JSLayout& operator=(const JSLayout&) = delete;
 
     void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
 };
