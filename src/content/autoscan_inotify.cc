@@ -85,6 +85,7 @@ void AutoscanInotify::run()
     }
 }
 
+/// \brief main proc for thread
 void AutoscanInotify::threadProc()
 {
     std::error_code ec;
@@ -92,6 +93,7 @@ void AutoscanInotify::threadProc()
         try {
             std::unique_lock<std::mutex> lock(mutex);
 
+            //  remove old dirs
             while (!unmonitorQueue.empty()) {
                 auto adir = unmonitorQueue.front();
                 unmonitorQueue.pop();
@@ -103,6 +105,7 @@ void AutoscanInotify::threadProc()
                     lock.lock();
                     continue;
                 }
+                // read dir
                 auto dirEnt = fs::directory_entry(location, ec);
 
                 if (adir->getRecursive()) {
@@ -116,12 +119,14 @@ void AutoscanInotify::threadProc()
                 lock.lock();
             }
 
+            // monitor new dir
             while (!monitorQueue.empty()) {
                 auto adir = monitorQueue.front();
                 monitorQueue.pop();
 
                 lock.unlock();
 
+                // read dir
                 fs::path location = adir->getLocation();
                 if (location.empty()) {
                     lock.lock();
@@ -130,6 +135,7 @@ void AutoscanInotify::threadProc()
 
                 auto dirEnt = fs::directory_entry(location, ec);
                 if (!ec) {
+                    // handle dir recursively
                     if (adir->getRecursive()) {
                         log_debug("Adding recursive watch: {}", location.c_str());
                         monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
@@ -166,6 +172,7 @@ void AutoscanInotify::threadProc()
                 }
 
                 fs::path path = wdObj->getPath();
+                // file is not gone
                 if (!(mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)))
                     path /= name;
 
@@ -176,20 +183,24 @@ void AutoscanInotify::threadProc()
                 else
                     adir = nullptr;
 
+                // file is renamed
                 if (mask & IN_MOVE_SELF) {
                     checkMoveWatches(wd, wdObj);
                 }
 
+                // file is deleted
                 if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                     recheckNonexistingMonitors(wd, wdObj);
                 }
 
+                // file is directory
                 if (mask & IN_ISDIR) {
                     if (mask & (IN_CREATE | IN_MOVED_TO)) {
                         recheckNonexistingMonitors(wd, wdObj);
                     }
 
                     if (adir != nullptr && adir->getRecursive()) {
+                        // dir created
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
                                 log_debug("Detected new dir, adding to inotify: {}", path.c_str());
@@ -206,10 +217,13 @@ void AutoscanInotify::threadProc()
                     }
                 }
 
+                // changed
                 if (adir != nullptr && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
+                    // not new
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
                         log_debug("deleting {}", path.c_str());
 
+                        // deleted
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
@@ -226,6 +240,7 @@ void AutoscanInotify::threadProc()
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(adir, objectID, !(mask & IN_MOVED_TO));
                     }
+                    // new file
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
                         log_debug("Adding {}", path.c_str());
                         auto dirEnt = fs::directory_entry(path, ec);
@@ -298,12 +313,12 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 {
     int wd = inotify->addWatch(path, events);
     if (wd >= 0) {
-        bool alreadyThere = false;
-
         std::shared_ptr<Wd> wdObj = nullptr;
         try {
+            //find
             wdObj = watches->at(wd);
 
+            //alreadyThere
             int parentWdSet = wdObj->getParentWd();
             if (parentWdSet >= 0) {
                 if (parentWd != parentWdSet) {
@@ -312,20 +327,15 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
                 }
             } else
                 wdObj->setParentWd(parentWd);
-
-            //find
-            //alreadyThere =...
-            //FIXME: not finished?
-
         } catch (const std::out_of_range& ex) {
+            // add new wstch
             wdObj = std::make_shared<Wd>(path, wd, parentWd);
             watches->emplace(wd, wdObj);
         }
 
-        if (!alreadyThere) {
-            auto watch = std::make_shared<WatchMove>(removeWd);
-            wdObj->addWatch(watch);
-        }
+        // add move watch
+        auto watch = std::make_shared<WatchMove>(removeWd);
+        wdObj->addWatch(watch);
     }
     return wd;
 }

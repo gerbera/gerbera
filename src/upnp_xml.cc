@@ -339,6 +339,8 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
     return pathBase;
 }
 
+/// \brief build path for first resource from item
+/// depending on the item type it returns the url to the media
 std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item)
 {
     auto urlBase = getPathBase(item);
@@ -357,7 +359,6 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
 
 std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) const
 {
-    // FIXME: This is temporary until we do artwork properly.
     log_debug("Building Art url for {}", item->getID());
 
     auto urlBase = getPathBase(item);
@@ -676,8 +677,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             isExtThumbnail = true;
         }
 
-        /// FIXME: currently resource is misused for album art
-
+        // resource is used to point to album art
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
         if (res->isMetaResource(ID3_ALBUM_ART) //
             || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //

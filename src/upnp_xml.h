@@ -85,7 +85,8 @@ public:
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 
-    // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
+    /// \brief build path for first resource from item
+    /// depending on the item type it returns the url to the media
     static std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item);
 
 protected:
@@ -95,8 +96,7 @@ protected:
     const std::string virtualURL;
     const std::string presentationURL;
 
-    // Holds a part of path and bool which says if we need to append the resource
-    // TODO: Remove this and use centralised routing instead of building URLs all over the place
+    /// \brief Holds a part of path and bool which says if we need to append the resource
     class PathBase {
     public:
         std::string pathBase;
