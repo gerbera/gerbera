@@ -46,6 +46,7 @@ class CdsObject;
 class CurlContentHandler {
 public:
     explicit CurlContentHandler(const std::shared_ptr<Context>& context);
+    virtual ~CurlContentHandler() = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.

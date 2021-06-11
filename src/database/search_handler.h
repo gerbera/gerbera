@@ -111,6 +111,8 @@ class SQLEmitter;
 
 class ASTNode {
 public:
+    virtual ~ASTNode() = default;
+
     std::string emitSQL() const;
     virtual std::string emit() const = 0;
 
@@ -356,6 +358,7 @@ protected:
 
 class SQLEmitter {
 public:
+    virtual ~SQLEmitter() = default;
     virtual std::string emitSQL(const ASTNode* node) const = 0;
     virtual std::string emit(const ASTAsterisk* node) const = 0;
     virtual std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const = 0;
@@ -374,6 +377,7 @@ public:
 
 class ColumnMapper {
 public:
+    virtual ~ColumnMapper() = default;
     virtual bool hasEntry(const std::string& tag) const = 0;
     virtual std::string tableQuoted() const = 0;
     virtual std::string mapQuoted(const std::string& tag) const = 0;

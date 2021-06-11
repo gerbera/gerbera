@@ -46,6 +46,8 @@ class DirectoryConfigList;
 
 class ConfigOption {
 public:
+    virtual ~ConfigOption() = default;
+
     virtual std::string getOption() const
     {
         throw std::runtime_error("Wrong option type string");

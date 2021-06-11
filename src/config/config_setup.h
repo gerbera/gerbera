@@ -92,6 +92,8 @@ protected:
     }
 
 public:
+    virtual ~ConfigSetup() = default;
+
     static constexpr auto ROOT_NAME = std::string_view("config");
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
