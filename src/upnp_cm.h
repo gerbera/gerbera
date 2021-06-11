@@ -81,7 +81,6 @@ public:
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
-    virtual ~ConnectionManagerService() = default;
 
     static void setStaticArgs(std::string serviceType, std::string serviceID);
 

@@ -54,9 +54,9 @@ public:
         };
 
         Parameter(timer_param_t param, int id)
+            : param(param)
+            , id(id)
         {
-            this->param = param;
-            this->id = id;
         }
 
         timer_param_t whoami() const { return param; }
@@ -121,7 +121,7 @@ protected:
         {
             getTimespecAfterMillis(notifyInterval, nextNotify);
         }
-        std::chrono::milliseconds getNextNotify() { return nextNotify; }
+        std::chrono::milliseconds getNextNotify() const { return nextNotify; }
 
         std::shared_ptr<Parameter> getParameter() const { return parameter; }
 

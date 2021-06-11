@@ -81,8 +81,6 @@ public:
     static std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
     std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params);
 
-    virtual ~RequestHandler() = default;
-
 protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<Context> context;

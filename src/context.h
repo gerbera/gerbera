@@ -48,8 +48,6 @@ public:
         std::shared_ptr<Server> server,
         std::shared_ptr<web::SessionManager> session_manager);
 
-    virtual ~Context() = default;
-
     std::shared_ptr<Config> getConfig() const
     {
         return config;

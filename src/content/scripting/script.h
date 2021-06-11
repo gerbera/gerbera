@@ -67,13 +67,13 @@ public:
     Script(const Script&) = delete;
     Script& operator=(const Script&) = delete;
 
-    std::string getProperty(const std::string& name);
-    int getBoolProperty(const std::string& name);
-    int getIntProperty(const std::string& name, int def);
+    std::string getProperty(const std::string& name) const;
+    int getBoolProperty(const std::string& name) const;
+    int getIntProperty(const std::string& name, int def) const;
 
     void setProperty(const std::string& name, const std::string& value);
     void setIntProperty(const std::string& name, int value);
-    std::vector<std::string> getPropertyNames();
+    std::vector<std::string> getPropertyNames() const;
 
     void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);

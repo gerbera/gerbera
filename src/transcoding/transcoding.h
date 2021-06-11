@@ -124,7 +124,7 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(const std::string& name, std::string value);
+    void addAttribute(const std::string& name, const std::string& value);
 
     std::map<std::string, std::string> getAttributes() const;
 
@@ -160,7 +160,7 @@ public:
     ///
     /// \param list List of FourCC entries.
     /// \param mode Specifies if the FourCCs in the list are accepted or ignored
-    void setAVIFourCCList(std::vector<std::string> list,
+    void setAVIFourCCList(const std::vector<std::string>& list,
         avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
@@ -211,9 +211,9 @@ class TranscodingProfileList {
 public:
     void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
-    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
-    const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() { return list; }
-    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false);
+    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType) const;
+    std::map<std::string, std::shared_ptr<TranscodingProfileMap>> getList() const { return list; }
+    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
     size_t size() const { return list.size(); }
     void setKey(const std::string& oldKey, const std::string& newKey)
     {
@@ -231,10 +231,10 @@ protected:
 
 class TranscodingProcess {
 public:
-    TranscodingProcess(pid_t pid, const std::string& fname)
+    TranscodingProcess(pid_t pid, std::string fname)
+        : pid(pid)
+        , fname(std::move(fname))
     {
-        this->pid = pid;
-        this->fname = fname;
     }
 
     pid_t getPID() const { return pid; }

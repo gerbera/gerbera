@@ -36,7 +36,7 @@ class ConfigDefinition {
 public:
     static constexpr auto ATTRIBUTE = std::string_view("attribute::");
 
-    static const std::vector<std::shared_ptr<ConfigSetup>>& getOptionList()
+    static std::vector<std::shared_ptr<ConfigSetup>> getOptionList()
     {
         return complexOptions;
     }
@@ -50,7 +50,7 @@ public:
     {
         std::vector<std::shared_ptr<CS>> result;
         for (auto&& co : complexOptions) {
-            std::shared_ptr<CS> tco = std::dynamic_pointer_cast<CS>(co);
+            auto tco = std::dynamic_pointer_cast<CS>(co);
             if (tco != nullptr && tco->getValue() != nullptr) {
                 result.emplace_back(tco);
             }
@@ -61,11 +61,11 @@ public:
     template <class CS>
     static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
     {
-        std::shared_ptr<ConfigSetup> base = findConfigSetup(option, save);
+        auto base = findConfigSetup(option, save);
         if (base == nullptr && save)
             return nullptr;
 
-        std::shared_ptr<CS> result = std::dynamic_pointer_cast<CS>(base);
+        auto result = std::dynamic_pointer_cast<CS>(base);
         if (result == nullptr) {
             throw_std_runtime_error("Error in config code: {} has wrong class", option);
         }

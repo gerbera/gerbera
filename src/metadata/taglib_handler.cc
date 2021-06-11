@@ -230,6 +230,8 @@ void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const 
     }
 }
 
+/// \brief read metadata from file and add to object
+/// \param obj Object to handle
 void TagLibHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -274,9 +276,7 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 {
 #ifdef HAVE_MAGIC
     auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
-    if (art_mimetype.empty())
-        return MIMETYPE_DEFAULT;
-    return art_mimetype;
+    return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
 #else
     return MIMETYPE_DEFAULT;
 #endif
@@ -296,10 +296,14 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
     }
 }
 
+/// \brief stream content of object or resource to client
+/// \param obj Object to stream
+/// \param resNum number of resource
+/// \return iohandler to stream to client
 std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item == nullptr)
+    if (item == nullptr) // not streamable
         return nullptr;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -308,7 +312,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
     TagLib::FileStream roStream(item->getLocation().c_str(), true); // Open read only
 
     if (content_type == CONTENT_TYPE_MP3) {
-
+        // stream album art from MP3 file
         TagLib::MPEG::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
@@ -326,6 +330,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
     }
     if (content_type == CONTENT_TYPE_FLAC) {
+        // stream album art from FLAC file
         TagLib::FLAC::File f(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
         if (!f.isValid())
@@ -340,6 +345,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_MP4) {
+        // stream album art from MP4 file
         TagLib::MP4::File f(&roStream);
 
         if (!f.isValid()) {
@@ -368,6 +374,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_WMA) {
+        // stream album art from WMA file
         TagLib::ASF::File f(&roStream);
 
         if (!f.isValid())
@@ -390,6 +397,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
     if (content_type == CONTENT_TYPE_OGG) {
+        // stream album art from Ogg/Vorbis file
         TagLib::Ogg::Vorbis::File f(&roStream);
 
         if (!f.isValid() || !f.tag())

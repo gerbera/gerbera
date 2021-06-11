@@ -49,7 +49,7 @@ public:
 
     std::shared_ptr<pugi::xml_node> init();
 
-    std::shared_ptr<pugi::xml_node> getNode(const std::string& tag);
+    std::shared_ptr<pugi::xml_node> getNode(const std::string& tag) const;
 
 protected:
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;

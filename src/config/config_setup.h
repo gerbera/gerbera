@@ -121,8 +121,6 @@ public:
     {
     }
 
-    virtual ~ConfigSetup() = default;
-
     void setDefaultValue(const std::string& defaultValue)
     {
         this->defaultValue.assign(defaultValue);

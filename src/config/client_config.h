@@ -80,7 +80,7 @@ public:
     /// \param userAgent user agent
     ClientConfig(int flags, const std::string& ip, const std::string& userAgent);
 
-    std::shared_ptr<ClientInfo> getClientInfo() { return clientInfo; }
+    std::shared_ptr<ClientInfo> getClientInfo() const { return clientInfo; }
 
     int getFlags() const { return clientInfo->flags; }
     void setFlags(int flags) { this->clientInfo->flags = flags; }

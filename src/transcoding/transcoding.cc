@@ -46,9 +46,9 @@ void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
     initial_fill_size = ifs;
 }
 
-void TranscodingProfile::addAttribute(const std::string& name, std::string value)
+void TranscodingProfile::addAttribute(const std::string& name, const std::string& value)
 {
-    attributes[name] = std::move(value);
+    attributes[name] = value;
 }
 
 std::map<std::string, std::string> TranscodingProfile::getAttributes() const
@@ -56,9 +56,9 @@ std::map<std::string, std::string> TranscodingProfile::getAttributes() const
     return attributes;
 }
 
-void TranscodingProfile::setAVIFourCCList(std::vector<std::string> list, avi_fourcc_listmode_t mode)
+void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, avi_fourcc_listmode_t mode)
 {
-    fourcc_list = std::move(list);
+    fourcc_list = list;
     fourcc_mode = mode;
 }
 
@@ -80,7 +80,7 @@ void TranscodingProfileList::add(const std::string& sourceMimeType, const std::s
     list[sourceMimeType] = inner;
 }
 
-std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::string& sourceMimeType)
+std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::string& sourceMimeType) const
 {
     auto it = list.find(sourceMimeType);
     if (it != list.end())
@@ -88,7 +88,7 @@ std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::st
     return nullptr;
 }
 
-std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll)
+std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll) const
 {
     for (auto&& [key, inner] : list) {
         auto tp = inner->find(name);

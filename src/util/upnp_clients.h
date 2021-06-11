@@ -82,7 +82,6 @@ struct ClientCacheEntry {
 class Clients {
 public:
     explicit Clients(const std::shared_ptr<Config>& config);
-    virtual ~Clients() = default;
 
     // always return something, 'Unknown' if we do not know better
     void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);

@@ -53,8 +53,6 @@ public:
 
     /// \brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, size_t length);
-#else
-    virtual ~Mime() = default;
 #endif // HAVE_MAGIC
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);

@@ -132,9 +132,8 @@ void Session::clearUpdateIDs()
 
 SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer)
     : timer(std::move(timer))
-    , timerAdded(false)
+    , accounts(config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST))
 {
-    accounts = config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST);
 }
 
 std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds timeout)
@@ -186,7 +185,7 @@ void SessionManager::removeSession(const std::string& sessionID)
     }
 }
 
-std::string SessionManager::getUserPassword(const std::string& user)
+std::string SessionManager::getUserPassword(const std::string& user) const
 {
     return getValueOrDefault(accounts, user);
 }
