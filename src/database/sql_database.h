@@ -54,8 +54,7 @@ class SQLEmitter;
 
 class SQLRow {
 public:
-    //SQLRow() { }
-    //virtual ~SQLRow();
+    virtual ~SQLRow() = default;
     std::string col(int index) const
     {
         char* c = col_c_str(index);
@@ -64,8 +63,6 @@ public:
         return std::string(c);
     }
     virtual char* col_c_str(int index) const = 0;
-
-    virtual ~SQLRow() = default;
 };
 
 class SQLResult {

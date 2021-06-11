@@ -190,6 +190,7 @@ public:
     /// \brief Definition of the supported metadata fields.
 
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
+    virtual ~MetadataHandler() = default;
 
     static void setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
     static std::string getMetaFieldName(metadata_fields_t field);

@@ -48,8 +48,7 @@ class Sqlite3Result;
 /// \brief A virtual class that represents a task to be done by the sqlite3 thread.
 class SLTask {
 public:
-    /// \brief Instantiate a task
-    SLTask() = default;
+    virtual ~SLTask() = default;
 
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Database to do the queries with.

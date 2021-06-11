@@ -52,7 +52,8 @@ class Server;
 
 class RequestHandler {
 public:
-    RequestHandler(std::shared_ptr<ContentManager> content);
+    explicit RequestHandler(std::shared_ptr<ContentManager> content);
+    virtual ~RequestHandler() = default;
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
