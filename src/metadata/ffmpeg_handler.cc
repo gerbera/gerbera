@@ -363,7 +363,6 @@ void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, cons
         log_error("Failed to write thumbnail cache: {}", e.what());
     }
 }
-#endif
 
 namespace {
 template <auto C, auto D>
@@ -373,6 +372,7 @@ inline auto wrap_unique_ptr()
     return std::unique_ptr<std::remove_pointer_t<decltype(raw_ptr)>, decltype(D)>(raw_ptr, D);
 }
 } // namespace
+#endif
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
