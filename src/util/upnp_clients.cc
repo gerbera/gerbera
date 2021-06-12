@@ -278,12 +278,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         }
     } else {
         // add new client
-        auto add = ClientCacheEntry();
-        add.addr = *addr;
-        add.age = add.last = now;
-        add.userAgent = userAgent;
-        add.pInfo = pInfo;
-        cache->push_back(add);
+        cache->push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
     }
 }
 

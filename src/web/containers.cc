@@ -61,8 +61,7 @@ void web::containers::process()
     if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();
 
-    auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
-    auto arr = database->browse(param);
+    auto arr = database->browse(std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS));
     for (auto&& obj : arr) {
         //if (obj->isContainer())
         //{
