@@ -34,7 +34,7 @@
 #include <upnp.h>
 
 // table of supported clients (reverse search, sequence of entries matters!)
-static const auto bultinClientInfo = std::array<ClientInfo, 8> {
+static constexpr auto bultinClientInfo = std::array<ClientInfo, 8> {
     {
 
         // Used for not explicitly listed clients, must be first entry
@@ -121,8 +121,9 @@ static const auto bultinClientInfo = std::array<ClientInfo, 8> {
 
 Clients::Clients(const std::shared_ptr<Config>& config)
 {
-    std::copy(bultinClientInfo.begin(), bultinClientInfo.end(), std::back_inserter(clientInfo));
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
+    clientInfo.reserve(bultinClientInfo.size() + clientConfigList->size());
+    clientInfo.insert(clientInfo.begin(), bultinClientInfo.begin(), bultinClientInfo.end());
     for (size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
         auto client = clientConfig->getClientInfo();
@@ -192,7 +193,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             // IPv4
             struct sockaddr_in clientAddr = {};
             clientAddr.sin_family = AF_INET;
-            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
+            clientAddr.sin_addr.s_addr = inet_addr(c.match.data());
             if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                 return true;
             }
@@ -200,7 +201,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             // IPv6
             struct sockaddr_in6 clientAddr = {};
             clientAddr.sin6_family = AF_INET6;
-            if (inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) {
+            if (inet_pton(AF_INET6, c.match.data(), &clientAddr.sin6_addr) == 1) {
                 if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                     return true;
                 }
