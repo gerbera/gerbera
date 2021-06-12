@@ -78,22 +78,22 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, const std::string& ip, const std::string& userAgent);
+    ClientConfig(int flags, std::string_view ip, std::string_view userAgent);
 
     std::shared_ptr<ClientInfo> getClientInfo() const { return clientInfo; }
 
     int getFlags() const { return clientInfo->flags; }
     void setFlags(int flags) { this->clientInfo->flags = flags; }
 
-    std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
-    void setIp(const std::string& ip)
+    std::string_view getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
+    void setIp(std::string_view ip)
     {
         this->clientInfo->matchType = ClientMatchType::IP;
         this->clientInfo->match = ip;
     }
 
-    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
-    void setUserAgent(const std::string& userAgent)
+    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match.data() : ""; }
+    void setUserAgent(std::string_view userAgent)
     {
         this->clientInfo->matchType = ClientMatchType::UserAgent;
         this->clientInfo->match = userAgent;
