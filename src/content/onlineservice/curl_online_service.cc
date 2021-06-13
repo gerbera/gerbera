@@ -145,7 +145,6 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
 
         //        if (server->getShutdownStatus())
         //            return false;
-
     } while (obj != nullptr);
 
     return false;
