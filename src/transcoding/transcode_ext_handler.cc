@@ -118,9 +118,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
         //FIXME: #warning check if socket is ready
         sleep(15);
-    }
-    //FIXME: #warning check if we can use "accept url" with sopcast
-    else {
+    } else {
+        //FIXME: #warning check if we can use "accept url" with sopcast
 #endif
         if (isURL && (!profile->acceptURL())) {
 #ifdef HAVE_CURL

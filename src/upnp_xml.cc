@@ -509,9 +509,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
                     continue;
                 }
-            }
-            // check user fourcc settings
-            else if (ct == CONTENT_TYPE_AVI) {
+            } else if (ct == CONTENT_TYPE_AVI) {
+                // check user fourcc settings
                 avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
 
                 std::vector<std::string> fcc_list = tp->getAVIFourCCList();
@@ -527,10 +526,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                         // fourcc can not match anything we will skip the item
                         if (fcc_mode == FCC_Process)
                             continue;
-                    }
-                    // we have the current and hopefully valid fcc string
-                    // let's have a look if it matches the list
-                    else {
+                    } else {
+                        // we have the current and hopefully valid fcc string
+                        // let's have a look if it matches the list
                         bool fcc_match = std::find(fcc_list.begin(), fcc_list.end(), current_fcc) != fcc_list.end();
                         if (!fcc_match && (fcc_mode == FCC_Process))
                             continue;
