@@ -162,10 +162,10 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     config->append_attribute("xsi:schemaLocation") = fmt::format("{}{} {}{}.xsd", XML_XMLNS, CONFIG_XML_VERSION, XML_XMLNS, CONFIG_XML_VERSION).c_str();
 
     auto docinfo = config->append_child(pugi::node_comment);
-    docinfo.set_value("\n\
-     See http://gerbera.io or read the docs for more\n\
-     information on creating and using config.xml configuration files.\n\
-    ");
+    docinfo.set_value(R"(
+     See http://gerbera.io or read the docs for more
+     information on creating and using config.xml configuration files.
+    )");
 
     generateServer(userHome, configDir, dataDir);
     generateImport(dataDir, magicFile);
@@ -191,14 +191,15 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     setValue(CFG_SERVER_WEBROOT, webRoot.string());
 
     auto aliveinfo = server->append_child(pugi::node_comment);
-    aliveinfo.set_value(fmt::format("\n\
-        How frequently (in seconds) to send ssdp:alive advertisements.\n\
-        Minimum alive value accepted is: {}\n\n\
-        The advertisement will be sent every (A/2)-30 seconds,\n\
-        and will have a cache-control max-age of A where A is\n\
-        the value configured here. Ex: A value of 62 will result\n\
-        in an SSDP advertisement being sent every second.\n\
-    ",
+    aliveinfo.set_value(fmt::format(R"(
+        How frequently (in seconds) to send ssdp:alive advertisements.
+        Minimum alive value accepted is: {}
+
+        The advertisement will be sent every (A/2)-30 seconds,
+        and will have a cache-control max-age of A where A is
+        the value configured here. Ex: A value of 62 will result
+        in an SSDP advertisement being sent every second.
+    )",
         ALIVE_INTERVAL_MIN)
                             .c_str());
     setValue(CFG_SERVER_ALIVE_INTERVAL);
