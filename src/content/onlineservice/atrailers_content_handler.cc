@@ -78,7 +78,6 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         auto item = getObject(trailer);
         if (item != nullptr)
             return item;
-
     } // while trailer_it
 
     return nullptr;

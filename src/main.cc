@@ -484,7 +484,6 @@ int main(int argc, char** argv, char** envp)
             server->init();
             server->run();
         } catch (const UpnpException& ue) {
-
             sigemptyset(&mask_set);
             pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
 
@@ -616,7 +615,6 @@ int main(int argc, char** argv, char** envp)
 
         log_info("Gerbera exiting. Have a nice day.");
         exit(ret);
-
     } catch (const cxxopts::OptionException& e) {
         std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
         exit(EXIT_FAILURE);

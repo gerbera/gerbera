@@ -604,7 +604,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
     size_t resCount = item->getResourceCount();
     for (size_t i = 0; i < resCount; i++) {
-
         /// \todo what if the resource has a different mimetype than the item??
         /*        std::string mimeType = item->getMimeType();
                   if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */

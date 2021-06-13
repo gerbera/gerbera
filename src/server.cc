@@ -358,7 +358,6 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
 
     // dispatch event based on event type
     switch (eventType) {
-
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {

@@ -152,7 +152,6 @@ void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CS
     {
         /// \todo add another error code
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-
     }
 
     UpnpNotifyExt(deviceHandle,

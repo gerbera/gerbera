@@ -207,9 +207,8 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
 
 void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const
 {
-    std::vector<std::string> aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    auto aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (auto&& desiredTag : aux_tags_list) {
-
         if (desiredTag.empty()) {
             continue;
         }

@@ -111,7 +111,6 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
             auto item = getObject(groupName, channel);
             if (item != nullptr)
                 return item;
-
         } // for channel
     } // for group
 
