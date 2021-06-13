@@ -249,11 +249,10 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
         add(obj, id);
-    }
-    // the object is not yet in the database (probably we got it from a
-    // playlist script, so we set the ref id after adding - it will be used
-    // for all consequent virtual objects
-    else {
+    } else {
+        // the object is not yet in the database (probably we got it from a
+        // playlist script, so we set the ref id after adding - it will be used
+        // for all consequent virtual objects
         add(obj, id);
         obj->setRefID(obj->getID());
     }
