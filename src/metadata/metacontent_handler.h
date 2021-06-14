@@ -28,19 +28,30 @@
 #define __METADATA_CONTENT_H__
 
 #include <filesystem>
+#include <map>
 namespace fs = std::filesystem;
 
+#include "config/config.h"
 #include "metadata_handler.h"
+
+class ContentPathSetup {
+public:
+    explicit ContentPathSetup(std::shared_ptr<Config> config, config_option_t fileListOption, config_option_t dirListOption);
+    std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "");
+
+private:
+    const std::shared_ptr<Config> config;
+    std::vector<std::string> names;
+    std::map<std::string, std::string> patterns;
+    std::shared_ptr<DirectoryConfigList> allTweaks;
+    std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
+    bool caseSensitive;
+};
 
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
 public:
     explicit MetacontentHandler(const std::shared_ptr<Context>& context);
-    static bool caseSensitive;
-
-protected:
-    static fs::path getContentPath(const std::vector<std::string>& names, const std::shared_ptr<CdsObject>& obj, bool isCaseSensitive, fs::path folder = "");
-    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
@@ -51,8 +62,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::vector<std::string> names;
-    static bool initDone;
+    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
@@ -63,8 +73,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::vector<std::string> names;
-    static bool initDone;
+    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for populating filesystem based subtitles
@@ -75,8 +84,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::vector<std::string> names;
-    static bool initDone;
+    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for reverse mapping filesystem based resources
@@ -87,8 +95,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::vector<std::string> names;
-    static bool initDone;
+    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 #endif // __METADATA_CONTENT_H__

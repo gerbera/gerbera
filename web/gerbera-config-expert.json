@@ -681,6 +681,24 @@
 									"editable": true
 								}
 							]
+						},
+						{
+							"item": "/import/resources/container/add-dir",
+							"caption": "Images Directory Patterns",
+							"type": "List",
+							"editable": true,
+							"children": [
+								{
+									"item": "/import/resources/container/add-dir/attribute::name",
+									"caption": "Directory Name",
+									"editable": true
+								},
+								{
+									"item": "/import/resources/container/add-dir/attribute::ext",
+									"caption": "File Extension",
+									"editable": true
+								}
+							]
 						}
 					]
 				},
@@ -693,6 +711,24 @@
 						{
 							"item": "/import/resources/fanart/add-file/attribute::name",
 							"caption": "File Name",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/resources/fanart/add-dir",
+					"caption": "Fanart Directory Patterns",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/fanart/add-dir/attribute::name",
+							"caption": "Directory Name",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/fanart/add-dir/attribute::ext",
+							"caption": "File Extension",
 							"editable": true
 						}
 					]
@@ -711,6 +747,24 @@
 					]
 				},
 				{
+					"item": "/import/resources/subtitle/add-dir",
+					"caption": "Subtitle Directory Patterns",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/subtitle/add-dir/attribute::name",
+							"caption": "Directory Name",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/subtitle/add-dir/attribute::ext",
+							"caption": "File Extension",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/import/resources/resource/add-file",
 					"caption": "Resource Files",
 					"type": "List",
@@ -719,6 +773,24 @@
 						{
 							"item": "/import/resources/resource/add-file/attribute::name",
 							"caption": "File Name",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/resources/resource/add-dir",
+					"caption": "Resource Directory Patterns",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/resource/add-dir/attribute::name",
+							"caption": "Directory Name",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/resource/add-dir/attribute::ext",
+							"caption": "File Extension",
 							"editable": true
 						}
 					]
@@ -1097,6 +1169,24 @@
 						},
 						{
 							"item": "/server/upnp/artist-properties/upnp-property/attribute::meta-data",
+							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/server/upnp/genre-properties/upnp-property",
+					"caption": "Genre-Properties",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/genre-properties/upnp-property/attribute::upnp-tag",
+							"caption": "UPnP Tag",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/genre-properties/upnp-property/attribute::meta-data",
 							"caption": "Metadata",
 							"editable": true
 						}

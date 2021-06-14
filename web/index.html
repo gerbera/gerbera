@@ -123,70 +123,73 @@
 <div id="video" style="display: none;"></div>
 
 
-<div id="editModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
+<div id="editModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog edit-dialog" role="document">
+        <div class="modal-content edit-content">
             <div class="modal-header">
                 <h4 class="modal-title">Edit Item</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <table><tbody><tr><td>
-                <form style="width: calc( 500px - 2rem );">
-                    <div class="form-group" id="objectIdGroup" hidden>
-                        <label for="editdObjectIdTxt">ID</label>
-                        <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
-                    </div>
-                    <div class="form-group" id="parentIdGroup" hidden>
-                        <label for="addParentId">Parent ID</label>
-                        <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
-                    </div>
-                    <div class="form-group" style="display: inline-flex;">
-                        <img width="150px" id="mediaimage"/>
-                        <div class="form-group" style="margin-left: 1em;">
-                            <label for="editLmt">Last Modified</label>
-                            <input type="text" class="form-control" id="editLmt">
+            <div class="modal-body edit-body">
+                <table class="edit-table"><tbody><tr>
+                <td class="edit-cell">
+                    <form class="editor-form">
+                        <div class="form-group" id="objectIdGroup" hidden>
+                            <label for="editdObjectIdTxt">ID</label>
+                            <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
                         </div>
+                        <div class="form-group" id="parentIdGroup" hidden>
+                            <label for="addParentId">Parent ID</label>
+                            <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
+                        </div>
+                        <div class="form-group" style="display: inline-flex;">
+                            <img id="mediaimage"/>
+                            <div class="form-group" style="margin-left: 1em;">
+                                <label for="editLmt">Last Modified</label>
+                                <input type="text" class="form-control" id="editLmt">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editObjectType">Type</label>
+                            <select id="editObjectType" class="form-control">
+                                <option value="container">Container</option>
+                                <option value="item">Item</option>
+                                <option value="external_url">External Link (URL)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTitle">Title</label>
+                            <input type="text" class="form-control" id="editTitle">
+                        </div>
+                        <div class="form-group">
+                            <label for="editTitle">Location</label>
+                            <input type="text" class="form-control" id="editLocation">
+                        </div>
+                        <div class="form-group">
+                            <label for="editClass">Class</label>
+                            <input type="text" class="form-control" id="editClass" value="default">
+                        </div>
+                        <div class="form-group">
+                            <label for="editDesc">Description</label>
+                            <input type="text" class="form-control" id="editDesc">
+                        </div>
+                        <div class="form-group">
+                            <label for="editMime">Mimetype</label>
+                            <input type="text" class="form-control" id="editMime">
+                        </div>
+                        <div class="form-group">
+                            <label for="editProtocol">Protocol</label>
+                            <input type="text" class="form-control" id="editProtocol">
+                        </div>
+                    </form>
+                </td><td class="edit-cell">
+                    <div class="detail-area">
+                        <table id="metadata" class="detail-table"></table>
+                        <table id="auxdata" class="detail-table"></table>
+                        <table id="resdata" class="detail-table"></table>
                     </div>
-                    <div class="form-group">
-                        <label for="editObjectType">Type</label>
-                        <select id="editObjectType" class="form-control">
-                            <option value="container">Container</option>
-                            <option value="item">Item</option>
-                            <option value="external_url">External Link (URL)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTitle">Title</label>
-                        <input type="text" class="form-control" id="editTitle">
-                    </div>
-                    <div class="form-group">
-                        <label for="editTitle">Location</label>
-                        <input type="text" class="form-control" id="editLocation">
-                    </div>
-                    <div class="form-group">
-                        <label for="editClass">Class</label>
-                        <input type="text" class="form-control" id="editClass" value="default">
-                    </div>
-                    <div class="form-group">
-                        <label for="editDesc">Description</label>
-                        <input type="text" class="form-control" id="editDesc">
-                    </div>
-                    <div class="form-group">
-                        <label for="editMime">Mimetype</label>
-                        <input type="text" class="form-control" id="editMime">
-                    </div>
-                    <div class="form-group">
-                        <label for="editProtocol">Protocol</label>
-                        <input type="text" class="form-control" id="editProtocol">
-                    </div>
-                </form>
-                </td><td>
-                <table id="metadata" class="detail-table"></table>
-                <table id="auxdata" class="detail-table"></table>
-                <table id="resdata" class="detail-table"></table>
                 </td></tr></tbody>
                 </table>
             </div>

@@ -95,6 +95,12 @@ void web::configLoad::setValue(pugi::xml_node& item, const std::string& value)
 }
 
 template <>
+void web::configLoad::setValue(pugi::xml_node& item, const std::string_view& value)
+{
+    item.append_attribute("value") = value.data();
+}
+
+template <>
 void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
 {
     item.append_attribute("value") = value.c_str();

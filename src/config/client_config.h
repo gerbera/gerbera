@@ -85,14 +85,14 @@ public:
     int getFlags() const { return clientInfo->flags; }
     void setFlags(int flags) { this->clientInfo->flags = flags; }
 
-    std::string_view getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
+    std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
     void setIp(std::string_view ip)
     {
         this->clientInfo->matchType = ClientMatchType::IP;
         this->clientInfo->match = ip;
     }
 
-    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match.data() : ""; }
+    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
     void setUserAgent(std::string_view userAgent)
     {
         this->clientInfo->matchType = ClientMatchType::UserAgent;

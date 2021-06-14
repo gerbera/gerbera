@@ -110,7 +110,7 @@
     modal.find('#hidebutton').hide();
   }
 
-  function appendMetaItem(tbody, name, value) {
+  function appendMetaItem(tbody, name, value, special = null) {
     let row, content, text;
     row = $('<tr></tr>');
     content = $('<td></td>');
@@ -119,9 +119,14 @@
     text.text(name).appendTo(content);
     row.append(content);
     content = $('<td></td>');
-    const nl = '\n';
-    text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
-    text.appendTo(content);
+    if (value !== null) {
+      const nl = '\n';
+      text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
+      text.appendTo(content);
+    }
+    if (special !== null) {
+        special.appendTo(content);
+    }
     row.append(content);
     tbody.append(row);
   }
@@ -195,8 +200,11 @@
             $(`<thead><tr><th>Resource</th><th>${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
             tbody = $('<tbody></tbody>');
             restable.append(tbody);
-          }
-          else {
+          } else if (item.resources.resources[i].resname === 'image') {
+            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="' +  item.resources.resources[i].resvalue + '"/>'));
+          } else if (item.resources.resources[i].resname === 'link') {
+            appendMetaItem(tbody, 'content', null, $('<a href=' +  item.resources.resources[i].resvalue + '>Open</span>'));
+          } else {
             appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue);
           }
         }

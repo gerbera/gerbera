@@ -148,6 +148,38 @@ static std::vector<std::string> excludes_fullpath {
     "/var",
 };
 
+/// \brief default values for CFG_IMPORT_RESOURCES_FANART_FILE_LIST
+static std::vector<std::string> defaultFanArtFile {
+    // "%title%.jpg",
+    // "%filename%.jpg",
+    // "folder.jpg",
+    // "poster.jpg",
+    // "cover.jpg",
+    // "albumartsmall.jpg",
+    // "%album%.jpg",
+};
+
+/// \brief default values for CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST
+static std::vector<std::string> defaultContainerArtFile {
+    // "folder.jpg",
+    // "poster.jpg",
+    // "cover.jpg",
+    // "albumartsmall.jpg",
+};
+
+/// \brief default values for CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST
+static std::vector<std::string> defaultSubtitleFile {
+    // "%title%.srt",
+    // "%filename%.srt"
+};
+
+/// \brief default values for CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST
+static std::vector<std::string> defaultResourceFile {
+    // "%filename%.srt",
+    // "cover.jpg",
+    // "%album%.jpg",
+};
+
 /// \brief default values for CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
 static std::vector<std::string> defaultItemsPerPage {
     "10",
@@ -565,11 +597,19 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_RESOURCES_CASE_SENSITIVE),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
         "/import/resources/fanart", "config-import.html#resources",
-        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, std::move(defaultFanArtFile)),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_FANART_DIR_LIST,
+        "/import/resources/fanart", "config-import.html#resources",
+        ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
         "/import/resources/container", "config-import.html#container",
-        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, std::move(defaultContainerArtFile)),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+        "/import/resources/container", "config-import.html#container",
+        ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION,
         "/import/resources/container/attribute::location", "config-import.html#container",
         ""),
@@ -582,10 +622,19 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
-        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, std::move(defaultSubtitleFile)),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+        "/import/resources/subtitle", "config-import.html#resources",
+        ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
         "/import/resources/resource", "config-import.html#resources",
-        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, std::move(defaultResourceFile)),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+        "/import/resources/resource", "config-import.html#resources",
+        ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
+
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, true, true,
@@ -893,6 +942,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::name", "config-import.html#resources",
         ""),
 
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_RESOURCES_EXT,
+        "attribute::ext", "config-import.html#resources",
+        ""),
+
     std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_MAPPING_FROM,
         "attribute::from", "config-import.html#layout",
         ""),
@@ -943,6 +996,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "map", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_RESOURCES_ADD_FILE,
         "add-file", ""),
+    std::make_shared<ConfigSetup>(ATTR_IMPORT_RESOURCES_ADD_DIR,
+        "add-dir", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LIBOPTS_AUXDATA_DATA,
         "add-data", ""),
     std::make_shared<ConfigSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE,
@@ -1015,7 +1070,10 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
 
-    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_SYSTEM_DIRECTORIES } },
+    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, //
+                                      CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, //
+                                      CFG_IMPORT_SYSTEM_DIRECTORIES } },
+    { ATTR_IMPORT_RESOURCES_EXT, { CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
