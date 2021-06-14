@@ -34,7 +34,7 @@
 #include <upnp.h>
 
 // table of supported clients (reverse search, sequence of entries matters!)
-static constexpr auto bultinClientInfo = std::array<ClientInfo, 8> {
+static const auto bultinClientInfo = std::array<ClientInfo, 8> {
     {
 
         // Used for not explicitly listed clients, must be first entry
@@ -193,7 +193,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             // IPv4
             struct sockaddr_in clientAddr = {};
             clientAddr.sin_family = AF_INET;
-            clientAddr.sin_addr.s_addr = inet_addr(c.match.data());
+            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
             if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                 return true;
             }
@@ -201,7 +201,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
             // IPv6
             struct sockaddr_in6 clientAddr = {};
             clientAddr.sin6_family = AF_INET6;
-            if (inet_pton(AF_INET6, c.match.data(), &clientAddr.sin6_addr) == 1) {
+            if (inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) {
                 if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
                     return true;
                 }

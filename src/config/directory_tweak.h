@@ -83,6 +83,11 @@ protected:
     void _add(const std::shared_ptr<DirectoryTweak>& dir, size_t index);
 };
 
+#define SETTING_FANART "FanArt"
+#define SETTING_CONTAINERART "ContainerArt"
+#define SETTING_SUBTITLE "SubTitle"
+#define SETTING_RESOURCE "Resource"
+
 /// \brief Provides information about one directory.
 class DirectoryTweak {
 public:
@@ -122,17 +127,20 @@ public:
     bool hasMetaCharset() const { return resourceFiles.find("MetaCharset") != resourceFiles.end(); }
     std::string getMetaCharset() const { return resourceFiles.at("MetaCharset"); }
 
-    void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles["FanArt"] = fanArtFile; }
-    bool hasFanArtFile() const { return resourceFiles.find("FanArt") != resourceFiles.end(); }
-    std::string getFanArtFile() const { return resourceFiles.at("FanArt"); }
+    void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles[SETTING_FANART] = fanArtFile; }
+    bool hasFanArtFile() const { return resourceFiles.find(SETTING_FANART) != resourceFiles.end(); }
+    std::string getFanArtFile() const { return resourceFiles.at(SETTING_FANART); }
 
-    void setSubTitleFile(const std::string& subTitleFile) { this->resourceFiles["SubTitle"] = subTitleFile; }
-    bool hasSubTitleFile() const { return resourceFiles.find("SubTitle") != resourceFiles.end(); }
-    std::string getSubTitleFile() const { return resourceFiles.at("SubTitle"); }
+    void setSubTitleFile(const std::string& subTitleFile) { this->resourceFiles[SETTING_SUBTITLE] = subTitleFile; }
+    bool hasSubTitleFile() const { return resourceFiles.find(SETTING_SUBTITLE) != resourceFiles.end(); }
+    std::string getSubTitleFile() const { return resourceFiles.at(SETTING_SUBTITLE); }
 
-    void setResourceFile(const std::string& resourceFile) { this->resourceFiles["Resource"] = resourceFile; }
-    bool hasResourceFile() const { return resourceFiles.find("Resource") != resourceFiles.end(); }
-    std::string getResourceFile() const { return resourceFiles.at("Resource"); }
+    void setResourceFile(const std::string& resourceFile) { this->resourceFiles[SETTING_RESOURCE] = resourceFile; }
+    bool hasResourceFile() const { return resourceFiles.find(SETTING_RESOURCE) != resourceFiles.end(); }
+    std::string getResourceFile() const { return resourceFiles.at(SETTING_RESOURCE); }
+
+    bool hasSetting(const std::string& setting) const { return resourceFiles.find(setting) != resourceFiles.end(); }
+    std::string getSetting(const std::string& setting) const { return resourceFiles.at(setting); }
 
 protected:
     fs::path location;

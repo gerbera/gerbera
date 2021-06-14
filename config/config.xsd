@@ -606,6 +606,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="parentCount"/>
             <xs:attribute name="minDepth"/>
@@ -616,6 +617,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -624,6 +626,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -632,6 +635,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -639,6 +643,13 @@
     <xs:element name="add-file">
         <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-dir">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="ext" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

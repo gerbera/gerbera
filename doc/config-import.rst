@@ -507,7 +507,8 @@ Defines various layout options for generated virtual layout.
 
 * Optional
 
-Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added anymore. You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
+Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added by default anymore.
+You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
 
     ::
 
@@ -536,7 +537,7 @@ Defines various resource options for file based resources. Older versions of Ger
 
     ``resource`` patterns are used to trigger rescan of the whole directory if such a file was changed, added or removed.
 
-    Each of these tags can contain multiple ``add-file`` entries. ``container`` has additional attributes.
+    Each of these tags can contain multiple ``add-file`` or ``add-dir`` entries. ``container`` has additional attributes.
 
 **Child tags:**
 
@@ -587,14 +588,52 @@ Defines various resource options for file based resources. Older versions of Ger
 
     * Optional
 
-    Add search pattern to resource handler. The search pattern can contain variables:
+        ::
 
-    - ``%album%``: Value of the album tag
-    - ``%albumArtist%``: Value of the albumArtist tag
-    - ``%artist%``: Value of the artist tag
-    - ``%filename%``: Name of the file without extension or name of the container
-    - ``%genre%``: Value of the genre tag
-    - ``%title%``: Value of the title tag
+            name="..."
+
+        * Required
+
+        Add file search pattern to resource handler. The search pattern can contain variables:
+
+        - ``%album%``: Value of the album tag
+        - ``%albumArtist%``: Value of the albumArtist tag
+        - ``%artist%``: Value of the artist tag
+        - ``%filename%``: Name of the file without extension or name of the container
+        - ``%genre%``: Value of the genre tag
+        - ``%title%``: Value of the title tag
+
+
+``add-dir``
+------------
+
+    ::
+
+        <add-dir name="/data/subtitles/%title%" ext="srt"/>
+        <add-dir name="/data/subtitles" ext="%title%*.srt"/>
+        <add-dir name="%filename%" ext="srt"/>
+
+    * Optional
+
+        ::
+
+            name="..."
+
+        * Required
+
+        Add directory search pattern to resource handler. The search pattern can contain the same variables as ``add-file``.
+        If the directory is relative the file is searched in a subdirectory of the directory containing the media file.
+
+        ::
+
+            ext="..."
+
+        * Required
+
+        Define the extension or file name pattern. The search pattern can contain the same variables as ``add-file``.
+        If it does not contain a ``.`` it is considered as extension.
+        If it contains a ``.`` the part before can contain ``*`` and ``?`` as wildcards and must exactly match the file name.
+
 
 A sample configuration would be:
 
@@ -606,6 +645,7 @@ A sample configuration would be:
       </fanart>
       <subtitle>
           <add-file name="%filename%.srt"/>
+          <add-dir name="/data/subtitles/%title%" ext="srt"/>
       </subtitle>
       <resource>
           <add-file name="cover.png"/>
