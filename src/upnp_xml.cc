@@ -313,30 +313,25 @@ void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::
 
 std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal)
 {
-    auto pathBase = std::make_unique<PathBase>();
     /// \todo resource options must be read from configuration files
 
     std::map<std::string, std::string> dict;
     dict[URL_OBJECT_ID] = fmt::to_string(item->getID());
 
-    pathBase->addResID = false;
     /// \todo move this down into the "for" loop and create different urls
     /// for each resource once the io handlers are ready    int objectType = ;
     if (item->isExternalItem()) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
-            pathBase->pathBase = item->getLocation();
-            return pathBase;
+            return std::make_unique<PathBase>(PathBase { item->getLocation(), false });
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            pathBase->pathBase = RequestHandler::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-            pathBase->addResID = true;
-            return pathBase;
+            auto path = RequestHandler::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
+            return std::make_unique<PathBase>(PathBase { path, true });
         }
     }
-    pathBase->pathBase = RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-    pathBase->addResID = true;
-    return pathBase;
+    auto path = RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
+    return std::make_unique<PathBase>(PathBase { path, true });
 }
 
 /// \brief build path for first resource from item

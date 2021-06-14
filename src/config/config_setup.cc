@@ -1483,7 +1483,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
     index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getIp());
+            config->setOrigValue(index, entry->getIp().data());
         if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
             entry->setIp(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());

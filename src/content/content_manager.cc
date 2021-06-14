@@ -87,10 +87,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #ifdef HAVE_LASTFMLIB
     , last_fm(std::make_shared<LastFm>(context))
 #endif
-    , layout_enabled(false)
-    , working(false)
-    , shutdownFlag(false)
-    , taskID(1)
 {
     update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES

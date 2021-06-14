@@ -37,7 +37,7 @@ ClientConfig::ClientConfig()
     clientInfo->flags = 0;
 }
 
-ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& userAgent)
+ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
     : clientInfo(std::make_shared<ClientInfo>())
 {
     clientInfo->type = ClientType::Unknown;
@@ -51,7 +51,9 @@ ClientConfig::ClientConfig(int flags, const std::string& ip, const std::string& 
         clientInfo->matchType = ClientMatchType::None;
     }
     clientInfo->flags = flags;
-    clientInfo->name = fmt::format("Manual Setup for{}{}", !ip.empty() ? " IP " + ip : "", !userAgent.empty() ? " UserAgent " + userAgent : "");
+    auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
+    auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
+    clientInfo->name = fmt::format("Manual Setup for{}{}", sIP, sUA);
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t index)

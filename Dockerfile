@@ -29,7 +29,7 @@ RUN mkdir build && \
 FROM alpine:3.13
 RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
 	file libexif curl ffmpeg-libs ffmpegthumbnailer libmatroska libebml taglib \
-	pugixml spdlog sqlite-libs libupnp duktape su-exec
+	pugixml spdlog sqlite-libs libupnp duktape su-exec tzdata
 
 # Gerbera itself
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

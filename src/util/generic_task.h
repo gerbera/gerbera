@@ -32,6 +32,7 @@ protected:
 
 public:
     explicit GenericTask(task_owner_t taskOwner);
+    virtual ~GenericTask() = default;
     virtual void run() = 0;
     void setDescription(const std::string& description) { this->description = description; }
     std::string getDescription() const { return description; }
