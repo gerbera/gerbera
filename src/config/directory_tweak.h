@@ -86,7 +86,7 @@ protected:
 /// \brief Provides information about one directory.
 class DirectoryTweak {
 public:
-    explicit DirectoryTweak() = default;
+    DirectoryTweak() = default;
     explicit DirectoryTweak(fs::path location, bool inherit)
         : location(std::move(location))
         , inherit(inherit)

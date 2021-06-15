@@ -378,7 +378,7 @@ protected:
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    explicit CdsItem();
+    CdsItem();
 
     /// \brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
@@ -428,7 +428,7 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// \brief Constructor, sets the object type.
-    explicit CdsItemExternalURL();
+    CdsItemExternalURL();
     bool isPureItem() const override { return false; }
     bool isExternalItem() const override { return true; }
 
@@ -465,7 +465,7 @@ protected:
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
-    explicit CdsContainer();
+    CdsContainer();
     bool isContainer() const override { return true; }
 
     /// \brief Set the searchable flag.

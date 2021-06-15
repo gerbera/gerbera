@@ -32,9 +32,11 @@
 ClientConfig::ClientConfig()
     : clientInfo(std::make_shared<ClientInfo>())
 {
-    clientInfo->matchType = ClientMatchType::None;
+    clientInfo->name = "Unknown";
     clientInfo->type = ClientType::Unknown;
-    clientInfo->flags = 0;
+    clientInfo->flags = QUIRK_FLAG_NONE;
+    clientInfo->matchType = ClientMatchType::None;
+    clientInfo->match = "";
 }
 
 ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)

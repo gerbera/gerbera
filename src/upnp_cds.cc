@@ -42,8 +42,7 @@
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
-    : systemUpdateID(0)
-    , stringLimit(stringLimit)
+    : stringLimit(stringLimit)
     , config(context->getConfig())
     , database(context->getDatabase())
     , deviceHandle(deviceHandle)

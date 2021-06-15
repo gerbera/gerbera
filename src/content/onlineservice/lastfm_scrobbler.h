@@ -71,8 +71,8 @@ public:
 private:
     std::shared_ptr<Config> config;
 
-    lastfm_scrobbler* scrobbler;
-    int currentTrackId;
+    lastfm_scrobbler* scrobbler {};
+    int currentTrackId { -1 };
 };
 
 #endif //__LASTFM_H__
