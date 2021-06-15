@@ -344,7 +344,7 @@ int main(int argc, char** argv, char** envp)
 
             // convert to a string
             char pidstr[20];
-            if (0 > snprintf(pidstr, 18, "%d", pid)) {
+            if (0 > snprintf(pidstr, sizeof(pidstr) - 2, "%d", pid)) {
                 log_error("Could not determine pid of running process.");
                 exit(EXIT_FAILURE);
             }
