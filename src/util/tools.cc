@@ -41,6 +41,7 @@
 #include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <numeric>
 #include <queue>
 #include <sstream>
 #include <sys/ioctl.h>
@@ -747,12 +748,7 @@ std::string fallbackString(const std::string& first, const std::string& fallback
 
 unsigned int stringHash(const std::string& str)
 {
-    unsigned int hash = 5381;
-    auto data = str.c_str();
-    int c;
-    while ((c = *data++))
-        hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
-    return hash;
+    return std::accumulate(str.begin(), str.end(), 5381, [](auto&& h, auto&& ch) { return ((h << 5) + h) ^ ch; });
 }
 
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
