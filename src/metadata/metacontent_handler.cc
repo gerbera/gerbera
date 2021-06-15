@@ -74,7 +74,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             std::error_code ec;
             for (auto&& p : fs::directory_iterator(folder, ec))
                 if (isRegularFile(p, ec))
-                    fileNames[toLower(p.path().filename())] = p;
+                    fileNames[toLower(p.path().filename().string())] = p;
 
             for (auto&& name : files) {
                 auto fileName = toLower(expandName(name, obj));
@@ -106,7 +106,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
                 }
                 for (auto&& p : fs::directory_iterator(found, ec)) {
-                    if (isRegularFile(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension()) == extn))) {
+                    if (isRegularFile(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension().string()) == extn))) {
                         if (!stem.empty()) {
                             replaceAllString(stem, "*", ".*");
                             replaceAllString(stem, ".", "?");
@@ -147,14 +147,14 @@ std::string ContentPathSetup::expandName(const std::string& name, const std::sha
 
     if (obj->isItem()) {
         fs::path location = obj->getLocation();
-        replaceString(copy, "%filename%", location.stem());
+        replaceString(copy, "%filename%", location.stem().string().c_str());
     }
     if (obj->isContainer()) {
         auto title = obj->getTitle();
         if (!title.empty())
             replaceString(copy, "%filename%", title);
         fs::path location = obj->getLocation();
-        replaceString(copy, "%filename%", location.filename());
+        replaceString(copy, "%filename%", location.filename().string().c_str());
     }
     return copy;
 }

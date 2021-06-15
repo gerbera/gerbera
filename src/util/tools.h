@@ -55,7 +55,7 @@ class IOHandler;
 /// \param sep separator character
 /// \param treat subsequent separators as empty array elements
 /// \return array of strings
-std::vector<std::string> splitString(const std::string& str, char sep, bool empty = false);
+std::vector<std::string> splitString(std::string_view str, char sep, bool empty = false);
 
 /// \brief trim from start (in place)
 void leftTrimStringInPlace(std::string& str);
@@ -70,10 +70,10 @@ void trimStringInPlace(std::string& str);
 std::string trimString(std::string str);
 
 /// \brief returns true if str starts with check
-bool startswith(const std::string& str, const std::string& check);
+bool startswith(std::string_view str, std::string_view check);
 
 /// \brief returns lowercase of str
-std::string toLower(std::string str);
+std::string toLower(std::string_view str);
 
 /// \brief convert string to integer
 int stoiString(const std::string& str, int def = 0, int base = 10);
@@ -84,8 +84,8 @@ unsigned long stoulString(const std::string& str, int def = 0, int base = 10);
 void reduceString(std::string& str, char ch);
 
 /// \brief  Used to replace parts of string with other value
-void replaceString(std::string& str, std::string_view from, const std::string& to);
-void replaceAllString(std::string& str, std::string_view from, const std::string& to);
+void replaceString(std::string& str, std::string_view from, std::string_view to);
+void replaceAllString(std::string& str, std::string_view from, std::string_view to);
 
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
@@ -106,14 +106,14 @@ bool isExecutable(const fs::path& path, int* err = nullptr);
 fs::path findInPath(const fs::path& exec);
 
 /// \brief Render browser friendly uri (handle IPv6)
-std::string renderWebUri(const std::string& ip, int port);
+std::string renderWebUri(std::string_view ip, int port);
 
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
 /// \param page HTML document to redirect to.
 /// \return string representing the desired HTML document.
-std::string httpRedirectTo(const std::string& addr, const std::string& page = "");
+std::string httpRedirectTo(std::string_view addr, std::string_view page = "");
 
 /// \brief Encodes arbitrary data to a hex string.
 /// \param data Buffer that is holding the data
@@ -124,7 +124,7 @@ std::string hexEncode(const void* data, int len);
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
 /// \return decoded string
-std::string hexDecodeString(const std::string& encoded);
+std::string hexDecodeString(std::string_view encoded);
 
 /// \brief Generates random id.
 /// \return String representing the newly created id.
@@ -134,20 +134,20 @@ std::string generateRandomId();
 std::string hexMd5(const void* data, int length);
 
 /// \brief Generates hex md5 sum of the given string.
-std::string hexStringMd5(const std::string& str);
+std::string hexStringMd5(std::string_view str);
 
 /// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// \param str String to be converted.
 /// \return string that contains the url-escaped representation of the original string.
-std::string urlEscape(const std::string& str);
+std::string urlEscape(std::string_view str);
 
 /// \brief Opposite of urlEscape :)
-std::string urlUnescape(const std::string& str);
+std::string urlUnescape(std::string_view str);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
-void dictDecode(const std::string& url, std::map<std::string, std::string>* dict, bool unEscape = true);
-void dictDecodeSimple(const std::string& url, std::map<std::string, std::string>* dict);
+void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, bool unEscape = true);
+void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* dict);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
@@ -158,7 +158,7 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
 std::string readTextFile(const fs::path& path);
 
 /// \brief writes a string into a text file
-void writeTextFile(const fs::path& path, const std::string& contents);
+void writeTextFile(const fs::path& path, std::string_view contents);
 
 /// \brief Reads entire contents of a binary file into a buffer.
 /// \return an empty optional if file can't be open and throws if read fails.
@@ -173,11 +173,11 @@ void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t si
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
 /// \return The rendered protocolInfo String
-std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol = PROTOCOL, const std::string& extend = "");
+std::string renderProtocolInfo(std::string_view mimetype, std::string_view protocol = PROTOCOL, std::string_view extend = "");
 
 /// \brief Extracts mimetype from the protocol info string.
 /// \param protocol info string as used in the protocolInfo attribute
-std::string getMTFromProtocolInfo(const std::string& protocol);
+std::string getMTFromProtocolInfo(std::string_view protocol);
 
 /// \brief Parses a protocolInfo string (see renderProtocolInfo).
 ///
@@ -195,7 +195,7 @@ int HMSFToMilliseconds(const std::string& time);
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-bool checkResolution(const std::string& resolution, int* x = nullptr, int* y = nullptr);
+bool checkResolution(std::string_view resolution, int* x = nullptr, int* y = nullptr);
 
 std::string escape(std::string string, char escape_char, char to_escape);
 
@@ -223,7 +223,7 @@ std::string fallbackString(const std::string& first, const std::string& fallback
 /// \brief computes an (unsigned int) hash for the given string
 /// \param str the string to compute the hash for
 /// \return return the (unsigned int) hash value
-unsigned int stringHash(const std::string& str);
+unsigned int stringHash(std::string_view str);
 
 template <typename C, typename D>
 std::string join(const C& container, const D& delimiter)
@@ -260,11 +260,11 @@ void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::millis
 /// \brief Finds the Interface with the specified IP address.
 /// \param ip i.e. 192.168.4.56.
 /// \return Interface name or nullptr if IP was not found.
-std::string ipToInterface(const std::string& ip);
+std::string ipToInterface(std::string_view ip);
 
 /// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
 /// returns false.
-bool validateYesNo(const std::string& value);
+bool validateYesNo(std::string_view value);
 
 /// \brief Parses a command line, splitting the arguments into an array and
 /// substitutes %in and %out tokens with given strings.
@@ -296,18 +296,18 @@ fs::path getLastPath(const fs::path& path);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.
-ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos);
+ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
-std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, const std::string& mimeType);
-std::string getDLNAprofileString(const std::string& contentType);
-std::string getDLNAContentHeader([[maybe_unused]] const std::shared_ptr<Config>& config, const std::string& contentType);
+std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view mimeType);
+std::string getDLNAprofileString(std::string_view contentType);
+std::string getDLNAContentHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view contentType);
 
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.
 ///
 /// This code is based on offsets, so we will use it only if ffmpeg is not
 /// available.
-std::string getAVIFourCC(const fs::path& avi_filename);
+std::string getAVIFourCC(std::string_view avi_filename);
 #endif
 
 /// \brief Compare sockaddr

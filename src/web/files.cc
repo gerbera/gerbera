@@ -65,7 +65,7 @@ void web::files::process()
 
         if (!isRegularFile(it, ec))
             continue;
-        if (exclude_config_files && startswith(filepath.filename(), "."))
+        if (exclude_config_files && startswith(filepath.filename().string(), "."))
             continue;
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());

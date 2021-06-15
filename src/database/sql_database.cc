@@ -433,7 +433,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql["location"] = quote(dbLocation);
-        cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
+        cdsObjectSql["location_hash"] = quote(stringHash(dbLocation.string()));
     }
 
     if (obj->isItem()) {
@@ -448,7 +448,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 obj->setParentID(parentID);
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql["location"] = quote(dbLocation);
-                cdsObjectSql["location_hash"] = quote(stringHash(dbLocation));
+                cdsObjectSql["location_hash"] = quote(stringHash(dbLocation.string()));
             } else {
                 // URLs
                 cdsObjectSql["location"] = quote(loc);

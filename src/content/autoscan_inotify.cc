@@ -342,7 +342,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 
 void AutoscanInotify::monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    auto pathAr = splitString(path, DIR_SEPARATOR);
+    auto pathAr = splitString(path.string(), DIR_SEPARATOR);
     recheckNonexistingMonitor(-1, pathAr, adir);
 }
 
@@ -608,7 +608,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray().empty()) {
                 fs::path testLocation = watchAs->getAutoscanDirectory()->getLocation();
-                if (startswith(path, testLocation)) {
+                if (startswith(path.string(), testLocation.string())) {
                     if (!pathBestMatch.empty()) {
                         if (pathBestMatch.string().length() < testLocation.string().length()) {
                             pathBestMatch = testLocation;
