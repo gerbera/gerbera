@@ -251,7 +251,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     string mimetype = "video/mpeg";
     string id = "2";
     string location = "/home/gerbera/video.mp4";
-    int online_service = static_cast<int>(OS_None);
+    auto online_service = int(OS_None);
     int theora = 0;
     map<string, string> aux;
     map<string, string> meta;
@@ -288,7 +288,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     string genre = "Genre";
     string id = "2";
     string location = "/home/gerbera/video.mp4";
-    int online_service = static_cast<int>(OS_ATrailers);
+    auto online_service = int(OS_ATrailers);
     int theora = 0;
     map<string, string> res;
 
@@ -337,7 +337,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     string date = "2018-01-01";
     string id = "2";
     string location = "/home/gerbera/image.jpg";
-    int online_service = static_cast<int>(OS_ATrailers);
+    auto online_service = int(OS_ATrailers);
     int theora = 0;
 
     map<string, string> meta = {
@@ -383,7 +383,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     string mimetype = "application/ogg";
     string id = "2";
     string location = "/home/gerbera/video.ogg";
-    int online_service = static_cast<int>(OS_None);
+    auto online_service = int(OS_None);
     int theora = 1;
     map<string, string> aux;
     map<string, string> meta;
