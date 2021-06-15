@@ -130,7 +130,6 @@ struct inotify_event* Inotify::nextEvent()
     // first_byte is index into event buffer
     if (first_byte != 0
         && first_byte <= int(bytes - sizeof(struct inotify_event))) {
-
         ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(&event[0]) + first_byte);
         first_byte += sizeof(struct inotify_event) + ret->len;
 
@@ -193,7 +192,6 @@ struct inotify_event* Inotify::nextEvent()
     }
 
     if (FD_ISSET(inotify_fd, &read_fds)) {
-
         // wait until we have enough bytes to read
         do {
             rc = ioctl(inotify_fd, FIONREAD, &bytes_to_read);

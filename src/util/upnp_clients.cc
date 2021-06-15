@@ -36,7 +36,6 @@
 // table of supported clients (reverse search, sequence of entries matters!)
 static const auto bultinClientInfo = std::array<ClientInfo, 8> {
     {
-
         // Used for not explicitly listed clients, must be first entry
         {
             "Unknown",
