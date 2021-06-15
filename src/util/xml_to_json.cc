@@ -112,9 +112,9 @@ std::string Xml2Json::getAsString(const char* str)
 {
     auto escaped = escape(str, '\\', '"');
 
-    escaped = replaceAllString(escaped, "\n", "\\n");
-    escaped = replaceAllString(escaped, "\r", "\\r");
-    return "\"" + escaped + '"';
+    replaceAllString(escaped, "\n", "\\n");
+    replaceAllString(escaped, "\r", "\\r");
+    return fmt::format(R"("{}")", escaped);
 }
 
 std::string Xml2Json::getValue(const std::string& name, const char* text, const Hints& hints)
