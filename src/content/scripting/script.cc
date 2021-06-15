@@ -141,8 +141,7 @@ void Script::setIntProperty(const std::string& name, int value)
 
 Script::Script(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name)
-    : gc_counter(0)
-    , config(content->getContext()->getConfig())
+    : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(std::move(content))
     , runtime(runtime)

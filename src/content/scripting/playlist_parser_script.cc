@@ -106,9 +106,6 @@ js_getCdsObject(duk_context* ctx)
 PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
     : Script(std::move(content), runtime, "playlist")
-    , currentHandle(nullptr)
-    , currentObjectID(INVALID_OBJECT_ID)
-    , currentLine(nullptr)
 {
     try {
         ScriptingRuntime::AutoLock lock(runtime->getMutex());
