@@ -54,7 +54,7 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::string& rh)
+static bool checkFileAndSubtitle(fs::path path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, std::string mimeType, struct stat* statbuf, const std::string& rh)
 {
     bool is_srt = false;
 
@@ -63,10 +63,10 @@ static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject
         mimeType = MIMETYPE_TEXT;
         is_srt = !res_path.empty();
         if (is_srt) {
-            path = res_path;
+            path = std::move(res_path);
         }
     }
-    int ret = stat(path.c_str(), &statbuf);
+    int ret = stat(path.c_str(), statbuf);
     if (ret != 0) {
         if (is_srt) {
             throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
@@ -104,7 +104,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     fs::path path = item != nullptr ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, &statbuf, rh);
 
     UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
@@ -239,7 +239,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     fs::path path = item != nullptr ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, &statbuf, rh);
 
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
