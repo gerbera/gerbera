@@ -108,7 +108,6 @@ protected:
 
     duk_context* ctx;
 
-protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
