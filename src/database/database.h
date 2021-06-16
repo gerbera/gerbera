@@ -312,7 +312,6 @@ protected:
 
     virtual std::shared_ptr<Database> getSelf() = 0;
 
-protected:
     std::shared_ptr<Config> config;
 };
 
