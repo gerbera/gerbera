@@ -100,7 +100,7 @@ protected:
         const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name);
 
     void execute();
-    int gc_counter;
+    int gc_counter {};
 
     // object that is currently being processed by the script (set in import
     // script)

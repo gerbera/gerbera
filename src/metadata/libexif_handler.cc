@@ -398,7 +398,6 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
         } catch (const std::runtime_error& e) {
             log_error("Something bad happened! {}", e.what());
         }
-
     } // (ed->size)
     exif_data_unref(ed);
 }

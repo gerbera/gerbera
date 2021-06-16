@@ -50,7 +50,7 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 
 void RequestHandler::splitUrl(const char* url, char separator, std::string& path, std::string& parameters)
 {
-    const auto url_s = std::string { url };
+    auto url_s = std::string { url };
     const auto i1 = size_t { [=]() {
         if (separator == '/')
             return url_s.rfind(separator);
@@ -60,7 +60,7 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
     }() };
 
     if (i1 == std::string::npos) {
-        path = url_s;
+        path = std::move(url_s);
         parameters.clear();
     } else {
         parameters = url_s.substr(i1 + 1);

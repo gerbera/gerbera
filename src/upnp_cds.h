@@ -53,7 +53,7 @@ protected:
     /// devices.
     /// Also, this variable is returned by the upnp_action_GetSystemUpdateID()
     /// action.
-    int systemUpdateID;
+    int systemUpdateID {};
 
     /// \brief All strings in the XML will be cut at this length.
     int stringLimit;

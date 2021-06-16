@@ -62,13 +62,13 @@ enum class ClientMatchType {
 };
 
 struct ClientInfo {
-    std::string_view name; // used for logging/debugging proposes only
+    std::string name; // used for logging/debugging proposes only
     ClientType type;
     QuirkFlags flags;
 
     // to match the client
     ClientMatchType matchType;
-    std::string_view match;
+    std::string match;
 };
 
 struct ClientCacheEntry {

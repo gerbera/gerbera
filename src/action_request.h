@@ -55,7 +55,7 @@ protected:
     UpnpActionRequest* upnp_request;
 
     /// \brief Error code that is returned to the SDK.
-    int errCode;
+    int errCode { UPNP_E_SUCCESS };
 
     /// \brief Name of the action.
     ////request///

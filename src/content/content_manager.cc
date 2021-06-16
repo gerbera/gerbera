@@ -1296,7 +1296,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         auto title = dirEnt.path().filename().string();
         if (config->getBoolOption(CFG_IMPORT_READABLE_NAMES) && upnp_class != UPNP_CLASS_ITEM) {
             title = dirEnt.path().stem().string();
-            title = replaceAllString(title, "_", " ");
+            std::replace(title.begin(), title.end(), '_', ' ');
         }
         obj->setTitle(f2i->convert(title));
 

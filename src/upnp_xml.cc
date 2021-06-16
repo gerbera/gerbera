@@ -400,26 +400,32 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
     return artAdded;
 }
 
+std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res, int index)
+{
+    auto&& res_params = res->getParameters();
+    auto urlBase = getPathBase(item);
+    std::string url;
+    if (urlBase->addResID) {
+        url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase.c_str(), index, _URL_PARAM_SEPARATOR);
+    } else
+        url = virtualURL + urlBase->pathBase;
+
+    if (!res_params.empty()) {
+        url.append(dictEncodeSimple(res_params));
+    }
+    return url;
+}
+
 bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
 {
     bool artAdded = false;
-    auto urlBase = getPathBase(item);
     int realCount = 0;
     for (auto&& res : item->getResources()) {
         if (res->isMetaResource(ID3_ALBUM_ART) //
             || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
             || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
         ) {
-            auto res_attrs = res->getAttributes();
-            auto res_params = res->getParameters();
-            if (urlBase->addResID) {
-                url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase.c_str(), realCount, _URL_PARAM_SEPARATOR);
-            } else
-                url = virtualURL + urlBase->pathBase;
-
-            if (!res_params.empty()) {
-                url.append(dictEncodeSimple(res_params));
-            }
+            url = renderOneResource(virtualURL, item, res, realCount);
             artAdded = true;
             break;
         }
@@ -431,20 +437,10 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
 bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
 {
     bool srtAdded = false;
-    auto urlBase = getPathBase(item);
     int realCount = 0;
     for (auto&& res : item->getResources()) {
         if (res->isMetaResource(VIDEO_SUB)) {
-            auto res_attrs = res->getAttributes();
-            auto res_params = res->getParameters();
-            if (urlBase->addResID) {
-                url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase, realCount, _URL_PARAM_SEPARATOR);
-            } else
-                url = virtualURL + urlBase->pathBase;
-
-            if (!res_params.empty()) {
-                url.append(dictEncodeSimple(res_params));
-            }
+            url = renderOneResource(virtualURL, item, res, realCount);
             srtAdded = true;
             break;
         }
@@ -453,7 +449,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
     return srtAdded;
 }
 
-std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const std::string& location)
+std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
 {
     std::string ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
 
@@ -461,14 +457,11 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         return fmt::format("{}.{}", ext, contentType);
     }
 
-    if (!location.empty()) {
-        size_t dot = location.rfind('.');
-        if (dot != std::string::npos) {
-            std::string extension = location.substr(dot);
-            // make sure that the extension does not contain the separator character
-            if (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) {
-                return ext + extension;
-            }
+    if (!location.empty() && location.has_extension()) {
+        std::string extension = location.filename().string();
+        // make sure that the extension does not contain the separator character
+        if (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) {
+            return fmt::format("{}.{}", ext, extension);
         }
     }
 
@@ -509,9 +502,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
                     continue;
                 }
-            }
-            // check user fourcc settings
-            else if (ct == CONTENT_TYPE_AVI) {
+            } else if (ct == CONTENT_TYPE_AVI) {
+                // check user fourcc settings
                 avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
 
                 std::vector<std::string> fcc_list = tp->getAVIFourCCList();
@@ -527,10 +519,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                         // fourcc can not match anything we will skip the item
                         if (fcc_mode == FCC_Process)
                             continue;
-                    }
-                    // we have the current and hopefully valid fcc string
-                    // let's have a look if it matches the list
-                    else {
+                    } else {
+                        // we have the current and hopefully valid fcc string
+                        // let's have a look if it matches the list
                         bool fcc_match = std::find(fcc_list.begin(), fcc_list.end(), current_fcc) != fcc_list.end();
                         if (!fcc_match && (fcc_mode == FCC_Process))
                             continue;
@@ -605,8 +596,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     }
 
     size_t resCount = item->getResourceCount();
+    bool isFirstSub = true;
     for (size_t i = 0; i < resCount; i++) {
-
         /// \todo what if the resource has a different mimetype than the item??
         /*        std::string mimeType = item->getMimeType();
                   if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */
@@ -685,14 +676,18 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             /// provide the profile correctly
             aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
             aa.append_attribute("dlna:profileID") = "JPEG_TN";
-            if (res->isMetaResource(ID3_ALBUM_ART))
+            if (res->isMetaResource(ID3_ALBUM_ART)) {
                 continue;
+            }
         }
-        if (res->isMetaResource(VIDEO_SUB)) {
+        if (isFirstSub && res->isMetaResource(VIDEO_SUB)) {
             auto vs = parent->append_child("sec:CaptionInfoEx");
+            url.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
             vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
             vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
+            vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
             vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
+            isFirstSub = false;
             continue;
         }
 
@@ -702,7 +697,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // content type here and that we will not limit ourselves to the
             // first resource
             if (!skipURL) {
-                url.append(renderExtension(contentType, transcoded ? "" : item->getLocation()));
+                auto ext = renderExtension("", res->getAttribute(R_RESOURCE_FILE)); // try extension from resource file
+                if (ext.empty())
+                    ext = renderExtension(contentType, transcoded ? "" : item->getLocation());
+                url.append(ext);
             }
         }
 

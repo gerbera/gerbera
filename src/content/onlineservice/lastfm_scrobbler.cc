@@ -38,8 +38,6 @@
 
 LastFm::LastFm(std::shared_ptr<Context> context)
     : config(context->getConfig())
-    , scrobbler(NULL)
-    , currentTrackId(-1)
 {
 }
 
@@ -69,12 +67,12 @@ void LastFm::shutdown()
 
     finished_playing(scrobbler);
     destroy_scrobbler(scrobbler);
-    scrobbler = NULL;
+    scrobbler = nullptr;
 }
 
 void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
 {
-    if (currentTrackId == item->getID() || scrobbler == NULL)
+    if (currentTrackId == item->getID() || scrobbler == nullptr)
         return;
 
     currentTrackId = item->getID();

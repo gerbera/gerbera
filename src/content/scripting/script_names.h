@@ -30,7 +30,7 @@
 
 #include "metadata/metadata_handler.h"
 
-static constexpr auto res_names = std::array<std::pair<resource_attributes_t, const char*>, 11> { {
+static constexpr auto res_names = std::array<std::pair<resource_attributes_t, const char*>, R_MAX> { {
     { R_SIZE, "R_SIZE" },
     { R_DURATION, "R_DURATION" },
     { R_BITRATE, "R_BITRATE" },
@@ -42,9 +42,12 @@ static constexpr auto res_names = std::array<std::pair<resource_attributes_t, co
     { R_RESOURCE_FILE, "R_RESOURCE_FILE" },
     { R_BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE" },
     { R_TYPE, "R_TYPE" },
+    { R_FANART_OBJ_ID, "R_FANART_OBJ_ID" },
+    { R_FANART_RES_ID, "R_FANART_RES_ID" },
+    { R_LANGUAGE, "R_LANGUAGE" },
 } };
 
-static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, 23> { {
+static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, M_MAX> { {
     { M_TITLE, "M_TITLE" },
     { M_ARTIST, "M_ARTIST" },
     { M_ALBUM, "M_ALBUM" },

@@ -46,6 +46,7 @@ web::edit_load::edit_load(std::shared_ptr<ContentManager> content)
 {
 }
 
+/// \brief: process request 'edit_load' to list contents of a folder
 void web::edit_load::process()
 {
     check_request();
@@ -58,10 +59,12 @@ void web::edit_load::process()
     objectID = std::stoi(objID);
     auto obj = database->loadObject(objectID);
 
+    // set handling of json properties
     auto root = xmlDoc->document_element();
     xml2JsonHints->setFieldType("value", "string");
     xml2JsonHints->setFieldType("title", "string");
 
+    // write object core info
     auto item = root.append_child("item");
     item.append_attribute("object_id") = objectID;
 
@@ -85,6 +88,7 @@ void web::edit_load::process()
 
     item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).data());
 
+    // write metadata
     auto metaData = item.append_child("metadata");
     xml2JsonHints->setArrayName(metaData, "metadata");
     xml2JsonHints->setFieldType("metavalue", "string");
@@ -96,6 +100,7 @@ void web::edit_load::process()
         metaEntry.append_attribute("editable") = false;
     }
 
+    // write auxdata
     auto auxData = item.append_child("auxdata");
     xml2JsonHints->setArrayName(auxData, "auxdata");
     xml2JsonHints->setFieldType("auxvalue", "string");
@@ -111,6 +116,9 @@ void web::edit_load::process()
     xml2JsonHints->setArrayName(resources, "resources");
     xml2JsonHints->setFieldType("resvalue", "string");
 
+    auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
+
+    // write resource info
     int resIndex = 0;
     for (auto&& resItem : obj->getResources()) {
         auto resEntry = resources.append_child("resources");
@@ -123,18 +131,39 @@ void web::edit_load::process()
         resEntry.append_attribute("resvalue") = fmt::format("{}", MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
         resEntry.append_attribute("editable") = false;
 
+        // write resource content
+        if (objItem) {
+            std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem, resIndex);
+            if (resItem->isMetaResource(ID3_ALBUM_ART) //
+                || (resItem->getHandlerType() == CH_LIBEXIF && resItem->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+                || (resItem->getHandlerType() == CH_FFTH && resItem->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) {
+                auto image = resources.append_child("resources");
+                image.append_attribute("resname") = "image";
+                image.append_attribute("resvalue") = url.c_str();
+                image.append_attribute("editable") = false;
+            } else {
+                resEntry = resources.append_child("resources");
+                resEntry.append_attribute("resname") = "link";
+                resEntry.append_attribute("resvalue") = url.c_str();
+                resEntry.append_attribute("editable") = false;
+            }
+        }
+
+        // write resource parameters
         for (auto&& [key, val] : resItem->getParameters()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = fmt::format(".{}", key.c_str()).c_str();
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
+        // write resource attributes
         for (auto&& [key, val] : resItem->getAttributes()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = fmt::format(" {}", key.c_str()).c_str();
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
+        // write resource options
         for (auto&& [key, val] : resItem->getOptions()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = fmt::format("-{}", key.c_str()).c_str();
@@ -144,9 +173,8 @@ void web::edit_load::process()
         resIndex++;
     }
 
+    // write item meta info
     if (obj->isItem()) {
-        auto objItem = std::static_pointer_cast<CdsItem>(obj);
-
         auto description = item.append_child("description");
         description.append_attribute("value") = objItem->getMetadata(M_DESCRIPTION).c_str();
         description.append_attribute("editable") = true;
@@ -173,6 +201,7 @@ void web::edit_load::process()
         }
     }
 
+    // write container meta info
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         std::string url;

@@ -52,9 +52,9 @@ public:
     script_class_t whoami() override { return S_PLAYLIST; }
 
 private:
-    FILE* currentHandle;
-    int currentObjectID;
-    char* currentLine;
+    FILE* currentHandle {};
+    int currentObjectID { INVALID_OBJECT_ID };
+    char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
 };
 

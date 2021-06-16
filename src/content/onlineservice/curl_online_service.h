@@ -93,7 +93,7 @@ protected:
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;
     // safeguard to ensure the above
-    pthread_t pid;
+    pthread_t pid {};
 
     std::string service_url;
     std::string serviceName;

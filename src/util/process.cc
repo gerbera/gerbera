@@ -69,7 +69,6 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
     if (ret < input.length()) {
-
         log_debug("Failed to write to {}: {}", input.c_str(), std::strerror(errno));
         throw_std_runtime_error("Failed to write to {}: {}", input.c_str(), std::strerror(errno));
     }

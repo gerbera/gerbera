@@ -160,6 +160,7 @@ enum resource_attributes_t {
     R_FANART_OBJ_ID,
     R_FANART_RES_ID,
     R_BITS_PER_SAMPLE,
+    R_LANGUAGE,
     R_MAX
 };
 
@@ -176,6 +177,7 @@ static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, con
     { R_FANART_OBJ_ID, "fanArtObject" },
     { R_FANART_RES_ID, "fanArtResource" },
     { R_BITS_PER_SAMPLE, "bitsPerSample" },
+    { R_LANGUAGE, "dc:language" },
     { R_TYPE, "type" },
 } };
 
