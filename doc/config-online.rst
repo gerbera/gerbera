@@ -147,3 +147,29 @@ This tag defines the online content for `SopCast <http://www.sopcast.com/>`_
     Sets the expiration time of downloaded content in seconds.
 
 
+``mimetype-mappings``
+----------------------
+::
+
+    <mimetype-mappings>
+
+* Optional
+
+This section holds the file name extension to mime type mappings.
+
+**Child tags:**
+
+``map``
+-------
+
+::
+
+    <map from="wmv" to="video/sopcast-x-ms-wmv"/>
+    <map from="mp3" to="audio/sopcast-mpeg"/>
+    <map from="wma" to="audio/sopcast-x-ms-wma"/>
+    <map from="*" to="application/sopcast-stream"/>
+
+* Optional
+
+Specifies a mapping from a certain file name extension (everything after the last dot ".") to mime type.
+``*`` is used to set the default value.

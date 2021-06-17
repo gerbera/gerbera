@@ -915,6 +915,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="AppleTrailers" minOccurs="0"/>
+                <xs:element ref="SopCast" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
@@ -940,8 +941,64 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="purge-after" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
             <xs:attribute name="resolution" type="xs:nonNegativeInteger" default="640"/>
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="SopCast">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="mimetype-mappings" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="43200"/>
+            <xs:attribute name="purge-after" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="purge-after" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="update-at-start" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mimetype-mappings">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

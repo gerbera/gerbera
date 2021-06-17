@@ -583,6 +583,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     setOption(root, CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
+    setOption(root, CFG_IMPORT_SOPCAST_MIMETYE_LIST);
 #endif
 
 #ifdef ATRAILERS
