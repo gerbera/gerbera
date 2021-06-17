@@ -38,7 +38,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <numeric>
@@ -153,32 +152,28 @@ unsigned long stoulString(const std::string& str, int def, int base)
     return std::stoul(str, nullptr, base);
 }
 
-std::string reduceString(std::string str, char ch)
+void reduceString(std::string& str, char ch)
 {
-    std::string::iterator new_end = std::unique(
-        str.begin(), str.end(),
-        [&](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
+    auto new_end = std::unique(str.begin(), str.end(),
+        [=](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
 
     str.erase(new_end, str.end());
-    return str;
 }
 
-std::string& replaceString(std::string& str, std::string_view from, const std::string& to)
+void replaceString(std::string& str, std::string_view from, const std::string& to)
 {
     size_t start_pos = str.find(from);
     if (start_pos != std::string::npos)
         str.replace(start_pos, from.length(), to);
-    return str;
 }
 
-std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to)
+void replaceAllString(std::string& str, std::string_view from, const std::string& to)
 {
     size_t start_pos = str.find(from);
     while (start_pos != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos = str.find(from, start_pos + to.length());
     }
-    return str;
 }
 
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept

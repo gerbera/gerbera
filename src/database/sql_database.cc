@@ -1035,7 +1035,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
-    virtualPath = reduceString(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
+    reduceString(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
     if (virtualPath == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
         return;

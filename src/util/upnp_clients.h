@@ -98,7 +98,6 @@ private:
 
     static bool downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document> xml);
 
-private:
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
     std::shared_ptr<std::vector<ClientCacheEntry>> cache;

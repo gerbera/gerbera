@@ -81,11 +81,11 @@ int stoiString(const std::string& str, int def = 0, int base = 10);
 unsigned long stoulString(const std::string& str, int def = 0, int base = 10);
 
 /// \brief  Used to replace potential multiple following //../ with single /
-std::string reduceString(std::string str, char ch);
+void reduceString(std::string& str, char ch);
 
 /// \brief  Used to replace parts of string with other value
-std::string& replaceString(std::string& str, std::string_view from, const std::string& to);
-std::string& replaceAllString(std::string& str, std::string_view from, const std::string& to);
+void replaceString(std::string& str, std::string_view from, const std::string& to);
+void replaceAllString(std::string& str, std::string_view from, const std::string& to);
 
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;

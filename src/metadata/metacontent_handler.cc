@@ -108,8 +108,8 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                 for (auto&& p : fs::directory_iterator(found, ec)) {
                     if (isRegularFile(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension()) == extn))) {
                         if (!stem.empty()) {
-                            stem = replaceAllString(stem, "*", ".*");
-                            stem = replaceAllString(stem, ".", "?");
+                            replaceAllString(stem, "*", ".*");
+                            replaceAllString(stem, ".", "?");
                             std::regex re(fmt::format("^{}$", stem));
                             std::cmatch m;
                             if (std::regex_match(p.path().stem().string().c_str(), m, re)) {

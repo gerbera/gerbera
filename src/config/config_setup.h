@@ -138,7 +138,7 @@ public:
 
     bool checkValue(std::string& optValue) const
     {
-        return (rawCheck != nullptr && !rawCheck(optValue)) ? false : true;
+        return !(rawCheck != nullptr && !rawCheck(optValue));
     }
     const char* getHelp() const { return help; }
     std::shared_ptr<ConfigOption> getValue() const { return optionValue; }
