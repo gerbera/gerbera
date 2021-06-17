@@ -33,9 +33,10 @@
 
 #include <upnp.h>
 
-// table of supported clients (reverse search, sequence of entries matters!)
-static const auto bultinClientInfo = std::array<ClientInfo, 8> {
-    {
+Clients::Clients()
+{
+    // table of supported clients (reverse search, sequence of entries matters!)
+    clientInfo = {
         // Used for not explicitly listed clients, must be first entry
         {
             "Unknown",
@@ -115,14 +116,13 @@ static const auto bultinClientInfo = std::array<ClientInfo, 8> {
             ClientMatchType::UserAgent,
             "[BD]J5500",
         },
-    }
-};
+    };
+}
 
 Clients::Clients(const std::shared_ptr<Config>& config)
+    : Clients()
 {
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
-    clientInfo.reserve(bultinClientInfo.size() + clientConfigList->size());
-    clientInfo.insert(clientInfo.begin(), bultinClientInfo.begin(), bultinClientInfo.end());
     for (size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
         auto client = clientConfig->getClientInfo();
