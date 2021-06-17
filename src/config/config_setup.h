@@ -437,7 +437,7 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
-    std::vector<std::string> defaultEntries = {};
+    std::vector<std::string> defaultEntries;
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -508,7 +508,7 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     bool tolower = false;
-    std::map<std::string, std::string> defaultEntries = {};
+    std::map<std::string, std::string> defaultEntries;
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -535,22 +535,22 @@ public:
     config_option_t valOption {};
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, std::map<std::string, std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initDict(init)
-        , defaultEntries(defaultEntries)
+        , defaultEntries(std::move(defaultEntries))
     {
     }
 
     explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help,
         config_option_t nodeOption, config_option_t keyOption, config_option_t valOption,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, const std::map<std::string, std::string>& defaultEntries = {})
+        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, std::map<std::string, std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , defaultEntries(defaultEntries)
+        , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
         , keyOption(keyOption)
         , valOption(valOption)
