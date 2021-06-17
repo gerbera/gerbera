@@ -141,20 +141,13 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
         return nullptr;
     }
 
-    // I wish they had a mimetype setting
-    //auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
-    //std::string mt = getValueOrDefault(mappings, temp);
-    std::string mt = [temp]() {
-        // map was empty, we have to do construct the mimetype ourselves
-        if (temp == "wmv")
-            return "video/sopcast-x-ms-wmv";
-        if (temp == "mp3")
-            return "audio/sopcast-mpeg";
-        if (temp == "wma")
-            return "audio/sopcast-x-ms-wma";
+    // use mimetype setting
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_SOPCAST_MIMETYE_LIST);
+    std::string mt = getValueOrDefault(mappings, temp, "*");
+    if (mt == "*") {
+        mt = getValueOrDefault(mappings, "*");
         log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
-        return "application/sopcast-stream";
-    }();
+    }
 
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mt, SOPCAST_PROTOCOL));
     item->setMimeType(mt);
