@@ -342,15 +342,13 @@ int main(int argc, char** argv, char** envp)
             // get the pid of our process
             pid_t pid = getpid();
 
-            // convert to a string
-            char pidstr[20];
-            if (0 > snprintf(pidstr, 18, "%d", pid)) {
+            if (pid <= 1) {
                 log_error("Could not determine pid of running process.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
-            // add a newline
-            strcat(pidstr, "\n");
+            // convert to a string
+            auto pidstr = fmt::to_string(pid);
 
             // open the pidfile
             int pidfd = open(pidfile->c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -359,8 +357,11 @@ int main(int argc, char** argv, char** envp)
                 exit(EXIT_FAILURE);
             }
 
+            // add a newline
+            pidstr += "\n";
+
             // write pid to file
-            if (ssize_t(strlen(pidstr)) != write(pidfd, pidstr, strlen(pidstr))) {
+            if (ssize_t(pidstr.size()) != write(pidfd, pidstr.c_str(), pidstr.size())) {
                 log_error("Could not write pidfile {}.", pidfile->c_str());
                 exit(EXIT_FAILURE);
             }

@@ -250,6 +250,16 @@ static std::map<std::string, std::string> ext_mt_defaults {
     { "wvx", "video/x-ms-wvx" },
 };
 
+#ifdef SOPCAST
+/// \brief default values for CFG_IMPORT_SOPCAST_MIMETYE_LIST
+static std::map<std::string, std::string> sc_mt_defaults {
+    { "wmv", "video/sopcast-x-ms-wmv" },
+    { "mp3", "audio/sopcast-mpeg" },
+    { "wma", "audio/sopcast-x-ms-wma" },
+    { "*", "application/sopcast-stream" }, // default value
+};
+#endif
+
 /// \brief default values for ATTR_TRANSCODING_MIMETYPE_PROF_MAP
 static std::map<std::string, std::string> tr_mt_defaults {
     { "video/x-flv", "vlcmpeg" },
@@ -706,6 +716,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER,
         "/import/online-content/SopCast/attribute::purge-after", "config-online.html#sopcast",
         0),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SOPCAST_MIMETYE_LIST,
+        "/import/online-content/SopCast/mimetype-mappings", "config-online.html#sopcast",
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, false, std::move(sc_mt_defaults)),
 #endif
 #ifdef ATRAILERS
     std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED,
@@ -1067,8 +1081,8 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST } },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST } },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_SOPCAST_MIMETYE_LIST } },
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_SOPCAST_MIMETYE_LIST } },
 
     { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, //
                                       CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, //

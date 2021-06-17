@@ -73,10 +73,7 @@ public:
     std::shared_ptr<CdsObject> getNextObject() override;
 
 protected:
-    static std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel);
-
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
+    std::shared_ptr<CdsObject> getObject(const std::string& groupName, const pugi::xml_node& channel);
 
     std::unique_ptr<pugi::xml_document> service_xml;
     pugi::xml_node_iterator group_it;
