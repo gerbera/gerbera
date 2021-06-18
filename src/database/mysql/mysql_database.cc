@@ -110,8 +110,6 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
     : SQLDatabase(std::move(config))
-    , mysql_connection(false)
-    , mysql_init_key_initialized(false)
 {
     table_quote_begin = '`';
     table_quote_end = '`';
