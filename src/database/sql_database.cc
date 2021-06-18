@@ -652,61 +652,21 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
 {
-    int objectID;
-    int objectType = 0;
-
     bool getContainers = param->getFlag(BROWSE_CONTAINERS);
     bool getItems = param->getFlag(BROWSE_ITEMS);
-
-    objectID = param->getObjectID();
-
-    std::shared_ptr<SQLResult> res;
-    std::unique_ptr<SQLRow> row;
-
-    std::ostringstream qb;
-    qb << "SELECT " << TQ("object_type")
-       << " FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("id") << '=' << objectID;
-    beginTransaction("browse");
-    res = select(qb);
-    commit("browse");
-    if (res != nullptr && (row = res->nextRow()) != nullptr) {
-        objectType = std::stoi(row->col(0));
-    } else {
-        throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
-    }
-
-    row = nullptr;
-    res = nullptr;
-
+    auto parent = param->getObject();
     bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
 
-    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
-        param->setTotalMatches(getChildCount(objectID, getContainers, getItems, hideFsRoot));
+    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        param->setTotalMatches(getChildCount(parent->getID(), getContainers, getItems, hideFsRoot));
     } else {
         param->setTotalMatches(1);
     }
 
-    // order by code..
-    auto orderByCode = [&]() {
-        std::ostringstream orderQb;
-        if (param->getFlag(BROWSE_TRACK_SORT)) {
-            orderQb << TQBM(BrowseCol::part_number) << ',';
-            orderQb << TQBM(BrowseCol::track_number);
-        } else {
-            SortParser sortParser(browseColumnMapper, param->getSortCriteria());
-            orderQb << sortParser.parse();
-        }
-        if (orderQb.str().empty()) {
-            orderQb << TQBM(BrowseCol::dc_title);
-        }
-        return orderQb.str();
-    };
-
-    qb.str("");
+    std::ostringstream qb;
     qb << sql_browse_query << " WHERE ";
 
-    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && IS_CDS_CONTAINER(objectType)) {
+    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         int count = param->getRequestedCount();
         bool doLimit = true;
         if (!count) {
@@ -716,10 +676,26 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                 doLimit = false;
         }
 
-        qb << TQBM(BrowseCol::parent_id) << '=' << objectID;
+        qb << TQBM(BrowseCol::parent_id) << '=' << parent->getID();
 
-        if (objectID == CDS_ID_ROOT && hideFsRoot)
+        if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
             qb << " AND " << TQBM(BrowseCol::id) << "!=" << quote(CDS_ID_FS_ROOT);
+
+        // order by code..
+        auto orderByCode = [&]() {
+            std::ostringstream orderQb;
+            if (param->getFlag(BROWSE_TRACK_SORT)) {
+                orderQb << TQBM(BrowseCol::part_number) << ',';
+                orderQb << TQBM(BrowseCol::track_number);
+            } else {
+                SortParser sortParser(browseColumnMapper, param->getSortCriteria());
+                orderQb << sortParser.parse();
+            }
+            if (orderQb.str().empty()) {
+                orderQb << TQBM(BrowseCol::dc_title);
+            }
+            return orderQb.str();
+        };
 
         if (!getContainers && !getItems) {
             qb << " AND 0=1";
@@ -739,25 +715,21 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         }
         if (doLimit)
             qb << " LIMIT " << count << " OFFSET " << param->getStartingIndex();
-    } else // metadata
-    {
-        qb << TQBM(BrowseCol::id) << '=' << objectID << " LIMIT 1";
+    } else { // metadata
+        qb << TQBM(BrowseCol::id) << '=' << parent->getID() << " LIMIT 1";
     }
     log_debug("QUERY: {}", qb.str().c_str());
-    beginTransaction("browse 2");
-    res = select(qb);
-    commit("browse 2");
+    beginTransaction("browse");
+    std::shared_ptr<SQLResult> sqlResult = select(qb);
+    commit("browse");
 
     std::vector<std::shared_ptr<CdsObject>> arr;
 
-    while ((row = res->nextRow()) != nullptr) {
+    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
         auto obj = createObjectFromRow(row);
         arr.push_back(obj);
-        row = nullptr;
+        row = nullptr; // clear out content from unique_ptr
     }
-
-    row = nullptr;
-    res = nullptr;
 
     // update childCount fields
     for (auto&& obj : arr) {
@@ -817,14 +789,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> arr;
 
-    std::unique_ptr<SQLRow> sqlRow;
-    while ((sqlRow = sqlResult->nextRow()) != nullptr) {
-        auto obj = createObjectFromSearchRow(sqlRow);
+    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
+        auto obj = createObjectFromSearchRow(row);
         arr.push_back(obj);
-        sqlRow = nullptr;
+        row = nullptr; // clear out content from unique_ptr
     }
-    sqlRow = nullptr;
-    sqlResult = nullptr;
 
     return arr;
 }

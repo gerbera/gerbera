@@ -63,7 +63,7 @@ void web::items::process()
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(parentID);
-    auto param = std::make_unique<BrowseParam>(parentID, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
+    auto param = std::make_unique<BrowseParam>(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
     if ((container->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (container->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))

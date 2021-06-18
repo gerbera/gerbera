@@ -59,7 +59,7 @@ class Timer;
 class BrowseParam {
 protected:
     unsigned int flags;
-    int objectID;
+    std::shared_ptr<CdsObject> object;
 
     int startingIndex {};
     int requestedCount {};
@@ -69,9 +69,9 @@ protected:
     int totalMatches {};
 
 public:
-    BrowseParam(int objectID, unsigned int flags)
+    BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
         : flags(flags)
-        , objectID(objectID)
+        , object(object)
     {
     }
 
@@ -88,7 +88,7 @@ public:
     }
     void clearFlag(unsigned int mask) { flags &= !mask; }
 
-    int getObjectID() const { return objectID; }
+    std::shared_ptr<CdsObject> getObject() const { return object; }
 
     void setRange(int startingIndex, int requestedCount)
     {
