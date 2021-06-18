@@ -1127,7 +1127,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
         update_manager->containerChanged(result);
         session_manager->containerChangedUI(result);
     }
-    return { result, isNew };
+    return std::pair(result, isNew);
 }
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
@@ -1182,7 +1182,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         session_manager->containerChangedUI(updateID.back());
     }
 
-    return { containerID, isNew };
+    return std::pair(containerID, isNew);
 }
 
 void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
