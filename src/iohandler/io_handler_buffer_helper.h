@@ -67,25 +67,25 @@ protected:
     std::shared_ptr<Config> config;
     size_t bufSize;
     size_t initialFillSize;
-    char* buffer;
-    bool isOpen;
-    bool eof;
-    bool readError;
+    char* buffer {};
+    bool isOpen {};
+    bool eof {};
+    bool readError {};
     bool waitForInitialFillSize;
-    bool signalAfterEveryRead;
-    bool checkSocket;
+    bool signalAfterEveryRead {};
+    bool checkSocket {};
 
     // buffer stuff..
-    bool empty;
-    size_t a;
-    size_t b;
-    off_t posRead;
+    bool empty { true };
+    size_t a {};
+    size_t b {};
+    off_t posRead {};
 
     // seek stuff...
-    bool seekEnabled;
-    bool doSeek;
-    off_t seekOffset;
-    int seekWhence;
+    bool seekEnabled {};
+    bool doSeek {};
+    off_t seekOffset {};
+    int seekWhence {};
 
     // thread stuff..
     void startBufferThread();
@@ -94,7 +94,7 @@ protected:
     virtual void threadProc() = 0;
 
     std::unique_ptr<StdThreadRunner> threadRunner;
-    bool threadShutdown;
+    bool threadShutdown {};
 };
 
 #endif // __IO_HANDLER_BUFFER_HELPER_H__
