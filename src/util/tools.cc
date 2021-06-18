@@ -1040,21 +1040,15 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 
 std::string getDLNAprofileString(std::string_view contentType)
 {
-    std::string profile = [=] {
-        if (contentType == CONTENT_TYPE_MP4)
-            return UPNP_DLNA_PROFILE_AVC_MP4_EU;
-        if (contentType == CONTENT_TYPE_MKV)
-            return UPNP_DLNA_PROFILE_MKV;
-        if (contentType == CONTENT_TYPE_AVI)
-            return UPNP_DLNA_PROFILE_AVI;
-        if (contentType == CONTENT_TYPE_MPEG)
-            return UPNP_DLNA_PROFILE_MPEG_PS_PAL;
-        if (contentType == CONTENT_TYPE_MP3)
-            return UPNP_DLNA_PROFILE_MP3;
-        if (contentType == CONTENT_TYPE_PCM)
-            return UPNP_DLNA_PROFILE_LPCM;
-        return "";
-    }();
+    static std::map<std::string_view, std::string_view> dlnaProfMap {
+        { CONTENT_TYPE_MP4, UPNP_DLNA_PROFILE_AVC_MP4_EU },
+        { CONTENT_TYPE_MKV, UPNP_DLNA_PROFILE_MKV },
+        { CONTENT_TYPE_AVI, UPNP_DLNA_PROFILE_AVI },
+        { CONTENT_TYPE_MPEG, UPNP_DLNA_PROFILE_MPEG_PS_PAL },
+        { CONTENT_TYPE_MP3, UPNP_DLNA_PROFILE_MP3 },
+        { CONTENT_TYPE_PCM, UPNP_DLNA_PROFILE_LPCM },
+    };
+    auto profile = getValueOrDefault(dlnaProfMap, contentType, std::string_view(""));
 
     return profile.empty() ? "" : fmt::format("{}={}", UPNP_DLNA_PROFILE, profile);
 }
