@@ -527,7 +527,7 @@ bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 /// <some-section>
 ///
 /// This function will create an array like that: ["data", "otherdata"]
-bool ConfigArraySetup::createArrayFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
+bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
     if (element != nullptr) {
         for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
@@ -617,7 +617,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
             throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     } else {
-        if (!createArrayFromNode(optValue, result)) {
+        if (!createOptionFromNode(optValue, result)) {
             throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     }
@@ -707,7 +707,7 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
 ///
 /// This function will create a dictionary with the following
 /// key:value paris: "1":"2", "3":"4"
-bool ConfigDictionarySetup::createDictionaryFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
+bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
 {
     if (optValue != nullptr) {
         const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
@@ -823,7 +823,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
             throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
     } else {
-        if (!createDictionaryFromNode(optValue, result) && required) {
+        if (!createOptionFromNode(optValue, result) && required) {
             throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
         }
     }
@@ -857,7 +857,7 @@ std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOpti
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
 /// \param element starting element of the nodeset.
 /// \param scanmode add only directories with the specified scanmode to the array
-bool ConfigAutoscanSetup::createAutoscanListFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result)
+bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result)
 {
     if (element == nullptr)
         return true;
@@ -1005,7 +1005,7 @@ void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shar
 std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_node& optValue)
 {
     auto result = std::make_shared<AutoscanList>(nullptr);
-    if (!createAutoscanListFromNode(optValue, result)) {
+    if (!createOptionFromNode(optValue, result)) {
         throw_std_runtime_error("Init {} autoscan failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<AutoscanListOption>(result);
@@ -1015,7 +1015,7 @@ std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_nod
 /// \brief Creates an array of TranscodingProfile objects from an XML
 /// nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigTranscodingSetup::createTranscodingProfileListFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result)
+bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result)
 {
     if (element == nullptr)
         return true;
@@ -1417,7 +1417,7 @@ std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_
 {
     auto result = std::make_shared<TranscodingProfileList>();
 
-    if (!createTranscodingProfileListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
+    if (!createOptionFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
         throw_std_runtime_error("Init {} transcoding failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<TranscodingProfileListOption>(result);
@@ -1426,7 +1426,7 @@ std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigClientSetup::createClientConfigListFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result)
+bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result)
 {
     if (element == nullptr)
         return true;
@@ -1543,7 +1543,7 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
 {
     auto result = std::make_shared<ClientConfigList>();
 
-    if (!createClientConfigListFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
+    if (!createOptionFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
         throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<ClientConfigListOption>(result);
@@ -1563,7 +1563,7 @@ std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigDirectorySetup::createDirectoryTweakListFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
+bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
 {
     if (element == nullptr)
         return true;
@@ -1771,7 +1771,7 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
 {
     auto result = std::make_shared<DirectoryConfigList>();
 
-    if (!createDirectoryTweakListFromNode(optValue, result)) {
+    if (!createOptionFromNode(optValue, result)) {
         throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<DirectoryTweakOption>(result);
