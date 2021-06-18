@@ -127,13 +127,17 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
             strcpy(fifo_template, "mt_transcode_XXXXXX");
             location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
             log_debug("creating reader fifo: {}", location.c_str());
-            if (mkfifo(location.c_str(), O_RDWR) == -1) {
+            auto r = mkfifo(location.c_str(), O_RDWR);
+            if (r != 0) {
                 log_error("Failed to create fifo for the remote content reading thread: {}", std::strerror(errno));
                 throw_std_runtime_error("Could not create reader fifo");
             }
 
             try {
-                chmod(location.c_str(), S_IWUSR | S_IRUSR);
+                auto ret = chmod(location.c_str(), S_IWUSR | S_IRUSR);
+                if (ret != 0) {
+                    log_error("Failed to change location permissions: {}", std::strerror(errno));
+                }
 
                 std::unique_ptr<IOHandler> c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
@@ -173,12 +177,16 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
         throw_std_runtime_error("Transcoder {} is not executable: {}", profile->getCommand().c_str(), std::strerror(err));
 
     log_debug("creating fifo: {}", fifo_name.c_str());
-    if (mkfifo(fifo_name.c_str(), O_RDWR) == -1) {
+    err = mkfifo(fifo_name.c_str(), O_RDWR);
+    if (err != 0) {
         log_error("Failed to create fifo for the transcoding process!: {}", std::strerror(errno));
         throw_std_runtime_error("Could not create fifo");
     }
 
-    chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
+    err = chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
+    if (err != 0) {
+        log_error("Failed to change location permissions: {}", std::strerror(errno));
+    }
 
     arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range, obj->getTitle());
 
