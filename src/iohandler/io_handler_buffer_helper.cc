@@ -37,27 +37,14 @@
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize)
     : config(std::move(config))
+    , bufSize(bufSize)
+    , initialFillSize(initialFillSize)
+    , waitForInitialFillSize(initialFillSize > 0)
 {
     if (bufSize == 0)
         throw_std_runtime_error("bufSize must be greater than 0");
     if (initialFillSize > bufSize)
         throw_std_runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
-
-    this->bufSize = bufSize;
-    this->initialFillSize = initialFillSize;
-    waitForInitialFillSize = (initialFillSize > 0);
-    buffer = nullptr;
-    isOpen = false;
-    threadShutdown = false;
-    eof = false;
-    readError = false;
-    a = b = posRead = 0;
-    empty = true;
-    signalAfterEveryRead = false;
-    checkSocket = false;
-
-    seekEnabled = false;
-    doSeek = false;
 }
 
 void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
