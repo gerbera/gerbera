@@ -75,7 +75,7 @@ private:
 
     void _exec(const char* query, int length = -1);
 
-    MYSQL db;
+    MYSQL db {};
 
     bool mysql_connection {};
 
@@ -84,7 +84,7 @@ private:
     void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }
 
-    pthread_key_t mysql_init_key;
+    pthread_key_t mysql_init_key {};
     bool mysql_init_key_initialized {};
 
     void checkMysqlThreadInit() const;
