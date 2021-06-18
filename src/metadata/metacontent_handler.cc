@@ -164,14 +164,10 @@ MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-std::unique_ptr<ContentPathSetup> FanArtHandler::setup {};
-
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_FANART_DIR_LIST);
-    }
+    setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_FANART_DIR_LIST);
 }
 
 void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
@@ -212,14 +208,10 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> ContainerArtHandler::setup {};
-
 ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
-    }
+    setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
 }
 
 void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
@@ -266,14 +258,10 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<Cds
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> SubtitleHandler::setup {};
-
 SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
-    }
+    setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
 }
 
 void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
@@ -321,14 +309,10 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsObje
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> ResourceHandler::setup {};
-
 ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
-    }
+    setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
 }
 
 void ResourceHandler::fillMetadata(std::shared_ptr<CdsObject> obj)

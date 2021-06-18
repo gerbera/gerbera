@@ -62,7 +62,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
@@ -73,7 +73,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for populating filesystem based subtitles
@@ -84,7 +84,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// \brief This class is responsible for reverse mapping filesystem based resources
@@ -95,7 +95,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 #endif // __METADATA_CONTENT_H__
