@@ -102,14 +102,14 @@ protected:
     std::shared_ptr<ContentManager> content;
 
     std::string ip;
-    in_port_t port;
+    in_port_t port {};
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};
 
     /// \brief Handle for our upnp callbacks.
-    UpnpDevice_Handle rootDeviceHandle;
-    UpnpDevice_Handle clientHandle;
+    UpnpDevice_Handle rootDeviceHandle {};
+    UpnpDevice_Handle clientHandle {};
 
     /// \brief Unique Device Number of the server.
     ///
@@ -143,7 +143,7 @@ protected:
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
-    int aliveAdvertisementInterval;
+    int aliveAdvertisementInterval {};
 
     std::unique_ptr<UpnpXMLBuilder> xmlbuilder;
 
