@@ -71,11 +71,10 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
         objID.c_str(), browseFlag.c_str(), startingIndex.c_str(), requestedCount.c_str(), sortCriteria.c_str());
 
-    int objectID;
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
-    objectID = stoiString(objID);
+    int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
@@ -92,7 +91,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
-    auto param = std::make_unique<BrowseParam>(objectID, flag);
+    auto param = std::make_unique<BrowseParam>(parent, flag);
 
     param->setStartingIndex(stoiString(startingIndex));
     param->setRequestedCount(stoiString(requestedCount));
