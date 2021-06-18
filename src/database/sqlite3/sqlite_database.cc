@@ -133,10 +133,6 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config))
     , timer(std::move(timer))
-    , shutdownFlag(false)
-    , dirty(false)
-    , dbInitDone(false)
-    , hasBackupTimer(false)
 {
     table_quote_begin = '"';
     table_quote_end = '"';

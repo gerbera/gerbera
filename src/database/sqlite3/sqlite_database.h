@@ -201,7 +201,7 @@ private:
     std::shared_ptr<Timer> timer;
 
     /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
-    bool shutdownFlag;
+    bool shutdownFlag {};
 
     /// \brief the tasks to be done by the sqlite3 thread
     std::queue<std::shared_ptr<SLTask>> taskQueue;
@@ -210,9 +210,9 @@ private:
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }
 
-    bool dirty;
-    bool dbInitDone;
-    bool hasBackupTimer;
+    bool dirty {};
+    bool dbInitDone {};
+    bool hasBackupTimer {};
     int sqliteStatus {};
 
     friend class SLSelectTask;
