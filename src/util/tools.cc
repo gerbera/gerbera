@@ -42,6 +42,7 @@
 #include <netinet/in.h>
 #include <numeric>
 #include <queue>
+#include <random>
 #include <sstream>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -1174,8 +1175,11 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
         return -1;
     }
 
+    std::mt19937 rng;
+    std::uniform_int_distribution<in_port_t> gen(range_min, range_max);
+
     do {
-        port = rand() % (range_max - range_min) + range_min;
+        port = gen(rng);
 
         fd = socket(AF_INET, SOCK_STREAM, 0);
         if (fd < 0) {
