@@ -1202,6 +1202,8 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
             return port;
         }
 
+        close(fd);
+
         retry_count++;
     } while (retry_count < std::numeric_limits<uint16_t>::max());
 
