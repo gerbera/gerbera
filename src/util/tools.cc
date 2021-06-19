@@ -745,7 +745,7 @@ std::string fallbackString(const std::string& first, const std::string& fallback
 
 unsigned int stringHash(std::string_view str)
 {
-    return std::accumulate(str.begin(), str.end(), 5381, [](auto&& h, auto&& ch) { return ((h << 5) + h) ^ ch; });
+    return std::accumulate(str.begin(), str.end(), 5381U, [](auto h, auto ch) { return ((h << 5) + h) ^ ch; });
 }
 
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
