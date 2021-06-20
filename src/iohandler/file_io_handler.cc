@@ -104,7 +104,7 @@ off_t FileIOHandler::tell()
 void FileIOHandler::close()
 {
     if (f != nullptr && fclose(f) != 0) {
-        throw_std_runtime_error("fclose failed");
+        log_error("fclose failed");
     }
     f = nullptr;
 }
