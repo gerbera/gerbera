@@ -479,19 +479,15 @@ static const std::map<std::string, std::string> logicOperator = {
 std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
     if (colMapper != nullptr && colMapper->hasEntry(property)) {
-        return {
-            colMapper->mapQuoted(property),
-            colMapper->mapQuotedLower(property)
-        };
+        return std::make_pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
     }
     if (metaMapper != nullptr) {
-        return {
+        return std::make_pair(
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
-            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property)
-        };
+            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property));
     }
     log_info("Property {} not yet supported. Search may return no result!", property);
-    return { "", "" };
+    return {};
 }
 
 std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::string& property,
