@@ -164,7 +164,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
 void IOHandlerBufferHelper::close()
 {
     if (!isOpen)
-        throw_std_runtime_error("close called on closed IOHandlerBufferHelper");
+        log_error("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
     delete[] buffer;

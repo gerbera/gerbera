@@ -109,7 +109,7 @@ public:
         if (file == nullptr)
             return;
         if (fclose(file) != 0) {
-            throw_std_runtime_error("fclose failed");
+            log_error("fclose failed");
         }
         file = nullptr;
     }
