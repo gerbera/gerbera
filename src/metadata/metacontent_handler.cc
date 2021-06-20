@@ -125,9 +125,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             }
         }
     }
-    if (result.empty())
-        result.push_back("");
-    return result;
+    return result.empty() ? std::vector<fs::path>(1, "") : std::move(result);
 }
 
 static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 5> metaTags { {
