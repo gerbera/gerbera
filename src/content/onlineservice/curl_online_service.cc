@@ -26,10 +26,7 @@
 #ifdef HAVE_CURL
 #include "curl_online_service.h" // API
 
-#include <string>
-
-#include "config/config_manager.h"
-#include "config/config_options.h"
+#include "config/config.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/string_converter.h"

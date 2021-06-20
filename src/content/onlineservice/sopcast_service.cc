@@ -32,12 +32,8 @@
 #ifdef SOPCAST
 #include "sopcast_service.h" // API
 
-#include "config/config_manager.h"
 #include "content/content_manager.h"
-#include "database/database.h"
 #include "sopcast_content_handler.h"
-#include "util/string_converter.h"
-#include "util/url.h"
 
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 

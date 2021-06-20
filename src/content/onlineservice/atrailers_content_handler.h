@@ -35,10 +35,6 @@
 #ifndef __ATRAILERS_CONTENT_HANDLER_H__
 #define __ATRAILERS_CONTENT_HANDLER_H__
 
-#include <memory>
-#include <pugixml.hpp>
-
-#include "context.h"
 #include "curl_online_service.h"
 
 // forward declaration

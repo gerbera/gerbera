@@ -35,10 +35,6 @@
 #ifndef __SOPCAST_CONTENT_HANDLER_H__
 #define __SOPCAST_CONTENT_HANDLER_H__
 
-#include <memory>
-#include <pugixml.hpp>
-
-#include "context.h"
 #include "curl_online_service.h"
 
 #define SOPCAST_SERVICE "SopCast"
