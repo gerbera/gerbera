@@ -31,7 +31,6 @@
 #define __CURL_ONLINE_SERVICE_H__
 
 #include <curl/curl.h>
-#include <memory>
 #include <pugixml.hpp>
 
 #include "context.h"

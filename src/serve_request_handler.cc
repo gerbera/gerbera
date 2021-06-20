@@ -91,7 +91,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #if defined(USING_NPUPNP)
         UpnpFileInfo_set_ContentType(info, mimetype);
 #else
-        UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimetype.c_str()));
+        UpnpFileInfo_set_ContentType(info, mimetype.c_str());
 #endif
     } else {
         throw_std_runtime_error("Not a regular file: {}", path.c_str());

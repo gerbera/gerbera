@@ -35,10 +35,6 @@
 #ifndef __SOPCAST_SERVICE_H__
 #define __SOPCAST_SERVICE_H__
 
-#include <curl/curl.h>
-#include <memory>
-#include <pugixml.hpp>
-
 #include "curl_online_service.h"
 
 // forward declaration

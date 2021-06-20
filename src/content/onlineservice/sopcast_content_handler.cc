@@ -33,8 +33,7 @@
 #include "sopcast_content_handler.h" // API
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
-#include "curl_online_service.h"
+#include "config/config.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 

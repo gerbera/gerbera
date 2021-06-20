@@ -202,7 +202,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #if defined(USING_NPUPNP)
     UpnpFileInfo_set_ContentType(info, mimeType);
 #else
-    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
+    UpnpFileInfo_set_ContentType(info, mimeType.c_str());
 #endif
 
     headers->writeHeaders(info);

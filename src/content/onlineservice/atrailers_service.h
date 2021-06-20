@@ -35,12 +35,7 @@
 #ifndef __ATRAILERS_SERVICE_H__
 #define __ATRAILERS_SERVICE_H__
 
-#include <curl/curl.h>
-#include <memory>
-#include <pugixml.hpp>
-
 #include "atrailers_content_handler.h"
-#include "curl_online_service.h"
 
 // forward declaration
 class ContentManager;
