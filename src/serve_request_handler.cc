@@ -88,11 +88,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             UpnpFileInfo_set_IsReadable(info, 0);
         }
 
-#if defined(USING_NPUPNP)
-        UpnpFileInfo_set_ContentType(info, mimetype);
-#else
         UpnpFileInfo_set_ContentType(info, mimetype.c_str());
-#endif
     } else {
         throw_std_runtime_error("Not a regular file: {}", path.c_str());
     }
