@@ -1104,7 +1104,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     for (auto&& item : chain) {
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
-            return { INVALID_OBJECT_ID, false };
+            return std::make_pair(INVALID_OBJECT_ID, false);
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received chain item {}", tree);
@@ -1127,7 +1127,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
         update_manager->containerChanged(result);
         session_manager->containerChangedUI(result);
     }
-    return { result, isNew };
+    return std::make_pair(result, isNew);
 }
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
@@ -1182,7 +1182,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         session_manager->containerChangedUI(updateID.back());
     }
 
-    return { containerID, isNew };
+    return std::make_pair(containerID, isNew);
 }
 
 void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
