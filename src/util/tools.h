@@ -189,7 +189,7 @@ std::string getProtocol(const std::string& protocolInfo);
 std::string millisecondsToHMSF(int milliseconds);
 
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
-int HMSFToMilliseconds(const std::string& time);
+int HMSFToMilliseconds(std::string_view time);
 
 /// \brief Extracts resolution from a JPEG image
 std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh);
