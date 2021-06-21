@@ -548,7 +548,7 @@ int Server::registerVirtualDirCallbacks()
             return -1;
         }
     });
-    if (ret != 0)
+    if (ret != UPNP_E_SUCCESS)
         return ret;
 
     log_debug("Setting UpnpVirtualDir OpenCallback");
@@ -612,16 +612,13 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
         //log_debug("{} close()", f);
         int ret_close = 0;
-        auto handler = static_cast<IOHandler*>(f);
+        auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
         try {
             handler->close();
         } catch (const std::runtime_error& e) {
             log_error("Exception during close: {}", e.what());
             ret_close = -1;
         }
-
-        delete handler;
-        handler = nullptr;
 
         return ret_close;
     });
