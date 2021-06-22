@@ -215,7 +215,7 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     const char* ifName = iface.empty() ? nullptr : iface.c_str();
 
     int ret = UPNP_E_INIT_FAILED;
-    for (int attempt = 0; ret != UPNP_E_SUCCESS; attempt++) {
+    for (size_t attempt = 0; ret != UPNP_E_SUCCESS; attempt++) {
         ret = UpnpInit2(ifName, inPort);
         if (ret != UPNP_E_SUCCESS) {
             if (attempt > 3) {
