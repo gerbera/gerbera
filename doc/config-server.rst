@@ -826,13 +826,24 @@ This section defines the properties which are send to UPnP clients as part of th
 
 ::
 
-    <containers>
+    <containers enabled="yes">
 
 * Optional
 
 Add dynamic containers to virtual layout.
 
 This section sets the rules for additional containers which have calculated content.
+
+    **Attributes:**
+
+    ::
+
+        enabled=...
+
+    * Optional
+    * Default: **yes**
+
+    Enables or disables the dynamic containers driver.
 
     **Child tags:**
 

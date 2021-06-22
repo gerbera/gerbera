@@ -1000,6 +1000,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigDynamicContentSetup>(CFG_SERVER_DYNAMIC_CONTENT_LIST,
         "/server/containers", "config-server.html#containers"),
+    std::make_shared<ConfigBoolSetup>(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED,
+        "/server/containers/attribute::enabled", "config-server.html#containers",
+        true, false),
     std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION,
         "attribute::location", "config-server.html#location",
         "", true, false, true),

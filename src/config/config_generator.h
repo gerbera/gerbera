@@ -40,6 +40,7 @@ public:
     void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
     void generateUi();
     void generateExtendedRuntime();
+    void generateDynamics();
     void generateDatabase();
     void generateImport(const fs::path& prefixDir, const fs::path& magicFile);
     void generateMappings();

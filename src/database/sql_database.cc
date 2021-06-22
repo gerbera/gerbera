@@ -773,7 +773,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         }
     }
 
-    if (getContainers && param->getStartingIndex() == 0 && param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param->getStartingIndex() == 0 && param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
             for (size_t count = 0; count < dynContent->size(); count++) {
