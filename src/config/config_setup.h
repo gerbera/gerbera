@@ -372,7 +372,7 @@ public:
 
     int checkIntValue(std::string& sVal, const std::string& pathName = "") const;
 
-    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : fmt::format("{}", optionValue->getIntOption()); }
+    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : fmt::to_string(optionValue->getIntOption()); }
 
     static bool CheckSqlLiteSyncValue(std::string& value);
 

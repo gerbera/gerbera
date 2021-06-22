@@ -276,7 +276,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
             setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
             setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
-            duk_put_prop_string(ctx, -2, fmt::format("{}", adir->getScanID()).c_str());
+            duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
         autoscanItemPath = ascs->getItemPath(-2);
     }
@@ -741,7 +741,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         if (obj->getResourceCount() > 0) {
             int resCount = 0;
             for (auto&& res : obj->getResources()) {
-                setProperty(fmt::format("{}:handlerType", resCount), fmt::format("{}", res->getHandlerType()));
+                setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(res->getHandlerType()));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, val] : attributes) {
                     setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), val);
