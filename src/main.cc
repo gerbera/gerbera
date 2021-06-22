@@ -327,21 +327,17 @@ int main(int argc, char** argv, char** envp)
         if (opts.count("pidfile") > 0) {
             pidfile = opts["pidfile"].as<std::string>();
 
-            // exit if the pidfile already exists
-            struct stat s;
-            errno = 0;
-            // for pidfile to be not there stat needs to fail and it needs
-            // to fail due to ENOENT (no such file or dir)
-            if (!(-1 == stat(pidfile->c_str(), &s) && errno == ENOENT)) {
+            // x will make it fail if file exists
+            auto pidf = ::fopen(pidfile->c_str(), "wx");
+            if (pidf == nullptr) {
                 log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
                 log_error("running or the file is a leftover from an unclean shutdown.");
                 log_error("In that case, remove the file before starting gerbera.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // get the pid of our process
             pid_t pid = getpid();
-
             if (pid <= 1) {
                 log_error("Could not determine pid of running process.");
                 std::exit(EXIT_FAILURE);
@@ -349,26 +345,16 @@ int main(int argc, char** argv, char** envp)
 
             // convert to a string
             auto pidstr = fmt::to_string(pid);
-
-            // open the pidfile
-            int pidfd = open(pidfile->c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-            if (-1 == pidfd) {
-                log_error("Could not create pidfile {}.", pidfile->c_str());
-                exit(EXIT_FAILURE);
-            }
-
             // add a newline
             pidstr += "\n";
 
             // write pid to file
-            if (ssize_t(pidstr.size()) != write(pidfd, pidstr.c_str(), pidstr.size())) {
+            if (::fputs(pidstr.c_str(), pidf) < 0) {
                 log_error("Could not write pidfile {}.", pidfile->c_str());
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
             log_debug("Wrote pidfile {}.", pidfile->c_str());
-
-            // close filedescriptor
-            close(pidfd);
+            ::fclose(pidf);
         }
 
         std::optional<std::string> config_file;
