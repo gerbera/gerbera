@@ -94,9 +94,13 @@
 // updates 9->10: last_modified
 #define MYSQL_UPDATE_9_10_1 "ALTER TABLE `mt_cds_object` ADD `last_modified` bigint(20) unsigned default NULL AFTER `bookmark_pos`"
 
+// updates 10->11: last_updated
+#define MYSQL_UPDATE_10_11_1 "ALTER TABLE `mt_cds_object` ADD `last_updated` bigint(20) unsigned default '0' AFTER `last_modified`"
+#define MYSQL_UPDATE_10_11_2 "UPDATE `mt_cds_object` SET `last_updated`=`last_modified`"
+
 #define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
 
-static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
+static const auto dbUpdates = std::array<std::vector<const char*>, 10> { {
     { MYSQL_UPDATE_1_2_1, MYSQL_UPDATE_1_2_2, MYSQL_UPDATE_1_2_3, MYSQL_UPDATE_1_2_4, MYSQL_UPDATE_1_2_5 },
     { MYSQL_UPDATE_2_3_1, MYSQL_UPDATE_2_3_2, MYSQL_UPDATE_2_3_3 },
     { MYSQL_UPDATE_3_4_1, MYSQL_UPDATE_3_4_2 },
@@ -106,10 +110,11 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 9> { {
     { MYSQL_UPDATE_7_8_1, MYSQL_UPDATE_7_8_2, MYSQL_UPDATE_7_8_3 },
     { MYSQL_UPDATE_8_9_1 },
     { MYSQL_UPDATE_9_10_1 },
+    { MYSQL_UPDATE_10_11_1 MYSQL_UPDATE_10_11_2 },
 } };
 
-MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config)
-    : SQLDatabase(std::move(config))
+MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+    : SQLDatabase(std::move(config), std::move(mime))
 {
     table_quote_begin = '`';
     table_quote_end = '`';

@@ -43,7 +43,7 @@
 
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    explicit MySQLDatabase(std::shared_ptr<Config> config);
+    explicit MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     ~MySQLDatabase() override;
 
     MySQLDatabase(const MySQLDatabase&) = delete;

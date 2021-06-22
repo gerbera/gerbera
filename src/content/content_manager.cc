@@ -32,7 +32,6 @@
 #include "content_manager.h" // API
 
 #include <cerrno>
-#include <chrono>
 #include <cstring>
 #include <regex>
 
@@ -292,14 +291,6 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
         fetchOnlineContent(service_type_t(parameter->getID()));
     }
 #endif // ONLINE_SERVICES
-}
-
-template <typename TP>
-static std::chrono::seconds to_seconds(TP tp)
-{
-    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
-        + std::chrono::system_clock::now());
-    return std::chrono::seconds(std::chrono::system_clock::to_time_t(asSystemTime));
 }
 
 void ContentManager::shutdown()

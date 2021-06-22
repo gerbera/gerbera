@@ -39,7 +39,8 @@
 
 #include "database.h"
 
-// forward declaration
+// forward declarations
+class CdsContainer;
 class SQLResult;
 class SQLEmitter;
 
@@ -169,12 +170,14 @@ public:
     void clearFlagInDB(int flag) override;
 
 protected:
-    explicit SQLDatabase(std::shared_ptr<Config> config);
+    explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     //virtual ~SQLDatabase();
     void init() override;
 
     void doMetadataMigration() override;
     void migrateMetadata(const std::shared_ptr<CdsObject>& object);
+
+    std::shared_ptr<Mime> mime;
 
     char table_quote_begin;
     char table_quote_end;
@@ -183,6 +186,7 @@ protected:
 
     std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
+    std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
 private:
     std::string sql_browse_query;

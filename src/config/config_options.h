@@ -43,6 +43,7 @@
 class AutoscanList;
 class ClientConfigList;
 class DirectoryConfigList;
+class DynamicContentList;
 
 class ConfigOption {
 public:
@@ -91,6 +92,11 @@ public:
     virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const
     {
         throw std::runtime_error("Wrong option type directory list");
+    }
+
+    virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption() const
+    {
+        throw std::runtime_error("Wrong option type dynamic content list");
     }
 };
 
@@ -237,6 +243,7 @@ public:
         : option(std::move(option))
     {
     }
+
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const override
     {
         return option;
@@ -249,6 +256,22 @@ public:
 
 protected:
     std::shared_ptr<TranscodingProfileList> option;
+};
+
+class DynamicContentListOption : public ConfigOption {
+public:
+    explicit DynamicContentListOption(std::shared_ptr<DynamicContentList> option)
+        : option(std::move(option))
+    {
+    }
+
+    std::shared_ptr<DynamicContentList> getDynamicContentListOption() const override
+    {
+        return option;
+    }
+
+protected:
+    std::shared_ptr<DynamicContentList> option;
 };
 
 #endif // __CONFIG_MANAGER_H__

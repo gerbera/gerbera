@@ -670,7 +670,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
 Modify the settings for UPnP items.
 
-This section defines sets the properties which are send to UPnP clients as part of the response.
+This section defines the properties which are send to UPnP clients as part of the response.
 
     **Child tags:**
 
@@ -716,7 +716,7 @@ This section defines sets the properties which are send to UPnP clients as part 
         M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
         M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
 
-        Instead of metadata you may also use auxdata entries as defined in ``library-options``.
+        Instead of metadata, you may also use auxdata entries as defined in ``library-options``.
 
     **Defaults:**
 
@@ -757,6 +757,14 @@ This section defines sets the properties which are send to UPnP clients as part 
     +----------------------+-------------------+
     | ``upnp:albumArtist`` | ``M_ALBUMARTIST`` |
     +----------------------+-------------------+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+
+    * Genre-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
     | ``upnp:genre``       | ``M_GENRE``       |
     +----------------------+-------------------+
 
@@ -811,3 +819,73 @@ This section defines sets the properties which are send to UPnP clients as part 
     +-----------------------------------+-----------------------+
     | ``upnp:region``                   | ``M_REGION``          |
     +-----------------------------------+-----------------------+
+
+
+``containers``
+~~~~~~~~~~~~~~
+
+::
+
+    <containers>
+
+* Optional
+
+Add dynamic containers to virtual layout.
+
+This section sets the rules for additional containers which have calculated content.
+
+    **Child tags:**
+
+    ::
+
+
+        <container location="/New" title="Recently added" sort="-last_updated">
+            <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+        </container>
+
+    * Optional
+
+    Defines the properties of the dynamic container.
+
+    It contains the following entries.
+
+        ::
+
+            <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+
+        * Required
+
+        Filter to run to get the contents of the container. It uses the syntax of UPnP search with additional properties ``last_modified`` and ``last_updated``.
+        It also support comparing against a special value ``"@last*"`` where ``*`` can be any integer which evaluates to the current time minus the number of days as specified.
+
+        ::
+
+            location="..."
+
+        * Required
+
+        Position in the virtual layout where the node is added. If it is in a sub-container, e.g. ``/Audio/New``, it only becomes visible if the import generates the parent container.
+
+        ::
+
+            title="..."
+
+        * Optional
+
+        Text to display as title of the container. If it is empty the last section of the location is used.
+
+        ::
+
+            sort="..."
+
+        * Optional
+
+        UPnP sort statement to use as sorting criteria for the container.
+
+        ::
+
+            image="..."
+
+        * Optional
+
+        Path to an image to display for the container. It still depends on the client whether the image becomes visible.

@@ -998,6 +998,24 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_UPNP_PROPERTIES_METADATA,
         "attribute::meta-data", "config-server.html#upnp"),
 
+    std::make_shared<ConfigDynamicContentSetup>(CFG_SERVER_DYNAMIC_CONTENT_LIST,
+        "/server/containers", "config-server.html#containers"),
+    std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION,
+        "attribute::location", "config-server.html#location",
+        "", true, false, true),
+    std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_IMAGE,
+        "attribute::image", "config-server.html#image",
+        "", true, false),
+    std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_TITLE,
+        "attribute::title", "config-server.html#title",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_FILTER,
+        "filter", "config-server.html#filter",
+        true, "last_updated < @last31"),
+    std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT,
+        "attribute::sort", "config-server.html#sort",
+        ""),
+
     // simpleOptions
 
     std::make_shared<ConfigSetup>(ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION,
@@ -1024,6 +1042,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "genre", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_SYSTEM_DIR_ADD_PATH,
         "add-path", ""),
+    std::make_shared<ConfigSetup>(ATTR_DYNAMIC_CONTAINER,
+        "container", ""),
 
     std::make_shared<ConfigSetup>(ATTR_UPNP_PROPERTIES_PROPERTY,
         "upnp-property", ""),
@@ -1075,6 +1095,13 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_DIRECTORIES_TWEAK_HIDDEN, { CFG_IMPORT_DIRECTORIES_LIST } },
     { ATTR_DIRECTORIES_TWEAK_CASE_SENSITIVE, { CFG_IMPORT_DIRECTORIES_LIST } },
     { ATTR_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, { CFG_IMPORT_DIRECTORIES_LIST } },
+
+    { ATTR_DYNAMIC_CONTAINER, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
+    { ATTR_DYNAMIC_CONTAINER_LOCATION, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
+    { ATTR_DYNAMIC_CONTAINER_IMAGE, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
+    { ATTR_DYNAMIC_CONTAINER_TITLE, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
+    { ATTR_DYNAMIC_CONTAINER_FILTER, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
+    { ATTR_DYNAMIC_CONTAINER_SORT, { CFG_SERVER_DYNAMIC_CONTENT_LIST } },
 
     { ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, {} },
 

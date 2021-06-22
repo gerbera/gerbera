@@ -30,13 +30,14 @@
 #include <vector>
 namespace fs = std::filesystem;
 
-// forward declaration
-class AutoscanList;
+// forward declarations
 class AutoscanDirectory;
+class AutoscanList;
 class ClientConfigList;
 class ConfigOption;
 class Database;
 class DirectoryConfigList;
+class DynamicContentList;
 class TranscodingProfileList;
 
 enum config_option_t {
@@ -217,6 +218,7 @@ enum config_option_t {
     CFG_THREAD_SCOPE_SYSTEM,
     CFG_IMPORT_READABLE_NAMES,
     CFG_IMPORT_SOPCAST_MIMETYE_LIST,
+    CFG_SERVER_DYNAMIC_CONTENT_LIST,
 
     CFG_MAX,
 
@@ -300,6 +302,13 @@ enum config_option_t {
     ATTR_UPNP_PROPERTIES_PROPERTY,
     ATTR_UPNP_PROPERTIES_UPNPTAG,
     ATTR_UPNP_PROPERTIES_METADATA,
+
+    ATTR_DYNAMIC_CONTAINER,
+    ATTR_DYNAMIC_CONTAINER_LOCATION,
+    ATTR_DYNAMIC_CONTAINER_IMAGE,
+    ATTR_DYNAMIC_CONTAINER_TITLE,
+    ATTR_DYNAMIC_CONTAINER_FILTER,
+    ATTR_DYNAMIC_CONTAINER_SORT,
 };
 
 class Config {
@@ -358,6 +367,10 @@ public:
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const = 0;
+
+    /// \brief returns a config option of type DynamicContentList
+    /// \param option to retrieve
+    virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const = 0;
 };
 
 #endif // __CONFIG_H__

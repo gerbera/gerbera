@@ -491,6 +491,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
     setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
     setOption(root, CFG_IMPORT_SYSTEM_DIRECTORIES);
+    setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST);
 
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);
@@ -711,6 +712,11 @@ std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(confi
 std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(config_option_t option) const
 {
     return options->at(option)->getDirectoryTweakOption();
+}
+
+std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(config_option_t option) const
+{
+    return options->at(option)->getDynamicContentListOption();
 }
 
 std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option) const

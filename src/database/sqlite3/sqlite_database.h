@@ -158,7 +158,7 @@ protected:
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
-    Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Timer> timer);
+    Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer);
 
 private:
     void prepare();

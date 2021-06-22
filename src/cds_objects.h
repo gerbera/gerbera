@@ -98,6 +98,10 @@ protected:
     /// In seconds since UNIX epoch.
     std::chrono::seconds mtime {};
 
+    /// \brief Last update time in database
+    /// In seconds since UNIX epoch.
+    std::chrono::seconds utime {};
+
     /// \brief File size on disk (in bytes).
     off_t sizeOnDisk { 0 };
 
@@ -155,43 +159,41 @@ public:
 
     /// \brief Set the restricted flag.
     void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
-
     /// \brief Query the restricted flag.
     bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
     void setTitle(const std::string& title) { this->title = title; }
-
     /// \brief Retrieve the title.
     std::string getTitle() const { return title; }
 
     /// \brief set the upnp:class
     void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
-
     /// \brief Retrieve class
     std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
     void setLocation(const fs::path& location) { this->location = location; }
-
     /// \brief Retrieve media location.
     fs::path getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
-
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
     std::chrono::seconds getMTime() const { return mtime; }
 
+    /// \brief Set update time of the database entry.
+    void setUTime(std::chrono::seconds utime) { this->utime = utime; }
+    /// \brief Retrieve the database entry update time (in seconds since UNIX epoch).
+    std::chrono::seconds getUTime() const { return utime; }
+
     /// \brief Set file size.
     void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
-
     /// \brief Retrieve the file size (in bytes).
     off_t getSizeOnDisk() const { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
     void setVirtual(bool virt) { this->virt = virt; }
-
     /// \brief Query the virtual flag.
     bool isVirtual() const { return virt; }
 

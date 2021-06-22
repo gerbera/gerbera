@@ -83,6 +83,7 @@
                 <xs:element ref="tmpdir" minOccurs="0"/>
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
                 <xs:element ref="upnp" minOccurs="0"/>
+                <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="system-threads" type="boolean" default="yes"/>
         </xs:complexType>
@@ -291,6 +292,28 @@
     </xs:element>
 
     <xs:element name="option" type="xs:positiveInteger"/>
+
+    <xs:element name="containers">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="container" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="filter" minOccurs="1" maxOccurs="1"/>
+            </xs:all>
+            <xs:attribute name="location" type="xs:string" use="required"/>
+            <xs:attribute name="title" type="xs:string"/>
+            <xs:attribute name="image" type="xs:string"/>
+            <xs:attribute name="sort" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="filter" type="xs:string"/>
 
     <!-- Storage -->
 
