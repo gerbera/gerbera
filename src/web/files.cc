@@ -69,7 +69,7 @@ void web::files::process()
             continue;
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = { filepath.filename().native() };
+        filesMap[id] = filepath.filename();
     }
 
     auto f2i = StringConverter::f2i(config);

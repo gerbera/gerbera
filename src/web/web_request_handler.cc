@@ -108,7 +108,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     UpnpFileInfo_set_ContentType(info, contentType.c_str());
     Headers headers;
-    headers.addHeader(std::string { "Cache-Control" }, std::string { "no-cache, must-revalidate" });
+    headers.addHeader("Cache-Control", "no-cache, must-revalidate");
     headers.writeHeaders(info);
 }
 
@@ -155,7 +155,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         error = e.getUserMessage();
         error_code = 500;
     } catch (const std::runtime_error& e) {
-        error = std::string { "Error: " } + e.what();
+        error = fmt::format("Error: {}", e.what());
         error_code = 800;
     }
 
