@@ -22,6 +22,7 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <regex>
 
 #include "config/config_manager.h"
 #include "database/search_handler.h"
@@ -49,6 +50,8 @@ enum class TestCol {
     property_value,
     upnp_class,
     ref_id,
+    last7,
+    last_updated,
 };
 
 const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
@@ -58,6 +61,7 @@ const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
     { TestCol::property_value, { "t", "property_value" } },
     { TestCol::upnp_class, { "t", "upnp_class" } },
     { TestCol::ref_id, { "t", "ref_id" } },
+    { TestCol::last_updated, { "t", "last_updated" } },
 };
 
 const std::vector<std::pair<std::string, TestCol>> testSortMap = {
@@ -67,6 +71,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
     { META_VALUE, TestCol::property_value },
     { UPNP_SEARCH_CLASS, TestCol::upnp_class },
     { UPNP_SEARCH_REFID, TestCol::ref_id },
+    { UPNP_SEARCH_LAST_UPDATED, TestCol::last_updated },
 };
 
 ::testing::AssertionResult executeSearchLexerTest(const std::string& input,
@@ -92,7 +97,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 }
 
 ::testing::AssertionResult executeSearchParserTest(const SQLEmitter& emitter, const std::string& input,
-    const std::string& expectedOutput)
+    const std::string& expectedOutput, const std::string& expectedRe = "")
 {
     try {
         auto parser = SearchParser(emitter, input);
@@ -101,7 +106,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
             return ::testing::AssertionFailure() << "Failed to create AST";
 
         auto output = rootNode->emit();
-        if (output != expectedOutput)
+        if (output != expectedOutput && !std::regex_match(output, std::regex(expectedRe, std::regex::ECMAScript)))
             return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
 
         return ::testing::AssertionSuccess();
@@ -449,6 +454,15 @@ TEST(SearchParser, SearchCriteriaWindowMedia)
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.videoItem\" and @refID exists false",
         "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.videoItem%')) AND (_t_._ref_id_ IS NULL)"));
+}
+
+TEST(SearchParser, SearchCriteriaDynamic)
+{
+    auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item\" and last_updated > \"@last7\"",
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > [0-9]+))", 
+        R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ > [0-9]+\))")); // regular expression because last7 is dynamic
 }
 
 TEST(SortParser, SortCriteria)

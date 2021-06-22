@@ -46,6 +46,7 @@ class AutoscanList;
 class CdsObject;
 class Config;
 class ConfigValue;
+class Mime;
 enum class ScanMode;
 class Timer;
 
@@ -139,6 +140,7 @@ public:
         , requestedCount(requestedCount)
     {
     }
+    const std::string& getContainerId() const { return containerID; }
     const std::string& searchCriteria() const { return searchCrit; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
@@ -307,7 +309,7 @@ protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
 
-    static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer);
+    static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
     friend class Server;
 
     virtual std::shared_ptr<Database> getSelf() = 0;

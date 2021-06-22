@@ -41,16 +41,16 @@ Database::Database(std::shared_ptr<Config> config)
 {
 }
 
-std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Timer>& timer)
+std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
     auto database = [&]() -> std::shared_ptr<Database> {
         if (type == "sqlite3") {
-            return std::make_shared<Sqlite3Database>(config, timer);
+            return std::make_shared<Sqlite3Database>(config, mime, timer);
         }
 #ifdef HAVE_MYSQL
         if (type == "mysql") {
-            return std::make_shared<MySQLDatabase>(config);
+            return std::make_shared<MySQLDatabase>(config, mime);
         }
 #endif
         // other database types...

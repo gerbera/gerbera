@@ -26,6 +26,7 @@ CREATE TABLE `mt_cds_object` (
   `service_id` varchar(255) default NULL,
   `bookmark_pos` int(11) unsigned NOT NULL default '0',
   `last_modified` bigint(20) unsigned default NULL,
+  `last_updated` bigint(20) unsigned default '0',
   PRIMARY KEY  (`id`),
   KEY `cds_object_ref_id` (`ref_id`),
   KEY `cds_object_parent_id` (`parent_id`,`object_type`,`dc_title`),
@@ -36,10 +37,10 @@ CREATE TABLE `mt_cds_object` (
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL);
-INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL);
+INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
+INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
 UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
-INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL);
+INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,

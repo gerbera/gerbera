@@ -31,6 +31,7 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
+#include <chrono>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -184,6 +185,14 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 /// \param protocolInfoStr the String from renderProtocolInfo.
 /// \return Protocol (i.e. http-get).
 std::string getProtocol(const std::string& protocolInfo);
+
+template <typename TP>
+static std::chrono::seconds to_seconds(TP tp)
+{
+    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
+        + std::chrono::system_clock::now());
+    return std::chrono::seconds(std::chrono::system_clock::to_time_t(asSystemTime));
+}
 
 /// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
 std::string millisecondsToHMSF(int milliseconds);

@@ -294,6 +294,46 @@
 			]
 		},
 		{
+			"item": "/server/containers",
+			"caption": "Dynamic Content",
+			"type": "Element",
+			"editable": true,
+			"children": [
+				{
+					"item": "/server/containers/container",
+					"caption": "Dynamic Containers",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/containers/container/attribute::location",
+							"caption": "Location",
+							"editable": true
+						},
+						{
+							"item": "/server/containers/container/attribute::image",
+							"caption": "Image",
+							"editable": true
+						},
+						{
+							"item": "/server/containers/container/attribute::title",
+							"caption": "Title",
+							"editable": true
+						},
+						{
+							"item": "/server/containers/container/attribute::filter",
+							"caption": "Filter",
+							"editable": true
+						},
+						{
+							"item": "/server/containers/container/attribute::sort",
+							"caption": "Sort",
+							"editable": true
+						}
+					]
+				}]
+		},
+		{
 			"item": "/import",
 			"caption": "Import",
 			"type": "Element",

@@ -48,6 +48,7 @@ public:
     void setOrigValue(const std::string& item, int value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (const override));
+    MOCK_METHOD(std::shared_ptr<DynamicContentList>, getDynamicContentListOption, (config_option_t option), (const override));
 };
 
 #endif // __CONFIG_MOCK_H__

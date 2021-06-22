@@ -141,7 +141,7 @@ std::string toLower(std::string_view str)
 
 int stoiString(const std::string& str, int def, int base)
 {
-    if (str.empty() || !std::isdigit(*str.c_str()))
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
 
     return std::stoi(str, nullptr, base);
@@ -149,7 +149,7 @@ int stoiString(const std::string& str, int def, int base)
 
 unsigned long stoulString(const std::string& str, int def, int base)
 {
-    if (str.empty() || !std::isdigit(*str.c_str()))
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
 
     return std::stoul(str, nullptr, base);

@@ -40,6 +40,7 @@
 
 class ConfigOption;
 class DirectoryTweak;
+class DynamicContent;
 enum class ScanMode;
 
 using StringCheckFunction = bool (*)(std::string& value);
@@ -673,6 +674,34 @@ protected:
 
 public:
     ConfigDirectorySetup(config_option_t option, const char* xpath, const char* help)
+        : ConfigSetup(option, xpath, help)
+    {
+    }
+
+    std::string getTypeString() const override { return "List"; }
+
+    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+
+    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
+
+    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    std::string getCurrentValue() const override { return ""; }
+};
+
+/// \brief Setup of dynamic content reader
+class ConfigDynamicContentSetup : public ConfigSetup {
+protected:
+    /// \brief Creates an array of DynamicContent objects from a XML nodeset.
+    /// \param element starting element of the nodeset.
+    static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result);
+
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;
+
+public:
+    ConfigDynamicContentSetup(config_option_t option, const char* xpath, const char* help)
         : ConfigSetup(option, xpath, help)
     {
     }

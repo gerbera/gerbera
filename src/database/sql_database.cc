@@ -43,9 +43,11 @@
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
+#include "config/dynamic_content.h"
 #include "content/autoscan.h"
 #include "metadata/metadata_handler.h"
 #include "search_handler.h"
+#include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -91,6 +93,7 @@ enum class BrowseCol {
     service_id,
     bookmark_pos,
     last_modified,
+    last_updated,
     ref_upnp_class,
     ref_location,
     ref_metadata,
@@ -114,7 +117,9 @@ enum class SearchCol {
     mime_type,
     part_number,
     track_number,
-    location
+    location,
+    last_modified,
+    last_updated,
 };
 
 /// \brief meta column ids
@@ -147,6 +152,7 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::service_id, { ITM_ALIAS, "service_id" } },
     { BrowseCol::bookmark_pos, { ITM_ALIAS, "bookmark_pos" } },
     { BrowseCol::last_modified, { ITM_ALIAS, "last_modified" } },
+    { BrowseCol::last_updated, { ITM_ALIAS, "last_updated" } },
     { BrowseCol::ref_upnp_class, { REF_ALIAS, "upnp_class" } },
     { BrowseCol::ref_location, { REF_ALIAS, "location" } },
     { BrowseCol::ref_metadata, { REF_ALIAS, "metadata" } },
@@ -172,6 +178,8 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
     { SearchCol::track_number, { SRC_ALIAS, "track_number" } },
     { SearchCol::location, { SRC_ALIAS, "location" } },
+    { SearchCol::last_modified, { SRC_ALIAS, "last_modified" } },
+    { SearchCol::last_updated, { SRC_ALIAS, "last_updated" } },
 };
 
 /// \brief Map meta column ids to column names
@@ -195,6 +203,8 @@ static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap = {
     { UPNP_SEARCH_REFID, BrowseCol::ref_id },
     { UPNP_SEARCH_PARENTID, BrowseCol::parent_id },
     { UPNP_SEARCH_ID, BrowseCol::id },
+    { UPNP_SEARCH_LAST_UPDATED, BrowseCol::last_updated },
+    { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::last_modified },
 };
 
 /// \brief Map search sort keys to column ids
@@ -209,6 +219,8 @@ static const std::vector<std::pair<std::string, SearchCol>> searchSortMap = {
     { UPNP_SEARCH_REFID, SearchCol::ref_id },
     { UPNP_SEARCH_PARENTID, SearchCol::parent_id },
     { UPNP_SEARCH_ID, SearchCol::id },
+    { UPNP_SEARCH_LAST_UPDATED, SearchCol::last_updated },
+    { UPNP_SEARCH_LAST_MODIFIED, SearchCol::last_modified },
 };
 
 /// \brief Map meta search keys to column ids
@@ -233,8 +245,9 @@ static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 
-SQLDatabase::SQLDatabase(std::shared_ptr<Config> config)
+SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : Database(std::move(config))
+    , mime(std::move(mime))
     , table_quote_begin('\0')
     , table_quote_end('\0')
     , use_transaction(this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
@@ -429,6 +442,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     } else {
         cdsObjectSql["last_modified"] = SQL_NULL;
     }
+    cdsObjectSql["last_updated"] = quote(to_seconds(std::chrono::system_clock::now()).count());
 
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
@@ -589,6 +603,10 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 {
+    if (dynamicContainers.find(objectID) != dynamicContainers.end()) {
+        return dynamicContainers.at(objectID);
+    }
+
     std::ostringstream qb;
 
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::id) << '=' << objectID;
@@ -652,13 +670,29 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
 {
+    auto parent = param->getObject();
+
+    if (dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
+        auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
+        if (dynConfig != nullptr) {
+            auto srcParam = std::make_unique<SearchParam>(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
+                param->getStartingIndex(), param->getRequestedCount() == 0 ? 1000 : param->getRequestedCount()); // get params from browse
+            int numMatches = 0;
+            auto result = this->search(srcParam, &numMatches);
+            param->setTotalMatches(numMatches);
+            return result;
+        } else {
+            log_warning("Dynamic content {} error '{}'", parent->getID(), parent->getLocation().string());
+        }
+    }
+
     bool getContainers = param->getFlag(BROWSE_CONTAINERS);
     bool getItems = param->getFlag(BROWSE_ITEMS);
-    auto parent = param->getObject();
     bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
-
+    int childCount = 1;
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        param->setTotalMatches(getChildCount(parent->getID(), getContainers, getItems, hideFsRoot));
+        childCount = getChildCount(parent->getID(), getContainers, getItems, hideFsRoot);
+        param->setTotalMatches(childCount);
     } else {
         param->setTotalMatches(1);
     }
@@ -723,23 +757,66 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     std::shared_ptr<SQLResult> sqlResult = select(qb);
     commit("browse");
 
-    std::vector<std::shared_ptr<CdsObject>> arr;
+    std::vector<std::shared_ptr<CdsObject>> result;
 
     for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
         auto obj = createObjectFromRow(row);
-        arr.push_back(obj);
+        result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
     }
 
     // update childCount fields
-    for (auto&& obj : arr) {
+    for (auto&& obj : result) {
         if (obj->isContainer()) {
             auto cont = std::static_pointer_cast<CdsContainer>(obj);
             cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
         }
     }
 
-    return arr;
+    if (getContainers && param->getStartingIndex() == 0 && param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+        if (dynamicContainers.size() < dynContent->size()) {
+            for (size_t count = 0; count < dynContent->size(); count++) {
+                auto dynConfig = dynContent->get(count);
+                if (parent->getLocation() == dynConfig->getLocation().parent_path() || (parent->getLocation().empty() && dynConfig->getLocation().parent_path() == "/")) {
+                    int dynId = -(parent->getID() + 1) * 10000 - count;
+                    // create runtime container
+                    if (dynamicContainers.find(dynId) == dynamicContainers.end()) {
+                        auto dynFolder = std::make_shared<CdsContainer>();
+                        dynFolder->setTitle(dynConfig->getTitle());
+                        dynFolder->setID(dynId);
+                        dynFolder->setParentID(parent->getID());
+                        dynFolder->setLocation(dynConfig->getLocation());
+                        dynFolder->setClass("object.container.dynamicFolder");
+
+                        auto image = dynConfig->getImage();
+                        std::error_code ec;
+                        if (!image.empty() && isRegularFile(image, ec)) {
+                            auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
+                            std::string type = image.extension().string().substr(1);
+                            std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
+                            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
+                            resource->addAttribute(R_RESOURCE_FILE, image.string());
+                            resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
+                            dynFolder->addResource(resource);
+                        }
+                        dynamicContainers[dynId] = dynFolder;
+                    }
+                    result.push_back(dynamicContainers[dynId]);
+                    childCount++;
+                }
+            }
+        } else {
+            for (auto&& [dynId, dynFolder] : dynamicContainers) {
+                if (dynFolder->getParentID() == parent->getID()) {
+                    result.push_back(dynFolder);
+                    childCount++;
+                }
+            }
+        }
+        param->setTotalMatches(childCount);
+    }
+    return result;
 }
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_ptr<SearchParam>& param, int* numMatches)
@@ -750,9 +827,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     if (searchSQL.empty())
         throw_std_runtime_error("failed to generate SQL for search");
 
+    beginTransaction("search");
     std::ostringstream countSQL;
     countSQL << "SELECT COUNT(*) " << searchSQL;
-    beginTransaction("search");
     auto sqlResult = select(countSQL);
     commit("search");
     auto countRow = sqlResult->nextRow();
@@ -1074,6 +1151,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setClass(fallbackString(getCol(row, BrowseCol::upnp_class), getCol(row, BrowseCol::ref_upnp_class)));
     obj->setFlags(std::stoi(getCol(row, BrowseCol::flags)));
     obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_modified))));
+    obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_updated))));
 
     auto meta = retrieveMetadataForObject(obj->getID());
     if (!meta.empty()) {

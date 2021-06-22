@@ -44,17 +44,18 @@ namespace fs = std::filesystem;
 #include "config.h"
 
 // forward declaration
-class AutoscanList;
 class AutoscanDirectory;
-class ClientConfigList;
+class AutoscanList;
 class ClientConfig;
-class ConfigSetup;
-class DirectoryConfigList;
-enum class ScanMode;
-enum class ClientType;
+class ClientConfigList;
 class ConfigOption;
+class ConfigSetup;
 class Database;
+class DirectoryConfigList;
+class DynamicContentList;
 class TranscodingProfileList;
+enum class ClientType;
+enum class ScanMode;
 
 class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
 public:
@@ -110,6 +111,10 @@ public:
     /// \brief returns a config option of type DirectoryConfigList
     /// \param option to retrieve
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override;
+
+    /// \brief returns a config option of type DynamicContentList
+    /// \param option to retrieve
+    std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const override;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve

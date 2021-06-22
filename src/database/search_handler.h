@@ -40,6 +40,8 @@
 #define UPNP_SEARCH_ID "@id"
 #define UPNP_SEARCH_REFID "@refID"
 #define UPNP_SEARCH_PARENTID "@parentID"
+#define UPNP_SEARCH_LAST_UPDATED "last_updated"
+#define UPNP_SEARCH_LAST_MODIFIED "last_modified"
 #define UPNP_SEARCH_PATH "path"
 #define META_NAME "name"
 #define META_VALUE "value"
@@ -456,6 +458,8 @@ public:
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != colMap.end()) {
+            if (colMap.at(tag).first.empty()) // no column
+                return colMap.at(tag).second;
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(tag).first, colMap.at(tag).second, table_quote_end);
         }
         return "";
@@ -470,6 +474,8 @@ public:
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
+            if (colMap.at(it->second).first.empty()) // no column
+                return colMap.at(it->second).second;
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
         return "";
@@ -478,6 +484,8 @@ public:
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
+            if (colMap.at(it->second).first.empty()) // no column
+                return fmt::format("LOWER({})", colMap.at(it->second).second);
             return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
         return "";

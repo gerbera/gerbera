@@ -72,8 +72,10 @@ add_library(libgerbera STATIC
         src/config/config_options.h
         src/config/config_setup.cc
         src/config/config_setup.h
-        src/config/directory_tweak.h
         src/config/directory_tweak.cc
+        src/config/directory_tweak.h
+        src/config/dynamic_content.cc
+        src/config/dynamic_content.h
         src/content/autoscan.cc
         src/content/autoscan.h
         src/content/autoscan_list.cc

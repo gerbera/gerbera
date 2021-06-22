@@ -149,11 +149,13 @@ std::string SearchLexer::nextStringToken(const std::string& input)
     auto startPos = currentPos;
     for (; currentPos < input.length();) {
         auto ch = input[currentPos];
-        if (std::isalnum(ch) || ch == ':' || ch == '@' || ch == '.')
+        if (std::isalnum(ch) || ch == ':' || ch == '@' || ch == '.' || ch == '_')
             currentPos++;
         else
             break;
     }
+    if (startPos == currentPos)
+        throw_std_runtime_error("String expected, found '{}' instead", input[currentPos]);
     return input.substr(startPos, currentPos - startPos);
 }
 
@@ -472,6 +474,7 @@ static const std::map<std::string, std::string> logicOperator = {
     //{ "derivedfrom", "{0} LIKE LOWER('{3}%')" },
     { "exists", "({1} IS {3} AND {0} IS NOT NULL)" },
     { "@exists", "({1} IS {3})" },
+    { "newer", "({1} {3})" },
     { "compare", "({2}LOWER('{3}') AND {0} IS NOT NULL)" }, // lower
     { "@compare", "({2}LOWER('{3}'))" }, // lower
 };
@@ -494,10 +497,14 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     const std::string& value) const
 {
     auto operatr = node->getValue();
-    if (operatr != "=")
+    auto&& [prpUpper, prpLower] = getPropertyStatement(property);
+
+    if ((operatr == ">" || operatr == ">=") && value.substr(0, 5) == "@last") {
+        auto dateVal = to_seconds(std::chrono::system_clock::now()).count() - (24 * 60 * 60 * stoiString(value.substr(5)));
+        return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal);
+    } else if (operatr != "=")
         throw_std_runtime_error("Operator '{}' not yet supported", operatr);
 
-    auto&& [prpUpper, prpLower] = getPropertyStatement(property);
     auto&& [clsUpper, clcLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
     return fmt::format(logicOperator.at((property[0] == '@') ? "@compare" : "compare"), clsUpper,
         fmt::format("{}{}", prpUpper, operatr), fmt::format("{}{}", prpLower, operatr), value);
