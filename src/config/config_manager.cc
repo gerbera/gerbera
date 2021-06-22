@@ -657,7 +657,7 @@ void ConfigManager::setOrigValue(const std::string& item, bool value)
 
 void ConfigManager::setOrigValue(const std::string& item, int value)
 {
-    origValues.try_emplace(item, fmt::format("{}", value));
+    origValues.try_emplace(item, fmt::to_string(value));
 }
 
 // The validate function ensures that the array is completely filled!

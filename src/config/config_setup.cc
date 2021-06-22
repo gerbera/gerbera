@@ -928,7 +928,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, fmt::format("{}", entry->getInterval().count()));
+            config->setOrigValue(index, fmt::to_string(entry->getInterval().count()));
         entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval().count());
         return true;
@@ -1175,7 +1175,7 @@ void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::s
 std::string ConfigTranscodingSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index < 0) {
-        return fmt::format("{}", xpath);
+        return fmt::to_string(xpath);
     }
 
     auto opt2 = ConfigDefinition::ensureAttribute(propOption2, propOption3 == CFG_MAX);
@@ -1553,7 +1553,7 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
 std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index < 0) {
-        return fmt::format("{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        return fmt::to_string(ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT));
     }
     if (propOption != CFG_MAX) {
         return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOption));
@@ -1781,7 +1781,7 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
 std::string ConfigDirectorySetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index < 0) {
-        return fmt::format("{}", ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
+        return fmt::to_string(ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK));
     }
     if (propOption != CFG_MAX) {
         return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_DIRECTORIES_TWEAK), index, ConfigDefinition::ensureAttribute(propOption));
