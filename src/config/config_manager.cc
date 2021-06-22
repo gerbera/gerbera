@@ -492,6 +492,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
     setOption(root, CFG_IMPORT_SYSTEM_DIRECTORIES);
     setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST);
+    setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
 
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);

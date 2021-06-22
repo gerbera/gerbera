@@ -205,6 +205,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     setValue(CFG_SERVER_ALIVE_INTERVAL);
 
     generateDatabase();
+    generateDynamics();
     generateExtendedRuntime();
 }
 
@@ -216,6 +217,27 @@ void ConfigGenerator::generateUi()
     setValue(CFG_SERVER_UI_SESSION_TIMEOUT);
     setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, DEFAULT_ACCOUNT_USER);
     setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, DEFAULT_ACCOUNT_PASSWORD);
+}
+
+void ConfigGenerator::generateDynamics()
+{
+    setValue(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
+    setDictionary(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+
+    auto&& containersTag = ConfigDefinition::mapConfigOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+    auto&& containerTag = ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER);
+
+    auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    setValue(container, ATTR_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_TITLE, "Recently Added");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_SORT, "-last_updated");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
+
+    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    setValue(container, ATTR_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_SORT, "-last_modified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
 }
 
 void ConfigGenerator::generateDatabase()

@@ -298,6 +298,7 @@
             <xs:sequence>
                 <xs:element ref="container" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

@@ -28,6 +28,14 @@
       <database>gerbera</database>
     </mysql>
   </storage>
+  <containers enabled="yes">
+    <container location="/LastAdded" title="Recently Added" sort="-last_updated">
+      <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+    </container>
+    <container location="/LastModified" title="Recently Modified" sort="-last_modified">
+      <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
+    </container>
+  </containers>
   <extended-runtime-options>
     <ffmpegthumbnailer enabled="no">
       <thumbnail-size>128</thumbnail-size>
