@@ -59,7 +59,7 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
-    info.append_attribute("id") = fmt::format("{}", cs->option).c_str();
+    info.append_attribute("id") = fmt::to_string(cs->option).c_str();
     info.append_attribute("type") = cs->getTypeString().c_str();
     info.append_attribute("value") = cs->getDefaultValue().c_str();
     info.append_attribute("help") = cs->getHelp();
@@ -86,7 +86,7 @@ template <typename T>
 void web::configLoad::setValue(pugi::xml_node& item, const T& value)
 {
     static_assert(fmt::has_formatter<T, fmt::format_context>::value, "T must be formattable");
-    item.append_attribute("value") = fmt::format("{}", value).c_str();
+    item.append_attribute("value") = fmt::to_string(value).c_str();
 }
 
 template <>
