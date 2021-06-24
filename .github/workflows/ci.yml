@@ -13,12 +13,12 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - name: gcc 9
-            cc: gcc-9
-            cxx: g++-9
-#          - name: clang 11
-#            cc: clang-11
-#            cxx: clang++-11
+#          - name: gcc 9
+#            cc: gcc-9
+#            cxx: g++-9
+          - name: clang 9
+            cc: clang-9
+            cxx: clang++-9
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
@@ -37,20 +37,20 @@ jobs:
         run: |
           pip install -U --no-cache-dir conan
           conan profile new default --detect
+          conan profile update settings.compiler=clang default
+          conan profile update settings.compiler.version=9 default
           conan profile update settings.compiler.libcxx=libstdc++11 default
-      - name: Cache conan dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.conan/data
-          key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
-          restore-keys: |
-            - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
+#      - name: Cache conan dependencies
+#        uses: actions/cache@v2
+#        with:
+#          path: ~/.conan/data
+#          key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
+#          restore-keys: |
+#            - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
       - name: build and test
         run: |
-          # Remove existing package if it comes from the cache, otherwise
-          # Conan will skip building it (due to --build=missing policy)
-          conan remove 'gerbera/*' --force
           conan create -pr ./conan/dev --build=missing . gerbera/dev@
+
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |
