@@ -49,6 +49,8 @@ using DictionaryInitFunction = bool (*)(const pugi::xml_node& value, std::map<st
 using IntCheckFunction = bool (*)(int value);
 using IntMinFunction = bool (*)(int value, int minValue);
 
+using ConfigOptionIterator = EnumIterator<config_option_t, config_option_t::CFG_MIN, config_option_t::CFG_MAX>;
+
 class ConfigValue {
 public:
     std::string key;

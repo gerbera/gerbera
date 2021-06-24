@@ -228,8 +228,8 @@ Script::Script(std::shared_ptr<ContentManager> content,
     }
 
     duk_push_object(ctx); // config
-    for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigDefinition::findConfigSetup(config_option_t(i), true);
+    for (auto&& i : ConfigOptionIterator()) {
+        auto scs = ConfigDefinition::findConfigSetup(i, true);
         if (scs == nullptr)
             continue;
         auto value = scs->getCurrentValue();

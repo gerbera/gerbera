@@ -40,6 +40,7 @@ class DirectoryConfigList;
 class DynamicContentList;
 class TranscodingProfileList;
 
+#define CFG_MIN CFG_SERVER_PORT
 enum config_option_t {
     CFG_SERVER_PORT = 0,
     CFG_SERVER_IP,

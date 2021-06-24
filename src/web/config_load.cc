@@ -162,13 +162,13 @@ void web::configLoad::process()
     }
 
     // write all values with simple type (string, int, bool)
-    for (int i = 0; i < int(CFG_MAX); i++) {
-        auto scs = ConfigDefinition::findConfigSetup(config_option_t(i));
+    for (auto&& option : ConfigOptionIterator()) {
+        auto scs = ConfigDefinition::findConfigSetup(option);
         auto item = values.append_child("item");
-        createItem(item, scs->getItemPath(-1), config_option_t(i), config_option_t(i), scs);
+        createItem(item, scs->getItemPath(-1), option, option, scs);
 
         try {
-            log_debug("    Option {:03d} {} = {}", i, scs->getItemPath(), scs->getCurrentValue().c_str());
+            log_debug("    Option {:03d} {} = {}", option, scs->getItemPath(), scs->getCurrentValue().c_str());
             setValue(item, scs->getCurrentValue());
         } catch (const std::runtime_error& e) {
         }
