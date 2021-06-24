@@ -110,7 +110,7 @@ static const auto dbUpdates = std::array<std::vector<const char*>, 10> { {
     { MYSQL_UPDATE_7_8_1, MYSQL_UPDATE_7_8_2, MYSQL_UPDATE_7_8_3 },
     { MYSQL_UPDATE_8_9_1 },
     { MYSQL_UPDATE_9_10_1 },
-    { MYSQL_UPDATE_10_11_1 MYSQL_UPDATE_10_11_2 },
+    { MYSQL_UPDATE_10_11_1, MYSQL_UPDATE_10_11_2 },
 } };
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
