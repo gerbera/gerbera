@@ -175,7 +175,6 @@ class ArrayOption : public ConfigOption {
 public:
     explicit ArrayOption(std::vector<std::string> option)
         : option(std::move(option))
-        , origSize()
     {
         this->origSize = this->option.size();
         for (size_t i = 0; i < this->origSize; i++) {
@@ -196,7 +195,7 @@ public:
 
 private:
     std::vector<std::string> option;
-    size_t origSize;
+    size_t origSize {};
     std::map<size_t, size_t> indexMap;
 };
 

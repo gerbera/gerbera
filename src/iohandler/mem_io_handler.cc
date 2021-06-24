@@ -42,7 +42,6 @@
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(new char[length])
     , length(length)
-    , pos(-1)
 {
     memcpy(this->buffer, buffer, length);
 }
@@ -50,7 +49,6 @@ MemIOHandler::MemIOHandler(const void* buffer, int length)
 MemIOHandler::MemIOHandler(const std::string& str)
     : buffer(new char[str.length()])
     , length(str.length())
-    , pos(-1)
 {
     memcpy(this->buffer, str.c_str(), length);
 }

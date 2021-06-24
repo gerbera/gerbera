@@ -70,10 +70,10 @@ protected:
 
     std::unique_ptr<std::unordered_set<int>> objectIDHash;
 
-    bool shutdownFlag;
-    int flushPolicy;
+    bool shutdownFlag {};
+    int flushPolicy { FLUSH_SPEC };
 
-    int lastContainerChanged;
+    int lastContainerChanged { INVALID_OBJECT_ID };
 
     static void* staticThreadProc(void* arg);
     void threadProc();

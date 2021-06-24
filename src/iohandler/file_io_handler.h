@@ -45,7 +45,7 @@ protected:
     fs::path filename;
 
     /// \brief Handle of the file.
-    FILE* f;
+    FILE* f {};
 
 public:
     /// \brief Sets the filename to work with.

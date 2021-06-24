@@ -37,7 +37,6 @@
 
 FileIOHandler::FileIOHandler(fs::path filename)
     : filename(std::move(filename))
-    , f(nullptr)
 {
 }
 

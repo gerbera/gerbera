@@ -248,10 +248,7 @@ static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : Database(std::move(config))
     , mime(std::move(mime))
-    , table_quote_begin('\0')
-    , table_quote_end('\0')
     , use_transaction(this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
-    , inTransaction(false)
 {
 }
 
