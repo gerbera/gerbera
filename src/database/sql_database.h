@@ -179,10 +179,10 @@ protected:
 
     std::shared_ptr<Mime> mime;
 
-    char table_quote_begin;
-    char table_quote_end;
+    char table_quote_begin { '\0' };
+    char table_quote_end { '\0' };
     bool use_transaction;
-    bool inTransaction;
+    bool inTransaction {};
 
     std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;

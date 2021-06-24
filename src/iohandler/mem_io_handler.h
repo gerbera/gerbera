@@ -43,7 +43,7 @@ protected:
     off_t length;
 
     /// \brief current offset in the buffer
-    off_t pos;
+    off_t pos { -1 };
 
 public:
     /// \brief Initializes the internal buffer.
