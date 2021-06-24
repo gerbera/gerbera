@@ -234,6 +234,7 @@ std::string fallbackString(const std::string& first, const std::string& fallback
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(std::string_view str);
 
+/// \brief join items of container by delimiter
 template <typename C, typename D>
 std::string join(const C& container, const D& delimiter)
 {
@@ -246,6 +247,43 @@ std::string join(const C& container, const D& delimiter)
     }
     return buf.str();
 }
+
+/// \brief Iterator over values of a sequential enum between begin and end
+template <typename C, C beginVal, C endVal>
+class EnumIterator {
+private:
+    using val_t = typename std::underlying_type<C>::type;
+    val_t val;
+
+public:
+    EnumIterator(const C& f)
+        : val(static_cast<val_t>(f))
+    {
+    }
+    EnumIterator()
+        : val(static_cast<val_t>(beginVal))
+    {
+    }
+
+    EnumIterator operator++()
+    {
+        ++val;
+        return *this;
+    }
+
+    C operator*() { return static_cast<C>(val); }
+
+    EnumIterator begin() { return *this; }
+    EnumIterator end()
+    {
+        static const EnumIterator endIter = ++EnumIterator(endVal);
+        return endIter;
+    }
+    bool operator!=(const EnumIterator& i)
+    {
+        return val != i.val;
+    }
+};
 
 /// \brief Get value of map, iff not key is not in map return defval
 template <typename K, typename V>
