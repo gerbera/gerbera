@@ -850,7 +850,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     retrievalSQL << " ORDER BY " << orderByCode();
 
-    int startingIndex = param->getStartingIndex(), requestedCount = param->getRequestedCount();
+    size_t startingIndex = param->getStartingIndex();
+    size_t requestedCount = param->getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
         retrievalSQL << " LIMIT " << (requestedCount == 0 ? 10000000000 : requestedCount)
                      << " OFFSET " << startingIndex;
@@ -861,15 +862,18 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     sqlResult = select(retrievalSQL);
     commit("search 2");
 
-    std::vector<std::shared_ptr<CdsObject>> arr;
+    std::vector<std::shared_ptr<CdsObject>> result;
 
     for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
         auto obj = createObjectFromSearchRow(row);
-        arr.push_back(obj);
+        result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
     }
+    if (result.size() < requestedCount) {
+        *numMatches = startingIndex + result.size(); // make sure we do not report too many hits
+    }
 
-    return arr;
+    return result;
 }
 
 int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hideFsRoot)
