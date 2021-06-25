@@ -70,7 +70,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                 result.push_back(found);
             }
         } else {
-            auto fileNames = std::map<std::string, fs::path>();
+            std::map<std::string, fs::path> fileNames;
             std::error_code ec;
             for (auto&& p : fs::directory_iterator(folder, ec))
                 if (isRegularFile(p, ec))

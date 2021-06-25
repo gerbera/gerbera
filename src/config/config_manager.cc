@@ -631,7 +631,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
                             log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);
                         }
                     } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
-                        std::map<std::string, std::string> arguments = { { "status", cfgValue.status } };
+                        std::map<std::string, std::string> arguments { { "status", cfgValue.status } };
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
                             log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);
                         }
