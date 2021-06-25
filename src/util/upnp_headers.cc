@@ -120,7 +120,7 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
 #if defined(USING_NPUPNP)
     return std::make_unique<std::map<std::string, std::string>>(fileInfo->request_headers);
 #else
-    auto ret = std::make_unique<std::map<std::string, std::string>>();
+    std::map<std::string, std::string> ret;
 
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     UpnpListIter pos;
@@ -128,9 +128,9 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         auto extra = reinterpret_cast<UpnpExtraHeaders*>(pos);
         std::string header = UpnpExtraHeaders_get_resp(extra);
         auto add = parseHeader(header);
-        ret->insert(add);
+        ret.insert(add);
     }
 
-    return ret;
+    return std::make_unique<std::map<std::string, std::string>>(std::move(ret));
 #endif
 }

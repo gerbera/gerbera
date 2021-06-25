@@ -116,7 +116,7 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
 
         log_debug("saveSamsungBookMarkedPosition: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
 
-        std::map<std::string, std::string> m = {
+        std::map<std::string, std::string> m {
             { "bookmarkpos", bookMarkPos },
         };
         content->updateObject(stoiString(objectID), m);
