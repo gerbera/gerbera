@@ -1123,7 +1123,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
-    std::map<std::string, std::string> lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string>();
+    auto lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string> {};
     std::vector<int> updateID;
     bool isNew = false;
 
