@@ -439,7 +439,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
     bool srtAdded = false;
     int realCount = 0;
     for (auto&& res : item->getResources()) {
-        if (res->isMetaResource(VIDEO_SUB)) {
+        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
             url = renderOneResource(virtualURL, item, res, realCount);
             srtAdded = true;
             break;
@@ -451,18 +451,17 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
 {
-    std::string ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
+    auto&& ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
         return fmt::format("{}.{}", ext, contentType);
     }
 
     if (!location.empty() && location.has_extension()) {
-        std::string extension = location.filename().string();
-        // make sure that the extension does not contain the separator character
-        if (extension.find(URL_PARAM_SEPARATOR) == std::string::npos) {
-            return fmt::format("{}.{}", ext, extension);
-        }
+        // make sure that the filename does not contain the separator character
+        auto&& filename = urlEscape(location.filename().stem().string());
+        auto&& extension = location.filename().extension().string();
+        return fmt::format("{}.{}{}", ext, (filename), extension);
     }
 
     return "";
