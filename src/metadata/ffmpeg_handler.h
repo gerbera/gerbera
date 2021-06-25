@@ -46,7 +46,7 @@ namespace fs = std::filesystem;
 #include "metadata_handler.h"
 
 // forward declaration
-class AVFormatContext;
+struct AVFormatContext;
 
 /// \brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MetadataHandler {
