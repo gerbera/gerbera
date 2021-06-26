@@ -35,7 +35,6 @@
 #include <climits>
 #include <filesystem>
 #include <fmt/chrono.h>
-#include <list>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -1374,7 +1373,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
     commit("incrementUpdateIDs 2");
 
     std::unique_ptr<SQLRow> row;
-    std::list<std::string> rows;
+    std::vector<std::string> rows;
     while ((row = res->nextRow()) != nullptr) {
         std::ostringstream s;
         s << row->col(0) << ',' << row->col(1);
