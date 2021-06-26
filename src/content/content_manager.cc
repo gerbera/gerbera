@@ -1896,7 +1896,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, 
     , rescanResource(rescanResource)
 {
     this->taskType = RemoveObject;
-    cancellable = false;
+    this->cancellable = false;
 }
 
 void CMRemoveObjectTask::run()

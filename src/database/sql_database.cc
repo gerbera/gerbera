@@ -1404,7 +1404,7 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     while ((row = res->nextRow()) != nullptr) {
         ret.insert(std::stoi(row->col(0)));
     }
-    return std::make_unique<std::unordered_set<int>>(ret);
+    return std::make_unique<std::unordered_set<int>>(std::move(ret));
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
