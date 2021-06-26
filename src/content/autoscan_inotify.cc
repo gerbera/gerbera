@@ -54,7 +54,7 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<ContentManager> content)
         }
     }
 
-    watches = std::make_unique<std::unordered_map<int, std::shared_ptr<Wd>>>();
+    watches = std::make_unique<std::unordered_map<int, std::shared_ptr<Wd>>>(0);
     shutdownFlag = true;
     events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
 }
