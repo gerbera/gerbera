@@ -40,7 +40,7 @@ public:
     std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "");
 
 private:
-    const std::shared_ptr<Config> config;
+    std::shared_ptr<Config> config;
     std::vector<std::string> names;
     std::map<std::string, std::string> patterns;
     std::shared_ptr<DirectoryConfigList> allTweaks;
@@ -51,7 +51,10 @@ private:
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
 public:
-    explicit MetacontentHandler(const std::shared_ptr<Context>& context);
+    explicit MetacontentHandler(const std::shared_ptr<Context>& context)
+        : MetadataHandler(context)
+    {
+    }
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art

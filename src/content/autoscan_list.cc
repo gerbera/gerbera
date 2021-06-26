@@ -27,11 +27,6 @@
 #include "autoscan.h"
 #include "database/database.h"
 
-AutoscanList::AutoscanList(std::shared_ptr<Database> database)
-    : database(std::move(database))
-{
-}
-
 void AutoscanList::updateLMinDB()
 {
     AutoLock lock(mutex);

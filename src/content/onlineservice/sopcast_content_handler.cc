@@ -37,11 +37,6 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-SopCastContentHandler::SopCastContentHandler(const std::shared_ptr<Context>& context)
-    : CurlContentHandler(context)
-{
-}
-
 void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
     service_xml = std::move(service);

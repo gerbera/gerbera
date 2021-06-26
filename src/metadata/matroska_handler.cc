@@ -115,11 +115,6 @@ public:
     }
 };
 
-MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
-{
-}
-
 void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

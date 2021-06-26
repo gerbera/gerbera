@@ -93,14 +93,17 @@ private:
 
 class MysqlResult : public SQLResult {
 public:
-    explicit MysqlResult(MYSQL_RES* mysql_res);
+    explicit MysqlResult(MYSQL_RES* mysql_res)
+        : mysql_res(mysql_res)
+    {
+    }
     ~MysqlResult() override;
 
     MysqlResult(const MysqlResult&) = delete;
     MysqlResult& operator=(const MysqlResult&) = delete;
 
 private:
-    int nullRead;
+    int nullRead {};
     std::unique_ptr<SQLRow> nextRow() override;
     unsigned long long getNumRows() const override { return mysql_num_rows(mysql_res); }
     MYSQL_RES* mysql_res;

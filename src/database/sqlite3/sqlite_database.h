@@ -94,7 +94,10 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    explicit SLInitTask(std::shared_ptr<Config> config);
+    explicit SLInitTask(std::shared_ptr<Config> config)
+        : config(std::move(config))
+    {
+    }
     void run(sqlite3** db, Sqlite3Database* sl) override;
 
     std::string_view taskType() const override { return "InitTask"; }
@@ -108,7 +111,10 @@ class SLSelectTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
-    explicit SLSelectTask(const char* query);
+    explicit SLSelectTask(const char* query)
+        : query(query)
+    {
+    }
     void run(sqlite3** db, Sqlite3Database* sl) override;
     [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
@@ -251,7 +257,10 @@ private:
 /// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
 public:
-    explicit Sqlite3Row(char** row);
+    explicit Sqlite3Row(char** row)
+        : row(row)
+    {
+    }
 
 private:
     char* col_c_str(int index) const override { return row[index]; }

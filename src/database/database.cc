@@ -36,11 +36,6 @@
 #include "database/sqlite3/sqlite_database.h"
 #include "util/tools.h"
 
-Database::Database(std::shared_ptr<Config> config)
-    : config(std::move(config))
-{
-}
-
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {
     std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
