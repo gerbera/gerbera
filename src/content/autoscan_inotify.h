@@ -93,8 +93,8 @@ private:
     class Watch {
     public:
         explicit Watch(WatchType type)
+            : type(type)
         {
-            this->type = type;
         }
         WatchType getType() const { return type; }
 

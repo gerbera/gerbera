@@ -40,11 +40,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
-{
-}
-
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
 {

@@ -40,11 +40,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
-{
-}
-
 void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
 {
     try {

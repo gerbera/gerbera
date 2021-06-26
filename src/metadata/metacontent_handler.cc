@@ -159,11 +159,6 @@ std::string ContentPathSetup::expandName(const std::string& name, const std::sha
     return copy;
 }
 
-MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
-{
-}
-
 std::unique_ptr<ContentPathSetup> FanArtHandler::setup {};
 
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)

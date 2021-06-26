@@ -392,12 +392,6 @@ void MySQLDatabase::_exec(const char* query, int length)
 
 /* MysqlResult */
 
-MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
-    : nullRead(false)
-    , mysql_res(mysql_res)
-{
-}
-
 MysqlResult::~MysqlResult()
 {
     if (mysql_res) {

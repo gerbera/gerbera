@@ -76,12 +76,6 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
-// Default constructor
-FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
-{
-}
-
 void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {

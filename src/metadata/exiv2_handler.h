@@ -37,7 +37,10 @@
 /// \brief This class is responsible for reading exif header metadata
 class Exiv2Handler : public MetadataHandler {
 public:
-    explicit Exiv2Handler(const std::shared_ptr<Context>& context);
+    explicit Exiv2Handler(const std::shared_ptr<Context>& context)
+        : MetadataHandler(context)
+    {
+    }
     void fillMetadata(std::shared_ptr<CdsObject> item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 };

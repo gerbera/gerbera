@@ -37,11 +37,6 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-ATrailersContentHandler::ATrailersContentHandler(const std::shared_ptr<Context>& context)
-    : CurlContentHandler(context)
-{
-}
-
 void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
     service_xml = std::move(service);
