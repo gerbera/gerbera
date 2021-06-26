@@ -1414,10 +1414,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     if (count <= 0)
         return nullptr;
 
-    for (int id : *list) {
-        if (IS_FORBIDDEN_CDS_ID(id)) {
-            throw_std_runtime_error("Tried to delete a forbidden ID ({})", id);
-        }
+    auto it = std::find_if(list->begin(), list->end(), IS_FORBIDDEN_CDS_ID);
+    if (it != list->end()) {
+        throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
     }
 
     std::ostringstream idsBuf;
