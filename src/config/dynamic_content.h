@@ -80,7 +80,7 @@ public:
     }
 
     void setLocation(const fs::path& location) { this->location = location; }
-    fs::path getLocation() { return location; }
+    fs::path getLocation() const { return location; }
 
     void setOrig(bool orig) { this->isOrig = orig; }
     bool getOrig() const { return isOrig; }

@@ -80,7 +80,7 @@ public:
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
     /// contains the port on which the server is actually running.
-    std::string getVirtualUrl();
+    std::string getVirtualUrl() const;
 
     /// \brief Tells if the server is about to be terminated.
     ///
@@ -233,7 +233,7 @@ protected:
     void writeBookmark(const std::string& addr);
     void emptyBookmark();
 
-    std::string getPresentationUrl();
+    std::string getPresentationUrl() const;
     int startupInterface(const std::string& iface, in_port_t port);
 };
 

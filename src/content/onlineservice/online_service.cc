@@ -77,7 +77,7 @@ char OnlineService::getDatabasePrefix(service_type_t service)
     return service_prefixes.at(service);
 }
 
-char OnlineService::getDatabasePrefix()
+char OnlineService::getDatabasePrefix() const
 {
     return getDatabasePrefix(getServiceType());
 }
