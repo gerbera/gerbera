@@ -72,7 +72,7 @@ protected:
 public:
     BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
         : flags(flags)
-        , object(object)
+        , object(std::move(object))
     {
     }
 
