@@ -1145,10 +1145,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
 
     constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
     for (auto&& unw : unwanted) {
-        const auto itm = lastMetadata.find(MetadataHandler::getMetaFieldName(unw));
-        if (itm != lastMetadata.end()) {
-            lastMetadata.erase(itm);
-        }
+        lastMetadata.erase(MetadataHandler::getMetaFieldName(unw));
     }
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
