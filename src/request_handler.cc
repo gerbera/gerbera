@@ -86,7 +86,7 @@ std::map<std::string, std::string> RequestHandler::parseParameters(const char* f
     return params;
 }
 
-std::shared_ptr<CdsObject> RequestHandler::getObjectById(std::map<std::string, std::string> params)
+std::shared_ptr<CdsObject> RequestHandler::getObjectById(std::map<std::string, std::string> params) const
 {
     auto it = params.find("object_id");
     if (it == params.end()) {

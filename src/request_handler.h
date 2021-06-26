@@ -80,7 +80,7 @@ public:
     static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, const std::string& separator = _URL_PARAM_SEPARATOR);
 
     static std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
-    std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params);
+    std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params) const;
 
 protected:
     std::shared_ptr<ContentManager> content;

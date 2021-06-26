@@ -243,7 +243,7 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     return ret;
 }
 
-std::string Server::getPresentationUrl()
+std::string Server::getPresentationUrl() const
 {
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
     if (presentationURL.empty()) {
@@ -279,7 +279,7 @@ void Server::emptyBookmark()
     writeTextFile(path, data);
 }
 
-std::string Server::getVirtualUrl()
+std::string Server::getVirtualUrl() const
 {
     auto cfgVirt = config->getOption(CFG_VIRTUAL_URL);
     return cfgVirt.empty() ? virtualUrl : fmt::format("{}/{}", cfgVirt, virtual_directory);

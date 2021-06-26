@@ -80,13 +80,13 @@ public:
     virtual bool refreshServiceData(std::shared_ptr<Layout> layout) = 0;
 
     /// \brief Returns the service type
-    virtual service_type_t getServiceType() = 0;
+    virtual service_type_t getServiceType() const = 0;
 
     /// \brief Returns the service name
     virtual std::string getServiceName() const = 0;
 
     /// \brief Get the database service prefix for a particular service
-    char getDatabasePrefix();
+    char getDatabasePrefix() const;
 
     /// \brief Get the database prefix for a given service type
     static char getDatabasePrefix(service_type_t service);

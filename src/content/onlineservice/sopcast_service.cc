@@ -48,7 +48,7 @@ std::unique_ptr<CurlContentHandler> SopCastService::getContentHandler() const
     return std::make_unique<SopCastContentHandler>(content->getContext());
 }
 
-service_type_t SopCastService::getServiceType()
+service_type_t SopCastService::getServiceType() const
 {
     return OS_SopCast;
 }

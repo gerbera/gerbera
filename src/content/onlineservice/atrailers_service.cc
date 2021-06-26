@@ -51,7 +51,7 @@ std::unique_ptr<CurlContentHandler> ATrailersService::getContentHandler() const
     return std::make_unique<ATrailersContentHandler>(content->getContext());
 }
 
-service_type_t ATrailersService::getServiceType()
+service_type_t ATrailersService::getServiceType() const
 {
     return OS_ATrailers;
 }
