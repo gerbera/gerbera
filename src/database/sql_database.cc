@@ -700,9 +700,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             auto result = this->search(srcParam, &numMatches);
             param->setTotalMatches(numMatches);
             return result;
-        } else {
-            log_warning("Dynamic content {} error '{}'", parent->getID(), parent->getLocation().string());
         }
+        log_warning("Dynamic content {} error '{}'", parent->getID(), parent->getLocation().string());
     }
 
     bool getContainers = param->getFlag(BROWSE_CONTAINERS);

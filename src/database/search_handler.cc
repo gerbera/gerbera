@@ -502,7 +502,9 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     if ((operatr == ">" || operatr == ">=") && value.substr(0, 5) == "@last") {
         auto dateVal = to_seconds(std::chrono::system_clock::now()).count() - (24 * 60 * 60 * stoiString(value.substr(5)));
         return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal);
-    } else if (operatr != "=")
+    }
+
+    if (operatr != "=")
         throw_std_runtime_error("Operator '{}' not yet supported", operatr);
 
     auto&& [clsUpper, clcLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
