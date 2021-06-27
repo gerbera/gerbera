@@ -49,6 +49,9 @@ public:
     MySQLDatabase(const MySQLDatabase&) = delete;
     MySQLDatabase& operator=(const MySQLDatabase&) = delete;
 
+protected:
+    void _exec(const char* query, int length = -1) override;
+
 private:
     void init() override;
     void shutdownDriver() override;
@@ -72,8 +75,6 @@ private:
     void commit(const std::string_view& tName) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
-
-    void _exec(const char* query, int length = -1);
 
     MYSQL db {};
 

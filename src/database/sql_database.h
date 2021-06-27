@@ -44,6 +44,8 @@ class CdsContainer;
 class SQLResult;
 class SQLEmitter;
 
+#define DBVERSION 11
+
 #define QTB table_quote_begin
 #define QTE table_quote_end
 
@@ -187,6 +189,9 @@ protected:
     std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
+
+    void upgradeDatabase(std::string& dbVersion, std::array<std::vector<const char*>, DBVERSION - 1> dbUpdates, std::string_view updateVersionCommand);
+    virtual void _exec(const char* query, int length = -1) = 0;
 
 private:
     std::string sql_browse_query;
