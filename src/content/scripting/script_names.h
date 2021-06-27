@@ -28,6 +28,7 @@
 
 #include <array>
 
+#include "cds_objects.h"
 #include "metadata/metadata_handler.h"
 
 static constexpr auto res_names = std::array<std::pair<resource_attributes_t, const char*>, R_MAX> { {
