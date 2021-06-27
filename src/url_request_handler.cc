@@ -76,20 +76,11 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
-        std::string url;
-
 #ifdef ONLINE_SERVICES
-        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-            /// \todo write a helper class that will handle various online
-            /// services
-            OnlineServiceHelper helper;
-            url = helper.resolveURL(item);
-        } else
+        std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+#else
+        std::string url = item->getLocation().string();
 #endif
-        {
-            url = item->getLocation();
-        }
-
         log_debug("Online content url: {}", url.c_str());
         try {
             auto st = URL::getInfo(url);
@@ -136,18 +127,11 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
-
-    std::string url;
 #ifdef ONLINE_SERVICES
-    if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        OnlineServiceHelper helper;
-        url = helper.resolveURL(item);
-    } else
+    std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+#else
+    std::string url = item->getLocation().string();
 #endif
-    {
-        url = item->getLocation();
-    }
-
     log_debug("Online content url: {}", url.c_str());
 
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
