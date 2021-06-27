@@ -679,15 +679,15 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 continue;
             }
         }
-        if (isFirstSub && res->isMetaResource(VIDEO_SUB)) {
+        if (isFirstSub && res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
             auto vs = parent->append_child("sec:CaptionInfoEx");
-            url.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
-            vs.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
+            auto subUrl = url;
+            subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
+            vs.append_child(pugi::node_pcdata).set_value((virtualURL + subUrl).c_str());
             vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
             vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
             vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
             isFirstSub = false;
-            continue;
         }
 
         if (!isExtThumbnail) {

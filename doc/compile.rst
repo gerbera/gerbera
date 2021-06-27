@@ -62,7 +62,9 @@ In order to compile Gerbera you will have to install the following packages:
 | inotify             |               | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+------------------------+----------+--------------------+
 
+
 Scripts for installation of (build) dependencies from source can be found under `scripts`.
+
 
 .. index:: Quick Start Build
 
