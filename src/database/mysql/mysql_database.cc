@@ -311,7 +311,7 @@ void MySQLDatabase::commit(const std::string_view& tName)
     inTransaction = false;
 }
 
-std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
+std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
@@ -345,7 +345,7 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, int length)
     return std::make_shared<MysqlResult>(mysql_res);
 }
 
-int MySQLDatabase::exec(const char* query, int length, bool getLastInsertId)
+int MySQLDatabase::exec(const char* query, size_t length, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);

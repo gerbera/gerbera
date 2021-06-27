@@ -180,8 +180,8 @@ private:
     std::string quote(char val) const override { return quote(std::string(1, val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
 
-    std::shared_ptr<SQLResult> select(const char* query, int length) override;
-    int exec(const char* query, int length, bool getLastInsertId = false) override;
+    std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
+    int exec(const char* query, size_t length, bool getLastInsertId = false) override;
 
     void beginTransaction(const std::string_view& tName) override;
     void rollback(const std::string_view& tName) override;

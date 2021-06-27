@@ -312,7 +312,7 @@ void Sqlite3Database::commit(const std::string_view& tName)
     }
 }
 
-std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length)
+std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, size_t length)
 {
     try {
         log_debug("Adding select to Queue: {}", query);
@@ -330,7 +330,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, int length
     }
 }
 
-int Sqlite3Database::exec(const char* query, int length, bool getLastInsertId)
+int Sqlite3Database::exec(const char* query, size_t length, bool getLastInsertId)
 {
     try {
         log_debug("Adding query to Queue: {}", query);

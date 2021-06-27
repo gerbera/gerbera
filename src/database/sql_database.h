@@ -94,8 +94,8 @@ public:
     virtual void rollback(const std::string_view& tName) = 0;
     virtual void commit(const std::string_view& tName) = 0;
 
-    virtual std::shared_ptr<SQLResult> select(const char* query, int length) = 0;
-    virtual int exec(const char* query, int length, bool getLastInsertId = false) = 0;
+    virtual std::shared_ptr<SQLResult> select(const char* query, size_t length) = 0;
+    virtual int exec(const char* query, size_t length, bool getLastInsertId = false) = 0;
 
     /* wrapper functions for select and exec */
     std::shared_ptr<SQLResult> select(const std::string& buf)
