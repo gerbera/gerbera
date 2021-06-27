@@ -81,7 +81,6 @@ struct ClientCacheEntry {
 
 class Clients {
 public:
-    Clients();
     explicit Clients(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
