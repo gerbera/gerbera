@@ -32,6 +32,7 @@
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"
 
+#include <array>
 #include <cstdlib>
 
 #include <netinet/in.h>
@@ -98,9 +99,10 @@
 #define MYSQL_UPDATE_10_11_1 "ALTER TABLE `mt_cds_object` ADD `last_updated` bigint(20) unsigned default '0' AFTER `last_modified`"
 #define MYSQL_UPDATE_10_11_2 "UPDATE `mt_cds_object` SET `last_updated`=`last_modified`"
 
+#define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
 #define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
 
-static const auto dbUpdates = std::array<std::vector<const char*>, 10> { {
+static const auto dbUpdates = std::array<std::vector<const char*>, DBVERSION - 1> { {
     { MYSQL_UPDATE_1_2_1, MYSQL_UPDATE_1_2_2, MYSQL_UPDATE_1_2_3, MYSQL_UPDATE_1_2_4, MYSQL_UPDATE_1_2_5 },
     { MYSQL_UPDATE_2_3_1, MYSQL_UPDATE_2_3_2, MYSQL_UPDATE_2_3_3 },
     { MYSQL_UPDATE_3_4_1, MYSQL_UPDATE_3_4_2 },
@@ -231,6 +233,7 @@ void MySQLDatabase::init()
                 throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
             }
         }
+        _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION).c_str());
 
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
@@ -239,25 +242,8 @@ void MySQLDatabase::init()
         }
         log_info("Database created successfully!");
     }
-    log_debug("db_version: {}", dbVersion.c_str());
 
-    /* --- database upgrades --- */
-    int version = 1;
-    for (auto&& upgrade : dbUpdates) {
-        if (dbVersion == fmt::to_string(version)) {
-            log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (auto&& upgradeCmd : upgrade) {
-                _exec(upgradeCmd);
-            }
-            _exec(fmt::format(MYSQL_UPDATE_VERSION, version + 1, version).c_str());
-            dbVersion = fmt::to_string(version + 1);
-            log_info("Database upgrade to version {} successful.", dbVersion.c_str());
-        }
-        version++;
-    }
-
-    if (dbVersion != fmt::to_string(version))
-        throw_std_runtime_error("The database seems to be from a newer version (database version {})", dbVersion);
+    upgradeDatabase(dbVersion, dbUpdates, MYSQL_UPDATE_VERSION);
 
     lock.unlock();
 

@@ -160,6 +160,9 @@ public:
     void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
     Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer);
 
+protected:
+    void _exec(const char* query, int length = -1) override;
+
 private:
     void prepare();
     void init() override;
@@ -185,8 +188,6 @@ private:
     void commit(const std::string_view& tName) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
-
-    void _exec(const char* query);
 
     std::string startupError;
 

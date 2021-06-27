@@ -30,7 +30,6 @@ CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
 );
-INSERT INTO "mt_internal_setting" VALUES('db_version', '10');
 CREATE TABLE "mt_autoscan" (
   "id" integer primary key,
   "obj_id" integer default NULL,

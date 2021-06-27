@@ -120,9 +120,10 @@ PRAGMA foreign_keys = ON;"
 #define SQLITE3_UPDATE_10_11_1 "ALTER TABLE \"mt_cds_object\" ADD \"last_updated\" integer unsigned default 0"
 #define SQLITE3_UPDATE_10_11_2 "UPDATE \"mt_cds_object\" SET \"last_updated\"=\"last_modified\""
 
+#define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
 #define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
 
-static const auto dbUpdates = std::array<std::vector<const char*>, 10> { {
+static const auto dbUpdates = std::array<std::vector<const char*>, DBVERSION - 1> { {
     { SQLITE3_UPDATE_1_2_1, SQLITE3_UPDATE_1_2_2, SQLITE3_UPDATE_1_2_3 },
     { SQLITE3_UPDATE_2_3_1, SQLITE3_UPDATE_2_3_2 },
     { SQLITE3_UPDATE_3_4_1, SQLITE3_UPDATE_3_4_2 },
@@ -233,25 +234,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        log_debug("db_version: {}", dbVersion.c_str());
-
-        /* --- database upgrades --- */
-        int version = 1;
-        for (auto&& upgrade : dbUpdates) {
-            if (dbVersion == fmt::to_string(version)) {
-                log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-                for (auto&& upgradeCmd : upgrade) {
-                    _exec(upgradeCmd);
-                }
-                _exec(fmt::format(SQLITE3_UPDATE_VERSION, version + 1, version).c_str());
-                dbVersion = fmt::to_string(version + 1);
-                log_info("Database upgrade to version {} successful.", dbVersion.c_str());
-            }
-            version++;
-        }
-
-        if (dbVersion != fmt::to_string(version))
-            throw_std_runtime_error("The database seems to be from a newer version");
+        upgradeDatabase(dbVersion, dbUpdates, SQLITE3_UPDATE_VERSION);
 
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
             // do a backup now
@@ -277,9 +260,12 @@ std::shared_ptr<Database> Sqlite3Database::getSelf()
     return shared_from_this();
 }
 
-void Sqlite3Database::_exec(const char* query)
+void Sqlite3Database::_exec(const char* query, int length)
 {
-    exec(query, strlen(query), false);
+    if (length == -1) {
+        length = strlen(query);
+    }
+    exec(query, length, false);
 }
 
 std::string Sqlite3Database::quote(std::string value) const
@@ -533,6 +519,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = readTextFile(sqlFilePath);
+    sql += fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION);
 
     char* err = nullptr;
     int ret = sqlite3_exec(

@@ -302,6 +302,29 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper);
 }
 
+void SQLDatabase::upgradeDatabase(std::string& dbVersion, std::array<std::vector<const char*>, DBVERSION - 1> dbUpdates, std::string_view updateVersionCommand)
+{
+    log_debug("db_version: {}", dbVersion.c_str());
+
+    /* --- database upgrades --- */
+    int version = 1;
+    for (auto&& upgrade : dbUpdates) {
+        if (dbVersion == fmt::to_string(version)) {
+            log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
+            for (auto&& upgradeCmd : upgrade) {
+                _exec(upgradeCmd);
+            }
+            _exec(fmt::format(updateVersionCommand, version + 1, version).c_str());
+            dbVersion = fmt::to_string(version + 1);
+            log_info("Database upgrade to version {} successful.", dbVersion.c_str());
+        }
+        version++;
+    }
+
+    if (version != DBVERSION || dbVersion != fmt::to_string(DBVERSION))
+        throw_std_runtime_error("The database seems to be from a newer version");
+}
+
 void SQLDatabase::shutdown()
 {
     shutdownDriver();
