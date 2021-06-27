@@ -33,7 +33,7 @@
 
 #include <upnp.h>
 
-Clients::Clients()
+Clients::Clients(const std::shared_ptr<Config>& config)
 {
     // table of supported clients (reverse search, sequence of entries matters!)
     clientInfo = {
@@ -117,11 +117,7 @@ Clients::Clients()
             "[BD]J5500",
         },
     };
-}
 
-Clients::Clients(const std::shared_ptr<Config>& config)
-    : Clients()
-{
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
     for (size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
