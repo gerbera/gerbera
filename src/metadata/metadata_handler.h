@@ -161,6 +161,8 @@ enum resource_attributes_t {
     R_FANART_RES_ID,
     R_BITS_PER_SAMPLE,
     R_LANGUAGE,
+    R_AUDIOCODEC,
+    R_VIDEOCODEC,
     R_MAX
 };
 
@@ -178,6 +180,8 @@ static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, con
     { R_FANART_RES_ID, "fanArtResource" },
     { R_BITS_PER_SAMPLE, "bitsPerSample" },
     { R_LANGUAGE, "dc:language" },
+    { R_AUDIOCODEC, "sec:acodec" },
+    { R_VIDEOCODEC, "sec:vcodec" },
     { R_TYPE, "type" },
 } };
 
