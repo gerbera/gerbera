@@ -46,6 +46,8 @@ static constexpr auto res_names = std::array<std::pair<resource_attributes_t, co
     { R_FANART_OBJ_ID, "R_FANART_OBJ_ID" },
     { R_FANART_RES_ID, "R_FANART_RES_ID" },
     { R_LANGUAGE, "R_LANGUAGE" },
+    { R_AUDIOCODEC, "R_AUDIOCODEC" },
+    { R_VIDEOCODEC, "R_VIDEOCODEC" },
 } };
 
 static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, M_MAX> { {

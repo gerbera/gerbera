@@ -81,7 +81,7 @@ ENDIF (NOT FFMPEG_INCLUDE_DIR)
 get_filename_component(FFMPEG_INCLUDE_DIR ${FFMPEG_INCLUDE_DIR} ABSOLUTE)
 
 FIND_PACKAGE(PkgConfig QUIET)
-PKG_CHECK_MODULES(FFMPEG IMPORTED_TARGET GLOBAL libavformat libavutil)
+PKG_CHECK_MODULES(FFMPEG IMPORTED_TARGET GLOBAL libavformat libavutil libavcodec)
 IF (NOT FFMPEG_FOUND)
 	FIND_LIBRARY(FFMPEG_avformat_LIBRARY avformat
 		/usr/local/lib
@@ -165,6 +165,7 @@ IF (FFMPEG_INCLUDE_DIR)
                         ${FFMPEG_avformat_LIBRARY}
                         ${FFMPEG_avcodec_LIBRARY}
                         ${FFMPEG_avutil_LIBRARY}
+                        ${FFMPEG_avcodec_LIBRARY}
                         )
 
                 # swresample is a dependency of avformat and avcodec
