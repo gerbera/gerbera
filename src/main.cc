@@ -343,14 +343,11 @@ int main(int argc, char** argv, char** envp)
                 std::exit(EXIT_FAILURE);
             }
 
-            // convert to a string
-            auto pidstr = fmt::to_string(pid);
-            // add a newline
-            pidstr += "\n";
-
-            // write pid to file
-            if (::fputs(pidstr.c_str(), pidf) < 0) {
-                log_error("Could not write pidfile {}.", pidfile->c_str());
+            try {
+                // write pid to file
+                fmt::print(pidf, "{}\n", pid);
+            } catch (const std::system_error& ex) {
+                log_error("Could not write pidfile {}: {}.", pidfile->c_str(), ex.what());
                 std::exit(EXIT_FAILURE);
             }
             log_debug("Wrote pidfile {}.", pidfile->c_str());
