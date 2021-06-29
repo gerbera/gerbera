@@ -37,104 +37,8 @@
 
 #define DB_BACKUP_FORMAT "{}.backup"
 
-// updates 1->2
-#define SQLITE3_UPDATE_1_2_1 "DROP INDEX mt_autoscan_obj_id"
-#define SQLITE3_UPDATE_1_2_2 "CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)"
-#define SQLITE3_UPDATE_1_2_3 "ALTER TABLE \"mt_autoscan\" ADD \"path_ids\" text"
-
-// updates 2->3
-#define SQLITE3_UPDATE_2_3_1 "ALTER TABLE \"mt_cds_object\" ADD \"service_id\" varchar(255) default NULL"
-#define SQLITE3_UPDATE_2_3_2 "CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)"
-
-// updates 3->4: Move to Metadata table
-#define SQLITE3_UPDATE_3_4_1 "CREATE TABLE \"mt_metadata\" ( \
-  \"id\" integer primary key, \
-  \"item_id\" integer NOT NULL, \
-  \"property_name\" varchar(255) NOT NULL, \
-  \"property_value\" text NOT NULL, \
-  CONSTRAINT \"mt_metadata_idfk1\" FOREIGN KEY (\"item_id\") REFERENCES \"mt_cds_object\" (\"id\") \
-  ON DELETE CASCADE ON UPDATE CASCADE )"
-#define SQLITE3_UPDATE_3_4_2 "CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)"
-
-// updates 4->5: Fix incorrect SQLite foreign key
-#define SQLITE3_UPDATE_4_5_1 "PRAGMA foreign_keys = OFF;  \
-CREATE TABLE mt_cds_object_new \
-( \
-    id integer primary key, \
-    ref_id integer default NULL \
-    constraint cds_object_ibfk_1 \
-        references mt_cds_object (id) \
-            ON update cascade on delete cascade, \
-            parent_id integer default '0' not null \
-    constraint cds_object_ibfk_2 \
-        references mt_cds_object (id) \
-            ON update cascade on delete cascade, \
-            object_type tinyint unsigned not null, \
-    upnp_class varchar(80) default NULL, \
-    dc_title varchar(255) default NULL, \
-    location text default NULL, \
-    location_hash integer unsigned default NULL, \
-    metadata text default NULL, \
-    auxdata text default NULL, \
-    resources text default NULL, \
-    update_id integer default '0' not null, \
-    mime_type varchar(40) default NULL, \
-    flags integer unsigned default '1' not null, \
-    track_number integer default NULL, \
-    service_id varchar(255) default NULL \
-); \
-INSERT INTO mt_cds_object_new(id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id) SELECT id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id FROM mt_cds_object; \
-DROP TABLE mt_cds_object; \
-ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object; \
-CREATE INDEX mt_cds_object_parent_id ON mt_cds_object (parent_id, object_type, dc_title); \
-CREATE INDEX mt_cds_object_ref_id ON mt_cds_object (ref_id); \
-CREATE INDEX mt_cds_object_service_id ON mt_cds_object (service_id); \
-CREATE INDEX mt_location_parent ON mt_cds_object (location_hash, parent_id); \
-CREATE INDEX mt_object_type ON mt_cds_object (object_type); \
-CREATE INDEX mt_track_number on mt_cds_object (track_number); \
-PRAGMA foreign_keys = ON;"
-
-// updates 5->6: add config value table
-#define SQLITE3_UPDATE_5_6_1 "CREATE TABLE \"grb_config_value\" ( \
-  \"item\" varchar(255) primary key, \
-  \"key\" varchar(255) NOT NULL, \
-  \"item_value\" varchar(255) NOT NULL, \
-  \"status\" varchar(20) NOT NULL)"
-#define SQLITE3_UPDATE_5_6_2 "CREATE INDEX grb_config_value_item ON grb_config_value(item)"
-
-// updates 6->7
-#define SQLITE3_UPDATE_6_7_1 "DROP TABLE mt_cds_active_item;"
-
-// updates 7->8: part_number
-#define SQLITE3_UPDATE_7_8_1 "ALTER TABLE \"mt_cds_object\" ADD \"part_number\" integer default NULL"
-#define SQLITE3_UPDATE_7_8_2 "DROP INDEX mt_track_number"
-#define SQLITE3_UPDATE_7_8_3 "CREATE INDEX \"grb_track_number\" ON mt_cds_object (part_number,track_number)"
-
-// updates 8->9: bookmark_pos
-#define SQLITE3_UPDATE_8_9_1 "ALTER TABLE \"mt_cds_object\" ADD \"bookmark_pos\" integer unsigned NOT NULL default 0"
-
-// updates 9->10: last_modified
-#define SQLITE3_UPDATE_9_10_1 "ALTER TABLE \"mt_cds_object\" ADD \"last_modified\" integer unsigned default NULL"
-
-// updates 10->11: last_updated
-#define SQLITE3_UPDATE_10_11_1 "ALTER TABLE \"mt_cds_object\" ADD \"last_updated\" integer unsigned default 0"
-#define SQLITE3_UPDATE_10_11_2 "UPDATE \"mt_cds_object\" SET \"last_updated\"=\"last_modified\""
-
 #define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
 #define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
-
-static const auto dbUpdates = std::array<std::vector<const char*>, DBVERSION - 1> { {
-    { SQLITE3_UPDATE_1_2_1, SQLITE3_UPDATE_1_2_2, SQLITE3_UPDATE_1_2_3 },
-    { SQLITE3_UPDATE_2_3_1, SQLITE3_UPDATE_2_3_2 },
-    { SQLITE3_UPDATE_3_4_1, SQLITE3_UPDATE_3_4_2 },
-    { SQLITE3_UPDATE_4_5_1 },
-    { SQLITE3_UPDATE_5_6_1, SQLITE3_UPDATE_5_6_2 },
-    { SQLITE3_UPDATE_6_7_1 },
-    { SQLITE3_UPDATE_7_8_1, SQLITE3_UPDATE_7_8_2, SQLITE3_UPDATE_7_8_3 },
-    { SQLITE3_UPDATE_8_9_1 },
-    { SQLITE3_UPDATE_9_10_1 },
-    { SQLITE3_UPDATE_10_11_1, SQLITE3_UPDATE_10_11_2 },
-} };
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config), std::move(mime))
@@ -234,7 +138,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(dbVersion, dbUpdates, SQLITE3_UPDATE_VERSION);
+        upgradeDatabase(dbVersion, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
 
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
             // do a backup now
