@@ -122,7 +122,6 @@ void ConfigManager::addOption(config_option_t option, std::shared_ptr<ConfigOpti
 void ConfigManager::load(const fs::path& userHome)
 {
     std::string temp;
-    pugi::xml_node tmpEl;
 
     std::map<std::string, std::string> args;
     auto self = getSelf();
@@ -212,6 +211,9 @@ void ConfigManager::load(const fs::path& userHome)
         co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
         co->makeOption(root, self);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+        co->setDefaultValue(dataDir / "mysql-upgrade.xml");
+        co->makeOption(root, self);
     }
 #else
     if (mysql_en) {
@@ -229,8 +231,10 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
         co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-        fs::path dir = dataDir / "sqlite3.sql";
-        co->setDefaultValue(dir.string());
+        co->setDefaultValue(dataDir / "sqlite3.sql");
+        co->makeOption(root, self);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+        co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
         co->makeOption(root, self);
     }
 

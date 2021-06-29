@@ -333,6 +333,7 @@
             <xs:all>
                 <xs:element ref="database-file" minOccurs="0"/>
                 <xs:element ref="init-sql-file" minOccurs="0"/>
+                <xs:element ref="upgrade-file" minOccurs="0"/>
                 <xs:element ref="synchronous" minOccurs="0"/>
                 <xs:element ref="on-error" minOccurs="0"/>
                 <xs:element ref="backup" minOccurs="0"/>
@@ -378,6 +379,7 @@
                 <xs:element ref="database" minOccurs="0"/>
                 <xs:element ref="socket" minOccurs="0"/>
                 <xs:element ref="init-sql-file" minOccurs="0"/>
+                <xs:element ref="upgrade-file" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
@@ -388,6 +390,7 @@
     <xs:element name="password" type="xs:string"/>
     <xs:element name="database" type="xs:string" default="localhost"/>
     <xs:element name="socket" type="xs:string"/>
+    <xs:element name="upgrade-file" type="xs:string"/>
 
     <xs:element name="upnp">
         <xs:complexType>

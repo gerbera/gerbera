@@ -302,17 +302,39 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(std::string& dbVersion, std::array<std::vector<const char*>, DBVERSION - 1> dbUpdates, std::string_view updateVersionCommand)
+void SQLDatabase::upgradeDatabase(std::string& dbVersion, config_option_t upgradeOption, std::string_view updateVersionCommand)
 {
-    log_debug("db_version: {}", dbVersion.c_str());
+    /* --- load database upgrades from config file --- */
+    const fs::path& upgradeFile = config->getOption(upgradeOption);
+    log_debug("db_version: {}", dbVersion);
+    std::vector<std::unique_ptr<std::vector<std::string>>> dbUpdates;
+    log_debug("Loading SQL Upgrades from: {}", upgradeFile.c_str());
+    pugi::xml_document xmlDoc;
+    pugi::xml_parse_result result = xmlDoc.load_file(upgradeFile.c_str());
+    if (result.status != pugi::xml_parse_status::status_ok) {
+        throw ConfigParseException(result.description());
+    }
+    auto root = xmlDoc.document_element();
+    if (root.name() != std::string_view("upgrade"))
+        throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
 
-    /* --- database upgrades --- */
+    for (auto&& version : root.select_nodes("/upgrade/version")) {
+        const pugi::xml_node& versionNode = version.node();
+        auto versionCmds = std::make_unique<std::vector<std::string>>();
+        for (auto&& script : versionNode.select_nodes("script")) {
+            const pugi::xml_node& scriptNode = script.node();
+            versionCmds->push_back(trimString(scriptNode.text().as_string()));
+        }
+        dbUpdates.push_back(std::move(versionCmds));
+    }
+
+    /* --- run database upgrades --- */
     int version = 1;
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == fmt::to_string(version)) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (auto&& upgradeCmd : upgrade) {
-                _exec(upgradeCmd);
+            for (auto&& upgradeCmd : *upgrade) {
+                _exec(upgradeCmd.c_str());
             }
             _exec(fmt::format(updateVersionCommand, version + 1, version).c_str());
             dbVersion = fmt::to_string(version + 1);

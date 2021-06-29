@@ -396,6 +396,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE,
         "/server/storage/mysql/init-sql-file", "config-server.html#storage",
         "", true), // This should really be "dataDir / mysql.sql"
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE,
+        "/server/storage/mysql/upgrade-file", "config-server.html#storage",
+        "", true),
 #else
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_MYSQL_ENABLED,
         "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
@@ -433,6 +436,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
         "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
         "", true), // This should really be "dataDir / sqlite3.sql"
+    std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE,
+        "/server/storage/sqlite3/upgrade-file", "config-server.html#storage",
+        "", true),
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLED,
         "/server/ui/attribute::enabled", "config-server.html#ui",

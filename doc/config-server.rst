@@ -521,6 +521,15 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
         .. code-block:: xml
 
+            <upgrade-file>/etc/gerbera/sqlite3-upgrade.xml</upgrade-file>
+
+        * Optional
+        * Default: **Datadir / sqlite3-upgrade.xml**
+
+        The full path to the upgrade settings for the database
+
+        .. code-block:: xml
+
             <database-file>gerbera.db</database-file>
 
         * Optional
@@ -657,6 +666,15 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
         * Default: **Datadir / mysql.sql**
 
         The full path to the init script for the database
+
+        .. code-block:: xml
+
+            <upgrade-file>/etc/gerbera/mysql-upgrade.xml</upgrade-file>
+
+        * Optional
+        * Default: **Datadir / mysql-upgrade.xml**
+
+        The full path to the upgrade settings for the database
 
 
 ``upnp``

@@ -37,6 +37,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "config/config.h"
 #include "database.h"
 
 // forward declarations
@@ -190,7 +191,7 @@ protected:
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(std::string& dbVersion, std::array<std::vector<const char*>, DBVERSION - 1> dbUpdates, std::string_view updateVersionCommand);
+    void upgradeDatabase(std::string& dbVersion, config_option_t upgradeOption, std::string_view updateVersionCommand);
     virtual void _exec(const char* query, int length = -1) = 0;
 
 private:
