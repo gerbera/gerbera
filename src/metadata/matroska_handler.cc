@@ -77,7 +77,7 @@ public:
 
     uint32 read(void* buffer, size_t size) override
     {
-        assert(file != nullptr);
+        assert(file);
         if (size == 0)
             return 0;
         return fread(buffer, 1, size, file);
@@ -85,7 +85,7 @@ public:
 
     void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
     {
-        assert(file != nullptr);
+        assert(file);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
         if (fseeko(file, offset, mode) != 0) {
             throw_std_runtime_error("fseek failed");
@@ -100,7 +100,7 @@ public:
 
     uint64 getFilePointer() override
     {
-        assert(file != nullptr);
+        assert(file);
         return ftello(file);
     }
 
@@ -142,10 +142,10 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
     EbmlStream ebml_stream(ebml_file);
 
     auto el_l0 = ebml_stream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);
-    while (el_l0 != nullptr) {
+    while (el_l0) {
         int i_upper_level = 0;
         auto el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true);
-        while (el_l1 != nullptr) {
+        while (el_l1) {
             parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
 
             el_l1->SkipData(ebml_stream, el_l1->Generic().Context);
@@ -231,7 +231,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
             auto fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             log_debug("KaxFileData (size={})", fileData.GetSize());
 
-            if (p_io_handler != nullptr) {
+            if (p_io_handler) {
                 // serveContent
                 *p_io_handler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
             } else {

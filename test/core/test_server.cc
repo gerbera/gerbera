@@ -28,7 +28,7 @@ public:
         if (!pipe)
             throw_std_runtime_error("popen() failed");
         while (!feof(pipe.get())) {
-            if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+            if (fgets(buffer.data(), 128, pipe.get()))
                 result += buffer.data();
         }
         return result;

@@ -367,7 +367,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     if (refID > 0) {
         try {
             auto refObj = loadObject(refID);
-            if (refObj != nullptr && refObj->getLocation() == location)
+            if (refObj && refObj->getLocation() == location)
                 return refObj;
         } catch (const std::runtime_error& e) {
             throw_std_runtime_error("illegal refID was set");
@@ -539,7 +539,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
           << " LIMIT 1";
         auto res = select(q);
         // if duplicate items is found - ignore
-        if (res != nullptr && (res->nextRow() != nullptr))
+        if (res && (res->nextRow()))
             return returnVal;
     }
 
@@ -632,9 +632,9 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 
     beginTransaction("loadObject");
     auto res = select(qb);
-    if (res != nullptr) {
+    if (res) {
         auto row = res->nextRow();
-        if (row != nullptr) {
+        if (row) {
             auto result = createObjectFromRow(row);
             commit("loadObject");
             return result;
@@ -651,9 +651,9 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::service_id) << '=' << quote(serviceID);
     beginTransaction("loadObjectByServiceID");
     auto res = select(qb);
-    if (res != nullptr) {
+    if (res) {
         auto row = res->nextRow();
-        if (row != nullptr) {
+        if (row) {
             auto result = createObjectFromRow(row);
             commit("loadObjectByServiceID");
             return result;
@@ -680,7 +680,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
 
     std::vector<int> objectIDs;
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         objectIDs.push_back(std::stoi(row->col(0)));
     }
 
@@ -693,7 +693,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
     if (dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
-        if (dynConfig != nullptr) {
+        if (dynConfig) {
             auto srcParam = std::make_unique<SearchParam>(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
                 param->getStartingIndex(), param->getRequestedCount() == 0 ? 1000 : param->getRequestedCount()); // get params from browse
             int numMatches = 0;
@@ -777,7 +777,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
 
-    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
+    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row; row = sqlResult->nextRow()) {
         auto obj = createObjectFromRow(row);
         result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
@@ -851,7 +851,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     auto sqlResult = select(countSQL);
     commit("search");
     auto countRow = sqlResult->nextRow();
-    if (countRow != nullptr) {
+    if (countRow) {
         *numMatches = std::stoi(countRow->col(0));
     }
 
@@ -885,7 +885,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
 
-    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row != nullptr; row = sqlResult->nextRow()) {
+    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row; row = sqlResult->nextRow()) {
         auto obj = createObjectFromSearchRow(row);
         result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
@@ -917,9 +917,9 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     auto res = select(qb);
     commit("getChildCount");
 
-    if (res != nullptr) {
+    if (res) {
         auto row = res->nextRow();
-        if (row != nullptr) {
+        if (row) {
             int childCount = std::stoi(row->col(0));
             return childCount;
         }
@@ -943,7 +943,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
         throw_std_runtime_error("db error");
 
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         arr.push_back(std::string(row->col(0)));
     }
 
@@ -998,13 +998,13 @@ int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
         return CDS_ID_FS_ROOT;
 
     auto obj = findObjectByPath(path);
-    if (obj != nullptr)
+    if (obj)
         return obj->getID();
 
     int parentID = ensurePathExistence(path.parent_path(), changedContainer);
 
     auto f2i = StringConverter::f2i(config);
-    if (changedContainer != nullptr && *changedContainer == INVALID_OBJECT_ID)
+    if (changedContainer && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
     return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::map<std::string, std::string>());
@@ -1117,10 +1117,10 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
 
     beginTransaction("addContainerChain");
     auto res = select(qb);
-    if (res != nullptr) {
+    if (res) {
         auto row = res->nextRow();
-        if (row != nullptr) {
-            if (containerID != nullptr)
+        if (row) {
+            if (containerID)
                 *containerID = std::stoi(row->col(0));
             commit("addContainerChain");
             return;
@@ -1326,7 +1326,7 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
         return metadata;
 
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         metadata[getCol(row, MetadataCol::property_name)] = getCol(row, MetadataCol::property_value);
     }
     return metadata;
@@ -1353,7 +1353,7 @@ int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, cons
     auto res = select(query);
 
     std::unique_ptr<SQLRow> row;
-    if (res != nullptr && (row = res->nextRow()) != nullptr) {
+    if (res && (row = res->nextRow())) {
         return std::stoi(row->col(0));
     }
     return 0;
@@ -1396,7 +1396,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered
 
     std::unique_ptr<SQLRow> row;
     std::vector<std::string> rows;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         std::ostringstream s;
         s << row->col(0) << ',' << row->col(1);
         rows.emplace_back(s.str());
@@ -1423,7 +1423,7 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         ret.insert(std::stoi(row->col(0)));
     }
     return std::make_unique<std::unordered_set<int>>(std::move(ret));
@@ -1452,7 +1452,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         int objectType = std::stoi(row->col(1));
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(std::stol(row->col(0)));
@@ -1482,11 +1482,11 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
 
     beginTransaction("_removeObjects");
     auto res = select(sel);
-    if (res != nullptr) {
+    if (res) {
         log_debug("relevant autoscans!");
         std::vector<std::string> delete_as;
         std::unique_ptr<SQLRow> row;
-        while ((row = res->nextRow()) != nullptr) {
+        while ((row = res->nextRow())) {
             bool persistent = remapBool(row->col(1));
             if (persistent) {
                 auto location = stripLocationPrefix(row->col(2));
@@ -1602,7 +1602,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
         if (res == nullptr)
             throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
         parentIds.clear();
-        while ((row = res->nextRow()) != nullptr) {
+        while ((row = res->nextRow())) {
             changedContainers.ui.push_back(std::stoi(row->col(0)));
         }
     }
@@ -1619,7 +1619,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             if (res == nullptr)
                 throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             parentIds.clear();
-            while ((row = res->nextRow()) != nullptr) {
+            while ((row = res->nextRow())) {
                 changedContainers.upnp.push_back(std::stoi(row->col(0)));
             }
         }
@@ -1632,7 +1632,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             if (res == nullptr)
                 throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             itemIds.clear();
-            while ((row = res->nextRow()) != nullptr) {
+            while ((row = res->nextRow())) {
                 removeIds.push_back(std::stoi(row->col(0)));
                 changedContainers.upnp.push_back(std::stoi(row->col(1)));
             }
@@ -1646,7 +1646,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             if (res == nullptr)
                 throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
             containerIds.clear();
-            while ((row = res->nextRow()) != nullptr) {
+            while ((row = res->nextRow())) {
                 int objectType = std::stoi(row->col(1));
                 if (IS_CDS_CONTAINER(objectType)) {
                     containerIds.push_back(std::stoi(row->col(0)));
@@ -1741,7 +1741,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             selUpnp.clear();
             if (res == nullptr)
                 throw_std_runtime_error("db error");
-            while ((row = res->nextRow()) != nullptr) {
+            while ((row = res->nextRow())) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
                     changedContainers.upnp.push_back(std::stoi(row->col(0)));
@@ -1762,7 +1762,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             selUi.clear();
             if (res == nullptr)
                 throw_std_runtime_error("db error");
-            while ((row = res->nextRow()) != nullptr) {
+            while ((row = res->nextRow())) {
                 int flags = std::stoi(row->col(3));
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
                     changedContainers.ui.push_back(std::stoi(row->col(0)));
@@ -1837,7 +1837,7 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
         return result;
 
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         result.push_back({ row->col(1),
             row->col(0),
             row->col(2),
@@ -1950,7 +1950,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
         commit("updateAutoscanList x");
 
         auto row = res->nextRow();
-        if (row != nullptr) {
+        if (row) {
             ad->setDatabaseID(std::stoi(row->col(0)));
             updateAutoscanDirectory(ad);
         } else
@@ -1983,7 +1983,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
     auto self = getSelf();
     auto ret = std::make_shared<AutoscanList>(self);
     std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow()) != nullptr) {
+    while ((row = res->nextRow())) {
         std::shared_ptr<AutoscanDirectory> adir = _fillAutoscanDirectory(row);
         if (adir == nullptr)
             _removeAutoscanDirectory(std::stoi(row->col(0)));
@@ -2161,7 +2161,7 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
     if (res == nullptr)
         throw DatabaseException("", "error while doing select on ");
     auto row = res->nextRow();
-    if (row != nullptr && !row->col(0).empty())
+    if (row && !row->col(0).empty())
         return std::stoi(row->col(0));
     return INVALID_OBJECT_ID;
 }
@@ -2208,7 +2208,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         if (res == nullptr)
             throw_std_runtime_error("SQL error");
 
-        if ((row = res->nextRow()) != nullptr) {
+        if ((row = res->nextRow())) {
             auto obj = loadObject(checkObjectID);
             if (obj == nullptr)
                 throw_std_runtime_error("Referenced object (by Autoscan) not found.");
@@ -2232,7 +2232,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         auto res = select(qRec);
         if (res == nullptr)
             throw_std_runtime_error("SQL error");
-        if ((row = res->nextRow()) != nullptr) {
+        if ((row = res->nextRow())) {
             int objectID = std::stoi(row->col(0));
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
@@ -2484,7 +2484,7 @@ void SQLDatabase::doMetadataMigration()
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
-    while ((row = resIds->nextRow()) != nullptr) {
+    while ((row = resIds->nextRow())) {
         auto cdsObject = loadObject(std::stoi(row->col(0)));
         migrateMetadata(cdsObject);
         ++objectsUpdated;

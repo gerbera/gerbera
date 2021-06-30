@@ -86,7 +86,7 @@ void web::configSave::process()
                 continue;
             }
 
-            if (cs != nullptr) {
+            if (cs) {
                 auto value = fmt::format("data[{}][{}]", i, "value");
                 auto orig = fmt::format("data[{}][{}]", i, "origValue");
                 log_debug("found option to update {}", cs->getUniquePath());
@@ -163,7 +163,7 @@ void web::configSave::process()
                 targetPath = targetPath.parent_path();
             }
             int objectID = database->findObjectIDByPath(target);
-            if (objectID > 0 && autoscan != nullptr) {
+            if (objectID > 0 && autoscan) {
                 content->rescanDirectory(autoscan, objectID, target);
                 auto taskEl = root.append_child("task");
                 taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();

@@ -254,7 +254,7 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
     std::shared_ptr<ASTNode> lhsNode = nullptr;
     std::shared_ptr<ASTNode> rhsNode = nullptr;
     getNextToken();
-    while (currentToken != nullptr && currentToken->getType() != TokenType::RPAREN) {
+    while (currentToken && currentToken->getType() != TokenType::RPAREN) {
         // just call parseSearchExpression() at this point?
         if (currentToken->getType() == TokenType::PROPERTY) {
             currentNode = parseRelationshipExpression();
@@ -481,10 +481,10 @@ static const std::map<std::string, std::string> logicOperator = {
 
 std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
-    if (colMapper != nullptr && colMapper->hasEntry(property)) {
+    if (colMapper && colMapper->hasEntry(property)) {
         return std::make_pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
     }
-    if (metaMapper != nullptr) {
+    if (metaMapper) {
         return std::make_pair(
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property));
@@ -564,7 +564,7 @@ std::string SortParser::parse()
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        auto sortSql = colMapper != nullptr ? colMapper->mapQuoted(seg) : "";
+        auto sortSql = colMapper ? colMapper->mapQuoted(seg) : "";
         if (!sortSql.empty()) {
             sort.emplace_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
         } else {

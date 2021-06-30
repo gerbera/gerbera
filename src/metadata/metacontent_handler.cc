@@ -48,7 +48,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
 {
     auto tweak = allTweaks->get(obj->getLocation());
     auto files = tweak == nullptr || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
-    auto isCaseSensitive = tweak != nullptr && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
+    auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
     std::vector<fs::path> result;
 

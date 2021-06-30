@@ -1158,7 +1158,7 @@ std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::
         return *co;
     }
 
-    if (parent != nullptr) {
+    if (parent) {
         auto attrKey = key.substr(parent->getUniquePath().length());
         if (attrKey.find_first_of(']') != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of(']') + 1);

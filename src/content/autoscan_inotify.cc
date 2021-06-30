@@ -178,7 +178,7 @@ void AutoscanInotify::threadProc()
 
                 std::shared_ptr<AutoscanDirectory> adir;
                 auto watchAs = getAppropriateAutoscan(wdObj, path);
-                if (watchAs != nullptr)
+                if (watchAs)
                     adir = watchAs->getAutoscanDirectory();
                 else
                     adir = nullptr;
@@ -199,7 +199,7 @@ void AutoscanInotify::threadProc()
                         recheckNonexistingMonitors(wd, wdObj);
                     }
 
-                    if (adir != nullptr && adir->getRecursive()) {
+                    if (adir && adir->getRecursive()) {
                         // dir created
                         if (mask & IN_CREATE) {
                             if (adir->getHidden() || name.at(0) != '.') {
@@ -218,7 +218,7 @@ void AutoscanInotify::threadProc()
                 }
 
                 // changed
-                if (adir != nullptr && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
+                if (adir && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
                     // not new
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
                         log_debug("deleting {}", path.c_str());
@@ -228,7 +228,7 @@ void AutoscanInotify::threadProc()
                             if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
                             auto watch = getStartPoint(wdObj);
-                            if (watch != nullptr) {
+                            if (watch) {
                                 if (adir->persistent()) {
                                     monitorNonexisting(path, watch->getAutoscanDirectory());
                                     content->handlePeristentAutoscanRemove(adir);
@@ -405,7 +405,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
 
                 inotify->removeWatch(removeWd);
                 auto watchToRemove = getStartPoint(wdToRemove);
-                if (watchToRemove != nullptr) {
+                if (watchToRemove) {
                     std::shared_ptr<AutoscanDirectory> adir = watchToRemove->getAutoscanDirectory();
                     if (adir->persistent()) {
                         monitorNonexisting(path, adir);
@@ -521,7 +521,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
             }
 
             if (pathArray == nullptr)
-                alreadyWatching = (getAppropriateAutoscan(wdObj, adir) != nullptr);
+                alreadyWatching = getAppropriateAutoscan(wdObj, adir) != nullptr;
 
             // should we check for already existing "nonexisting" watches?
             // ...
@@ -532,7 +532,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 
         if (!alreadyWatching) {
             auto watch = std::make_shared<WatchAutoscan>(startPoint, adir);
-            if (pathArray != nullptr) {
+            if (pathArray) {
                 watch->setNonexistingPathArray(*pathArray);
             }
             wdObj->addWatch(watch);

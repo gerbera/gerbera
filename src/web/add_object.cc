@@ -146,7 +146,7 @@ void web::addObject::process()
         throw_std_runtime_error("Unknown object type: {}", obj_type.c_str());
     }
 
-    if (obj != nullptr) {
+    if (obj) {
         obj->setVirtual(true);
         if (obj_type == STRING_OBJECT_TYPE_ITEM) {
             content->addVirtualItem(obj, allow_fifo);

@@ -58,7 +58,7 @@ public:
     ~ThreadRunner() override
     {
         log_debug("ThreadRunner: Destroying {}", threadName.c_str());
-        if (attr != nullptr) {
+        if (attr) {
             pthread_attr_destroy(attr);
             delete attr;
         }

@@ -53,7 +53,7 @@ public:
     IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize);
     ~IOHandlerChainer() override
     {
-        if (buf != nullptr) {
+        if (buf) {
             delete[] buf;
             buf = nullptr;
         }

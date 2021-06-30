@@ -82,7 +82,7 @@ void web::items::process()
 
     auto parentDir = database->getAutoscanDirectory(parentID);
     int autoscanType = 0;
-    if (parentDir != nullptr) {
+    if (parentDir) {
         autoscanType = parentDir->persistent() ? 2 : 1;
         autoscanMode = "timed";
     }
@@ -93,10 +93,10 @@ void web::items::process()
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
             auto pathIDs = database->getPathIDs(parentID);
-            if (pathIDs != nullptr) {
+            if (pathIDs) {
                 for (int pathId : *pathIDs) {
                     auto pathDir = database->getAutoscanDirectory(pathId);
-                    if (pathDir != nullptr && pathDir->getRecursive()) {
+                    if (pathDir && pathDir->getRecursive()) {
                         startpoint_id = pathId;
                         break;
                     }
@@ -108,7 +108,7 @@ void web::items::process()
 
         if (startpoint_id != INVALID_OBJECT_ID) {
             std::shared_ptr<AutoscanDirectory> startPtDir = database->getAutoscanDirectory(startpoint_id);
-            if (startPtDir != nullptr && startPtDir->getScanMode() == ScanMode::INotify) {
+            if (startPtDir && startPtDir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || startPtDir->persistent())
                     protectContainer = true;

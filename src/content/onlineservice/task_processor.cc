@@ -127,7 +127,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
 {
     auto lock = threadRunner->lockGuard();
     auto tc = getCurrentTask();
-    if (tc != nullptr) {
+    if (tc) {
         if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
             tc->invalidate();
         }

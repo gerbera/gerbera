@@ -150,7 +150,7 @@ void MySQLDatabase::checkMysqlThreadInit() const
 
 void MySQLDatabase::threadCleanup()
 {
-    if (pthread_getspecific(mysql_init_key) != nullptr) {
+    if (pthread_getspecific(mysql_init_key)) {
         mysql_thread_end();
     }
 }
@@ -396,7 +396,7 @@ MysqlResult::~MysqlResult()
 {
     if (mysql_res) {
         if (!nullRead) {
-            while ((mysql_fetch_row(mysql_res)) != nullptr)
+            while ((mysql_fetch_row(mysql_res)))
                 ; // read out data
         }
         mysql_free_result(mysql_res);
@@ -406,7 +406,7 @@ MysqlResult::~MysqlResult()
 
 std::unique_ptr<SQLRow> MysqlResult::nextRow()
 {
-    if (auto mysql_row = mysql_fetch_row(mysql_res); mysql_row != nullptr) {
+    if (auto mysql_row = mysql_fetch_row(mysql_res); mysql_row) {
         return std::make_unique<MysqlRow>(mysql_row);
     }
     nullRead = true;

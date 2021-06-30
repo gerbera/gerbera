@@ -234,7 +234,7 @@ off_t getFileSize(const fs::directory_entry& dirEnt)
 bool isExecutable(const fs::path& path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
-    if (err != nullptr)
+    if (err)
         *err = errno;
 
     return ret == 0;
@@ -644,10 +644,10 @@ int HMSFToMilliseconds(std::string_view time)
 
 bool checkResolution(std::string_view resolution, int* x, int* y)
 {
-    if (x != nullptr)
+    if (x)
         *x = 0;
 
-    if (y != nullptr)
+    if (y)
         *y = 0;
 
     std::vector<std::string> parts = splitString(resolution, 'x');
@@ -659,10 +659,10 @@ bool checkResolution(std::string_view resolution, int* x, int* y)
         int _y = std::stoi(parts[1]);
 
         if ((_x > 0) && (_y > 0)) {
-            if (x != nullptr)
+            if (x)
                 *x = _x;
 
-            if (y != nullptr)
+            if (y)
                 *y = _y;
 
             return true;
@@ -803,7 +803,7 @@ std::string ipToInterface(std::string_view ip)
         log_error("Could not getifaddrs: {}", std::strerror(errno));
     }
 
-    for (ifa = ifaddr, n = 0; ifa != nullptr; ifa = ifa->ifa_next, n++) {
+    for (ifa = ifaddr, n = 0; ifa; ifa = ifa->ifa_next, n++) {
         if (ifa->ifa_addr == nullptr)
             continue;
 

@@ -128,7 +128,7 @@ std::string PlaylistParserScript::readln()
     if (!currentHandle)
         throw_std_runtime_error("Readline not yet setup for use");
 
-    if ((currentTask != nullptr) && (!currentTask->isValid()))
+    if ((currentTask) && (!currentTask->isValid()))
         return "";
 
     while (true) {
@@ -143,7 +143,7 @@ std::string PlaylistParserScript::readln()
 
 void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task)
 {
-    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle != nullptr) || (currentLine != nullptr)) {
+    if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle) || (currentLine)) {
         throw_std_runtime_error("recursion not allowed");
     }
 
