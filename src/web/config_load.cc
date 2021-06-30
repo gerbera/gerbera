@@ -59,7 +59,7 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
-    info.append_attribute("id") = fmt::to_string(cs->option).c_str();
+    info.append_attribute("id") = fmt::format("{:03d}", cs->option).c_str();
     info.append_attribute("type") = cs->getTypeString().c_str();
     info.append_attribute("value") = cs->getDefaultValue().c_str();
     info.append_attribute("help") = cs->getHelp();
@@ -69,8 +69,8 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
 {
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
-    item.append_attribute("id") = fmt::format("{:02d}", id).c_str();
-    item.append_attribute("aid") = fmt::format("{:02d}", aid).c_str();
+    item.append_attribute("id") = fmt::format("{:03d}", id).c_str();
+    item.append_attribute("aid") = fmt::format("{:03d}", aid).c_str();
     if (std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; })) {
         item.append_attribute("status") = "unchanged";
         item.append_attribute("source") = "database";
@@ -163,14 +163,15 @@ void web::configLoad::process()
 
     // write all values with simple type (string, int, bool)
     for (auto&& option : ConfigOptionIterator()) {
-        auto scs = ConfigDefinition::findConfigSetup(option);
-        auto item = values.append_child("item");
-        createItem(item, scs->getItemPath(-1), option, option, scs);
-
         try {
+            auto scs = ConfigDefinition::findConfigSetup(option);
+            auto item = values.append_child("item");
+            createItem(item, scs->getItemPath(-1), option, option, scs);
+
             log_debug("    Option {:03d} {} = {}", option, scs->getItemPath(), scs->getCurrentValue().c_str());
             setValue(item, scs->getCurrentValue());
         } catch (const std::runtime_error& e) {
+            log_warning("Option {:03d} {}", option, e.what());
         }
     }
 
