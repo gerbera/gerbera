@@ -66,38 +66,38 @@ bool ProcessIOHandler::abort() const
 {
     return std::any_of(procList.begin(), procList.end(),
         [=](auto&& proc) { auto exec = proc->getExecutor();
-            return exec != nullptr && !exec->isAlive() && proc->abortOnDeath(); });
+            return exec && !exec->isAlive() && proc->abortOnDeath(); });
 }
 
 void ProcessIOHandler::killAll() const
 {
     for (auto&& i : procList) {
         auto exec = i->getExecutor();
-        if (exec != nullptr)
+        if (exec)
             exec->kill();
     }
 }
 
 void ProcessIOHandler::registerAll()
 {
-    if (mainProc != nullptr)
+    if (mainProc)
         content->registerExecutor(mainProc);
 
     for (auto&& i : procList) {
         auto exec = i->getExecutor();
-        if (exec != nullptr)
+        if (exec)
             content->registerExecutor(exec);
     }
 }
 
 void ProcessIOHandler::unregisterAll()
 {
-    if (mainProc != nullptr)
+    if (mainProc)
         content->unregisterExecutor(mainProc);
 
     for (auto&& i : procList) {
         auto exec = i->getExecutor();
-        if (exec != nullptr)
+        if (exec)
             content->unregisterExecutor(exec);
     }
 }
@@ -113,7 +113,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     , filename(std::move(filename))
     , ignoreSeek(ignoreSeek)
 {
-    if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
+    if ((mainProc) && ((!mainProc->isAlive() || abort()))) {
         killAll();
         throw_std_runtime_error("process terminated early");
     }
@@ -122,7 +122,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     {
         log_error("Failed to create fifo: {}", std::strerror(errno));
         killAll();
-        if (main_proc != nullptr)
+        if (main_proc)
             main_proc->kill();
 
         throw_std_runtime_error("Could not create reader fifo");
@@ -133,7 +133,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
 void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if ((mainProc != nullptr) && ((!mainProc->isAlive() || abort()))) {
+    if ((mainProc) && ((!mainProc->isAlive() || abort()))) {
         killAll();
         throw_std_runtime_error("process terminated early");
     }
@@ -159,7 +159,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         }
 
         killAll();
-        if (mainProc != nullptr)
+        if (mainProc)
             mainProc->kill();
         fs::remove(filename);
         throw_std_runtime_error("open: failed to open: {}", filename.c_str());
@@ -192,7 +192,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
 
         // timeout
         if (ret == 0) {
-            if (mainProc != nullptr) {
+            if (mainProc) {
                 bool main_ok = mainProc->isAlive();
                 if (!main_ok || abort()) {
                     if (!main_ok) {
@@ -243,7 +243,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (mainProc != nullptr) {
+        if (mainProc) {
             if (mainProc->isAlive())
                 mainProc->kill();
             if (mainProc->getStatus() == EXIT_SUCCESS)
@@ -284,7 +284,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
 
         // timeout
         if (ret == 0) {
-            if (mainProc != nullptr) {
+            if (mainProc) {
                 bool main_ok = mainProc->isAlive();
                 if (!main_ok || abort()) {
                     if (!main_ok) {
@@ -328,7 +328,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
         // actually that will depend on the ret code of the process
         ret = -1;
 
-        if (mainProc != nullptr) {
+        if (mainProc) {
             if (!mainProc->isAlive()) {
                 if (mainProc->getStatus() == EXIT_SUCCESS)
                     ret = 0;
@@ -360,7 +360,7 @@ void ProcessIOHandler::close()
     log_debug("terminating process, closing {}", this->filename.c_str());
     unregisterAll();
 
-    if (mainProc != nullptr) {
+    if (mainProc) {
         ret = mainProc->kill();
     } else
         ret = true;

@@ -199,7 +199,7 @@ std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, co
         charset = cm->getOption(CFG_IMPORT_METADATA_CHARSET);
     }
     auto tweak = cm->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
-    if (tweak != nullptr && tweak->hasMetaCharset()) {
+    if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
         log_debug("Using charset {} for {}", charset, location.string());
     }

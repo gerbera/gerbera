@@ -130,7 +130,7 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
         if (old == nullptr) {
             log_debug("Adding new {} object", serviceName);
 
-            if (layout != nullptr)
+            if (layout)
                 layout->processCdsObject(obj, "");
         } else {
             log_debug("Updating existing {} object", serviceName);
@@ -141,7 +141,7 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
 
         //        if (server->getShutdownStatus())
         //            return false;
-    } while (obj != nullptr);
+    } while (obj);
 
     return false;
 }

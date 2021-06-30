@@ -51,7 +51,7 @@ public:
         std::vector<std::shared_ptr<CS>> result;
         for (auto&& co : complexOptions) {
             auto tco = std::dynamic_pointer_cast<CS>(co);
-            if (tco != nullptr && tco->getValue() != nullptr) {
+            if (tco && tco->getValue()) {
                 result.emplace_back(tco);
             }
         }

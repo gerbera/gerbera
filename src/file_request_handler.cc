@@ -101,7 +101,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
-    fs::path path = item != nullptr ? item->getLocation() : "";
+    fs::path path = item ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
     bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
@@ -173,7 +173,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #else
         UpnpFileInfo_set_FileLength(info, -1);
 #endif
-    } else if (item != nullptr) {
+    } else if (item) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
         quirks->addCaptionInfo(item, headers);
@@ -186,7 +186,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         }
     }
 
-    if (mimeType.empty() && item != nullptr)
+    if (mimeType.empty() && item)
         mimeType = item->getMimeType();
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
@@ -232,7 +232,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
-    fs::path path = item != nullptr ? item->getLocation() : "";
+    fs::path path = item ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
     bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);

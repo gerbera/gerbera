@@ -158,7 +158,7 @@ bool Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints, std::stri
         return false;
     }
 
-    if (arrayName != nullptr)
+    if (arrayName)
         *arrayName = hint->second;
 
     return true;

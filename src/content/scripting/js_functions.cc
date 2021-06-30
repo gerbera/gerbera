@@ -83,7 +83,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
             }
             duk_to_object(ctx, -1);
             auto cds_obj = self->dukObject2cdsObject(nullptr);
-            if (cds_obj != nullptr) {
+            if (cds_obj) {
                 result.emplace_back(cds_obj);
             } else {
                 log_js("js_addContainerTree: no CdsObject at {}", i);

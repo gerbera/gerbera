@@ -36,7 +36,7 @@ decltype(auto) getAllTokens(const std::string& input)
     bool gotToken = false;
     do {
         searchToken = lexer.nextToken();
-        gotToken = searchToken != nullptr;
+        gotToken = !!searchToken;
         if (searchToken)
             searchTokens->push_back(std::move(searchToken));
     } while (gotToken);

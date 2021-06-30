@@ -288,7 +288,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_LAYOUT_MAPPING);
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-    if (setlocale(LC_ALL, "") != nullptr) {
+    if (setlocale(LC_ALL, "")) {
         temp = nl_langinfo(CODESET);
         log_debug("received {} from nl_langinfo", temp.c_str());
     }
@@ -620,7 +620,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
         try {
             auto cs = ConfigDefinition::findConfigSetupByPath(cfgValue.key, true);
 
-            if (cs != nullptr) {
+            if (cs) {
                 if (cfgValue.item == cs->xpath) {
                     origValues[cfgValue.item] = cs->getCurrentValue();
                     cs->makeOption(cfgValue.value, self);

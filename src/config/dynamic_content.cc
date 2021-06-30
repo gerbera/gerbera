@@ -84,7 +84,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location
 {
     AutoLock lock(mutex);
     auto entry = std::find_if(list.begin(), list.end(), [&](auto&& c) { return c->getLocation() == location; });
-    if (entry != list.end() && *entry != nullptr) {
+    if (entry != list.end() && *entry) {
         return *entry;
     }
     return nullptr;

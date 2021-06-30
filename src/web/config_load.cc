@@ -45,7 +45,7 @@ web::configLoad::configLoad(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
     try {
-        if (this->database != nullptr) {
+        if (this->database) {
             dbEntries = this->database->getConfigValues();
         } else {
             log_error("configLoad database missing");
@@ -79,7 +79,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
         item.append_attribute("source") = cs == nullptr || !cs->isDefaultValueUsed() ? "config.xml" : "default";
     }
     item.append_attribute("origValue") = config->getOrigValue(name).c_str();
-    item.append_attribute("defaultValue") = cs != nullptr ? cs->getDefaultValue().c_str() : "";
+    item.append_attribute("defaultValue") = cs ? cs->getDefaultValue().c_str() : "";
 }
 
 template <typename T>
@@ -452,9 +452,9 @@ void web::configLoad::process()
         } else {
             auto cs = ConfigDefinition::findConfigSetupByPath(entry.item, true);
             auto acs = ConfigDefinition::findConfigSetupByPath(entry.item, true, cs);
-            if (cs != nullptr) {
+            if (cs) {
                 auto item = values.append_child("item");
-                createItem(item, entry.item, cs->option, acs != nullptr ? acs->option : CFG_MAX);
+                createItem(item, entry.item, cs->option, acs ? acs->option : CFG_MAX);
                 setValue(item, entry.value);
                 item.attribute("status") = entry.status.c_str();
                 item.attribute("origValue") = config->getOrigValue(entry.item).c_str();

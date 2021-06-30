@@ -141,7 +141,7 @@ public:
 
     bool checkValue(std::string& optValue) const
     {
-        return !(rawCheck != nullptr && !rawCheck(optValue));
+        return !(rawCheck && !rawCheck(optValue));
     }
     const char* getHelp() const { return help; }
     std::shared_ptr<ConfigOption> getValue() const { return optionValue; }
@@ -221,7 +221,7 @@ public:
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
     {
-        if (arguments != nullptr && arguments->find("notEmpty") != arguments->end()) {
+        if (arguments && arguments->find("notEmpty") != arguments->end()) {
             notEmpty = arguments->find("notEmpty")->second == "true";
         }
         newOption(ConfigSetup::getXmlContent(root, true));

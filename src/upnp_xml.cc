@@ -119,7 +119,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
-        if (quirks != nullptr)
+        if (quirks)
             quirks->restoreSamsungBookMarkedPosition(item, &result);
 
         auto meta = obj->getMetadata();
@@ -491,7 +491,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     // now get the profile
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto tp_mt = tlist->get(item->getMimeType());
-    if (tp_mt != nullptr) {
+    if (tp_mt) {
         for (auto&& [key, tp] : *tp_mt) {
             if (tp == nullptr)
                 throw_std_runtime_error("Invalid profile encountered");
@@ -642,7 +642,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!skipURL)
                 url = urlBase->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
             else {
-                assert(urlBase_tr != nullptr);
+                assert(urlBase_tr);
                 url = urlBase_tr->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
             }
         }

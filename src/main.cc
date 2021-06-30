@@ -375,13 +375,13 @@ int main(int argc, char** argv, char** envp)
         if (!config_file.has_value() && !home.has_value()) {
             // Check XDG first
             const char* h = std::getenv("XDG_CONFIG_HOME");
-            if (h != nullptr) {
+            if (h) {
                 home = h;
                 confdir = "gerbera";
             } else {
                 // Then look for home
                 h = std::getenv("HOME");
-                if (h != nullptr)
+                if (h)
                     home = h;
             }
 
@@ -394,11 +394,11 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<std::string> dataDir;
         char* pref = std::getenv("GERBERA_DATADIR");
-        if (pref != nullptr) {
+        if (pref) {
             dataDir = pref;
         } else {
             pref = std::getenv("MEDIATOMB_DATADIR");
-            if (pref != nullptr)
+            if (pref)
                 dataDir = pref;
         }
         if (!dataDir.has_value())
@@ -406,11 +406,11 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<std::string> magic;
         char* mgc = std::getenv("GERBERA_MAGIC_FILE");
-        if (mgc != nullptr) {
+        if (mgc) {
             magic = mgc;
         } else {
             mgc = std::getenv("MEDIATOMB_MAGIC_FILE");
-            if (mgc != nullptr)
+            if (mgc)
                 magic = mgc;
         }
 

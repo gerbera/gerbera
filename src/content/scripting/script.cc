@@ -432,7 +432,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
         auto parent = dukObject2cdsObject(nullptr);
-        if (parent != nullptr) {
+        if (parent) {
             obj->setParent(parent);
             log_debug("dukObject2cdsObject: Parent {}", parent->getClass());
         }
@@ -444,7 +444,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         val = sc->convert(val);
         obj->setTitle(val);
     } else {
-        if (pcd != nullptr)
+        if (pcd)
             obj->setTitle(pcd->getTitle());
     }
 
@@ -453,7 +453,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         val = sc->convert(val);
         obj->setClass(val);
     } else {
-        if (pcd != nullptr)
+        if (pcd)
             obj->setClass(pcd->getClass());
     }
 
@@ -492,7 +492,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     duk_pop(ctx);
 
     // stuff that has not been exported to js
-    if (pcd != nullptr) {
+    if (pcd) {
         obj->setFlags(pcd->getFlags());
         obj->setResources(pcd->getResources());
         obj->setAuxData(pcd->getAuxData());
@@ -566,7 +566,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         auto item = std::static_pointer_cast<CdsItem>(obj);
         std::shared_ptr<CdsItem> pcd_item;
 
-        if (pcd != nullptr)
+        if (pcd)
             pcd_item = std::static_pointer_cast<CdsItem>(pcd);
 
         val = getProperty("mimetype");
@@ -574,7 +574,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             val = sc->convert(val);
             item->setMimeType(val);
         } else {
-            if (pcd != nullptr)
+            if (pcd)
                 item->setMimeType(pcd_item->getMimeType());
         }
 
@@ -591,7 +591,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             val = sc->convert(val);
             item->setMetadata(M_DESCRIPTION, val);
         } else {
-            if (pcd != nullptr)
+            if (pcd)
                 item->setMetadata(M_DESCRIPTION, pcd_item->getMetadata(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
@@ -603,7 +603,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (!location.empty())
             obj->setLocation(location);
         else {
-            if (pcd != nullptr)
+            if (pcd)
                 obj->setLocation(pcd->getLocation());
         }
 

@@ -116,7 +116,7 @@ void ContentManager::run()
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
     for (size_t i = 0; i < config_timed_list->size(); i++) {
         auto dir = config_timed_list->get(i);
-        if (dir != nullptr) {
+        if (dir) {
             fs::path path = dir->getLocation();
             if (fs::is_directory(path)) {
                 dir->setObjectID(ensurePathExistence(path));
@@ -135,7 +135,7 @@ void ContentManager::run()
         auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
         for (size_t i = 0; i < config_inotify_list->size(); i++) {
             auto dir = config_inotify_list->get(i);
-            if (dir != nullptr) {
+            if (dir) {
                 fs::path path = dir->getLocation();
                 if (fs::is_directory(path)) {
                     dir->setObjectID(ensurePathExistence(path));
@@ -311,7 +311,7 @@ void ContentManager::shutdown()
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoScanDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nullptr) {
+            if (dir) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
                     auto t = to_seconds(dirEnt.last_write_time());
@@ -330,7 +330,7 @@ void ContentManager::shutdown()
     shutdownFlag = true;
 
     for (auto&& exec : process_list) {
-        if (exec != nullptr)
+        if (exec)
             exec->kill();
     }
 
@@ -434,9 +434,9 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
     } else if (obj->isItem() && processExisting) {
         MetadataHandler::setMetadata(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
     }
-    if (obj->isItem() && layout != nullptr && (processExisting || isNew)) {
+    if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
-            if (rootPath.empty() && (task != nullptr))
+            if (rootPath.empty() && (task))
                 rootPath = task->getRootPath();
 
             layout->processCdsObject(obj, rootPath);
@@ -445,7 +445,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
 
 #ifdef HAVE_JS
-            if ((playlist_parser_script != nullptr) && (content_type == CONTENT_TYPE_PLAYLIST))
+            if ((playlist_parser_script) && (content_type == CONTENT_TYPE_PLAYLIST))
                 playlist_parser_script->processPlaylistObject(obj, task);
 #else
             if (content_type == CONTENT_TYPE_PLAYLIST)
@@ -528,7 +528,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
     bool parentRemoved = false;
     if (rescanResource) {
         auto obj = database->loadObject(objectID);
-        if (obj != nullptr && obj->hasResource(CH_RESOURCE)) {
+        if (obj && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path().string();
             parentRemoved = updateAttachedResources(adir, obj->getLocation(), parentPath, all);
         }
@@ -539,7 +539,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
 
     if (!parentRemoved) {
         auto changedContainers = database->removeObject(objectID, all);
-        if (changedContainers != nullptr) {
+        if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
         }
@@ -662,7 +662,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     auto list = database->getObjects(containerID, !asSetting.recursive);
 
     unsigned int thisTaskID;
-    if (task != nullptr) {
+    if (task) {
         thisTaskID = task->getID();
     } else {
         thisTaskID = 0;
@@ -680,7 +680,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             continue;
         }
 
-        if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
+        if ((shutdownFlag) || ((task) && !task->isValid()))
             break;
 
         // it is possible that someone hits remove while the container is being scanned
@@ -694,7 +694,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (!asSetting.followSymlinks && dirEnt.is_symlink()) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
-                if (list != nullptr)
+                if (list)
                     list->erase(objectID);
                 removeObject(adir, objectID, false);
             }
@@ -711,7 +711,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (isRegularFile(dirEnt, ec)) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
-                if (list != nullptr)
+                if (list)
                     list->erase(objectID);
 
                 // check modification time and update file if chagned
@@ -746,7 +746,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 last_modified_new_max = lwt;
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
-                if (list != nullptr)
+                if (list)
                     list->erase(objectID);
                 // add a task to rescan the directory that was found
                 rescanDirectory(adir, objectID, newPath, task->isCancellable());
@@ -783,12 +783,12 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     finishScan(adir, location, parentContainer, last_modified_new_max, firstObject);
 
-    if ((shutdownFlag) || ((task != nullptr) && !task->isValid())) {
+    if ((shutdownFlag) || ((task) && !task->isValid())) {
         return;
     }
-    if (list != nullptr && !list->empty()) {
+    if (list && !list->empty()) {
         auto changedContainers = database->removeObjects(list);
-        if (changedContainers != nullptr) {
+        if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
         }
@@ -822,7 +822,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
     // abort loop if either:
     // no valid directory returned, server is about to shutdown, the task is there and was invalidated
-    if (task != nullptr) {
+    if (task) {
         log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), subDir.path().c_str());
     }
 #ifdef HAVE_INOTIFY
@@ -830,7 +830,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
-            if (dir != nullptr && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
+            if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
                 adir = dir;
             }
         }
@@ -840,7 +840,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         for (size_t i = 0; i < autoscan_timed->size(); i++) {
             log_debug("Timed AutoscanDir {}", i);
             std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
-            if (dir != nullptr && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
+            if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
                 adir = dir;
             }
         }
@@ -853,7 +853,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
     auto last_modified_current_max = std::chrono::seconds::zero();
     auto last_modified_new_max = last_modified_current_max;
-    if (adir != nullptr) {
+    if (adir) {
         last_modified_current_max = adir->getPreviousLMT(subDir.path(), parentContainer);
         last_modified_new_max = last_modified_current_max;
         adir->setCurrentLMT(subDir.path(), std::chrono::seconds::zero());
@@ -867,14 +867,14 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         if (name[0] == '.' && !hidden) {
             continue;
         }
-        if ((shutdownFlag) || ((task != nullptr) && !task->isValid()))
+        if ((shutdownFlag) || ((task) && !task->isValid()))
             break;
 
         if (config->getConfigFilename() == newPath)
             continue;
 
         // For the Web UI
-        if (task != nullptr) {
+        if (task) {
             task->setDescription(fmt::format("Importing: {}", newPath.string().c_str()));
         }
 
@@ -883,7 +883,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             // check database if parent, process existing
             auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
 
-            if (obj != nullptr) {
+            if (obj) {
                 firstChild = false;
                 auto lwt = to_seconds(subDirEnt.last_write_time(ec));
                 if (last_modified_current_max < lwt) {
@@ -920,7 +920,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
 void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
 {
-    if (adir != nullptr) {
+    if (adir) {
         adir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));
         if (parent && lmt > std::chrono::seconds::zero()) {
             parent->setMTime(lmt);
@@ -1039,11 +1039,11 @@ void ContentManager::updateObject(int objectID, const std::map<std::string, std:
 {
     auto obj = database->loadObject(objectID);
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item != nullptr) {
+    if (item) {
         updateCdsObject(item, parameters);
     } else {
         auto cont = std::dynamic_pointer_cast<CdsContainer>(obj);
-        if (cont != nullptr) {
+        if (cont) {
             updateCdsObject(cont, parameters);
         } else {
             updateCdsObject(obj, parameters);
@@ -1123,7 +1123,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
-    auto lastMetadata = origObj != nullptr ? origObj->getMetadata() : std::map<std::string, std::string> {};
+    auto lastMetadata = origObj ? origObj->getMetadata() : std::map<std::string, std::string> {};
     std::vector<int> updateID;
     bool isNew = false;
 
@@ -1199,7 +1199,7 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
             }
         }
 
-        if (origObj != nullptr) {
+        if (origObj) {
             if (fanart == resources.end() && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::count(location.begin(), location.end(), '/') > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
                 const std::vector<std::shared_ptr<CdsResource>>& origResources = origObj->getResources();
                 fanart = std::find_if(origResources.begin(), origResources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
@@ -1535,7 +1535,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
     if (taskOwner == ContentManagerTask) {
         auto lock = threadRunner->lockGuard("invalidateTask");
         auto tc = getCurrentTask();
-        if (tc != nullptr) {
+        if (tc) {
             if ((tc->getID() == taskID) || (tc->getParentID() == taskID)) {
                 tc->invalidate();
             }
@@ -1613,7 +1613,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
             }
 
             auto t = getCurrentTask();
-            if (t != nullptr) {
+            if (t) {
                 invalidateAddTask(t, path);
             }
         }
@@ -1739,7 +1739,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     }
 #endif
 
-    if (original != nullptr)
+    if (original)
         dir->setDatabaseID(original->getDatabaseID());
 
     database->checkOverlappingAutoscans(dir);
@@ -1864,7 +1864,7 @@ CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
 {
     this->cancellable = cancellable;
     this->taskType = AddFile;
-    if (this->asSetting.adir != nullptr)
+    if (this->asSetting.adir)
         this->asSetting.adir->incTaskCount();
 }
 
@@ -1877,7 +1877,7 @@ void CMAddFileTask::run()
     log_debug("running add file task with path {} recursive: {}", dirEnt.path().c_str(), asSetting.recursive);
     auto self = shared_from_this();
     content->_addFile(dirEnt, rootpath, asSetting, self);
-    if (asSetting.adir != nullptr) {
+    if (asSetting.adir) {
         asSetting.adir->decTaskCount();
         if (asSetting.adir->updateLMT()) {
             log_debug("CMAddFileTask::run: Updating last_modified for autoscan directory {}", asSetting.adir->getLocation().c_str());

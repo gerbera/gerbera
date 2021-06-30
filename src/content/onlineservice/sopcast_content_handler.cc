@@ -103,7 +103,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
 
             // we know that we have a channel
             auto item = getObject(groupName, channel);
-            if (item != nullptr)
+            if (item)
                 return item;
         } // for channel
     } // for group
@@ -172,7 +172,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
         item->setTitle("Unknown");
 
     tmp_el = channel.child("region");
-    if (tmp_el != nullptr) {
+    if (tmp_el) {
         temp = tmp_el.attribute("en").as_string();
         if (!temp.empty())
             item->setMetadata(M_REGION, temp);

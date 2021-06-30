@@ -85,7 +85,7 @@ void web::containers::process()
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(cont->getID());
-                if ((adir != nullptr) && (adir->getScanMode() == ScanMode::INotify))
+                if ((adir) && (adir->getScanMode() == ScanMode::INotify))
                     autoscanMode = "inotify";
             }
 #endif

@@ -70,7 +70,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 
         // we know that we have a trailer
         auto item = getObject(trailer);
-        if (item != nullptr)
+        if (item)
             return item;
     } // while trailer_it
 
@@ -156,7 +156,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
 
     auto cast = trailer.child("cast");
-    if (cast != nullptr) {
+    if (cast) {
         std::string actors;
         for (auto&& actor : cast.children()) {
             if (actor.type() != pugi::node_element)
@@ -178,7 +178,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
 
     auto genre = trailer.child("genre");
-    if (genre != nullptr) {
+    if (genre) {
         std::string genres;
         for (auto&& gn : genre.children()) {
             if (gn.type() != pugi::node_element)
@@ -205,7 +205,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     I add the fastscaler
 
     auto poster = trailer.child("poster");
-    if (poster != nullptr)
+    if (poster)
     {
     }
     */
