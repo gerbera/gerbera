@@ -94,8 +94,9 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    explicit SLInitTask(std::shared_ptr<Config> config)
+    explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
         : config(std::move(config))
+        , hashie(hashie)
     {
     }
     void run(sqlite3** db, Sqlite3Database* sl) override;
@@ -104,6 +105,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
+    unsigned int hashie;
 };
 
 /// \brief A task for the sqlite3 thread to do a SQL select.
