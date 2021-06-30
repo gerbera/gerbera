@@ -276,7 +276,7 @@ public:
     EnumIterator begin() { return *this; }
     EnumIterator end()
     {
-        static const EnumIterator endIter = ++EnumIterator(endVal);
+        static const EnumIterator endIter = EnumIterator(endVal);
         return endIter;
     }
     bool operator!=(const EnumIterator& i)

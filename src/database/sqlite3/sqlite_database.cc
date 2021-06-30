@@ -138,7 +138,8 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(dbVersion, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
+        std::array<unsigned int, DBVERSION> hashies { 0, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356 };
+        upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
 
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
             // do a backup now

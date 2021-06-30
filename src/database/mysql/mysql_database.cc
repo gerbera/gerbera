@@ -176,7 +176,8 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    upgradeDatabase(dbVersion, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION);
+    std::array<unsigned int, DBVERSION> hashies { 0, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694 };
+    upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION);
 
     lock.unlock();
 

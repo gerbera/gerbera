@@ -191,7 +191,7 @@ protected:
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(std::string& dbVersion, config_option_t upgradeOption, std::string_view updateVersionCommand);
+    void upgradeDatabase(std::string& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand);
     virtual void _exec(const char* query, int length = -1) = 0;
 
 private:

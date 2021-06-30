@@ -1,14 +1,14 @@
 <upgrade>
-    <version from="1" to="2">
+    <version number="2">
         <script>DROP INDEX mt_autoscan_obj_id</script>
         <script>CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)</script>
         <script>ALTER TABLE "mt_autoscan" ADD "path_ids" text</script>
     </version>
-    <version from="2" to="3">
+    <version number="3">
         <script>ALTER TABLE "mt_cds_object" ADD "service_id" varchar(255) default NULL</script>
         <script>CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)</script>
     </version>
-    <version from="3" to="4" remark="Move to Metadata table">
+    <version number="4" remark="Move to Metadata table">
         <script>
         CREATE TABLE "mt_metadata" (
             "id" integer primary key,
@@ -19,7 +19,7 @@
         </script>
         <script>CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)</script>
     </version>
-    <version from="4" to="5" remark="Fix incorrect SQLite foreign key">
+    <version number="5" remark="Fix incorrect SQLite foreign key">
         <script>
         PRAGMA foreign_keys = OFF;
         CREATE TABLE mt_cds_object_new (
@@ -52,7 +52,7 @@
         PRAGMA foreign_keys = ON;
         </script>
     </version>
-    <version from="5" to="6" remark="add config value table">
+    <version number="6" remark="add config value table">
         <script>
         CREATE TABLE "grb_config_value" (
             "item" varchar(255) primary key,
@@ -62,21 +62,21 @@
         </script>
         <script>CREATE INDEX grb_config_value_item ON grb_config_value(item)</script>
     </version>
-    <version from="6" to="7">
+    <version number="7">
         <script>DROP TABLE mt_cds_active_item</script>
     </version>
-    <version from="7" to="8" remark="part_number">
+    <version number="8" remark="part_number">
         <script>ALTER TABLE "mt_cds_object" ADD "part_number" integer default NULL</script>
         <script>DROP INDEX mt_track_number</script>
         <script>CREATE INDEX "grb_track_number" ON mt_cds_object (part_number,track_number)</script>
     </version>
-    <version from="8" to="9" remark="bookmark_pos">
+    <version number="9" remark="bookmark_pos">
         <script>ALTER TABLE "mt_cds_object" ADD "bookmark_pos" integer unsigned NOT NULL default 0</script>
     </version>
-    <version from="9" to="10" remark="last_modified">
+    <version number="10" remark="last_modified">
         <script>ALTER TABLE "mt_cds_object" ADD "last_modified" integer unsigned default NULL</script>
     </version>
-    <version from="10" to="11" remark="last_updated">
+    <version number="11" remark="last_updated">
         <script>ALTER TABLE "mt_cds_object" ADD "last_updated" integer unsigned default 0</script>
         <script>UPDATE "mt_cds_object" SET "last_updated"="last_modified"</script>
     </version>

@@ -441,6 +441,7 @@ bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::sh
     for (auto&& res : item->getResources()) {
         if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
             url = renderOneResource(virtualURL, item, res, realCount);
+            url.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
             srtAdded = true;
             break;
         }

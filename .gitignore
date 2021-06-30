@@ -17,7 +17,7 @@ compile_commands.json
 
 Testing/
 
-**/node_modules/
+**/node_modules*/
 **/coverage/
 **/_buildconfig/sqlite3.sql.Z
 
