@@ -98,12 +98,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         log_debug("Could not determine memory for string conversion!");
         throw_std_runtime_error("Could not determine memory for string conversion");
     }
-    auto output = new char[length];
-    if (!output) {
-        log_debug("Could not allocate memory for string conversion!");
-        throw_std_runtime_error("Could not allocate memory for string conversion");
-    }
 
+    auto output = new char[length];
     const char* input_copy = input;
     char* output_copy = output;
 
