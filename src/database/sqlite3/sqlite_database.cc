@@ -117,9 +117,12 @@ void Sqlite3Database::init()
         }
     }
 
+    // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
+    std::array<unsigned int, DBVERSION> hashies { 3175875507, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356 };
+
     if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
         log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
-        auto itask = std::make_shared<SLInitTask>(config);
+        auto itask = std::make_shared<SLInitTask>(config, hashies[0]);
         addTask(itask);
         try {
             itask->waitForTask();
@@ -138,7 +141,6 @@ void Sqlite3Database::init()
     }
 
     try {
-        std::array<unsigned int, DBVERSION> hashies { 0, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356 };
         upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
 
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
@@ -419,24 +421,30 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = readTextFile(sqlFilePath);
-    sql += fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION);
+    auto&& myHash = stringHash(sql);
 
-    char* err = nullptr;
-    int ret = sqlite3_exec(
-        *db,
-        sql.c_str(),
-        nullptr,
-        nullptr,
-        &err);
-    std::string error;
-    if (err) {
-        error = err;
-        sqlite3_free(err);
+    if (myHash == hashie) {
+        sql += fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION);
+
+        char* err = nullptr;
+        int ret = sqlite3_exec(
+            *db,
+            sql.c_str(),
+            nullptr,
+            nullptr,
+            &err);
+        std::string error;
+        if (err) {
+            error = err;
+            sqlite3_free(err);
+        }
+        if (ret != SQLITE_OK) {
+            throw DatabaseException("", sl->getError(sql, error, *db, ret));
+        }
+        contamination = true;
+    } else {
+        log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashie);
     }
-    if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(sql, error, *db, ret));
-    }
-    contamination = true;
 }
 
 /* SLSelectTask */

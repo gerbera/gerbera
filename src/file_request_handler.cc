@@ -157,8 +157,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = tp->getTargetMimeType();
 
-        auto mappings = config->getDictionaryOption(
-            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             std::string freq = obj->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
             std::string nrch = obj->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
@@ -178,8 +177,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         quirks->addCaptionInfo(item, headers);
 
-        auto mappings = config->getDictionaryOption(
-            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
         if (!dlnaContentHeader.empty()) {
             headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
@@ -206,7 +204,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
-    log_debug("web_get_info(): end");
+    log_debug("end");
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)

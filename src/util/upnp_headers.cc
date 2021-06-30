@@ -73,14 +73,7 @@ void Headers::addHeader(const std::string& key, const std::string& value)
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
 {
-    std::string headerValue;
-    headerValue += header.first;
-    headerValue += ": ";
-    headerValue += header.second;
-    if (crlf)
-        headerValue += "\r\n";
-
-    return headerValue;
+    return fmt::format("{}: {}{}", header.first, header.second, (crlf) ? "\r\n" : "");
 }
 
 std::pair<std::string, std::string> Headers::parseHeader(const std::string& header)

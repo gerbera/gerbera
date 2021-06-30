@@ -148,26 +148,33 @@ void MySQLDatabase::init()
         log_debug("{}", e.what());
     }
 
+    // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
+    std::array<unsigned int, DBVERSION> hashies { 3622530614, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694 };
+
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
         auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
         auto sql = readTextFile(sqlFilePath);
+        auto&& myHash = stringHash(sql);
 
-        for (auto&& statement : splitString(sql, ';')) {
-            trimStringInPlace(statement);
-            if (statement.empty()) {
-                continue;
+        if (myHash == hashies[0]) {
+            for (auto&& statement : splitString(sql, ';')) {
+                trimStringInPlace(statement);
+                if (statement.empty()) {
+                    continue;
+                }
+                log_debug("executing statement: '{}'", statement);
+                ret = mysql_real_query(&db, statement.c_str(), statement.size());
+                if (ret) {
+                    std::string myError = getError(&db);
+                    throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
+                }
             }
-            log_debug("executing statement: '{}'", statement);
-            ret = mysql_real_query(&db, statement.c_str(), statement.size());
-            if (ret) {
-                std::string myError = getError(&db);
-                throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
-            }
+            _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION).c_str());
+        } else {
+            log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
         }
-        _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION).c_str());
-
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {
             shutdown();
@@ -176,7 +183,6 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    std::array<unsigned int, DBVERSION> hashies { 0, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694 };
     upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION);
 
     lock.unlock();
