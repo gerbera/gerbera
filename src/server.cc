@@ -351,7 +351,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     log_debug("start");
 
     // check parameters
-    if (event == nullptr) {
+    if (!event) {
         log_debug("handleUpnpRootDeviceEvent: NULL event structure");
         return UPNP_E_BAD_REQUEST;
     }
@@ -402,7 +402,7 @@ int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* 
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
 {
     // check parameters
-    if (event == nullptr) {
+    if (!event) {
         log_debug("handleUpnpClientEvent: NULL event structure");
         return UPNP_E_BAD_REQUEST;
     }

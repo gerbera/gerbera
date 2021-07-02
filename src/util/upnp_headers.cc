@@ -63,7 +63,7 @@ void Headers::addHeader(const std::string& key, const std::string& value)
         return;
     }
 
-    if (headers == nullptr) {
+    if (!headers) {
         headers = std::make_unique<std::map<std::string, std::string>>();
     }
 
@@ -93,7 +93,7 @@ std::pair<std::string, std::string> Headers::parseHeader(const std::string& head
 
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 {
-    if (headers == nullptr)
+    if (!headers)
         return;
 
 #if defined(USING_NPUPNP)

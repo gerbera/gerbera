@@ -73,7 +73,7 @@ void MySQLDatabase::checkMysqlThreadInit() const
 {
     if (!mysql_connection)
         throw_std_runtime_error("mysql connection is not open or already closed");
-    if (pthread_getspecific(mysql_init_key) == nullptr) {
+    if (!pthread_getspecific(mysql_init_key)) {
         if (mysql_thread_init())
             throw_std_runtime_error("error while calling mysql_thread_init()");
         if (pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1)))

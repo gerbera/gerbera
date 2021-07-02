@@ -117,7 +117,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& key, const std::string& value)
 {
     auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
-    if (cs == nullptr)
+    if (!cs)
         return nullptr;
 
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
@@ -130,7 +130,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(config_option_t option)
 {
     auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
-    if (cs == nullptr)
+    if (!cs)
         return nullptr;
 
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);

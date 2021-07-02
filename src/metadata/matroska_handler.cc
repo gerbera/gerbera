@@ -62,7 +62,7 @@ public:
         : file(fopen(path, "rb"))
 #endif
     {
-        if (file == nullptr) {
+        if (!file) {
             throw_std_runtime_error("Could not fopen {}", path);
         }
     }
@@ -106,7 +106,7 @@ public:
 
     void close() override
     {
-        if (file == nullptr)
+        if (!file)
             return;
         if (fclose(file) != 0) {
             log_error("fclose failed");
@@ -118,7 +118,7 @@ public:
 void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item == nullptr)
+    if (!item)
         return;
 
     parseMKV(item, nullptr);
@@ -127,7 +127,7 @@ void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item == nullptr)
+    if (!item)
         return nullptr;
 
     std::unique_ptr<MemIOHandler> io_handler;
@@ -169,7 +169,7 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, E
     if (!el_l1->IsMaster())
         return;
     auto master = dynamic_cast<EbmlMaster*>(el_l1);
-    if (master == nullptr) {
+    if (!master) {
         log_debug("dynamic_cast unexpectedly returned nullptr, seems to be broken");
         return;
     }
@@ -193,7 +193,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     for (auto&& el : *info) {
         if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxTitle::ClassInfos.GlobalId) {
             auto title_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxTitle*>(el);
-            if (title_el == nullptr) {
+            if (!title_el) {
                 log_error("Malformed MKV file; KaxTitle cast failed!");
                 continue;
             }
@@ -202,7 +202,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             item->setMetadata(M_TITLE, sc->convert(title));
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
             auto date_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
-            if (date_el == nullptr) {
+            if (!date_el) {
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }

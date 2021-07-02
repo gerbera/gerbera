@@ -520,7 +520,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
                 wdObj->setParentWd(parentWd);
             }
 
-            if (pathArray == nullptr)
+            if (!pathArray)
                 alreadyWatching = getAppropriateAutoscan(wdObj, adir) != nullptr;
 
             // should we check for already existing "nonexisting" watches?
@@ -562,13 +562,13 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
     }
 
     auto wdObj = watches->at(wd);
-    if (wdObj == nullptr) {
+    if (!wdObj) {
         log_error("wd not found in watches!? ({}, {})", wd, path.c_str());
         return;
     }
 
     auto watchAs = getAppropriateAutoscan(wdObj, adir);
-    if (watchAs == nullptr) {
+    if (!watchAs) {
         log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
     } else {
         if (wdObj->getWdWatches()->size() == 1) {
@@ -704,12 +704,12 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
     } catch (const std::out_of_range& ex) {
         return;
     }
-    if (wdObj == nullptr)
+    if (!wdObj)
         return;
 
     //   log_debug("found wdObj");
     auto watch = getAppropriateAutoscan(wdObj, adir);
-    if (watch == nullptr)
+    if (!watch)
         return;
     //    log_debug("adding descendant");
     watch->addDescendant(addWd);

@@ -179,7 +179,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
 
 void AutoscanList::notifyAll(Timer::Subscriber* sub)
 {
-    if (sub == nullptr)
+    if (!sub)
         return;
     AutoLock lock(mutex);
 

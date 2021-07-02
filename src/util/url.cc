@@ -45,10 +45,10 @@ std::string URL::download(const std::string& URL, long* HTTP_retcode,
     bool cleanup = false;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
 
-    if (curl_handle == nullptr) {
+    if (!curl_handle) {
         curl_handle = curl_easy_init();
         cleanup = true;
-        if (curl_handle == nullptr)
+        if (!curl_handle)
             throw_std_runtime_error("Invalid curl handle");
     }
 
@@ -122,10 +122,10 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     char* c_url;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
 
-    if (curl_handle == nullptr) {
+    if (!curl_handle) {
         curl_handle = curl_easy_init();
         cleanup = true;
-        if (curl_handle == nullptr)
+        if (!curl_handle)
             throw_std_runtime_error("Invalid curl handle");
     }
 

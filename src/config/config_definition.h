@@ -62,11 +62,11 @@ public:
     static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
     {
         auto base = findConfigSetup(option, save);
-        if (base == nullptr && save)
+        if (!base && save)
             return nullptr;
 
         auto result = std::dynamic_pointer_cast<CS>(base);
-        if (result == nullptr) {
+        if (!result) {
             throw_std_runtime_error("Error in config code: {} has wrong class", option);
         }
         return result;

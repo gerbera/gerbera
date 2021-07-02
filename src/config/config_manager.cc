@@ -142,7 +142,7 @@ void ConfigManager::load(const fs::path& userHome)
     if (root.name() != ConfigSetup::ROOT_NAME)
         throw std::runtime_error("Error in config file: <config> tag not found");
 
-    if (root.child("server") == nullptr)
+    if (!root.child("server"))
         throw std::runtime_error("Error in config file: <server> tag not found");
 
     std::string version = root.attribute("version").as_string();
@@ -670,7 +670,7 @@ void ConfigManager::setOrigValue(const std::string& item, int value)
 std::string ConfigManager::getOption(config_option_t option) const
 {
     auto o = options->at(option);
-    if (o == nullptr) {
+    if (!o) {
         throw std::runtime_error("option not set");
     }
     return o->getOption();
@@ -679,7 +679,7 @@ std::string ConfigManager::getOption(config_option_t option) const
 int ConfigManager::getIntOption(config_option_t option) const
 {
     auto o = options->at(option);
-    if (o == nullptr) {
+    if (!o) {
         throw std::runtime_error("option not set");
     }
     return o->getIntOption();
@@ -688,7 +688,7 @@ int ConfigManager::getIntOption(config_option_t option) const
 bool ConfigManager::getBoolOption(config_option_t option) const
 {
     auto o = options->at(option);
-    if (o == nullptr) {
+    if (!o) {
         throw std::runtime_error("option not set");
     }
     return o->getBoolOption();

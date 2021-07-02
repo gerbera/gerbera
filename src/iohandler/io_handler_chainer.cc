@@ -39,7 +39,7 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::uni
 {
     if (chunkSize <= 0)
         throw_std_runtime_error("chunkSize must be positive");
-    if (readFrom == nullptr || writeTo == nullptr)
+    if (!readFrom || !writeTo)
         throw_std_runtime_error("readFrom and writeTo need to be set");
     status = 0;
     readFrom->open(UPNP_READ);

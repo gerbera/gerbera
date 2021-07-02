@@ -48,7 +48,7 @@ static duk_ret_t
 js_readln(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
-    if (self == nullptr) {
+    if (!self) {
         return 0;
     }
 
@@ -72,7 +72,7 @@ static duk_ret_t
 js_getCdsObject(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
-    if (self == nullptr) {
+    if (!self) {
         return 0;
     }
 
@@ -87,7 +87,7 @@ js_getCdsObject(duk_context* ctx)
 
     auto database = self->getDatabase();
     auto obj = database->findObjectByPath(path);
-    if (obj == nullptr) {
+    if (!obj) {
         auto cm = self->getContent();
         std::error_code ec;
         auto dirEnt = fs::directory_entry(path, ec);
@@ -96,7 +96,7 @@ js_getCdsObject(duk_context* ctx)
         } else {
             log_error("Failed to read {}: {}", path.c_str(), ec.message());
         }
-        if (obj == nullptr) { // object ignored
+        if (!obj) { // object ignored
             return 0;
         }
     }
@@ -132,7 +132,7 @@ std::string PlaylistParserScript::readln()
         return "";
 
     while (true) {
-        if (fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle) == nullptr)
+        if (!fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle))
             return "";
 
         ret = trimString(currentLine);

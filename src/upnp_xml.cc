@@ -494,7 +494,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     auto tp_mt = tlist->get(item->getMimeType());
     if (tp_mt) {
         for (auto&& [key, tp] : *tp_mt) {
-            if (tp == nullptr)
+            if (!tp)
                 throw_std_runtime_error("Invalid profile encountered");
 
             std::string ct = getValueOrDefault(mappings, item->getMimeType());

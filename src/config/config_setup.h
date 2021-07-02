@@ -169,7 +169,7 @@ public:
     virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }
-    virtual std::string getCurrentValue() const { return optionValue == nullptr ? "" : optionValue->getOption(); }
+    virtual std::string getCurrentValue() const { return optionValue ? optionValue->getOption() : ""; }
 };
 
 class ConfigStringSetup : public ConfigSetup {
@@ -375,7 +375,7 @@ public:
 
     int checkIntValue(std::string& sVal, const std::string& pathName = "") const;
 
-    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : fmt::to_string(optionValue->getIntOption()); }
+    std::string getCurrentValue() const override { return optionValue ? fmt::to_string(optionValue->getIntOption()) : ""; }
 
     static bool CheckSqlLiteSyncValue(std::string& value);
 
@@ -426,7 +426,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(bool optValue);
 
-    std::string getCurrentValue() const override { return optionValue == nullptr ? "" : (optionValue->getBoolOption() ? "true" : "false"); }
+    std::string getCurrentValue() const override { return optionValue ? (optionValue->getBoolOption() ? "true" : "false") : ""; }
 
     static bool CheckSqlLiteRestoreValue(std::string& value);
 

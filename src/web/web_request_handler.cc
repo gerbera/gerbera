@@ -74,7 +74,7 @@ void WebRequestHandler::check_request(bool checkLogin)
     if (sid.empty())
         throw SessionException("no session id given");
 
-    if ((session = sessionManager->getSession(sid)) == nullptr)
+    if (!(session = sessionManager->getSession(sid)))
         throw SessionException("invalid session id");
 
     if (checkLogin && !session->isLoggedIn())
@@ -253,7 +253,7 @@ void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pu
 
 void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node* parent)
 {
-    if (task == nullptr || parent == nullptr)
+    if (!task || !parent)
         return;
     auto taskEl = parent->append_child("task");
     taskEl.append_attribute("id") = task->getID();

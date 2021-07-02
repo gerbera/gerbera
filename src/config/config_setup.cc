@@ -47,10 +47,10 @@
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
-    if (xpathNode.node() == nullptr) {
+    if (!xpathNode.node()) {
         xpathNode = root.select_node(xpath);
     }
-    if (required && xpathNode.node() == nullptr) {
+    if (required && !xpathNode.node()) {
         throw_std_runtime_error("Error in config file: {}/{} tag not found", root.path(), xpath);
     }
     return xpathNode.node();
@@ -860,7 +860,7 @@ std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOpti
 /// \param scanmode add only directories with the specified scanmode to the array
 bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result)
 {
-    if (element == nullptr)
+    if (!element)
         return true;
 
     auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
@@ -968,7 +968,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
         if (i < std::numeric_limits<std::size_t>::max()) {
             auto entry = list->get(i, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<AutoscanDirectory>();
                 entry->setScanMode(scanMode);
                 list->add(entry, i);
@@ -1018,7 +1018,7 @@ std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_nod
 /// \param element starting element of the nodeset.
 bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result)
 {
-    if (element == nullptr)
+    if (!element)
         return true;
 
     const pugi::xml_node& root = element.root();
@@ -1429,7 +1429,7 @@ std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_
 /// \param element starting element of the nodeset.
 bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result)
 {
-    if (element == nullptr)
+    if (!element)
         return true;
 
     auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
@@ -1515,7 +1515,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
-            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<ClientConfig>();
                 list->add(entry, index);
             }
@@ -1566,7 +1566,7 @@ std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption
 /// \param element starting element of the nodeset.
 bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
 {
-    if (element == nullptr)
+    if (!element)
         return true;
 
     auto&& tcs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_DIRECTORIES_TWEAK);
@@ -1743,7 +1743,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
-            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<DirectoryTweak>();
                 list->add(entry, index);
             }
@@ -1794,7 +1794,7 @@ std::string ConfigDirectorySetup::getItemPath(int index, config_option_t propOpt
 /// \param element starting element of the nodeset.
 bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result)
 {
-    if (element == nullptr)
+    if (!element)
         return true;
 
     auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_DYNAMIC_CONTAINER);
@@ -1908,7 +1908,7 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::st
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
-            if (entry == nullptr && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
                 entry = std::make_shared<DynamicContent>();
                 list->add(entry, index);
             }

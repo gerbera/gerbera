@@ -71,7 +71,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 {
     log_debug("Start transcoding file: {}", location.c_str());
 
-    if (profile == nullptr)
+    if (!profile)
         throw_std_runtime_error("Transcoding of file {} requested but no profile given", location.c_str());
 
     bool isURL = obj->isExternalItem();

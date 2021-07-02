@@ -142,7 +142,7 @@ void web::autoscan::process()
 
 void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
 {
-    if (adir == nullptr) {
+    if (!adir) {
         element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
         element->append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
         element->append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
