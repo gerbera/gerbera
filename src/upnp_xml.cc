@@ -724,8 +724,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         } else {
             /* handle audio/video content */
             extend = getDLNAprofileString(config, contentType);
-            if (!extend.empty())
-                extend.append(";");
         }
 
         // we do not support seeking at all, so 00
