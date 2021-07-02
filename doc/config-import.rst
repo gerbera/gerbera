@@ -417,6 +417,7 @@ the removed directory if it becomes available/gets created again.
 
         Allowed values: ``yes`` or ``no``, process hidden files, overrides the hidden-files value in the ``<import/>`` tag.
 
+
 ``system-directories``
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -449,6 +450,41 @@ If the element does not exists, the default list of system directories is set to
         * Required
 
         Absolute path to the directory that shall be hidden.
+
+
+``visible-directories``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    <visible-directories>
+
+* Optional
+
+Specifies a list of system directories visible in filesystem web ui. It can contain any path which is accessible by the gerbera server.
+
+If the element exists it supercedes ``system-directories``, i.e. only visible directories can be selected in web ui.
+This is the more forward way of defining content but cannot be defaulted.
+
+    **Child tags:**
+
+    ::
+
+        <add-path name="/home/media"/>
+
+    * Optional
+
+    Defines a visible directory.
+
+    The attributes specify various options:
+
+        ::
+
+            name=...
+
+        * Required
+
+        Absolute path to the directory that shall be visible.
 
 
 ``layout``

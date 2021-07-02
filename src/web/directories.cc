@@ -61,6 +61,7 @@ void web::directories::process()
 
     // don't bother users with system directorties
     auto&& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
+    auto&& includes_fullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
     constexpr auto excludes_dirname = std::array {
         "lost+found",
@@ -75,12 +76,17 @@ void web::directories::process()
 
         if (!it.is_directory(ec))
             continue;
-        if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
-            continue;
-        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
-            || (exclude_config_dirs && startswith(filepath.filename().string(), ".")))
-            continue;
-
+        if (!includes_fullpath.empty()
+            && std::none_of(includes_fullpath.begin(), includes_fullpath.end(), //
+                [&](auto&& sub) { return startswith(filepath.string(), sub) || startswith(sub, filepath.string()); }))
+            continue; // skip unwanted dir
+        if (includes_fullpath.empty()) {
+            if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
+                continue; // skip excluded dir
+            if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
+                || (exclude_config_dirs && startswith(filepath.filename().string(), ".")))
+                continue; // skip dir with leading .
+        }
         auto&& dir = fs::directory_iterator(filepath, ec);
         bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 

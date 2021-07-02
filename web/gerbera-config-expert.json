@@ -486,6 +486,19 @@
 					]
 				},
 				{
+					"item": "/import/visible-directories/add-path",
+					"caption": "Visible Directories",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/visible-directories/add-path/attribute::name",
+							"caption": "Path",
+							"editable": false
+						}
+					]
+				},
+				{
 					"item": "/import/scripting/virtual-layout/genre-map/genre",
 					"caption": "Genre Map",
 					"type": "List",

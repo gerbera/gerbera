@@ -59,6 +59,7 @@ void web::files::process()
 
     std::error_code ec;
     std::map<std::string, fs::path> filesMap;
+    auto&& includes_fullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
@@ -67,6 +68,10 @@ void web::files::process()
             continue;
         if (exclude_config_files && startswith(filepath.filename().string(), "."))
             continue;
+        if (!includes_fullpath.empty()
+            && std::none_of(includes_fullpath.begin(), includes_fullpath.end(), //
+                [&](auto&& sub) { return startswith(filepath.string(), sub); }))
+            continue; // skip unwanted file
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
         filesMap[id] = filepath.filename();
