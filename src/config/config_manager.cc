@@ -288,6 +288,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
     args.clear();
     setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    setOption(root, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
     setOption(root, CFG_IMPORT_LAYOUT_PARENT_PATH);
     setOption(root, CFG_IMPORT_LAYOUT_MAPPING);
 

@@ -345,9 +345,9 @@ fs::path getLastPath(const fs::path& path);
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
+std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType);
 std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view mimeType);
-std::string getDLNAprofileString(std::string_view contentType);
-std::string getDLNAContentHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view contentType);
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType);
 
 #ifndef HAVE_FFMPEG
 /// \brief Fallback code to retrieve the used fourcc from an AVI file.

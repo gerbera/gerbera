@@ -323,6 +323,7 @@ void ConfigGenerator::generateMappings()
 
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
 }
 
 void ConfigGenerator::generateOnlineContent()

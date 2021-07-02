@@ -68,6 +68,14 @@
       <treat mimetype="video/x-matroska" as="mkv" />
       <treat mimetype="video/x-msvideo" as="avi" />
     </mimetype-contenttype>
+    <contenttype-dlnaprofile>
+      <map from="avi" to="AVI" />
+      <map from="mkv" to="MKV" />
+      <map from="mp3" to="MP3" />
+      <map from="mp4" to="AVC_MP4_EU" />
+      <map from="mpeg" to="MPEG_PS_PAL" />
+      <map from="pcm" to="LPCM" />
+    </contenttype-dlnaprofile>
   </mappings>
   <online-content>
     <AppleTrailers enabled="no" refresh="43200" update-at-start="no" resolution="640" />
