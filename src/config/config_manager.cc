@@ -496,6 +496,7 @@ void ConfigManager::load(const fs::path& userHome)
     setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
     setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
     setOption(root, CFG_IMPORT_SYSTEM_DIRECTORIES);
+    setOption(root, CFG_IMPORT_VISIBLE_DIRECTORIES);
     setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST);
     setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
 
