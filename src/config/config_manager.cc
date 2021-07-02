@@ -79,7 +79,7 @@ ConfigManager::ConfigManager(fs::path filename,
     if (this->filename.empty()) {
         // No config file path provided, so lets find one.
         fs::path home = userHome / configDir;
-        this->filename += home / DEFAULT_CONFIG_NAME;
+        this->filename = home / DEFAULT_CONFIG_NAME;
     }
 
     std::error_code ec;
