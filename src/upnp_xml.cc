@@ -204,6 +204,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
 
     auto root = doc->append_child("root");
     root.append_attribute("xmlns") = UPNP_DESC_DEVICE_NAMESPACE;
+    root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     auto specVersion = root.append_child("specVersion");
     specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MAJOR);
@@ -212,19 +213,11 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     auto device = root.append_child("device");
 
     auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
-    dlnaDoc.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:device-1-0";
+    dlnaDoc.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    device.append_child("deviceType").append_child(pugi::node_pcdata).set_value(UPNP_DESC_DEVICE_TYPE);
-    if (presentationURL.empty())
-        device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value("/");
-    else
-        device.append_child("presentationURL").append_child(pugi::node_pcdata).set_value(presentationURL.c_str());
-
     constexpr std::array<std::pair<const char*, config_option_t>, 9> deviceProperties { {
-        // { "deviceType", {} },
-        // { "presentationURL", {} },
         { "friendlyName", CFG_SERVER_NAME },
         { "manufacturer", CFG_SERVER_MANUFACTURER },
         { "manufacturerURL", CFG_SERVER_MANUFACTURER_URL },
@@ -237,6 +230,15 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     } };
     for (auto&& [tag, field] : deviceProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
+    }
+    std::array<std::pair<const char*, const char*>, 4> deviceStringProperties { {
+        { "deviceType", UPNP_DESC_DEVICE_TYPE },
+        { "presentationURL", presentationURL.empty() ? "/" : presentationURL.c_str() },
+        { "sec:ProductCap", UPNP_DESC_PRODUCT_CAPS },
+        { "sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS }, // used by SAMSUNG
+    } };
+    for (auto&& [tag, value] : deviceStringProperties) {
+        device.append_child(tag).append_child(pugi::node_pcdata).set_value(value);
     }
 
     // add icons
@@ -674,7 +676,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
             /// \todo clean this up, make sure to check the mimetype and
             /// provide the profile correctly
-            aa.append_attribute("xmlns:dlna") = "urn:schemas-dlna-org:metadata-1-0";
+            aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
             aa.append_attribute("dlna:profileID") = "JPEG_TN";
             if (res->isMetaResource(ID3_ALBUM_ART)) {
                 continue;

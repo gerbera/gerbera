@@ -589,7 +589,9 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/gerbera)
 INSTALL(FILES
         src/database/mysql/mysql.sql
+        src/database/mysql/mysql-upgrade.xml
         src/database/sqlite3/sqlite3.sql
+        src/database/sqlite3/sqlite3-upgrade.xml
         DESTINATION share/gerbera)
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION share/man/man1)
 
