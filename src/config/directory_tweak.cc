@@ -33,7 +33,7 @@
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
 {
     auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(location);
-    if (tweak == nullptr)
+    if (!tweak)
         return;
 
     if (tweak->hasFollowSymlinks())

@@ -56,9 +56,9 @@ CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& 
 
 void CurlIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if (curl_handle == nullptr) {
+    if (!curl_handle) {
         curl_handle = curl_easy_init();
-        if (curl_handle == nullptr)
+        if (!curl_handle)
             throw_std_runtime_error("failed to init curl");
     } else
         curl_easy_reset(curl_handle);

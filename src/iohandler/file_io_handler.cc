@@ -58,7 +58,7 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
     }
 
-    if (f == nullptr) {
+    if (!f) {
         throw_std_runtime_error("Failed to open: {}", filename.c_str());
     }
 }

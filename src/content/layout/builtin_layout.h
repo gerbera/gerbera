@@ -51,7 +51,7 @@ public:
     virtual ~BuiltinLayout();
 #endif
 
-    void processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath) override;
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, fs::path rootpath) override;
 
 protected:
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool use_ref = true);

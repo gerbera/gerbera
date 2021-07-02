@@ -62,7 +62,7 @@ public:
     std::string col(int index) const
     {
         char* c = col_c_str(index);
-        if (c == nullptr)
+        if (!c)
             return "";
         return std::string(c);
     }

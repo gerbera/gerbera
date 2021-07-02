@@ -405,7 +405,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
     return genre;
 }
 
-void BuiltinLayout::processCdsObject(std::shared_ptr<CdsObject> obj, fs::path rootpath)
+void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, fs::path rootpath)
 {
     log_debug("Process CDS Object: {}", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING

@@ -102,7 +102,7 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
     try {
         auto parser = SearchParser(emitter, input);
         auto rootNode = parser.parse();
-        if (rootNode == nullptr)
+        if (!rootNode)
             return ::testing::AssertionFailure() << "Failed to create AST";
 
         auto output = rootNode->emit();

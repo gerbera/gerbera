@@ -62,7 +62,7 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
 
 void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
 {
-    if (tag == nullptr)
+    if (!tag)
         return;
 
     if (tag->isEmpty())
@@ -234,7 +234,7 @@ void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const 
 void TagLibHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item == nullptr)
+    if (!item)
         return;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -302,7 +302,7 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
 std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (item == nullptr) // not streamable
+    if (!item) // not streamable
         return nullptr;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -450,7 +450,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             std::string value;
             for (auto&& frame : frameList) {
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
-                if (textFrame == nullptr)
+                if (!textFrame)
                     continue;
                 TagLib::String frameContents = textFrame->fieldList().toString(entrySeparator);
                 if (!value.empty())
@@ -471,7 +471,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
 
             for (auto&& frame : frameList) {
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
-                if (textFrame == nullptr)
+                if (!textFrame)
                     continue;
                 std::string content;
                 std::string subTag;

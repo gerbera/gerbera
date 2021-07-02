@@ -193,18 +193,18 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
         if (currentToken->getType() == TokenType::PROPERTY) {
             expressionNode = parseRelationshipExpression();
             if (currentOperator == TokenType::AND) {
-                if (nodeStack.top() == nullptr)
+                if (!nodeStack.top())
                     throw_std_runtime_error("Cannot construct ASTAndOperator without lhs");
-                if (expressionNode == nullptr)
+                if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTAndOperator without rhs");
                 std::shared_ptr<ASTNode> lhs(nodeStack.top());
                 nodeStack.pop();
                 nodeStack.push(std::make_shared<ASTAndOperator>(sqlEmitter, lhs, expressionNode));
                 operatorStack.pop();
             } else if (currentOperator == TokenType::OR) {
-                if (nodeStack.top() == nullptr)
+                if (!nodeStack.top())
                     throw_std_runtime_error("Cannot construct ASTOrOperator without lhs");
-                if (expressionNode == nullptr)
+                if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTOrOperator without rhs");
                 std::shared_ptr<ASTNode> lhs(nodeStack.top());
                 nodeStack.pop();
@@ -282,7 +282,7 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
             getNextToken();
         }
     }
-    if (currentNode == nullptr)
+    if (!currentNode)
         throw_std_runtime_error("Failed to parse search criteria - bad expression between parenthesis");
 
     return std::make_shared<ASTParenthesis>(sqlEmitter, currentNode);

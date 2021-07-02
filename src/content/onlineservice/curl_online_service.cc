@@ -108,7 +108,7 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
         throw_std_runtime_error("Not allowed to call refreshServiceData from different threads");
 
     auto reply = getData();
-    if (reply == nullptr) {
+    if (!reply) {
         log_debug("Failed to get XML content from {} service", serviceName);
         throw_std_runtime_error("Failed to get XML content from {} service", serviceName);
     }
@@ -121,13 +121,13 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
         /// \todo add try/catch here and a possibility do find out if we
         /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
-        if (obj == nullptr)
+        if (!obj)
             break;
 
         obj->setVirtual(true);
 
         auto old = database->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
-        if (old == nullptr) {
+        if (!old) {
             log_debug("Adding new {} object", serviceName);
 
             if (layout)

@@ -59,7 +59,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         auto trailer = *trailer_it;
         ++trailer_it;
 
-        if (trailer == nullptr)
+        if (!trailer)
             return nullptr;
 
         if (trailer.type() != pugi::node_element)
@@ -84,7 +84,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->addResource(resource);
 
     auto info = trailer.child("info");
-    if (info == nullptr)
+    if (!info)
         return nullptr;
 
     std::string temp = info.child("title").text().as_string();
@@ -110,7 +110,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setServiceID(temp);
 
     auto preview = trailer.child("preview");
-    if (preview == nullptr) {
+    if (!preview) {
         log_warning("Failed to retrieve Trailer location for \"{}\", "
                     "skipping...\n",
             item->getTitle().c_str());

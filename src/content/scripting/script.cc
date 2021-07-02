@@ -230,7 +230,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     duk_push_object(ctx); // config
     for (auto&& i : ConfigOptionIterator()) {
         auto scs = ConfigDefinition::findConfigSetup(i, true);
-        if (scs == nullptr)
+        if (!scs)
             continue;
         auto value = scs->getCurrentValue();
         if (!value.empty()) {
@@ -322,7 +322,7 @@ Script* Script::getContextScript(duk_context* ctx)
     duk_get_prop_string(ctx, -1, "this");
     auto self = static_cast<Script*>(duk_get_pointer(ctx, -1));
     duk_pop_2(ctx);
-    if (self == nullptr) {
+    if (!self) {
         log_debug("Could not retrieve class instance from global object");
         duk_error(ctx, DUK_ERR_ERROR, "Could not retrieve current script from stash");
     }

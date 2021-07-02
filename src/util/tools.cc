@@ -84,7 +84,7 @@ std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
     const char* end = data + str.length();
     while (data < end) {
         auto pos = std::strchr(data, sep);
-        if (pos == nullptr) {
+        if (!pos) {
             std::string part = data;
             ret.push_back(part);
             data = end;
@@ -804,7 +804,7 @@ std::string ipToInterface(std::string_view ip)
     }
 
     for (ifa = ifaddr, n = 0; ifa; ifa = ifa->ifa_next, n++) {
-        if (ifa->ifa_addr == nullptr)
+        if (!ifa->ifa_addr)
             continue;
 
         family = ifa->ifa_addr->sa_family;
@@ -1188,7 +1188,7 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
         }
 
         server = gethostbyname("127.0.0.1");
-        if (server == nullptr) {
+        if (!server) {
             log_error("could not resolve localhost");
             close(fd);
             return -1;

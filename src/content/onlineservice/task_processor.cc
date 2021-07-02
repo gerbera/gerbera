@@ -80,7 +80,7 @@ void TaskProcessor::threadProc()
             taskQueue.pop_front();
         }
 
-        if (task == nullptr) {
+        if (!task) {
             working = false;
             threadRunner->wait(lock);
             working = true;
@@ -149,7 +149,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 
     // if there is no current task, then the queues are empty
     // and we do not have to allocate the array
-    if (tc == nullptr)
+    if (!tc)
         return taskList;
 
     taskList.push_back(tc);
@@ -180,7 +180,7 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
 
 void TPFetchOnlineContentTask::run()
 {
-    if (this->service == nullptr) {
+    if (!this->service) {
         log_debug("No service specified");
         return;
     }

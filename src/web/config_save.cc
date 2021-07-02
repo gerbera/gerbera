@@ -157,8 +157,8 @@ void web::configSave::process()
     if (action == "rescan" && !target.empty()) {
         if (target != "--all") {
             fs::path targetPath(target);
-            std::shared_ptr<AutoscanDirectory> autoscan = nullptr;
-            while (targetPath != "/" && autoscan == nullptr) {
+            std::shared_ptr<AutoscanDirectory> autoscan;
+            while (targetPath != "/" && !autoscan) {
                 autoscan = content->getAutoscanDirectory(targetPath);
                 targetPath = targetPath.parent_path();
             }
