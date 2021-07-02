@@ -1039,31 +1039,22 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
     return pos;
 }
 
-std::string getDLNAprofileString(std::string_view contentType)
+std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType)
 {
-    static std::map<std::string_view, std::string_view> dlnaProfMap {
-        { CONTENT_TYPE_MP4, UPNP_DLNA_PROFILE_AVC_MP4_EU },
-        { CONTENT_TYPE_MKV, UPNP_DLNA_PROFILE_MKV },
-        { CONTENT_TYPE_AVI, UPNP_DLNA_PROFILE_AVI },
-        { CONTENT_TYPE_MPEG, UPNP_DLNA_PROFILE_MPEG_PS_PAL },
-        { CONTENT_TYPE_MP3, UPNP_DLNA_PROFILE_MP3 },
-        { CONTENT_TYPE_PCM, UPNP_DLNA_PROFILE_LPCM },
-    };
-    auto profile = getValueOrDefault(dlnaProfMap, contentType, std::string_view(""));
+    // get profiles from <contenttype-dlnaprofile> mappings
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    auto profile = getValueOrDefault(mappings, contentType, "");
 
     return profile.empty() ? "" : fmt::format("{}={}", UPNP_DLNA_PROFILE, profile);
 }
 
-std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, std::string_view contentType)
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType)
 {
-    std::string content_parameter;
-    content_parameter = getDLNAprofileString(contentType);
-    if (!content_parameter.empty())
-        content_parameter += std::string(";");
-    content_parameter += std::string(UPNP_DLNA_OP) + "=" + UPNP_DLNA_OP_SEEK_RANGE + ";";
-    content_parameter += std::string(UPNP_DLNA_CONVERSION_INDICATOR) + "=" + UPNP_DLNA_NO_CONVERSION + ";";
-    content_parameter += std::string(UPNP_DLNA_FLAGS "=" UPNP_DLNA_ORG_FLAGS_AV);
-    return content_parameter;
+    std::string content_parameter = getDLNAprofileString(config, contentType);
+    return fmt::format("{}{}{}={};{}={};{}={}", content_parameter, !content_parameter.empty() ? ";" : "", //
+        UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
+        UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
+        UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
 }
 
 std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::string_view mimeType)

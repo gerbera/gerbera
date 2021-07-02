@@ -219,7 +219,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
 }
 
 #elif !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
-TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSorOnline)
+TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
 

@@ -723,7 +723,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             }
         } else {
             /* handle audio/video content */
-            extend = getDLNAprofileString(contentType);
+            extend = getDLNAprofileString(config, contentType);
             if (!extend.empty())
                 extend.append(";");
         }

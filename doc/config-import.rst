@@ -721,8 +721,8 @@ Note:
     extension is case sensitive, this will probably need to be fixed.
 
 
-``mime-type-upnpclass``
-~~~~~~~~~~~~~~~~~~~~~~~
+``mimetype-upnpclass``
+~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -818,6 +818,33 @@ The ``as`` attribute can have following values:
 |                                   |               | | FourCC extraction will be attempted. |
 |                                   |               |                                        |
 +-----------------------------------+---------------+----------------------------------------+
+
+
+``contenttype-dlnaprofile``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    <contenttype-dlnaprofile>
+
+* Optional
+
+This section holds the content type to dlnaprofile mappings.
+
+
+**Child tags:**
+
+``map``
+-------
+
+::
+
+     <map from="mp4" to="AVC_MP4_BL_CIF30_AAC_MULT5"/>
+
+* Optional
+
+Specifies a mapping from a certain content type to a dlna profile in the Content Directory. The values of **from** and **to**
+attributes are case sensitive.
 
 
 ``library-options``
