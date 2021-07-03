@@ -275,7 +275,7 @@ void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(R_RESOLUTION, th_resolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
-            item->addResource(resource);
+            item->addResource(move(resource));
         } catch (const std::runtime_error& e) {
             log_error("Something bad happened! {}", e.what());
         }

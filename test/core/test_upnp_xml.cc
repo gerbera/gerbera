@@ -62,7 +62,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(R_RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-    obj->addResource(resource);
+    obj->addResource(move(resource));
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -151,7 +151,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     resource->addAttribute(R_DURATION, "123456");
     resource->addAttribute(R_NRAUDIOCHANNELS, "2");
     resource->addAttribute(R_SIZE, "4711");
-    obj->addResource(resource);
+    obj->addResource(move(resource));
 
     resource = std::make_shared<CdsResource>(CH_SUBTITLE);
     std::string type = "srt";
@@ -159,14 +159,14 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     resource->addAttribute(R_RESOURCE_FILE, "/home/resource/subtitle.srt");
     resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
     resource->addParameter("type", type);
-    obj->addResource(resource);
+    obj->addResource(move(resource));
 
     resource = std::make_shared<CdsResource>(CH_FANART);
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(R_RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addAttribute(R_RESOLUTION, "200x200");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-    obj->addResource(resource);
+    obj->addResource(move(resource));
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
