@@ -848,7 +848,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
                             resource->addAttribute(R_RESOURCE_FILE, image.string());
                             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-                            dynFolder->addResource(resource);
+                            dynFolder->addResource(move(resource));
                         }
                         dynamicContainers[dynId] = dynFolder;
                     }

@@ -266,7 +266,7 @@ void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, c
         auto resource = std::make_shared<CdsResource>(CH_MATROSKA);
         resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(art_mimetype));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-        item->addResource(resource);
+        item->addResource(move(resource));
     }
 }
 

@@ -590,7 +590,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 item->insertResource(0, t_res);
                 original_resource++;
             } else
-                item->addResource(t_res);
+                item->addResource(move(t_res));
         }
 
         if (skipURL)

@@ -104,7 +104,7 @@ std::shared_ptr<CdsObject> web::addObject::addUrl(int parentID, const std::share
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
-    item->addResource(resource);
+    item->addResource(move(resource));
 
     return item;
 }

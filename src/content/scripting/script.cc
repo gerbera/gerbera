@@ -623,7 +623,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
                 resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
 
-                item->addResource(resource);
+                item->addResource(move(resource));
             }
         }
     }

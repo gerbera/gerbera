@@ -335,7 +335,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 
         // add move watch
         auto watch = std::make_shared<WatchMove>(removeWd);
-        wdObj->addWatch(watch);
+        wdObj->addWatch(move(watch));
     }
     return wd;
 }
@@ -535,7 +535,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
             if (pathArray) {
                 watch->setNonexistingPathArray(*pathArray);
             }
-            wdObj->addWatch(watch);
+            wdObj->addWatch(move(watch));
 
             if (!startPoint) {
                 int startPointWd = inotify->addWatch(adir->getLocation(), events);

@@ -1201,7 +1201,7 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
 
         if (origObj) {
             if (fanart == resources.end() && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::count(location.begin(), location.end(), '/') > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
-                const std::vector<std::shared_ptr<CdsResource>>& origResources = origObj->getResources();
+                auto origResources = origObj->getResources();
                 fanart = std::find_if(origResources.begin(), origResources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
                 if (fanart != origResources.end()) {
                     if ((*fanart)->getAttribute(R_RESOURCE_FILE).empty()) {

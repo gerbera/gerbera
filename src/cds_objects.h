@@ -325,9 +325,9 @@ public:
     }
 
     /// \brief Add resource tag
-    void addResource(const std::shared_ptr<CdsResource>& resource)
+    void addResource(std::shared_ptr<CdsResource> resource)
     {
-        resources.push_back(resource);
+        resources.push_back(move(resource));
     }
 
     /// \brief Insert resource tag at index

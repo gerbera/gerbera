@@ -155,7 +155,7 @@ private:
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
         std::shared_ptr<std::vector<std::shared_ptr<Watch>>> getWdWatches() const { return wdWatches; }
-        void addWatch(const std::shared_ptr<Watch>& w) { wdWatches->push_back(w); }
+        void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(move(w)); }
 
     private:
         std::shared_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches;
