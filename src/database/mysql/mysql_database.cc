@@ -352,7 +352,7 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
     nullRead = true;
     mysql_free_result(mysql_res);
     mysql_res = nullptr;
-    return nullptr;
+    return {};
 }
 
 /* MysqlRow */

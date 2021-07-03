@@ -193,5 +193,5 @@ void* IOHandlerBufferHelper::staticThreadProc(void* arg)
 {
     auto inst = static_cast<IOHandlerBufferHelper*>(arg);
     inst->threadProc();
-    return nullptr;
+    return {};
 }

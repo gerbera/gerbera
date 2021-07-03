@@ -128,7 +128,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObje
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
-        return nullptr;
+        return {};
 
     std::unique_ptr<MemIOHandler> io_handler;
     parseMKV(item, &io_handler);

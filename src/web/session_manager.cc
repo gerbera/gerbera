@@ -158,7 +158,7 @@ std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds time
 std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock)
 {
     if (sessions.empty()) {
-        return nullptr;
+        return {};
     }
 
     auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock);
@@ -166,7 +166,9 @@ std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID
         lock.lock();
 
     auto it = std::find_if(sessions.begin(), sessions.end(), [&](auto&& s) { return s->getID() == sessionID; });
-    return it != sessions.end() ? *it : nullptr;
+    if (it != sessions.end()
+        return *it;
+    return {};
 }
 
 void SessionManager::removeSession(const std::string& sessionID)

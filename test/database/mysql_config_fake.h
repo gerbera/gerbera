@@ -44,16 +44,16 @@ public:
     bool getBoolOption(config_option_t option) const override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return std::map<std::string, std::string>(); }
     std::vector<std::string> getArrayOption(config_option_t option) const override { return std::vector<std::string>(); }
-    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
+    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return {}; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return {}; }
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return {}; }
     void updateConfigFromDatabase(std::shared_ptr<Database> database) override {};
     std::string getOrigValue(const std::string& item) const override { return ""; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }
     void setOrigValue(const std::string& item, int value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
-    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override { return nullptr; }
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override { return {}; }
 };
 
 #endif //GERBERA_MYSQL_CONFIG_FAKE_H

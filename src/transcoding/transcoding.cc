@@ -85,7 +85,7 @@ std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::st
     auto it = list.find(sourceMimeType);
     if (it != list.end())
         return it->second;
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll) const
@@ -95,7 +95,7 @@ std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std:
         if (tp != inner->end() && (getAll || tp->second->getEnabled()))
             return tp->second;
     }
-    return nullptr;
+    return {};
 }
 
 std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)

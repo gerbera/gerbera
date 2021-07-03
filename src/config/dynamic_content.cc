@@ -70,14 +70,14 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(size_t id, bool edit)
     AutoLock lock(mutex);
     if (!edit) {
         if (id >= list.size())
-            return nullptr;
+            return {};
 
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location)
@@ -87,7 +87,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location
     if (entry != list.end() && *entry) {
         return *entry;
     }
-    return nullptr;
+    return {};
 }
 
 void DynamicContentList::remove(size_t id, bool edit)

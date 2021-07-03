@@ -303,7 +303,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item) // not streamable
-        return nullptr;
+        return {};
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, item->getMimeType());

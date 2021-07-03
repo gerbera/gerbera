@@ -561,13 +561,13 @@ int Server::registerVirtualDirCallbacks()
             //log_debug("{} open({})", ioPtr, filename);
             return ioPtr;
         } catch (const ServerShutdownException& se) {
-            return nullptr;
+            return {};
         } catch (const SubtitlesNotFoundException& sex) {
             log_info("SubtitlesNotFoundException: {}", sex.what());
-            return nullptr;
+            return {};
         } catch (const std::runtime_error& ex) {
             log_error("Exception: {}", ex.what());
-            return nullptr;
+            return {};
         }
     });
     if (ret != UPNP_E_SUCCESS)

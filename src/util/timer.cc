@@ -56,7 +56,7 @@ void* Timer::staticThreadProc(void* arg)
     auto inst = static_cast<Timer*>(arg);
     inst->threadProc();
     log_debug("Exiting Timer thread...");
-    return nullptr;
+    return {};
 }
 
 void Timer::threadProc()

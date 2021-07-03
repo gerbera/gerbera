@@ -57,7 +57,7 @@ void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& se
 std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t service)
 {
     if (service > OS_Max)
-        return nullptr;
+        return {};
 
     return service_list.at(service);
 }

@@ -405,7 +405,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     int objType = getIntProperty("objectType", -1);
     if (objType == -1) {
         log_error("missing objectType property");
-        return nullptr;
+        return {};
     }
 
     auto obj = CdsObject::createObject(objType);

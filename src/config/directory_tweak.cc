@@ -90,14 +90,14 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(size_t id, bool edit)
     AutoLock lock(mutex);
     if (!edit) {
         if (id >= list.size())
-            return nullptr;
+            return {};
 
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location)
@@ -110,7 +110,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& locatio
             return *entry;
         }
     }
-    return nullptr;
+    return {};
 }
 
 void DirectoryConfigList::remove(size_t id, bool edit)

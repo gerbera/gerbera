@@ -91,14 +91,14 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id, bool edit)
     AutoLock lock(mutex);
     if (!edit) {
         if (id >= list.size())
-            return nullptr;
+            return {};
 
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
@@ -106,7 +106,9 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     AutoLock lock(mutex);
 
     auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return objectID == item->getObjectID(); });
-    return it != list.end() ? *it : nullptr;
+    if (it != list.end())
+        return *it;
+    return {};
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
@@ -114,7 +116,9 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
     AutoLock lock(mutex);
 
     auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return location == item->getLocation(); });
-    return it != list.end() ? *it : nullptr;
+    if (it != list.end())
+        return *it;
+    return {};
 }
 
 void AutoscanList::remove(size_t id, bool edit)

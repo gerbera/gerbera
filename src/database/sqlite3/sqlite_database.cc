@@ -265,7 +265,7 @@ void* Sqlite3Database::staticThreadProc(void* arg)
     } catch (const std::runtime_error& e) {
         log_error("Sqlite3Database::staticThreadProc - aborting thread");
     }
-    return nullptr;
+    return {};
 }
 
 void Sqlite3Database::threadProc()
@@ -565,9 +565,9 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
         if (cur_row <= nrow) {
             return std::make_unique<Sqlite3Row>(row);
         }
-        return nullptr;
+        return {};
     }
-    return nullptr;
+    return {};
 }
 
 /* Sqlite3BackupTimerSubscriber */

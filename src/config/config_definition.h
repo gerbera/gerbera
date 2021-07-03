@@ -63,7 +63,7 @@ public:
     {
         auto base = findConfigSetup(option, save);
         if (!base && save)
-            return nullptr;
+            return {};
 
         auto result = std::dynamic_pointer_cast<CS>(base);
         if (!result) {

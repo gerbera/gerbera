@@ -60,7 +60,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         ++trailer_it;
 
         if (!trailer)
-            return nullptr;
+            return {};
 
         if (trailer.type() != pugi::node_element)
             continue;
@@ -74,7 +74,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
             return item;
     } // while trailer_it
 
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
@@ -85,7 +85,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     auto info = trailer.child("info");
     if (!info)
-        return nullptr;
+        return {};
 
     std::string temp = info.child("title").text().as_string();
     if (temp.empty())
@@ -103,7 +103,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         log_warning("Failed to retrieve Trailer ID for \"{}\", "
                     "skipping...\n",
             item->getTitle().c_str());
-        return nullptr;
+        return {};
     }
 
     temp = fmt::format("{}{}", OnlineService::getDatabasePrefix(OS_ATrailers), temp);
@@ -114,7 +114,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         log_warning("Failed to retrieve Trailer location for \"{}\", "
                     "skipping...\n",
             item->getTitle().c_str());
-        return nullptr;
+        return {};
     }
 
     temp = preview.child("large").text().as_string();
@@ -124,7 +124,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         log_error("Could not get location for Trailers item {}, "
                   "skipping.\n",
             item->getTitle().c_str());
-        return nullptr;
+        return {};
     }
 
     item->setClass("object.item.videoItem");
@@ -160,9 +160,9 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         std::string actors;
         for (auto&& actor : cast.children()) {
             if (actor.type() != pugi::node_element)
-                return nullptr;
+                return {};
             if (std::string(actor.name()) != "name")
-                return nullptr;
+                return {};
 
             temp = actor.text().as_string();
             if (!temp.empty()) {
@@ -182,9 +182,9 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         std::string genres;
         for (auto&& gn : genre.children()) {
             if (gn.type() != pugi::node_element)
-                return nullptr;
+                return {};
             if (std::string(gn.name()) != "name")
-                return nullptr;
+                return {};
 
             temp = gn.text().as_string();
             if (!temp.empty()) {
@@ -219,7 +219,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     } catch (const std::runtime_error& ex) {
         log_warning("Failed to validate newly created Trailer item: {}",
             ex.what());
-        return nullptr;
+        return {};
     }
 }
 

@@ -58,7 +58,7 @@ void* TaskProcessor::staticThreadProc(void* arg)
 {
     auto inst = static_cast<TaskProcessor*>(arg);
     inst->threadProc();
-    return nullptr;
+    return {};
 }
 
 void TaskProcessor::threadProc()

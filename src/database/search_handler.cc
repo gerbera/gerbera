@@ -120,7 +120,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             }
         }
     }
-    return nullptr;
+    return {};
 }
 
 std::string SearchLexer::getQuotedValue(const std::string& input)

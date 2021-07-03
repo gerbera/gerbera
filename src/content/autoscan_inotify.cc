@@ -595,7 +595,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
             }
         }
     }
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const fs::path& path)
@@ -692,7 +692,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(c
                 return watchAs;
         }
     }
-    return nullptr;
+    return {};
 }
 
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shared_ptr<AutoscanDirectory>& adir)

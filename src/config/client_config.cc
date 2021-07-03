@@ -94,14 +94,14 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
     AutoLock lock(mutex);
     if (!edit) {
         if (id >= list.size())
-            return nullptr;
+            return {};
 
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
         return indexMap[id];
     }
-    return nullptr;
+    return {};
 }
 
 void ClientConfigList::remove(size_t id, bool edit)

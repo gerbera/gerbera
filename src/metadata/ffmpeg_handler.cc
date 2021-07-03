@@ -371,10 +371,10 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
 #ifdef HAVE_FFMPEGTHUMBNAILER
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
-        return nullptr;
+        return {};
 
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
-        return nullptr;
+        return {};
 
     const auto cache_enabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
 
@@ -404,7 +404,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject
 
     return std::make_unique<MemIOHandler>(img.data(), img.size());
 #else
-    return nullptr;
+    return {};
 #endif
 }
 

@@ -71,21 +71,21 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
             curl_handle, false, true, true);
     } catch (const std::runtime_error& ex) {
         log_error("Failed to download {} XML data: {}", serviceName, ex.what());
-        return nullptr;
+        return {};
     }
 
     if (buffer.empty())
-        return nullptr;
+        return {};
 
     if (retcode != 200)
-        return nullptr;
+        return {};
 
     log_debug("GOT BUFFER{}", buffer.c_str());
     auto doc = std::make_unique<pugi::xml_document>();
     pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         log_error("Error parsing {} XML: {}", serviceName, result.description());
-        return nullptr;
+        return {};
     }
 
     return doc;

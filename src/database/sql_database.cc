@@ -693,7 +693,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     }
     commit("loadObjectByServiceID");
 
-    return nullptr;
+    return {};
 }
 
 std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char servicePrefix)
@@ -1008,7 +1008,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
     auto row = res->nextRow();
     if (!row) {
         commit("findObjectByPath");
-        return nullptr;
+        return {};
     }
     auto result = createObjectFromRow(row);
     commit("findObjectByPath");
@@ -1450,7 +1450,7 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     if (!res)
         throw_std_runtime_error("db error");
     if (res->getNumRows() == 0)
-        return nullptr;
+        return {};
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
@@ -1464,7 +1464,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 {
     size_t count = list->size();
     if (count <= 0)
-        return nullptr;
+        return {};
 
     auto it = std::find_if(list->begin(), list->end(), IS_FORBIDDEN_CDS_ID);
     if (it != list->end()) {
@@ -1560,11 +1560,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
       << " WHERE " << TQ("id") << '=' << quote(objectID) << " LIMIT 1";
     auto res = select(q);
     if (!res)
-        return nullptr;
+        return {};
 
     auto row = res->nextRow();
     if (!row)
-        return nullptr;
+        return {};
 
     int objectType = std::stoi(row->col(0));
     bool isContainer = IS_CDS_CONTAINER(objectType);
@@ -1728,7 +1728,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         join(maybeEmpty->upnp, ',').c_str(),
         join(maybeEmpty->ui, ',').c_str());
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
-        return nullptr;
+        return {};
 
     std::ostringstream selectSql;
     selectSql << "SELECT " << TQD('a', "id")
@@ -2038,7 +2038,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectI
 
     auto row = res->nextRow();
     if (!row)
-        return nullptr;
+        return {};
 
     return _fillAutoscanDirectory(row);
 }
@@ -2058,7 +2058,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         char prefix;
         location = stripLocationPrefix(row->col(10), &prefix);
         if (prefix != LOC_DIR_PREFIX)
-            return nullptr;
+            return {};
     }
 
     ScanMode mode = AutoscanDirectory::remapScanmode(row->col(3));
@@ -2221,7 +2221,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
         throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
     int databaseID = adir->getDatabaseID();
 
     std::unique_ptr<SQLRow> row;
@@ -2306,7 +2306,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
 std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
 {
     if (objectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
 
     std::ostringstream sel;
     sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";

@@ -30,19 +30,19 @@ public:
     std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
 
     std::vector<std::string> getMimeTypes() override { return std::vector<std::string>(); }
-    std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) override { return nullptr; }
+    std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) override { return {}; }
     int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override { return ""; }
 
-    std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
+    std::shared_ptr<CdsObject> loadObject(int objectID) override { return {}; }
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
 
-    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return nullptr; }
-    std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override { return nullptr; }
-    std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override { return nullptr; }
+    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return {}; }
+    std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override { return {}; }
+    std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override { return {}; }
 
-    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return nullptr; }
-    std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override { return nullptr; }
+    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return {}; }
+    std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override { return {}; }
 
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
 
@@ -57,16 +57,16 @@ public:
     void removeConfigValue(const std::string& item) override { }
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
 
-    std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
+    std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
     void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
 
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return nullptr; }
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return {}; }
     void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override { }
 
-    std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override { return nullptr; }
+    std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override { return {}; }
     int ensurePathExistence(fs::path path, int* changedContainer) override { return 0; }
 
     void clearFlagInDB(int flag) override { }
@@ -77,7 +77,7 @@ public:
     void doMetadataMigration() override { }
 
 protected:
-    std::shared_ptr<Database> getSelf() override { return nullptr; }
+    std::shared_ptr<Database> getSelf() override { return {}; }
 };
 
 #endif // __DATABASE_MOCK_H__

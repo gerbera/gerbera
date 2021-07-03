@@ -234,5 +234,5 @@ void* UpdateManager::staticThreadProc(void* arg)
     auto inst = static_cast<UpdateManager*>(arg);
     inst->threadProc();
 
-    return nullptr;
+    return {};
 }

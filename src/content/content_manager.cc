@@ -425,7 +425,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
         obj = createObjectFromFile(dirEnt, followSymlinks);
         if (!obj) { // object ignored
             log_debug("Link to file or directory ignored: {}", dirEnt.path().c_str());
-            return nullptr;
+            return {};
         }
         if (obj->isItem()) {
             addObject(obj, firstChild);
@@ -1241,18 +1241,18 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 
     if (!dirEnt.exists(ec)) {
         log_warning("File or directory does not exist: {} ({})", dirEnt.path().c_str(), ec.message());
-        return nullptr;
+        return {};
     }
 
     if (!followSymlinks && dirEnt.is_symlink())
-        return nullptr;
+        return {};
 
     std::shared_ptr<CdsObject> obj;
     if (isRegularFile(dirEnt, ec) || (allow_fifo && dirEnt.is_fifo(ec))) { // item
         /* retrieve information about item and decide if it should be included */
         std::string mimetype = mime->getMimeType(dirEnt.path(), MIMETYPE_DEFAULT);
         if (mimetype.empty()) {
-            return nullptr;
+            return {};
         }
         log_debug("Mime '{}' for file {}", mimetype, dirEnt.path().c_str());
 
@@ -1424,7 +1424,7 @@ void* ContentManager::staticThreadProc(void* arg)
 {
     auto inst = static_cast<ContentManager*>(arg);
     inst->threadProc();
-    return nullptr;
+    return {};
 }
 
 void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)
@@ -1650,7 +1650,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
         return autoscan_inotify->get(scanID);
     }
 #endif
-    return nullptr;
+    return {};
 }
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID)

@@ -287,7 +287,7 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsObjec
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
-        return nullptr;
+        return {};
 
     auto res = item->getResource(resNum);
 
