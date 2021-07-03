@@ -672,7 +672,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     auto last_modified_new_max = last_modified_current_max;
     adir->setCurrentLMT(location, std::chrono::seconds::zero());
 
-    std::shared_ptr<CdsObject> firstObject = nullptr;
+    std::shared_ptr<CdsObject> firstObject;
     for (auto&& dirEnt : dIter) {
         auto&& newPath = dirEnt.path();
         auto&& name = newPath.filename().string();
@@ -860,7 +860,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     bool firstChild = true;
-    std::shared_ptr<CdsObject> firstObject = nullptr;
+    std::shared_ptr<CdsObject> firstObject;
     for (auto&& subDirEnt : dIter) {
         auto&& newPath = subDirEnt.path();
         auto&& name = newPath.filename().string();

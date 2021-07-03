@@ -186,8 +186,8 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
 {
     std::stack<std::shared_ptr<ASTNode>> nodeStack;
     std::stack<TokenType> operatorStack;
-    std::shared_ptr<ASTNode> root = nullptr;
-    std::shared_ptr<ASTNode> expressionNode = nullptr;
+    std::shared_ptr<ASTNode> root;
+    std::shared_ptr<ASTNode> expressionNode;
     TokenType currentOperator = TokenType::INVALID;
     while (currentToken) {
         if (currentToken->getType() == TokenType::PROPERTY) {
@@ -250,9 +250,9 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
     if (currentToken->getType() != TokenType::LPAREN)
         throw_std_runtime_error("Failed to parse search criteria - expecting a ')'");
 
-    std::shared_ptr<ASTNode> currentNode = nullptr;
-    std::shared_ptr<ASTNode> lhsNode = nullptr;
-    std::shared_ptr<ASTNode> rhsNode = nullptr;
+    std::shared_ptr<ASTNode> currentNode;
+    std::shared_ptr<ASTNode> lhsNode;
+    std::shared_ptr<ASTNode> rhsNode;
     getNextToken();
     while (currentToken && currentToken->getType() != TokenType::RPAREN) {
         // just call parseSearchExpression() at this point?

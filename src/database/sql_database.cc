@@ -415,7 +415,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
 
 std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
 {
-    std::shared_ptr<CdsObject> refObj = nullptr;
+    std::shared_ptr<CdsObject> refObj;
     bool hasReference = false;
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef) {
@@ -809,7 +809,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
 
-    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row; row = sqlResult->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while ((row = sqlResult->nextRow())) {
         auto obj = createObjectFromRow(row);
         result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
@@ -917,11 +918,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
 
-    for (std::unique_ptr<SQLRow> row = sqlResult->nextRow(); row; row = sqlResult->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while ((row = sqlResult->nextRow())) {
         auto obj = createObjectFromSearchRow(row);
         result.push_back(obj);
         row = nullptr; // clear out content from unique_ptr
     }
+
     if (result.size() < requestedCount) {
         *numMatches = startingIndex + result.size(); // make sure we do not report too many hits
     }
