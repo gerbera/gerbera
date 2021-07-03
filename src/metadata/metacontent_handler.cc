@@ -130,13 +130,13 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
     return result;
 }
 
-static constexpr std::array<std::pair<std::string_view, metadata_fields_t>, 5> metaTags { {
-    { "%album%", M_ALBUM },
-    { "%albumArtist%", M_ALBUMARTIST },
-    { "%artist%", M_ARTIST },
-    { "%genre%", M_GENRE },
-    { "%title%", M_TITLE },
-} };
+static constexpr auto metaTags = std::array<std::pair<std::string_view, metadata_fields_t>, 5> {
+    std::pair("%album%", M_ALBUM),
+    std::pair("%albumArtist%", M_ALBUMARTIST),
+    std::pair("%artist%", M_ARTIST),
+    std::pair("%genre%", M_GENRE),
+    std::pair("%title%", M_TITLE),
+};
 
 std::string ContentPathSetup::expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj)
 {

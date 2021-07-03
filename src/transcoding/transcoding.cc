@@ -76,7 +76,7 @@ void TranscodingProfileList::add(const std::string& sourceMimeType, const std::s
         return std::make_shared<TranscodingProfileMap>();
     }();
 
-    inner->insert(std::pair<std::string, std::shared_ptr<TranscodingProfile>>(prof->getName(), prof));
+    inner->insert(std::pair(prof->getName(), prof));
     list[sourceMimeType] = inner;
 }
 
