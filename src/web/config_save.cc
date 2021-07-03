@@ -73,7 +73,7 @@ void web::configSave::process()
             auto item = fmt::format("data[{}][{}]", i, "item");
             auto status = fmt::format("data[{}][{}]", i, "status");
             bool success = false;
-            std::shared_ptr<ConfigSetup> cs = nullptr;
+            std::shared_ptr<ConfigSetup> cs;
             log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
                 config_option_t option = CFG_MAX;

@@ -49,7 +49,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::string& value, bool makeLastChild)
 {
     auto split = splitString(tag, '/');
-    std::shared_ptr<pugi::xml_node> result = nullptr;
+    std::shared_ptr<pugi::xml_node> result;
     if (!split.empty()) {
         std::string parent;
         std::string nodeKey;

@@ -114,7 +114,7 @@ void web::auth::process()
         gerberaVersion.set_value(GERBERA_VERSION);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...");
-        std::shared_ptr<Session> session = nullptr;
+        std::shared_ptr<Session> session;
         std::string sid = param("sid");
 
         if (sid.empty() || !(session = sessionManager->getSession(sid))) {
