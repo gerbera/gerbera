@@ -73,15 +73,16 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     feature.append_attribute("name") = "samsung.com_BASICVIEW";
     feature.append_attribute("version") = "1";
     feature.append_attribute("version") = "1";
-    constexpr auto containers = std::array<std::pair<std::string_view, std::string_view>, 3> { {
-        { "object.item.audioItem", "0" },
-        { "object.item.videoItem", "0" },
-        { "object.item.imageItem", "0" },
-    } };
+    constexpr auto containers = std::array {
+        std::pair("object.item.audioItem", "0"),
+        std::pair("object.item.videoItem", "0"),
+        std::pair("object.item.imageItem", "0"),
+    };
+
     for (auto&& [type, id] : containers) {
         auto container = feature.append_child("container");
-        container.append_attribute("id") = id.data();
-        container.append_attribute("type") = type.data();
+        container.append_attribute("id") = id;
+        container.append_attribute("type") = type;
     }
     request->setResponse(std::move(response));
 }

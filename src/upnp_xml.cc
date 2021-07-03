@@ -217,26 +217,26 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    constexpr std::array<std::pair<const char*, config_option_t>, 9> deviceProperties { {
-        { "friendlyName", CFG_SERVER_NAME },
-        { "manufacturer", CFG_SERVER_MANUFACTURER },
-        { "manufacturerURL", CFG_SERVER_MANUFACTURER_URL },
-        { "modelDescription", CFG_SERVER_MODEL_DESCRIPTION },
-        { "modelName", CFG_SERVER_MODEL_NAME },
-        { "modelNumber", CFG_SERVER_MODEL_NUMBER },
-        { "modelURL", CFG_SERVER_MODEL_URL },
-        { "serialNumber", CFG_SERVER_SERIAL_NUMBER },
-        { "UDN", CFG_SERVER_UDN },
-    } };
+    constexpr auto deviceProperties = std::array<std::pair<const char*, config_option_t>, 9> {
+        std::pair("friendlyName", CFG_SERVER_NAME),
+        std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
+        std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
+        std::pair("modelDescription", CFG_SERVER_MODEL_DESCRIPTION),
+        std::pair("modelName", CFG_SERVER_MODEL_NAME),
+        std::pair("modelNumber", CFG_SERVER_MODEL_NUMBER),
+        std::pair("modelURL", CFG_SERVER_MODEL_URL),
+        std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
+        std::pair("UDN", CFG_SERVER_UDN),
+    };
     for (auto&& [tag, field] : deviceProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
-    std::array<std::pair<const char*, const char*>, 4> deviceStringProperties { {
-        { "deviceType", UPNP_DESC_DEVICE_TYPE },
-        { "presentationURL", presentationURL.empty() ? "/" : presentationURL.c_str() },
-        { "sec:ProductCap", UPNP_DESC_PRODUCT_CAPS },
-        { "sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS }, // used by SAMSUNG
-    } };
+    const auto deviceStringProperties = std::array {
+        std::pair("deviceType", UPNP_DESC_DEVICE_TYPE),
+        std::pair("presentationURL", presentationURL.empty() ? "/" : presentationURL.c_str()),
+        std::pair("sec:ProductCap", UPNP_DESC_PRODUCT_CAPS),
+        std::pair("sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS), // used by SAMSUNG
+    };
     for (auto&& [tag, value] : deviceStringProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(value);
     }
@@ -245,17 +245,17 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     {
         auto iconList = device.append_child("iconList");
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconDims { {
-            { "120", "24" },
-            { "48", "24" },
-            { "32", "8" },
-        } };
+        constexpr auto iconDims = std::array {
+            std::pair("120", "24"),
+            std::pair("48", "24"),
+            std::pair("32", "8"),
+        };
 
-        constexpr std::array<std::pair<const char*, const char*>, 3> iconTypes { {
-            { UPNP_DESC_ICON_PNG_MIMETYPE, ".png" },
-            { UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp" },
-            { UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg" },
-        } };
+        constexpr auto iconTypes = std::array {
+            std::pair(UPNP_DESC_ICON_PNG_MIMETYPE, ".png"),
+            std::pair(UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp"),
+            std::pair(UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg"),
+        };
 
         for (auto&& [dim, depth] : iconDims) {
             for (auto&& [mimetype, ext] : iconTypes) {
