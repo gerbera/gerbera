@@ -36,7 +36,7 @@
 #include "util/tools.h"
 
 ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, config_option_t fileListOption, config_option_t dirListOption)
-    : config(std::move(config))
+    : config(move(config))
     , names(this->config->getArrayOption(fileListOption))
     , patterns(this->config->getDictionaryOption(dirListOption))
     , allTweaks(this->config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST))

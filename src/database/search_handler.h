@@ -68,7 +68,7 @@ class SearchToken {
 public:
     SearchToken(TokenType type, std::string value)
         : type(type)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
 
@@ -88,7 +88,7 @@ protected:
 class SearchLexer {
 public:
     explicit SearchLexer(std::string input)
-        : input(std::move(input))
+        : input(move(input))
     {
     }
 
@@ -131,7 +131,7 @@ class ASTAsterisk : public ASTNode {
 public:
     ASTAsterisk(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -144,7 +144,7 @@ class ASTProperty : public ASTNode {
 public:
     ASTProperty(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -157,7 +157,7 @@ class ASTBoolean : public ASTNode {
 public:
     ASTBoolean(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -170,7 +170,7 @@ class ASTParenthesis : public ASTNode {
 public:
     ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node)
         : ASTNode(sqlEmitter)
-        , bracketedNode(std::move(node))
+        , bracketedNode(move(node))
     {
     }
     std::string emit() const override;
@@ -183,7 +183,7 @@ class ASTDQuote : public ASTNode {
 public:
     ASTDQuote(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -196,7 +196,7 @@ class ASTEscapedString : public ASTNode {
 public:
     ASTEscapedString(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -210,9 +210,9 @@ public:
     ASTQuotedString(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTDQuote> openQuote,
         std::shared_ptr<ASTEscapedString> escapedString, std::shared_ptr<ASTDQuote> closeQuote)
         : ASTNode(sqlEmitter)
-        , openQuote(std::move(openQuote))
-        , escapedString(std::move(escapedString))
-        , closeQuote(std::move(closeQuote))
+        , openQuote(move(openQuote))
+        , escapedString(move(escapedString))
+        , closeQuote(move(closeQuote))
     {
     }
     std::string emit() const override;
@@ -228,7 +228,7 @@ class ASTCompareOperator : public ASTNode {
 public:
     ASTCompareOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -245,9 +245,9 @@ public:
     ASTCompareExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
         std::shared_ptr<ASTCompareOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
         : ASTNode(sqlEmitter)
-        , lhs(std::move(lhs))
-        , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
+        , lhs(move(lhs))
+        , operatr(move(operatr))
+        , rhs(move(rhs))
     {
     }
     std::string emit() const override;
@@ -263,7 +263,7 @@ class ASTStringOperator : public ASTNode {
 public:
     ASTStringOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -280,9 +280,9 @@ public:
     ASTStringExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
         std::shared_ptr<ASTStringOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
         : ASTNode(sqlEmitter)
-        , lhs(std::move(lhs))
-        , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
+        , lhs(move(lhs))
+        , operatr(move(operatr))
+        , rhs(move(rhs))
     {
     }
     std::string emit() const override;
@@ -297,7 +297,7 @@ class ASTExistsOperator : public ASTNode {
 public:
     ASTExistsOperator(const SQLEmitter& sqlEmitter, std::string value)
         : ASTNode(sqlEmitter)
-        , value(std::move(value))
+        , value(move(value))
     {
     }
     std::string emit() const override;
@@ -313,9 +313,9 @@ public:
     ASTExistsExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
         std::shared_ptr<ASTExistsOperator> operatr, std::shared_ptr<ASTBoolean> rhs)
         : ASTNode(sqlEmitter)
-        , lhs(std::move(lhs))
-        , operatr(std::move(operatr))
-        , rhs(std::move(rhs))
+        , lhs(move(lhs))
+        , operatr(move(operatr))
+        , rhs(move(rhs))
     {
     }
     std::string emit() const override;
@@ -331,8 +331,8 @@ public:
     ASTAndOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs,
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
-        , lhs(std::move(lhs))
-        , rhs(std::move(rhs))
+        , lhs(move(lhs))
+        , rhs(move(rhs))
     {
     }
     std::string emit() const override;
@@ -347,8 +347,8 @@ public:
     ASTOrOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs,
         std::shared_ptr<ASTNode> rhs)
         : ASTNode(sqlEmitter)
-        , lhs(std::move(lhs))
-        , rhs(std::move(rhs))
+        , lhs(move(lhs))
+        , rhs(move(rhs))
     {
     }
     std::string emit() const override;
@@ -389,8 +389,8 @@ public:
 class DefaultSQLEmitter : public SQLEmitter {
 public:
     DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper)
-        : colMapper(std::move(colMapper))
-        , metaMapper(std::move(metaMapper))
+        : colMapper(move(colMapper))
+        , metaMapper(move(metaMapper))
     {
     }
 
@@ -444,8 +444,8 @@ public:
         const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
         : table_quote_begin(tabQuoteBegin)
         , table_quote_end(tabQuoteEnd)
-        , tableAlias(std::move(tableAlias))
-        , tableName(std::move(tableName))
+        , tableAlias(move(tableAlias))
+        , tableName(move(tableName))
         , keyMap(keyMap)
         , colMap(colMap)
     {
@@ -503,8 +503,8 @@ private:
 class SortParser {
 public:
     SortParser(std::shared_ptr<ColumnMapper> colMapper, std::string sortCriteria)
-        : colMapper(std::move(colMapper))
-        , sortCrit(std::move(sortCriteria))
+        : colMapper(move(colMapper))
+        , sortCrit(move(sortCriteria))
     {
     }
     std::string parse();

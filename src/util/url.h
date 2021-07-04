@@ -53,9 +53,9 @@ public:
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
         Stat(std::string url, off_t size, std::string mimetype)
-            : url(std::move(url))
+            : url(move(url))
             , size(size)
-            , mimetype(std::move(mimetype))
+            , mimetype(move(mimetype))
         {
         }
 

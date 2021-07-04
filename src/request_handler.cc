@@ -39,7 +39,7 @@
 #include "util/tools.h"
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
-    : content(std::move(content))
+    : content(move(content))
     , context(this->content->getContext())
     , config(this->context->getConfig())
     , mime(this->context->getMime())
@@ -60,7 +60,7 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
     }() };
 
     if (i1 == std::string::npos) {
-        path = std::move(url_s);
+        path = move(url_s);
         parameters.clear();
     } else {
         parameters = url_s.substr(i1 + 1);

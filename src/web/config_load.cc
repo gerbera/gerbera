@@ -42,7 +42,7 @@
 #include "util/upnp_clients.h"
 
 web::configLoad::configLoad(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
     try {
         if (this->database) {

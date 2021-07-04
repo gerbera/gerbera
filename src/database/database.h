@@ -72,7 +72,7 @@ protected:
 public:
     BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
         : flags(flags)
-        , object(std::move(object))
+        , object(move(object))
     {
     }
 
@@ -133,9 +133,9 @@ protected:
 public:
     SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
         int requestedCount)
-        : containerID(std::move(containerID))
-        , searchCrit(std::move(searchCriteria))
-        , sortCrit(std::move(sortCriteria))
+        : containerID(move(containerID))
+        , searchCrit(move(searchCriteria))
+        , sortCrit(move(sortCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
     {
@@ -150,7 +150,7 @@ public:
 class Database {
 public:
     explicit Database(std::shared_ptr<Config> config)
-        : config(std::move(config))
+        : config(move(config))
     {
     }
     virtual ~Database() = default;

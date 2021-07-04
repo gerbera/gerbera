@@ -30,6 +30,6 @@
 
 TranscodeHandler::TranscodeHandler(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())
-    , content(std::move(content))
+    , content(move(content))
 {
 }

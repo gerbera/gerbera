@@ -49,7 +49,7 @@
 #include "web/session_manager.h"
 
 FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(content))
+    : RequestHandler(move(content))
     , xmlBuilder(xmlBuilder)
 {
 }
@@ -279,5 +279,5 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     content->triggerPlayHook(obj);
 
     log_debug("end");
-    return std::move(io_handler);
+    return move(io_handler);
 }

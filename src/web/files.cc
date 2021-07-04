@@ -36,7 +36,7 @@
 #include "util/tools.h"
 
 web::files::files(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

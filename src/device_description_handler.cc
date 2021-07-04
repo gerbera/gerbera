@@ -27,7 +27,7 @@
 #include "util/tools.h"
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(content))
+    : RequestHandler(move(content))
     , xmlBuilder(xmlBuilder)
 {
     auto desc = xmlBuilder->renderDeviceDescription();
@@ -52,5 +52,5 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
 
     auto t = std::make_unique<MemIOHandler>(deviceDescription);
     t->open(mode);
-    return std::move(t);
+    return move(t);
 }

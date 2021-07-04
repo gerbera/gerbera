@@ -42,8 +42,8 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
     : config(context->getConfig())
     , database(context->getDatabase())
-    , virtualURL(std::move(virtualUrl))
-    , presentationURL(std::move(presentationURL))
+    , virtualURL(move(virtualUrl))
+    , presentationURL(move(presentationURL))
 {
 }
 

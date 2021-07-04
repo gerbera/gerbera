@@ -64,7 +64,7 @@ void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<i
 
 std::string BuiltinLayout::esc(std::string str)
 {
-    return escape(std::move(str), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
+    return escape(move(str), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR);
 }
 
 void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
@@ -387,7 +387,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 #endif
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
-    : Layout(std::move(content))
+    : Layout(move(content))
     , genreMap(config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
 #ifdef ENABLE_PROFILING

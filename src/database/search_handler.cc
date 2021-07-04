@@ -88,18 +88,18 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 auto token = std::string(&ch, 1);
                 currentPos++;
                 inQuotes = true;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
+                return std::make_unique<SearchToken>(TokenType::DQUOTE, move(token));
             } else {
                 auto token = std::string(&ch, 1);
                 currentPos++;
                 inQuotes = false;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
+                return std::make_unique<SearchToken>(TokenType::DQUOTE, move(token));
             }
         default:
             if (inQuotes) {
                 auto quotedStr = getQuotedValue(input);
                 if (!quotedStr.empty())
-                    return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
+                    return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, move(quotedStr));
             }
             if (std::isspace(ch)) {
                 currentPos++;

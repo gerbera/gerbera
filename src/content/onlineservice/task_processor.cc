@@ -167,11 +167,11 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
     bool cancellable,
     bool unscheduled_refresh)
     : GenericTask(TaskProcessorTask)
-    , content(std::move(content))
-    , task_processor(std::move(task_processor))
-    , timer(std::move(timer))
-    , service(std::move(service))
-    , layout(std::move(layout))
+    , content(move(content))
+    , task_processor(move(task_processor))
+    , timer(move(timer))
+    , service(move(service))
+    , layout(move(layout))
     , unscheduled_refresh(unscheduled_refresh)
 {
     this->cancellable = cancellable;

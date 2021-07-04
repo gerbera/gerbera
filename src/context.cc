@@ -31,11 +31,11 @@ Context::Context(std::shared_ptr<Config> config,
     std::shared_ptr<Database> database,
     std::shared_ptr<Server> server,
     std::shared_ptr<web::SessionManager> session_manager)
-    : config(std::move(config))
-    , clients(std::move(clients))
-    , mime(std::move(mime))
-    , database(std::move(database))
-    , server(std::move(server))
-    , session_manager(std::move(session_manager))
+    : config(move(config))
+    , clients(move(clients))
+    , mime(move(mime))
+    , database(move(database))
+    , server(move(server))
+    , session_manager(move(session_manager))
 {
 }

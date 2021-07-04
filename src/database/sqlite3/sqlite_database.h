@@ -95,7 +95,7 @@ class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
     explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
-        : config(std::move(config))
+        : config(move(config))
         , hashie(hashie)
     {
     }

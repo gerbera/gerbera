@@ -79,7 +79,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , database(context->getDatabase())
     , session_manager(context->getSessionManager())
     , context(context)
-    , timer(std::move(timer))
+    , timer(move(timer))
 #ifdef HAVE_JS
     , scripting_runtime(std::make_shared<ScriptingRuntime>())
 #endif
@@ -1082,7 +1082,7 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
 
 void ContentManager::addContainer(int parentID, std::string title, const std::string& upnpClass)
 {
-    addContainerChain(database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
+    addContainerChain(database->buildContainerPath(parentID, escape(move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR)), upnpClass);
 }
 
 std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain)
@@ -1857,7 +1857,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable)
     : GenericTask(ContentManagerTask)
-    , content(std::move(content))
+    , content(move(content))
     , dirEnt(std::move(dirEnt))
     , rootpath(std::move(rootpath))
     , asSetting(std::move(asSetting))
@@ -1889,8 +1889,8 @@ void CMAddFileTask::run()
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
     int objectID, bool rescanResource, bool all)
     : GenericTask(ContentManagerTask)
-    , content(std::move(content))
-    , adir(std::move(adir))
+    , content(move(content))
+    , adir(move(adir))
     , objectID(objectID)
     , all(all)
     , rescanResource(rescanResource)
@@ -1907,8 +1907,8 @@ void CMRemoveObjectTask::run()
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable)
     : GenericTask(ContentManagerTask)
-    , content(std::move(content))
-    , adir(std::move(adir))
+    , content(move(content))
+    , adir(move(adir))
     , containerID(containerId)
 {
     this->cancellable = cancellable;
@@ -1934,11 +1934,11 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
     std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
     : GenericTask(ContentManagerTask)
-    , content(std::move(content))
-    , task_processor(std::move(task_processor))
-    , timer(std::move(timer))
-    , service(std::move(service))
-    , layout(std::move(layout))
+    , content(move(content))
+    , task_processor(move(task_processor))
+    , timer(move(timer))
+    , service(move(service))
+    , layout(move(layout))
     , unscheduled_refresh(unscheduled_refresh)
 {
     this->cancellable = cancellable;

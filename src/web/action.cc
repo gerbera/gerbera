@@ -35,7 +35,7 @@
 #include "content/content_manager.h"
 
 web::action::action(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

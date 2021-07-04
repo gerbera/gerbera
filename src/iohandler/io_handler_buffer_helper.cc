@@ -36,7 +36,7 @@
 #include "config/config_manager.h"
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize)
-    : config(std::move(config))
+    : config(move(config))
     , bufSize(bufSize)
     , initialFillSize(initialFillSize)
     , waitForInitialFillSize(initialFillSize > 0)

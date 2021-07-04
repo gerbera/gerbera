@@ -139,7 +139,7 @@ protected:
 class voidType : public WebRequestHandler {
 public:
     explicit voidType(std::shared_ptr<ContentManager> content)
-        : WebRequestHandler(std::move(content))
+        : WebRequestHandler(move(content))
     {
     }
     void process() override;

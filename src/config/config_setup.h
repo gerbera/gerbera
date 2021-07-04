@@ -206,14 +206,14 @@ public:
     ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
-        , valueMap(std::move(valueMap))
+        , valueMap(move(valueMap))
     {
     }
 
     ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, defaultValue)
         , notEmpty(notEmpty)
-        , valueMap(std::move(valueMap))
+        , valueMap(move(valueMap))
     {
     }
 
@@ -468,7 +468,7 @@ public:
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(init)
-        , defaultEntries(std::move(defaultEntries))
+        , defaultEntries(move(defaultEntries))
         , nodeOption(nodeOption)
     {
     }
@@ -478,7 +478,7 @@ public:
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , defaultEntries(std::move(defaultEntries))
+        , defaultEntries(move(defaultEntries))
         , nodeOption(nodeOption)
         , attrOption(attrOption)
     {
@@ -543,7 +543,7 @@ public:
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
         , initDict(init)
-        , defaultEntries(std::move(defaultEntries))
+        , defaultEntries(move(defaultEntries))
     {
     }
 
@@ -553,7 +553,7 @@ public:
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , defaultEntries(std::move(defaultEntries))
+        , defaultEntries(move(defaultEntries))
         , nodeOption(nodeOption)
         , keyOption(keyOption)
         , valOption(valOption)

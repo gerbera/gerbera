@@ -42,7 +42,7 @@
 #include "util/tools.h"
 
 web::edit_load::edit_load(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

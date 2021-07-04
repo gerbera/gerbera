@@ -213,8 +213,8 @@ private:
     class AddUpdateTable {
     public:
         AddUpdateTable(std::string tableName, std::map<std::string, std::string> dict, Operation operation)
-            : tableName(std::move(tableName))
-            , dict(std::move(dict))
+            : tableName(move(tableName))
+            , dict(move(dict))
             , operation(operation)
         {
         }

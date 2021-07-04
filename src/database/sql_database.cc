@@ -245,8 +245,8 @@ static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : Database(std::move(config))
-    , mime(std::move(mime))
+    : Database(move(config))
+    , mime(move(mime))
     , use_transaction(this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
 {
 }
@@ -333,7 +333,7 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
         } else {
             log_warning("Wrong hash for version {}: {} != {}", version, myHash, hashies[version]);
         }
-        dbUpdates.push_back(std::move(versionCmds));
+        dbUpdates.push_back(move(versionCmds));
         version++;
     }
 
@@ -1070,7 +1070,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
        << parentID << ','
        << OBJECT_TYPE_CONTAINER << ','
        << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)) << ','
-       << quote(std::move(name)) << ','
+       << quote(move(name)) << ','
        << quote(dbLocation) << ','
        << quote(stringHash(dbLocation)) << ',';
     if (refID > 0) {
@@ -1460,7 +1460,7 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     while ((row = res->nextRow())) {
         ret.insert(std::stoi(row->col(0)));
     }
-    return std::make_unique<std::unordered_set<int>>(std::move(ret));
+    return std::make_unique<std::unordered_set<int>>(move(ret));
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
@@ -2426,7 +2426,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
     std::ostringstream qb;
     qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return std::make_unique<std::ostringstream>(move(qb));
 }
 
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2455,7 +2455,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
         qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return std::make_unique<std::ostringstream>(move(qb));
 }
 
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2478,7 +2478,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_
         qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return std::make_unique<std::ostringstream>(move(qb));
 }
 
 void SQLDatabase::doMetadataMigration()

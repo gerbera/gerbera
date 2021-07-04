@@ -38,7 +38,7 @@
 #define SOPCAST_CHANNEL_URL "http://www.sopcast.com/gchlxml"
 
 SopCastService::SopCastService(std::shared_ptr<ContentManager> content)
-    : CurlOnlineService(std::move(content), SOPCAST_SERVICE)
+    : CurlOnlineService(move(content), SOPCAST_SERVICE)
 {
     service_url = SOPCAST_CHANNEL_URL;
 }

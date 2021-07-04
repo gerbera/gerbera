@@ -64,7 +64,7 @@ static bool check_token(const std::string& token, const std::string& password, c
 }
 
 web::auth::auth(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
     , timeout(std::chrono::seconds(60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
 {
 }

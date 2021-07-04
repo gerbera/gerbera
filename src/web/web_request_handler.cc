@@ -44,7 +44,7 @@
 namespace web {
 
 WebRequestHandler::WebRequestHandler(std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(content))
+    : RequestHandler(move(content))
     , sessionManager(this->content->getContext()->getSessionManager())
 {
 }
@@ -209,7 +209,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
     auto io_handler = std::make_unique<MemIOHandler>(output);
     io_handler->open(mode);
-    return std::move(io_handler);
+    return move(io_handler);
 }
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)

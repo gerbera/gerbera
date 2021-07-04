@@ -44,8 +44,8 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::uni
     status = 0;
     readFrom->open(UPNP_READ);
     this->chunkSize = chunkSize;
-    this->readFrom = std::move(readFrom);
-    this->writeTo = std::move(writeTo);
+    this->readFrom = move(readFrom);
+    this->writeTo = move(writeTo);
     buf = new char[chunkSize];
     startThread();
 }

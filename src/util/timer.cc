@@ -34,7 +34,7 @@
 #include <cassert>
 
 Timer::Timer(std::shared_ptr<Config> config)
-    : config(std::move(config))
+    : config(move(config))
 {
 }
 
@@ -71,7 +71,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds
         throw_std_runtime_error("Tried to add timer with illegal notifyInterval: {}", notifyInterval.count());
 
     auto lock = threadRunner->lockGuard();
-    TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
+    TimerSubscriberElement element(timerSubscriber, notifyInterval, move(parameter), once);
 
     if (!subscribers.empty()) {
         bool err = std::find(subscribers.begin(), subscribers.end(), element) != subscribers.end();
@@ -89,7 +89,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
     log_debug("Removing subscriber...");
     auto lock = threadRunner->lockGuard();
     if (!subscribers.empty()) {
-        TimerSubscriberElement element(timerSubscriber, std::chrono::seconds::zero(), std::move(parameter));
+        TimerSubscriberElement element(timerSubscriber, std::chrono::seconds::zero(), move(parameter));
         auto it = std::find(subscribers.begin(), subscribers.end(), element);
         if (it != subscribers.end()) {
             subscribers.erase(it);

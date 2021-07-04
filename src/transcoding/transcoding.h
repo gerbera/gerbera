@@ -233,7 +233,7 @@ class TranscodingProcess {
 public:
     TranscodingProcess(pid_t pid, std::string fname)
         : pid(pid)
-        , fname(std::move(fname))
+        , fname(move(fname))
     {
     }
 

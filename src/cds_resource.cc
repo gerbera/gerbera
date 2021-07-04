@@ -46,15 +46,15 @@ CdsResource::CdsResource(int handlerType,
     std::map<std::string, std::string> parameters,
     std::map<std::string, std::string> options)
     : handlerType(handlerType)
-    , attributes(std::move(attributes))
-    , parameters(std::move(parameters))
-    , options(std::move(options))
+    , attributes(move(attributes))
+    , parameters(move(parameters))
+    , options(move(options))
 {
 }
 
 void CdsResource::addAttribute(resource_attributes_t res, std::string value)
 {
-    attributes[MetadataHandler::getResAttrName(res)] = std::move(value);
+    attributes[MetadataHandler::getResAttrName(res)] = move(value);
 }
 
 void CdsResource::removeAttribute(resource_attributes_t res)
@@ -71,12 +71,12 @@ void CdsResource::mergeAttributes(const std::map<std::string, std::string>& addi
 
 void CdsResource::addParameter(const std::string& name, std::string value)
 {
-    parameters[name] = std::move(value);
+    parameters[name] = move(value);
 }
 
 void CdsResource::addOption(const std::string& name, std::string value)
 {
-    options[name] = std::move(value);
+    options[name] = move(value);
 }
 
 int CdsResource::getHandlerType() const

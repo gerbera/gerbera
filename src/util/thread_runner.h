@@ -42,8 +42,8 @@ template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
     ThreadRunner(std::string name, ThreadProc targetProc, void* target, std::shared_ptr<Config> config)
-        : config(std::move(config))
-        , threadName(std::move(name))
+        : config(move(config))
+        , threadName(move(name))
         , targetProc(targetProc)
         , target(target)
     {

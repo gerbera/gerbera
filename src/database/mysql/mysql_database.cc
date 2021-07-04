@@ -49,7 +49,7 @@
 #define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : SQLDatabase(std::move(config), std::move(mime))
+    : SQLDatabase(move(config), move(mime))
 {
     table_quote_begin = '`';
     table_quote_end = '`';

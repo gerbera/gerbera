@@ -47,7 +47,7 @@
 #define MAX_TIMEOUTS 2 // maximum allowe consecutive timeouts
 
 ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
-    : executor(std::move(exec))
+    : executor(move(exec))
     , abort(abortOnDeath)
 {
 }
@@ -107,8 +107,8 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<Executor>& mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
-    : content(std::move(content))
-    , procList(std::move(procList))
+    : content(move(content))
+    , procList(move(procList))
     , mainProc(mainProc)
     , filename(std::move(filename))
     , ignoreSeek(ignoreSeek)

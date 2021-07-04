@@ -104,7 +104,7 @@ protected:
         TimerSubscriberElement(Subscriber* subscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
             : subscriber(subscriber)
             , notifyInterval(notifyInterval)
-            , parameter(std::move(parameter))
+            , parameter(move(parameter))
             , once(once)
         {
             updateNextNotify();

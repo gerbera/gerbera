@@ -41,7 +41,7 @@
 #include "util/tools.h"
 
 web::addObject::addObject(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

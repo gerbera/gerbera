@@ -108,7 +108,7 @@ js_getCdsObject(duk_context* ctx)
 
 PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(std::move(content), runtime, "playlist")
+    : Script(move(content), runtime, "playlist")
 {
     try {
         ScriptingRuntime::AutoLock lock(runtime->getMutex());
@@ -151,7 +151,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw_std_runtime_error("only allowed for pure items");
     }
 
-    currentTask = std::move(task);
+    currentTask = move(task);
     currentObjectID = obj->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';

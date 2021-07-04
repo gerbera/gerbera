@@ -191,7 +191,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     if (pFormatCtx->duration > 0) {
         auto duration = millisecondsToHMSF(pFormatCtx->duration / (AV_TIME_BASE / 1000));
         log_debug("Added duration: {}", duration);
-        resource->addAttribute(R_DURATION, std::move(duration));
+        resource->addAttribute(R_DURATION, move(duration));
     }
 
     // bitrate
@@ -231,7 +231,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
-                resource2->addAttribute(R_RESOLUTION, std::move(resolution));
+                resource2->addAttribute(R_RESOLUTION, move(resolution));
                 videoset = true;
             }
         }
@@ -333,10 +333,10 @@ fs::path getThumbnailCacheBasePath(const Config& config)
 {
     if (auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
         !configuredDir.empty()) {
-        return fs::path(std::move(configuredDir));
+        return fs::path(move(configuredDir));
     }
     auto home = config.getOption(CFG_SERVER_HOME);
-    return fs::path(std::move(home)) / "cache-dir";
+    return fs::path(move(home)) / "cache-dir";
 }
 
 fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)

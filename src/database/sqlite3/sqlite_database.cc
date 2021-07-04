@@ -41,8 +41,8 @@
 #define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
-    : SQLDatabase(std::move(config), std::move(mime))
-    , timer(std::move(timer))
+    : SQLDatabase(move(config), move(mime))
+    , timer(move(timer))
 {
     table_quote_begin = '"';
     table_quote_end = '"';
@@ -387,7 +387,7 @@ void SLTask::sendSignal()
 
 void SLTask::sendSignal(std::string error)
 {
-    this->error = std::move(error);
+    this->error = move(error);
     sendSignal();
 }
 
@@ -508,7 +508,7 @@ void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
 
 /* SLBackupTask */
 SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
-    : config(std::move(config))
+    : config(move(config))
     , restore(restore)
 {
 }

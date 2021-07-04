@@ -41,7 +41,7 @@
 #include "util/upnp_clients.h"
 
 web::configSave::configSave(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

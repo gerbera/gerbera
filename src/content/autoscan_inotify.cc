@@ -42,7 +42,7 @@
 AutoscanInotify::AutoscanInotify(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
-    , content(std::move(content))
+    , content(move(content))
 {
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {

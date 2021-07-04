@@ -46,7 +46,7 @@
 #endif
 
 URLRequestHandler::URLRequestHandler(std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(content))
+    : RequestHandler(move(content))
 {
 }
 
@@ -153,7 +153,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
     auto io_handler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
     io_handler->open(mode);
     content->triggerPlayHook(obj);
-    return std::move(io_handler);
+    return move(io_handler);
 }
 
 #endif // HAVE_CURL

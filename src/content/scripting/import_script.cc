@@ -38,7 +38,7 @@
 
 ImportScript::ImportScript(std::shared_ptr<ContentManager> content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(std::move(content), runtime, "import")
+    : Script(move(content), runtime, "import")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 

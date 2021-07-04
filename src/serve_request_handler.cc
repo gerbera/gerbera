@@ -41,7 +41,7 @@
 #include "util/tools.h"
 
 ServeRequestHandler::ServeRequestHandler(std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(content))
+    : RequestHandler(move(content))
 {
 }
 
@@ -129,5 +129,5 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
 
     auto io_handler = std::make_unique<FileIOHandler>(path);
     io_handler->open(mode);
-    return std::move(io_handler);
+    return move(io_handler);
 }

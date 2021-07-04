@@ -124,6 +124,6 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         ret.insert(add);
     }
 
-    return std::make_unique<std::map<std::string, std::string>>(std::move(ret));
+    return std::make_unique<std::map<std::string, std::string>>(move(ret));
 #endif
 }

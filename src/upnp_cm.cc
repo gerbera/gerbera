@@ -52,7 +52,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<A
     auto root = response->document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
@@ -79,7 +79,7 @@ void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionReq
     root.append_child("Source").append_child(pugi::node_pcdata).set_value(CSV.c_str());
     root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
 
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
     request->setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");

@@ -39,9 +39,9 @@ CurlContentHandler::CurlContentHandler(const std::shared_ptr<Context>& context)
 }
 
 CurlOnlineService::CurlOnlineService(std::shared_ptr<ContentManager> content, std::string serviceName)
-    : OnlineService(std::move(content))
+    : OnlineService(move(content))
     , curl_handle(curl_easy_init())
-    , serviceName(std::move(serviceName))
+    , serviceName(move(serviceName))
 {
     if (!curl_handle)
         throw_std_runtime_error("failed to initialize curl");
@@ -114,7 +114,7 @@ bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
     }
 
     auto sc = getContentHandler();
-    sc->setServiceContent(std::move(reply));
+    sc->setServiceContent(move(reply));
 
     std::shared_ptr<CdsObject> obj;
     do {

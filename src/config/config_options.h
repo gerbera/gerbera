@@ -103,7 +103,7 @@ public:
 class Option : public ConfigOption {
 public:
     explicit Option(std::string option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
 
@@ -142,7 +142,7 @@ private:
 class DictionaryOption : public ConfigOption {
 public:
     explicit DictionaryOption(std::map<std::string, std::string> option)
-        : option(std::move(option))
+        : option(move(option))
     {
         this->origSize = this->option.size();
         size_t i = 0;
@@ -174,7 +174,7 @@ private:
 class ArrayOption : public ConfigOption {
 public:
     explicit ArrayOption(std::vector<std::string> option)
-        : option(std::move(option))
+        : option(move(option))
     {
         this->origSize = this->option.size();
         for (size_t i = 0; i < this->origSize; i++) {
@@ -202,7 +202,7 @@ private:
 class AutoscanListOption : public ConfigOption {
 public:
     explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
 
@@ -215,7 +215,7 @@ private:
 class ClientConfigListOption : public ConfigOption {
 public:
     explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
     std::shared_ptr<ClientConfigList> getClientConfigListOption() const override { return option; }
@@ -227,7 +227,7 @@ private:
 class DirectoryTweakOption : public ConfigOption {
 public:
     explicit DirectoryTweakOption(std::shared_ptr<DirectoryConfigList> option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const override { return option; }
@@ -239,7 +239,7 @@ protected:
 class TranscodingProfileListOption : public ConfigOption {
 public:
     explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
 
@@ -260,7 +260,7 @@ protected:
 class DynamicContentListOption : public ConfigOption {
 public:
     explicit DynamicContentListOption(std::shared_ptr<DynamicContentList> option)
-        : option(std::move(option))
+        : option(move(option))
     {
     }
 

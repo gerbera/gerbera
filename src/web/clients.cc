@@ -35,7 +35,7 @@
 #include <fmt/chrono.h>
 
 web::clients::clients(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

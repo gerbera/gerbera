@@ -53,7 +53,7 @@ Session::Session(std::chrono::seconds timeout)
 void Session::put(const std::string& key, std::string value)
 {
     AutoLockR lock(rmutex);
-    dict[key] = std::move(value);
+    dict[key] = move(value);
 }
 
 std::string Session::get(const std::string& key)
@@ -131,7 +131,7 @@ void Session::clearUpdateIDs()
 }
 
 SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer)
-    : timer(std::move(timer))
+    : timer(move(timer))
     , accounts(config->getDictionaryOption(CFG_SERVER_UI_ACCOUNT_LIST))
 {
 }

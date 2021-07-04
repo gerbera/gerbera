@@ -39,7 +39,7 @@
 
 void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
-    service_xml = std::move(service);
+    service_xml = move(service);
     auto root = service_xml->document_element();
 
     if (std::string(root.name()) != "channels")
@@ -194,7 +194,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
 
     try {
         item->validate();
-        return std::move(item);
+        return move(item);
     } catch (const std::runtime_error& ex) {
         log_warning("Failed to validate newly created SopCast item: {}",
             ex.what());

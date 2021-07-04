@@ -60,7 +60,7 @@
 #endif
 
 TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ContentManager> content)
-    : TranscodeHandler(std::move(content))
+    : TranscodeHandler(move(content))
 {
 }
 
@@ -143,7 +143,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 auto p_ioh = std::unique_ptr<IOHandler>(std::make_unique<ProcessIOHandler>(content, location, nullptr));
-                auto ch = std::make_shared<IOHandlerChainer>(std::move(c_ioh), std::move(p_ioh), 16384);
+                auto ch = std::make_shared<IOHandlerChainer>(move(c_ioh), move(p_ioh), 16384);
                 auto pr_item = std::make_shared<ProcListItem>(ch);
                 proc_list.push_back(pr_item);
             } catch (const std::runtime_error& ex) {
@@ -202,6 +202,6 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
     auto u_ioh = std::unique_ptr<IOHandler>(std::make_unique<ProcessIOHandler>(content, fifo_name, main_proc, proc_list));
     return std::make_unique<BufferedIOHandler>(
-        config, std::move(u_ioh),
+        config, move(u_ioh),
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
 }

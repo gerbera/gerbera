@@ -30,6 +30,6 @@
 Layout::Layout(std::shared_ptr<ContentManager> content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
-    , content(std::move(content))
+    , content(move(content))
 {
 }

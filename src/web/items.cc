@@ -38,7 +38,7 @@
 #include "upnp_xml.h"
 
 web::items::items(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+    : WebRequestHandler(move(content))
 {
 }
 

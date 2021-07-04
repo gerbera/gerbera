@@ -39,7 +39,7 @@
 
 void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
-    service_xml = std::move(service);
+    service_xml = move(service);
     auto root = service_xml->document_element();
 
     if (std::string(root.name()) != "records")
@@ -215,7 +215,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     try {
         item->validate();
-        return std::move(item);
+        return move(item);
     } catch (const std::runtime_error& ex) {
         log_warning("Failed to validate newly created Trailer item: {}",
             ex.what());

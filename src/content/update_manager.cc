@@ -47,9 +47,9 @@ static constexpr auto MIN_SLEEP = std::chrono::milliseconds(1);
 #define OBJECT_ID_HASH_CAPACITY 3109
 
 UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database, std::shared_ptr<Server> server)
-    : config(std::move(config))
-    , database(std::move(database))
-    , server(std::move(server))
+    : config(move(config))
+    , database(move(database))
+    , server(move(server))
     , objectIDHash(std::make_unique<std::unordered_set<int>>(0))
 {
 }

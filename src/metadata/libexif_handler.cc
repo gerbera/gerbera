@@ -304,6 +304,6 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(std::shared_ptr<CdsObjec
 
     auto h = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);
-    return std::move(h);
+    return move(h);
 }
 #endif // HAVE_LIBEXIF

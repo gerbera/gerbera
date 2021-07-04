@@ -140,7 +140,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
     resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param->getTotalMatches()).c_str());
     resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 
     log_debug("end");
 }
@@ -213,7 +213,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
     resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
     resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 
     log_debug("end");
 }
@@ -225,7 +225,7 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 
     log_debug("end");
 }
@@ -237,7 +237,7 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 
     log_debug("end");
 }
@@ -249,7 +249,7 @@ void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRe
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 
     log_debug("end");
 }

@@ -37,7 +37,7 @@
 #include "util/upnp_headers.h"
 
 Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent)
-    : context(std::move(context))
+    : context(move(context))
     , content(this->context->getServer()->getContent())
 {
     this->context->getClients()->getInfo(addr, userAgent, &pClientInfo);
@@ -84,7 +84,7 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
         container.append_attribute("id") = id;
         container.append_attribute("type") = type;
     }
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 }
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const
@@ -123,5 +123,5 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
         content->updateObject(stoiString(objectID), m);
     }
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    request->setResponse(std::move(response));
+    request->setResponse(move(response));
 }

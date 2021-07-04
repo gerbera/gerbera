@@ -44,7 +44,7 @@ ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest
 {
     auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
-    quirks = std::make_shared<Quirks>(std::move(context), ctrlPtIPAddr, userAgent);
+    quirks = std::make_shared<Quirks>(move(context), ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const
@@ -86,7 +86,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 
 void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document> response)
 {
-    this->response = std::move(response);
+    this->response = move(response);
 }
 
 void ActionRequest::setErrorCode(int errCode)
