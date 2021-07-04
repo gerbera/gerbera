@@ -53,13 +53,6 @@ static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "or", TokenType::OR }
 };
 
-static std::string aslowercase(const std::string& src)
-{
-    std::string copy = src;
-    std::transform(copy.begin(), copy.end(), copy.begin(), ::tolower);
-    return copy;
-}
-
 std::unique_ptr<SearchToken> SearchLexer::nextToken()
 {
     for (; currentPos < input.length();) {
@@ -161,7 +154,7 @@ std::string SearchLexer::nextStringToken(const std::string& input)
 
 std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
 {
-    auto itr = tokenTypes.find(aslowercase(tokenStr));
+    auto itr = tokenTypes.find(toLower(tokenStr));
     if (itr != tokenTypes.end()) {
         return std::make_unique<SearchToken>(itr->second, tokenStr);
     }
@@ -514,7 +507,7 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
 
 std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property, const std::string& value) const
 {
-    auto stringOperator = aslowercase(node->getValue());
+    auto stringOperator = toLower(node->getValue());
     if (logicOperator.find(stringOperator) == logicOperator.end()) {
         throw_std_runtime_error("Operation '{}' not yet supported", stringOperator);
     }

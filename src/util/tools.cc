@@ -134,7 +134,7 @@ bool startswith(std::string_view str, std::string_view check)
 
 std::string toLower(std::string_view str)
 {
-    std::string lower = str.data();
+    std::string lower(str);
     std::transform(str.begin(), str.end(), lower.begin(), ::tolower);
     return lower;
 }
