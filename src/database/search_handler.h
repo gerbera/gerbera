@@ -429,7 +429,6 @@ protected:
     std::shared_ptr<ASTNode> parseRelationshipExpression();
     std::shared_ptr<ASTNode> parseParenthesis();
     std::shared_ptr<ASTQuotedString> parseQuotedString();
-    void checkIsExpected(TokenType tokenType, const std::string& tokenTypeDescription);
 
 private:
     std::shared_ptr<SearchToken> currentToken;

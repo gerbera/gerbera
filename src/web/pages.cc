@@ -35,7 +35,7 @@ namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<ContentManager> content,
-    const std::string& page)
+    std::string_view page)
 {
     if (page == "add")
         return std::make_unique<web::add>(std::move(content));
@@ -72,7 +72,7 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "config_save")
         return std::make_unique<web::configSave>(std::move(content));
 
-    throw_std_runtime_error("Unknown page: {}", page.c_str());
+    throw_std_runtime_error("Unknown page: {}", page);
 }
 
 } // namespace web

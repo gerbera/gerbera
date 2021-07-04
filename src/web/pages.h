@@ -164,7 +164,7 @@ public:
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<ContentManager> content,
-    const std::string& page);
+    std::string_view page);
 
 /// \brief Browse clients list
 class clients : public WebRequestHandler {
