@@ -71,7 +71,7 @@ void RequestHandler::splitUrl(const char* url, char separator, std::string& path
 std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, const std::string& separator)
 {
     return !components.empty()
-        ? (std::accumulate(std::next(components.begin()), components.end(), separator + components[0], [=](auto&& a, auto&& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
+        ? (std::accumulate(next(components.begin()), components.end(), separator + components[0], [=](auto&& a, auto&& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
         : "/";
 }
 
