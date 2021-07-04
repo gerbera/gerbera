@@ -44,7 +44,7 @@ private:
     std::vector<std::string> names;
     std::map<std::string, std::string> patterns;
     std::shared_ptr<DirectoryConfigList> allTweaks;
-    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
+    static std::string expandName(std::string_view name, const std::shared_ptr<CdsObject>& obj);
     bool caseSensitive;
 };
 

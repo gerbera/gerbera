@@ -138,7 +138,7 @@ static constexpr auto metaTags = std::array<std::pair<std::string_view, metadata
     std::pair("%title%", M_TITLE),
 };
 
-std::string ContentPathSetup::expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj)
+std::string ContentPathSetup::expandName(std::string_view name, const std::shared_ptr<CdsObject>& obj)
 {
     std::string copy(name);
 
