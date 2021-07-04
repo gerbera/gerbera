@@ -331,14 +331,6 @@ std::shared_ptr<ASTQuotedString> SearchParser::parseQuotedString()
     return std::make_shared<ASTQuotedString>(sqlEmitter, openQuote, escapedString, closeQuote);
 }
 
-void SearchParser::checkIsExpected(TokenType tokenType, const std::string& tokenTypeDescription)
-{
-    if (currentToken->getType() != tokenType) {
-        std::string errorMsg(std::string("Failed to parse search criteria - expecting ") + tokenTypeDescription);
-        throw_std_runtime_error(errorMsg);
-    }
-}
-
 std::string ASTNode::emitSQL() const
 {
     return sqlEmitter.emitSQL(this);

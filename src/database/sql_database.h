@@ -260,7 +260,7 @@ private:
     /* location helper: filesystem path or virtual path to db location*/
     static std::string addLocationPrefix(char prefix, const fs::path& path);
     /* location helpers: db location to filesystem path */
-    static fs::path stripLocationPrefix(const std::string& dbLocation, char* prefix = nullptr);
+    static fs::path stripLocationPrefix(std::string_view dbLocation, char* prefix = nullptr);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);

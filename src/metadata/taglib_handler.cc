@@ -264,11 +264,11 @@ void TagLibHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
     log_debug("TagLib handler done.");
 }
 
-bool TagLibHandler::isValidArtworkContentType(const std::string& art_mimetype)
+bool TagLibHandler::isValidArtworkContentType(std::string_view art_mimetype)
 {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
-    return art_mimetype.find('/') != std::string::npos;
+    return art_mimetype.find('/') != std::string_view::npos;
 }
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const

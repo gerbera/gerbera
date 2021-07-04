@@ -1184,7 +1184,7 @@ std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
     return fmt::format("{}{}", prefix, path.string().c_str());
 }
 
-fs::path SQLDatabase::stripLocationPrefix(const std::string& dbLocation, char* prefix)
+fs::path SQLDatabase::stripLocationPrefix(std::string_view dbLocation, char* prefix)
 {
     if (dbLocation.empty()) {
         if (prefix)
