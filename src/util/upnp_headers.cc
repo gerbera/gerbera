@@ -68,7 +68,7 @@ void Headers::addHeader(const std::string& key, const std::string& value)
     }
 
     log_debug("Adding header: '{}: {}'", cleanKey.c_str(), cleanValue.c_str());
-    headers->insert(std::make_pair(cleanKey, cleanValue));
+    headers->insert(std::pair(cleanKey, cleanValue));
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
@@ -88,7 +88,7 @@ std::pair<std::string, std::string> Headers::parseHeader(const std::string& head
 
     trimStringInPlace(first);
     trimStringInPlace(second);
-    return std::make_pair(first, second);
+    return std::pair(first, second);
 }
 
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
