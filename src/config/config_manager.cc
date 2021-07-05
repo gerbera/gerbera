@@ -121,8 +121,6 @@ void ConfigManager::addOption(config_option_t option, std::shared_ptr<ConfigOpti
 
 void ConfigManager::load(const fs::path& userHome)
 {
-    std::string temp;
-
     std::map<std::string, std::string> args;
     auto self = getSelf();
     std::shared_ptr<ConfigSetup> co;
@@ -137,40 +135,29 @@ void ConfigManager::load(const fs::path& userHome)
 
     auto root = xmlDoc->document_element();
 
-    // first check if the config file itself looks ok, it must have a config
-    // and a server tag
+    // first check if the config file itself looks ok,
+    // it must have a config and a server tag
     if (root.name() != ConfigSetup::ROOT_NAME)
-        throw std::runtime_error("Error in config file: <config> tag not found");
+        throw_std_runtime_error("Error in config file: <config> tag not found");
 
     if (!root.child("server"))
-        throw std::runtime_error("Error in config file: <server> tag not found");
+        throw_std_runtime_error("Error in config file: <server> tag not found");
 
     std::string version = root.attribute("version").as_string();
     if (std::stoi(version) > CONFIG_XML_VERSION)
-        throw std::runtime_error("Config version \"" + version + "\" does not yet exist");
+        throw_std_runtime_error("Config version \"{}\" does not yet exist", version);
 
-    // now go through the mandatory parameters, if something is missing
-    // we will not start the server
+    // now go through the mandatory parameters,
+    // if something is missing we will not start the server
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
-    if (!userHome.empty()) {
-        // respect command line; ignore xml value
-        temp = userHome;
-    } else {
-        temp = co->getXmlContent(root);
+    // respect command line if available; ignore xml value
+    {
+        std::string temp = !userHome.empty() ? userHome.string() : co->getXmlContent(root);
+        if (!fs::is_directory(temp))
+            throw_std_runtime_error("Directory '{}' does not exist", temp);
+        co->makeOption(temp, self);
+        ConfigPathSetup::Home = temp;
     }
-
-    if (!fs::is_directory(temp))
-        throw_std_runtime_error("Directory '{}' does not exist", temp);
-    co->makeOption(temp, self);
-    ConfigPathSetup::Home = temp;
-
-    // read root options
-    setOption(root, CFG_SERVER_WEBROOT);
-    setOption(root, CFG_SERVER_TMPDIR);
-    setOption(root, CFG_SERVER_SERVEDIR);
-
-    // udn should be already prepared
-    setOption(root, CFG_SERVER_UDN);
 
     // checking database driver options
     bool mysql_en = false;
@@ -191,16 +178,18 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     if (sqlite3_en && mysql_en)
-        throw std::runtime_error("You enabled both, sqlite3 and mysql but "
-                                 "only one database driver may be active at a time");
+        throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
+                                "only one database driver may be active at a time");
 
     if (!sqlite3_en && !mysql_en)
-        throw std::runtime_error("You disabled both sqlite3 and mysql but "
-                                 "one database driver must be active");
+        throw_std_runtime_error("You disabled both sqlite3 and mysql but "
+                                "one database driver must be active");
+
+    std::string dbDriver;
 
 #ifdef HAVE_MYSQL
-    // read mysql options
     if (mysql_en) {
+        // read mysql options
         setOption(root, CFG_SERVER_STORAGE_MYSQL_HOST);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_DATABASE);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_USERNAME);
@@ -214,16 +203,18 @@ void ConfigManager::load(const fs::path& userHome)
         co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
+        dbDriver = "mysql";
     }
 #else
     if (mysql_en) {
-        throw std::runtime_error("You enabled MySQL database in configuration, "
-                                 "however this version of Gerbera was compiled "
-                                 "without MySQL support!");
+        throw_std_runtime_error("You enabled MySQL database in configuration, "
+                                "however this version of Gerbera was compiled "
+                                "without MySQL support!");
     }
 #endif // HAVE_MYSQL
 
     if (sqlite3_en) {
+        // read sqlite options
         setOption(root, CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_RESTORE);
@@ -236,43 +227,21 @@ void ConfigManager::load(const fs::path& userHome)
         co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
         co->makeOption(root, self);
-    }
-
-    std::string dbDriver;
-    if (sqlite3_en)
         dbDriver = "sqlite3";
-    if (mysql_en)
-        dbDriver = "mysql";
+    }
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_DRIVER);
     co->makeOption(dbDriver, self);
 
     // now go through the optional settings and fix them if anything is missing
-    setOption(root, CFG_SERVER_UI_ENABLED);
-    setOption(root, CFG_SERVER_UI_SHOW_TOOLTIPS);
-    setOption(root, CFG_SERVER_UI_POLL_WHEN_IDLE);
-    setOption(root, CFG_SERVER_UI_POLL_INTERVAL);
-
     auto def_ipp = setOption(root, CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)->getIntOption();
 
     // now get the option list for the drop down menu
     auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
     if (std::find(menu_opts.begin(), menu_opts.end(), fmt::to_string(def_ipp)) == menu_opts.end())
-        throw std::runtime_error("Error in config file: at least one <option> "
-                                 "under <items-per-page> must match the "
-                                 "<items-per-page default=\"\" /> attribute");
-
-    // read account options
-    setOption(root, CFG_SERVER_UI_ACCOUNTS_ENABLED);
-    setOption(root, CFG_SERVER_UI_ACCOUNT_LIST);
-    setOption(root, CFG_SERVER_UI_SESSION_TIMEOUT);
-
-    // read upnp options
-    setOption(root, CFG_UPNP_ALBUM_PROPERTIES);
-    setOption(root, CFG_UPNP_ARTIST_PROPERTIES);
-    setOption(root, CFG_UPNP_GENRE_PROPERTIES);
-    setOption(root, CFG_UPNP_TITLE_PROPERTIES);
-    setOption(root, CFG_THREAD_SCOPE_SYSTEM);
+        throw_std_runtime_error("Error in config file: at least one <option> "
+                                "under <items-per-page> must match the "
+                                "<items-per-page default=\"\" /> attribute");
 
     bool cl_en = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
     args["isEnabled"] = cl_en ? "true" : "false";
@@ -280,113 +249,80 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
     setOption(root, CFG_IMPORT_HIDDEN_FILES);
-    setOption(root, CFG_IMPORT_FOLLOW_SYMLINKS);
-    setOption(root, CFG_IMPORT_READABLE_NAMES);
-    setOption(root, CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
     bool csens = setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
     args["tolower"] = fmt::to_string(!csens);
     setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
     args.clear();
-    setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    setOption(root, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
-    setOption(root, CFG_IMPORT_LAYOUT_PARENT_PATH);
-    setOption(root, CFG_IMPORT_LAYOUT_MAPPING);
 
+    std::string defaultCharSet = DEFAULT_FILESYSTEM_CHARSET;
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "")) {
-        temp = nl_langinfo(CODESET);
-        log_debug("received {} from nl_langinfo", temp.c_str());
+        defaultCharSet = nl_langinfo(CODESET);
+        log_debug("received {} from nl_langinfo", defaultCharSet.c_str());
     }
-
-    if (temp.empty())
-        temp = DEFAULT_FILESYSTEM_CHARSET;
-#else
-    temp = DEFAULT_FILESYSTEM_CHARSET;
 #endif
     // check if the one we take as default is actually available
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
     try {
-        auto conv = std::make_unique<StringConverter>(temp,
-            DEFAULT_INTERNAL_CHARSET);
+        auto conv = std::make_unique<StringConverter>(defaultCharSet, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
-        temp = DEFAULT_FALLBACK_CHARSET;
+        defaultCharSet = DEFAULT_FALLBACK_CHARSET;
     }
-    co->setDefaultValue(temp);
+    co->setDefaultValue(defaultCharSet);
+
     std::string charset = co->getXmlContent(root);
     try {
-        auto conv = std::make_unique<StringConverter>(charset,
-            DEFAULT_INTERNAL_CHARSET);
+        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error in config file: unsupported filesystem-charset specified: " + charset);
+        throw_std_runtime_error("Error in config file: unsupported filesystem-charset specified: {}\n{}", charset, e.what());
     }
     log_debug("Setting filesystem import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
-    co->setDefaultValue(temp);
+    co->setDefaultValue(defaultCharSet);
     charset = co->getXmlContent(root);
     try {
         auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error in config file: unsupported metadata-charset specified: " + charset);
+        throw_std_runtime_error("Error in config file: unsupported metadata-charset specified: {}\n{}", charset, e.what());
     }
     log_debug("Setting metadata import charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
+    // read playlist options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
-    co->setDefaultValue(temp);
+    co->setDefaultValue(defaultCharSet);
     charset = co->getXmlContent(root);
     try {
         auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error("Error in config file: unsupported playlist-charset specified: " + charset);
+        throw_std_runtime_error("Error in config file: unsupported playlist-charset specified: {}\n{}", charset, e.what());
     }
     log_debug("Setting playlist charset to {}", charset.c_str());
     co->makeOption(charset, self);
 
-    setOption(root, CFG_SERVER_HIDE_PC_DIRECTORY);
-
+    // read network options
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_NETWORK_INTERFACE);
-    if (interface.empty()) {
-        temp = co->getXmlContent(root);
-    } else {
-        temp = interface;
-    }
-    co->makeOption(temp, self);
+    co->makeOption((interface.empty()) ? co->getXmlContent(root) : interface, self);
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_IP);
-    if (ip.empty()) {
-        temp = co->getXmlContent(root); // bind to any IP address
-    } else {
-        temp = ip;
-    }
-    co->makeOption(temp, self);
+    // bind to any IP address
+    co->makeOption(ip.empty() ? co->getXmlContent(root) : ip, self);
 
     if (!getOption(CFG_SERVER_NETWORK_INTERFACE).empty() && !getOption(CFG_SERVER_IP).empty())
-        throw std::runtime_error("Error in config file: you can not specify interface and ip at the same time");
+        throw_std_runtime_error("Error in config file: you can not specify interface and ip at the same time");
 
     // read server options
-    setOption(root, CFG_SERVER_BOOKMARK_FILE);
-    setOption(root, CFG_SERVER_NAME);
-    setOption(root, CFG_SERVER_MODEL_NAME);
-    setOption(root, CFG_SERVER_MODEL_DESCRIPTION);
-    setOption(root, CFG_SERVER_MODEL_NUMBER);
-    setOption(root, CFG_SERVER_MODEL_URL);
-    setOption(root, CFG_SERVER_SERIAL_NUMBER);
-    setOption(root, CFG_SERVER_MANUFACTURER);
-    setOption(root, CFG_SERVER_MANUFACTURER_URL);
-    setOption(root, CFG_VIRTUAL_URL);
-    setOption(root, CFG_SERVER_PRESENTATION_URL);
-    setOption(root, CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT);
-
-    temp = setOption(root, CFG_SERVER_APPEND_PRESENTATION_URL_TO)->getOption();
-    if (((temp == "ip") || (temp == "port")) && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
-        throw_std_runtime_error("Error in config file: \"append-to\" attribute "
-                                "value in <presentationURL> tag is set to \"{}\""
-                                "but no URL is specified",
-            temp.c_str());
+    {
+        std::string temp = setOption(root, CFG_SERVER_APPEND_PRESENTATION_URL_TO)->getOption();
+        if ((temp == "ip" || temp == "port") && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
+            throw_std_runtime_error("Error in config file: \"append-to\" attribute "
+                                    "value in <presentationURL> tag is set to \"{}\""
+                                    "but no URL is specified",
+                temp.c_str());
+        }
     }
-
 #ifdef HAVE_JS
     // read javascript options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
@@ -401,39 +337,23 @@ void ConfigManager::load(const fs::path& userHome)
     args["resolveEmpty"] = "false";
     co->makeOption(root, self, &args);
     args.clear();
-
-    setOption(root, CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS);
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS);
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO);
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO);
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE);
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_TRAILER);
-
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS);
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ALBUMBOX);
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ARTISTBOX);
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_GENREBOX);
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_TRACKBOX);
-    setOption(root, CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR);
 #endif
-    setOption(root, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP);
 
     auto layoutType = setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE)->getOption();
 
 #ifndef HAVE_JS
     if (layoutType == "js")
-        throw std::runtime_error("Gerbera was compiled without JS support, "
-                                 "however you specified \"js\" to be used for the "
-                                 "virtual-layout.");
+        throw_std_runtime_error("Gerbera was compiled without JS support, "
+                                "however you specified \"js\" to be used for the "
+                                "virtual-layout.");
 #else
     // read more javascript options
     charset = setOption(root, CFG_IMPORT_SCRIPTING_CHARSET)->getOption();
     if (layoutType == "js") {
         try {
-            auto conv = std::make_unique<StringConverter>(charset,
-                DEFAULT_INTERNAL_CHARSET);
+            auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("Error in config file: unsupported import script charset specified: " + charset);
+            throw_std_runtime_error("Error in config file: unsupported import script charset specified: {}\n{}", charset, e.what());
         }
     }
 
@@ -444,14 +364,11 @@ void ConfigManager::load(const fs::path& userHome)
     co->makeOption(root, self, &args);
     args.clear();
     auto script_path = co->getValue()->getOption();
-
 #endif
+
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_PORT);
     // 0 means, that the SDK will any free port itself
     co->makeOption((port == 0) ? co->getXmlContent(root) : fmt::to_string(port), self);
-
-    setOption(root, CFG_SERVER_ALIVE_INTERVAL);
-    setOption(root, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
 
     args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";
     setOption(root, CFG_IMPORT_AUTOSCAN_TIMED_LIST, &args);
@@ -467,9 +384,8 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
     args.clear();
 
+    // read transcoding options
     auto tr_en = setOption(root, CFG_TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
-    setOption(root, CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED);
-    setOption(root, CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED);
     args["isEnabled"] = tr_en ? "true" : "false";
     setOption(root, CFG_TRANSCODING_PROFILE_LIST, &args);
     args.clear();
@@ -482,49 +398,10 @@ void ConfigManager::load(const fs::path& userHome)
 #endif //HAVE_CURL
 
     // read import options
-    setOption(root, CFG_IMPORT_RESOURCES_CASE_SENSITIVE);
-    setOption(root, CFG_IMPORT_RESOURCES_FANART_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_FANART_DIR_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION);
-    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
-    setOption(root, CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
-    setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST);
-    setOption(root, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
-    setOption(root, CFG_IMPORT_DIRECTORIES_LIST);
-    setOption(root, CFG_IMPORT_SYSTEM_DIRECTORIES);
-    setOption(root, CFG_IMPORT_VISIBLE_DIRECTORIES);
-    setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST);
-    setOption(root, CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
-
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
     args.clear();
-
-    // read library options
-#ifdef HAVE_LIBEXIF
-    setOption(root, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
-    setOption(root, CFG_IMPORT_LIBOPTS_EXIF_CHARSET);
-#endif // HAVE_LIBEXIF
-
-#ifdef HAVE_EXIV2
-    setOption(root, CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
-    setOption(root, CFG_IMPORT_LIBOPTS_EXIV2_CHARSET);
-#endif // HAVE_EXIV2
-
-#ifdef HAVE_TAGLIB
-    setOption(root, CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    setOption(root, CFG_IMPORT_LIBOPTS_ID3_CHARSET);
-#endif
-
-#ifdef HAVE_FFMPEG
-    setOption(root, CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-    setOption(root, CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET);
-#endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     auto ffmp_en = setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
@@ -540,12 +417,9 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
     bool markingEnabled = setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED)->getBoolOption();
-    setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-    setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
-    setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
     bool contentArrayEmpty = setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST)->getArrayOption().empty();
     if (markingEnabled && contentArrayEmpty) {
-        throw std::runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag");
+        throw_std_runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag");
     }
 
 #if defined(HAVE_LASTFMLIB)
@@ -573,37 +447,35 @@ void ConfigManager::load(const fs::path& userHome)
         for (size_t j = 0; j < config_timed_list->size(); j++) {
             auto t_dir = config_timed_list->get(j);
             if (i_dir->getLocation() == t_dir->getLocation())
-                throw std::runtime_error("Error in config file: same path used in both inotify and timed scan modes");
+                throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");
         }
     }
 #endif
 
     // read online content options
 #ifdef SOPCAST
-    setOption(root, CFG_ONLINE_CONTENT_SOPCAST_ENABLED);
-
     int sopcast_refresh = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_REFRESH)->getIntOption();
     int sopcast_purge = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER)->getIntOption();
 
     if (sopcast_refresh >= sopcast_purge) {
         if (sopcast_purge != 0)
-            throw std::runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
+            throw_std_runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
     }
-
-    setOption(root, CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START);
-    setOption(root, CFG_IMPORT_SOPCAST_MIMETYE_LIST);
 #endif
 
 #ifdef ATRAILERS
-    setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
     int atrailers_refresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
     co = ConfigDefinition::findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
     co->makeOption(fmt::to_string(atrailers_refresh), self);
-
-    setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
-    setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
 #endif
+
+    // read options that do not have special requirement and that are not yet loaded
+    for (auto&& optionKey : ConfigOptionIterator()) {
+        if (!options->at(optionKey) && !ConfigDefinition::isDependent(optionKey)) {
+            setOption(root, optionKey);
+        }
+    }
 
     log_info("Configuration check succeeded.");
 
@@ -671,62 +543,90 @@ void ConfigManager::setOrigValue(const std::string& item, int value)
 // The validate function ensures that the array is completely filled!
 std::string ConfigManager::getOption(config_option_t option) const
 {
-    auto o = options->at(option);
-    if (!o) {
-        throw std::runtime_error("option not set");
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
     }
-    return o->getOption();
+    return optionValue->getOption();
 }
 
 int ConfigManager::getIntOption(config_option_t option) const
 {
-    auto o = options->at(option);
-    if (!o) {
-        throw std::runtime_error("option not set");
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
     }
-    return o->getIntOption();
+    return optionValue->getIntOption();
 }
 
 bool ConfigManager::getBoolOption(config_option_t option) const
 {
-    auto o = options->at(option);
-    if (!o) {
-        throw std::runtime_error("option not set");
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
     }
-    return o->getBoolOption();
+    return optionValue->getBoolOption();
 }
 
 std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option) const
 {
-    return options->at(option)->getDictionaryOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getDictionaryOption();
 }
 
 std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) const
 {
-    return options->at(option)->getArrayOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getArrayOption();
 }
 
 std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option) const
 {
-    return options->at(option)->getAutoscanListOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getAutoscanListOption();
 }
 
 std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option) const
 {
-    return options->at(option)->getClientConfigListOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getClientConfigListOption();
 }
 
 std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(config_option_t option) const
 {
-    return options->at(option)->getDirectoryTweakOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getDirectoryTweakOption();
 }
 
 std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(config_option_t option) const
 {
-    return options->at(option)->getDynamicContentListOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getDynamicContentListOption();
 }
 
 std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option) const
 {
-    return options->at(option)->getTranscodingProfileListOption();
+    auto optionValue = options->at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getTranscodingProfileListOption();
 }

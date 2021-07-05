@@ -158,7 +158,7 @@ To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc+
   make
   sudo make install
   cd ..
- 	
+
 
 Install all libraries gerbera needs. Because they are to old libupnp, libfmt must be
 build and installed from the source:
@@ -364,3 +364,56 @@ To start the build enter
 ::
 
   sudo docker build gerbera/
+
+
+.. index:: Support Development Effort
+
+Support Development Effort
+==========================
+
+We welcome pull requests from everyone!
+
+Gerbera was originally based on MediaTomb which is an old project that we started working on modernising - there were a lot of cobwebs.
+
+For new code please use "modern" C++ (up to 17) constructs where possible.
+
+First Steps
+~~~~~~~~~~~
+
+1. Fork gerbera repo https://github.com/gerbera/gerbera.
+
+2. Clone your fork:
+
+::
+
+    `git clone git@github.com:your-username/gerbera.git`
+
+2. Make your change.
+
+3. Push to your fork
+
+4. [Submit a pull request](https://github.com/gerbera/gerbera/compare).
+
+Some things that will increase the chance that your pull request is accepted:
+
+- Stick to [Webkit style](https://webkit.org/code-style-guidelines/).
+- Format your code with `clang-format`.
+- Ensure your code works as expected by running it.
+- Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+
+It is also a good idea to run cmake with`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"`
+options for development.
+
+
+Guidelines for Special Topics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some topics require proper handling, so we explain the core steps here.
+
+* :doc:`Configuration Options </dev-configuration>`
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   Configuration Options         <dev-configuration>
