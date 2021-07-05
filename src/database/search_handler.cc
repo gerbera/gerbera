@@ -482,10 +482,10 @@ static const std::map<std::string, std::string> logicOperator = {
 std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
     if (colMapper && colMapper->hasEntry(property)) {
-        return std::make_pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
+        return std::pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
     }
     if (metaMapper) {
-        return std::make_pair(
+        return std::pair(
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property));
     }
