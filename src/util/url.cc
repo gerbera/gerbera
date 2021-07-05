@@ -37,7 +37,7 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-std::string URL::download(const std::string& URL, long* HTTP_retcode,
+std::string URL::download(std::string_view URL, long* HTTP_retcode,
     CURL* curl_handle, bool only_header,
     bool verbose, bool redirect)
 {
@@ -70,7 +70,7 @@ std::string URL::download(const std::string& URL, long* HTTP_retcode,
     // that they know...
     curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
         "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");
-    curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
+    curl_easy_setopt(curl_handle, CURLOPT_URL, URL.data());
     curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
     curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
@@ -112,7 +112,7 @@ std::string URL::download(const std::string& URL, long* HTTP_retcode,
     return buffer.str();
 }
 
-std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handle)
+std::unique_ptr<URL::Stat> URL::getInfo(std::string_view URL, CURL* curl_handle)
 {
     long retcode;
     bool cleanup = false;
@@ -133,7 +133,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     if (retcode != 200) {
         if (cleanup)
             curl_easy_cleanup(curl_handle);
-        throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", URL.c_str(), retcode);
+        throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", URL, retcode);
     }
 
     res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
@@ -163,7 +163,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
         throw_std_runtime_error(error_buffer);
     }
 
-    std::string used_url = c_url ? c_url : URL;
+    std::string used_url = c_url ? c_url : std::string(URL);
 
     if (cleanup)
         curl_easy_cleanup(curl_handle);

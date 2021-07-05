@@ -80,14 +80,14 @@ public:
     /// \param only_header set true if you only want the header and not the
     /// body
     /// \param vebose enable curl verbose option
-    static std::string download(const std::string& URL,
+    static std::string download(std::string_view URL,
         long* HTTP_retcode,
         CURL* curl_handle = nullptr,
         bool only_header = false,
         bool verbose = false,
         bool redirect = false);
 
-    static std::unique_ptr<Stat> getInfo(const std::string& URL, CURL* curl_handle = nullptr);
+    static std::unique_ptr<Stat> getInfo(std::string_view URL, CURL* curl_handle = nullptr);
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when

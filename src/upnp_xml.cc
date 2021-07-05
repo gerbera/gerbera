@@ -47,16 +47,16 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
 {
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(std::string_view actionName, std::string_view serviceType)
 {
     auto response = std::make_unique<pugi::xml_document>();
-    auto root = response->append_child(fmt::format("u:{}Response", actionName.c_str()).c_str());
-    root.append_attribute("xmlns:u") = serviceType.c_str();
+    auto root = response->append_child(fmt::format("u:{}Response", actionName).c_str());
+    root.append_attribute("xmlns:u") = serviceType.data();
 
     return response;
 }
 
-metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldName)
+metadata_fields_t UpnpXMLBuilder::remapMetaDataField(std::string_view fieldName)
 {
     for (auto&& [f, s] : mt_names) {
         if (s == fieldName) {
