@@ -42,6 +42,8 @@ public:
     }
 
     static const char* mapConfigOption(config_option_t option);
+    /// \brief check whether option is only available when other option is set
+    static bool isDependent(config_option_t option);
 
     static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
     static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
@@ -88,8 +90,12 @@ public:
     }
 
 private:
+    /// \brief all known options
     static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
+    /// \brief parent options for path search
     static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
+    /// \brief option dependencies for automatic loading
+    static const std::map<config_option_t, config_option_t> dependencyMap;
 };
 
 #endif // __CONFIG_DEFINITION_H__
