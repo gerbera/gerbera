@@ -57,4 +57,7 @@
         <script>ALTER TABLE `mt_cds_object` ADD `last_updated` bigint(20) unsigned default '0' AFTER `last_modified`</script>
         <script>UPDATE `mt_cds_object` SET `last_updated`=`last_modified`</script>
     </version>
+    <version number="12" remark="drop metadata column">
+        <script migration="metadata">ALTER TABLE `mt_cds_object` DROP COLUMN `metadata`</script>
+    </version>
 </upgrade>

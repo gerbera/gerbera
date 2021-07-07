@@ -386,22 +386,24 @@ First Steps
 
 ::
 
-    `git clone git@github.com:your-username/gerbera.git`
+    git clone git@github.com:your-username/gerbera.git
 
 2. Make your change.
 
-3. Push to your fork
+3. Compile and run ``ctest``
 
-4. [Submit a pull request](https://github.com/gerbera/gerbera/compare).
+4. Push to your fork
+
+5. `Submit a pull request <https://github.com/gerbera/gerbera/compare>`.
 
 Some things that will increase the chance that your pull request is accepted:
 
-- Stick to [Webkit style](https://webkit.org/code-style-guidelines/).
+- Stick to `Webkit style <https://webkit.org/code-style-guidelines/>`.
 - Format your code with `clang-format`.
 - Ensure your code works as expected by running it.
-- Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+- Write a `good commit message <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`.
 
-It is also a good idea to run cmake with`-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"`
+It is also a good idea to run cmake with ``-DWITH_TESTS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"``
 options for development.
 
 
@@ -417,3 +419,4 @@ Some topics require proper handling, so we explain the core steps here.
    :hidden:
 
    Configuration Options         <dev-configuration>
+   Database Schema               <dev-database>

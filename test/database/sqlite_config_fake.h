@@ -2,7 +2,7 @@
 
 Gerbera - https://gerbera.io/
 
-    mysql_config_fake.h - this file is part of Gerbera.
+    sqlite_config_fake.h - this file is part of Gerbera.
 
     Copyright (C) 2020-2021 Gerbera Contributors
 
@@ -19,38 +19,42 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file my_sql_config_fake.h
+/// \file sqlite_config_fake.h
 
-#ifndef GERBERA_MYSQL_CONFIG_FAKE_H
-#define GERBERA_MYSQL_CONFIG_FAKE_H
+#ifndef GERBERA_SQLITE_CONFIG_FAKE_H
+#define GERBERA_SQLITE_CONFIG_FAKE_H
 
-class MySQLConfigFake : public Config {
+class SqliteConfigFake : public Config {
 public:
     fs::path getConfigFilename() const override { return ""; }
-    std::string getOption(config_option_t option) const override {
-        if (option == CFG_SERVER_STORAGE_MYSQL_HOST) {
-            return "hydra.home";
+    std::string getOption(config_option_t option) const override
+    {
+        if (option == CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE) {
+            return "/tmp/gerbera.db";
         }
-        if (option == CFG_SERVER_STORAGE_MYSQL_USERNAME) {
-            return "root";
+        if (option == CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE) {
+            return "sqlite3.sql";
+        }
+        if (option == CFG_SERVER_STORAGE_SQLITE_RESTORE) {
+            return "true";
+        }
+        if (option == CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE) {
+            return "sqlite3-upgrade.xml";
         }
         if (option == CFG_SERVER_STORAGE_DRIVER) {
-            return "mysql";
+            return "sqlite3";
         }
-        if (option == CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE) {
-            return "mysql.sql";
-        }
-        if (option == CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
-            return "mysql-upgrade.xml";
-        }
-//        if (option == CFG_SERVER_STORAGE_MYSQL_DATABASE) {
-//            return "gerbera";
-//        }
         return "";
     };
     void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override { }
     int getIntOption(config_option_t option) const override { return 0; }
-    bool getBoolOption(config_option_t option) const override { return false; }
+    bool getBoolOption(config_option_t option) const override
+    {
+        if (option == CFG_SERVER_STORAGE_SQLITE_RESTORE) {
+            return true;
+        }
+        return false;
+    }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return std::map<std::string, std::string>(); }
     std::vector<std::string> getArrayOption(config_option_t option) const override { return std::vector<std::string>(); }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
