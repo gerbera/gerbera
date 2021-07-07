@@ -53,6 +53,9 @@ MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mim
 {
     table_quote_begin = '`';
     table_quote_end = '`';
+
+    // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
+    hashies = { 2444084521, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496 };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -148,9 +151,6 @@ void MySQLDatabase::init()
         log_debug("{}", e.what());
     }
 
-    // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    std::array<unsigned int, DBVERSION> hashies { 3622530614, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694 };
-
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
         auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
@@ -174,6 +174,7 @@ void MySQLDatabase::init()
             _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION).c_str());
         } else {
             log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
+            throw_std_runtime_error("Wrong hash for create script {}", DBVERSION);
         }
         dbVersion = getInternalSetting("db_version");
         if (dbVersion.empty()) {

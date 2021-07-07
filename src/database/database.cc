@@ -53,7 +53,6 @@ std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>
     }();
 
     database->init();
-    database->doMetadataMigration();
 
     return database;
 }

@@ -46,6 +46,9 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
 {
     table_quote_begin = '"';
     table_quote_end = '"';
+
+    // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
+    hashies = { 3614809442, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 3659570292 };
 }
 
 void Sqlite3Database::prepare()
@@ -117,9 +120,6 @@ void Sqlite3Database::init()
         }
     }
 
-    // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    std::array<unsigned int, DBVERSION> hashies { 3175875507, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356 };
-
     if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
         log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
         auto itask = std::make_shared<SLInitTask>(config, hashies[0]);
@@ -143,7 +143,7 @@ void Sqlite3Database::init()
     try {
         upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
 
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
+        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);
             this->addTask(btask);
@@ -350,7 +350,7 @@ void Sqlite3Database::shutdownDriver()
     auto lock = threadRunner->uniqueLockS("shutdown");
     if (!shutdownFlag) {
         shutdownFlag = true;
-        if (hasBackupTimer) {
+        if (hasBackupTimer && timer) {
             timer->removeTimerSubscriber(this, nullptr);
         }
         log_debug("signalling...");

@@ -306,7 +306,7 @@ public:
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() const = 0;
 
-    virtual void doMetadataMigration() = 0;
+    virtual bool doMetadataMigration() = 0;
 
 protected:
     /* helper for addContainerChain */

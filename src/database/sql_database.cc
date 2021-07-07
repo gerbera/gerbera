@@ -81,7 +81,6 @@ enum class BrowseCol {
     dc_title,
     location,
     location_hash,
-    metadata,
     auxdata,
     resources,
     update_id,
@@ -95,7 +94,6 @@ enum class BrowseCol {
     last_updated,
     ref_upnp_class,
     ref_location,
-    ref_metadata,
     ref_auxdata,
     ref_resources,
     ref_mime_type,
@@ -111,7 +109,6 @@ enum class SearchCol {
     object_type,
     upnp_class,
     dc_title,
-    metadata,
     resources,
     mime_type,
     part_number,
@@ -140,7 +137,6 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::dc_title, { ITM_ALIAS, "dc_title" } },
     { BrowseCol::location, { ITM_ALIAS, "location" } },
     { BrowseCol::location_hash, { ITM_ALIAS, "location_hash" } },
-    { BrowseCol::metadata, { ITM_ALIAS, "metadata" } },
     { BrowseCol::auxdata, { ITM_ALIAS, "auxdata" } },
     { BrowseCol::resources, { ITM_ALIAS, "resources" } },
     { BrowseCol::update_id, { ITM_ALIAS, "update_id" } },
@@ -154,7 +150,6 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::last_updated, { ITM_ALIAS, "last_updated" } },
     { BrowseCol::ref_upnp_class, { REF_ALIAS, "upnp_class" } },
     { BrowseCol::ref_location, { REF_ALIAS, "location" } },
-    { BrowseCol::ref_metadata, { REF_ALIAS, "metadata" } },
     { BrowseCol::ref_auxdata, { REF_ALIAS, "auxdata" } },
     { BrowseCol::ref_resources, { REF_ALIAS, "resources" } },
     { BrowseCol::ref_mime_type, { REF_ALIAS, "mime_type" } },
@@ -171,7 +166,6 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::object_type, { SRC_ALIAS, "object_type" } },
     { SearchCol::upnp_class, { SRC_ALIAS, "upnp_class" } },
     { SearchCol::dc_title, { SRC_ALIAS, "dc_title" } },
-    { SearchCol::metadata, { SRC_ALIAS, "metadata" } },
     { SearchCol::resources, { SRC_ALIAS, "resources" } },
     { SearchCol::mime_type, { SRC_ALIAS, "mime_type" } },
     { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
@@ -307,8 +301,8 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
     log_debug("db_version: {}", dbVersion);
-    std::vector<std::unique_ptr<std::vector<std::string>>> dbUpdates;
     log_debug("Loading SQL Upgrades from: {}", upgradeFile.c_str());
+    std::vector<std::unique_ptr<std::vector<std::pair<std::string, std::string>>>> dbUpdates;
     pugi::xml_document xmlDoc;
     pugi::xml_parse_result result = xmlDoc.load_file(upgradeFile.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
@@ -321,29 +315,37 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     size_t version = 1;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
-        auto versionCmds = std::make_unique<std::vector<std::string>>();
+        auto versionCmds = std::make_unique<std::vector<std::pair<std::string, std::string>>>();
         std::ostringstream ostr;
         versionNode.print(ostr);
         auto&& myHash = stringHash(ostr.str());
         if (version < DBVERSION && myHash == hashies[version]) {
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();
-                versionCmds->push_back(trimString(scriptNode.text().as_string()));
+                std::string migration = trimString(scriptNode.attribute("migration").as_string());
+                versionCmds->push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
             }
         } else {
-            log_warning("Wrong hash for version {}: {} != {}", version, myHash, hashies[version]);
+            log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies[version]);
+            throw_std_runtime_error("Wrong hash for version {}", version + 1);
         }
         dbUpdates.push_back(std::move(versionCmds));
         version++;
     }
 
     version = 1;
+    static const std::map<std::string, bool (SQLDatabase::*)()> migActions = {
+        { "metadata", &SQLDatabase::doMetadataMigration },
+    };
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == fmt::to_string(version)) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (auto&& upgradeCmd : *upgrade) {
-                if (!upgradeCmd.empty())
+            for (auto&& [migrationCmd, upgradeCmd] : *upgrade) {
+                bool actionResult = true;
+                if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
+                    actionResult = (*this.*(migActions.at(migrationCmd)))();
+                if (actionResult && !upgradeCmd.empty())
                     _exec(upgradeCmd.c_str());
             }
             _exec(fmt::format(updateVersionCommand, version + 1, version).c_str());
@@ -1217,13 +1219,6 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         meta = retrieveMetadataForObject(obj->getRefID());
         if (!meta.empty())
             obj->setMetadata(meta);
-    }
-    if (meta.empty()) {
-        // fallback to metadata that might be in mt_cds_object, which
-        // will be useful if retrieving for schema upgrade
-        std::string metadataStr = getCol(row, BrowseCol::metadata);
-        dictDecode(metadataStr, &meta);
-        obj->setMetadata(meta);
     }
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::ref_auxdata));
@@ -2481,7 +2476,8 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_
     return std::make_unique<std::ostringstream>(std::move(qb));
 }
 
-void SQLDatabase::doMetadataMigration()
+// column metadata is dropped in DBVERSION 12
+bool SQLDatabase::doMetadataMigration()
 {
     log_debug("Checking if metadata migration is required");
     std::ostringstream qbCountNotNull;
@@ -2502,14 +2498,13 @@ void SQLDatabase::doMetadataMigration()
 
     if (expectedConversionCount > 0 && metadataRowCount > 0) {
         log_info("No metadata migration required");
-        return;
+        return true;
     }
 
     log_info("About to migrate metadata from mt_cds_object to mt_metadata");
-    log_info("No data will be removed from mt_cds_object");
 
     std::ostringstream qbRetrieveIDs;
-    qbRetrieveIDs << "SELECT " << TQ("id")
+    qbRetrieveIDs << "SELECT " << TQ("id") << ", " << TQ("metadata")
                   << " FROM " << TQ(CDS_OBJECT_TABLE)
                   << " WHERE " << TQ("metadata")
                   << " is not null";
@@ -2518,21 +2513,20 @@ void SQLDatabase::doMetadataMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow())) {
-        auto cdsObject = loadObject(std::stoi(row->col(0)));
-        migrateMetadata(cdsObject);
+        migrateMetadata(std::stoi(row->col(0)), row->col(1));
         ++objectsUpdated;
     }
     log_info("Migrated metadata - object count: {}", objectsUpdated);
+    return true;
 }
 
-void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
+void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 {
-    if (!object)
-        return;
+    std::map<std::string, std::string> dict;
+    dictDecode(metadataStr, &dict);
 
-    auto dict = object->getMetadata();
     if (!dict.empty()) {
-        log_debug("Migrating metadata for cds object {}", object->getID());
+        log_debug("Migrating metadata for cds object {}", objectId);
         std::map<std::string, std::string> metadataSQLVals;
         for (auto&& [key, val] : dict) {
             metadataSQLVals[quote(key)] = quote(val);
@@ -2543,9 +2537,8 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
             fields << TQ("item_id") << ','
                    << TQ("property_name") << ','
                    << TQ("property_value");
-            values << object->getID() << ','
-                   << key << ','
-                   << val;
+            values << objectId << ','
+                   << key << ',' << val;
             std::ostringstream qb;
             qb << "INSERT INTO " << TQ(METADATA_TABLE)
                << " (" << fields.str()
@@ -2554,6 +2547,6 @@ void SQLDatabase::migrateMetadata(const std::shared_ptr<CdsObject>& object)
             exec(qb.str());
         }
     } else {
-        log_debug("Skipping migration - no metadata for cds object {}", object->getID());
+        log_debug("Skipping migration - no metadata for cds object {}", objectId);
     }
 }

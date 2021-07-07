@@ -32,6 +32,7 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
+#include <array>
 #include <mutex>
 #include <sstream>
 #include <unordered_set>
@@ -45,7 +46,7 @@ class CdsContainer;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 11
+#define DBVERSION 12
 
 #define QTB table_quote_begin
 #define QTE table_quote_end
@@ -171,14 +172,15 @@ public:
     static std::string getSearchCapabilities();
 
     void clearFlagInDB(int flag) override;
+    unsigned int getHash(size_t index) { return index < DBVERSION ? hashies[index] : 0; }
 
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     //virtual ~SQLDatabase();
     void init() override;
 
-    void doMetadataMigration() override;
-    void migrateMetadata(const std::shared_ptr<CdsObject>& object);
+    bool doMetadataMigration() override;
+    void migrateMetadata(int objectId, const std::string& metadataStr);
 
     std::shared_ptr<Mime> mime;
 
@@ -186,6 +188,7 @@ protected:
     char table_quote_end { '\0' };
     bool use_transaction;
     bool inTransaction {};
+    std::array<unsigned int, DBVERSION> hashies;
 
     std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
