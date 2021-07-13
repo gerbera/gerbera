@@ -19,13 +19,13 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | Library             | Min Version   | Required?     | Note                       | Compile-time option     | Default  | Script             |
 +=====================+===============+===============+============================+=========================+==========+====================+
-| libupnp             | 1.14.0        | XOR libnpupnp | [pupnp]                    |                         |          | install-pupnp.sh   |
+| libupnp             | 1.14.0        | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh   |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libnpupnp           | 4.1.2         | XOR libupnp   | [npupnp]                   | WITH\_NPUPNP            | Disabled |                    |
+| libnpupnp           | 4.1.2         | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libuuid             |               | Depends on OS | Not required on \*BSD      |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [pugixml]           |               | Required      | XML file and data support  |                         |          | install-pugixml.sh |
+| pugixml             |               | Required      | XML file and data support  |                         |          | install-pugixml.sh |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libiconv            |               | Required      | Charset conversion         |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
@@ -33,17 +33,17 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | zlib                |               | Required      | Data compression           |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [fmtlib]            | 5.3           | Required      | Fast string formatting     |                         |          | install-fmt.sh     |
+| fmtlib              | 5.3           | Required      | Fast string formatting     |                         |          | install-fmt.sh     |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [spdlog]            |               | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
+| spdlog              |               | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [duktape]           | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh |
+| duktape             | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | mysql               |               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | curl                |               | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [taglib]            | 1.11.1        | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh  |
+| taglib              | 1.11.1        | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libmagic            |               | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
@@ -57,11 +57,21 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | lastfmlib           | 0.4.0         | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| [ffmpegthumbnailer] |               | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled |                    |
+| ffmpegthumbnailer   |               | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | inotify             |               | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 
+Referenced packages:
+
+  `<duktape>: http://duktape.org`_
+  `<ffmpegthumbnailer>: https://github.com/dirkvdb/ffmpegthumbnailer`_
+  `<fmtlib>: https://github.com/fmtlib/fmt`_
+  `<npupnp>: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html`_
+  `<pugixml>: https://github.com/zeux/pugixml`_
+  `<pupnp>: https://github.com/pupnp/pupnp`_
+  `<spdlog>: https://github.com/gabime/spdlog`_
+  `<taglib>: http://taglib.org/`_
 
 Scripts for installation of (build) dependencies from source can be found under `scripts`.
 
@@ -83,7 +93,6 @@ Quick Start Build
 
 
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
-
 ::
 
   git clone https://github.com/gerbera/gerbera.git
@@ -122,7 +131,7 @@ The following packages are too old in 16.04 and must be installed from source:
 **taglib (1.11.x)**, and **libupnp (1.8.x).**
 
 **libupnp** must be configured/built with ``--enable-ipv6``. See
-``scripts/install-pupnp18.sh`` for details.
+``scripts/install-pupnp.sh`` for details.
 
 Build On Ubuntu 18.04
 ~~~~~~~~~~~~~~~~~~~~~
@@ -225,57 +234,66 @@ This guide is based on buildinh Gerbera on Pogo Kirkwood Armel architecture boxe
 
 2. If you for libnpupnp and libupnpp6 from https://www.lesbonscomptes.com/upmpdcli/ - Follow the build instructions to create Debian packages which you can then install with dpkg.
 
-3. Build the latest Taglib [`cmake; make -j2`] and use `make install` to install
+3. Build the latest Taglib ``cmake; make -j2`` and run ``make install`` to install or use ``scripts/install-taglib.sh``
 
 4. Use Apt-get to install the rest of the dev packages as per dependencies list. It is best to load fmtlib-dev and libspdlog.dev from the Buster Backports
 
 5. Clone the Gerbera git and edit the CMakeLists.txt file and comment the original version and add the new.
+::
 
-`# set(GERBERA_VERSION "git")`
-`set(GERBERA_VERSION "1.6.4-185-gae283931+d")`
+  # set(GERBERA_VERSION "git")
+  set(GERBERA_VERSION "1.6.4-185-gae283931+d")
 
 and add these lines to make the debian package
+::
 
-`SET(CPACK_GENERATOR "DEB")`
-`SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "KK")`
-`# include (cmake)`
-`include(packaging)`
+  SET(CPACK_GENERATOR "DEB")
+  SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "KK")
+  # include (cmake)
+  include(packaging)
 
 6. This is the Cmake command:
+::
 
-`cmake -g DEB ../gerbera -DWITH_NPUPNP=YES -DWITH_JS=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_TAGLIB=1 -DWITH_MAGIC=1 -DWITH_MATROSKA=0 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_EXIV2=0 -DWITH_LASTFM=0 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_INOTIFY=1`
+  cmake -g DEB ../gerbera -DWITH_NPUPNP=YES -DWITH_JS=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_TAGLIB=1 -DWITH_MAGIC=1 -DWITH_MATROSKA=0 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_EXIV2=0 -DWITH_LASTFM=0 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_INOTIFY=1
 
 Resolve any dependency issues now!
 
-7. the `make -j2` will take at least some hours - go for a walk, read a book, grab some sleep .....
+7. the ``make -j2`` will take at least some hours - go for a walk, read a book, grab some sleep .....
 
-8. `cpack -G DEB` will create a debian package file - All being well - no errors. Use dpkg to install.
+8. ``cpack -G DEB`` will create a debian package file - All being well - no errors. Use dpkg to install.
 
 9. follow the gerbera manual for installation. Create the gerbera user (give the user a home directory e.g. /home/gerbera). Make the /etc/gerbera folder and get the config.xml. Symbolic link the config file:
+::
 
-`ln -s /etc/gerbera/config.xml /home/gerbera/.config/gerbera`
+  ln -s /etc/gerbera/config.xml /home/gerbera/.config/gerbera
 
 Symbolic link the web directory:
+::
 
-`ln -s /usr/share/gerbera /usr/local/share`
+  ln -s /usr/share/gerbera /usr/local/share
 
-10. Edit `config.xml` and change the path to
+10. Edit ``config.xml`` and change the path to
+::
 
-`<home>/home/gerbera/.config/gerbera</home>`
+  <home>/home/gerbera/.config/gerbera</home>
 
 11. Start gerbera with the standard launch command. The server should start - watch the messages for errors. Check the web interface functions too. when happy that all is good - control-c to get back to shell
+::
 
-`gerbera -c /etc/gerbera/config.xml`
+  gerbera -c /etc/gerbera/config.xml
 
 12. For SystemD users, copy the gerbera.service script into /usr/systemd/system and edit it to correct the path to the gerbera server the use the systemctl command as per the manual to start and stop the server and debug any problems.
+::
 
-`ExecStart=/usr/bin/gerbera -c /etc/gerbera/config.xml`
+  ExecStart=/usr/bin/gerbera -c /etc/gerbera/config.xml
 
 13. For init.d users, you need a gerbera script which I took from the earlier version which is in the Debian APT library
 
 14. You need to put your new gerbera package on hold to prevent apt-get upgrade downgrading back to 1.1
+::
 
-`apt-mark hold gerbera`
+  apt-mark hold gerbera
 
 That should be everything you need. Gerbera version 1.6.4-185 build with this guide was running on a PogoPlug V2E02 and a V4 Pro quite happily using vlc and bubbleupnp as clients on to a fire stick and chromecast devices.
 
@@ -301,47 +319,43 @@ Build On FreeBSD
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
   cd build
-  sh ../gerbera/scripts/install-pupnp18.sh
+  sh ../gerbera/scripts/install-pupnp.sh
   sh ../gerbera/scripts/install-duktape.sh
   cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 \
-  -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0
+    -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0
   make -j4
   sudo make install
 
 
 .. index:: macOS
 
+
 Build On macOS
 ~~~~~~~~~~~~~~
 
 `The following has been tested on macOS High Sierra 10.13.4`
 
-The Gerbera Team maintains a Homebrew Tap to build and install Gerbera Media Server.  Take a look
-at the Homebrew formula to see an example of how to compile Gerbera on macOS.
-
-`homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`_
-
+The Gerbera Team maintains a Homebrew Tap to build and install Gerbera Media Server. Take a look
+at the Homebrew formula to see an example of how to compile Gerbera on macOS: `homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`_
 
 
 .. index:: Build Docker Container On Ubuntu
+
 
 Build Docker Container On Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install required tools in Ubuntu
-
 ::
 
   sudo apt-get install docker.io git
 
 Simplest way of building:
-
 ::
 
   sudo docker build https://github.com/gerbera/gerbera.git
 
 After successfull build you should get something like
-
 ::
 
   Successfully built a13ccc793373
@@ -351,7 +365,6 @@ documentation while replacing "gerbera/gerbera:vX.X.X" with the unique ID report
 
 To change the compile options of Gerbera split up the process.
 Download the project:
-
 ::
 
   git clone https://github.com/gerbera/gerbera.git
@@ -360,7 +373,6 @@ Then modify the compile parameter values in gerbera/Dockerfile. Also additional 
 E.g. to build a container with exiv2 support add the compile option "-DWITH_EXIV2=YES" and the library
 "exiv2-dev" in the first "RUN apk" command and "exiv2" in the second "RUN apk" command in the gerbera/Dockerfile.
 To start the build enter
-
 ::
 
   sudo docker build gerbera/
@@ -390,18 +402,18 @@ First Steps
 
 2. Make your change.
 
-3. Compile and run ``ctest``
+3. Compile and run ``ctest`` if tests are enabled
 
 4. Push to your fork
 
-5. `Submit a pull request <https://github.com/gerbera/gerbera/compare>`.
+5. Submit a `pull request <https://github.com/gerbera/gerbera/compare>`_.
 
 Some things that will increase the chance that your pull request is accepted:
 
-- Stick to `Webkit style <https://webkit.org/code-style-guidelines/>`.
-- Format your code with `clang-format`.
+- Stick to `Webkit style <https://webkit.org/code-style-guidelines/>`_.
+- Format your code with ``clang-format``.
 - Ensure your code works as expected by running it.
-- Write a `good commit message <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`.
+- Write a `good commit message <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_.
 
 It is also a good idea to run cmake with ``-DWITH_TESTS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"``
 options for development.

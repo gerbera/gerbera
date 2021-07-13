@@ -43,10 +43,11 @@
 
 // forward declarations
 class CdsContainer;
+class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 12
+#define DBVERSION 13
 
 #define QTB table_quote_begin
 #define QTE table_quote_end
@@ -55,6 +56,7 @@ class SQLEmitter;
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
 #define METADATA_TABLE "mt_metadata"
+#define RESOURCE_TABLE "grb_cds_resource"
 #define CONFIG_VALUE_TABLE "grb_config_value"
 
 class SQLRow {
@@ -179,8 +181,14 @@ protected:
     //virtual ~SQLDatabase();
     void init() override;
 
-    bool doMetadataMigration() override;
+    bool doMetadataMigration();
     void migrateMetadata(int objectId, const std::string& metadataStr);
+
+    /// \brief Add a column to resource table for each defined resource attribute
+    void prepareResourceTable(std::string_view addColumnCmd);
+
+    bool doResourceMigration();
+    void migrateResources(int objectId, const std::string& resourcesStr);
 
     std::shared_ptr<Mime> mime;
 
@@ -194,17 +202,21 @@ protected:
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(std::string& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand);
+    void upgradeDatabase(std::string& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
     virtual void _exec(const char* query, int length = -1) = 0;
 
 private:
     std::string sql_browse_query;
+    std::string sql_search_columns;
     std::string sql_search_query;
     std::string sql_meta_query;
+    std::string sql_resource_query;
+    std::string addResourceColumnCmd;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
     std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
+    std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 
     enum class Operation {
         Insert,
@@ -233,6 +245,9 @@ private:
     std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
 
     void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
+        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
+
+    void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
     std::unique_ptr<std::ostringstream> sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;

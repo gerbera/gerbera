@@ -60,4 +60,20 @@
     <version number="12" remark="drop metadata column">
         <script migration="metadata">ALTER TABLE `mt_cds_object` DROP COLUMN `metadata`</script>
     </version>
+    <version number="13" remark="add resource table">
+        <script>
+        CREATE TABLE `grb_cds_resource` (
+            `id` integer primary key,
+            `item_id` integer NOT NULL,
+            `res_id` integer NOT NULL,
+            `handlerType` integer NOT NULL,
+            `options` text default NULL,
+            `parameters` text default NULL,
+            CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '');
+        CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`);
+        </script>
+        <script migration="resources">ALTER TABLE `mt_cds_object` DROP COLUMN `resources`</script>
+    </version>
 </upgrade>

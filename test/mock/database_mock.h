@@ -74,7 +74,6 @@ public:
 
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }
-    bool doMetadataMigration() override { return true; }
 
 protected:
     std::shared_ptr<Database> getSelf() override { return nullptr; }

@@ -69,6 +69,7 @@
 #define AUS_ALIAS "as"
 #define SRC_ALIAS "c"
 #define MTA_ALIAS "m"
+#define RES_ALIAS "re"
 
 /// \brief browse column ids
 /// enum for createObjectFromRow's mode parameter
@@ -82,7 +83,6 @@ enum class BrowseCol {
     location,
     location_hash,
     auxdata,
-    resources,
     update_id,
     mime_type,
     flags,
@@ -95,7 +95,6 @@ enum class BrowseCol {
     ref_upnp_class,
     ref_location,
     ref_auxdata,
-    ref_resources,
     ref_mime_type,
     ref_service_id,
     as_persistent
@@ -109,7 +108,6 @@ enum class SearchCol {
     object_type,
     upnp_class,
     dc_title,
-    resources,
     mime_type,
     part_number,
     track_number,
@@ -126,6 +124,17 @@ enum class MetadataCol {
     property_value
 };
 
+/// \brief resource column ids
+enum class ResourceCol {
+    id = 0,
+    item_id,
+    res_id,
+    handlerType,
+    options,
+    parameters,
+    attributes, // index of first attribute
+};
+
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap = {
@@ -138,7 +147,6 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::location, { ITM_ALIAS, "location" } },
     { BrowseCol::location_hash, { ITM_ALIAS, "location_hash" } },
     { BrowseCol::auxdata, { ITM_ALIAS, "auxdata" } },
-    { BrowseCol::resources, { ITM_ALIAS, "resources" } },
     { BrowseCol::update_id, { ITM_ALIAS, "update_id" } },
     { BrowseCol::mime_type, { ITM_ALIAS, "mime_type" } },
     { BrowseCol::flags, { ITM_ALIAS, "flags" } },
@@ -151,7 +159,6 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::ref_upnp_class, { REF_ALIAS, "upnp_class" } },
     { BrowseCol::ref_location, { REF_ALIAS, "location" } },
     { BrowseCol::ref_auxdata, { REF_ALIAS, "auxdata" } },
-    { BrowseCol::ref_resources, { REF_ALIAS, "resources" } },
     { BrowseCol::ref_mime_type, { REF_ALIAS, "mime_type" } },
     { BrowseCol::ref_service_id, { REF_ALIAS, "service_id" } },
     { BrowseCol::as_persistent, { AUS_ALIAS, "persistent" } },
@@ -166,7 +173,6 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::object_type, { SRC_ALIAS, "object_type" } },
     { SearchCol::upnp_class, { SRC_ALIAS, "upnp_class" } },
     { SearchCol::dc_title, { SRC_ALIAS, "dc_title" } },
-    { SearchCol::resources, { SRC_ALIAS, "resources" } },
     { SearchCol::mime_type, { SRC_ALIAS, "mime_type" } },
     { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
     { SearchCol::track_number, { SRC_ALIAS, "track_number" } },
@@ -237,6 +243,7 @@ constexpr auto to_underlying(E e) noexcept
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
+static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : Database(std::move(config))
@@ -250,53 +257,98 @@ void SQLDatabase::init()
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
 
+    /// \brief Map resource search keys to column ids
+    // entries are handled sequentially,
+    // duplicate entries are added to statement in same order if key is present in SortCriteria
+    std::vector<std::pair<std::string, int>> resourceTagMap = {
+        { "id", to_underlying(ResourceCol::id) },
+        { UPNP_SEARCH_ID, to_underlying(ResourceCol::item_id) },
+        { "res@id", to_underlying(ResourceCol::res_id) },
+    };
+    /// \brief Map resource column ids to column names
+    // map ensures entries are in correct order, each value of ResourceCol must be present
+    std::map<int, std::pair<std::string, std::string>> resourceColMap = {
+        { to_underlying(ResourceCol::id), { RES_ALIAS, "id" } },
+        { to_underlying(ResourceCol::item_id), { RES_ALIAS, "item_id" } },
+        { to_underlying(ResourceCol::res_id), { RES_ALIAS, "res_id" } },
+        { to_underlying(ResourceCol::handlerType), { RES_ALIAS, "handlerType" } },
+        { to_underlying(ResourceCol::options), { RES_ALIAS, "options" } },
+        { to_underlying(ResourceCol::parameters), { RES_ALIAS, "parameters" } },
+    };
+    for (auto&& resAttrId : ResourceAttributeIterator()) {
+        auto attrName = MetadataHandler::getResAttrName(resAttrId);
+        resourceTagMap.emplace_back(std::pair<std::string, int>(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId));
+        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = std::pair<std::string, std::string>(RES_ALIAS, attrName);
+    }
+
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchSortMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
+    resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
 
     // Statement for UPnP browse
-    std::ostringstream buf;
-    buf << "SELECT ";
-    for (auto&& [key, col] : browseColMap) {
-        if (key > BrowseCol::id) {
-            buf << ", ";
+    {
+        std::ostringstream buf;
+        buf << "SELECT ";
+        for (auto&& [key, col] : browseColMap) {
+            if (key > BrowseCol::id) {
+                buf << ", ";
+            }
+            buf << TQD(col.first, col.second);
         }
-        buf << TQD(col.first, col.second);
+        buf << " FROM " << browseColumnMapper->tableQuoted();
+        buf << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(REF_ALIAS) << " ON " << TQBM(BrowseCol::ref_id) << "=" << TQD(REF_ALIAS, browseColMap.at(BrowseCol::id).second);
+        buf << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' << TQ(AUS_ALIAS) << " ON " << TQD(AUS_ALIAS, "obj_id") << "=" << TQBM(BrowseCol::id);
+        buf << " ";
+        this->sql_browse_query = buf.str();
     }
-    buf << " FROM " << browseColumnMapper->tableQuoted();
-    buf << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(REF_ALIAS) << " ON " << TQBM(BrowseCol::ref_id) << "=" << TQD(REF_ALIAS, browseColMap.at(BrowseCol::id).second);
-    buf << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' << TQ(AUS_ALIAS) << " ON " << TQD(AUS_ALIAS, "obj_id") << "=" << TQBM(BrowseCol::id);
-    buf << " ";
-    this->sql_browse_query = buf.str();
-
     // Statement for UPnP search
-    buf.str("");
-    buf << "SELECT DISTINCT ";
-    for (auto&& [key, col] : searchColMap) {
-        if (key > SearchCol::id) {
-            buf << ", ";
+    {
+        std::ostringstream colBuf;
+        for (auto&& [key, col] : searchColMap) {
+            if (key > SearchCol::id) {
+                colBuf << ", ";
+            }
+            colBuf << TQD(col.first, col.second);
         }
-        buf << TQD(col.first, col.second);
+        this->sql_search_columns = colBuf.str();
+        std::ostringstream buf;
+        buf << searchColumnMapper->tableQuoted();
+        buf << fmt::format(" INNER JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        buf << fmt::format(" INNER JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        this->sql_search_query = buf.str();
     }
-    buf << " ";
-    this->sql_search_query = buf.str();
-
     // Statement for metadata
-    buf.str("");
-    buf << "SELECT ";
-    for (auto&& [key, col] : metaColMap) {
-        if (key > MetadataCol::id) {
-            buf << ", ";
+    {
+        std::ostringstream buf;
+        buf << "SELECT ";
+        for (auto&& [key, col] : metaColMap) {
+            if (key > MetadataCol::id) {
+                buf << ", ";
+            }
+            buf << TQ(col.second); // currently no alias
         }
-        buf << TQ(col.second); // currently no alias
+        buf << " ";
+        this->sql_meta_query = buf.str();
     }
-    buf << " ";
-    this->sql_meta_query = buf.str();
+    // Statement for resource
+    {
+        std::ostringstream buf;
+        buf << "SELECT ";
+        for (auto&& [key, col] : resourceColMap) {
+            if (key > to_underlying(ResourceCol::id)) {
+                buf << ", ";
+            }
+            buf << TQ(col.second); // currently no alias
+        }
+        buf << " ";
+        this->sql_resource_query = buf.str();
+    }
 
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper);
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand)
+void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -336,7 +388,9 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     version = 1;
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions = {
         { "metadata", &SQLDatabase::doMetadataMigration },
+        { "resources", &SQLDatabase::doResourceMigration },
     };
+    this->addResourceColumnCmd = addResourceColumnCmd;
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == fmt::to_string(version)) {
@@ -357,6 +411,8 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
 
     if (version != DBVERSION || dbVersion != fmt::to_string(DBVERSION))
         throw_std_runtime_error("The database seems to be from a newer version");
+
+    prepareResourceTable(addResourceColumnCmd);
 }
 
 void SQLDatabase::shutdown()
@@ -368,7 +424,7 @@ std::string SQLDatabase::getSortCapabilities()
 {
     auto sortKeys = std::vector<std::string>();
     for (auto&& [key, col] : browseSortMap) {
-        if (std::find(sortKeys.begin(), sortKeys.end(), key) != sortKeys.end()) {
+        if (std::find(sortKeys.begin(), sortKeys.end(), key) == sortKeys.end()) {
             sortKeys.emplace_back(key);
         }
     }
@@ -382,8 +438,12 @@ std::string SQLDatabase::getSearchCapabilities()
         UPNP_SEARCH_CLASS,
         MetadataHandler::getMetaFieldName(M_ARTIST),
         MetadataHandler::getMetaFieldName(M_ALBUM),
-        MetadataHandler::getMetaFieldName(M_GENRE)
+        MetadataHandler::getMetaFieldName(M_GENRE),
     };
+    for (auto&& resAttrId : ResourceAttributeIterator()) {
+        auto attrName = MetadataHandler::getResAttrName(resAttrId);
+        searchKeys.emplace_back(fmt::format("res@{}", attrName));
+    }
     return join(searchKeys, ',');
 }
 
@@ -466,30 +526,16 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     if (op == Operation::Update)
         cdsObjectSql["auxdata"] = SQL_NULL;
-    if (auto auxData = obj->getAuxData(); !auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
+
+    auto auxData = obj->getAuxData();
+    if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
         cdsObjectSql["auxdata"] = quote(dictEncode(auxData));
     }
 
-    if (!hasReference || (!obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF) && !refObj->resourcesEqual(obj))) {
-        // encode resources
-        std::ostringstream resBuf;
-        for (size_t i = 0; i < obj->getResourceCount(); i++) {
-            if (i > 0)
-                resBuf << RESOURCE_SEP;
-            resBuf << obj->getResource(i)->encode();
-        }
-        std::string resStr = resBuf.str();
-        if (!resStr.empty())
-            cdsObjectSql["resources"] = quote(resStr);
-        else
-            cdsObjectSql["resources"] = SQL_NULL;
-    } else if (op == Operation::Update) {
-        cdsObjectSql["resources"] = SQL_NULL;
-    }
-
+    bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-
     cdsObjectSql["flags"] = quote(obj->getFlags());
+
     if (obj->getMTime() > std::chrono::seconds::zero()) {
         cdsObjectSql["last_modified"] = quote(obj->getMTime().count());
     } else {
@@ -582,11 +628,14 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
-
     returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
+    }
+
+    if (!hasReference || (!useResourceRef && !refObj->resourcesEqual(obj))) {
+        generateResourceDBOperations(obj, op, returnVal);
     }
 
     return returnVal;
@@ -881,9 +930,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
         throw_std_runtime_error("failed to generate SQL for search");
 
     beginTransaction("search");
-    std::ostringstream countSQL;
-    countSQL << "SELECT COUNT(*) " << searchSQL;
-    auto sqlResult = select(countSQL);
+    std::string countSQL(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_search_query, searchSQL));
+    log_debug("Search count resolves to SQL [{}]", countSQL);
+    auto sqlResult = select(countSQL.c_str());
     commit("search");
     auto countRow = sqlResult->nextRow();
     if (countRow) {
@@ -891,7 +940,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     }
 
     std::ostringstream retrievalSQL;
-    retrievalSQL << sql_search_query << searchSQL;
+    retrievalSQL << fmt::format("SELECT DISTINCT {} FROM {} WHERE {}", sql_search_columns, sql_search_query, searchSQL);
 
     // order by code..
     auto orderByCode = [&]() {
@@ -1226,15 +1275,15 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     dictDecode(auxdataStr, &aux);
     obj->setAuxData(aux);
 
-    std::string resources_str = fallbackString(getCol(row, BrowseCol::resources), getCol(row, BrowseCol::ref_resources));
-    bool resource_zero_ok = false;
-    if (!resources_str.empty()) {
-        std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
-        resource_zero_ok = !resources.empty();
-        for (auto&& resource : resources) {
-            obj->addResource(CdsResource::decode(resource));
-        }
+    auto resources = retrieveResourcesForObject(obj->getID());
+    if (!resources.empty()) {
+        obj->setResources(resources);
+    } else if (obj->getRefID() != CDS_ID_ROOT) {
+        resources = retrieveResourcesForObject(obj->getRefID());
+        if (!resources.empty())
+            obj->setResources(resources);
     }
+    auto resource_zero_ok = !resources.empty();
 
     obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
@@ -1311,15 +1360,16 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     if (!meta.empty())
         obj->setMetadata(meta);
 
-    std::string resources_str = getCol(row, SearchCol::resources);
-    bool resource_zero_ok = false;
-    if (!resources_str.empty()) {
-        std::vector<std::string> resources = splitString(resources_str, RESOURCE_SEP);
-        resource_zero_ok = !resources.empty();
-        for (auto&& resource : resources) {
-            obj->addResource(CdsResource::decode(resource));
-        }
+    auto resources = retrieveResourcesForObject(obj->getID());
+    if (!resources.empty()) {
+        obj->setResources(resources);
+    } else if (obj->getRefID() != CDS_ID_ROOT) {
+        resources = retrieveResourcesForObject(obj->getRefID());
+        if (!resources.empty())
+            obj->setResources(resources);
     }
+
+    auto resource_zero_ok = !resources.empty();
 
     if (obj->isItem()) {
         if (!resource_zero_ok)
@@ -2392,6 +2442,87 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
     }
 }
 
+std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObject(int objectId)
+{
+    auto rsql = fmt::format("{3} FROM {0}{2}{1} WHERE {0}item_id{1} = {4} ORDER BY {0}res_id{1}",
+        table_quote_begin, table_quote_end, RESOURCE_TABLE, sql_resource_query, objectId);
+    log_debug("SQLDatabase::retrieveResourcesForObject {}", rsql);
+    auto&& res = select(rsql.c_str());
+
+    if (!res)
+        return {};
+
+    std::vector<std::shared_ptr<CdsResource>> resources;
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
+        resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
+        for (auto&& resAttrId : ResourceAttributeIterator()) {
+            resource->addAttribute(resAttrId, row->col(to_underlying(ResourceCol::attributes) + to_underlying(resAttrId)));
+        }
+        resources.push_back(resource);
+    }
+    return resources;
+}
+
+void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
+    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
+{
+    auto resources = obj->getResources();
+    if (op == Operation::Insert) {
+        size_t res_id = 0;
+        for (auto&& resource : resources) {
+            std::map<std::string, std::string> resourceSql;
+            resourceSql["res_id"] = quote(res_id);
+            resourceSql["handlerType"] = quote(resource->getHandlerType());
+            auto options = resource->getOptions();
+            if (!options.empty()) {
+                resourceSql["options"] = quote(dictEncode(options));
+            }
+            auto parameters = resource->getParameters();
+            if (!parameters.empty()) {
+                resourceSql["parameters"] = quote(dictEncode(parameters));
+            }
+            for (auto&& [key, val] : resource->getAttributes()) {
+                resourceSql[key] = quote(val);
+            }
+            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, op));
+            res_id++;
+        }
+    } else {
+        // get current resoures from DB
+        auto dbResources = retrieveResourcesForObject(obj->getID());
+        size_t res_id = 0;
+        for (auto&& resource : resources) {
+            Operation operation = res_id < dbResources.size() ? Operation::Update : Operation::Insert;
+            std::map<std::string, std::string> resourceSql;
+            resourceSql["res_id"] = quote(res_id);
+            resourceSql["handlerType"] = quote(resource->getHandlerType());
+            auto options = resource->getOptions();
+            if (!options.empty()) {
+                resourceSql["options"] = quote(dictEncode(options));
+            }
+            auto parameters = resource->getParameters();
+            if (!parameters.empty()) {
+                resourceSql["parameters"] = quote(dictEncode(parameters));
+            }
+            for (auto&& [key, val] : resource->getAttributes()) {
+                resourceSql[key] = quote(val);
+            }
+            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, operation));
+            res_id++;
+        }
+        // res_id in db resources but not obj resources, so needs a delete
+        for (; res_id < dbResources.size(); res_id++) {
+            if (resources.at(res_id)) {
+                std::map<std::string, std::string> resourceSql;
+                resourceSql["res_id"] = quote(res_id);
+                operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, Operation::Delete));
+            }
+        }
+    }
+}
+
 std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     std::string tableName = addUpdateTable->getTableName();
@@ -2413,7 +2544,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
         throw_std_runtime_error("Attempted to insert new object with ID!");
     }
 
-    if (tableName == METADATA_TABLE) {
+    if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
         fields << "," << TQ("item_id");
         values << "," << obj->getID();
     }
@@ -2548,5 +2679,101 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
         }
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", objectId);
+    }
+}
+
+void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
+{
+    auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
+    bool addedAttribute = false;
+    for (auto&& resAttrId : ResourceAttributeIterator()) {
+        auto&& resAttrib = MetadataHandler::getResAttrName(resAttrId);
+        if (std::find_if(resourceAttributes.begin(), resourceAttributes.end(), [&](auto&& attr) { return attr == resAttrib; }) == resourceAttributes.end()) {
+            _exec(fmt::format(addColumnCmd, resAttrib).c_str());
+            resourceAttributes.push_back(resAttrib);
+            addedAttribute = true;
+        }
+    }
+    if (addedAttribute)
+        storeInternalSetting("resource_attribute", join(resourceAttributes, ','));
+}
+
+// column resources is dropped in DBVERSION 13
+bool SQLDatabase::doResourceMigration()
+{
+    if (!addResourceColumnCmd.empty())
+        prepareResourceTable(addResourceColumnCmd);
+
+    log_debug("Checking if resources migration is required");
+    auto res = select(
+        fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}resources{1} is not null",
+            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE)
+            .c_str());
+    int expectedConversionCount = std::stoi(res->nextRow()->col(0));
+    log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
+
+    res = select(
+        fmt::format("SELECT COUNT(*) FROM {0}{2}{1}",
+            table_quote_begin, table_quote_end, RESOURCE_TABLE)
+            .c_str());
+    int resourceRowCount = std::stoi(res->nextRow()->col(0));
+    log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
+
+    if (expectedConversionCount > 0 && resourceRowCount > 0) {
+        log_info("No resources migration required");
+        return true;
+    }
+
+    log_info("About to migrate resources from {} to {}", CDS_OBJECT_TABLE, RESOURCE_TABLE);
+
+    auto resIds = select(
+        fmt::format("SELECT {0}id{1}, {0}resources{1} FROM {0}{2}{1} WHERE {0}resources{1} is not null",
+            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE)
+            .c_str());
+    std::unique_ptr<SQLRow> row;
+
+    int objectsUpdated = 0;
+    while ((row = resIds->nextRow())) {
+        migrateResources(std::stoi(row->col(0)), row->col(1));
+        ++objectsUpdated;
+    }
+    log_info("Migrated resources - object count: {}", objectsUpdated);
+    return true;
+}
+
+void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr)
+{
+    if (!resourcesStr.empty()) {
+        log_debug("Migrating resources for cds object {}", objectId);
+        std::vector<std::string> resources = splitString(resourcesStr, RESOURCE_SEP);
+        size_t res_id = 0;
+        for (auto&& resString : resources) {
+            std::map<std::string, std::string> resourceSQLVals;
+            auto&& resource = CdsResource::decode(resString);
+            for (auto&& [key, val] : resource->getAttributes()) {
+                resourceSQLVals[key] = quote(val);
+            }
+            std::ostringstream fields, values;
+            fields << TQ("item_id") << ", " << TQ("res_id") << ", " << TQ("handlerType");
+            values << objectId << ", " << res_id << ", " << resource->getHandlerType();
+            auto options = resource->getOptions();
+            if (!options.empty()) {
+                fields << ", " << TQ("options");
+                values << ", " << quote(dictEncode(options));
+            }
+            auto parameters = resource->getParameters();
+            if (!parameters.empty()) {
+                fields << ", " << TQ("parameters");
+                values << ", " << quote(dictEncode(parameters));
+            }
+            for (auto&& [key, val] : resourceSQLVals) {
+                fields << ',' << TQ(key);
+                values << ',' << val;
+            }
+            exec(fmt::format("INSERT INTO {}{}{} ({}) VALUES ({})", table_quote_begin, RESOURCE_TABLE, table_quote_end, fields.str(), values.str()).c_str());
+            res_id++;
+        }
+    } else {
+        log_debug("Skipping migration - no resources for cds object {}", objectId);
     }
 }

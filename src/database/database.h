@@ -306,8 +306,6 @@ public:
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() const = 0;
 
-    virtual bool doMetadataMigration() = 0;
-
 protected:
     /* helper for addContainerChain */
     static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);

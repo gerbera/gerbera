@@ -433,10 +433,7 @@ std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
     std::string predicates = node->emit();
     if (!predicates.empty()) {
-        return fmt::format("FROM {} INNER JOIN {} ON {} = {} WHERE {}",
-            colMapper->tableQuoted(), metaMapper->tableQuoted(),
-            colMapper->mapQuoted(UPNP_SEARCH_ID), metaMapper->mapQuoted(UPNP_SEARCH_ID),
-            predicates);
+        return predicates;
     }
     throw_std_runtime_error("No SQL generated from AST");
 }
@@ -468,6 +465,9 @@ std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(cons
 {
     if (colMapper && colMapper->hasEntry(property)) {
         return std::pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
+    }
+    if (resMapper && resMapper->hasEntry(property)) {
+        return std::pair(resMapper->mapQuoted(property), resMapper->mapQuotedLower(property));
     }
     if (metaMapper) {
         return std::pair(
