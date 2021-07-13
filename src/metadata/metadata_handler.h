@@ -38,6 +38,7 @@ namespace fs = std::filesystem;
 
 #include "common.h"
 #include "context.h"
+#include "util/tools.h"
 
 // forward declaration
 class CdsItem;
@@ -184,6 +185,8 @@ static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, con
     std::pair(R_VIDEOCODEC, "sec:vcodec"),
     std::pair(R_TYPE, "type"),
 };
+
+using ResourceAttributeIterator = EnumIterator<resource_attributes_t, resource_attributes_t::R_SIZE, resource_attributes_t::R_MAX>;
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.

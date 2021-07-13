@@ -142,6 +142,14 @@ std::string CdsResource::encode()
     return buf.str();
 }
 
+void CdsResource::decode(const std::string& options, const std::string& parameters)
+{
+    if (!options.empty())
+        dictDecode(options, &this->options);
+    if (!parameters.empty())
+        dictDecode(parameters, &this->parameters);
+}
+
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 {
     std::vector<std::string> parts = splitString(serial, RESOURCE_PART_SEP, true);

@@ -388,9 +388,10 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper)
+    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper)
         : colMapper(std::move(colMapper))
         , metaMapper(std::move(metaMapper))
+        , resMapper(std::move(resMapper))
     {
     }
 
@@ -410,6 +411,7 @@ public:
 private:
     std::shared_ptr<ColumnMapper> colMapper;
     std::shared_ptr<ColumnMapper> metaMapper;
+    std::shared_ptr<ColumnMapper> resMapper;
 
     std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
 };

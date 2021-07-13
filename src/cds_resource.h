@@ -119,6 +119,7 @@ public:
     /// \brief urlencode into string
     std::string encode();
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
+    void decode(const std::string& options, const std::string& parameters);
 };
 
 #endif // __CDS_RESOURCE_H__

@@ -39,6 +39,7 @@
 
 #define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
 #define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
+#define SQLITE3_ADD_RESOURCE_ATTR "ALTER TABLE \"grb_cds_resource\" ADD COLUMN \"{}\" varchar(255) default NULL"
 
 Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(std::move(config), std::move(mime))
@@ -48,14 +49,14 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 3614809442, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 3659570292 };
+    hashies = { 1195382418, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 3659570292, 273632429 };
 }
 
 void Sqlite3Database::prepare()
 {
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
-    _exec("PRAGMA journal_mode = WAL;");
+    _exec("PRAGMA journal_mode = WAL");
     SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
 }
 
@@ -141,8 +142,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION);
-
+        upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);
@@ -177,7 +177,10 @@ void Sqlite3Database::_exec(const char* query, int length)
 
 std::string Sqlite3Database::quote(std::string value) const
 {
-    char* q = sqlite3_mprintf("'%q'", value.c_str());
+    // https://www.sqlite.org/printf.html#percentq:
+    // The string is printed with all single quote (') characters doubled so that the string can safely appear inside an SQL string literal.
+    // The %Q substitution type also puts single-quotes on both ends of the substituted string.
+    char* q = sqlite3_mprintf("%Q", value.c_str());
     std::string ret = q;
     sqlite3_free(q);
     return ret;
@@ -364,11 +367,8 @@ void Sqlite3Database::shutdownDriver()
 
 void Sqlite3Database::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    std::ostringstream q;
-    q << "INSERT OR REPLACE INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (" << QTB << "key" << QTE << ", " << QTB << "value" << QTE << ") "
-                                                                                                                                               "VALUES ("
-      << quote(key) << ", " << quote(value) << ") ";
-    SQLDatabase::exec(q.str());
+    auto command = fmt::format("INSERT OR REPLACE INTO {0}{2}{1} ({0}key{1}, {0}value{1}) VALUES ({3}, {4})", table_quote_begin, table_quote_begin, INTERNAL_SETTINGS_TABLE, quote(key), quote(value));
+    SQLDatabase::exec(command.c_str());
 }
 
 bool SLTask::is_running() const

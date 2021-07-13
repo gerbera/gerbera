@@ -47,6 +47,7 @@
 
 #define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
 #define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
+#define MYSQL_ADD_RESOURCE_ATTR "ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL"
 
 MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : SQLDatabase(std::move(config), std::move(mime))
@@ -55,7 +56,7 @@ MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mim
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 2444084521, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496 };
+    hashies = { 2807109597, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496, 287802415 };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -184,7 +185,7 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION);
+    upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION, MYSQL_ADD_RESOURCE_ATTR);
 
     lock.unlock();
 

@@ -318,7 +318,7 @@ TEST(SearchLexer, MultipleTokens)
 TEST(SearchParser, SimpleSearchCriteriaUsingEqualsOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
         "dc:title=\"Hospital Roll Call\"",
@@ -343,7 +343,7 @@ TEST(SearchParser, SimpleSearchCriteriaUsingEqualsOperator)
 TEST(SearchParser, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // (equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter,
         "(upnp:album=\"Scraps At Midnight\")",
@@ -383,7 +383,7 @@ TEST(SearchParser, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
 TEST(SearchParser, SearchCriteriaUsingContainsOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\"", "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('%Midnight%') AND _t_._upnp_class_ IS NOT NULL)"));
 
@@ -395,7 +395,7 @@ TEST(SearchParser, SearchCriteriaUsingContainsOperator)
 TEST(SearchParser, SearchCriteriaUsingDoesNotContainOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album doesnotcontain \"Midnight\"",
         "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) NOT LIKE LOWER('%Midnight%') AND _t_._upnp_class_ IS NOT NULL)"));
@@ -408,7 +408,7 @@ TEST(SearchParser, SearchCriteriaUsingDoesNotContainOperator)
 TEST(SearchParser, SearchCriteriaUsingStartsWithOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album startswith \"Midnight\"", "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('Midnight%') AND _t_._upnp_class_ IS NOT NULL)"));
 
@@ -420,7 +420,7 @@ TEST(SearchParser, SearchCriteriaUsingStartsWithOperator)
 TEST(SearchParser, SearchCriteriaUsingExistsOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album exists true",
         "(_t_._property_name_='upnp:album' AND _t_._property_value_ IS NOT NULL AND _t_._upnp_class_ IS NOT NULL)"));
@@ -433,7 +433,7 @@ TEST(SearchParser, SearchCriteriaUsingExistsOperator)
 TEST(SearchParser, SearchCriteriaWithExtendsOperator)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.audioItem\"",
         "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.audioItem%'))"));
@@ -450,7 +450,7 @@ TEST(SearchParser, SearchCriteriaWithExtendsOperator)
 TEST(SearchParser, SearchCriteriaWindowMedia)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     // derivedfromOpExpr
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item.videoItem\" and @refID exists false",
         "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.videoItem%')) AND (_t_._ref_id_ IS NULL)"));
@@ -459,7 +459,7 @@ TEST(SearchParser, SearchCriteriaWindowMedia)
 TEST(SearchParser, SearchCriteriaDynamic)
 {
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper);
+    DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item\" and last_updated > \"@last7\"",
         "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > [0-9]+))", 
         R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ > [0-9]+\))")); // regular expression because last7 is dynamic
