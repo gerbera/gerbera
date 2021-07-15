@@ -35,10 +35,16 @@ CREATE TABLE `mt_cds_object` (
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_cds_object` VALUES (-1,NULL,-1,0,NULL,NULL,NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
-INSERT INTO `mt_cds_object` VALUES (0,NULL,-1,1,'object.container','Root',NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
+INSERT INTO `mt_cds_object` (
+    `id`, `parent_id`, `object_type`, `flags`
+) VALUES (-1,-1,0,9);
+INSERT INTO `mt_cds_object` (
+    `id`, `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`
+) VALUES (0,-1,1,'object.container','Root',9);
 UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
-INSERT INTO `mt_cds_object` VALUES (1,NULL,0,1,'object.container','PC Directory',NULL,NULL,NULL,0,NULL,9,NULL,NULL,NULL,0,NULL,0);
+INSERT INTO `mt_cds_object` (
+    `id`,  `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`
+) VALUES (1,0,1,'object.container','PC Directory',9);
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
@@ -78,14 +84,14 @@ CREATE TABLE `grb_config_value` (
   ENGINE=MyISAM CHARSET=utf8;
 CREATE INDEX grb_config_value_item ON grb_config_value(item);
 CREATE TABLE `grb_cds_resource` (
-    `id` integer primary key,
-    `item_id` integer NOT NULL,
-    `res_id` integer NOT NULL,
-    `handlerType` integer NOT NULL,
+    `id` int(11) primary key auto_increment,
+    `item_id` int(11) NOT NULL,
+    `res_id` int(11) NOT NULL,
+    `handlerType` int(11) NOT NULL,
     `options` text default NULL,
     `parameters` text default NULL,
     CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-);
+) ENGINE=MyISAM CHARSET=utf8;
 INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '');
 CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`);
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

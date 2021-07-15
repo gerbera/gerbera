@@ -146,7 +146,7 @@ password (the defaults) use:
     mysql> GRANT ALL ON gerbera.* TO 'gerbera'@'localhost';
 
 If Gerbera was compiled with database auto creation the tables will be created automatically during the first startup.
-All table names have a ``mt_`` prefix, so you can theoretically share the database with a different application.
+All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
 However, this is not recommended.
 
 If database auto creation was not compiled in you have to create the tables manually:

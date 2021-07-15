@@ -2458,7 +2458,11 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
         auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
         resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
         for (auto&& resAttrId : ResourceAttributeIterator()) {
-            resource->addAttribute(resAttrId, row->col(to_underlying(ResourceCol::attributes) + to_underlying(resAttrId)));
+            auto index = to_underlying(ResourceCol::attributes) + to_underlying(resAttrId);
+            auto value = row->col_c_str(index);
+            if (value) {
+                resource->addAttribute(resAttrId, value);
+            }
         }
         resources.push_back(resource);
     }

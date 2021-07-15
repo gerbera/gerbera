@@ -49,7 +49,7 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 1195382418, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 3659570292, 273632429 };
+    hashies = { 2510610215, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 43189396, 2767540493 };
 }
 
 void Sqlite3Database::prepare()
