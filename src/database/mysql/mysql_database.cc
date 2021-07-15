@@ -56,7 +56,7 @@ MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mim
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 2807109597, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496, 287802415 };
+    hashies = { 3398516749, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496, 2030024486 };
 }
 
 MySQLDatabase::~MySQLDatabase()

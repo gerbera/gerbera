@@ -211,7 +211,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 
         if ((st) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
             auto codec_id = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codec_id));
+            resource->addAttribute(R_VIDEOCODEC, avcodec_get_name(codec_id));
 
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
@@ -237,7 +237,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
         }
         if ((st) && (!audioset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
             auto codec_id = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_VIDEOCODEC, avcodec_get_name(codec_id));
+            resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codec_id));
             // find the first stream that has a valid sample rate
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;

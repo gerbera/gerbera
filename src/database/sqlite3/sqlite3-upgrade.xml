@@ -107,9 +107,9 @@
           CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
         );
         INSERT INTO mt_cds_object_new(
-            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, service_id, bookmark_pos, last_modified, last_updated
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
         ) SELECT
-            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, service_id, bookmark_pos, last_modified, last_updated
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
         FROM mt_cds_object;
         DROP TABLE mt_cds_object;
         ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object;
@@ -162,9 +162,9 @@
           CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
         );
         INSERT INTO mt_cds_object_new(
-            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, service_id, bookmark_pos, last_modified, last_updated
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
         ) SELECT
-            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, service_id, bookmark_pos, last_modified, last_updated
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
         FROM mt_cds_object;
         DROP TABLE mt_cds_object;
         ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object;
