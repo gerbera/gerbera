@@ -30,32 +30,35 @@
 #include "util/upnp_quirks.h"
 
 ClientConfig::ClientConfig()
-    : clientInfo(std::make_shared<ClientInfo>())
 {
-    clientInfo->name = "Unknown";
-    clientInfo->type = ClientType::Unknown;
-    clientInfo->flags = QUIRK_FLAG_NONE;
-    clientInfo->matchType = ClientMatchType::None;
-    clientInfo->match = "";
+    auto cInfo = ClientInfo {
+        "Unknown",
+        ClientType::Unknown,
+        QUIRK_FLAG_NONE,
+        ClientMatchType::None,
+        "",
+    };
+    clientInfo = std::make_shared<ClientInfo>(std::move(cInfo));
 }
 
 ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
-    : clientInfo(std::make_shared<ClientInfo>())
 {
-    clientInfo->type = ClientType::Unknown;
+    auto cInfo = ClientInfo();
+    cInfo.type = ClientType::Unknown;
     if (!ip.empty()) {
-        clientInfo->matchType = ClientMatchType::IP;
-        clientInfo->match = ip;
+        cInfo.matchType = ClientMatchType::IP;
+        cInfo.match = ip;
     } else if (!userAgent.empty()) {
-        clientInfo->matchType = ClientMatchType::UserAgent;
-        clientInfo->match = userAgent;
+        cInfo.matchType = ClientMatchType::UserAgent;
+        cInfo.match = userAgent;
     } else {
-        clientInfo->matchType = ClientMatchType::None;
+        cInfo.matchType = ClientMatchType::None;
     }
-    clientInfo->flags = flags;
+    cInfo.flags = flags;
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
-    clientInfo->name = fmt::format("Manual Setup for{}{}", sIP, sUA);
+    cInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
+    clientInfo = std::make_shared<ClientInfo>(std::move(cInfo));
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t index)
