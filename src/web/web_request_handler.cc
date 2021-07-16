@@ -114,7 +114,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 {
-    xmlDoc = std::make_shared<pugi::xml_document>();
+    xmlDoc = std::make_unique<pugi::xml_document>();
     auto decl = xmlDoc->prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
