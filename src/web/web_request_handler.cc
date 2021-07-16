@@ -120,7 +120,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     decl.append_attribute("encoding") = "UTF-8";
     auto root = xmlDoc->append_child("root");
 
-    xml2JsonHints = std::make_shared<Xml2Json::Hints>();
+    xml2JsonHints = std::make_unique<Xml2Json::Hints>();
 
     std::string error;
     int error_code = 0;

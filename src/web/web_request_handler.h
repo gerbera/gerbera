@@ -82,7 +82,7 @@ protected:
     std::shared_ptr<pugi::xml_document> xmlDoc;
 
     /// \brief Hints for Xml2Json, such that we know when to create an array
-    std::shared_ptr<Xml2Json::Hints> xml2JsonHints;
+    std::unique_ptr<Xml2Json::Hints> xml2JsonHints;
 
     /// \brief The current session, used for this request; will be filled by
     /// check_request()
