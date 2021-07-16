@@ -112,8 +112,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
         int p2 = find_local_port(45000, 65500);
         sop_args = populateCommandLine(fmt::format("{} {} {}", location.c_str(), p1, p2));
         auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
-        auto pr_item = std::make_shared<ProcListItem>(spsc);
-        proc_list.push_back(pr_item);
+        proc_list.push_back(std::make_shared<ProcListItem>(std::move(spsc)));
         location = fmt::format("http://localhost:{}/tv.asf", p2);
 
         //FIXME: #warning check if socket is ready
@@ -144,8 +143,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
                 auto p_ioh = std::unique_ptr<IOHandler>(std::make_unique<ProcessIOHandler>(content, location, nullptr));
                 auto ch = std::make_shared<IOHandlerChainer>(std::move(c_ioh), std::move(p_ioh), 16384);
-                auto pr_item = std::make_shared<ProcListItem>(ch);
-                proc_list.push_back(pr_item);
+                proc_list.push_back(std::make_shared<ProcListItem>(std::move(ch)));
             } catch (const std::runtime_error& ex) {
                 unlink(location.c_str());
                 throw ex;
