@@ -178,15 +178,16 @@ public:
 
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
-    //virtual ~SQLDatabase();
     void init() override;
 
+    /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();
     void migrateMetadata(int objectId, const std::string& metadataStr);
 
     /// \brief Add a column to resource table for each defined resource attribute
     void prepareResourceTable(std::string_view addColumnCmd);
 
+    /// \brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
     void migrateResources(int objectId, const std::string& resourcesStr);
 

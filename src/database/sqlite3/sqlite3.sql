@@ -23,7 +23,7 @@ CREATE TABLE "mt_cds_object" (
 );
 INSERT INTO "mt_cds_object" (
     id, ref_id, parent_id, object_type, upnp_class, dc_title, flags
-) VALUES (-1, NULL, -1, 0, NULL, NULL, NULL, 9);
+) VALUES (-1, NULL, -1, 0, NULL, NULL, 9);
 INSERT INTO "mt_cds_object" (
     id, ref_id, parent_id, object_type, upnp_class, dc_title, flags
 ) VALUES (0, NULL, -1, 1, 'object.container', 'Root', 9);

@@ -140,12 +140,15 @@ li.nav-item.active a {
     height: calc( 100vh - 3.5rem - 70px - 72px );
     overflow-y: auto;
 }
+.editor-form {
+    min-width: calc( 500px - 3rem );
+}
 .edit-table {
 }
 .edit-cell {
 }
 .edit-form {
-    width: calc( 500px - 2rem );;
+    width: calc( 500px - 2rem );
 }
 
 .detail-table {
