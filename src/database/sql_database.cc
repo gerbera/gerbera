@@ -2518,7 +2518,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
         }
         // res_id in db resources but not obj resources, so needs a delete
         for (; res_id < dbResources.size(); res_id++) {
-            if (resources.at(res_id)) {
+            if (dbResources.at(res_id)) {
                 std::map<std::string, std::string> resourceSql;
                 resourceSql["res_id"] = quote(res_id);
                 operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, Operation::Delete));
@@ -2578,7 +2578,10 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
     }
 
     // relying on only one element when tableName is mt_metadata
-    if (tableName == METADATA_TABLE) {
+    if (tableName == RESOURCE_TABLE) {
+        qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
+        qb << " AND " << TQ("res_id") << " = " << dict["res_id"];
+    } else if (tableName == METADATA_TABLE) {
         qb << " WHERE " << TQ("item_id") << " = " << obj->getID();
         qb << " AND " << TQ("property_name") << " = " << dict.begin()->second;
     } else {
