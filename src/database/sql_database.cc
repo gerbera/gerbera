@@ -277,8 +277,8 @@ void SQLDatabase::init()
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
-        resourceTagMap.emplace_back(std::pair<std::string, int>(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId));
-        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = std::pair<std::string, std::string>(RES_ALIAS, attrName);
+        resourceTagMap.emplace_back(std::pair(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId));
+        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = std::pair(RES_ALIAS, attrName);
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
