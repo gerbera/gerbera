@@ -54,17 +54,17 @@
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr std::array<duk_function_list_entry, 9> js_global_functions = { {
-    { "print", js_print, DUK_VARARGS },
-    { "addCdsObject", js_addCdsObject, 3 },
-    { "addContainerTree", js_addContainerTree, 1 },
-    { "copyObject", js_copyObject, 1 },
-    { "f2i", js_f2i, 1 },
-    { "m2i", js_m2i, 1 },
-    { "p2i", js_p2i, 1 },
-    { "j2i", js_j2i, 1 },
-    { nullptr, nullptr, 0 },
-} };
+static constexpr auto js_global_functions = std::array {
+    duk_function_list_entry { "print", js_print, DUK_VARARGS },
+    duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },
+    duk_function_list_entry { "addContainerTree", js_addContainerTree, 1 },
+    duk_function_list_entry { "copyObject", js_copyObject, 1 },
+    duk_function_list_entry { "f2i", js_f2i, 1 },
+    duk_function_list_entry { "m2i", js_m2i, 1 },
+    duk_function_list_entry { "p2i", js_p2i, 1 },
+    duk_function_list_entry { "j2i", js_j2i, 1 },
+    duk_function_list_entry { nullptr, nullptr, 0 },
+};
 
 std::string Script::getProperty(const std::string& name) const
 {
