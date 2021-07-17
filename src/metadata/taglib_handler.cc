@@ -325,6 +325,9 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject
             throw_std_runtime_error("resource has no album information");
 
         auto art = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
+        if (!art) {
+            return nullptr;
+        }
 
         return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
     }
@@ -504,6 +507,9 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     const TagLib::ID3v2::FrameList apicFrameList = mp3.ID3v2Tag()->frameList("APIC");
     if (!apicFrameList.isEmpty()) {
         auto art = dynamic_cast<const TagLib::ID3v2::AttachedPictureFrame*>(apicFrameList.front());
+        if (!art) {
+            return;
+        }
 
         const TagLib::ByteVector pic = art->picture();
         std::string art_mimetype = sc->convert(art->mimeType().toCString(true));
