@@ -932,7 +932,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     beginTransaction("search");
     std::string countSQL(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_search_query, searchSQL));
     log_debug("Search count resolves to SQL [{}]", countSQL);
-    auto sqlResult = select(countSQL.c_str());
+    auto sqlResult = select(countSQL);
     commit("search");
     auto countRow = sqlResult->nextRow();
     if (countRow) {
@@ -2447,7 +2447,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     auto rsql = fmt::format("{3} FROM {0}{2}{1} WHERE {0}item_id{1} = {4} ORDER BY {0}res_id{1}",
         table_quote_begin, table_quote_end, RESOURCE_TABLE, sql_resource_query, objectId);
     log_debug("SQLDatabase::retrieveResourcesForObject {}", rsql);
-    auto&& res = select(rsql.c_str());
+    auto&& res = select(rsql);
 
     if (!res)
         return {};
@@ -2714,15 +2714,13 @@ bool SQLDatabase::doResourceMigration()
     log_debug("Checking if resources migration is required");
     auto res = select(
         fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}resources{1} is not null",
-            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE)
-            .c_str());
+            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
     int expectedConversionCount = std::stoi(res->nextRow()->col(0));
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
         fmt::format("SELECT COUNT(*) FROM {0}{2}{1}",
-            table_quote_begin, table_quote_end, RESOURCE_TABLE)
-            .c_str());
+            table_quote_begin, table_quote_end, RESOURCE_TABLE));
     int resourceRowCount = std::stoi(res->nextRow()->col(0));
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
@@ -2735,8 +2733,7 @@ bool SQLDatabase::doResourceMigration()
 
     auto resIds = select(
         fmt::format("SELECT {0}id{1}, {0}resources{1} FROM {0}{2}{1} WHERE {0}resources{1} is not null",
-            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE)
-            .c_str());
+            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
@@ -2777,7 +2774,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 fields << ',' << TQ(key);
                 values << ',' << val;
             }
-            exec(fmt::format("INSERT INTO {}{}{} ({}) VALUES ({})", table_quote_begin, RESOURCE_TABLE, table_quote_end, fields.str(), values.str()).c_str());
+            exec(fmt::format("INSERT INTO {}{}{} ({}) VALUES ({})", table_quote_begin, RESOURCE_TABLE, table_quote_end, fields.str(), values.str()));
             res_id++;
         }
     } else {
