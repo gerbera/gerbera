@@ -211,7 +211,7 @@ static std::map<std::string, std::string> mt_ct_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
-static const std::map<std::string, std::string> ct_dlna_defaults = {
+static std::map<std::string, std::string> ct_dlna_defaults = {
     { CONTENT_TYPE_MP4, UPNP_DLNA_PROFILE_AVC_MP4_EU },
     { CONTENT_TYPE_MKV, UPNP_DLNA_PROFILE_MKV },
     { CONTENT_TYPE_AVI, UPNP_DLNA_PROFILE_AVI },
