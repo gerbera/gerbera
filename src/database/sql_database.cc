@@ -371,14 +371,14 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
         std::ostringstream ostr;
         versionNode.print(ostr);
         auto&& myHash = stringHash(ostr.str());
-        if (version < DBVERSION && myHash == hashies[version]) {
+        if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
                 versionCmds->push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
             }
         } else {
-            log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies[version]);
+            log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
             throw_std_runtime_error("Wrong hash for version {}", version + 1);
         }
         dbUpdates.push_back(std::move(versionCmds));
