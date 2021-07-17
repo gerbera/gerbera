@@ -217,7 +217,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    constexpr auto deviceProperties = std::array<std::pair<const char*, config_option_t>, 9> {
+    constexpr auto deviceProperties = std::array {
         std::pair("friendlyName", CFG_SERVER_NAME),
         std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
         std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
