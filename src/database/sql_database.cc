@@ -683,19 +683,17 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
         Operation op = addUpdateTable->getOperation();
-        std::unique_ptr<std::ostringstream> qb;
-
-        switch (op) {
-        case Operation::Insert:
-            qb = sqlForInsert(obj, addUpdateTable);
-            break;
-        case Operation::Update:
-            qb = sqlForUpdate(obj, addUpdateTable);
-            break;
-        case Operation::Delete:
-            qb = sqlForDelete(obj, addUpdateTable);
-            break;
-        }
+        auto qb = [=]() -> std::unique_ptr<std::ostringstream> {
+            switch (op) {
+            case Operation::Insert:
+                return sqlForInsert(obj, addUpdateTable);
+            case Operation::Update:
+                return sqlForUpdate(obj, addUpdateTable);
+            case Operation::Delete:
+                return sqlForDelete(obj, addUpdateTable);
+            }
+            return nullptr;
+        }();
 
         log_debug("upd_query: {}", qb->str());
         exec(qb->str());
