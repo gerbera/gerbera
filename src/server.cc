@@ -492,11 +492,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::string link = urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
-    std::unique_ptr<RequestHandler> ret;
-
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
-        ret = std::make_unique<FileRequestHandler>(content, xmlbuilder.get());
-    } else if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
+        return std::make_unique<FileRequestHandler>(content, xmlbuilder.get());
+    }
+
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
         std::string parameters;
         std::string path;
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
@@ -507,26 +507,28 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        ret = web::createWebRequestHandler(content, r_type);
-    } else if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
-        ret = std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
-    } else if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_SERVE_HANDLER))) {
-        if (config->getOption(CFG_SERVER_SERVEDIR).empty())
-            throw_std_runtime_error("Serving directories is not enabled in configuration");
+        return web::createWebRequestHandler(content, r_type);
+    }
 
-        ret = std::make_unique<ServeRequestHandler>(content);
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
+        return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
+    }
+
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_SERVE_HANDLER))) {
+        if (config->getOption(CFG_SERVER_SERVEDIR).empty()) {
+            throw_std_runtime_error("Serving directories is not enabled in configuration");
+        }
+
+        return std::make_unique<ServeRequestHandler>(content);
     }
 
 #if defined(HAVE_CURL)
-    else if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER))) {
-        ret = std::make_unique<URLRequestHandler>(content);
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER))) {
+        return std::make_unique<URLRequestHandler>(content);
     }
 #endif
-    else {
-        throw_std_runtime_error("No valid handler type in {}", filename);
-    }
 
-    return ret;
+    throw_std_runtime_error("No valid handler type in {}", filename);
 }
 
 int Server::registerVirtualDirCallbacks()
