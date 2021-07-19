@@ -220,7 +220,7 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return res;
 }
 
-void MySQLDatabase::beginTransaction(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::beginTransaction(const std::string_view& tName)
 {
     log_debug("START TRANSACTION {} {}", tName, inTransaction);
     StdThreadRunner::waitFor(
@@ -232,7 +232,7 @@ void MySQLDatabase::beginTransaction(const std::string_view& tName)
         _exec("START TRANSACTION");
 }
 
-void MySQLDatabase::rollback(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::rollback(const std::string_view& tName)
 {
     log_debug("ROLLBACK {}", tName);
     if (use_transaction && inTransaction && mysql_rollback(&db)) {
@@ -242,7 +242,7 @@ void MySQLDatabase::rollback(const std::string_view& tName)
     inTransaction = false;
 }
 
-void MySQLDatabase::commit(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::commit(const std::string_view& tName)
 {
     log_debug("COMMIT {}", tName);
     SqlAutoLock lock(sqlMutex);
@@ -253,7 +253,7 @@ void MySQLDatabase::commit(const std::string_view& tName)
     inTransaction = false;
 }
 
-std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t length)
+std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const char* query, size_t length)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
@@ -282,6 +282,27 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t lengt
     }
     if (myTransaction) {
         inTransaction = false;
+    }
+
+    return std::make_shared<MysqlResult>(mysql_res);
+}
+
+std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t length)
+{
+    log_debug("{}", query);
+
+    checkMysqlThreadInit();
+    SqlAutoLock lock(sqlMutex);
+    auto res = mysql_real_query(&db, query, length);
+    if (res) {
+        std::string myError = getError(&db);
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
+    }
+
+    MYSQL_RES* mysql_res = mysql_store_result(&db);
+    if (!mysql_res && mysql_field_count(&db)) {
+        std::string myError = getError(&db);
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_store_result() failed: {}; query: {}", myError, query));
     }
 
     return std::make_shared<MysqlResult>(mysql_res);

@@ -191,10 +191,6 @@ private:
     std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
     int exec(const char* query, size_t length, bool getLastInsertId = false) override;
 
-    void beginTransaction(const std::string_view& tName) override;
-    void rollback(const std::string_view& tName) override;
-    void commit(const std::string_view& tName) override;
-
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     std::string startupError;
@@ -228,6 +224,19 @@ private:
     friend class SLExecTask;
     friend class SLInitTask;
     friend class Sqlite3BackupTimerSubscriber;
+};
+
+/// \brief The Database class for using SQLite3 with transactions
+class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
+public:
+    Sqlite3DatabaseWithTransactions(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
+        : SqlWithTransactions(config)
+        , Sqlite3Database(std::move(config), std::move(mime), std::move(timer))
+    {
+    }
+    void beginTransaction(const std::string_view& tName) override;
+    void rollback(const std::string_view& tName) override;
+    void commit(const std::string_view& tName) override;
 };
 
 /// \brief Represents a result of a sqlite3 select
