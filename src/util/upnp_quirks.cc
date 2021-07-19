@@ -65,13 +65,12 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto features = response->append_child("FeatureList").append_child("Features").append_child("Feature");
+    auto features = response->append_child("FeatureList").append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
     features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
     features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
     auto feature = features.append_child("Feature");
     feature.append_attribute("name") = "samsung.com_BASICVIEW";
-    feature.append_attribute("version") = "1";
     feature.append_attribute("version") = "1";
     constexpr auto containers = std::array {
         std::pair("object.item.audioItem", "0"),
