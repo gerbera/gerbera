@@ -102,6 +102,14 @@ protected:
     ///
     static void doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request);
 
+    /// \brief Samsung Extension X_GetObjectIDfromIndex
+    /// \param request Incoming ActionRequest.
+    void doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request);
+
+    /// \brief Samsung Extension X_GetIndexfromRID
+    /// \param request Incoming ActionRequest.
+    void doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request);
+
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 

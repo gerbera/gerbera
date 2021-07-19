@@ -272,6 +272,24 @@ void ContentDirectoryService::doSamsungFeatureList(const std::unique_ptr<ActionR
     log_debug("end");
 }
 
+void ContentDirectoryService::doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungObjectIDfromIndex(request);
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungIndexfromRID(request);
+
+    log_debug("end");
+}
+
 void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
@@ -290,6 +308,10 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
         doSamsungBookmark(request);
     } else if (request->getActionName() == "X_GetFeatureList") {
         doSamsungFeatureList(request);
+    } else if (request->getActionName() == "X_GetObjectIDfromIndex") {
+        doSamsungGetObjectIDfromIndex(request);
+    } else if (request->getActionName() == "X_GetIndexfromRID") {
+        doSamsungGetIndexfromRID(request);
     } else {
         // invalid or unsupported action
         log_warning("Unrecognized action {}", request->getActionName().c_str());

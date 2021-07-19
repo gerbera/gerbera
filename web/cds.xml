@@ -145,6 +145,56 @@
             </argument>
          </argumentList>
       </action>
+      <action>
+        <name>X_GetFeatureList</name>
+        <argumentList>
+          <argument>
+            <name>FeatureList</name>
+            <direction>out</direction>
+            <relatedStateVariable>A_ARG_TYPE_Featurelist</relatedStateVariable>
+          </argument>
+        </argumentList>
+      </action>
+      <action>
+        <name>X_GetObjectIDfromIndex</name>
+        <argumentList>
+          <argument>
+            <name>CategoryType</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_CategoryType</relatedStateVariable>
+          </argument>
+          <argument>
+            <name>Index</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_Index</relatedStateVariable>
+          </argument>
+          <argument>
+            <name>ObjectID</name>
+            <direction>out</direction>
+            <relatedStateVariable>A_ARG_TYPE_ObjectID</relatedStateVariable>
+          </argument>
+        </argumentList>
+      </action>
+      <action>
+      <name>X_GetIndexfromRID</name>
+      <argumentList>
+        <argument>
+          <name>CategoryType</name>
+          <direction>in</direction>
+          <relatedStateVariable>A_ARG_TYPE_CategoryType</relatedStateVariable>
+        </argument>
+        <argument>
+          <name>RID</name>
+          <direction>in</direction>
+          <relatedStateVariable>A_ARG_TYPE_RID</relatedStateVariable>
+        </argument>
+        <argument>
+          <name>Index</name>
+          <direction>out</direction>
+          <relatedStateVariable>A_ARG_TYPE_Index</relatedStateVariable>
+        </argument>
+      </argumentList>
+    </action>
    </actionList>
    <serviceStateTable>
       <stateVariable sendEvents="no">
@@ -202,6 +252,21 @@
       <stateVariable sendEvents="no">
          <name>A_ARG_TYPE_Filter</name>
          <dataType>string</dataType>
+      </stateVariable>
+      <stateVariable sendEvents="no">
+        <name>A_ARG_TYPE_CategoryType</name>
+        <dataType>ui4</dataType>
+        <defaultValue/>
+      </stateVariable>
+      <stateVariable sendEvents="no">
+        <name>A_ARG_TYPE_RID</name>
+        <dataType>ui4</dataType>
+        <defaultValue/>
+      </stateVariable>
+      <stateVariable sendEvents="no">
+        <name>A_ARG_TYPE_Featurelist</name>
+        <dataType>string</dataType>
+        <defaultValue/>
       </stateVariable>
    </serviceStateTable>
 </scpd>
