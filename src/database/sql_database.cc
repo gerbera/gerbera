@@ -248,7 +248,6 @@ static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
     : Database(std::move(config))
     , mime(std::move(mime))
-    , use_transaction(this->config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
 {
 }
 

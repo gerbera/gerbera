@@ -192,7 +192,7 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-void Sqlite3Database::beginTransaction(const std::string_view& tName)
+void Sqlite3DatabaseWithTransactions::beginTransaction(const std::string_view& tName)
 {
     if (use_transaction) {
         log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
@@ -204,7 +204,7 @@ void Sqlite3Database::beginTransaction(const std::string_view& tName)
     }
 }
 
-void Sqlite3Database::rollback(const std::string_view& tName)
+void Sqlite3DatabaseWithTransactions::rollback(const std::string_view& tName)
 {
     if (use_transaction && inTransaction) {
         log_debug("ROLLBACK {} {}", tName, inTransaction);
@@ -213,7 +213,7 @@ void Sqlite3Database::rollback(const std::string_view& tName)
     }
 }
 
-void Sqlite3Database::commit(const std::string_view& tName)
+void Sqlite3DatabaseWithTransactions::commit(const std::string_view& tName)
 {
     if (use_transaction && inTransaction) {
         log_debug("COMMIT {} {}", tName, inTransaction);
