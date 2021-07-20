@@ -367,19 +367,19 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     size_t version = 1;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
-        auto versionCmds = std::make_unique<std::vector<std::pair<std::string, std::string>>>();
+        std::vector<std::pair<std::string, std::string>> versionCmds;
         auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
-                versionCmds->push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
+                versionCmds.push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
             }
         } else {
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
             throw_std_runtime_error("Wrong hash for version {}", version + 1);
         }
-        dbUpdates.push_back(std::move(versionCmds));
+        dbUpdates.push_back(std::make_unique<std::vector<std::pair<std::string, std::string>>>(std::move(versionCmds)));
         version++;
     }
 
