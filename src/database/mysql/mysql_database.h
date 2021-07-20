@@ -56,7 +56,7 @@ protected:
 
     static std::string getError(MYSQL* db);
 
-    MYSQL db {};
+    MYSQL* db {};
 
 private:
     void init() override;
