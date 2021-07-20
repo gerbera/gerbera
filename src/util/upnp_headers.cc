@@ -37,9 +37,9 @@
 #include "common.h"
 #include "util/tools.h"
 
-std::string Headers::stripInvalid(const std::string& value)
+std::string Headers::stripInvalid(std::string_view value)
 {
-    std::string result = value;
+    std::string result(value);
     std::size_t found = value.find_first_of('\r');
     if (found != std::string::npos) {
         result = value.substr(0, found);
@@ -51,7 +51,7 @@ std::string Headers::stripInvalid(const std::string& value)
     return result;
 }
 
-void Headers::addHeader(const std::string& key, const std::string& value)
+void Headers::addHeader(std::string_view key, std::string_view value)
 {
     if (key.empty() || value.empty()) {
         return;
@@ -76,12 +76,12 @@ std::string Headers::formatHeader(const std::pair<std::string, std::string>& hea
     return fmt::format("{}: {}{}", header.first, header.second, (crlf) ? "\r\n" : "");
 }
 
-std::pair<std::string, std::string> Headers::parseHeader(const std::string& header)
+std::pair<std::string, std::string> Headers::parseHeader(std::string_view header)
 {
-    std::string first = header;
+    std::string first(header);
     std::string second;
     std::size_t found = header.find_first_of(':');
-    if (found != std::string::npos) {
+    if (found != std::string_view::npos) {
         first = header.substr(0, found);
         second = header.substr(found + 1);
     }

@@ -28,20 +28,22 @@
 
 #include <map>
 #include <memory>
-#include <upnp.h>
+#include <string_view>
 #include <vector>
+
+#include <upnp.h>
 
 class Headers {
 public:
-    void addHeader(const std::string& key, const std::string& value);
+    void addHeader(std::string_view key, std::string_view value);
     void writeHeaders(UpnpFileInfo* fileInfo) const;
 
     static std::unique_ptr<std::map<std::string, std::string>> readHeaders(UpnpFileInfo* fileInfo);
 
 private:
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
-    static std::pair<std::string, std::string> parseHeader(const std::string& header);
-    static std::string stripInvalid(const std::string& value);
+    static std::pair<std::string, std::string> parseHeader(std::string_view header);
+    static std::string stripInvalid(std::string_view value);
 
     std::unique_ptr<std::map<std::string, std::string>> headers;
 };
