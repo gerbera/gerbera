@@ -94,9 +94,10 @@ public:
     virtual std::string quote(char val) const = 0;
     virtual std::string quote(long long val) const = 0;
 
-    virtual void beginTransaction(const std::string_view& tName) = 0;
-    virtual void rollback(const std::string_view& tName) = 0;
-    virtual void commit(const std::string_view& tName) = 0;
+    // hooks for transactions
+    virtual void beginTransaction(const std::string_view& tName) { }
+    virtual void rollback(const std::string_view& tName) { }
+    virtual void commit(const std::string_view& tName) { }
 
     virtual std::shared_ptr<SQLResult> select(const char* query, size_t length) = 0;
     virtual int exec(const char* query, size_t length, bool getLastInsertId = false) = 0;
@@ -195,8 +196,6 @@ protected:
 
     char table_quote_begin { '\0' };
     char table_quote_end { '\0' };
-    bool use_transaction;
-    bool inTransaction {};
     std::array<unsigned int, DBVERSION> hashies;
 
     std::recursive_mutex sqlMutex;
@@ -290,6 +289,17 @@ private:
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
     using AutoLock = std::lock_guard<std::mutex>;
+};
+
+class SqlWithTransactions {
+protected:
+    explicit SqlWithTransactions(std::shared_ptr<Config> config)
+        : use_transaction(config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
+    {
+    }
+
+    bool use_transaction;
+    bool inTransaction {};
 };
 
 #endif // __SQL_STORAGE_H__

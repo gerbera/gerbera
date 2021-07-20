@@ -41,6 +41,7 @@
 #include <string>
 #include <vector>
 
+/// \brief The Database class for using MySQL
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     explicit MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
@@ -51,6 +52,11 @@ public:
 
 protected:
     void _exec(const char* query, int length = -1) override;
+    void checkMysqlThreadInit() const;
+
+    static std::string getError(MYSQL* db);
+
+    MYSQL db {};
 
 private:
     void init() override;
@@ -67,28 +73,34 @@ private:
     std::string quote(bool val) const override { return fmt::to_string(val ? '1' : '0'); }
     std::string quote(char val) const override { return quote(fmt::to_string(val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
+
     std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
     int exec(const char* query, size_t length, bool getLastInsertId = false) override;
 
-    void beginTransaction(const std::string_view& tName) override;
-    void rollback(const std::string_view& tName) override;
-    void commit(const std::string_view& tName) override;
-
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
-    MYSQL db {};
-
     bool mysql_connection {};
-
-    static std::string getError(MYSQL* db);
 
     void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }
 
     pthread_key_t mysql_init_key {};
     bool mysql_init_key_initialized {};
+};
 
-    void checkMysqlThreadInit() const;
+/// \brief The Database class for using MySQL with transactions
+class MySQLDatabaseWithTransactions : public SqlWithTransactions, public MySQLDatabase {
+public:
+    MySQLDatabaseWithTransactions(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+        : SqlWithTransactions(config)
+        , MySQLDatabase(std::move(config), std::move(mime))
+    {
+    }
+    void beginTransaction(const std::string_view& tName) override;
+    void rollback(const std::string_view& tName) override;
+    void commit(const std::string_view& tName) override;
+
+    std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
 };
 
 class MysqlResult : public SQLResult {
