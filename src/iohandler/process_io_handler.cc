@@ -104,16 +104,16 @@ void ProcessIOHandler::unregisterAll()
 
 ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     fs::path filename,
-    const std::shared_ptr<Executor>& mainProc,
+    std::shared_ptr<Executor> mainProc,
     std::vector<std::shared_ptr<ProcListItem>> procList,
     bool ignoreSeek)
     : content(std::move(content))
     , procList(std::move(procList))
-    , mainProc(mainProc)
+    , mainProc(std::move(mainProc))
     , filename(std::move(filename))
     , ignoreSeek(ignoreSeek)
 {
-    if ((mainProc) && ((!mainProc->isAlive() || abort()))) {
+    if (this->mainProc && (!this->mainProc->isAlive() || abort())) {
         killAll();
         throw_std_runtime_error("process terminated early");
     }
