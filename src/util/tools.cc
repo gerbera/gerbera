@@ -386,13 +386,13 @@ std::string urlEscape(std::string_view str)
 
 std::string urlUnescape(std::string_view str)
 {
-    auto data = const_cast<char*>(str.data());
+    auto data = str.data();
     int len = str.length();
     std::ostringstream buf;
 
     int i = 0;
     while (i < len) {
-        char c = data[i++];
+        const char c = data[i++];
         if (c == '%') {
             if (i + 2 > len)
                 break; // avoid buffer overrun
