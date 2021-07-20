@@ -129,9 +129,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
         xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuirks());
     }
 
-    std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
+    std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
     log_debug("didl {}", didl_lite_xml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
@@ -202,9 +200,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         xmlBuilder->renderObject(cdsObject, stringLimit, &didl_lite_root);
     }
 
-    std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
+    std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
     log_debug("didl {}", didl_lite_xml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);

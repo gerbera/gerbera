@@ -46,6 +46,7 @@
 #include "content/autoscan.h"
 #include "metadata/metadata_handler.h"
 #include "search_handler.h"
+#include "upnp_xml.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -368,9 +369,7 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
         auto versionCmds = std::make_unique<std::vector<std::pair<std::string, std::string>>>();
-        std::ostringstream ostr;
-        versionNode.print(ostr);
-        auto&& myHash = stringHash(ostr.str());
+        auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();

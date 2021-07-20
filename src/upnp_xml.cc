@@ -78,6 +78,13 @@ void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std:
     }
 }
 
+std::string UpnpXMLBuilder::printXml(const pugi::xml_node& entry, const char* indent, int flags)
+{
+    std::ostringstream buf;
+    entry.print(buf, indent, flags);
+    return buf.str();
+}
+
 void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
 {
     // e.g. used for M_ALBUMARTIST
@@ -175,11 +182,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
     }
-#ifdef DEBUG_UPNP
-    std::ostringstream osr;
-    result.print(osr, "  ");
-    log_debug("Rendered DIDL: {}", osr.str());
-#endif
+    log_debug("Rendered DIDL: {}", printXml(result, "  "));
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()

@@ -27,6 +27,7 @@ Gerbera - https://gerbera.io/
 #include "cds_objects.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "sqlite_config_fake.h"
+#include "upnp_xml.h"
 
 #if HAVE_MYSQL
 #include "database/mysql/mysql_database.h"
@@ -61,9 +62,7 @@ void DatabaseTestBase::testUpgrade(config_option_t option)
     size_t version = 1;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
-        std::ostringstream ostr;
-        versionNode.print(ostr);
-        auto&& myHash = stringHash(ostr.str());
+        auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(version));
         version++;
     }
