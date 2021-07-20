@@ -79,6 +79,22 @@ public:
      */
     void getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const;
 
+    /** \brief get Samsung ObjectID from Index
+     *
+     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * \return void
+     *
+     */
+    void getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request) const;
+
+    /** \brief get Samsung Index from RID
+     *
+     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * \return void
+     *
+     */
+    void getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const;
+
 private:
     std::shared_ptr<Context> context;
     std::shared_ptr<ContentManager> content;

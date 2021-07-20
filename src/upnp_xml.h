@@ -90,6 +90,9 @@ public:
     /// depending on the item type it returns the url to the media
     static std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item);
 
+    /// \brief convert xml tree to string
+    static std::string printXml(const pugi::xml_node& entry, const char* indent = PUGIXML_TEXT("\t"), int flags = pugi::format_default);
+
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
