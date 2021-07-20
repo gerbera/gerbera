@@ -44,7 +44,7 @@
 namespace web {
 
 Session::Session(std::chrono::seconds timeout)
-    : uiUpdateIDs(std::make_shared<std::unordered_set<int>>())
+    : uiUpdateIDs(std::make_unique<std::unordered_set<int>>())
     , timeout(timeout)
 {
     access();
