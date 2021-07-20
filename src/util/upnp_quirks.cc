@@ -65,8 +65,8 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    auto features = resp_root.append_child("FeatureList").append_child("Features");
+    pugi::xml_document resp_root;
+    auto features = resp_root.append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
     features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
     features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
@@ -86,6 +86,8 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
         container.append_attribute("id") = id;
         container.append_attribute("type") = type;
     }
+
+    response->document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(resp_root, "", 0).c_str());
     request->setResponse(std::move(response));
 }
 
@@ -96,13 +98,9 @@ void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& r
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
-    auto req = request->getRequest();
-    auto req_root = req->document_element();
+    auto req_root = request->getRequest()->document_element();
 
-    std::ostringstream buf;
-    req_root.print(buf, "", 0);
-    std::string req_root_xml = buf.str();
-    log_debug("request {}", req_root_xml);
+    log_debug("request {}", UpnpXMLBuilder::printXml(req_root, " "));
 
     auto categoryType = req_root.child("CategoryType").text().as_string();
     auto index = req_root.child("Index").text().as_string();
@@ -110,8 +108,7 @@ void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& r
     log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
+    response->document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
     request->setResponse(std::move(response));
 }
 
@@ -121,13 +118,9 @@ void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& reques
         return;
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
-    auto req = request->getRequest();
-    auto req_root = req->document_element();
+    auto req_root = request->getRequest()->document_element();
 
-    std::ostringstream buf;
-    req_root.print(buf, "", 0);
-    std::string req_root_xml = buf.str();
-    log_debug("request {}", req_root_xml);
+    log_debug("request {}", UpnpXMLBuilder::printXml(req_root, " "));
 
     auto categoryType = req_root.child("CategoryType").text().as_string();
     auto rID = req_root.child("RID").text().as_string();
@@ -135,8 +128,7 @@ void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& reques
     log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("Index").append_child(pugi::node_pcdata).set_value("0");
+    response->document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
     request->setResponse(std::move(response));
 }
 
