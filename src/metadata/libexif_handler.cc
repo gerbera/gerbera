@@ -185,7 +185,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         switch (e->tag) {
         case EXIF_TAG_DATE_TIME_ORIGINAL: {
-            auto value = trimString(const_cast<char*>(exif_egv(e)));
+            auto value = trimString(exif_egv(e));
             if (!value.empty()) {
                 value = sc->convert(value);
                 // convert date to ISO 8601 as required in the UPnP spec
@@ -197,21 +197,21 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             break;
         }
         case EXIF_TAG_USER_COMMENT: {
-            auto value = trimString(const_cast<char*>(exif_egv(e)));
+            auto value = trimString(exif_egv(e));
             if (!value.empty()) {
                 item->setMetadata(M_DESCRIPTION, sc->convert(value));
             }
             break;
         }
         case EXIF_TAG_PIXEL_X_DIMENSION: {
-            auto value = trimString(const_cast<char*>(exif_egv(e)));
+            auto value = trimString(exif_egv(e));
             if (!value.empty()) {
                 imageX = sc->convert(value);
             }
             break;
         }
         case EXIF_TAG_PIXEL_Y_DIMENSION: {
-            auto value = trimString(const_cast<char*>(exif_egv(e)));
+            auto value = trimString(exif_egv(e));
             if (!value.empty()) {
                 imageY = sc->convert(value);
             }
@@ -225,7 +225,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         for (auto&& aux : auxtags) {
             if (!aux.empty()) {
                 if (e->tag == getTagFromString(aux)) {
-                    auto value = trimString(const_cast<char*>(exif_egv(e)));
+                    auto value = trimString(exif_egv(e));
                     if (!value.empty()) {
                         item->setAuxData(aux, sc->convert(value));
                         // log_debug("Adding tag: {} with value {}", aux, value);
