@@ -44,7 +44,7 @@ LastFm::LastFm(std::shared_ptr<Context> context)
 LastFm::~LastFm()
 {
     if (currentTrackId != -1 && scrobbler)
-        finished_playing(scrobbler);
+        scrobbler->finishedPlaying();
 }
 
 void LastFm::run()
@@ -55,9 +55,9 @@ void LastFm::run()
     std::string username = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
     std::string password = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
 
-    scrobbler = create_scrobbler(username.c_str(), password.c_str(), 0, 0);
-    authenticate_scrobbler(scrobbler);
-    set_commit_only_mode(scrobbler, 1);
+    scrobbler = std::make_unique<LastFmScrobbler>(username, password, false, false);
+    scrobbler->authenticate();
+    scrobbler->setCommitOnlyMode(true);
 }
 
 void LastFm::shutdown()
@@ -65,8 +65,7 @@ void LastFm::shutdown()
     if (!scrobbler)
         return;
 
-    finished_playing(scrobbler);
-    destroy_scrobbler(scrobbler);
+    scrobbler->finishedPlaying();
     scrobbler = nullptr;
 }
 
@@ -86,32 +85,28 @@ void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
     std::string title = item->getMetadata(M_TITLE);
 
     if (artist.empty() || title.empty()) {
-        finished_playing(scrobbler);
+        scrobbler->finishedPlaying();
         currentTrackId = -1;
         return;
     }
 
-    submission_info* info = create_submission_info();
-    info->artist = const_cast<char*>(artist.c_str());
-    info->track = const_cast<char*>(title.c_str());
+    auto info = SubmissionInfo(artist, title);
 
     std::string album = item->getMetadata(M_ALBUM);
     if (!album.empty())
-        info->album = const_cast<char*>(album.c_str());
+        info.setAlbum(album);
 
     std::string trackNr = item->getMetadata(M_TRACKNUMBER);
     if (!trackNr.empty())
-        info->track_nr = atoi(trackNr.c_str());
+        info.setTrackNr(std::stoi(trackNr));
 
     if (item->getResourceCount() > 0) {
         auto resource = item->getResource(0);
         std::string duration = resource->getAttribute(R_DURATION);
-        info->track_length_in_secs = HMSFToMilliseconds(duration.c_str()) / 1000;
+        info.setTrackLength(HMSFToMilliseconds(duration) / 1000);
     }
 
-    started_playing(scrobbler, info);
-
-    destroy_submission_info(info);
+    scrobbler->startedPlaying(info);
 }
 
 #endif //HAVE_LASTFMLIB
