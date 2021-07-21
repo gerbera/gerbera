@@ -24,7 +24,7 @@ public:
         std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override { }
     fs::path buildContainerPath(int parentID, const std::string& title) override { return ""; }
 
-    void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override { }
+    void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
 
     std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override { return std::vector<std::shared_ptr<CdsObject>>(); }
     std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
