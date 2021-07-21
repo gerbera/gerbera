@@ -36,7 +36,7 @@
 #define __LASTFM_H__
 
 #include <cstdlib>
-#include <lastfmlib/lastfmscrobblerc.h>
+#include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
 
 #include "cds_objects.h"
@@ -71,7 +71,7 @@ public:
 private:
     std::shared_ptr<Config> config;
 
-    lastfm_scrobbler* scrobbler {};
+    std::unique_ptr<LastFmScrobbler> scrobbler;
     int currentTrackId { -1 };
 };
 
