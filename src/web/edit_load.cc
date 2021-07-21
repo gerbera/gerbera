@@ -86,6 +86,16 @@ void web::edit_load::process()
         lmtEl.append_attribute("editable") = false;
     }
 
+    if (obj->getUTime() > std::chrono::seconds::zero()) {
+        auto lmtEl = item.append_child("last_updated");
+        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getUTime().count())).c_str();
+        lmtEl.append_attribute("editable") = false;
+    } else {
+        auto lmtEl = item.append_child("last_updated");
+        lmtEl.append_attribute("value") = "";
+        lmtEl.append_attribute("editable") = false;
+    }
+
     item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).data());
 
     // write metadata

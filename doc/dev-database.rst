@@ -8,7 +8,7 @@ The database contains 6 tables.
 Table ``mt_autoscan`` maintains data on autoscan directories.
 Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like database version) and configuration values changed via UI.
 
-.. |Database Schema| image:: _static/gerbera-db.png
+.. image:: _static/gerbera-db.png
 
 Modify Schema
 =============
