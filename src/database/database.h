@@ -188,7 +188,7 @@ public:
     /// It will be escaped.
     virtual fs::path buildContainerPath(int parentID, const std::string& title) = 0;
 
-    virtual void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
+    virtual void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
     virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
     virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;

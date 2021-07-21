@@ -661,7 +661,7 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     commit("addObject");
 }
 
-void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
+void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer)
 {
     std::vector<std::shared_ptr<AddUpdateTable>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
@@ -680,8 +680,8 @@ void SQLDatabase::updateObject(std::shared_ptr<CdsObject> obj, int* changedConta
 
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
-        Operation op = addUpdateTable->getOperation();
-        auto qb = [=]() -> std::unique_ptr<std::ostringstream> {
+        auto qb = [this, &obj, &addUpdateTable]() -> std::unique_ptr<std::ostringstream> {
+            Operation op = addUpdateTable->getOperation();
             switch (op) {
             case Operation::Insert:
                 return sqlForInsert(obj, addUpdateTable);

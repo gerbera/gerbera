@@ -118,7 +118,7 @@ public:
     }
 
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
-    void updateObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
+    void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override;
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
