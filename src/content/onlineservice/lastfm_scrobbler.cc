@@ -36,7 +36,7 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-LastFm::LastFm(std::shared_ptr<Context> context)
+LastFm::LastFm(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
 {
 }
@@ -69,7 +69,7 @@ void LastFm::shutdown()
     scrobbler = nullptr;
 }
 
-void LastFm::startedPlaying(std::shared_ptr<CdsItem> item)
+void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
 {
     if (currentTrackId == item->getID() || !scrobbler)
         return;

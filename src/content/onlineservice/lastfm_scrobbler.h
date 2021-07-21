@@ -45,7 +45,7 @@
 
 class LastFm {
 public:
-    explicit LastFm(std::shared_ptr<Context> context);
+    explicit LastFm(const std::shared_ptr<Context>& context);
     ~LastFm();
 
     /// \brief Initializes the LastFm client.
@@ -66,7 +66,7 @@ public:
     /// to a file
     ///
     /// \param item the audio item that is being played
-    void startedPlaying(std::shared_ptr<CdsItem> item);
+    void startedPlaying(const std::shared_ptr<CdsItem>& item);
 
 private:
     std::shared_ptr<Config> config;
