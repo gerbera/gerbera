@@ -1107,9 +1107,15 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
             containerMap[tree] = container;
+            if (item->getMTime() > container->getMTime()) {
+                createdIds.push_back(result); // ensure update
+            }
             isNew = true;
         } else {
             result = containerMap[tree]->getID();
+            if (item->getMTime() > containerMap[tree]->getMTime()) {
+                createdIds.push_back(result);
+            }
         }
         assignFanArt({ containerMap[tree] }, item);
     }
@@ -1175,14 +1181,20 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
 
 void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
 {
+    {
+        auto container = containerList.back();
+        if (origObj && container && origObj->getMTime() > container->getMTime()) {
+            container->setMTime(origObj->getMTime());
+            database->updateObject(container, nullptr);
+        }
+    }
     int count = 0;
     for (auto&& container : containerList) {
         const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
         auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
         if (fanart == resources.end()) {
             MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
-            int containerChanged = INVALID_OBJECT_ID;
-            database->updateObject(container, &containerChanged);
+            database->updateObject(container, nullptr);
             fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
         }
         auto location = container->getLocation().string();
@@ -1210,8 +1222,7 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
                     }
                     container->addResource(*fanart);
                 }
-                int containerChanged = INVALID_OBJECT_ID;
-                database->updateObject(container, &containerChanged);
+                database->updateObject(container, nullptr);
             }
         }
         count++;

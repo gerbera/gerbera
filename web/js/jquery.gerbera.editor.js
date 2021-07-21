@@ -271,6 +271,18 @@
         .closest('.form-group').hide();
     }
 
+    if ('last_updated' in item && item['last_updated'].value !== '') {
+      modal.find('#editLut')
+        .val(item['last_updated'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLut')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+
     hideFields([
       modal.find('#editProtocol')
     ]);
@@ -295,6 +307,18 @@
     } else {
       modal.find('#editLmt')
         .text('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+
+    if ('last_updated' in item && item['last_updated'].value !== '') {
+      modal.find('#editLut')
+        .val(item['last_updated'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLut')
+        .val('')
         .prop('disabled', true)
         .closest('.form-group').hide();
     }

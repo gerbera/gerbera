@@ -855,7 +855,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         }
         var cds = getCdsObject(location);
         if (!cds) {
-            print("Skipping item: " + location);
+            print("Playlist " + playlist_title + " Skipping entry: " + location);
             return playlistOrder;
         }
 

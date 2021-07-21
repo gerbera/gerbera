@@ -1075,7 +1075,9 @@ int SQLDatabase::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
 
 int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
 {
-    *changedContainer = INVALID_OBJECT_ID;
+    if (changedContainer)
+        *changedContainer = INVALID_OBJECT_ID;
+
     if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 

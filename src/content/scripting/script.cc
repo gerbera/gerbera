@@ -425,8 +425,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     i = getIntProperty("mtime", 0);
-    if (i > 0)
+    if (i > 0) {
         obj->setMTime(std::chrono::seconds(i));
+    }
 
     duk_get_prop_string(ctx, -1, "parent");
     if (duk_is_object(ctx, -1)) {
@@ -675,6 +676,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         setProperty("location", val);
 
     setIntProperty("mtime", int(obj->getMTime().count()));
+    setIntProperty("utime", int(obj->getUTime().count()));
     setIntProperty("sizeOnDisk", int(obj->getSizeOnDisk()));
     setIntProperty("flags", obj->getFlags());
 
