@@ -106,7 +106,11 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string mimetype = (returnType == "xml") ? MIMETYPE_XML : MIMETYPE_JSON;
     std::string contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
 
+#ifdef WITH_NPUPNP
+    info->content_type = std::move(contentType);
+#else
     UpnpFileInfo_set_ContentType(info, contentType.c_str());
+#endif
     Headers headers;
     headers.addHeader("Cache-Control", "no-cache, must-revalidate");
     headers.writeHeaders(info);

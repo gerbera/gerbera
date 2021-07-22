@@ -105,7 +105,11 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     //            ixmlCloneDOMString(header.c_str()));
     //    }
 
+#ifdef WITH_NPUPNP
+    info->content_type = std::move(mimeType);
+#else
     UpnpFileInfo_set_ContentType(info, mimeType.c_str());
+#endif
     log_debug("web_get_info(): end");
 
     /// \todo transcoding for get_info
