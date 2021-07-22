@@ -81,7 +81,7 @@ void AutoscanInotify::run()
     if (shutdownFlag) {
         shutdownFlag = false;
         inotify = std::make_unique<Inotify>();
-        thread_ = std::thread { &AutoscanInotify::threadProc, this };
+        thread_ = std::thread([this] { threadProc(); });
     }
 }
 
