@@ -142,7 +142,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
+        upgradeDatabase(std::move(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);

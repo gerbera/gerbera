@@ -185,7 +185,7 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    upgradeDatabase(dbVersion, hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION, MYSQL_ADD_RESOURCE_ATTR);
+    upgradeDatabase(std::move(dbVersion), hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION, MYSQL_ADD_RESOURCE_ATTR);
 
     lock.unlock();
 
