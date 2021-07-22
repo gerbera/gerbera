@@ -256,7 +256,7 @@ private:
     val_t val;
 
 public:
-    EnumIterator(const C& f)
+    explicit EnumIterator(const C& f)
         : val(static_cast<val_t>(f))
     {
     }
