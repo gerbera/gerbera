@@ -293,7 +293,7 @@ private:
 
 class SqlWithTransactions {
 protected:
-    explicit SqlWithTransactions(std::shared_ptr<Config> config)
+    explicit SqlWithTransactions(const std::shared_ptr<Config>& config)
         : use_transaction(config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
     {
     }
