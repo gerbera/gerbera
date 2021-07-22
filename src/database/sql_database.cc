@@ -138,7 +138,7 @@ enum class ResourceCol {
 
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
-static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap = {
+static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap {
     { BrowseCol::id, { ITM_ALIAS, "id" } },
     { BrowseCol::ref_id, { ITM_ALIAS, "ref_id" } },
     { BrowseCol::parent_id, { ITM_ALIAS, "parent_id" } },
@@ -167,7 +167,7 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
 
 /// \brief Map search oolumn ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
-static const std::map<SearchCol, std::pair<std::string, std::string>> searchColMap = {
+static const std::map<SearchCol, std::pair<std::string, std::string>> searchColMap {
     { SearchCol::id, { SRC_ALIAS, "id" } },
     { SearchCol::ref_id, { SRC_ALIAS, "ref_id" } },
     { SearchCol::parent_id, { SRC_ALIAS, "parent_id" } },
@@ -184,7 +184,7 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
 
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
-static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap = {
+static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap {
     { MetadataCol::id, { MTA_ALIAS, "id" } },
     { MetadataCol::item_id, { MTA_ALIAS, "item_id" } },
     { MetadataCol::property_name, { MTA_ALIAS, "property_name" } },
@@ -194,7 +194,7 @@ static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColM
 /// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap = {
+static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::part_number },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::track_number },
     { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::dc_title },
@@ -210,7 +210,7 @@ static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap = {
 /// \brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, SearchCol>> searchSortMap = {
+static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::part_number },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::track_number },
     { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::dc_title },
@@ -226,7 +226,7 @@ static const std::vector<std::pair<std::string, SearchCol>> searchSortMap = {
 /// \brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap = {
+static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
     { "id", MetadataCol::id },
     { UPNP_SEARCH_ID, MetadataCol::item_id },
     { META_NAME, MetadataCol::property_name },
@@ -260,14 +260,14 @@ void SQLDatabase::init()
     /// \brief Map resource search keys to column ids
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
-    std::vector<std::pair<std::string, int>> resourceTagMap = {
+    std::vector<std::pair<std::string, int>> resourceTagMap {
         { "id", to_underlying(ResourceCol::id) },
         { UPNP_SEARCH_ID, to_underlying(ResourceCol::item_id) },
         { "res@id", to_underlying(ResourceCol::res_id) },
     };
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
-    std::map<int, std::pair<std::string, std::string>> resourceColMap = {
+    std::map<int, std::pair<std::string, std::string>> resourceColMap {
         { to_underlying(ResourceCol::id), { RES_ALIAS, "id" } },
         { to_underlying(ResourceCol::item_id), { RES_ALIAS, "item_id" } },
         { to_underlying(ResourceCol::res_id), { RES_ALIAS, "res_id" } },
@@ -384,7 +384,7 @@ void SQLDatabase::upgradeDatabase(std::string& dbVersion, const std::array<unsig
     }
 
     version = 1;
-    static const std::map<std::string, bool (SQLDatabase::*)()> migActions = {
+    static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
         { "metadata", &SQLDatabase::doMetadataMigration },
         { "resources", &SQLDatabase::doResourceMigration },
     };

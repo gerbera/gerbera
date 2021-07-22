@@ -211,7 +211,7 @@ static std::map<std::string, std::string> mt_ct_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
-static std::map<std::string, std::string> ct_dlna_defaults = {
+static std::map<std::string, std::string> ct_dlna_defaults {
     { CONTENT_TYPE_MP4, UPNP_DLNA_PROFILE_AVC_MP4_EU },
     { CONTENT_TYPE_MKV, UPNP_DLNA_PROFILE_MKV },
     { CONTENT_TYPE_AVI, UPNP_DLNA_PROFILE_AVI },
@@ -1076,7 +1076,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 };
 
 /// \brief define parent options for path search
-const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::parentOptions = {
+const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::parentOptions {
     { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
