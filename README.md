@@ -64,7 +64,7 @@ sudo make install
 | ffmpeg/libav  |               | Optional      | File metadata              | WITH_AVCODEC           | Disabled |                    |
 | libexif       |               | Optional      | JPEG Exif metadata         | WITH_EXIF              | Enabled  |                    |
 | libexiv2      |               | Optional      | Exif, IPTC, XMP metadata   | WITH_EXIV2             | Disabled |                    |
-| lastfmlib     | 0.4.0         | Optional      | Enables scrobbling         | WITH_LASTFM            | Disabled | install-lastfm.sh  |
+| [lastfmlib]   | 0.4.0         | Optional      | Enables scrobbling         | WITH_LASTFM            | Disabled | install-lastfm.sh  |
 | [ffmpegthumbnailer] |         | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |                    |
 | inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY           | Enabled  |                    |
 
@@ -90,6 +90,7 @@ Scripts for installation of (build) dependencies from source can be found under 
 [duktape]: http://duktape.org
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
+[lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp

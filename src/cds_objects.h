@@ -327,13 +327,8 @@ public:
     /// \brief Add resource tag
     void addResource(std::shared_ptr<CdsResource> resource)
     {
+        resource->setResId(resources.size());
         resources.push_back(move(resource));
-    }
-
-    /// \brief Insert resource tag at index
-    void insertResource(size_t index, const std::shared_ptr<CdsResource>& resource)
-    {
-        resources.insert(resources.begin() + index, resource);
     }
 
     /// \brief Copies all object properties to another object.

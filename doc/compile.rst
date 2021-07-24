@@ -67,6 +67,7 @@ Referenced packages:
   `<duktape>: http://duktape.org`_
   `<ffmpegthumbnailer>: https://github.com/dirkvdb/ffmpegthumbnailer`_
   `<fmtlib>: https://github.com/fmtlib/fmt`_
+  `<lastfmlib>: https://github.com/dirkvdb/lastfmlib`_
   `<npupnp>: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html`_
   `<pugixml>: https://github.com/zeux/pugixml`_
   `<pupnp>: https://github.com/pupnp/pupnp`_

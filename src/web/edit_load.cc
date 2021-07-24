@@ -129,11 +129,10 @@ void web::edit_load::process()
     auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
 
     // write resource info
-    int resIndex = 0;
     for (auto&& resItem : obj->getResources()) {
         auto resEntry = resources.append_child("resources");
         resEntry.append_attribute("resname") = "----RESOURCE----";
-        resEntry.append_attribute("resvalue") = fmt::to_string(resIndex).c_str();
+        resEntry.append_attribute("resvalue") = fmt::to_string(resItem->getResId()).c_str();
         resEntry.append_attribute("editable") = false;
 
         resEntry = resources.append_child("resources");
@@ -143,7 +142,7 @@ void web::edit_load::process()
 
         // write resource content
         if (objItem) {
-            std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem, resIndex);
+            std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem);
             if (resItem->isMetaResource(ID3_ALBUM_ART) //
                 || (resItem->getHandlerType() == CH_LIBEXIF && resItem->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
                 || (resItem->getHandlerType() == CH_FFTH && resItem->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) {
@@ -180,7 +179,6 @@ void web::edit_load::process()
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
-        resIndex++;
     }
 
     // write item meta info
