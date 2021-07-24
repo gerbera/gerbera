@@ -69,14 +69,14 @@ void CdsResource::mergeAttributes(const std::map<std::string, std::string>& addi
     }
 }
 
-void CdsResource::addParameter(const std::string& name, std::string value)
+void CdsResource::addParameter(std::string name, std::string value)
 {
-    parameters[name] = std::move(value);
+    parameters.insert_or_assign(std::move(name), std::move(value));
 }
 
-void CdsResource::addOption(const std::string& name, std::string value)
+void CdsResource::addOption(std::string name, std::string value)
 {
-    options[name] = std::move(value);
+    options.insert_or_assign(std::move(name), std::move(value));
 }
 
 int CdsResource::getHandlerType() const

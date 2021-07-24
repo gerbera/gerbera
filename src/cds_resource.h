@@ -93,13 +93,13 @@ public:
     ///
     /// \param name parameter name
     /// \param value parameter value
-    void addParameter(const std::string& name, std::string value);
+    void addParameter(std::string name, std::string value);
 
     /// \brief Add an option to the resource.
     ///
     /// The options are internal, they do not appear in the URL or in the
     /// XML but can be used for any purpose.
-    void addOption(const std::string& name, std::string value);
+    void addOption(std::string name, std::string value);
 
     int getHandlerType() const;
     std::map<std::string, std::string> getAttributes() const;
