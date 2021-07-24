@@ -218,6 +218,7 @@ public:
     virtual std::string getMimeType();
 
     static const char* mapContentHandler2String(int ch);
+    static int remapContentHandler(const std::string& contHandler);
 };
 
 #endif // __METADATA_HANDLER_H__

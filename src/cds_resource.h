@@ -52,6 +52,7 @@
 class CdsResource {
 protected:
     int handlerType;
+    int resId { -1 };
     std::map<std::string, std::string> attributes;
     std::map<std::string, std::string> parameters;
     std::map<std::string, std::string> options;
@@ -68,6 +69,8 @@ public:
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);
 
+    int getResId() { return resId; }
+    void setResId(int rId) { resId = rId; }
     /// \brief Adds a resource attribute.
     ///
     /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.

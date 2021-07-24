@@ -34,6 +34,7 @@
 
 #include <memory>
 #include <pugixml.hpp>
+#include <vector>
 
 #include "cds_objects.h"
 #include "common.h"
@@ -82,7 +83,7 @@ public:
     static bool renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url);
     static bool renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
     static bool renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
-    static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res, int index);
+    static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
 
@@ -97,6 +98,8 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
+    static std::vector<int> orderedHandler;
+
     const std::string virtualURL;
     const std::string presentationURL;
 
@@ -106,6 +109,7 @@ protected:
         std::string pathBase;
         bool addResID;
     };
+    static std::vector<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsItem>& item);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const fs::path& location);

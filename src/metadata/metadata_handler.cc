@@ -192,43 +192,44 @@ std::string MetadataHandler::getMimeType()
     return MIMETYPE_DEFAULT;
 }
 
-const char* MetadataHandler::mapContentHandler2String(int ch)
-{
-    switch (ch) {
-    case CH_DEFAULT:
-        return "Default";
+static constexpr std::array ch_keys = {
+    std::pair(CH_DEFAULT, "Default"),
 #ifdef HAVE_LIBEXIF
-    case CH_LIBEXIF:
-        return "LibExif";
+    std::pair(CH_LIBEXIF, "LibExif"),
 #endif
 #ifdef HAVE_TAGLIB
-    case CH_ID3:
-        return "TagLib";
+    std::pair(CH_ID3, "TagLib"),
 #endif
-    case CH_TRANSCODE:
-        return "Transcode";
-    case CH_EXTURL:
-        return "Exturl";
-    case CH_MP4:
-        return "MP4";
+    std::pair(CH_TRANSCODE, "Transcode"),
+    std::pair(CH_EXTURL, "Exturl"),
+    std::pair(CH_MP4, "MP4"),
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    case CH_FFTH:
-        return "FFmpegThumbnailer";
+    std::pair(CH_FFTH, "FFmpegThumbnailer"),
 #endif
-    case CH_FLAC:
-        return "Flac";
-    case CH_FANART:
-        return "Fanart";
-    case CH_CONTAINERART:
-        return "ContainerArt";
+    std::pair(CH_FLAC, "Flac"),
+    std::pair(CH_FANART, "Fanart"),
+    std::pair(CH_CONTAINERART, "ContainerArt"),
 #ifdef HAVE_MATROSKA
-    case CH_MATROSKA:
-        return "Matroska";
+    std::pair(CH_MATROSKA, "Matroska"),
 #endif
-    case CH_SUBTITLE:
-        return "Subtitle";
-    case CH_RESOURCE:
-        return "Resource";
+    std::pair(CH_SUBTITLE, "Subtitle"),
+    std::pair(CH_RESOURCE, "Resource"),
+};
+
+int MetadataHandler::remapContentHandler(const std::string& contHandler)
+{
+    auto ch_entry = std::find_if(ch_keys.begin(), ch_keys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
+    if (ch_entry != ch_keys.end()) {
+        return ch_entry->first;
+    }
+    return -1;
+}
+
+const char* MetadataHandler::mapContentHandler2String(int ch)
+{
+    auto ch_entry = std::find_if(ch_keys.begin(), ch_keys.end(), [ch](auto&& entry) { return ch == entry.first; });
+    if (ch_entry != ch_keys.end()) {
+        return ch_entry->second;
     }
     return "Unknown";
 }

@@ -665,6 +665,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/resources/resource", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
 
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_ORDER,
+        "/import/resources/order", "config-import.html#resources-order",
+        ATTR_IMPORT_RESOURCES_HANDLER, ATTR_IMPORT_RESOURCES_NAME),
+
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, true, true,
@@ -1070,6 +1074,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "add-path", ""),
     std::make_shared<ConfigSetup>(ATTR_DYNAMIC_CONTAINER,
         "container", ""),
+    std::make_shared<ConfigSetup>(ATTR_IMPORT_RESOURCES_HANDLER,
+        "handler", ""),
 
     std::make_shared<ConfigSetup>(ATTR_UPNP_PROPERTIES_PROPERTY,
         "upnp-property", ""),
@@ -1147,7 +1153,7 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
 
     { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, //
                                       CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, //
-                                      CFG_IMPORT_SYSTEM_DIRECTORIES } },
+                                      CFG_IMPORT_SYSTEM_DIRECTORIES, CFG_IMPORT_RESOURCES_ORDER } },
     { ATTR_IMPORT_RESOURCES_EXT, { CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },

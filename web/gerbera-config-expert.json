@@ -702,6 +702,19 @@
 					"editable": true
 				},
 				{
+					"item": "/import/resources/order/handler",
+					"type": "List",
+					"caption": "Resource Order",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/order/handler/attribute::name",
+							"caption": "Resource Name",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/import/resources/container",
 					"type": "Element",
 					"caption": "Container Images",
