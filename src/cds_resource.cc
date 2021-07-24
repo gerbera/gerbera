@@ -62,11 +62,9 @@ void CdsResource::removeAttribute(resource_attributes_t res)
     attributes.erase(MetadataHandler::getResAttrName(res));
 }
 
-void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
+void CdsResource::mergeAttributes(std::map<std::string, std::string> additional)
 {
-    for (auto&& [key, val] : additional) {
-        attributes[key] = val;
-    }
+    attributes.merge(std::move(additional));
 }
 
 void CdsResource::addParameter(const std::string& name, std::string value)

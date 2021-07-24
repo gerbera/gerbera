@@ -82,7 +82,7 @@ public:
     void removeAttribute(resource_attributes_t res);
 
     /// \brief Merge existing attributes with new ones
-    void mergeAttributes(const std::map<std::string, std::string>& additional);
+    void mergeAttributes(std::map<std::string, std::string> additional);
 
     /// \brief Adds a parameter (will be appended to the URL)
     ///
