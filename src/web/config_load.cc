@@ -297,6 +297,10 @@ void web::configLoad::process()
         setValue(item, entry->getName());
 
         item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+        setValue(item, ClientConfig::mapFlags(entry->getClientFlags()));
+
+        item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
         setValue(item, entry->getEnabled());
 

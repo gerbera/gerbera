@@ -159,7 +159,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         }
         const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
         addPropertyList(result, meta, auxData, titleProperties);
-        addResources(item, &result);
+        addResources(item, &result, quirks);
 
         result.set_name("item");
     } else if (obj->isContainer()) {
@@ -497,7 +497,7 @@ std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(co
     return orderedResources;
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent)
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks)
 {
     auto urlBase = getPathBase(item);
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
@@ -525,7 +525,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         for (auto&& [key, tp] : *tp_mt) {
             if (!tp)
                 throw_std_runtime_error("Invalid profile encountered");
-            // TODO: Add check for client profile prop and filter if no match
+            // check for client profile prop and filter if no match
+            if (quirks && quirks->checkFlags(tp->getClientFlags()) > 0)
+                continue;
             std::string ct = getValueOrDefault(mappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {

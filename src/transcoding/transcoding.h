@@ -60,6 +60,9 @@ class TranscodingProfile {
 public:
     TranscodingProfile(transcoding_type_t tr_type, std::string name);
 
+    int getClientFlags() const { return clientFlags; }
+    void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
+
     /// \brief returns the transcoding type.
     transcoding_type_t getType() const { return tr_type; }
 
@@ -203,6 +206,7 @@ protected:
     std::map<std::string, std::string> attributes;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode { FCC_None };
+    int clientFlags { 0 };
 };
 
 /// \brief this class allows access to available transcoding profiles.
