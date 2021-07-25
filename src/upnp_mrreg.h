@@ -39,6 +39,7 @@
 #include "common.h"
 #include "context.h"
 #include "subscription_request.h"
+#include "upnp_compat.h"
 #include "upnp_xml.h"
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
@@ -82,13 +83,18 @@ protected:
     std::shared_ptr<Config> config;
 
     UpnpXMLBuilder* xmlBuilder;
+
+    /// \brief UpnpLib handle
+    UPNP_LIB_MEMBER
+
+    /// \brief Upnp Device handle
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
+    MRRegistrarService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
+        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.

@@ -255,7 +255,7 @@ add_library(libgerbera STATIC
         src/web/tasks.cc
         src/web/web_autoscan.cc
         src/web/web_update.cc
-)
+        src/upnp_compat.h)
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)
@@ -560,7 +560,7 @@ if(WITH_SYSTEMD)
         message(STATUS "Configuring systemd unit file: gerbera.service" )
         INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/gerbera.service DESTINATION ${SYSTEMD_UNIT_DIR} COMPONENT init)
     else()
-        message(FATAL_ERROR "Systemd not found")
+        message(WARNING "Systemd not found")
     endif()
 endif()
 

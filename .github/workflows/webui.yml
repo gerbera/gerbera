@@ -1,0 +1,25 @@
+name: Web UI Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  js:
+    runs-on: ubuntu-20.04
+    env:
+      DETECT_CHROMEDRIVER_VERSION: true
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: run tests
+        run: |
+          npm ci
+          npm run lint
+          npm run test
+          npm run test:e2e
+        working-directory: ./gerbera-web

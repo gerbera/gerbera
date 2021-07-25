@@ -38,6 +38,7 @@
 #include "subscription_request.h"
 #include "upnp_cds.h"
 #include "upnp_cm.h"
+#include "upnp_compat.h"
 #include "upnp_mrreg.h"
 
 // forward declaration
@@ -108,6 +109,9 @@ protected:
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};
+
+    /// \brief UpnpLib handle
+    UPNP_LIB_MEMBER
 
     /// \brief Handle for our upnp callbacks.
     UpnpDevice_Handle rootDeviceHandle {};
@@ -205,7 +209,7 @@ protected:
     /// \b web_close Close file.
     ///
     /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
-    static int registerVirtualDirCallbacks();
+    int registerVirtualDirCallbacks();
 
     /// \brief Dispatch incoming UPnP root device events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
@@ -218,14 +222,12 @@ protected:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
-    static int handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
-    int handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event);
+    int handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event);
 
     /// \brief Dispatch incoming UPnP client events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
     ///
-    static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
     int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Creates a html file that is a redirector to the current server i
@@ -234,7 +236,7 @@ protected:
     void emptyBookmark();
 
     std::string getPresentationUrl() const;
-    int startupInterface(const std::string& iface, in_port_t inPort);
+    int startupInterface(const std::string& iface, in_port_t port);
 };
 
 #endif // __SERVER_H__

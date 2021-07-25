@@ -11,4 +11,4 @@ build_type=RelWithDebInfo
 *:fPIC=False
 
 [env]
-CXXFLAGS=-O2 -Werror -Wall -flto
+gerbera:CXXFLAGS=-O2 -Werror -Wall -flto

@@ -38,12 +38,14 @@
 #include "common.h"
 #include "context.h"
 #include "subscription_request.h"
+#include "upnp_compat.h"
 #include "upnp_xml.h"
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
 /// Handles subscription and action invocation requests for the Connection Manager.
 class ConnectionManagerService {
+
 protected:
     /// \brief UPnP standard defined action: GetCurrentConnectionIDs()
     /// \param request Incoming ActionRequest.
@@ -72,14 +74,15 @@ protected:
     std::shared_ptr<Database> database;
 
     UpnpXMLBuilder* xmlBuilder;
+    UPNP_LIB_MEMBER
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
-    explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
+    explicit ConnectionManagerService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
+        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle handle);
 
     static void setStaticArgs(std::string serviceType, std::string serviceID);
 

@@ -24,14 +24,13 @@
 /// \file upnp_clients.cc
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
-#include "upnp_clients.h" // API
-#include "config/client_config.h"
-#include "config/config.h"
-#include "util/tools.h"
-
 #include <array>
 
-#include <upnp.h>
+#include "config/client_config.h"
+#include "config/config.h"
+#include "upnp_clients.h" // API
+#include "upnp_compat.h"
+#include "util/tools.h"
 
 Clients::Clients(const std::shared_ptr<Config>& config)
 {
@@ -279,6 +278,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, std::string userA
     }
 }
 
+#if 0
 std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
 {
 #if defined(USING_NPUPNP)
@@ -292,7 +292,7 @@ std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::stri
     auto ret = xml->load_string(description.c_str());
 #else
     IXML_Document* descDoc = nullptr;
-    int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
+    int errCode = UpnpDownloadXmlDoc(UPNP_LIB_ARG location.c_str(), &descDoc);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
         return {};
@@ -313,3 +313,4 @@ std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::stri
 
     return xml;
 }
+#endif

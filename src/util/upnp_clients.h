@@ -35,6 +35,7 @@
 #include <sys/socket.h>
 #include <vector>
 
+#include "upnp_compat.h"
 #include "util/upnp_quirks.h"
 
 // forward declaration
@@ -106,7 +107,9 @@ private:
     bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
     void updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo);
 
-    static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
+#if 0
+    std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
+#endif
 
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;

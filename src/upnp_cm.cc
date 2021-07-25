@@ -35,14 +35,16 @@
 
 #include "config/config_manager.h"
 #include "database/database.h"
+#include "upnp_compat.h"
 #include "util/tools.h"
 
-ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,
+ConnectionManagerService::ConnectionManagerService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(context->getConfig())
     , database(context->getDatabase())
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
+          UPNP_LIB_INIT_LIST
 {
 }
 
@@ -131,7 +133,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpAcceptSubscriptionExt(deviceHandle,
+    UpnpAcceptSubscriptionExt(UPNP_LIB_ARG deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         UPNP_DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
@@ -160,7 +162,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle,
+    UpnpNotifyExt(UPNP_LIB_ARG deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         UPNP_DESC_CM_SERVICE_ID, event);
 

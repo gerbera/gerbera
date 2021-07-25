@@ -38,15 +38,17 @@
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "database/sql_database.h"
+#include "upnp_compat.h"
 #include "util/upnp_quirks.h"
 
-ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
+ContentDirectoryService::ContentDirectoryService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : stringLimit(stringLimit)
     , config(context->getConfig())
     , database(context->getDatabase())
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
+          UPNP_LIB_INIT_LIST
 {
 }
 
@@ -343,7 +345,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpAcceptSubscriptionExt(deviceHandle,
+    UpnpAcceptSubscriptionExt(UPNP_LIB_ARG deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         UPNP_DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
@@ -378,7 +380,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle,
+    UpnpNotifyExt(UPNP_LIB_ARG deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         UPNP_DESC_CDS_SERVICE_ID, event);
 

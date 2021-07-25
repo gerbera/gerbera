@@ -18,6 +18,7 @@ class GerberaConan(ConanFile):
         "exif": [True, False],
         "matroska": [True, False],
         "mysql": [True, False],
+        "systemd": [True, False],
         "ffmpeg": [True, False],
         "ffmpegthumbnailer": [True, False],
     }
@@ -30,6 +31,7 @@ class GerberaConan(ConanFile):
         "taglib": True,
         "exif": True,
         "matroska": True,
+        "systemd": False,
         # The following are false in CMakeLists.txt, but almost always turned on.
         "mysql": True,
         "ffmpeg": True,
@@ -39,7 +41,6 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "cmake/[>=3.18.0]",
         "fmt/7.1.3",
         "spdlog/1.8.5",
         "pugixml/1.10",
@@ -47,6 +48,8 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "zlib/1.2.11",
         "pupnp/[>=1.14.0]",
+        # Fix the openssl conflict between curl and maridadb
+        "openssl/[~=1.1.1k]"
     ]
 
     def configure(self):
@@ -74,8 +77,11 @@ class GerberaConan(ConanFile):
         if self.options.curl:
             self.requires("libcurl/[>=7.74.0]")
 
+        if self.options.taglib:
+            self.requires("taglib/[>=1.11.1]")
+
         if self.options.mysql:
-            self.requires("mariadb-connector-c/3.1.11")
+            self.requires("mariadb-connector-c/[>=3.1.11]")
 
         if not self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
@@ -106,16 +112,6 @@ class GerberaConan(ConanFile):
                     "pacman": "file",
                     "yum": "file-devel",
                     "freebsd": [],
-                }[pm]
-            )
-
-        if self.options.taglib:
-            installer.install(
-                {
-                    "apt": "libtag1-dev",
-                    "pacman": "taglib",
-                    "yum": "libtag-devel",
-                    "freebsd": "taglib",
                 }[pm]
             )
 
@@ -177,6 +173,7 @@ class GerberaConan(ConanFile):
         cmake.definitions["WITH_MYSQL"] = self.options.mysql
         cmake.definitions["WITH_AVCODEC"] = self.options.ffmpeg
         cmake.definitions["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
+        cmake.definitions["WITH_SYSTEMD"] = self.options.systemd
 
         if self.settings.os != "Linux" or tools.cross_building(self):
             cmake.definitions["WITH_SYSTEMD"] = False

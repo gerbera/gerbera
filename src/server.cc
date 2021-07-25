@@ -79,12 +79,13 @@ void Server::init()
     auto self = shared_from_this();
     timer = std::make_shared<Timer>(config);
 
-    clients = std::make_shared<Clients>(config);
     mime = std::make_shared<Mime>(config);
     timer->run();
+
     database = Database::createInstance(config, mime, timer);
     config->updateConfigFromDatabase(database);
     session_manager = std::make_shared<Web::SessionManager>(config, timer);
+    clients = std::make_shared<Clients>(config);
     context = std::make_shared<Context>(config, clients, mime, database, self, session_manager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
@@ -127,7 +128,7 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpInit failed {} {}", iface, port));
     }
 
-    ret = UpnpSetWebServerRootDir(web_root.c_str());
+    ret = UpnpSetWebServerRootDir(UPNP_LIB_ARG web_root.c_str());
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpSetWebServerRootDir failed {}", web_root));
     }
@@ -135,7 +136,7 @@ void Server::run()
     log_debug("webroot: {}", web_root.c_str());
 
     log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
-    ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
+    ret = UpnpAddVirtualDir(UPNP_LIB_ARG virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpAddVirtualDir failed {}", virtual_directory));
     }
@@ -160,11 +161,14 @@ void Server::run()
 
     log_debug("Registering with UPnP...");
     ret = UpnpRegisterRootDevice2(
-        UPNPREG_BUF_DESC,
+        UPNP_LIB_ARG
+            UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        deviceDescription.length() + 1,
+        size_t(deviceDescription.length()) + 1,
         true,
-        handleUpnpRootDeviceEventCallback,
+        [](UPNP_LIB_PARAM Upnp_EventType eventType, const void* event, UPNP_FUNPTR_COOKIE_CONST void* cookie) -> int {
+            return static_cast<Server*>(const_cast<void*>(cookie))->handleUpnpRootDeviceEvent(eventType, event);
+        },
         this,
         &rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -172,7 +176,11 @@ void Server::run()
     }
 
     ret = UpnpRegisterClient(
-        handleUpnpClientEventCallback,
+        UPNP_LIB_ARG
+            [](UPNP_LIB_PARAM Upnp_EventType eventType, const void* event, UPNP_FUNPTR_COOKIE_CONST void* cookie)
+                ->int {
+                    return static_cast<Server*>(const_cast<void*>(cookie))->handleUpnpClientEvent(eventType, event);
+                },
         this,
         &clientHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -180,19 +188,19 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder.get(), rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(UPNP_LIB_ARG context, xmlbuilder.get(), rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder.get(), rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(UPNP_LIB_ARG context, xmlbuilder.get(), rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder.get(), rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(UPNP_LIB_ARG context, xmlbuilder.get(), rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
     log_debug("Sending UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
-    ret = UpnpSendAdvertisement(rootDeviceHandle, aliveAdvertisementInterval);
+    ret = UpnpSendAdvertisement(UPNP_LIB_ARG rootDeviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
@@ -215,8 +223,17 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     const char* ifName = iface.empty() ? nullptr : iface.c_str();
 
     int ret = UPNP_E_INIT_FAILED;
+
     for (std::size_t attempt = 0; ret != UPNP_E_SUCCESS; attempt++) {
+#if UPNP_VERSION_MAJOR >= 1 && UPNP_VERSION_MINOR >= 16
+        ret = UpnpInit2(&upnpLib, ifName, inPort, nullptr);
+//        UpnpSetLogLevel(UpnpGetLog(upnpLib), UPNP_INFO);
+//        UpnpSetLogCallback(UpnpGetLog(upnpLib), [](Upnp_LogLevel level, Dbg_Module module, const char* sourceFile, const int* sourceLine, const char* log) {
+//            log_debug("UPNP[{}:{}]: {} {}", sourceFile, *sourceLine, UpnpLogLevelToStr(level), trimString(log));
+//        });
+#else
         ret = UpnpInit2(ifName, inPort);
+#endif
         if (ret != UPNP_E_SUCCESS) {
             if (attempt > 3) {
                 throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName, inPort));
@@ -230,13 +247,13 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
         }
     }
 
-    port = UpnpGetServerPort();
+    port = UpnpGetServerPort(UPNP_LIB_ARG_SINGLE);
     /* The IP libupnp picks is not always the same as passed into config, as we map it to an interface */
-    ip = UpnpGetServerIpAddress();
+    ip = UpnpGetServerIpAddress(UPNP_LIB_ARG_SINGLE);
 
     log_info("IPv4: Server bound to: {}:{}", ip, port);
-    log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(), UpnpGetServerPort6());
-    log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
+    log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(UPNP_LIB_ARG_SINGLE), UpnpGetServerPort6(UPNP_LIB_ARG_SINGLE));
+    log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(UPNP_LIB_ARG_SINGLE), UpnpGetServerUlaGuaPort6(UPNP_LIB_ARG_SINGLE));
 
     virtualUrl = fmt::format("http://{}:{}/{}", ip, port, virtual_directory);
 
@@ -299,12 +316,12 @@ void Server::shutdown()
 
     log_debug("Server shutting down");
 
-    ret = UpnpUnRegisterClient(clientHandle);
+    ret = UpnpUnRegisterClient(UPNP_LIB_ARG clientHandle);
     if (ret != UPNP_E_SUCCESS) {
         log_error("UpnpUnRegisterClient failed ({})", ret);
     }
 
-    ret = UpnpUnRegisterRootDevice(rootDeviceHandle);
+    ret = UpnpUnRegisterRootDevice(UPNP_LIB_ARG rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
         log_error("UpnpUnRegisterRootDevice failed ({})", ret);
     }
@@ -314,7 +331,7 @@ void Server::shutdown()
 #endif
 
     log_debug("now calling upnp finish");
-    UpnpFinish();
+    UpnpFinish(UPNP_LIB_ARG_SINGLE);
 
     if (content) {
         content->shutdown();
@@ -337,11 +354,6 @@ void Server::shutdown()
 
     mime = nullptr;
     clients = nullptr;
-}
-
-int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event);
 }
 
 int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
@@ -392,11 +404,6 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
 
     log_debug("returning {}", ret);
     return ret;
-}
-
-int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
 }
 
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
@@ -532,7 +539,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
 int Server::registerVirtualDirCallbacks()
 {
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
+    int ret = UpnpVirtualDir_set_GetInfoCallback(UPNP_LIB_ARG[](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie)->int {
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
@@ -552,7 +559,7 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir OpenCallback");
-    ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
+    ret = UpnpVirtualDir_set_OpenCallback(UPNP_LIB_ARG[](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie)->UpnpWebFileHandle {
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
@@ -574,7 +581,7 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir ReadCallback");
-    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_ReadCallback(UPNP_LIB_ARG[](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)->int {
         //log_debug("{} read({})", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
@@ -586,7 +593,7 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir WriteCallback");
-    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_WriteCallback(UPNP_LIB_ARG[](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)->int {
         //log_debug("{} write({})", f, length);
         return 0;
     });
@@ -594,7 +601,7 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir SeekCallback");
-    ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_SeekCallback(UPNP_LIB_ARG[](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie)->int {
         //log_debug("{} seek({}, {})", f, offset, whence);
         try {
             auto handler = static_cast<IOHandler*>(f);
@@ -609,7 +616,7 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
-    ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
+    ret = UpnpVirtualDir_set_CloseCallback(UPNP_LIB_ARG[](UpnpWebFileHandle f, const void* cookie, const void* requestCookie)->int {
         //log_debug("{} close()", f);
         int ret_close = 0;
         auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));

@@ -35,14 +35,16 @@
 
 #include "config/config_manager.h"
 #include "database/database.h"
+#include "upnp_compat.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
 
-MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
+MRRegistrarService::MRRegistrarService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
     UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(context->getConfig())
     , xmlBuilder(xmlBuilder)
     , deviceHandle(deviceHandle)
+          UPNP_LIB_INIT_LIST
 {
 }
 
@@ -127,7 +129,7 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpAcceptSubscriptionExt(deviceHandle,
+    UpnpAcceptSubscriptionExt(UPNP_LIB_ARG deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
         UPNP_DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
 

@@ -38,6 +38,7 @@
 #include "common.h"
 #include "context.h"
 #include "subscription_request.h"
+#include "upnp_compat.h"
 #include "upnp_xml.h"
 #include <string>
 
@@ -114,13 +115,14 @@ protected:
     std::shared_ptr<Database> database;
 
     UpnpDevice_Handle deviceHandle;
+    UPNP_LIB_MEMBER
     UpnpXMLBuilder* xmlBuilder;
 
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit);
+    explicit ContentDirectoryService(UPNP_LIB_PARAM const std::shared_ptr<Context>& context,
+        UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.

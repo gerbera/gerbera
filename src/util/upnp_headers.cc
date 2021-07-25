@@ -26,7 +26,9 @@
 #include "upnp_headers.h" // API
 
 #if !defined(USING_NPUPNP)
-#if (UPNP_VERSION > 11299)
+#if (UPNP_VERSION > 11599)
+#include <UpnpHttpHeaders.h>
+#elif (UPNP_VERSION > 11299)
 #include <UpnpExtraHeaders.h>
 #else
 #include <ExtraHeaders.h>
@@ -35,6 +37,7 @@
 #include <string>
 
 #include "common.h"
+#include "upnp_compat.h"
 #include "util/tools.h"
 
 std::string Headers::stripInvalid(const std::string& value)

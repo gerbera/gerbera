@@ -4,12 +4,14 @@ include(./common)
 
 [settings]
 build_type=Debug
+cmake:build_type=Release
 
 [options]
 # Use shared libraries for faster link time
 *:shared=True
 gerbera:debug_logging=True
 gerbera:tests=True
+gerbera:systemd=False
 
 [env]
 CXXFLAGS=-Og -Werror -Wall
