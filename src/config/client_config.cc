@@ -25,6 +25,8 @@
 
 #include "client_config.h" // API
 
+#include <numeric>
+
 #include "content/content_manager.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
@@ -213,6 +215,12 @@ int ClientConfig::remapFlag(const std::string& flag)
     }
 
     return stoiString(flag, 0, 0);
+}
+
+int ClientConfig::makeFlags(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
 }
 
 std::string ClientConfig::mapFlags(QuirkFlags flags)

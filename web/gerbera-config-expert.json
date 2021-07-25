@@ -1089,6 +1089,11 @@
 							"editable": false
 						},
 						{
+							"item": "/transcoding/profiles/profile/attribute::client-flags",
+							"caption": "Client Flags",
+							"editable": true
+						},
+						{
 							"item": "/transcoding/profiles/profile/attribute::type",
 							"caption": "Type",
 							"editable": true

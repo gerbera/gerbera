@@ -107,6 +107,8 @@ public:
     static std::string_view mapMatchType(ClientMatchType matchType);
     static ClientType remapClientType(const std::string& clientType);
     static int remapFlag(const std::string& flag);
+    static int makeFlags(const std::string& optValue);
+
     static std::string mapFlags(QuirkFlags flags);
 
     void setOrig(bool orig) { this->isOrig = orig; }

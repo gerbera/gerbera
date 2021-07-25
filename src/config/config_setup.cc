@@ -1054,6 +1054,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
         prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
+        prof->setClientFlags(ClientConfig::makeFlags(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child)));
 
         pugi::xml_node sub;
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
@@ -1245,6 +1246,13 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 config->setOrigValue(index, entry->getEnabled());
                 entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+            if (optItem == index) {
+                config->setOrigValue(index, entry->getClientFlags());
+                entry->setClientFlags(ClientConfig::makeFlags(optValue));
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getClientFlags());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
@@ -1440,10 +1448,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
         auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
 
-        std::vector<std::string> flagsVector = splitString(flags, '|', false);
-        int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
-
-        auto client = std::make_shared<ClientConfig>(flag, ip, userAgent);
+        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), ip, userAgent);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -1473,9 +1478,7 @@ bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const s
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
         if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
-            std::vector<std::string> flagsVector = splitString(optValue, '|', false);
-            int flag = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(i); });
-            entry->setFlags(flag);
+            entry->setFlags(ClientConfig::makeFlags(optValue));
             log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
             return true;
         }
