@@ -1282,6 +1282,24 @@
 					]
 				},
 				{
+					"item": "/server/upnp/playlist-properties/upnp-property",
+					"caption": "Playlist-Properties",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/playlist-properties/upnp-property/attribute::upnp-tag",
+							"caption": "UPnP Tag",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/playlist-properties/upnp-property/attribute::meta-data",
+							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/server/upnp/title-properties/upnp-property",
 					"caption": "Title-Properties",
 					"type": "List",

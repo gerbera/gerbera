@@ -182,8 +182,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         } else if (upnp_class == UPNP_CLASS_MUSIC_GENRE) {
             const auto genreProperties = config->getDictionaryOption(CFG_UPNP_GENRE_PROPERTIES);
             addPropertyList(result, meta, auxData, genreProperties);
+        } else if (upnp_class == UPNP_CLASS_PLAYLIST_CONTAINER) {
+            const auto genreProperties = config->getDictionaryOption(CFG_UPNP_PLAYLIST_PROPERTIES);
+            addPropertyList(result, meta, auxData, genreProperties);
         }
-        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER) {
+        if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER || upnp_class == UPNP_CLASS_PLAYLIST_CONTAINER) {
             std::string url;
             bool artAdded = renderContainerImage(virtualURL, cont, url);
             if (artAdded) {
