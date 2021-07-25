@@ -304,6 +304,11 @@ static std::map<std::string, std::string> upnp_genre_prop_defaults {
     { "upnp:genre", "M_GENRE" },
 };
 
+/// \brief default values for CFG_UPNP_PLAYLIST_PROPERTIES
+static std::map<std::string, std::string> upnp_playlist_prop_defaults {
+    { "dc:date", "M_UPNP_DATE" },
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -1019,6 +1024,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/upnp/genre-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
         false, false, true, std::move(upnp_genre_prop_defaults)),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_PLAYLIST_PROPERTIES,
+        "/server/upnp/playlist-properties", "config-server.html#upnp",
+        ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
+        false, false, true, std::move(upnp_playlist_prop_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_PROPERTIES,
         "/server/upnp/title-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
@@ -1087,12 +1096,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 /// \brief define parent options for path search
 const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::parentOptions {
     { ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, { CFG_TRANSCODING_PROFILE_LIST } },
+    { ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, { CFG_TRANSCODING_PROFILE_LIST } },
     { ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, { CFG_TRANSCODING_PROFILE_LIST } },
 
-    { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
-    { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
-    { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
+    { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
 
     { ATTR_AUTOSCAN_DIRECTORY_LOCATION, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
