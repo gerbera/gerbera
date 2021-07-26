@@ -697,6 +697,7 @@ This section defines the properties which are send to UPnP clients as part of th
         <album-properties>...</album-properties>
         <artist-properties>...</artist-properties>
         <genre-properties>...</genre-properties>
+        <playlist-properties>...</playlist-properties>
         <title-properties>...</title-properties>
 
     * Optional
@@ -784,6 +785,14 @@ This section defines the properties which are send to UPnP clients as part of th
     | upnp-tag             | meta-data         |
     +======================+===================+
     | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+
+    * Playlist-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``dc:date``          | ``M_UPNP_DATE``   |
     +----------------------+-------------------+
 
     * Title-Properties

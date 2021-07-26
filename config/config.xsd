@@ -299,6 +299,7 @@
                 <xs:element ref="album-properties" minOccurs="0"/>
                 <xs:element ref="artist-properties" minOccurs="0"/>
                 <xs:element ref="genre-properties" minOccurs="0"/>
+                <xs:element ref="playlist-properties" minOccurs="0"/>
                 <xs:element ref="title-properties" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
@@ -321,6 +322,14 @@
     </xs:element>
 
     <xs:element name="genre-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="playlist-properties">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="upnp-property" minOccurs="0"/>
@@ -638,12 +647,21 @@
     <xs:element name="resources">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="order" minOccurs="0"/>
                 <xs:element ref="container" minOccurs="0"/>
                 <xs:element ref="fanart" minOccurs="0"/>
                 <xs:element ref="subtitle" minOccurs="0"/>
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="order">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="handler" minOccurs="0"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 
@@ -682,6 +700,12 @@
                 <xs:element ref="add-file" minOccurs="0"/>
                 <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="handler">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
@@ -814,6 +838,7 @@
                 <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="client-flags" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" use="required"/>
             <xs:attribute name="type" use="required">
                 <xs:simpleType>
