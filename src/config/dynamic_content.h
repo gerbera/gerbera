@@ -99,19 +99,19 @@ public:
 
 private:
     /// \brief virtual tree location
-    fs::path location {};
+    fs::path location;
 
     /// \brief title
-    std::string title {};
+    std::string title;
 
     /// \brief search filter
-    std::string filter {};
+    std::string filter;
 
     /// \brief sort criteria
-    std::string sort {};
+    std::string sort;
 
     /// \brief folder image
-    fs::path image {};
+    fs::path image;
 
     bool isOrig { false };
 };
