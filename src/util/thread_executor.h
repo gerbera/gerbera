@@ -64,7 +64,7 @@ protected:
 
     std::condition_variable cond;
     std::mutex mutex;
-    pthread_t thread { 0 };
+    pthread_t thread {};
 
     /// \brief abstract thread method, which needs to be overridden
     virtual void threadProc() = 0;

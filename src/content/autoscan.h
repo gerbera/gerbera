@@ -154,7 +154,7 @@ protected:
     bool hidden {};
     bool persistent_flag {};
     std::chrono::seconds interval {};
-    int taskCount { 0 };
+    int taskCount {};
     int scanID { INVALID_SCAN_ID };
     int objectID { INVALID_OBJECT_ID };
     int databaseID { INVALID_OBJECT_ID };
@@ -162,7 +162,7 @@ protected:
     std::chrono::seconds last_mod_current_scan {};
     std::shared_ptr<Timer::Parameter> timer_parameter;
     std::map<fs::path, std::chrono::seconds> lastModified;
-    unsigned int activeScanCount { 0 };
+    unsigned int activeScanCount {};
 };
 
 #endif
