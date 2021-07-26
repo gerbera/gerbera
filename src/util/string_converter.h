@@ -79,7 +79,7 @@ public:
 
 protected:
     iconv_t cd;
-    bool dirty { false };
+    bool dirty {};
 
     std::string _convert(const std::string& str, bool validate,
         size_t* stoppedAt = nullptr);

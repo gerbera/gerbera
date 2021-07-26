@@ -113,7 +113,7 @@ private:
     /// \brief folder image
     fs::path image;
 
-    bool isOrig { false };
+    bool isOrig {};
 };
 
 #endif

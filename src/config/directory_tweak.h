@@ -144,7 +144,7 @@ public:
 
 protected:
     fs::path location;
-    bool isOrig { false };
+    bool isOrig {};
     bool inherit { true };
     std::map<std::string, std::string> resourceFiles;
     std::map<std::string, bool> flags;

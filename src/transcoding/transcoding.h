@@ -188,11 +188,11 @@ protected:
     fs::path command;
     std::string args;
     bool enabled { true };
-    bool first_resource { false };
-    bool theora { false };
+    bool first_resource {};
+    bool theora {};
     bool accept_url { true };
-    bool hide_orig_res { false };
-    bool thumbnail { false };
+    bool hide_orig_res {};
+    bool thumbnail {};
     bool force_chunked { true };
     size_t buffer_size {};
     size_t chunk_size {};

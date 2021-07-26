@@ -79,10 +79,10 @@ protected:
     bool running { true };
 
     /// \brief true if this task has changed the db (in comparison to the backup)
-    bool contamination { false };
+    bool contamination {};
 
     /// \brief true if this task has backuped the db
-    bool decontamination { false };
+    bool decontamination {};
 
     std::condition_variable cond;
     std::mutex mutex;
