@@ -25,8 +25,8 @@ protected:
     std::string description;
     task_type_t taskType { Invalid };
     task_owner_t taskOwner;
-    unsigned int parentTaskID { 0 };
-    unsigned int taskID { 0 };
+    unsigned int parentTaskID {};
+    unsigned int taskID {};
     bool valid { true };
     bool cancellable { true };
 

@@ -103,7 +103,7 @@ protected:
     std::chrono::seconds utime {};
 
     /// \brief File size on disk (in bytes).
-    off_t sizeOnDisk { 0 };
+    off_t sizeOnDisk {};
 
     /// \brief virtual object flag
     bool virt { false };
@@ -115,7 +115,7 @@ protected:
     unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
 
     /// \brief flag that allows to sort objects within a container
-    int sortPriority { 0 };
+    int sortPriority {};
 
     std::map<std::string, std::string> metadata;
     std::map<std::string, std::string> auxdata;
@@ -368,10 +368,10 @@ protected:
     std::string mimeType { MIMETYPE_DEFAULT };
 
     /// \brief number of part, e.g. disk or season
-    int partNumber { 0 };
+    int partNumber {};
 
     /// \brief number of track e.g. track on disk or episode of season
-    int trackNumber { 0 };
+    int trackNumber {};
 
     /// \brief unique service ID
     std::string serviceID;
@@ -457,7 +457,7 @@ public:
 class CdsContainer final : public CdsObject {
 protected:
     /// \brief container update id.
-    int updateID { 0 };
+    int updateID {};
 
     /// \brief childCount attribute
     int childCount { -1 };
