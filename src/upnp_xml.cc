@@ -98,10 +98,11 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
 {
     // e.g. used for M_ALBUMARTIST
     // name@attr[val] => <name attr="val">
-    std::size_t i, j;
-    if (((i = key.find('@')) != std::string::npos)
-        && ((j = key.find('[', i + 1)) != std::string::npos)
-        && (key[key.length() - 1] == ']')) {
+    std::size_t i = key.find('@');
+    std::size_t j = key.find('[', i + 1);
+    if (i != std::string::npos
+        && j != std::string::npos
+        && key[key.length() - 1] == ']') {
         std::string attr_name = key.substr(i + 1, j - i - 1);
         std::string attr_value = key.substr(j + 1, key.length() - j - 2);
         std::string name = key.substr(0, i);
@@ -155,6 +156,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 }
             } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
                 addField(result, key, val);
+            }
+        }
+        {
+            std::string url;
+            bool artAdded = renderItemImage(virtualURL, item, url);
+            if (artAdded) {
+                meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
             }
         }
         const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
@@ -480,7 +488,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsItem>& item)
 {
     // Order resources according to index defined by orderedHandler
-    std::vector<std::shared_ptr<CdsResource>> orderedResources {};
+    std::vector<std::shared_ptr<CdsResource>> orderedResources;
     auto&& resources = item->getResources();
     for (auto&& oh : orderedHandler) {
         std::for_each(resources.begin(), resources.end(), [&](auto res) { if (oh == res->getHandlerType()) orderedResources.push_back(res); });
