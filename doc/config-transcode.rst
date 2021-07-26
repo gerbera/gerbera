@@ -141,6 +141,14 @@ This section defines the various transcoding profiles.
 
         ::
 
+            client-flags=...
+
+        * Optional
+
+        If the flags match the ones defined in clients, the profile is selected for that client. Choose an unused flag, e.g. "0x100", to avoid collisions with other features.
+
+        ::
+
             type=...
 
         * Required

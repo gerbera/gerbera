@@ -433,33 +433,30 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
 
 bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
 {
-    bool artAdded = false;
     auto orderedResources = getOrderedResources(item);
-    for (auto&& res : orderedResources) {
-        if (res->isMetaResource(ID3_ALBUM_ART) //
-            || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
-            || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
-        ) {
-            url = renderOneResource(virtualURL, item, res);
-            artAdded = true;
-            break;
-        }
+    auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(),
+        [](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART) //
+                             || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+                             || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL); });
+    if (resFound != orderedResources.end()) {
+        url = renderOneResource(virtualURL, item, *resFound);
+        return true;
     }
-    return artAdded;
+
+    return false;
 }
 
 bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
 {
-    bool srtAdded = false;
-    for (auto&& res : item->getResources()) {
-        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
-            url = renderOneResource(virtualURL, item, res);
-            url.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
-            srtAdded = true;
-            break;
-        }
+    auto resources = item->getResources();
+    auto resFound = std::find_if(resources.begin(), resources.end(),
+        [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
+    if (resFound != resources.end()) {
+        url = renderOneResource(virtualURL, item, *resFound);
+        url.append(renderExtension("", (*resFound)->getAttribute(R_RESOURCE_FILE)));
+        return true;
     }
-    return srtAdded;
+    return false;
 }
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
@@ -492,8 +489,7 @@ std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(co
     // Append resources not listed in orderedHandler
     for (auto&& res : resources) {
         auto ch = res->getHandlerType();
-        auto chIndex = std::find_if(orderedHandler.begin(), orderedHandler.end(), [ch](auto&& entry) { return ch == entry; });
-        if (chIndex == orderedHandler.end()) {
+        if (std::none_of(orderedHandler.begin(), orderedHandler.end(), [ch](auto&& entry) { return ch == entry; })) {
             orderedResources.push_back(res);
         }
     }
@@ -529,7 +525,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!tp)
                 throw_std_runtime_error("Invalid profile encountered");
             // check for client profile prop and filter if no match
-            if (quirks && quirks->checkFlags(tp->getClientFlags()) > 0)
+            if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0)
                 continue;
             std::string ct = getValueOrDefault(mappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
@@ -567,6 +563,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             }
 
             auto t_res = std::make_shared<CdsResource>(CH_TRANSCODE);
+            t_res->setResId(std::numeric_limits<int>::max());
             t_res->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
             // after transcoding resource was added we can not rely on
             // index 0, so we will make sure the ogg option is there

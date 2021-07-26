@@ -560,6 +560,31 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     ::
 
+        <order>...</order>
+
+    * Optional
+
+    Define the order in which the metadata is rendered in the output
+
+    **Child tags:**
+
+    ``handler``
+    -----------
+
+        ::
+
+            <handler name="Fanart"/>
+
+            ::
+
+                name="..."
+
+            * Required
+
+            Valid handler names are ``Default``, ``LibExif``, ``TagLib``, ``Transcode``, ``Fanart``, ``Exturl``, ``MP4``, ``FFmpegThumbnailer``, ``Flac``, ``Matroska``, ``Subtitle``, ``Resource``, ``ContainerArt``
+
+    ::
+
         <container>...</container>
         <fanart>...</fanart>
         <subtitle>...</subtitle>
