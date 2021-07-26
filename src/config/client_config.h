@@ -114,7 +114,7 @@ public:
     bool getOrig() const { return isOrig; }
 
 protected:
-    bool isOrig { false };
+    bool isOrig {};
     std::shared_ptr<ClientInfo> clientInfo;
 };
 

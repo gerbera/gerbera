@@ -149,7 +149,7 @@ public:
 protected:
     fs::path location;
     ScanMode mode {};
-    bool isOrig { false };
+    bool isOrig {};
     bool recursive {};
     bool hidden {};
     bool persistent_flag {};

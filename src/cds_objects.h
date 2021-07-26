@@ -106,7 +106,7 @@ protected:
     off_t sizeOnDisk {};
 
     /// \brief virtual object flag
-    bool virt { false };
+    bool virt {};
 
     /// \brief type of the object: item, container, etc.
     unsigned int objectType;

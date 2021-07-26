@@ -58,7 +58,7 @@ public:
     int getStatus() override = 0;
 
 protected:
-    bool threadShutdown { false };
+    bool threadShutdown {};
     /// \brief if the thread is currently running
     bool threadRunning {};
 

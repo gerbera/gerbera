@@ -37,8 +37,8 @@ protected:
     std::shared_ptr<Config> config;
     std::unique_ptr<StdThreadRunner> threadRunner;
 
-    bool shutdownFlag { false };
-    bool working { false };
+    bool shutdownFlag {};
+    bool working {};
     unsigned int taskID { 1 };
     std::deque<std::shared_ptr<GenericTask>> taskQueue;
     std::shared_ptr<GenericTask> currentTask;
