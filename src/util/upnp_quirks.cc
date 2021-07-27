@@ -56,8 +56,8 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::uni
     if (!startswith(item->getMimeType(), "video"))
         return;
 
-    std::string url;
-    if (UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, url)) {
+    auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item);
+    if (subAdded) {
         headers->addHeader("CaptionInfo.sec", url);
     }
 }

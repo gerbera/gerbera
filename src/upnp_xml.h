@@ -80,9 +80,9 @@ public:
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
     static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
 
-    static bool renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url);
-    static bool renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
-    static bool renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url);
+    static std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
+    static std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
+    static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
     static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks);

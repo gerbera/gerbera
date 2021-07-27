@@ -195,8 +195,8 @@ void web::edit_load::process()
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
 
-        std::string url;
-        if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
+        auto [url, artAdded] = UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem);
+        if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();
             image.append_attribute("editable") = false;
@@ -212,8 +212,8 @@ void web::edit_load::process()
     // write container meta info
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        std::string url;
-        if (UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont, url)) {
+        auto [url, artAdded] = UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont);
+        if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();
             image.append_attribute("editable") = false;

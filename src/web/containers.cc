@@ -74,8 +74,8 @@ void web::containers::process()
         int autoscanType = cont->getAutoscanType();
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
-        std::string url;
-        if (UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont, url)) {
+        auto [url, artAdded] = UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont);
+        if (artAdded) {
             ce.append_attribute("image") = url.c_str();
         }
 

@@ -159,8 +159,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
         {
-            std::string url;
-            bool artAdded = renderItemImage(virtualURL, item, url);
+            auto [url, artAdded] = renderItemImage(virtualURL, item);
             if (artAdded) {
                 meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
             }
@@ -195,8 +194,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             addPropertyList(result, meta, auxData, genreProperties);
         }
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER || upnp_class == UPNP_CLASS_PLAYLIST_CONTAINER) {
-            std::string url;
-            bool artAdded = renderContainerImage(virtualURL, cont, url);
+            auto [url, artAdded] = renderContainerImage(virtualURL, cont);
             if (artAdded) {
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str()).append_child(pugi::node_pcdata).set_value(url.c_str());
             }
@@ -388,9 +386,8 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
     return virtualURL + urlBase->pathBase;
 }
 
-bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont, std::string& url)
+std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont)
 {
-    bool artAdded = false;
     for (auto&& res : cont->getResources()) {
         if (res->isMetaResource(ID3_ALBUM_ART)) {
             auto&& resFile = res->getAttribute(R_RESOURCE_FILE);
@@ -402,10 +399,8 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
 
                 auto res_params = res->getParameters();
                 res_params[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
-                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(res_params) }));
-
-                artAdded = true;
-                break;
+                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(res_params) });
+                return std::pair(url, true);
             }
 
             if (!resObj.empty()) {
@@ -413,14 +408,12 @@ bool UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const s
                 dict[URL_OBJECT_ID] = resObj;
 
                 auto res_params = res->getParameters();
-                url.assign(virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) }));
-
-                artAdded = true;
-                break;
+                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) });
+                return std::pair(url, true);
             }
         }
     }
-    return artAdded;
+    return {};
 }
 
 std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res)
@@ -439,7 +432,7 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
     return url;
 }
 
-bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
+std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item)
 {
     auto orderedResources = getOrderedResources(item);
     auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(),
@@ -447,24 +440,22 @@ bool UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::s
                              || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
                              || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL); });
     if (resFound != orderedResources.end()) {
-        url = renderOneResource(virtualURL, item, *resFound);
-        return true;
+        return std::pair(renderOneResource(virtualURL, item, *resFound), true);
     }
 
-    return false;
+    return {};
 }
 
-bool UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, std::string& url)
+std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item)
 {
     auto resources = item->getResources();
     auto resFound = std::find_if(resources.begin(), resources.end(),
         [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
     if (resFound != resources.end()) {
-        url = renderOneResource(virtualURL, item, *resFound);
-        url.append(renderExtension("", (*resFound)->getAttribute(R_RESOURCE_FILE)));
-        return true;
+        auto url = renderOneResource(virtualURL, item, *resFound) + renderExtension("", (*resFound)->getAttribute(R_RESOURCE_FILE));
+        return std::pair(url, true);
     }
-    return false;
+    return {};
 }
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
