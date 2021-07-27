@@ -38,6 +38,7 @@
 
 #include "cds_objects.h"
 #include "common.h"
+#include "config/config.h"
 #include "context.h"
 #include "util/upnp_quirks.h"
 
@@ -115,7 +116,7 @@ protected:
     static std::string renderExtension(const std::string& contentType, const fs::path& location);
     std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item) const;
     static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
-    static void addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData, const std::map<std::string, std::string>& propertyMap);
+    void addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
     static metadata_fields_t remapMetaDataField(const std::string& fieldName);
 };
 #endif // __UPNP_XML_H__

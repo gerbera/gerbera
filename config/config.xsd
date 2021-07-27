@@ -308,6 +308,7 @@
     <xs:element name="album-properties">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
                 <xs:element ref="upnp-property" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -316,6 +317,7 @@
     <xs:element name="artist-properties">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
                 <xs:element ref="upnp-property" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -324,6 +326,7 @@
     <xs:element name="genre-properties">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
                 <xs:element ref="upnp-property" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -332,6 +335,7 @@
     <xs:element name="playlist-properties">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
                 <xs:element ref="upnp-property" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -340,6 +344,7 @@
     <xs:element name="title-properties">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
                 <xs:element ref="upnp-property" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -349,6 +354,13 @@
         <xs:complexType>
             <xs:attribute name="upnp-tag" type="xs:string" use="required"/>
             <xs:attribute name="meta-data" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="upnp-namespace">
+        <xs:complexType>
+            <xs:attribute name="xmlns" type="xs:string" use="required"/>
+            <xs:attribute name="uri" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

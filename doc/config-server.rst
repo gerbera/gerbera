@@ -708,13 +708,30 @@ This section defines the properties which are send to UPnP clients as part of th
 
     ::
 
-        <upnp-property upnp-tag="upnp:artist" meta-data="M_ARTIST"/>
+        <upnp-namespace xmlns="gerbera" uri="https://gerbera.io"/>
+        <upnp-property upnp-tag="gerbera:artist" meta-data="M_ARTIST"/>
 
     * Optional
 
-    Defines an UPnP property.
+    Defines an UPnP property and references the namespace for the property.
 
     The attributes specify the property:
+
+        ::
+
+            xmlns="..."
+
+        * Required
+
+        Key for the namespace
+
+        ::
+
+            uri="..."
+
+        * Required
+
+        Uri for the namespace
 
         ::
 

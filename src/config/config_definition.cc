@@ -1037,6 +1037,31 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_UPNP_PROPERTIES_METADATA,
         "attribute::meta-data", "config-server.html#upnp"),
 
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_NAMESPACES,
+        "/server/upnp/album-properties", "config-server.html#upnp",
+        ATTR_UPNP_NAMESPACE_PROPERTY, ATTR_UPNP_NAMESPACE_KEY, ATTR_UPNP_NAMESPACE_URI,
+        false, false, false),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ARTIST_NAMESPACES,
+        "/server/upnp/artist-properties", "config-server.html#upnp",
+        ATTR_UPNP_NAMESPACE_PROPERTY, ATTR_UPNP_NAMESPACE_KEY, ATTR_UPNP_NAMESPACE_URI,
+        false, false, false),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_GENRE_NAMESPACES,
+        "/server/upnp/genre-properties", "config-server.html#upnp",
+        ATTR_UPNP_NAMESPACE_PROPERTY, ATTR_UPNP_NAMESPACE_KEY, ATTR_UPNP_NAMESPACE_URI,
+        false, false, false),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_PLAYLIST_NAMESPACES,
+        "/server/upnp/playlist-properties", "config-server.html#upnp",
+        ATTR_UPNP_NAMESPACE_PROPERTY, ATTR_UPNP_NAMESPACE_KEY, ATTR_UPNP_NAMESPACE_URI,
+        false, false, false),
+    std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_NAMESPACES,
+        "/server/upnp/title-properties", "config-server.html#upnp",
+        ATTR_UPNP_NAMESPACE_PROPERTY, ATTR_UPNP_NAMESPACE_KEY, ATTR_UPNP_NAMESPACE_URI,
+        false, false, false),
+    std::make_shared<ConfigStringSetup>(ATTR_UPNP_NAMESPACE_KEY,
+        "attribute::xmlns", "config-server.html#upnp"),
+    std::make_shared<ConfigStringSetup>(ATTR_UPNP_NAMESPACE_URI,
+        "attribute::uri", "config-server.html#upnp"),
+
     std::make_shared<ConfigDynamicContentSetup>(CFG_SERVER_DYNAMIC_CONTENT_LIST,
         "/server/containers", "config-server.html#containers"),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED,
@@ -1091,6 +1116,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigSetup>(ATTR_UPNP_PROPERTIES_PROPERTY,
         "upnp-property", ""),
+    std::make_shared<ConfigSetup>(ATTR_UPNP_NAMESPACE_PROPERTY,
+        "upnp-namespace", ""),
 };
 
 /// \brief define parent options for path search
@@ -1103,6 +1130,10 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_UPNP_PROPERTIES_PROPERTY, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
     { ATTR_UPNP_PROPERTIES_UPNPTAG, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
     { ATTR_UPNP_PROPERTIES_METADATA, { CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_PLAYLIST_PROPERTIES } },
+
+    { ATTR_UPNP_NAMESPACE_PROPERTY, { CFG_UPNP_ALBUM_NAMESPACES, CFG_UPNP_GENRE_NAMESPACES, CFG_UPNP_ARTIST_NAMESPACES, CFG_UPNP_TITLE_NAMESPACES, CFG_UPNP_PLAYLIST_NAMESPACES } },
+    { ATTR_UPNP_NAMESPACE_KEY, { CFG_UPNP_ALBUM_NAMESPACES, CFG_UPNP_GENRE_NAMESPACES, CFG_UPNP_ARTIST_NAMESPACES, CFG_UPNP_TITLE_NAMESPACES, CFG_UPNP_PLAYLIST_NAMESPACES } },
+    { ATTR_UPNP_NAMESPACE_URI, { CFG_UPNP_ALBUM_NAMESPACES, CFG_UPNP_GENRE_NAMESPACES, CFG_UPNP_ARTIST_NAMESPACES, CFG_UPNP_TITLE_NAMESPACES, CFG_UPNP_PLAYLIST_NAMESPACES } },
 
     { ATTR_AUTOSCAN_DIRECTORY_LOCATION, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
