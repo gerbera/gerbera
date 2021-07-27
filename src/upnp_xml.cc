@@ -76,8 +76,13 @@ metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldNam
 }
 
 void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData,
-    const std::map<std::string, std::string>& propertyMap)
+    config_option_t itemProps, config_option_t nsProp)
 {
+    auto&& namespaceMap = config->getDictionaryOption(nsProp);
+    for (auto&& [xmlns, uri] : namespaceMap) {
+        result.append_attribute(fmt::format("xmlns:{}", xmlns).c_str()) = uri.c_str();
+    }
+    auto&& propertyMap = config->getDictionaryOption(itemProps);
     for (auto&& [tag, field] : propertyMap) {
         auto metaField = remapMetaDataField(field);
         auto value = (metaField != M_MAX) ? getValueOrDefault(meta, MetadataHandler::getMetaFieldName(metaField)) : getValueOrDefault(auxData, field);
@@ -164,8 +169,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
             }
         }
-        const auto titleProperties = config->getDictionaryOption(CFG_UPNP_TITLE_PROPERTIES);
-        addPropertyList(result, meta, auxData, titleProperties);
+        addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
         addResources(item, &result, quirks);
 
         result.set_name("item");
@@ -181,17 +185,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         log_debug("container is class: {}", upnp_class.c_str());
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
-            const auto albumProperties = config->getDictionaryOption(CFG_UPNP_ALBUM_PROPERTIES);
-            addPropertyList(result, meta, auxData, albumProperties);
+            addPropertyList(result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {
-            const auto artistProperties = config->getDictionaryOption(CFG_UPNP_ARTIST_PROPERTIES);
-            addPropertyList(result, meta, auxData, artistProperties);
+            addPropertyList(result, meta, auxData, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_ARTIST_NAMESPACES);
         } else if (upnp_class == UPNP_CLASS_MUSIC_GENRE) {
-            const auto genreProperties = config->getDictionaryOption(CFG_UPNP_GENRE_PROPERTIES);
-            addPropertyList(result, meta, auxData, genreProperties);
+            addPropertyList(result, meta, auxData, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_GENRE_NAMESPACES);
         } else if (upnp_class == UPNP_CLASS_PLAYLIST_CONTAINER) {
-            const auto genreProperties = config->getDictionaryOption(CFG_UPNP_PLAYLIST_PROPERTIES);
-            addPropertyList(result, meta, auxData, genreProperties);
+            addPropertyList(result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
         }
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM || upnp_class == UPNP_CLASS_MUSIC_ARTIST || upnp_class == UPNP_CLASS_CONTAINER || upnp_class == UPNP_CLASS_PLAYLIST_CONTAINER) {
             auto [url, artAdded] = renderContainerImage(virtualURL, cont);
