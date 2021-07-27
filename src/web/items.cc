@@ -133,8 +133,8 @@ void web::items::process()
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 
-        std::string url;
-        if (UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem, url)) {
+        auto [url, artAdded] = UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem);
+        if (artAdded) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }
     }
