@@ -990,15 +990,13 @@ bool isTheora(const fs::path& ogg_filename)
 
 fs::path getLastPath(const fs::path& path)
 {
-    fs::path ret;
-
     auto it = std::prev(path.end()); // filename
     if (it != path.end())
         it = std::prev(it); // last path
     if (it != path.end())
-        ret = *it;
+        return *it;
 
-    return ret;
+    return {};
 }
 
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
@@ -1053,12 +1051,15 @@ std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const st
 
 std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::string_view mimeType)
 {
-    std::string transfer_parameter;
-    if (startswith(mimeType, "image"))
-        transfer_parameter = UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
-    else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-        transfer_parameter = UPNP_DLNA_TRANSFER_MODE_STREAMING;
-    return transfer_parameter;
+    if (startswith(mimeType, "image")) {
+        return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
+    }
+
+    if (startswith(mimeType, "audio") || startswith(mimeType, "video")) {
+        return UPNP_DLNA_TRANSFER_MODE_STREAMING;
+    }
+
+    return {};
 }
 
 #ifndef HAVE_FFMPEG
