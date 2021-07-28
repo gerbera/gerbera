@@ -780,12 +780,6 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::c
     return second - first;
 }
 
-void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::milliseconds& ret)
-{
-    auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    ret = start + delta;
-}
-
 std::string ipToInterface(std::string_view ip)
 {
     if (ip.empty()) {
