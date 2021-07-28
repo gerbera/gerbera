@@ -68,22 +68,20 @@ static constexpr auto js_global_functions = std::array {
 
 std::string Script::getProperty(const std::string& name) const
 {
-    std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
-        return "";
+        return {};
     duk_get_prop_string(ctx, -1, name.c_str());
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
         duk_pop(ctx);
-        return "";
+        return {};
     }
-    ret = duk_get_string(ctx, -1);
+    auto ret = duk_get_string(ctx, -1);
     duk_pop(ctx);
     return ret;
 }
 
 int Script::getBoolProperty(const std::string& name) const
 {
-    int ret;
     if (!duk_is_object_coercible(ctx, -1))
         return -1;
     duk_get_prop_string(ctx, -1, name.c_str());
@@ -91,14 +89,13 @@ int Script::getBoolProperty(const std::string& name) const
         duk_pop(ctx);
         return -1;
     }
-    ret = duk_to_boolean(ctx, -1);
+    auto ret = duk_to_boolean(ctx, -1);
     duk_pop(ctx);
     return ret;
 }
 
 int Script::getIntProperty(const std::string& name, int def) const
 {
-    int ret;
     if (!duk_is_object_coercible(ctx, -1))
         return def;
     duk_get_prop_string(ctx, -1, name.c_str());
@@ -106,7 +103,7 @@ int Script::getIntProperty(const std::string& name, int def) const
         duk_pop(ctx);
         return def;
     }
-    ret = duk_to_int32(ctx, -1);
+    auto ret = duk_to_int32(ctx, -1);
     duk_pop(ctx);
     return ret;
 }
