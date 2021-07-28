@@ -302,8 +302,6 @@ std::chrono::milliseconds currentTimeMS();
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
-void getTimespecAfterMillis(std::chrono::milliseconds delta, std::chrono::milliseconds& ret);
-
 /// \brief Finds the Interface with the specified IP address.
 /// \param ip i.e. 192.168.4.56.
 /// \return Interface name or nullptr if IP was not found.

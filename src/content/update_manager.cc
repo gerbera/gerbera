@@ -177,9 +177,6 @@ void UpdateManager::threadProc()
             }
             bool sendUpdates = true;
             if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS) {
-                std::chrono::milliseconds timeout;
-                getTimespecAfterMillis(sleepMillis, timeout);
-
                 log_debug("threadProc: sleeping for {} millis", sleepMillis.count());
                 auto ret = threadRunner->waitFor(lock, sleepMillis);
 
