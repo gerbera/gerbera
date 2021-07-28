@@ -395,12 +395,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     std::string val;
     int b;
     int i;
-    std::unique_ptr<StringConverter> sc;
-
-    if (this->whoami() == S_PLAYLIST) {
-        sc = StringConverter::p2i(config);
-    } else
-        sc = StringConverter::i2i(config);
+    std::unique_ptr<StringConverter> sc = (this->whoami() == S_PLAYLIST) ? StringConverter::p2i(config) : StringConverter::i2i(config);
 
     int objType = getIntProperty("objectType", -1);
     if (objType == -1) {

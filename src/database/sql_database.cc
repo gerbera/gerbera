@@ -649,13 +649,13 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     beginTransaction("addObject");
     for (auto&& addUpdateTable : tables) {
         auto qb = sqlForInsert(obj, addUpdateTable);
-        log_debug("Generated insert: {}", qb->str().c_str());
+        log_debug("Generated insert: {}", qb.str().c_str());
 
         if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
-            int newId = exec(qb->str(), true);
+            int newId = exec(qb.str(), true);
             obj->setID(newId);
         } else {
-            exec(qb->str(), false);
+            exec(qb.str(), false);
         }
     }
     commit("addObject");
@@ -680,7 +680,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
 
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
-        auto qb = [this, &obj, &addUpdateTable]() -> std::unique_ptr<std::ostringstream> {
+        auto qb = [this, &obj, &addUpdateTable]() {
             Operation op = addUpdateTable->getOperation();
             switch (op) {
             case Operation::Insert:
@@ -690,11 +690,11 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
             case Operation::Delete:
                 return sqlForDelete(obj, addUpdateTable);
             }
-            return nullptr;
+            return std::ostringstream();
         }();
 
-        log_debug("upd_query: {}", qb->str());
-        exec(qb->str());
+        log_debug("upd_query: {}", qb.str());
+        exec(qb.str());
     }
     commit("updateObject");
 }
@@ -2526,7 +2526,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
     }
 }
 
-std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::ostringstream SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
@@ -2555,10 +2555,10 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForInsert(const std::shared_
     std::ostringstream qb;
     qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::ostringstream SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (!addUpdateTable
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2587,10 +2587,10 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForUpdate(const std::shared_
         qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return qb;
 }
 
-std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::ostringstream SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (!addUpdateTable
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2610,7 +2610,7 @@ std::unique_ptr<std::ostringstream> SQLDatabase::sqlForDelete(const std::shared_
         qb << " WHERE " << TQ("id") << " = " << obj->getID();
     }
 
-    return std::make_unique<std::ostringstream>(std::move(qb));
+    return qb;
 }
 
 // column metadata is dropped in DBVERSION 12
