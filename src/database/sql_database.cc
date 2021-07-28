@@ -354,7 +354,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     const fs::path& upgradeFile = config->getOption(upgradeOption);
     log_debug("db_version: {}", dbVersion);
     log_debug("Loading SQL Upgrades from: {}", upgradeFile.c_str());
-    std::vector<std::unique_ptr<std::vector<std::pair<std::string, std::string>>>> dbUpdates;
+    std::vector<std::vector<std::pair<std::string, std::string>>> dbUpdates;
     pugi::xml_document xmlDoc;
     pugi::xml_parse_result result = xmlDoc.load_file(upgradeFile.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
@@ -379,7 +379,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
             throw_std_runtime_error("Wrong hash for version {}", version + 1);
         }
-        dbUpdates.push_back(std::make_unique<std::vector<std::pair<std::string, std::string>>>(std::move(versionCmds)));
+        dbUpdates.push_back(std::move(versionCmds));
         version++;
     }
 
@@ -393,7 +393,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == fmt::to_string(version)) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (auto&& [migrationCmd, upgradeCmd] : *upgrade) {
+            for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
                 bool actionResult = true;
                 if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
                     actionResult = (*this.*(migActions.at(migrationCmd)))();
