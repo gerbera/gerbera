@@ -108,10 +108,10 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 #endif
 }
 
-std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
+std::map<std::string, std::string> Headers::readHeaders(UpnpFileInfo* fileInfo)
 {
 #if defined(USING_NPUPNP)
-    return std::make_unique<std::map<std::string, std::string>>(fileInfo->request_headers);
+    return fileInfo->request_headers;
 #else
     std::map<std::string, std::string> ret;
 
@@ -124,6 +124,6 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         ret.insert(add);
     }
 
-    return std::make_unique<std::map<std::string, std::string>>(std::move(ret));
+    return ret;
 #endif
 }
