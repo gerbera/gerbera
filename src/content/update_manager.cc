@@ -50,7 +50,6 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
     : config(std::move(config))
     , database(std::move(database))
     , server(std::move(server))
-    , objectIDHash(std::make_unique<std::unordered_set<int>>(0))
 {
 }
 
@@ -90,15 +89,15 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
         signal = true;
     }
     size_t size = objectIDs.size();
-    size_t hashSize = objectIDHash->size();
+    size_t hashSize = objectIDHash.size();
 
     bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
     for (int objectID : objectIDs) {
         if (objectID != lastContainerChanged) {
             //log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
-            objectIDHash->insert(objectID);
-            if (split && objectIDHash->size() > MAX_OBJECT_IDS) {
-                while (objectIDHash->size() > MAX_OBJECT_IDS) {
+            objectIDHash.insert(objectID);
+            if (split && objectIDHash.size() > MAX_OBJECT_IDS) {
+                while (objectIDHash.size() > MAX_OBJECT_IDS) {
                     log_debug("in-between signalling...");
                     threadRunner->notify();
                     lock.unlock();
@@ -107,7 +106,7 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
             }
         }
     }
-    if (objectIDHash->size() >= MAX_OBJECT_IDS)
+    if (objectIDHash.size() >= MAX_OBJECT_IDS)
         signal = true;
     if (signal) {
         log_debug("signalling...");
@@ -127,10 +126,10 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         // there were no unprocessed updates
         bool signal = (!haveUpdates());
         log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
-        objectIDHash->insert(objectID);
+        objectIDHash.insert(objectID);
 
         // signalling if the hash gets too full
-        if (objectIDHash->size() >= MAX_OBJECT_IDS)
+        if (objectIDHash.size() >= MAX_OBJECT_IDS)
             signal = true;
 
         // very simple caching, but it get's a lot of hits
@@ -176,7 +175,7 @@ void UpdateManager::threadProc()
                 break;
             }
             bool sendUpdates = true;
-            if (sleepMillis >= MIN_SLEEP && objectIDHash->size() < MAX_OBJECT_IDS) {
+            if (sleepMillis >= MIN_SLEEP && objectIDHash.size() < MAX_OBJECT_IDS) {
                 log_debug("threadProc: sleeping for {} millis", sleepMillis.count());
                 auto ret = threadRunner->waitFor(lock, sleepMillis);
 
@@ -195,7 +194,7 @@ void UpdateManager::threadProc()
 
                 try {
                     updateString = database->incrementUpdateIDs(objectIDHash);
-                    objectIDHash->clear(); // hash_data_array will be invalid after clear()
+                    objectIDHash.clear(); // hash_data_array will be invalid after clear()
                 } catch (const std::runtime_error& e) {
                     log_error("Fatal error when sending updates: {}", e.what());
                     log_error("Forcing Gerbera shutdown.");

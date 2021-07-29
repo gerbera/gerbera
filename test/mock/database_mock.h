@@ -32,7 +32,7 @@ public:
     std::vector<std::string> getMimeTypes() override { return std::vector<std::string>(); }
     std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) override { return nullptr; }
     int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
-    std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override { return ""; }
+    std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }

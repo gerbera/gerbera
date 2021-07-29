@@ -1436,14 +1436,14 @@ int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, cons
     return 0;
 }
 
-std::string SQLDatabase::incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids)
+std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 {
-    if (ids->empty())
-        return "";
+    if (ids.empty())
+        return {};
     std::ostringstream inBuf;
 
     bool first = true;
-    for (auto&& id : *ids) {
+    for (auto&& id : ids) {
         if (first) {
             inBuf << "IN (" << id;
             first = false;

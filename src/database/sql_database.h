@@ -142,7 +142,7 @@ public:
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
     std::shared_ptr<CdsObject> findObjectByPath(fs::path fullpath, bool wasRegularFile = false) override;
     int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override;
-    std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) override;
+    std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
     void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID, std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override;

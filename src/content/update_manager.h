@@ -68,7 +68,7 @@ protected:
 
     std::unique_ptr<StdThreadRunner> threadRunner;
 
-    std::unique_ptr<std::unordered_set<int>> objectIDHash;
+    std::unordered_set<int> objectIDHash;
 
     bool shutdownFlag {};
     int flushPolicy { FLUSH_SPEC };
@@ -78,7 +78,7 @@ protected:
     static void* staticThreadProc(void* arg);
     void threadProc();
 
-    bool haveUpdates() const { return !objectIDHash->empty(); }
+    bool haveUpdates() const { return !objectIDHash.empty(); }
 };
 
 #endif // __UPDATE_MANAGER_H__
