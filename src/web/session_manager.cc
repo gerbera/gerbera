@@ -44,8 +44,7 @@
 namespace web {
 
 Session::Session(std::chrono::seconds timeout)
-    : uiUpdateIDs(std::make_unique<std::unordered_set<int>>())
-    , timeout(timeout)
+    : timeout(timeout)
 {
     access();
 }
@@ -69,11 +68,11 @@ void Session::containerChangedUI(int objectID)
     if (!updateAll) {
         AutoLockR lock(rmutex);
         if (!updateAll) {
-            if (uiUpdateIDs->size() >= MAX_UI_UPDATE_IDS) {
+            if (uiUpdateIDs.size() >= MAX_UI_UPDATE_IDS) {
                 updateAll = true;
-                uiUpdateIDs->clear();
+                uiUpdateIDs.clear();
             } else
-                uiUpdateIDs->insert(objectID);
+                uiUpdateIDs.insert(objectID);
         }
     }
 }
@@ -89,14 +88,13 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
     if (updateAll)
         return;
 
-    if (uiUpdateIDs->size() + arSize >= MAX_UI_UPDATE_IDS) {
+    if (uiUpdateIDs.size() + arSize >= MAX_UI_UPDATE_IDS) {
         updateAll = true;
-        uiUpdateIDs->clear();
+        uiUpdateIDs.clear();
         return;
     }
-    for (int objectId : objectIDs) {
-        uiUpdateIDs->insert(objectId);
-    }
+
+    uiUpdateIDs.insert(objectIDs.begin(), objectIDs.end());
 }
 
 std::string Session::getUIUpdateIDs()
@@ -110,7 +108,7 @@ std::string Session::getUIUpdateIDs()
     }
     std::string ret = toCSV(uiUpdateIDs);
     if (!ret.empty())
-        uiUpdateIDs->clear();
+        uiUpdateIDs.clear();
     return ret;
 }
 
@@ -119,14 +117,14 @@ bool Session::hasUIUpdateIDs() const
     if (updateAll)
         return true;
     // AutoLock lock(mutex); only accessing an int - shouldn't be necessary
-    return (!uiUpdateIDs->empty());
+    return !uiUpdateIDs.empty();
 }
 
 void Session::clearUpdateIDs()
 {
     log_debug("clearing UI updateIDs");
     AutoLockR lock(rmutex);
-    uiUpdateIDs->clear();
+    uiUpdateIDs.clear();
     updateAll = false;
 }
 

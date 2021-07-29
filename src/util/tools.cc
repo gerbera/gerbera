@@ -754,9 +754,9 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::string toCSV(const std::unique_ptr<std::unordered_set<int>>& array)
+std::string toCSV(const std::unordered_set<int>& array)
 {
-    return array->empty() ? "" : join(*array, ",");
+    return array.empty() ? "" : join(array, ",");
 }
 
 std::chrono::seconds currentTime()
