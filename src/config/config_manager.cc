@@ -72,7 +72,6 @@ ConfigManager::ConfigManager(fs::path filename,
     , interface(std::move(interface))
     , port(port)
     , xmlDoc(std::make_unique<pugi::xml_document>())
-    , options(std::make_unique<std::vector<std::shared_ptr<ConfigOption>>>(CFG_MAX))
 {
     ConfigManager::debug = debug;
 
@@ -116,7 +115,7 @@ std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& roo
 
 void ConfigManager::addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue)
 {
-    options->at(option) = optionValue;
+    options.at(option) = optionValue;
 }
 
 void ConfigManager::load(const fs::path& userHome)
@@ -472,7 +471,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // read options that do not have special requirement and that are not yet loaded
     for (auto&& optionKey : ConfigOptionIterator()) {
-        if (!options->at(optionKey) && !ConfigDefinition::isDependent(optionKey)) {
+        if (!options.at(optionKey) && !ConfigDefinition::isDependent(optionKey)) {
             setOption(root, optionKey);
         }
     }
@@ -543,7 +542,7 @@ void ConfigManager::setOrigValue(const std::string& item, int value)
 // The validate function ensures that the array is completely filled!
 std::string ConfigManager::getOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -552,7 +551,7 @@ std::string ConfigManager::getOption(config_option_t option) const
 
 int ConfigManager::getIntOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -561,7 +560,7 @@ int ConfigManager::getIntOption(config_option_t option) const
 
 bool ConfigManager::getBoolOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -570,7 +569,7 @@ bool ConfigManager::getBoolOption(config_option_t option) const
 
 std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -579,7 +578,7 @@ std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_opt
 
 std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -588,7 +587,7 @@ std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) c
 
 std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -597,7 +596,7 @@ std::shared_ptr<AutoscanList> ConfigManager::getAutoscanListOption(config_option
 
 std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -606,7 +605,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(confi
 
 std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -615,7 +614,7 @@ std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(conf
 
 std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
@@ -624,7 +623,7 @@ std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(c
 
 std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option) const
 {
-    auto optionValue = options->at(option);
+    auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }

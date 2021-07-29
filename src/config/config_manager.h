@@ -149,7 +149,7 @@ protected:
 
     std::unique_ptr<pugi::xml_document> xmlDoc;
 
-    std::unique_ptr<std::vector<std::shared_ptr<ConfigOption>>> options;
+    std::vector<std::shared_ptr<ConfigOption>> options { CFG_MAX };
 
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments = nullptr);
 
