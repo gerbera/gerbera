@@ -649,13 +649,13 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     beginTransaction("addObject");
     for (auto&& addUpdateTable : tables) {
         auto qb = sqlForInsert(obj, addUpdateTable);
-        log_debug("Generated insert: {}", qb.str().c_str());
+        log_debug("Generated insert: {}", qb);
 
         if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
-            int newId = exec(qb.str(), true);
+            int newId = exec(qb, true);
             obj->setID(newId);
         } else {
-            exec(qb.str(), false);
+            exec(qb, false);
         }
     }
     commit("addObject");
@@ -690,11 +690,11 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
             case Operation::Delete:
                 return sqlForDelete(obj, addUpdateTable);
             }
-            return std::ostringstream();
+            return std::string();
         }();
 
-        log_debug("upd_query: {}", qb.str());
-        exec(qb.str());
+        log_debug("upd_query: {}", qb);
+        exec(qb);
     }
     commit("updateObject");
 }
@@ -2526,21 +2526,17 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
     }
 }
 
-std::ostringstream SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    std::ostringstream fields;
-    std::ostringstream values;
+    std::vector<std::string> fields;
+    std::vector<std::string> values;
 
     for (auto it = dict.begin(); it != dict.end(); it++) {
-        if (it != dict.begin()) {
-            fields << ',';
-            values << ',';
-        }
-        fields << TQ(it->first);
-        values << it->second;
+        fields.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, it->first));
+        values.push_back(fmt::format("{}", it->second));
     }
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
@@ -2548,17 +2544,14 @@ std::ostringstream SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& o
     }
 
     if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
-        fields << "," << TQ("item_id");
-        values << "," << obj->getID();
+        fields.push_back(fmt::format("{0}item_id{1}", table_quote_begin, table_quote_end));
+        values.push_back(fmt::format("{}", obj->getID()));
     }
 
-    std::ostringstream qb;
-    qb << "INSERT INTO " << TQ(tableName) << " (" << fields.str() << ") VALUES (" << values.str() << ')';
-
-    return qb;
+    return fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ", "), fmt::join(values, ", "));
 }
 
-std::ostringstream SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (!addUpdateTable
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2567,29 +2560,27 @@ std::ostringstream SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& o
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    std::ostringstream fields;
+    std::vector<std::string> fields;
     for (auto it = dict.begin(); it != dict.end(); it++) {
-        if (it != dict.begin())
-            fields << ',';
-        fields << fmt::format("{0}{2}{1} = {3}", table_quote_begin, table_quote_end, it->first, it->second);
+        fields.push_back(fmt::format("{0}{2}{1} = {3}", table_quote_begin, table_quote_end, it->first, it->second));
     }
 
-    std::ostringstream where;
+    std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
-        where << fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID());
-        where << " AND " << fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]);
+        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
-        where << fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID());
-        where << " AND " << fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second);
+        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second));
     } else {
-        where << fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID());
+        where.push_back(fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
     }
 
-    return qb;
+    return fmt::format("UPDATE {0}{2}{1} SET {3} WHERE {4}", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ", "), fmt::join(where, " AND "));
 }
 
-std::ostringstream SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     if (!addUpdateTable
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
@@ -2598,19 +2589,19 @@ std::ostringstream SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& o
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    std::ostringstream where;
+    std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
-        where << fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID());
-        where << " AND " << fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]);
+        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
-        where << fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID());
-        where << " AND " << fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second);
+        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second));
     } else {
-        where << fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID());
+        where.push_back(fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
     }
 
-    return qb;
+    return fmt::format("DELETE FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, tableName, fmt::join(where, " AND "));
 }
 
 // column metadata is dropped in DBVERSION 12

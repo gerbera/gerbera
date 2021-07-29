@@ -250,9 +250,9 @@ private:
     void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::ostringstream sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::ostringstream sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::ostringstream sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t>& objectIDs);
