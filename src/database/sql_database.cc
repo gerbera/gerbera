@@ -136,6 +136,13 @@ enum class ResourceCol {
     attributes, // index of first attribute
 };
 
+/// \brief autoscan column ids
+enum class AutoscanCol {
+    id = 0,
+    obj_id,
+    persistent,
+};
+
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap {
@@ -191,6 +198,14 @@ static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColM
     { MetadataCol::property_value, { MTA_ALIAS, "property_value" } },
 };
 
+/// \brief Map autoscan column ids to column names
+// map ensures entries are in correct order, each value of AutoscanCol must be present
+static const std::map<AutoscanCol, std::pair<std::string, std::string>> autoscanColMap {
+    { AutoscanCol::id, { AUS_ALIAS, "id" } },
+    { AutoscanCol::obj_id, { AUS_ALIAS, "obj_id" } },
+    { AutoscanCol::persistent, { AUS_ALIAS, "persistent" } },
+};
+
 /// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
@@ -233,6 +248,15 @@ static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
     { META_VALUE, MetadataCol::property_value },
 };
 
+/// \brief Map meta search keys to column ids
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+static const std::vector<std::pair<std::string, AutoscanCol>> autoscanTagMap {
+    { "id", AutoscanCol::id },
+    { "obj_id", AutoscanCol::obj_id },
+    { "persistent", AutoscanCol::persistent },
+};
+
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
 {
@@ -244,6 +268,7 @@ constexpr auto to_underlying(E e) noexcept
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
+static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
@@ -285,64 +310,49 @@ void SQLDatabase::init()
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchSortMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
+    asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
 
     // Statement for UPnP browse
     {
-        std::ostringstream buf;
-        buf << "SELECT ";
+        std::vector<std::string> buf;
+        buf.reserve(browseColMap.size());
         for (auto&& [key, col] : browseColMap) {
-            if (key > BrowseCol::id) {
-                buf << ", ";
-            }
-            buf << TQD(col.first, col.second);
+            buf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
         }
-        buf << " FROM " << browseColumnMapper->tableQuoted();
-        buf << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ(REF_ALIAS) << " ON " << TQBM(BrowseCol::ref_id) << "=" << TQD(REF_ALIAS, browseColMap.at(BrowseCol::id).second);
-        buf << " LEFT JOIN " << TQ(AUTOSCAN_TABLE) << ' ' << TQ(AUS_ALIAS) << " ON " << TQD(AUS_ALIAS, "obj_id") << "=" << TQBM(BrowseCol::id);
-        buf << " ";
-        this->sql_browse_query = buf.str();
+        auto join1 = fmt::format("{0}{2}{1} {0}{3}{1} ON {4} = {0}{3}{1}.{0}{5}{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, REF_ALIAS, browseColumnMapper->mapQuoted(BrowseCol::ref_id), browseColMap.at(BrowseCol::id).second);
+        auto join2 = fmt::format("{} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
+        this->sql_browse_query = fmt::format("SELECT {} FROM {} LEFT JOIN {} LEFT JOIN {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for UPnP search
     {
-        std::ostringstream colBuf;
+        std::vector<std::string> colBuf;
+        colBuf.reserve(searchColMap.size());
         for (auto&& [key, col] : searchColMap) {
-            if (key > SearchCol::id) {
-                colBuf << ", ";
-            }
-            colBuf << TQD(col.first, col.second);
+            colBuf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
         }
-        this->sql_search_columns = colBuf.str();
-        std::ostringstream buf;
-        buf << searchColumnMapper->tableQuoted();
-        buf << fmt::format(" INNER JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        buf << fmt::format(" INNER JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        this->sql_search_query = buf.str();
+        this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
+
+        auto join1 = fmt::format("{} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join2 = fmt::format("{} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        this->sql_search_query = fmt::format("{} INNER JOIN {} INNER JOIN {}", searchColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for metadata
     {
-        std::ostringstream buf;
-        buf << "SELECT ";
+        std::vector<std::string> buf;
+        buf.reserve(metaColMap.size());
         for (auto&& [key, col] : metaColMap) {
-            if (key > MetadataCol::id) {
-                buf << ", ";
-            }
-            buf << TQ(col.second); // currently no alias
+            buf.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, col.second)); // currently no alias
         }
-        buf << " ";
-        this->sql_meta_query = buf.str();
+        this->sql_meta_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
     // Statement for resource
     {
-        std::ostringstream buf;
-        buf << "SELECT ";
+        std::vector<std::string> buf;
+        buf.reserve(resourceColMap.size());
         for (auto&& [key, col] : resourceColMap) {
-            if (key > to_underlying(ResourceCol::id)) {
-                buf << ", ";
-            }
-            buf << TQ(col.second); // currently no alias
+            buf.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, col.second)); // currently no alias
         }
-        buf << " ";
-        this->sql_resource_query = buf.str();
+        this->sql_resource_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
 
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
@@ -605,17 +615,12 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
-        std::ostringstream q;
-        q << "SELECT " << TQ("id")
-          << " FROM " << TQ(CDS_OBJECT_TABLE)
-          << " WHERE " << TQ("parent_id")
-          << '=' << quote(obj->getParentID())
-          << " AND " << TQ("ref_id")
-          << '=' << quote(refObj->getID())
-          << " AND " << TQ("dc_title")
-          << '=' << quote(obj->getTitle())
-          << " LIMIT 1";
-        auto res = select(q);
+        std::vector<std::string> where = {
+            fmt::format("{}parent_id{}={}", table_quote_begin, table_quote_end, quote(obj->getParentID())),
+            fmt::format("{}ref_id{}={}", table_quote_begin, table_quote_end, quote(refObj->getID())),
+            fmt::format("{}dc_title{}={}", table_quote_begin, table_quote_end, quote(obj->getTitle())),
+        };
+        auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
         if (res && (res->nextRow()))
             return returnVal;
@@ -705,12 +710,9 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
         return dynamicContainers.at(objectID);
     }
 
-    std::ostringstream qb;
-
-    qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::id) << '=' << objectID;
-
     beginTransaction("loadObject");
-    auto res = select(qb);
+    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::id), objectID);
+    auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -719,17 +721,16 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
             return result;
         }
     }
-    log_debug("sql_query = {}", qb.str());
+    log_debug("sql_query = {}", loadSql);
     commit("loadObject");
     throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
 {
-    std::ostringstream qb;
-    qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::service_id) << '=' << quote(serviceID);
+    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::service_id), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
-    auto res = select(qb);
+    auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -745,14 +746,10 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
 
 std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
-    std::ostringstream qb;
-    qb << "SELECT " << TQ("id")
-       << " FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("service_id")
-       << " LIKE " << quote(std::string(1, servicePrefix) + '%');
+    auto getSql = fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}service_id{1} LIKE {}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(std::string(1, servicePrefix) + '%'));
 
     beginTransaction("getServiceObjectIDs");
-    auto res = select(qb);
+    auto res = select(getSql);
     commit("getServiceObjectIDs");
     if (!res)
         throw_std_runtime_error("db error");
@@ -984,19 +981,18 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (!containers && !items)
         return 0;
 
-    std::ostringstream qb;
-    qb << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("parent_id") << '=' << contId;
+    std::vector<std::string> where {
+        fmt::format("{}parent_id{} = {}", table_quote_begin, table_quote_end, contId)
+    };
     if (containers && !items)
-        qb << " AND " << TQ("object_type") << '=' << OBJECT_TYPE_CONTAINER;
+        where.push_back(fmt::format("{}object_type{} = {}", table_quote_begin, table_quote_end, OBJECT_TYPE_CONTAINER));
     else if (items && !containers)
-        qb << " AND (" << TQ("object_type") << " & " << OBJECT_TYPE_ITEM
-           << ") = " << OBJECT_TYPE_ITEM;
+        where.push_back(fmt::format("({0}object_type{1} & {2}) = {2}", table_quote_begin, table_quote_end, OBJECT_TYPE_ITEM));
     if (contId == CDS_ID_ROOT && hideFsRoot) {
-        qb << " AND " << TQ("id") << "!=" << quote(CDS_ID_FS_ROOT);
+        where.push_back(fmt::format("{}id{} != {}", table_quote_begin, table_quote_end, quote(CDS_ID_FS_ROOT)));
     }
     beginTransaction("getChildCount");
-    auto res = select(qb);
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
     commit("getChildCount");
 
     if (res) {
@@ -1011,19 +1007,14 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
 
 std::vector<std::string> SQLDatabase::getMimeTypes()
 {
-    std::vector<std::string> arr;
-
-    std::ostringstream qb;
-    qb << "SELECT DISTINCT " << TQ("mime_type")
-       << " FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("mime_type") << " IS NOT NULL ORDER BY "
-       << TQ("mime_type");
     beginTransaction("getMimeTypes");
-    auto res = select(qb);
+    auto res = select(fmt::format("SELECT DISTINCT {0}mime_type{1} FROM {0}{2}{1} WHERE {0}mime_type{1} IS NOT NULL ORDER BY {0}mime_type{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
     commit("getMimeTypes");
+
     if (!res)
         throw_std_runtime_error("db error");
 
+    std::vector<std::string> arr;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         arr.push_back(std::string(row->col(0)));
@@ -1041,18 +1032,18 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
     else
         dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
 
-    std::ostringstream qb;
-    qb << sql_browse_query
-       << " WHERE " << TQBM(BrowseCol::location_hash) << '=' << quote(stringHash(dbLocation))
-       << " AND " << TQBM(BrowseCol::location) << '=' << quote(dbLocation)
-       << " AND " << TQBM(BrowseCol::ref_id) << " IS NULL"
-                                                " LIMIT 1";
+    std::vector<std::string> where {
+        fmt::format("{} = {}", TQBM(BrowseCol::location_hash), quote(stringHash(dbLocation))),
+        fmt::format("{} = {}", TQBM(BrowseCol::location), quote(dbLocation)),
+        fmt::format("{} IS NULL", TQBM(BrowseCol::ref_id)),
+    };
+    auto findSql = fmt::format("{} WHERE {} LIMIT 1", sql_browse_query, fmt::join(where, " AND "));
 
     beginTransaction("findObjectByPath");
-    auto res = select(qb);
+    auto res = select(findSql);
     if (!res) {
         commit("findObjectByPath");
-        throw_std_runtime_error("error while doing select: {}", qb.str());
+        throw_std_runtime_error("error while doing select: {}", findSql);
     }
 
     auto row = res->nextRow();
@@ -1157,16 +1148,11 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
 {
-    //title = escape(title, xxx);
     if (parentID == CDS_ID_ROOT)
         return fmt::format("{}{}", VIRTUAL_CONTAINER_SEPARATOR, title);
 
-    std::ostringstream qb;
-    qb << "SELECT " << TQ("location") << " FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("id") << '=' << parentID << " LIMIT 1";
-
     beginTransaction("buildContainerPath");
-    auto res = select(qb);
+    auto res = select(fmt::format("SELECT {0}location{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID));
     commit("buildContainerPath");
     if (!res)
         return "";
@@ -1192,15 +1178,10 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         *containerID = CDS_ID_ROOT;
         return;
     }
-    std::ostringstream qb;
     std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, virtualPath);
-    qb << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE)
-       << " WHERE " << TQ("location_hash") << '=' << quote(stringHash(dbLocation))
-       << " AND " << TQ("location") << '=' << quote(dbLocation)
-       << " LIMIT 1";
 
     beginTransaction("addContainerChain");
-    auto res = select(qb);
+    auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}location_hash{1} = {3} AND {0}location{1} = {4} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(stringHash(dbLocation)), quote(dbLocation)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -1392,12 +1373,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 
 std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int objectId)
 {
-    std::ostringstream qb;
-    qb << sql_meta_query
-       << " FROM " << TQ(METADATA_TABLE)
-       << " WHERE " << TQ("item_id")
-       << " = " << objectId;
-    auto res = select(qb);
+    auto res = select(fmt::format("{2} FROM {0}{3}{1} WHERE {0}item_id{1} = {4}", table_quote_begin, table_quote_end, sql_meta_query, METADATA_TABLE, objectId));
     if (!res)
         return {};
 
@@ -1411,23 +1387,19 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
 
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
-    std::ostringstream query;
-    query << "SELECT COUNT(*) FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE "
-          << TQ("object_type") << " != " << quote(OBJECT_TYPE_CONTAINER);
+    std::vector<std::string> where {
+        fmt::format("{}object_type{} != {}", table_quote_begin, table_quote_end, quote(OBJECT_TYPE_CONTAINER)),
+    };
     if (!mimeType.empty()) {
-        query << " AND " << TQ("mime_type") << " LIKE " << quote(mimeType + "%");
+        where.push_back(fmt::format("{}mime_type{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", mimeType))));
     }
     if (!upnpClass.empty()) {
-        query << " AND " << TQ("upnp_class") << " LIKE " << quote(upnpClass + "%");
+        where.push_back(fmt::format("{}upnp_class{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", upnpClass))));
     }
-    if (isVirtual) {
-        query << " AND " << TQ("location") << " LIKE " << quote(fmt::format("{}%", LOC_VIRT_PREFIX));
-    } else {
-        query << " AND " << TQ("location") << " LIKE " << quote(fmt::format("{}%", LOC_FILE_PREFIX));
-    }
+    where.push_back(fmt::format("{}location{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", (isVirtual) ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
     //<< " AND is_virtual = 0";
 
-    auto res = select(query);
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
 
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
@@ -1440,31 +1412,12 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 {
     if (ids.empty())
         return {};
-    std::ostringstream inBuf;
 
-    bool first = true;
-    for (auto&& id : ids) {
-        if (first) {
-            inBuf << "IN (" << id;
-            first = false;
-        } else {
-            inBuf << ',' << id;
-        }
-    }
-    inBuf << ')';
-
-    std::ostringstream bufUpdate;
-    bufUpdate << "UPDATE " << TQ(CDS_OBJECT_TABLE) << " SET " << TQ("update_id")
-              << '=' << TQ("update_id") << " + 1 WHERE " << TQ("id") << ' ';
-    bufUpdate << inBuf.str();
     beginTransaction("incrementUpdateIDs");
-    exec(bufUpdate.str());
 
-    std::ostringstream bufSelect;
-    bufSelect << "SELECT " << TQ("id") << ',' << TQ("update_id") << " FROM "
-              << TQ(CDS_OBJECT_TABLE) << " WHERE " << TQ("id") << ' ';
-    bufSelect << inBuf.str();
-    auto res = select(bufSelect);
+    exec(fmt::format("UPDATE {0}{2}{1} SET {0}update_id{1} = {0}update_id{1} + 1 WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(ids, ",")));
+
+    auto res = select(fmt::format("SELECT {0}id{1}, {0}update_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(ids, ",")));
     if (!res) {
         rollback("incrementUpdateIDs 2");
         throw_std_runtime_error("Error while fetching update ids");
@@ -1474,9 +1427,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     std::unique_ptr<SQLRow> row;
     std::vector<std::string> rows;
     while ((row = res->nextRow())) {
-        std::ostringstream s;
-        s << row->col(0) << ',' << row->col(1);
-        rows.emplace_back(s.str());
+        rows.emplace_back(fmt::format("{},{}", row->col(0), row->col(1)));
     }
 
     if (rows.empty())
@@ -1486,13 +1437,10 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
 std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, bool withoutContainer)
 {
-    std::ostringstream q;
-    q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
-    if (withoutContainer)
-        q << TQ("object_type") << " != " << OBJECT_TYPE_CONTAINER << " AND ";
-    q << TQ("parent_id") << '=';
-    q << parentID;
-    auto res = select(q);
+    auto getSql = (withoutContainer) //
+        ? fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} = {3} AND {0}object_type{1} != {4}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID, OBJECT_TYPE_CONTAINER)
+        : fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} = {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID);
+    auto res = select(getSql);
     if (!res)
         throw_std_runtime_error("db error");
     if (res->getNumRows() == 0)
@@ -1517,12 +1465,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
     }
 
-    std::ostringstream idsBuf;
-    idsBuf << "SELECT " << TQ("id") << ',' << TQ("object_type")
-           << " FROM " << TQ(CDS_OBJECT_TABLE)
-           << " WHERE " << TQ("id") << " IN (" << join(*list, ",") << ")";
-
-    auto res = select(idsBuf);
+    auto res = select(fmt::format("SELECT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(*list, ",")));
     if (!res)
         throw_std_runtime_error("sql error");
 
@@ -1543,19 +1486,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 
 void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
 {
-    auto objectIdsStr = join(objectIDs, ',');
-    std::ostringstream sel;
-    sel << "SELECT " << TQD('a', "id") << ',' << TQD('a', "persistent")
-        << ',' << TQD('o', "location")
-        << " FROM " << TQ(AUTOSCAN_TABLE) << " a"
-                                             " JOIN "
-        << TQ(CDS_OBJECT_TABLE) << " o"
-                                   " ON "
-        << TQD('o', "id") << '=' << TQD('a', "obj_id")
-        << " WHERE " << TQD('o', "id")
-        << " IN (" << objectIdsStr << ')';
-
-    log_debug("{}", sel.str());
+    auto sel = fmt::format("SELECT {}, {}, {} FROM {} JOIN {} ON {} = {} WHERE {} IN ({})",
+        asColumnMapper->mapQuoted(AutoscanCol::id), asColumnMapper->mapQuoted(AutoscanCol::persistent), browseColumnMapper->mapQuoted(BrowseCol::location),
+        asColumnMapper->tableQuoted(), browseColumnMapper->tableQuoted(),
+        browseColumnMapper->mapQuoted(BrowseCol::id), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id), fmt::join(objectIDs, ","));
+    log_debug("{}", sel);
 
     beginTransaction("_removeObjects");
     auto res = select(sel);
@@ -1567,12 +1502,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
             bool persistent = remapBool(row->col(1));
             if (persistent) {
                 auto location = stripLocationPrefix(row->col(2));
-                std::ostringstream u;
-                u << "UPDATE " << TQ(AUTOSCAN_TABLE)
-                  << " SET " << TQ("obj_id") << "=" SQL_NULL
-                  << ',' << TQ("location") << '=' << quote(location.string())
-                  << " WHERE " << TQ("id") << '=' << quote(row->col(0));
-                exec(u.str());
+                exec(fmt::format("UPDATE {0}{2}{1} SET {0}obj_id{1} = {3}, {0}location{1} = {4} WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, SQL_NULL, quote(location.string()), quote(row->col(0))));
             } else {
                 delete_as.emplace_back(row->col_c_str(0));
             }
@@ -1580,31 +1510,19 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
         }
 
         if (!delete_as.empty()) {
-            std::ostringstream delAutoscan;
-            delAutoscan << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
-                        << " WHERE " << TQ("id") << " IN ("
-                        << join(delete_as, ',')
-                        << ')';
-            exec(delAutoscan.str());
-            log_debug("deleting autoscans: {}", delAutoscan.str().c_str());
+            auto delAutoscan = fmt::format("DELETE FROM {0}{2}{1} WHERE {0}id{1} IN ({})", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(delete_as, ", "));
+            exec(delAutoscan);
+            log_debug("deleting autoscans: {}", delAutoscan);
         }
     }
 
-    std::ostringstream qObject;
-    qObject << "DELETE FROM " << TQ(CDS_OBJECT_TABLE)
-            << " WHERE " << TQ("id")
-            << " IN (" << objectIdsStr << ')';
-    exec(qObject.str());
+    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(objectIDs, ",")));
     commit("_removeObjects");
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
 {
-    std::ostringstream q;
-    q << "SELECT " << TQ("object_type") << ',' << TQ("ref_id")
-      << " FROM " << TQ(CDS_OBJECT_TABLE)
-      << " WHERE " << TQ("id") << '=' << quote(objectID) << " LIMIT 1";
-    auto res = select(q);
+    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(objectID)));
     if (!res)
         return nullptr;
 
@@ -1641,24 +1559,6 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     bool all)
 {
     log_debug("start");
-    // select statements
-    std::ostringstream itemsSql;
-    itemsSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("parent_id")
-             << " FROM " << TQ(CDS_OBJECT_TABLE)
-             << " WHERE " << TQ("ref_id") << " IN (";
-
-    std::ostringstream containersSql;
-    containersSql << "SELECT DISTINCT " << TQ("id") << ',' << TQ("object_type");
-    if (all) {
-        containersSql << ',' << TQ("ref_id");
-    }
-    containersSql << " FROM " << TQ(CDS_OBJECT_TABLE)
-                  << " WHERE " << TQ("parent_id") << " IN (";
-
-    std::ostringstream parentsSql;
-    parentsSql << "SELECT DISTINCT " << TQ("parent_id")
-               << " FROM " << TQ(CDS_OBJECT_TABLE)
-               << " WHERE " << TQ("id") << " IN (";
 
     ChangedContainers changedContainers;
 
@@ -1670,14 +1570,20 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     std::vector<int32_t> parentIds(items);
     std::vector<int32_t> removeIds(containers);
 
+    // select statements
+    auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto itemSql = fmt::format("SELECT DISTINCT {0}id{1}, {0}parent_id{1} FROM {0}{2}{1} WHERE {0}ref_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto containersSql = (all) //
+        ? fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE) //
+        : fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+
     // collect container for update signals
     if (!containers.empty()) {
         parentIds.insert(parentIds.end(), containers.begin(), containers.end());
-        std::ostringstream sql;
-        sql << parentsSql.str() << join(parentIds, ',') << ')';
+        auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
         res = select(sql);
         if (!res)
-            throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
+            throw DatabaseException("", fmt::format("Sql error: {}", sql));
         parentIds.clear();
         while ((row = res->nextRow())) {
             changedContainers.ui.push_back(std::stoi(row->col(0)));
@@ -1690,11 +1596,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
         if (!parentIds.empty()) {
             // add ids to remove
             removeIds.insert(removeIds.end(), parentIds.begin(), parentIds.end());
-            std::ostringstream sql;
-            sql << parentsSql.str() << join(parentIds, ',') << ')';
+            auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
+                throw DatabaseException("", fmt::format("Sql error: {}", sql));
             parentIds.clear();
             while ((row = res->nextRow())) {
                 changedContainers.upnp.push_back(std::stoi(row->col(0)));
@@ -1703,11 +1608,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
         // collect entries
         if (!itemIds.empty()) {
-            std::ostringstream sql;
-            sql << itemsSql.str() << join(itemIds, ',') << ')';
+            auto sql = fmt::format("{} ({})", itemSql, fmt::join(itemIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
+                throw DatabaseException("", fmt::format("Sql error: {}", sql));
             itemIds.clear();
             while ((row = res->nextRow())) {
                 removeIds.push_back(std::stoi(row->col(0)));
@@ -1717,11 +1621,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
         // collect entries in container
         if (!containerIds.empty()) {
-            std::ostringstream sql;
-            sql << containersSql.str() << join(containerIds, ',') << ')';
+            auto sql = fmt::format("{} ({})", containersSql, fmt::join(containerIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql.str()));
+                throw DatabaseException("", fmt::format("Sql error: {}", sql));
             containerIds.clear();
             while ((row = res->nextRow())) {
                 int objectType = std::stoi(row->col(1));
@@ -1785,7 +1688,6 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
               << " ON " << TQD('a', "id") << '=' << TQD('b', "parent_id")
               << " WHERE " << TQD('a', "object_type") << '=' << quote(1)
               << " AND " << TQD('a', "id") << " IN ("; //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
-    std::string strSel2(") GROUP BY a.id"); // HAVING COUNT(b.parent_id)=0");
 
     std::ostringstream bufSelUpnp;
     bufSelUpnp << selectSql.str();
@@ -1811,10 +1713,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         again = false;
 
         if (!selUpnp.empty()) {
-            std::ostringstream sql;
-            sql << selectSql.str() << join(selUpnp, ',') << strSel2;
-            log_debug("upnp-sql: {}", sql.str().c_str());
-            res = select(sql.str());
+            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUpnp, ','));
+            log_debug("upnp-sql: {}", sql);
+            res = select(sql);
             selUpnp.clear();
             if (!res)
                 throw_std_runtime_error("db error");
@@ -1832,10 +1733,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         }
 
         if (!selUi.empty()) {
-            std::ostringstream sql;
-            sql << selectSql.str() << join(selUi, ',') << strSel2;
-            log_debug("ui-sql: {}", sql.str().c_str());
-            res = select(sql.str());
+            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUi, ','));
+            log_debug("ui-sql: {}", sql);
+            res = select(sql);
             selUi.clear();
             if (!res)
                 throw_std_runtime_error("db error");
@@ -1883,10 +1783,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)
 {
-    std::ostringstream q;
-    q << "SELECT " << TQ("value") << " FROM " << TQ(INTERNAL_SETTINGS_TABLE) << " WHERE " << TQ("key") << '='
-      << quote(key) << " LIMIT 1";
-    auto res = select(q);
+    auto res = select(fmt::format("SELECT {0}value{1} FROM {0}{2}{1} WHERE {0}key{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, INTERNAL_SETTINGS_TABLE, quote(key)));
     if (!res)
         return "";
 
@@ -1899,15 +1796,7 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
 /* config methods */
 std::vector<ConfigValue> SQLDatabase::getConfigValues()
 {
-    std::ostringstream query;
-    query << "SELECT DISTINCT "
-          << TQ("item") << ','
-          << TQ("key") << ','
-          << TQ("item_value") << ','
-          << TQ("status")
-          << " FROM "
-          << TQ(CONFIG_VALUE_TABLE);
-    auto res = select(query);
+    auto res = select(fmt::format("SELECT {0}item{1}, {0}key{1}, {0}item_value{1}, {0}status{1} FROM {0}{2}{1}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE));
     if (!res)
         return {};
 
@@ -1926,13 +1815,11 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
 
 void SQLDatabase::removeConfigValue(const std::string& item)
 {
-    std::ostringstream del;
-    del << "DELETE FROM " << TQ(CONFIG_VALUE_TABLE);
-    if (item != "*") {
-        del << " WHERE " << TQ("item") << '=' << quote(item);
-    }
-    log_info("deleting {} item", item);
-    exec(del.str());
+    auto del = (item == "*") //
+        ? fmt::format("DELETE FROM {0}{2}{1}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE) //
+        : fmt::format("DELETE FROM {0}{2}{1} WHERE {0}item{1} = {3}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item));
+    log_info("Deleting config item '{}'", item);
+    exec(del);
 }
 
 void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
