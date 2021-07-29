@@ -46,7 +46,7 @@ TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, DoesNotAddTerminationCarriageNewLineWhenAlreadyExists)
@@ -63,7 +63,7 @@ TEST_F(HeadersHelperTest, DoesNotAddTerminationCarriageNewLineWhenAlreadyExists)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, MultipleHeaders)
@@ -81,7 +81,7 @@ TEST_F(HeadersHelperTest, MultipleHeaders)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, MultipleHeadersSingleCarriageNewLine)
@@ -102,7 +102,7 @@ TEST_F(HeadersHelperTest, MultipleHeadersSingleCarriageNewLine)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, MultiBothCarriageNewLine)
@@ -123,7 +123,7 @@ TEST_F(HeadersHelperTest, MultiBothCarriageNewLine)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, IgnoresDataAfterFirstCarriageNewLine)
@@ -140,7 +140,7 @@ TEST_F(HeadersHelperTest, IgnoresDataAfterFirstCarriageNewLine)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HeaderIsOnlyLinebreakReturnsEmpty)
@@ -155,7 +155,7 @@ TEST_F(HeadersHelperTest, HeaderIsOnlyLinebreakReturnsEmpty)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HeaderIsEmptyReturnsEmpty)
@@ -170,7 +170,7 @@ TEST_F(HeadersHelperTest, HeaderIsEmptyReturnsEmpty)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HandlesSingleCarriageReturn)
@@ -187,7 +187,7 @@ TEST_F(HeadersHelperTest, HandlesSingleCarriageReturn)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HandlesSingleNewLine)
@@ -204,7 +204,7 @@ TEST_F(HeadersHelperTest, HandlesSingleNewLine)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, EmptyValueNotAdded)
@@ -219,7 +219,7 @@ TEST_F(HeadersHelperTest, EmptyValueNotAdded)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HandlesEmptyString)
@@ -234,7 +234,7 @@ TEST_F(HeadersHelperTest, HandlesEmptyString)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HandlesExtraContent)
@@ -251,7 +251,7 @@ TEST_F(HeadersHelperTest, HandlesExtraContent)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 
 TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
@@ -268,6 +268,6 @@ TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
 
     // assert
     auto actual = Headers::readHeaders(info);
-    EXPECT_EQ(*actual, expected);
+    EXPECT_EQ(actual, expected);
 }
 #endif
