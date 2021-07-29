@@ -294,7 +294,7 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 }
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 
-std::string toCSV(const std::unique_ptr<std::unordered_set<int>>& array);
+std::string toCSV(const std::unordered_set<int>& array);
 
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();

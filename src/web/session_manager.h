@@ -106,7 +106,7 @@ protected:
     /// the UI shall update every container
     bool updateAll {};
 
-    std::unique_ptr<std::unordered_set<int>> uiUpdateIDs;
+    std::unordered_set<int> uiUpdateIDs;
 
     /// \brief maximum time the session can be idle (starting from last_access)
     std::chrono::seconds timeout;
