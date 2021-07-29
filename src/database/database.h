@@ -216,7 +216,7 @@ public:
     /// \param size number of entries in the given array
     /// \return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
-    virtual std::string incrementUpdateIDs(const std::unique_ptr<std::unordered_set<int>>& ids) = 0;
+    virtual std::string incrementUpdateIDs(const std::unordered_set<int>& ids) = 0;
 
     /* utility methods */
     virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
