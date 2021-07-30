@@ -137,7 +137,7 @@ void web::edit_load::process()
 
         resEntry = resources.append_child("resources");
         resEntry.append_attribute("resname") = "handlerType";
-        resEntry.append_attribute("resvalue") = fmt::to_string(MetadataHandler::mapContentHandler2String(resItem->getHandlerType())).c_str();
+        resEntry.append_attribute("resvalue") = MetadataHandler::mapContentHandler2String(resItem->getHandlerType()).c_str();
         resEntry.append_attribute("editable") = false;
 
         // write resource content

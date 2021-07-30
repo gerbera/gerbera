@@ -225,7 +225,7 @@ int MetadataHandler::remapContentHandler(const std::string& contHandler)
     return -1;
 }
 
-const char* MetadataHandler::mapContentHandler2String(int ch)
+std::string MetadataHandler::mapContentHandler2String(int ch)
 {
     auto ch_entry = std::find_if(ch_keys.begin(), ch_keys.end(), [ch](auto&& entry) { return ch == entry.first; });
     if (ch_entry != ch_keys.end()) {

@@ -217,7 +217,7 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) = 0;
     virtual std::string getMimeType();
 
-    static const char* mapContentHandler2String(int ch);
+    static std::string mapContentHandler2String(int ch);
     static int remapContentHandler(const std::string& contHandler);
 };
 
