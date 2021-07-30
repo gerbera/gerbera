@@ -57,7 +57,7 @@ static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size
     }
 }
 
-static const std::map<std::string, int> exifTagMap {
+static auto exifTagMap = std::map<std::string, int> {
     { "EXIF_TAG_INTEROPERABILITY_INDEX", EXIF_TAG_INTEROPERABILITY_INDEX },
     { "EXIF_TAG_INTEROPERABILITY_VERSION", EXIF_TAG_INTEROPERABILITY_VERSION },
     { "EXIF_TAG_IMAGE_WIDTH", EXIF_TAG_IMAGE_WIDTH },
@@ -165,7 +165,7 @@ static const std::map<std::string, int> exifTagMap {
 
 static int getTagFromString(const std::string& tag)
 {
-    auto result = getValueOrDefault(exifTagMap, tag, -1);
+    auto result = getValueOrDefault(std::move(exifTagMap), tag, -1);
 
     if (result == -1)
         log_warning("Ignoring unknown libexif tag: {}", tag.c_str());
