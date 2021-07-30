@@ -1713,7 +1713,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         again = false;
 
         if (!selUpnp.empty()) {
-            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUpnp, ','));
+            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUpnp, ","));
             log_debug("upnp-sql: {}", sql);
             res = select(sql);
             selUpnp.clear();
@@ -1733,7 +1733,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         }
 
         if (!selUi.empty()) {
-            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUi, ','));
+            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUi, ","));
             log_debug("ui-sql: {}", sql);
             res = select(sql);
             selUi.clear();
