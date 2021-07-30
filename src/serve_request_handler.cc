@@ -87,7 +87,7 @@ void ServeRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         } else {
             UpnpFileInfo_set_IsReadable(info, 0);
         }
-#ifdef WITH_NPUPNP
+#ifdef USING_NPUPNP
         info->content_type = std::move(mimetype);
 #else
         UpnpFileInfo_set_ContentType(info, mimetype.c_str());
