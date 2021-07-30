@@ -1,5 +1,158 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.9.0
+
+- fix wrong define
+- use auto instead of const char*
+- move several variables down
+- unique_ptr removals
+- getTimespecAfterMillis: return ret instead of void
+- Generate namespace attributes required for properties
+- replace reference parameter with std::pair
+- clang-tidy 8 fixes
+- Allow setting resource order
+- remove pointless {}
+- use map.emplace
+- remove some = {}
+- use thread constructor
+- Re-add CI check with clang
+- Send container updates
+- fixup lambda for C++20 compatibility
+- lastfm: switch to C++ API
+- move make_unique down
+- use move with shared_ptr
+- make uiUpdateIDs a unique_ptr
+- remove pointless const_cast
+- Factor out transactions to reduce overhead when disabled
+- Fix X_GetFeatureList (Samsung)
+- some move
+- move make_shared outside of initializer list
+- switch xmlDoc to unique_ptr
+- remove ret variable
+- lambda conversion
+- more unique_ptr
+- some CTAD
+- remove pointless temporary
+- small cleanups
+- Add more documentation and cleanup SQL init code
+- remove wrong static
+- Move resources to separate table
+- several string_view conversions
+- convert expandName to string_view
+- Add link to database doc
+- Add migration hook to version update
+- Automatically load options
+- use make_pair in std::array
+- remove std from std::next
+- remove aslowercase
+- pass by value
+- Add DLNA profiles strings and visible file system directories to configuration
+- don't default assign nullptr to smart pointers
+- add missing const
+- remove == nullptr
+- Add ProductCap to please Samsung TVs
+- simplify pidfile write
+- Move db upgrade commands to config file
+- clang-tidy: remove implicit bool conversions
+- Add codec info to resource data
+- Subtitle: Add resouce and CaptionInfoEx
+- remove pointless constructor
+- clang-tidy: don't use else after return
+- several constructor changes
+- static
+- change length parameter to size_t
+- add missing header
+- Implement EnumIterator
+- SQLDatabase: Refactor init and upgrade
+- const member function conversions
+- clang-tidy: add missing functions
+- add a missing this->
+- pass 0 to std::unordered_
+- replace std::list with std::vector
+- remove manual loop
+- remove pointless find
+- small lambda conversion
+- Regression: Samsung Compatibility
+- switch to C++ ffmpegthumbnailer API
+- cosmetic map changes
+- remove two pointless unique_ptrs
+- declare AVFormatContext as struct
+- default init some members
+- Fix MySQL migration
+- switch several for loops to use size_t
+- replace POSIX file stuff with C
+- Implemement dynamic containers
+- small error handle
+- replace several usages of format with to_string
+- remove several {}
+- don't throw in noexcept destructors
+- Fix lastfm compilation
+- use make_pair
+- use a unique_ptr in lambda
+- nppnp changes
+- Close memory leak by duplicate call to ixmlCloneDOMString
+- replace rand with std::random
+- server: default init some variables
+- fix std::accumulate
+- add missing default initialization
+- default initialize some io stuff
+- add missing close
+- add missing nullptr check
+- default initialize members in mysql
+- Simplify and cleanup
+- string ref to string_view conversion
+- Cleanup exifhandler
+- Assign clientInfo in a default constructor
+- pass by value and std::move
+- use sizeof for snprintf
+- Add configuration option for SopCast mimetypes
+- fix replace string functions
+- lambda conversion
+- clang-tidy: remove redundant specifiers
+- clang-tidy: use auto
+- clang-tidy: simplify boolean expression
+- Configuration of folders for resources
+- remove const so move can be used
+- replace const static with static const
+- default member init
+- use std::replace instead of replaceAllString
+- replace stringHash with single accumulate call
+- remove pointless blank lines
+- match else and if blocks
+- remove duplicate include
+- use raw strings for multi line ones
+- Dockerfile: add tzdata
+- more make_unique changes
+- make bultinClientInfo constexpr
+- add m4a support for taglib
+- add back several defaulted destructors
+- avoid unused template warning
+- clang: add missing move
+- default init some members
+- Cleanup legacy code
+- Clean up a bit
+- Cppcheck
+- Add documentation and template for Apache/NGinx as reverse proxy
+- Fix script syntax
+- clang-tidy applied to tests
+- Add build for ubuntu 21.04 hirsute hippo
+- create-config: Reset config dir to empty if not in command line
+- TagLib: Add support for aux data to all supported media types
+- Haiku patches
+- clangh-tidy: non const reference removal
+- manual structured binding conversions
+- clang-tidy: pass unique_ptr by value
+- clang-tidy: get rid of some long and short
+- clang-tidy: fix some narrowing conversions
+- clang-tidy: use auto&& to avoid warning
+- clang-tidy: C to C++ headers
+- clang-tidy: initialize some members
+- Refactor SearchHandler to use ColumnMapper instead of hard coded texts.
+- mostly unique_ptr changes
+- move some initializations up
+- Revert "initialize several unique_ptrs"
+- initialize several unique_ptrs
+
 ### v1.8.2
 
 - Disable transactions by default
