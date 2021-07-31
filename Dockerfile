@@ -36,6 +36,7 @@ COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
 COPY --from=builder /gerbera_build/scripts/js /usr/local/share/gerbera/js
 COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
 COPY --from=builder /gerbera_build/src/database/*/*.sql /usr/local/share/gerbera/
+COPY --from=builder /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
 
 COPY scripts/docker/docker-entrypoint.sh /usr/local/bin
 
