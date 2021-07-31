@@ -38,7 +38,7 @@
 #include "request_handler.h"
 #include "transcoding/transcoding.h"
 
-std::vector<int> UpnpXMLBuilder::orderedHandler = {};
+static std::vector<int> orderedHandler;
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)

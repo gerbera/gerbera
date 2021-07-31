@@ -99,8 +99,6 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    static std::vector<int> orderedHandler;
-
     const std::string virtualURL;
     const std::string presentationURL;
 
