@@ -694,8 +694,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (!asSetting.followSymlinks && dirEnt.is_symlink()) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
-                if (list)
-                    list->erase(objectID);
+                list.erase(objectID);
                 removeObject(adir, objectID, false);
             }
             log_debug("link {} skipped", newPath.c_str());
@@ -711,8 +710,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (isRegularFile(dirEnt, ec)) {
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
-                if (list)
-                    list->erase(objectID);
+                list.erase(objectID);
 
                 // check modification time and update file if chagned
                 if (last_modified_current_max < lwt) {
@@ -746,8 +744,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 last_modified_new_max = lwt;
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
-                if (list)
-                    list->erase(objectID);
+                list.erase(objectID);
                 // add a task to rescan the directory that was found
                 rescanDirectory(adir, objectID, newPath, task->isCancellable());
             } else {
@@ -786,7 +783,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     if ((shutdownFlag) || ((task) && !task->isValid())) {
         return;
     }
-    if (list && !list->empty()) {
+    if (!list.empty()) {
         auto changedContainers = database->removeObjects(list);
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
