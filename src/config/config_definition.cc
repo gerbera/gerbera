@@ -237,6 +237,7 @@ static std::map<std::string, std::string> ext_mt_defaults {
     { "flv", "video/x-flv" },
     { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
     { "m3u", "audio/x-mpegurl" },
+    { "m3u8", "audio/x-mpegurl" },
     { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
     { "mka", "audio/x-matroska" },
     { "mkv", "video/x-matroska" },

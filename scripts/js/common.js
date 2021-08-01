@@ -876,6 +876,11 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
     var line = readln();
     var playlistOrder = 1;
 
+    // Remove a BOM if there is one
+    if (line.charCodeAt(0) === 0xFEFF) {
+        line = line.substr(1);
+    }
+
     // Here is the do - while loop which will read the playlist line by line.
     do {
         var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);

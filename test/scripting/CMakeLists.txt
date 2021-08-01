@@ -11,6 +11,7 @@ add_executable(testscripting
     test_import_script.cc
     test_import_struct_script.cc
     test_internal_m3u_playlist.cc
+    test_internal_m3u8_playlist.cc
     test_internal_pls_playlist.cc
     test_runtime.cc
 )
