@@ -46,7 +46,7 @@ public:
     {
     }
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     void parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const;
