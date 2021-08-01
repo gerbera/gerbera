@@ -299,7 +299,7 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
 /// \param obj Object to stream
 /// \param resNum number of resource
 /// \return iohandler to stream to client
-std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item) // not streamable

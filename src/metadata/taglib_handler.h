@@ -57,7 +57,7 @@ public:
     /// \param obj Object to stream
     /// \param resNum number of resource
     /// \return iohandler to stream to client
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     std::string entrySeparator;

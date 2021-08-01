@@ -214,7 +214,7 @@ public:
     /// \param obj Object to stream
     /// \param resNum number of resource
     /// \return iohandler to stream to client
-    virtual std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) = 0;
     virtual std::string getMimeType();
 
     static std::string mapContentHandler2String(int ch);

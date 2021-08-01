@@ -191,7 +191,7 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> FanArtHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     fs::path path = obj->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
@@ -242,7 +242,7 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     fs::path path = obj->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
@@ -300,7 +300,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> SubtitleHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     fs::path path = obj->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
@@ -345,7 +345,7 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> ResourceHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     fs::path path = obj->getResource(resNum)->getAttribute(R_RESOURCE_FILE);
     if (path.empty()) {
