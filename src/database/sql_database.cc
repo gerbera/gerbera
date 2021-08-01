@@ -1073,7 +1073,7 @@ int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, bool wasRegularFil
     return obj->getID();
 }
 
-int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
+int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer)
 {
     if (changedContainer)
         *changedContainer = INVALID_OBJECT_ID;

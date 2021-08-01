@@ -189,7 +189,7 @@ public:
     int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
-    int ensurePathExistence(fs::path path);
+    int ensurePathExistence(const fs::path& path);
     void removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.

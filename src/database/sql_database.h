@@ -168,7 +168,7 @@ public:
     void shutdown() override;
     virtual void shutdownDriver() = 0;
 
-    int ensurePathExistence(fs::path path, int* changedContainer) override;
+    int ensurePathExistence(const fs::path& path, int* changedContainer) override;
 
     std::string getFsRootName() override;
     static std::string getSortCapabilities();
