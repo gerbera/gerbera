@@ -202,14 +202,14 @@ public:
     /// \param path the path of the object; object is interpreted as directory
     /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
     /// \return the CdsObject
-    virtual std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
     /// \param path the path of the object; object is interpreted as directory
     /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
     /// \return the obejectID
-    virtual int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) = 0;
+    virtual int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) = 0;
 
     /// \brief increments the updateIDs for the given objectIDs
     /// \param ids pointer to the array of ids
@@ -296,7 +296,7 @@ public:
     ///
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
-    virtual int ensurePathExistence(fs::path path, int* changedContainer) = 0;
+    virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 
     /// \brief clears the given flag in all objects in the DB
     virtual void clearFlagInDB(int flag) = 0;

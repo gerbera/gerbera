@@ -30,8 +30,8 @@ public:
     std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
 
     std::vector<std::string> getMimeTypes() override { return std::vector<std::string>(); }
-    std::shared_ptr<CdsObject> findObjectByPath(fs::path path, bool wasRegularFile = false) override { return nullptr; }
-    int findObjectIDByPath(fs::path fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return nullptr; }
+    int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
@@ -67,7 +67,7 @@ public:
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override { }
 
     std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override { return nullptr; }
-    int ensurePathExistence(fs::path path, int* changedContainer) override { return 0; }
+    int ensurePathExistence(const fs::path& path, int* changedContainer) override { return 0; }
 
     void clearFlagInDB(int flag) override { }
     std::string getFsRootName() override { return ""; }

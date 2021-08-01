@@ -1022,14 +1022,14 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool wasRegularFile)
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, bool wasRegularFile)
 {
-    std::string dbLocation;
-    std::error_code ec;
-    if (isRegularFile(fullpath, ec) || wasRegularFile)
-        dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-    else
-        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+    std::string dbLocation = [&fullpath, wasRegularFile] {
+        std::error_code ec;
+        if (isRegularFile(fullpath, ec) || wasRegularFile)
+            return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+        return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+    }();
 
     auto where = std::vector<std::string> {
         fmt::format("{} = {}", TQBM(BrowseCol::location_hash), quote(stringHash(dbLocation))),
@@ -1055,7 +1055,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
     return result;
 }
 
-int SQLDatabase::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
+int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile)
 {
     auto obj = findObjectByPath(fullpath, wasRegularFile);
     if (!obj)
@@ -1063,7 +1063,7 @@ int SQLDatabase::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
     return obj->getID();
 }
 
-int SQLDatabase::ensurePathExistence(fs::path path, int* changedContainer)
+int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer)
 {
     if (changedContainer)
         *changedContainer = INVALID_OBJECT_ID;

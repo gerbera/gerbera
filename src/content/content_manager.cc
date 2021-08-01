@@ -548,10 +548,10 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
     // loadAccounting();
 }
 
-int ContentManager::ensurePathExistence(fs::path path)
+int ContentManager::ensurePathExistence(const fs::path& path)
 {
     int updateID;
-    int containerID = database->ensurePathExistence(std::move(path), &updateID);
+    int containerID = database->ensurePathExistence(path, &updateID);
     if (updateID != INVALID_OBJECT_ID) {
         update_manager->containerChanged(updateID);
         session_manager->containerChangedUI(updateID);
