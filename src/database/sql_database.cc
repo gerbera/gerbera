@@ -1032,14 +1032,14 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool wasRegularFile)
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, bool wasRegularFile)
 {
-    std::string dbLocation;
-    std::error_code ec;
-    if (isRegularFile(fullpath, ec) || wasRegularFile)
-        dbLocation = addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-    else
-        dbLocation = addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+    std::string dbLocation = [&fullpath, wasRegularFile] {
+        std::error_code ec;
+        if (isRegularFile(fullpath, ec) || wasRegularFile)
+            return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+        return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+    }();
 
     std::ostringstream qb;
     qb << sql_browse_query
@@ -1065,7 +1065,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(fs::path fullpath, bool
     return result;
 }
 
-int SQLDatabase::findObjectIDByPath(fs::path fullpath, bool wasRegularFile)
+int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile)
 {
     auto obj = findObjectByPath(fullpath, wasRegularFile);
     if (!obj)
