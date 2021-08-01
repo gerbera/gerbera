@@ -296,7 +296,7 @@ public:
     ///
     /// \param *changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
-    virtual int ensurePathExistence(fs::path path, int* changedContainer) = 0;
+    virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 
     /// \brief clears the given flag in all objects in the DB
     virtual void clearFlagInDB(int flag) = 0;
