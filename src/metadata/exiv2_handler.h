@@ -41,7 +41,7 @@ public:
         : MetadataHandler(context)
     {
     }
-    void fillMetadata(std::shared_ptr<CdsObject> item) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& item) override;
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> item, int resNum) override;
 };
 

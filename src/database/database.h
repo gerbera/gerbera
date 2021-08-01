@@ -286,7 +286,7 @@ public:
     virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
-    virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) = 0;
+    virtual void checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
 
     virtual std::vector<int> getPathIDs(int objectID) = 0;
 

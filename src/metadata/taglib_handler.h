@@ -51,7 +51,7 @@ public:
 
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
 
     /// \brief stream content of object or resource to client
     /// \param obj Object to stream

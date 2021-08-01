@@ -91,7 +91,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
     return doc;
 }
 
-bool CurlOnlineService::refreshServiceData(std::shared_ptr<Layout> layout)
+bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout)
 {
     log_debug("Refreshing {}", serviceName);
     // the layout is in full control of the service items
