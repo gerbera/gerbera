@@ -245,13 +245,13 @@ public:
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nullptr if there are none!
-    virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) = 0;
+    virtual std::unordered_set<int> getObjects(int parentID, bool withoutContainer) = 0;
 
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
     virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) = 0;

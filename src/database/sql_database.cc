@@ -1484,7 +1484,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     return join(rows, ",");
 }
 
-std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, bool withoutContainer)
+std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContainer)
 {
     std::ostringstream q;
     q << "SELECT " << TQ("id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
@@ -1496,31 +1496,31 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     if (!res)
         throw_std_runtime_error("db error");
     if (res->getNumRows() == 0)
-        return nullptr;
+        return {};
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         ret.insert(std::stoi(row->col(0)));
     }
-    return std::make_unique<std::unordered_set<int>>(std::move(ret));
+    return ret;
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
-    size_t count = list->size();
+    size_t count = list.size();
     if (count <= 0)
         return nullptr;
 
-    auto it = std::find_if(list->begin(), list->end(), IS_FORBIDDEN_CDS_ID);
-    if (it != list->end()) {
+    auto it = std::find_if(list.begin(), list.end(), IS_FORBIDDEN_CDS_ID);
+    if (it != list.end()) {
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
     }
 
     std::ostringstream idsBuf;
     idsBuf << "SELECT " << TQ("id") << ',' << TQ("object_type")
            << " FROM " << TQ(CDS_OBJECT_TABLE)
-           << " WHERE " << TQ("id") << " IN (" << join(*list, ",") << ")";
+           << " WHERE " << TQ("id") << " IN (" << join(list, ",") << ")";
 
     auto res = select(idsBuf);
     if (!res)

@@ -38,8 +38,8 @@ public:
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return nullptr; }
-    std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override { return nullptr; }
-    std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override { return nullptr; }
+    std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override { return {}; }
+    std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return nullptr; }
     std::vector<int> getServiceObjectIDs(char servicePrefix) override { return {}; }

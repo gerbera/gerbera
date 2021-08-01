@@ -123,10 +123,10 @@ public:
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
 
-    std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) override;
+    std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
-    std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override;
+    std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override;
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override;
     std::vector<int> getServiceObjectIDs(char servicePrefix) override;
