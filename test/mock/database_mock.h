@@ -66,7 +66,7 @@ public:
     void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override { }
 
-    std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override { return nullptr; }
+    std::vector<int> getPathIDs(int objectID) override { return {}; }
     int ensurePathExistence(const fs::path& path, int* changedContainer) override { return 0; }
 
     void clearFlagInDB(int flag) override { }

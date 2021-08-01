@@ -2169,7 +2169,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
       << quote(adir->getPreviousLMT().count()) << ','
       << mapBool(adir->persistent()) << ','
       << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
-      << (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
+      << (pathIds.empty() ? SQL_NULL : quote("," + toCSV(pathIds) + ','))
       << ')';
     adir->setDatabaseID(exec(q.str(), true));
 }
@@ -2203,7 +2203,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT().count());
     q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
       << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
-      << ',' << TQ("path_ids") << '=' << (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
+      << ',' << TQ("path_ids") << '=' << (pathIds.empty() ? SQL_NULL : quote("," + toCSV(pathIds) + ','))
       << ',' << TQ("touched") << '=' << mapBool(true)
       << " WHERE " << TQ("id") << '=' << quote(adir->getDatabaseID());
     exec(q.str());
@@ -2261,13 +2261,13 @@ void SQLDatabase::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> a
     (void)_checkOverlappingAutoscans(adir);
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
+std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
         throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
     int databaseID = adir->getDatabaseID();
 
     std::unique_ptr<SQLRow> row;
@@ -2321,13 +2321,11 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
 
     {
         auto pathIDs = getPathIDs(checkObjectID);
-        if (!pathIDs)
-            throw_std_runtime_error("getPathIDs returned nullptr");
         std::ostringstream qPath;
         qPath << "SELECT " << TQ("obj_id")
               << " FROM " << TQ(AUTOSCAN_TABLE)
               << " WHERE " << TQ("obj_id") << " IN ("
-              << toCSV(*pathIDs)
+              << toCSV(pathIDs)
               << ") AND " << TQ("recursive") << '=' << mapBool(true);
         if (databaseID >= 0)
             qPath << " AND " << TQ("id") << " != " << quote(databaseID);
@@ -2349,10 +2347,10 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
     throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
+std::vector<int> SQLDatabase::getPathIDs(int objectID)
 {
     if (objectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
 
     std::ostringstream sel;
     sel << "SELECT " << TQ("parent_id") << " FROM " << TQ(CDS_OBJECT_TABLE) << " WHERE ";
@@ -2370,7 +2368,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
             break;
         objectID = std::stoi(row->col(0));
     }
-    return std::make_unique<std::vector<int>>(pathIDs);
+    return pathIDs;
 }
 
 std::string SQLDatabase::getFsRootName()
