@@ -180,6 +180,7 @@ public:
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     void init() override;
+    int insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();

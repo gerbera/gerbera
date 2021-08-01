@@ -811,18 +811,17 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
         // order by code..
         auto orderByCode = [&]() {
-            std::ostringstream orderQb;
+            std::string orderQb;
             if (param->getFlag(BROWSE_TRACK_SORT)) {
-                orderQb << TQBM(BrowseCol::part_number) << ',';
-                orderQb << TQBM(BrowseCol::track_number);
+                orderQb = fmt::format("{},{}", TQBM(BrowseCol::part_number), TQBM(BrowseCol::track_number));
             } else {
                 SortParser sortParser(browseColumnMapper, param->getSortCriteria());
-                orderQb << sortParser.parse();
+                orderQb = sortParser.parse();
             }
-            if (orderQb.str().empty()) {
-                orderQb << TQBM(BrowseCol::dc_title);
+            if (orderQb.empty()) {
+                orderQb = TQBM(BrowseCol::dc_title);
             }
-            return orderQb.str();
+            return orderQb;
         };
 
         if (!getContainers && !getItems) {
@@ -1095,54 +1094,51 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
-    std::ostringstream qb;
-    qb << "INSERT INTO "
-       << TQ(CDS_OBJECT_TABLE)
-       << " ("
-       << TQ("parent_id") << ','
-       << TQ("object_type") << ','
-       << TQ("upnp_class") << ','
-       << TQ("dc_title") << ','
-       << TQ("location") << ','
-       << TQ("location_hash") << ','
-       << TQ("ref_id") << ") VALUES ("
-       << parentID << ','
-       << OBJECT_TYPE_CONTAINER << ','
-       << (!upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)) << ','
-       << quote(std::move(name)) << ','
-       << quote(dbLocation) << ','
-       << quote(stringHash(dbLocation)) << ',';
-    if (refID > 0) {
-        qb << refID;
-    } else {
-        qb << SQL_NULL;
-    }
-    qb << ')';
+    std::vector<std::string> fields {
+        fmt::format("{}parent_id{}", table_quote_begin, table_quote_end),
+        fmt::format("{}object_type{}", table_quote_begin, table_quote_end),
+        fmt::format("{}upnp_class{}", table_quote_begin, table_quote_end),
+        fmt::format("{}dc_title{}", table_quote_begin, table_quote_end),
+        fmt::format("{}location{}", table_quote_begin, table_quote_end),
+        fmt::format("{}location_hash{}", table_quote_begin, table_quote_end),
+        fmt::format("{}ref_id{}", table_quote_begin, table_quote_end),
+    };
+    std::vector<std::string> values {
+        fmt::format("{}", parentID),
+        fmt::format("{}", OBJECT_TYPE_CONTAINER),
+        fmt::format("{}", !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)),
+        quote(std::move(name)),
+        quote(dbLocation),
+        quote(stringHash(dbLocation)),
+        (refID > 0) ? fmt::format("{}", refID) : fmt::format("{}", SQL_NULL),
+    };
 
     beginTransaction("createContainer");
-    int newId = exec(qb.str(), true); // true = get last id#
+    int newId = insert(CDS_OBJECT_TABLE, fields, values, true); // true = get last id#
     log_debug("Created object row, id: {}", newId);
 
     if (!itemMetadata.empty()) {
         for (auto&& [key, val] : itemMetadata) {
-            std::ostringstream ib;
-            ib << "INSERT INTO "
-               << TQ(METADATA_TABLE)
-               << " ("
-               << TQ("item_id") << ','
-               << TQ("property_name") << ','
-               << TQ("property_value") << ") VALUES ("
-               << newId << ","
-               << quote(key) << ","
-               << quote(val)
-               << ")";
-            exec(ib.str());
+            std::vector<std::string> mfields {
+                fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
+            };
+            std::vector<std::string> mvalues {
+                fmt::format("{}", newId),
+                quote(key),
+                quote(val),
+            };
+            insert(METADATA_TABLE, mfields, mvalues);
         }
         log_debug("Wrote metadata for cds_object {}", newId);
     }
     commit("createContainer");
 
     return newId;
+}
+
+int SQLDatabase::insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId)
+{
+    return exec(fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ","), fmt::join(values, ",")));
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -1825,31 +1821,22 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 {
     auto res = select(fmt::format("SELECT {0}item{1} FROM {0}{2}{1} WHERE {0}item{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item)));
     if (!res || !res->nextRow()) {
-        std::ostringstream insert;
-        insert << "INSERT INTO "
-               << TQ(CONFIG_VALUE_TABLE)
-               << " ("
-               << TQ("item") << ','
-               << TQ("key") << ','
-               << TQ("item_value") << ','
-               << TQ("status")
-               << ") VALUES ("
-               << quote(item) << ','
-               << quote(key) << ','
-               << quote(value) << ','
-               << quote(status)
-               << ')';
-        exec(insert.str());
+        std::vector<std::string> fields {
+            fmt::format("{}item{}", table_quote_begin, table_quote_end),
+            fmt::format("{}key{}", table_quote_begin, table_quote_end),
+            fmt::format("{}item_value{}", table_quote_begin, table_quote_end),
+            fmt::format("{}status{}", table_quote_begin, table_quote_end),
+        };
+        std::vector<std::string> values {
+            quote(item),
+            quote(key),
+            quote(value),
+            quote(status),
+        };
+        insert(CONFIG_VALUE_TABLE, fields, values);
         log_debug("inserted for {} as {} {}", key, item, value);
     } else {
-        std::ostringstream update;
-        update << "UPDATE "
-               << TQ(CONFIG_VALUE_TABLE)
-               << " SET "
-               << TQ("item_value") << '=' << quote(value)
-               << " WHERE "
-               << TQ("item") << '=' << quote(item);
-        exec(update.str());
+        exec(fmt::format("UPDATE {0}{2}{1} SET {0}item_value{1} = {3} WHERE {0}item{1} = {4}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(value), quote(item)));
         log_debug("updated for {} as {} {}", key, item, value);
     }
 }
@@ -2008,31 +1995,31 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 
     _autoscanChangePersistentFlag(objectID, true);
 
-    std::ostringstream q;
-    q << "INSERT INTO " << TQ(AUTOSCAN_TABLE)
-      << " (" << TQ("obj_id") << ','
-      << TQ("scan_level") << ','
-      << TQ("scan_mode") << ','
-      << TQ("recursive") << ','
-      << TQ("hidden") << ','
-      << TQ("interval") << ','
-      << TQ("last_modified") << ','
-      << TQ("persistent") << ','
-      << TQ("location") << ','
-      << TQ("path_ids")
-      << ") VALUES ("
-      << (objectID >= 0 ? quote(objectID) : SQL_NULL) << ','
-      << quote("full") << ','
-      << quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) << ','
-      << mapBool(adir->getRecursive()) << ','
-      << mapBool(adir->getHidden()) << ','
-      << quote(adir->getInterval().count()) << ','
-      << quote(adir->getPreviousLMT().count()) << ','
-      << mapBool(adir->persistent()) << ','
-      << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())) << ','
-      << (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
-      << ')';
-    adir->setDatabaseID(exec(q.str(), true));
+    std::vector<std::string> fields {
+        fmt::format("{}obj_id{}", table_quote_begin, table_quote_end),
+        fmt::format("{}scan_level{}", table_quote_begin, table_quote_end),
+        fmt::format("{}scan_mode{}", table_quote_begin, table_quote_end),
+        fmt::format("{}recursive{}", table_quote_begin, table_quote_end),
+        fmt::format("{}hidden{}", table_quote_begin, table_quote_end),
+        fmt::format("{}interval{}", table_quote_begin, table_quote_end),
+        fmt::format("{}last_modified{}", table_quote_begin, table_quote_end),
+        fmt::format("{}persistent{}", table_quote_begin, table_quote_end),
+        fmt::format("{}location{}", table_quote_begin, table_quote_end),
+        fmt::format("{}path_ids{}", table_quote_begin, table_quote_end),
+    };
+    std::vector<std::string> values {
+        (objectID >= 0 ? quote(objectID) : SQL_NULL),
+        quote("full"),
+        quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
+        mapBool(adir->getRecursive()),
+        mapBool(adir->getHidden()),
+        quote(adir->getInterval().count()),
+        quote(adir->getPreviousLMT().count()),
+        mapBool(adir->persistent()),
+        (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
+        (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ',')),
+    };
+    adir->setDatabaseID(insert(AUTOSCAN_TABLE, fields, values, true));
 }
 
 void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
@@ -2387,6 +2374,7 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
     auto dict = addUpdateTable->getDict();
 
     std::vector<std::string> fields;
+    fields.reserve(dict.size());
     for (auto&& [field, value] : dict) {
         fields.push_back(fmt::format("{0}{2}{1} = {3}", table_quote_begin, table_quote_end, field, value));
     }
@@ -2483,7 +2471,7 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
                 fmt::format("{}", key),
                 fmt::format("{}", val),
             };
-            exec(fmt::format("INSERT INTO {0}{2}{1} ({}) VALUES ({})", METADATA_TABLE, fmt::join(fields, ","), fmt::join(values, ",")));
+            insert(METADATA_TABLE, fields, values);
         }
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", objectId);
@@ -2582,7 +2570,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 fields.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, key));
                 values.push_back(fmt::format("{}", val));
             }
-            exec(fmt::format("INSERT INTO {}{}{} ({}) VALUES ({})", table_quote_begin, RESOURCE_TABLE, table_quote_end, fmt::join(fields, ","), fmt::join(values, ",")));
+            insert(RESOURCE_TABLE, fields, values);
             res_id++;
         }
     } else {
