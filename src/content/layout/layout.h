@@ -47,7 +47,7 @@ public:
     explicit Layout(std::shared_ptr<ContentManager> content);
     virtual ~Layout() = default;
 
-    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, fs::path rootpath) = 0;
+    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath) = 0;
 
 protected:
     std::shared_ptr<Config> config;
