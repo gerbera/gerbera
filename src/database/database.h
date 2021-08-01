@@ -259,7 +259,7 @@ public:
     /// \brief Return an array of object ID's for a particular service.
     ///
     /// In the database, the service is identified by a service id prefix.
-    virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) = 0;
+    virtual std::vector<int> getServiceObjectIDs(char servicePrefix) = 0;
 
     /* accounting methods */
     virtual int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") = 0;
