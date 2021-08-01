@@ -2256,7 +2256,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
     exec(q.str());
 }
 
-void SQLDatabase::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
+void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     (void)_checkOverlappingAutoscans(adir);
 }

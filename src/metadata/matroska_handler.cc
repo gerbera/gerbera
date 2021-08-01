@@ -115,7 +115,7 @@ public:
     }
 };
 
-void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)

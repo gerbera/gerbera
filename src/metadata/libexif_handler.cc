@@ -236,7 +236,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
     }
 }
 
-void LibExifHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)

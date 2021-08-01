@@ -169,7 +169,7 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void FanArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     log_debug("Running fanart handler on {}", obj->getLocation().c_str());
     auto pathList = setup->getContentPath(obj, SETTING_FANART);
@@ -217,7 +217,7 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     }
 }
 
-void ContainerArtHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
     if (pathList.empty() || pathList[0].empty()) {
@@ -271,7 +271,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void SubtitleHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_SUBTITLE);
 
@@ -326,7 +326,7 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void ResourceHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_RESOURCE);
 
