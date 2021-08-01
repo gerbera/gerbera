@@ -459,7 +459,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
                 value = urlUnescape(value);
             }
 
-            dict->insert(std::pair(key, value));
+            dict->emplace(key, value);
         }
         data = ampPos + 1;
     }
@@ -487,7 +487,7 @@ void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* 
         std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
         last_pos = pos + 1;
 
-        dict->insert(std::pair(key, value));
+        dict->emplace(key, value);
     } while (last_pos < url.length());
 }
 

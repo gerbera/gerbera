@@ -69,7 +69,7 @@ std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx
             duk_pop(ctx);
         }
         if (!val.empty()) {
-            objValues.insert(make_pair(key, val));
+            objValues.emplace(key, val);
         }
     }
     return objValues;
