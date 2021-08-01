@@ -42,7 +42,7 @@ public:
     std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) override { return nullptr; }
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return nullptr; }
-    std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) override { return nullptr; }
+    std::vector<int> getServiceObjectIDs(char servicePrefix) override { return {}; }
 
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
 

@@ -1508,7 +1508,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
         std::chrono::seconds last = {};
         std::string temp;
 
-        for (int object_id : *ids) {
+        for (int object_id : ids) {
             auto obj = database->loadObject(object_id);
             if (!obj)
                 continue;

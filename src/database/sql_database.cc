@@ -743,7 +743,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     return nullptr;
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char servicePrefix)
+std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
     std::ostringstream qb;
     qb << "SELECT " << TQ("id")
@@ -763,7 +763,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
         objectIDs.push_back(std::stoi(row->col(0)));
     }
 
-    return std::make_unique<std::vector<int>>(objectIDs);
+    return objectIDs;
 }
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
