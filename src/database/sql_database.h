@@ -163,7 +163,7 @@ public:
     void removeConfigValue(const std::string& item) override;
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
 
-    std::unique_ptr<std::vector<int>> getPathIDs(int objectID) override;
+    std::vector<int> getPathIDs(int objectID) override;
 
     void shutdown() override;
     virtual void shutdownDriver() = 0;
@@ -270,7 +270,7 @@ private:
     int _getAutoscanObjectID(int autoscanID);
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     static std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
-    std::unique_ptr<std::vector<int>> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
+    std::vector<int> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /* location helper: filesystem path or virtual path to db location*/
     static std::string addLocationPrefix(char prefix, const fs::path& path);

@@ -288,7 +288,7 @@ public:
     virtual void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) = 0;
 
-    virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) = 0;
+    virtual std::vector<int> getPathIDs(int objectID) = 0;
 
     /// \brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but

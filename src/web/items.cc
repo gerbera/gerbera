@@ -93,13 +93,11 @@ void web::items::process()
         int startpoint_id = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
             auto pathIDs = database->getPathIDs(parentID);
-            if (pathIDs) {
-                for (int pathId : *pathIDs) {
-                    auto pathDir = database->getAutoscanDirectory(pathId);
-                    if (pathDir && pathDir->getRecursive()) {
-                        startpoint_id = pathId;
-                        break;
-                    }
+            for (int pathId : pathIDs) {
+                auto pathDir = database->getAutoscanDirectory(pathId);
+                if (pathDir && pathDir->getRecursive()) {
+                    startpoint_id = pathId;
+                    break;
                 }
             }
         } else {
