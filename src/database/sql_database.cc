@@ -373,7 +373,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
-                versionCmds.push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
+                versionCmds.emplace_back(migration, trimString(scriptNode.text().as_string()));
             }
         } else {
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
