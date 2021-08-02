@@ -36,6 +36,7 @@
 #include <filesystem>
 #include <iostream>
 #include <numeric>
+#include <sstream>
 #include <sys/stat.h>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)

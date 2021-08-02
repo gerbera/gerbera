@@ -708,9 +708,9 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
     auto watch = getAppropriateAutoscan(wdObj, adir);
     if (!watch)
         return;
-    //    log_debug("adding descendant");
+    // log_debug("adding descendant");
     watch->addDescendant(addWd);
-    //    log_debug("added descendant to {} (adir->path={}): {}; now: {}", startPointWd, adir->getLocation().c_str(), addWd, watch->getDescendants()->toCSV().c_str());
+    // log_debug("added descendant to {} (adir->path={}): {}; now: {}", startPointWd, adir->getLocation(), addWd, fmt::join(*(watch->getDescendants()), ","));
 }
 
 void AutoscanInotify::removeDescendants(int wd)

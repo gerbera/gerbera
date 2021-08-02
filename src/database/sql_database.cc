@@ -1170,6 +1170,8 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         for (auto&& [key, val] : itemMetadata) {
             std::vector<std::string> mfields {
                 fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
+                fmt::format("{}property_name{}", table_quote_begin, table_quote_end),
+                fmt::format("{}property_value{}", table_quote_begin, table_quote_end),
             };
             std::vector<std::string> mvalues {
                 fmt::format("{}", newId),
@@ -1187,7 +1189,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
 
 int SQLDatabase::insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
-    return exec(fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ","), fmt::join(values, ",")));
+    return exec(fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ","), fmt::join(values, ",")), getLastInsertId);
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -2374,6 +2376,11 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
     std::vector<std::string> values;
     fields.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
     values.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
+
+    if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
+        fields.push_back(fmt::format("{0}item_id{1}", table_quote_begin, table_quote_end));
+        values.push_back(fmt::format("{}", obj->getID()));
+    }
     for (auto&& [field, value] : dict) {
         fields.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, field));
         values.push_back(fmt::format("{}", value));
@@ -2381,11 +2388,6 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
         throw_std_runtime_error("Attempted to insert new object with ID!");
-    }
-
-    if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
-        fields.push_back(fmt::format("{0}item_id{1}", table_quote_begin, table_quote_end));
-        values.push_back(fmt::format("{}", obj->getID()));
     }
 
     return fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ", "), fmt::join(values, ", "));
