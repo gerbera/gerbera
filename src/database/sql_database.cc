@@ -601,8 +601,6 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         cdsObjectSql["mime_type"] = quote(item->getMimeType().substr(0, 40));
     }
 
-    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal;
-
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         std::ostringstream q;
@@ -618,7 +616,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         auto res = select(q);
         // if duplicate items is found - ignore
         if (res && (res->nextRow()))
-            return returnVal;
+            return {};
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID) {
@@ -626,7 +624,10 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
-    returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
+
+    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal = {
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op)
+    };
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
@@ -706,14 +707,11 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     }
 
     std::ostringstream qb;
-
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::id) << '=' << objectID;
 
     beginTransaction("loadObject");
-    auto res = select(qb);
-    if (res) {
-        auto row = res->nextRow();
-        if (row) {
+    if (auto res = select(qb)) {
+        if (auto row = res->nextRow()) {
             auto result = createObjectFromRow(row);
             commit("loadObject");
             return result;
@@ -729,10 +727,8 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     std::ostringstream qb;
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::service_id) << '=' << quote(serviceID);
     beginTransaction("loadObjectByServiceID");
-    auto res = select(qb);
-    if (res) {
-        auto row = res->nextRow();
-        if (row) {
+    if (auto res = select(qb)) {
+        if (auto row = res->nextRow()) {
             auto result = createObjectFromRow(row);
             commit("loadObjectByServiceID");
             return result;
@@ -758,8 +754,8 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
         throw_std_runtime_error("db error");
 
     std::vector<int> objectIDs;
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
+    objectIDs.reserve(res->getNumRows());
+    while (auto row = res->nextRow()) {
         objectIDs.push_back(std::stoi(row->col(0)));
     }
 
@@ -855,12 +851,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     commit("browse");
 
     std::vector<std::shared_ptr<CdsObject>> result;
-
-    std::unique_ptr<SQLRow> row;
-    while ((row = sqlResult->nextRow())) {
-        auto obj = createObjectFromRow(row);
-        result.push_back(obj);
-        row = nullptr; // clear out content from unique_ptr
+    result.reserve(sqlResult->getNumRows());
+    while (auto row = sqlResult->nextRow()) {
+        result.push_back(createObjectFromRow(row));
     }
 
     // update childCount fields
@@ -930,8 +923,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     log_debug("Search count resolves to SQL [{}]", countSQL);
     auto sqlResult = select(countSQL);
     commit("search");
-    auto countRow = sqlResult->nextRow();
-    if (countRow) {
+
+    if (auto countRow = sqlResult->nextRow()) {
         *numMatches = std::stoi(countRow->col(0));
     }
 
@@ -964,12 +957,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     commit("search 2");
 
     std::vector<std::shared_ptr<CdsObject>> result;
-
-    std::unique_ptr<SQLRow> row;
-    while ((row = sqlResult->nextRow())) {
-        auto obj = createObjectFromSearchRow(row);
-        result.push_back(obj);
-        row = nullptr; // clear out content from unique_ptr
+    result.reserve(sqlResult->getNumRows());
+    while (auto row = sqlResult->nextRow()) {
+        result.push_back(createObjectFromSearchRow(row));
     }
 
     if (result.size() < requestedCount) {
@@ -1000,8 +990,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     commit("getChildCount");
 
     if (res) {
-        auto row = res->nextRow();
-        if (row) {
+        if (auto row = res->nextRow()) {
             int childCount = std::stoi(row->col(0));
             return childCount;
         }
@@ -1011,8 +1000,6 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
 
 std::vector<std::string> SQLDatabase::getMimeTypes()
 {
-    std::vector<std::string> arr;
-
     std::ostringstream qb;
     qb << "SELECT DISTINCT " << TQ("mime_type")
        << " FROM " << TQ(CDS_OBJECT_TABLE)
@@ -1024,9 +1011,10 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     if (!res)
         throw_std_runtime_error("db error");
 
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
-        arr.push_back(std::string(row->col(0)));
+    std::vector<std::string> arr;
+    arr.reserve(res->getNumRows());
+    while (auto row = res->nextRow()) {
+        arr.push_back(row->col(0));
     }
 
     return arr;
@@ -1471,16 +1459,16 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     }
     commit("incrementUpdateIDs 2");
 
-    std::unique_ptr<SQLRow> row;
     std::vector<std::string> rows;
-    while ((row = res->nextRow())) {
+    rows.reserve(res->getNumRows());
+    while (auto row = res->nextRow()) {
         std::ostringstream s;
         s << row->col(0) << ',' << row->col(1);
         rows.emplace_back(s.str());
     }
 
     if (rows.empty())
-        return "";
+        return {};
     return join(rows, ",");
 }
 
@@ -1499,8 +1487,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
         return {};
 
     std::unordered_set<int> ret;
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
+    while (auto row = res->nextRow()) {
         ret.insert(std::stoi(row->col(0)));
     }
     return ret;
@@ -1528,13 +1515,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
-        int objectType = std::stoi(row->col(1));
+    while (auto row = res->nextRow()) {
+        const int32_t objectID = std::stoi(row->col(0));
+        const int objectType =   std::stoi(row->col(1));
         if (IS_CDS_CONTAINER(objectType))
-            containers.push_back(std::stol(row->col(0)));
+            containers.push_back(objectID);
         else
-            items.push_back(std::stol(row->col(0)));
+            items.push_back(objectID);
     }
 
     auto rr = _recursiveRemove(items, containers, all);
@@ -1558,8 +1545,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
     log_debug("{}", sel.str());
 
     beginTransaction("_removeObjects");
-    auto res = select(sel);
-    if (res) {
+    if (auto res = select(sel)) {
         log_debug("relevant autoscans!");
         std::vector<std::string> delete_as;
         std::unique_ptr<SQLRow> row;
@@ -1730,11 +1716,12 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                     removeIds.push_back(std::stoi(row->col(0)));
                 } else {
                     if (all) {
-                        std::string refId = row->col(2);
+                        const std::string refId = row->col(2);
                         if (!refId.empty()) {
-                            parentIds.push_back(std::stoi(row->col(2)));
-                            itemIds.push_back(std::stoi(row->col(2)));
-                            removeIds.push_back(std::stoi(row->col(2)));
+                            const int32_t refIdVal = std::stoi(refId);
+                            parentIds.push_back(refIdVal);
+                            itemIds.push_back(refIdVal);
+                            removeIds.push_back(refIdVal);
                         } else {
                             removeIds.push_back(std::stoi(row->col(0)));
                             itemIds.push_back(std::stoi(row->col(0)));
@@ -1912,8 +1899,8 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
         return {};
 
     std::vector<ConfigValue> result;
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
+    result.reserve(res->getNumRows());
+    while (auto row = res->nextRow()) {
         result.push_back({ row->col(1),
             row->col(0),
             row->col(2),
@@ -2362,7 +2349,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
         std::ostringstream q;
-        q << sel.str() << quote(objectID) << " LIMIT 1";
+        q << sel.str() << quote(objectID);
         res = select(q);
         if (!res || !(row = res->nextRow()))
             break;
@@ -2449,8 +2436,8 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
         return {};
 
     std::vector<std::shared_ptr<CdsResource>> resources;
-    std::unique_ptr<SQLRow> row;
-    while ((row = res->nextRow())) {
+    resources.reserve(res->getNumRows());
+    while (auto row = res->nextRow()) {
         auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
         resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
         resource->setResId(resources.size());
@@ -2461,8 +2448,9 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
                 resource->addAttribute(resAttrId, value);
             }
         }
-        resources.push_back(resource);
+        resources.push_back(std::move(resource));
     }
+
     return resources;
 }
 
