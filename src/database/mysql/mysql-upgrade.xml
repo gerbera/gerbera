@@ -71,12 +71,9 @@
             `parameters` text default NULL,
             CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
         ) ENGINE=MyISAM CHARSET=utf8
-        <script>
         </script>
-        INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '')
-        <script>
-        </script>CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`)
-        </script>
+        <script>INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '')</script>
+        <script>CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`)</script>
         <script migration="resources">ALTER TABLE `mt_cds_object` DROP COLUMN `resources`</script>
     </version>
 </upgrade>
