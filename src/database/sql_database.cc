@@ -383,7 +383,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
             for (auto&& script : versionNode.select_nodes("script")) {
                 const pugi::xml_node& scriptNode = script.node();
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
-                versionCmds.push_back(std::pair(migration, trimString(scriptNode.text().as_string())));
+                versionCmds.emplace_back(migration, trimString(scriptNode.text().as_string()));
             }
         } else {
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
@@ -744,7 +744,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     return nullptr;
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char servicePrefix)
+std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
     auto getSql = fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}service_id{1} LIKE {}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(std::string(1, servicePrefix) + '%'));
 
@@ -760,7 +760,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getServiceObjectIDs(char serviceP
         objectIDs.push_back(std::stoi(row->col(0)));
     }
 
-    return std::make_unique<std::vector<int>>(objectIDs);
+    return objectIDs;
 }
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
@@ -1430,7 +1430,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     return join(rows, ",");
 }
 
-std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, bool withoutContainer)
+std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContainer)
 {
     auto getSql = (withoutContainer) //
         ? fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} = {3} AND {0}object_type{1} != {4}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID, OBJECT_TYPE_CONTAINER)
@@ -1439,28 +1439,28 @@ std::unique_ptr<std::unordered_set<int>> SQLDatabase::getObjects(int parentID, b
     if (!res)
         throw_std_runtime_error("db error");
     if (res->getNumRows() == 0)
-        return nullptr;
+        return {};
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         ret.insert(std::stoi(row->col(0)));
     }
-    return std::make_unique<std::unordered_set<int>>(std::move(ret));
+    return ret;
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
-    size_t count = list->size();
+    size_t count = list.size();
     if (count <= 0)
         return nullptr;
 
-    auto it = std::find_if(list->begin(), list->end(), IS_FORBIDDEN_CDS_ID);
-    if (it != list->end()) {
+    auto it = std::find_if(list.begin(), list.end(), IS_FORBIDDEN_CDS_ID);
+    if (it != list.end()) {
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
     }
 
-    auto res = select(fmt::format("SELECT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(*list, ",")));
+    auto res = select(fmt::format("SELECT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(list, ",")));
     if (!res)
         throw_std_runtime_error("sql error");
 
@@ -2008,7 +2008,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
         fmt::format("{}path_ids{}", table_quote_begin, table_quote_end),
     };
     std::vector<std::string> values {
-        (objectID >= 0 ? quote(objectID) : SQL_NULL),
+        objectID >= 0 ? quote(objectID) : SQL_NULL,
         quote("full"),
         quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
         mapBool(adir->getRecursive()),
@@ -2016,8 +2016,8 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
         quote(adir->getInterval().count()),
         quote(adir->getPreviousLMT().count()),
         mapBool(adir->persistent()),
-        (objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
-        (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ',')),
+        objectID >= 0 ? SQL_NULL : quote(adir->getLocation()),
+        pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))),
     };
     adir->setDatabaseID(insert(AUTOSCAN_TABLE, fields, values, true));
 }
@@ -2051,7 +2051,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT().count());
     q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
       << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
-      << ',' << TQ("path_ids") << '=' << (!pathIds ? SQL_NULL : quote("," + toCSV(*pathIds) + ','))
+      << ',' << TQ("path_ids") << '=' << (pathIds.empty() ? SQL_NULL : quote("," + toCSV(pathIds) + ','))
       << ',' << TQ("touched") << '=' << mapBool(true)
       << " WHERE " << TQ("id") << '=' << quote(adir->getDatabaseID());
     exec(q.str());
@@ -2096,13 +2096,13 @@ void SQLDatabase::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> a
     (void)_checkOverlappingAutoscans(adir);
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
+std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
         throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
     int databaseID = adir->getDatabaseID();
 
     std::unique_ptr<SQLRow> row;
@@ -2150,11 +2150,11 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
 
     {
         auto pathIDs = getPathIDs(checkObjectID);
-        if (!pathIDs)
+        if (pathIDs.empty())
             throw_std_runtime_error("getPathIDs returned nullptr");
 
         std::vector<std::string> where {
-            fmt::format("{}obj_id{} IN ({})", table_quote_begin, table_quote_end, fmt::join(*pathIDs, ",")),
+            fmt::format("{}obj_id{} IN ({})", table_quote_begin, table_quote_end, fmt::join(pathIDs, ",")),
             fmt::format("{}recursive{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
         };
         if (databaseID >= 0)
@@ -2175,10 +2175,10 @@ std::unique_ptr<std::vector<int>> SQLDatabase::_checkOverlappingAutoscans(const 
     throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
 }
 
-std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
+std::vector<int> SQLDatabase::getPathIDs(int objectID)
 {
     if (objectID == INVALID_OBJECT_ID)
-        return nullptr;
+        return {};
 
     auto sel = fmt::format("SELECT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} = ", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
 
@@ -2193,7 +2193,7 @@ std::unique_ptr<std::vector<int>> SQLDatabase::getPathIDs(int objectID)
             break;
         objectID = std::stoi(row->col(0));
     }
-    return std::make_unique<std::vector<int>>(pathIDs);
+    return pathIDs;
 }
 
 std::string SQLDatabase::getFsRootName()

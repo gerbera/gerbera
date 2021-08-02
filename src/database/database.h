@@ -245,13 +245,13 @@ public:
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nullptr if there are none!
-    virtual std::unique_ptr<std::unordered_set<int>> getObjects(int parentID, bool withoutContainer) = 0;
+    virtual std::unordered_set<int> getObjects(int parentID, bool withoutContainer) = 0;
 
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed
     /// \param all if true and the object to be removed is a reference
     /// \return changed container ids
-    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unique_ptr<std::unordered_set<int>>& list, bool all = false) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
     virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) = 0;
@@ -259,7 +259,7 @@ public:
     /// \brief Return an array of object ID's for a particular service.
     ///
     /// In the database, the service is identified by a service id prefix.
-    virtual std::unique_ptr<std::vector<int>> getServiceObjectIDs(char servicePrefix) = 0;
+    virtual std::vector<int> getServiceObjectIDs(char servicePrefix) = 0;
 
     /* accounting methods */
     virtual int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") = 0;
@@ -288,7 +288,7 @@ public:
     virtual void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
     virtual void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) = 0;
 
-    virtual std::unique_ptr<std::vector<int>> getPathIDs(int objectID) = 0;
+    virtual std::vector<int> getPathIDs(int objectID) = 0;
 
     /// \brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
