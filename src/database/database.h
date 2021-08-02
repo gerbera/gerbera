@@ -191,7 +191,7 @@ public:
     virtual void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
     virtual std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) = 0;
-    virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) = 0;
+    virtual std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int& numMatches) = 0;
 
     virtual std::vector<std::string> getMimeTypes() = 0;
 

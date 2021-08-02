@@ -27,7 +27,7 @@ public:
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
 
     std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override { return std::vector<std::shared_ptr<CdsObject>>(); }
-    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
+    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int& numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
 
     std::vector<std::string> getMimeTypes() override { return std::vector<std::string>(); }
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return nullptr; }
