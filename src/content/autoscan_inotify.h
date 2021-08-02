@@ -143,7 +143,7 @@ private:
     class Wd {
     public:
         Wd(fs::path path, int wd, int parentWd)
-            : wdWatches(std::make_shared<std::vector<std::shared_ptr<Watch>>>())
+            : wdWatches(std::make_shared<std::list<std::shared_ptr<Watch>>>())
             , path(std::move(path))
             , parentWd(parentWd)
             , wd(wd)
@@ -154,11 +154,11 @@ private:
         int getParentWd() const { return parentWd; }
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
-        std::shared_ptr<std::vector<std::shared_ptr<Watch>>> getWdWatches() const { return wdWatches; }
+        std::shared_ptr<std::list<std::shared_ptr<Watch>>> getWdWatches() const { return wdWatches; }
         void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(move(w)); }
 
     private:
-        std::shared_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches;
+        std::shared_ptr<std::list<std::shared_ptr<Watch>>> wdWatches;
         fs::path path;
         int parentWd;
         int wd;

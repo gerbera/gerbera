@@ -131,7 +131,7 @@ protected:
     using AutoLock = std::lock_guard<decltype(mutex)>;
 
     /// \brief This array is holding available sessions.
-    std::vector<std::shared_ptr<Session>> sessions;
+    std::list<std::shared_ptr<Session>> sessions;
 
     std::map<std::string, std::string> accounts;
 

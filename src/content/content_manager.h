@@ -337,7 +337,7 @@ protected:
     std::shared_ptr<AutoscanList> autoscan_inotify;
 #endif
 
-    std::vector<std::shared_ptr<Executor>> process_list;
+    std::list<std::shared_ptr<Executor>> process_list;
 
     int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
         AutoScanSetting& asSetting,
