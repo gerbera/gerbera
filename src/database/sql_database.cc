@@ -2082,7 +2082,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
     exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, quote(objectID)));
 }
 
-void SQLDatabase::checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir)
+void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     (void)_checkOverlappingAutoscans(adir);
 }

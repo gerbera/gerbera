@@ -231,7 +231,7 @@ void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const 
 
 /// \brief read metadata from file and add to object
 /// \param obj Object to handle
-void TagLibHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
@@ -299,7 +299,7 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
 /// \param obj Object to stream
 /// \param resNum number of resource
 /// \return iohandler to stream to client
-std::unique_ptr<IOHandler> TagLibHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item) // not streamable

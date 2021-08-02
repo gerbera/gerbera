@@ -288,7 +288,7 @@ static void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl
     // do nothing
 }
 
-void FfmpegHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
@@ -366,7 +366,7 @@ void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, cons
 }
 #endif
 
-std::unique_ptr<IOHandler> FfmpegHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
 #ifdef HAVE_FFMPEGTHUMBNAILER
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

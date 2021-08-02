@@ -115,7 +115,7 @@ public:
     }
 };
 
-void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
+void MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
@@ -124,7 +124,7 @@ void MatroskaHandler::fillMetadata(std::shared_ptr<CdsObject> obj)
     parseMKV(item, nullptr);
 }
 
-std::unique_ptr<IOHandler> MatroskaHandler::serveContent(std::shared_ptr<CdsObject> obj, int resNum)
+std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)

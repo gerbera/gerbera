@@ -61,8 +61,8 @@ public:
 class FanArtHandler : public MetacontentHandler {
 public:
     explicit FanArtHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -72,8 +72,8 @@ private:
 class ContainerArtHandler : public MetacontentHandler {
 public:
     explicit ContainerArtHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -83,8 +83,8 @@ private:
 class SubtitleHandler : public MetacontentHandler {
 public:
     explicit SubtitleHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -94,8 +94,8 @@ private:
 class ResourceHandler : public MetacontentHandler {
 public:
     explicit ResourceHandler(const std::shared_ptr<Context>& context);
-    void fillMetadata(std::shared_ptr<CdsObject> obj) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsObject> obj, int resNum) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;

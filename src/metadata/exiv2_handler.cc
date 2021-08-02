@@ -40,7 +40,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
+void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
 {
     try {
         std::string value;
@@ -171,7 +171,7 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsObject> item)
     }
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(std::shared_ptr<CdsObject> item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(const std::shared_ptr<CdsObject>& item, int resNum)
 {
     return nullptr;
 }

@@ -156,7 +156,7 @@ public:
     void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
     void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    void checkOverlappingAutoscans(std::shared_ptr<AutoscanDirectory> adir) override;
+    void checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
     /* config methods */
     std::vector<ConfigValue> getConfigValues() override;
