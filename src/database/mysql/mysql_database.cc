@@ -56,7 +56,7 @@ MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mim
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 3398516749, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496, 2030024486 };
+    hashies = { 3398516749, 928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, 1512596496, 507706380 };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -335,14 +335,8 @@ void MySQLDatabase::shutdownDriver()
 
 void MySQLDatabase::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    std::string quotedValue = quote(value);
-    std::ostringstream q;
-    q << "INSERT INTO " << QTB << INTERNAL_SETTINGS_TABLE << QTE << " (`key`, `value`) "
-                                                                    "VALUES ("
-      << quote(key) << ", " << quotedValue << ") "
-                                              "ON DUPLICATE KEY UPDATE `value` = "
-      << quotedValue;
-    SQLDatabase::exec(q.str());
+    SQLDatabase::exec(fmt::format("INSERT INTO `{0}` (`key`, `value`) VALUES ({1}, {2}) ON DUPLICATE KEY UPDATE `value` = {2}",
+        INTERNAL_SETTINGS_TABLE, quote(key), quote(value)));
 }
 
 void MySQLDatabase::_exec(const char* query, int length)
