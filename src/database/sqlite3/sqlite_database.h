@@ -35,7 +35,6 @@
 
 #include <queue>
 #include <sqlite3.h>
-#include <sstream>
 #include <unistd.h>
 
 #include "database/sql_database.h"
@@ -113,8 +112,8 @@ class SLSelectTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
-    explicit SLSelectTask(const char* query)
-        : query(query)
+    explicit SLSelectTask(const std::string& query)
+        : query(query.c_str())
     {
     }
     void run(sqlite3** db, Sqlite3Database* sl) override;
@@ -134,7 +133,7 @@ class SLExecTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
-    SLExecTask(const char* query, bool getLastInsertId);
+    SLExecTask(const std::string& query, bool getLastInsertId);
     void run(sqlite3** db, Sqlite3Database* sl) override;
     int getLastInsertId() const { return lastInsertId; }
 
@@ -169,7 +168,7 @@ public:
     Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer);
 
 protected:
-    void _exec(const char* query, int length = -1) override;
+    void _exec(const std::string& query) override;
 
 private:
     void prepare();
@@ -188,8 +187,8 @@ private:
     std::string quote(char val) const override { return quote(std::string(1, val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
 
-    std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
-    int exec(const char* query, size_t length, bool getLastInsertId = false) override;
+    std::shared_ptr<SQLResult> select(const std::string& query) override;
+    int exec(const std::string& query, bool getLastInsertId = false) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 

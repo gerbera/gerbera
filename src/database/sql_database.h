@@ -34,7 +34,6 @@
 
 #include <array>
 #include <mutex>
-#include <sstream>
 #include <unordered_set>
 #include <utility>
 
@@ -96,23 +95,8 @@ public:
     virtual void rollback(const std::string_view& tName) { }
     virtual void commit(const std::string_view& tName) { }
 
-    virtual std::shared_ptr<SQLResult> select(const char* query, size_t length) = 0;
-    virtual int exec(const char* query, size_t length, bool getLastInsertId = false) = 0;
-
-    /* wrapper functions for select and exec */
-    std::shared_ptr<SQLResult> select(const std::string& buf)
-    {
-        return select(buf.c_str(), buf.length());
-    }
-    std::shared_ptr<SQLResult> select(const std::ostringstream& buf)
-    {
-        auto s = buf.str();
-        return select(s.c_str(), s.length());
-    }
-    int exec(const std::string& query, bool getLastInsertId = false)
-    {
-        return exec(query.c_str(), query.length(), getLastInsertId);
-    }
+    virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
+    virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override;
@@ -201,7 +185,7 @@ protected:
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
     void upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
-    virtual void _exec(const char* query, int length = -1) = 0;
+    virtual void _exec(const std::string& query) = 0;
 
 private:
     std::string sql_browse_query;

@@ -35,7 +35,6 @@
 #include <climits>
 #include <filesystem>
 #include <fmt/chrono.h>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -57,11 +56,6 @@
 #define SQL_NULL "NULL"
 
 #define RESOURCE_SEP '|'
-
-/* table quote */
-#define TQ(data) table_quote_begin << (data) << table_quote_end
-/* table quote with dot */
-#define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
 
 #define ITM_ALIAS "f"
 #define REF_ALIAS "rf"
@@ -140,6 +134,7 @@ enum class AutoscanCol {
     obj_id,
     persistent,
 };
+
 /// \brief autoscan column ids
 enum class AutoscanColumn {
     id = 0,
@@ -493,7 +488,7 @@ std::string SQLDatabase::getSortCapabilities()
             sortKeys.emplace_back(key);
         }
     }
-    return join(sortKeys, ',');
+    return fmt::format("{}", fmt::join(sortKeys, ","));
 }
 
 std::string SQLDatabase::getSearchCapabilities()
@@ -509,7 +504,7 @@ std::string SQLDatabase::getSearchCapabilities()
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
         searchKeys.emplace_back(fmt::format("res@{}", attrName));
     }
-    return join(searchKeys, ',');
+    return fmt::format("{}", fmt::join(searchKeys, ","));
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObject>& obj)
@@ -848,8 +843,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         param->setTotalMatches(1);
     }
 
-    std::ostringstream qb;
-    qb << sql_browse_query << " WHERE ";
+    std::vector<std::string> where;
+    std::string orderBy;
+    std::string limit;
 
     if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         int count = param->getRequestedCount();
@@ -861,10 +857,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                 doLimit = false;
         }
 
-        qb << browseColumnMapper->mapQuoted(BrowseCol::parent_id) << '=' << parent->getID();
+        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::parent_id), parent->getID()));
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
-            qb << " AND " << browseColumnMapper->mapQuoted(BrowseCol::id) << "!=" << quote(CDS_ID_FS_ROOT);
+            where.push_back(fmt::format("{} != {}", browseColumnMapper->mapQuoted(BrowseCol::id), quote(CDS_ID_FS_ROOT)));
 
         // order by code..
         auto orderByCode = [&]() {
@@ -882,27 +878,24 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         };
 
         if (!getContainers && !getItems) {
-            qb << " AND 0=1";
+            where.push_back("0 = 1");
         } else if (getContainers && !getItems) {
-            qb << " AND " << browseColumnMapper->mapQuoted(BrowseCol::object_type) << '='
-               << quote(OBJECT_TYPE_CONTAINER)
-               << " ORDER BY " << orderByCode();
+            where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER)));
+            orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else if (!getContainers && getItems) {
-            qb << " AND (" << browseColumnMapper->mapQuoted(BrowseCol::object_type) << " & "
-               << quote(OBJECT_TYPE_ITEM) << ") = "
-               << quote(OBJECT_TYPE_ITEM)
-               << " ORDER BY " << orderByCode();
+            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_ITEM)));
+            orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
-            qb << " ORDER BY ("
-               << browseColumnMapper->mapQuoted(BrowseCol::object_type) << '=' << quote(OBJECT_TYPE_CONTAINER)
-               << ") DESC, " << orderByCode();
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER), orderByCode());
         }
         if (doLimit)
-            qb << " LIMIT " << count << " OFFSET " << param->getStartingIndex();
+            limit = fmt::format(" LIMIT {} OFFSET {}", count, param->getStartingIndex());
     } else { // metadata
-        qb << browseColumnMapper->mapQuoted(BrowseCol::id) << '=' << parent->getID() << " LIMIT 1";
+        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::id), parent->getID()));
+        limit = " LIMIT 1";
     }
-    log_debug("QUERY: {}", qb.str().c_str());
+    auto qb = fmt::format("{} WHERE {}{}{}", sql_browse_query, fmt::join(where, " AND "), orderBy, limit);
+    log_debug("QUERY: {}", qb);
     beginTransaction("browse");
     std::shared_ptr<SQLResult> sqlResult = select(qb);
     commit("browse");
@@ -979,7 +972,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
         throw_std_runtime_error("failed to generate SQL for search");
 
     beginTransaction("search");
-    std::string countSQL(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_search_query, searchSQL));
+    auto countSQL = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_search_query, searchSQL);
     log_debug("Search count resolves to SQL [{}]", countSQL);
     auto sqlResult = select(countSQL);
     commit("search");
@@ -987,9 +980,6 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     if (countRow) {
         *numMatches = std::stoi(countRow->col(0));
     }
-
-    std::ostringstream retrievalSQL;
-    retrievalSQL << fmt::format("SELECT DISTINCT {} FROM {} WHERE {}", sql_search_columns, sql_search_query, searchSQL);
 
     // order by code..
     auto orderByCode = [&]() {
@@ -1001,16 +991,18 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
         return orderQb;
     };
 
-    retrievalSQL << " ORDER BY " << orderByCode();
+    auto orderBy = fmt::format(" ORDER BY {}", orderByCode());
+    std::string limit;
 
     size_t startingIndex = param->getStartingIndex();
     size_t requestedCount = param->getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
-        retrievalSQL << " LIMIT " << (requestedCount == 0 ? 10000000000 : requestedCount)
-                     << " OFFSET " << startingIndex;
+        limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }
 
-    log_debug("Search resolves to SQL [{}]", retrievalSQL.str().c_str());
+    auto retrievalSQL = fmt::format("SELECT DISTINCT {} FROM {} WHERE {}{}{}", sql_search_columns, sql_search_query, searchSQL, orderBy, limit);
+
+    log_debug("Search resolves to SQL [{}]", retrievalSQL);
     beginTransaction("search 2");
     sqlResult = select(retrievalSQL);
     commit("search 2");
@@ -1253,7 +1245,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         newClass = classes.back();
         classes.pop_back();
     }
-    addContainerChain(newpath, classes.empty() ? "" : join(classes, '/'), INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
+    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
 
     *containerID = createContainer(parentContainerID, container, virtualPath, true, newClass, lastRefID, lastMetadata);
     updateID.emplace(updateID.begin(), *containerID);
@@ -1484,7 +1476,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
     if (rows.empty())
         return "";
-    return join(rows, ",");
+    return fmt::format("{}", fmt::join(rows, ","));
 }
 
 std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContainer)
@@ -1795,7 +1787,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             }
         }
 
-        //log_debug("selecting: {}; removing: {}", bufSel->c_str(), join(del, ',').c_str());
+        // log_debug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
         if (!del.empty()) {
             _removeObjects(del);
             del.clear();
@@ -1815,8 +1807,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (!selUpnp.empty()) {
         changedUpnp.insert(changedUpnp.end(), selUpnp.begin(), selUpnp.end());
     }
-    // log_debug("end; changedContainers (upnp): {}", join(changedUpnp, ',').c_str());
-    // log_debug("end; changedContainers (ui): {}", join(changedUi, ',').c_str());
+    // log_debug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
+    // log_debug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
@@ -2526,7 +2518,7 @@ void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
         }
     }
     if (addedAttribute)
-        storeInternalSetting("resource_attribute", join(resourceAttributes, ','));
+        storeInternalSetting("resource_attribute", fmt::format("{}", fmt::join(resourceAttributes, ",")));
 }
 
 // column resources is dropped in DBVERSION 13
