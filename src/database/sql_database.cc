@@ -62,8 +62,6 @@
 #define TQ(data) QTB << (data) << QTE
 /* table quote with dot */
 #define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
-#define TQBM(data) browseColumnMapper->mapQuoted((data))
-#define TQSM(data) searchColumnMapper->mapQuoted((data))
 
 #define ITM_ALIAS "f"
 #define REF_ALIAS "rf"
@@ -804,22 +802,22 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                 doLimit = false;
         }
 
-        qb << TQBM(BrowseCol::parent_id) << '=' << parent->getID();
+        qb << browseColumnMapper->mapQuoted(BrowseCol::parent_id) << '=' << parent->getID();
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
-            qb << " AND " << TQBM(BrowseCol::id) << "!=" << quote(CDS_ID_FS_ROOT);
+            qb << " AND " << browseColumnMapper->mapQuoted(BrowseCol::id) << "!=" << quote(CDS_ID_FS_ROOT);
 
         // order by code..
         auto orderByCode = [&]() {
             std::string orderQb;
             if (param->getFlag(BROWSE_TRACK_SORT)) {
-                orderQb = fmt::format("{},{}", TQBM(BrowseCol::part_number), TQBM(BrowseCol::track_number));
+                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::part_number), browseColumnMapper->mapQuoted(BrowseCol::track_number));
             } else {
                 SortParser sortParser(browseColumnMapper, param->getSortCriteria());
                 orderQb = sortParser.parse();
             }
             if (orderQb.empty()) {
-                orderQb = TQBM(BrowseCol::dc_title);
+                orderQb = browseColumnMapper->mapQuoted(BrowseCol::dc_title);
             }
             return orderQb;
         };
@@ -827,23 +825,23 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         if (!getContainers && !getItems) {
             qb << " AND 0=1";
         } else if (getContainers && !getItems) {
-            qb << " AND " << TQBM(BrowseCol::object_type) << '='
+            qb << " AND " << browseColumnMapper->mapQuoted(BrowseCol::object_type) << '='
                << quote(OBJECT_TYPE_CONTAINER)
                << " ORDER BY " << orderByCode();
         } else if (!getContainers && getItems) {
-            qb << " AND (" << TQBM(BrowseCol::object_type) << " & "
+            qb << " AND (" << browseColumnMapper->mapQuoted(BrowseCol::object_type) << " & "
                << quote(OBJECT_TYPE_ITEM) << ") = "
                << quote(OBJECT_TYPE_ITEM)
                << " ORDER BY " << orderByCode();
         } else {
             qb << " ORDER BY ("
-               << TQBM(BrowseCol::object_type) << '=' << quote(OBJECT_TYPE_CONTAINER)
+               << browseColumnMapper->mapQuoted(BrowseCol::object_type) << '=' << quote(OBJECT_TYPE_CONTAINER)
                << ") DESC, " << orderByCode();
         }
         if (doLimit)
             qb << " LIMIT " << count << " OFFSET " << param->getStartingIndex();
     } else { // metadata
-        qb << TQBM(BrowseCol::id) << '=' << parent->getID() << " LIMIT 1";
+        qb << browseColumnMapper->mapQuoted(BrowseCol::id) << '=' << parent->getID() << " LIMIT 1";
     }
     log_debug("QUERY: {}", qb.str().c_str());
     beginTransaction("browse");
@@ -939,7 +937,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
         SortParser sortParser(searchColumnMapper, param->getSortCriteria());
         auto orderQb = sortParser.parse();
         if (orderQb.empty()) {
-            orderQb = TQSM(SearchCol::id);
+            orderQb = searchColumnMapper->mapQuoted(SearchCol::id);
         }
         return orderQb;
     };
@@ -1031,9 +1029,9 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
     }();
 
     auto where = std::vector<std::string> {
-        fmt::format("{} = {}", TQBM(BrowseCol::location_hash), quote(stringHash(dbLocation))),
-        fmt::format("{} = {}", TQBM(BrowseCol::location), quote(dbLocation)),
-        fmt::format("{} IS NULL", TQBM(BrowseCol::ref_id)),
+        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location_hash), quote(stringHash(dbLocation))),
+        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location), quote(dbLocation)),
+        fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::ref_id)),
     };
     auto findSql = fmt::format("{} WHERE {} LIMIT 1", sql_browse_query, fmt::join(where, " AND "));
 
@@ -1661,11 +1659,6 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     return std::make_unique<ChangedContainers>(changedContainers);
 }
 
-std::string SQLDatabase::toCSV(const std::vector<int>& input)
-{
-    return join(input, ",");
-}
-
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
     log_debug("start upnp: {}; ui: {}",
@@ -2037,24 +2030,22 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         _autoscanChangePersistentFlag(objectIDold, false);
         _autoscanChangePersistentFlag(objectID, true);
     }
-    std::ostringstream q;
-    q << "UPDATE " << TQ(AUTOSCAN_TABLE)
-      << " SET " << TQ("obj_id") << '=' << (objectID >= 0 ? quote(objectID) : SQL_NULL)
-      << ',' << TQ("scan_level") << '='
-      << quote("full")
-      << ',' << TQ("scan_mode") << '='
-      << quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))
-      << ',' << TQ("recursive") << '=' << mapBool(adir->getRecursive())
-      << ',' << TQ("hidden") << '=' << mapBool(adir->getHidden())
-      << ',' << TQ("interval") << '=' << quote(adir->getInterval().count());
-    if (adir->getPreviousLMT() > std::chrono::seconds::zero())
-        q << ',' << TQ("last_modified") << '=' << quote(adir->getPreviousLMT().count());
-    q << ',' << TQ("persistent") << '=' << mapBool(adir->persistent())
-      << ',' << TQ("location") << '=' << (objectID >= 0 ? SQL_NULL : quote(adir->getLocation()))
-      << ',' << TQ("path_ids") << '=' << (pathIds.empty() ? SQL_NULL : quote("," + toCSV(pathIds) + ','))
-      << ',' << TQ("touched") << '=' << mapBool(true)
-      << " WHERE " << TQ("id") << '=' << quote(adir->getDatabaseID());
-    exec(q.str());
+    std::vector<std::string> fields {
+        fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? quote(objectID) : SQL_NULL),
+        fmt::format("{}scan_level{} = {}", table_quote_begin, table_quote_end, quote("full")),
+        fmt::format("{}scan_mode{} = {}", table_quote_begin, table_quote_end, quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
+        fmt::format("{}recursive{} = {}", table_quote_begin, table_quote_end, mapBool(adir->getRecursive())),
+        fmt::format("{}hidden{} = {}", table_quote_begin, table_quote_end, mapBool(adir->getHidden())),
+        fmt::format("{}interval{} = {}", table_quote_begin, table_quote_end, quote(adir->getInterval().count())),
+        fmt::format("{}persistent{} = {}", table_quote_begin, table_quote_end, mapBool(adir->persistent())),
+        fmt::format("{}location{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
+        fmt::format("{}path_ids{} = {}", table_quote_begin, table_quote_end, pathIds.empty() ? SQL_NULL : fmt::format(",{},", fmt::join(pathIds, ","))),
+        fmt::format("{}touched{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
+    };
+    if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
+        fields.push_back(fmt::format("{}last_modified{} = {}", table_quote_begin, table_quote_end, quote(adir->getPreviousLMT().count())));
+    }
+    exec(fmt::format("UPDATE {0}{2}{1} SET {3} WHERE {0}id{1} = {4}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(fields, ","), quote(adir->getDatabaseID())));
 }
 
 void SQLDatabase::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)

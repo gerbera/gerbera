@@ -258,8 +258,6 @@ private:
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t>& objectIDs);
 
-    static std::string toCSV(const std::vector<int>& input);
-
     std::unique_ptr<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t>& items,
         const std::vector<int32_t>& containers, bool all);
