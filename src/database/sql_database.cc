@@ -59,7 +59,7 @@
 #define RESOURCE_SEP '|'
 
 /* table quote */
-#define TQ(data) QTB << (data) << QTE
+#define TQ(data) table_quote_begin << (data) << table_quote_end
 /* table quote with dot */
 #define TQD(data1, data2) TQ(data1) << '.' << TQ(data2)
 
@@ -1661,28 +1661,23 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
-    log_debug("start upnp: {}; ui: {}",
-        join(maybeEmpty->upnp, ',').c_str(),
-        join(maybeEmpty->ui, ',').c_str());
+    log_debug("start upnp: {}; ui: {}", fmt::join(maybeEmpty->upnp, ","), fmt::join(maybeEmpty->ui, ","));
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return nullptr;
 
-    std::ostringstream selectSql;
-    selectSql << "SELECT " << TQD('a', "id")
-              << ", COUNT(" << TQD('b', "parent_id")
-              << ")," << TQD('a', "parent_id") << ',' << TQD('a', "flags")
-              << " FROM " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('a')
-              << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('b')
-              << " ON " << TQD('a', "id") << '=' << TQD('b', "parent_id")
-              << " WHERE " << TQD('a', "object_type") << '=' << quote(1)
-              << " AND " << TQD('a', "id") << " IN ("; //(a.flags & " << OBJECT_FLAG_PERSISTENT_CONTAINER << ") = 0 AND
-
-    std::ostringstream bufSelUpnp;
-    bufSelUpnp << selectSql.str();
+    constexpr std::string_view tabAlias = "fol";
+    constexpr std::string_view childAlias = "cld";
+    std::vector<std::string> fields {
+        fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
+        fmt::format("COUNT({0}{3}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, tabAlias, childAlias),
+        fmt::format("{0}{2}{1}.{0}parent_id{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
+        fmt::format("{0}{2}{1}.{0}flags{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
+    };
+    std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {0}{3}{1}.{0}id{1} = {0}{4}{1}.{0}parent_id{1} WHERE {0}{3}{1}.{0}object_type{1} = {6} AND {0}{3}{1}.{0}id{1} ",
+        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, CDS_OBJECT_TABLE, quote(OBJECT_TYPE_CONTAINER));
 
     std::vector<int32_t> del;
 
-    std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
     std::vector<int32_t> selUi;
@@ -1701,9 +1696,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         again = false;
 
         if (!selUpnp.empty()) {
-            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUpnp, ","));
+            auto sql = fmt::format("{2} IN ({3}) GROUP BY {0}{4}{1}.{0}id{1}", table_quote_begin, table_quote_end, selectSql, fmt::join(selUpnp, ","), tabAlias);
             log_debug("upnp-sql: {}", sql);
-            res = select(sql);
+            std::shared_ptr<SQLResult> res = select(sql);
             selUpnp.clear();
             if (!res)
                 throw_std_runtime_error("db error");
@@ -1721,9 +1716,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         }
 
         if (!selUi.empty()) {
-            auto sql = fmt::format("{}{}) GROUP BY a.id", selectSql.str(), fmt::join(selUi, ","));
+            auto sql = fmt::format("{2} IN ({3}) GROUP BY {0}{4}{1}.{0}id{1}", table_quote_begin, table_quote_end, selectSql, fmt::join(selUi, ","), tabAlias);
             log_debug("ui-sql: {}", sql);
-            res = select(sql);
+            std::shared_ptr<SQLResult> res = select(sql);
             selUi.clear();
             if (!res)
                 throw_std_runtime_error("db error");

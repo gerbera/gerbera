@@ -49,9 +49,6 @@ class SQLEmitter;
 
 #define DBVERSION 13
 
-#define QTB table_quote_begin
-#define QTE table_quote_end
-
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
