@@ -208,6 +208,7 @@ private:
     std::string sql_search_columns;
     std::string sql_search_query;
     std::string sql_meta_query;
+    std::string sql_autoscan_query;
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
 

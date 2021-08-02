@@ -140,6 +140,20 @@ enum class AutoscanCol {
     obj_id,
     persistent,
 };
+/// \brief autoscan column ids
+enum class AutoscanColumn {
+    id = 0,
+    obj_id,
+    scan_level,
+    scan_mode,
+    recursive,
+    hidden,
+    interval,
+    last_modified,
+    persistent,
+    location,
+    obj_location,
+};
 
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
@@ -198,10 +212,26 @@ static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColM
 
 /// \brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanCol must be present
-static const std::map<AutoscanCol, std::pair<std::string, std::string>> autoscanColMap {
+static const std::map<AutoscanCol, std::pair<std::string, std::string>> asColMap {
     { AutoscanCol::id, { AUS_ALIAS, "id" } },
     { AutoscanCol::obj_id, { AUS_ALIAS, "obj_id" } },
     { AutoscanCol::persistent, { AUS_ALIAS, "persistent" } },
+};
+
+/// \brief Map autoscan column ids to column names
+// map ensures entries are in correct order, each value of AutoscanColumn must be present
+static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autoscanColMap {
+    { AutoscanColumn::id, { AUS_ALIAS, "id" } },
+    { AutoscanColumn::obj_id, { AUS_ALIAS, "obj_id" } },
+    { AutoscanColumn::scan_level, { AUS_ALIAS, "scan_level" } },
+    { AutoscanColumn::scan_mode, { AUS_ALIAS, "scan_mode" } },
+    { AutoscanColumn::recursive, { AUS_ALIAS, "recursive" } },
+    { AutoscanColumn::hidden, { AUS_ALIAS, "hidden" } },
+    { AutoscanColumn::interval, { AUS_ALIAS, "interval" } },
+    { AutoscanColumn::last_modified, { AUS_ALIAS, "last_modified" } },
+    { AutoscanColumn::persistent, { AUS_ALIAS, "persistent" } },
+    { AutoscanColumn::location, { AUS_ALIAS, "location" } },
+    { AutoscanColumn::obj_location, { ITM_ALIAS, "location" } },
 };
 
 /// \brief Map browse sort keys to column ids
@@ -249,10 +279,27 @@ static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
 /// \brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, AutoscanCol>> autoscanTagMap {
+static const std::vector<std::pair<std::string, AutoscanCol>> asTagMap {
     { "id", AutoscanCol::id },
     { "obj_id", AutoscanCol::obj_id },
     { "persistent", AutoscanCol::persistent },
+};
+
+/// \brief Autoscan search keys to column ids
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap {
+    { "id", AutoscanColumn::id },
+    { "obj_id", AutoscanColumn::obj_id },
+    { "scan_level", AutoscanColumn::scan_level },
+    { "scan_mode", AutoscanColumn::scan_mode },
+    { "recursive", AutoscanColumn::recursive },
+    { "hidden", AutoscanColumn::hidden },
+    { "interval", AutoscanColumn::interval },
+    { "last_modified", AutoscanColumn::last_modified },
+    { "persistent", AutoscanColumn::persistent },
+    { "location", AutoscanColumn::location },
+    { "obj_location", AutoscanColumn::obj_location },
 };
 
 template <typename E>
@@ -267,6 +314,7 @@ static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
+static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 
 SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
@@ -308,7 +356,8 @@ void SQLDatabase::init()
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchSortMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
-    asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
+    asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);
+    autoscanColumnMapper = std::make_shared<EnumColumnMapper<AutoscanColumn>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
 
     // Statement for UPnP browse
     {
@@ -317,9 +366,9 @@ void SQLDatabase::init()
         for (auto&& [key, col] : browseColMap) {
             buf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
         }
-        auto join1 = fmt::format("{0}{2}{1} {0}{3}{1} ON {4} = {0}{3}{1}.{0}{5}{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, REF_ALIAS, browseColumnMapper->mapQuoted(BrowseCol::ref_id), browseColMap.at(BrowseCol::id).second);
-        auto join2 = fmt::format("{} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
-        this->sql_browse_query = fmt::format("SELECT {} FROM {} LEFT JOIN {} LEFT JOIN {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
+        auto join1 = fmt::format("LEFT JOIN {0}{2}{1} {0}{3}{1} ON {4} = {0}{3}{1}.{0}{5}{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, REF_ALIAS, browseColumnMapper->mapQuoted(BrowseCol::ref_id), browseColMap.at(BrowseCol::id).second);
+        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
+        this->sql_browse_query = fmt::format("SELECT {} FROM {} {} {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for UPnP search
     {
@@ -330,9 +379,9 @@ void SQLDatabase::init()
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
-        auto join1 = fmt::format("{} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        auto join2 = fmt::format("{} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        this->sql_search_query = fmt::format("{} INNER JOIN {} INNER JOIN {}", searchColumnMapper->tableQuoted(), join1, join2);
+        auto join1 = fmt::format("INNER JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join2 = fmt::format("INNER JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for metadata
     {
@@ -342,6 +391,16 @@ void SQLDatabase::init()
             buf.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, col.second)); // currently no alias
         }
         this->sql_meta_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
+    }
+    // Statement for autoscan
+    {
+        std::vector<std::string> buf;
+        buf.reserve(autoscanColMap.size());
+        for (auto&& [key, col] : autoscanColMap) {
+            buf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
+        }
+        auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
+        this->sql_autoscan_query = fmt::format("SELECT {} FROM {} {}", fmt::join(buf, ", "), autoscanColumnMapper->tableQuoted(), join);
     }
     // Statement for resource
     {
@@ -1668,10 +1727,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     constexpr std::string_view tabAlias = "fol";
     constexpr std::string_view childAlias = "cld";
     std::vector<std::string> fields {
-        fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
-        fmt::format("COUNT({0}{3}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, tabAlias, childAlias),
-        fmt::format("{0}{2}{1}.{0}parent_id{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
-        fmt::format("{0}{2}{1}.{0}flags{1}", table_quote_begin, table_quote_end, tabAlias, childAlias),
+        fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias),
+        fmt::format("COUNT({0}{2}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, childAlias),
+        fmt::format("{0}{2}{1}.{0}parent_id{1}", table_quote_begin, table_quote_end, tabAlias),
+        fmt::format("{0}{2}{1}.{0}flags{1}", table_quote_begin, table_quote_end, tabAlias),
     };
     std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {0}{3}{1}.{0}id{1} = {0}{4}{1}.{0}parent_id{1} WHERE {0}{3}{1}.{0}object_type{1} = {6} AND {0}{3}{1}.{0}id{1} ",
         table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, CDS_OBJECT_TABLE, quote(OBJECT_TYPE_CONTAINER));
@@ -1881,14 +1940,9 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
 
 std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
 {
-#define FLD(field) << TQD('a', field) <<
-    std::ostringstream q;
-    q << "SELECT " FLD("id") ',' FLD("obj_id") ',' FLD("scan_level") ',' FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ',' FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ',' FLD("location") ',' << TQD('t', "location")
-      << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
-      << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
-      << " ON " FLD("obj_id") '=' << TQD('t', "id")
-      << " WHERE " FLD("scan_mode") '=' << quote(AutoscanDirectory::mapScanmode(scanmode));
-    auto res = select(q);
+    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, AUS_ALIAS, quote(AutoscanDirectory::mapScanmode(scanmode)));
+
+    auto res = select(selectSql);
     if (!res)
         throw DatabaseException("", "query error while fetching autoscan list");
 
@@ -1907,14 +1961,9 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
 
 std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectID)
 {
-#define FLD(field) << TQD('a', field) <<
-    std::ostringstream q;
-    q << "SELECT " FLD("id") ',' FLD("obj_id") ',' FLD("scan_level") ',' FLD("scan_mode") ',' FLD("recursive") ',' FLD("hidden") ',' FLD("interval") ',' FLD("last_modified") ',' FLD("persistent") ',' FLD("location") ',' << TQD('t', "location")
-      << " FROM " << TQ(AUTOSCAN_TABLE) << ' ' << TQ('a')
-      << " LEFT JOIN " << TQ(CDS_OBJECT_TABLE) << ' ' << TQ('t')
-      << " ON " FLD("obj_id") '=' << TQD('t', "id")
-      << " WHERE " << TQD('t', "id") << '=' << quote(objectID);
-    auto res = select(q);
+    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}id{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, ITM_ALIAS, quote(objectID));
+
+    auto res = select(selectSql);
     if (!res)
         throw DatabaseException("", "query error while fetching autoscan");
 
@@ -1928,29 +1977,29 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectI
 std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
 {
     int objectID = INVALID_OBJECT_ID;
-    std::string objectIDstr = row->col(1);
+    std::string objectIDstr = getCol(row, AutoscanColumn::obj_id);
     if (!objectIDstr.empty())
         objectID = std::stoi(objectIDstr);
-    int databaseID = std::stoi(row->col(0));
+    int databaseID = std::stoi(getCol(row, AutoscanColumn::id));
 
     fs::path location;
     if (objectID == INVALID_OBJECT_ID) {
-        location = row->col(9);
+        location = getCol(row, AutoscanColumn::location);
     } else {
         char prefix;
-        location = stripLocationPrefix(row->col(10), &prefix);
+        location = stripLocationPrefix(getCol(row, AutoscanColumn::obj_location), &prefix);
         if (prefix != LOC_DIR_PREFIX)
             return nullptr;
     }
 
-    ScanMode mode = AutoscanDirectory::remapScanmode(row->col(3));
-    bool recursive = remapBool(row->col(4));
-    bool hidden = remapBool(row->col(5));
-    bool persistent = remapBool(row->col(8));
+    ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::scan_mode));
+    bool recursive = remapBool(getCol(row, AutoscanColumn::recursive));
+    bool hidden = remapBool(getCol(row, AutoscanColumn::hidden));
+    bool persistent = remapBool(getCol(row, AutoscanColumn::persistent));
     int interval = 0;
     if (mode == ScanMode::Timed)
-        interval = std::stoi(row->col(6));
-    auto last_modified = std::chrono::seconds(std::stol(row->col(7)));
+        interval = std::stoi(getCol(row, AutoscanColumn::interval));
+    auto last_modified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::last_modified)));
 
     log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified.count())) : "unset");
 
@@ -2034,7 +2083,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         fmt::format("{}interval{} = {}", table_quote_begin, table_quote_end, quote(adir->getInterval().count())),
         fmt::format("{}persistent{} = {}", table_quote_begin, table_quote_end, mapBool(adir->persistent())),
         fmt::format("{}location{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
-        fmt::format("{}path_ids{} = {}", table_quote_begin, table_quote_end, pathIds.empty() ? SQL_NULL : fmt::format(",{},", fmt::join(pathIds, ","))),
+        fmt::format("{}path_ids{} = {}", table_quote_begin, table_quote_end, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
         fmt::format("{}touched{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
     };
     if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
