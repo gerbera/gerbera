@@ -52,6 +52,7 @@ function(generate_compile_info)
                 OUTPUT_STRIP_TRAILING_WHITESPACE
         )
     else()
+        set(GIT_TAG "")
         set(GIT_BRANCH "")
         set(GIT_COMMIT_HASH "")
     endif()

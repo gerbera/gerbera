@@ -29,8 +29,9 @@ jobs:
             lzlib \
             ossp-uuid \
             pugixml \
-            spdlog \
             taglib
+          sudo bash scripts/install-fmt.sh static
+          sudo bash scripts/install-spdlog.sh
           sudo bash scripts/install-googletest.sh
 
       - name: Build
