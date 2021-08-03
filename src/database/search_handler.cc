@@ -556,5 +556,5 @@ std::string SortParser::parse()
             log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
         }
     }
-    return join(sort, ", ");
+    return fmt::format("{}", fmt::join(sort, ", "));
 }

@@ -63,12 +63,8 @@ void Headers::addHeader(const std::string& key, const std::string& value)
         return;
     }
 
-    if (!headers) {
-        headers = std::make_unique<std::map<std::string, std::string>>();
-    }
-
     log_debug("Adding header: '{}: {}'", cleanKey.c_str(), cleanValue.c_str());
-    headers->emplace(cleanKey, cleanValue);
+    headers.emplace(cleanKey, cleanValue);
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
@@ -93,14 +89,11 @@ std::pair<std::string, std::string> Headers::parseHeader(const std::string& head
 
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 {
-    if (!headers)
-        return;
-
 #if defined(USING_NPUPNP)
-    std::copy(headers->begin(), headers->end(), std::back_inserter(fileInfo->response_headers));
+    std::copy(headers.begin(), headers.end(), std::back_inserter(fileInfo->response_headers));
 #else
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    for (auto&& iter : *headers) {
+    for (auto&& iter : headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
         UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
@@ -108,10 +101,10 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 #endif
 }
 
-std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFileInfo* fileInfo)
+std::map<std::string, std::string> Headers::readHeaders(UpnpFileInfo* fileInfo)
 {
 #if defined(USING_NPUPNP)
-    return std::make_unique<std::map<std::string, std::string>>(fileInfo->request_headers);
+    return fileInfo->request_headers;
 #else
     std::map<std::string, std::string> ret;
 
@@ -124,6 +117,6 @@ std::unique_ptr<std::map<std::string, std::string>> Headers::readHeaders(UpnpFil
         ret.insert(add);
     }
 
-    return std::make_unique<std::map<std::string, std::string>>(std::move(ret));
+    return ret;
 #endif
 }

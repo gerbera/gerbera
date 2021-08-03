@@ -57,7 +57,7 @@ void Sqlite3Database::prepare()
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
     _exec("PRAGMA journal_mode = WAL");
-    SQLDatabase::exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
+    exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
 }
 
 void Sqlite3Database::init()
@@ -167,12 +167,9 @@ std::shared_ptr<Database> Sqlite3Database::getSelf()
     return shared_from_this();
 }
 
-void Sqlite3Database::_exec(const char* query, int length)
+void Sqlite3Database::_exec(const std::string& query)
 {
-    if (length == -1) {
-        length = strlen(query);
-    }
-    exec(query, length, false);
+    exec(query, false);
 }
 
 std::string Sqlite3Database::quote(std::string value) const
@@ -222,7 +219,7 @@ void Sqlite3DatabaseWithTransactions::commit(const std::string_view& tName)
     }
 }
 
-std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, size_t length)
+std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
 {
     try {
         log_debug("Adding select to Queue: {}", query);
@@ -240,7 +237,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const char* query, size_t len
     }
 }
 
-int Sqlite3Database::exec(const char* query, size_t length, bool getLastInsertId)
+int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
 {
     try {
         log_debug("Adding query to Queue: {}", query);
@@ -367,8 +364,9 @@ void Sqlite3Database::shutdownDriver()
 
 void Sqlite3Database::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    auto command = fmt::format("INSERT OR REPLACE INTO {0}{2}{1} ({0}key{1}, {0}value{1}) VALUES ({3}, {4})", table_quote_begin, table_quote_begin, INTERNAL_SETTINGS_TABLE, quote(key), quote(value));
-    SQLDatabase::exec(command);
+    auto command = fmt::format("INSERT OR REPLACE INTO {0}{2}{1} ({0}key{1}, {0}value{1}) VALUES ({3}, {4})",
+        table_quote_begin, table_quote_begin, INTERNAL_SETTINGS_TABLE, quote(key), quote(value));
+    exec(command);
 }
 
 bool SLTask::is_running() const
@@ -477,8 +475,8 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(const char* query, bool getLastInsertId)
-    : query(query)
+SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId)
+    : query(query.c_str())
     , getLastInsertIdFlag(getLastInsertId)
 {
 }

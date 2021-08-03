@@ -259,14 +259,7 @@ fs::path findInPath(const fs::path& exec)
 
 std::string renderWebUri(std::string_view ip, int port)
 {
-    std::ostringstream webUIAddr;
-    if (ip.find(':') != std::string::npos) {
-        webUIAddr << '[' << ip << ']';
-    } else {
-        webUIAddr << ip;
-    }
-    webUIAddr << ':' << port;
-    return webUIAddr.str();
+    return fmt::format((ip.find(':') != std::string::npos) ? "[{}]:{}" : "{}:{}", ip, port);
 }
 
 std::string httpRedirectTo(std::string_view addr, std::string_view page)
@@ -493,13 +486,7 @@ void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* 
 
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
-    std::ostringstream buf;
-    for (auto&& mimeType : mimeTypes) {
-        buf << "http-get:*:" << mimeType << ":*"
-            << ",";
-    }
-
-    return buf.str();
+    return mimeTypes.empty() ? "" : fmt::format("http-get:*:{}:*", fmt::join(mimeTypes, ":*,http-get:*:"));
 }
 
 std::string readTextFile(const fs::path& path)
@@ -752,11 +739,6 @@ unsigned int stringHash(std::string_view str)
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
 {
     return getValueOrDefault<std::string, std::string>(m, key, defval);
-}
-
-std::string toCSV(const std::unordered_set<int>& array)
-{
-    return array.empty() ? "" : join(array, ",");
 }
 
 std::chrono::seconds currentTime()
