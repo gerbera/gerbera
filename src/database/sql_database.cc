@@ -482,7 +482,7 @@ void SQLDatabase::shutdown()
 
 std::string SQLDatabase::getSortCapabilities()
 {
-    auto sortKeys = std::vector<std::string>();
+    std::vector<std::string> sortKeys;
     for (auto&& [key, col] : browseSortMap) {
         if (std::find(sortKeys.begin(), sortKeys.end(), key) == sortKeys.end()) {
             sortKeys.emplace_back(key);
@@ -493,9 +493,9 @@ std::string SQLDatabase::getSortCapabilities()
 
 std::string SQLDatabase::getSearchCapabilities()
 {
-    auto searchKeys = std::vector<std::string> {
+    auto searchKeys = std::vector {
         MetadataHandler::getMetaFieldName(M_TITLE),
-        UPNP_SEARCH_CLASS,
+        std::string(UPNP_SEARCH_CLASS),
         MetadataHandler::getMetaFieldName(M_ARTIST),
         MetadataHandler::getMetaFieldName(M_ALBUM),
         MetadataHandler::getMetaFieldName(M_GENRE),
@@ -667,7 +667,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
-        std::vector<std::string> where = {
+        auto where = std::vector {
             fmt::format("{}parent_id{}={}", table_quote_begin, table_quote_end, quote(obj->getParentID())),
             fmt::format("{}ref_id{}={}", table_quote_begin, table_quote_end, quote(refObj->getID())),
             fmt::format("{}dc_title{}={}", table_quote_begin, table_quote_end, quote(obj->getTitle())),
@@ -1028,7 +1028,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (!containers && !items)
         return 0;
 
-    std::vector<std::string> where {
+    auto where = std::vector {
         fmt::format("{}parent_id{} = {}", table_quote_begin, table_quote_end, contId)
     };
     if (containers && !items)
@@ -1079,7 +1079,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     }();
 
-    auto where = std::vector<std::string> {
+    auto where = std::vector {
         fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location_hash), quote(stringHash(dbLocation))),
         fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location), quote(dbLocation)),
         fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::ref_id)),
@@ -1143,7 +1143,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
-    std::vector<std::string> fields {
+    auto fields = std::vector {
         fmt::format("{}parent_id{}", table_quote_begin, table_quote_end),
         fmt::format("{}object_type{}", table_quote_begin, table_quote_end),
         fmt::format("{}upnp_class{}", table_quote_begin, table_quote_end),
@@ -1152,7 +1152,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         fmt::format("{}location_hash{}", table_quote_begin, table_quote_end),
         fmt::format("{}ref_id{}", table_quote_begin, table_quote_end),
     };
-    std::vector<std::string> values {
+    auto values = std::vector {
         fmt::format("{}", parentID),
         fmt::format("{}", OBJECT_TYPE_CONTAINER),
         fmt::format("{}", !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)),
@@ -1168,12 +1168,12 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
 
     if (!itemMetadata.empty()) {
         for (auto&& [key, val] : itemMetadata) {
-            std::vector<std::string> mfields {
+            auto mfields = std::vector {
                 fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
                 fmt::format("{}property_name{}", table_quote_begin, table_quote_end),
                 fmt::format("{}property_value{}", table_quote_begin, table_quote_end),
             };
-            std::vector<std::string> mvalues {
+            auto mvalues = std::vector {
                 fmt::format("{}", newId),
                 quote(key),
                 quote(val),
@@ -1433,7 +1433,7 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
 
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
-    std::vector<std::string> where {
+    auto where = std::vector {
         fmt::format("{}object_type{} != {}", table_quote_begin, table_quote_end, quote(OBJECT_TYPE_CONTAINER)),
     };
     if (!mimeType.empty()) {
@@ -1611,10 +1611,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     std::shared_ptr<SQLResult> res;
     std::unique_ptr<SQLRow> row;
 
-    std::vector<int32_t> itemIds(items);
-    std::vector<int32_t> containerIds(containers);
-    std::vector<int32_t> parentIds(items);
-    std::vector<int32_t> removeIds(containers);
+    auto itemIds = std::vector(items);
+    auto containerIds = std::vector(containers);
+    auto parentIds = std::vector(items);
+    auto removeIds = std::vector(containers);
 
     // select statements
     auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
@@ -1718,9 +1718,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return nullptr;
 
-    constexpr const char* tabAlias = "fol";
-    constexpr const char* childAlias = "cld";
-    std::vector<std::string> fields {
+    constexpr auto tabAlias = "fol";
+    constexpr auto childAlias = "cld";
+    auto fields = std::vector {
         fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias),
         fmt::format("COUNT({0}{2}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, childAlias),
         fmt::format("{0}{2}{1}.{0}parent_id{1}", table_quote_begin, table_quote_end, tabAlias),
@@ -1862,13 +1862,13 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 {
     auto res = select(fmt::format("SELECT {0}item{1} FROM {0}{2}{1} WHERE {0}item{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item)));
     if (!res || !res->nextRow()) {
-        std::vector<std::string> fields {
+        auto fields = std::vector {
             fmt::format("{}item{}", table_quote_begin, table_quote_end),
             fmt::format("{}key{}", table_quote_begin, table_quote_end),
             fmt::format("{}item_value{}", table_quote_begin, table_quote_end),
             fmt::format("{}status{}", table_quote_begin, table_quote_end),
         };
-        std::vector<std::string> values {
+        auto values = std::vector {
             quote(item),
             quote(key),
             quote(value),
@@ -2026,7 +2026,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
 
     _autoscanChangePersistentFlag(objectID, true);
 
-    std::vector<std::string> fields {
+    auto fields = std::vector {
         fmt::format("{}obj_id{}", table_quote_begin, table_quote_end),
         fmt::format("{}scan_level{}", table_quote_begin, table_quote_end),
         fmt::format("{}scan_mode{}", table_quote_begin, table_quote_end),
@@ -2038,7 +2038,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
         fmt::format("{}location{}", table_quote_begin, table_quote_end),
         fmt::format("{}path_ids{}", table_quote_begin, table_quote_end),
     };
-    std::vector<std::string> values {
+    auto values = std::vector {
         objectID >= 0 ? quote(objectID) : SQL_NULL,
         quote("full"),
         quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
@@ -2068,7 +2068,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         _autoscanChangePersistentFlag(objectIDold, false);
         _autoscanChangePersistentFlag(objectID, true);
     }
-    std::vector<std::string> fields {
+    auto fields = std::vector {
         fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? quote(objectID) : SQL_NULL),
         fmt::format("{}scan_level{} = {}", table_quote_begin, table_quote_end, quote("full")),
         fmt::format("{}scan_mode{} = {}", table_quote_begin, table_quote_end, quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
@@ -2136,7 +2136,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
     std::unique_ptr<SQLRow> row;
     {
-        std::vector<std::string> where {
+        auto where = std::vector {
             fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, quote(checkObjectID)),
         };
         if (databaseID >= 0)
@@ -2156,7 +2156,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     }
 
     if (adir->getRecursive()) {
-        std::vector<std::string> where {
+        auto where = std::vector {
             fmt::format("{}path_ids{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("%,{},%", checkObjectID))),
         };
         if (databaseID >= 0)
@@ -2182,7 +2182,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         if (pathIDs.empty())
             throw_std_runtime_error("getPathIDs returned nullptr");
 
-        std::vector<std::string> where {
+        auto where = std::vector {
             fmt::format("{}obj_id{} IN ({})", table_quote_begin, table_quote_end, fmt::join(pathIDs, ",")),
             fmt::format("{}recursive{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
         };
@@ -2489,13 +2489,13 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
         for (auto&& [key, val] : dict) {
             metadataSQLVals[quote(key)] = quote(val);
         }
-        auto fields = std::vector<std::string> {
+        auto fields = std::vector {
             fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
             fmt::format("{}property_name{}", table_quote_begin, table_quote_end),
             fmt::format("{}property_value{}", table_quote_begin, table_quote_end),
         };
         for (auto&& [key, val] : metadataSQLVals) {
-            auto values = std::vector<std::string> {
+            auto values = std::vector {
                 fmt::format("{}", objectId),
                 fmt::format("{}", key),
                 fmt::format("{}", val),
@@ -2575,12 +2575,12 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSQLVals[key] = quote(val);
             }
-            std::vector<std::string> fields {
+            auto fields = std::vector {
                 fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
                 fmt::format("{}res_id{}", table_quote_begin, table_quote_end),
                 fmt::format("{}handlerType{}", table_quote_begin, table_quote_end),
             };
-            std::vector<std::string> values {
+            auto values = std::vector {
                 fmt::format("{}", objectId),
                 fmt::format("{}", res_id),
                 fmt::format("{}", resource->getHandlerType()),
