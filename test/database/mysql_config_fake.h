@@ -51,8 +51,8 @@ public:
     void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override { }
     int getIntOption(config_option_t option) const override { return 0; }
     bool getBoolOption(config_option_t option) const override { return false; }
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return std::map<std::string, std::string>(); }
-    std::vector<std::string> getArrayOption(config_option_t option) const override { return std::vector<std::string>(); }
+    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
+    std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }

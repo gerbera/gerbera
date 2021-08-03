@@ -182,7 +182,7 @@ private:
     std::string quote(unsigned int val) const override { return fmt::to_string(val); }
     std::string quote(long val) const override { return fmt::to_string(val); }
     std::string quote(unsigned long val) const override { return fmt::to_string(val); }
-    std::string quote(bool val) const override { return std::string(val ? "1" : "0"); }
+    std::string quote(bool val) const override { return val ? "1" : "0"; }
     std::string quote(char val) const override { return quote(std::string(1, val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
 

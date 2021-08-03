@@ -62,8 +62,8 @@ public:
     {
         char* c = col_c_str(index);
         if (!c)
-            return "";
-        return std::string(c);
+            return {};
+        return { c };
     }
     virtual char* col_c_str(int index) const = 0;
 };

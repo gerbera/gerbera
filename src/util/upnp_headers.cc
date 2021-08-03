@@ -84,7 +84,7 @@ std::pair<std::string, std::string> Headers::parseHeader(const std::string& head
 
     trimStringInPlace(first);
     trimStringInPlace(second);
-    return std::pair(first, second);
+    return { first, second };
 }
 
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const

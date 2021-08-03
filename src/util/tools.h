@@ -188,7 +188,7 @@ std::chrono::seconds to_seconds(TP tp)
 {
     auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
         + std::chrono::system_clock::now());
-    return std::chrono::seconds(std::chrono::system_clock::to_time_t(asSystemTime));
+    return std::chrono::duration_cast<std::chrono::seconds>(asSystemTime.time_since_epoch());
 }
 
 /// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
