@@ -253,7 +253,7 @@ void MySQLDatabaseWithTransactions::commit(const std::string_view& tName)
     inTransaction = false;
 }
 
-std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const char* query, size_t length)
+std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::string& query)
 {
 #ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
@@ -267,7 +267,7 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const char* que
         inTransaction = true;
         myTransaction = true;
     }
-    auto res = mysql_real_query(&db, query, length);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
         rollback("");
@@ -287,13 +287,13 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const char* que
     return std::make_shared<MysqlResult>(mysql_res);
 }
 
-std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t length)
+std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
 {
     log_debug("{}", query);
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
-    auto res = mysql_real_query(&db, query, length);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
@@ -308,7 +308,7 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const char* query, size_t lengt
     return std::make_shared<MysqlResult>(mysql_res);
 }
 
-int MySQLDatabase::exec(const char* query, size_t length, bool getLastInsertId)
+int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
@@ -317,7 +317,7 @@ int MySQLDatabase::exec(const char* query, size_t length, bool getLastInsertId)
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
-    auto res = mysql_real_query(&db, query, length);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
         rollback("");
@@ -335,13 +335,13 @@ void MySQLDatabase::shutdownDriver()
 
 void MySQLDatabase::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    SQLDatabase::exec(fmt::format("INSERT INTO `{0}` (`key`, `value`) VALUES ({1}, {2}) ON DUPLICATE KEY UPDATE `value` = {2}",
+    exec(fmt::format("INSERT INTO `{0}` (`key`, `value`) VALUES ({1}, {2}) ON DUPLICATE KEY UPDATE `value` = {2}",
         INTERNAL_SETTINGS_TABLE, quote(key), quote(value)));
 }
 
-void MySQLDatabase::_exec(const char* query, int length)
+void MySQLDatabase::_exec(const std::string& query)
 {
-    if (mysql_real_query(&db, query, (length > 0 ? length : strlen(query)))) {
+    if (mysql_real_query(&db, query.c_str(), query.size())) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while updating db: {}; query: {}", myError, query));
     }

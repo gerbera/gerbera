@@ -34,11 +34,8 @@
 #include <chrono>
 #include <filesystem>
 #include <map>
-#include <memory>
 #include <optional>
-#include <sstream>
 #include <string>
-#include <unordered_set>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -234,20 +231,6 @@ std::string fallbackString(const std::string& first, const std::string& fallback
 /// \return return the (unsigned int) hash value
 unsigned int stringHash(std::string_view str);
 
-/// \brief join items of container by delimiter
-template <typename C, typename D>
-std::string join(const C& container, const D& delimiter)
-{
-    std::ostringstream buf;
-    auto it = container.begin();
-    while (it != container.end()) {
-        buf << *it;
-        if (std::next(it++) != container.end())
-            buf << delimiter;
-    }
-    return buf.str();
-}
-
 /// \brief Iterator over values of a sequential enum between begin and end
 template <typename C, C beginVal, C endVal>
 class EnumIterator {
@@ -293,8 +276,6 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
     return (it == m.end()) ? defval : it->second;
 }
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
-
-std::string toCSV(const std::unordered_set<int>& array);
 
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();

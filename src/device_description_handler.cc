@@ -23,6 +23,8 @@
 
 #include "device_description_handler.h" // API
 
+#include <sstream>
+
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 

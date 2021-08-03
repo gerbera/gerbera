@@ -31,7 +31,7 @@
 
 #include "upnp_cds.h" // API
 
-#include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 

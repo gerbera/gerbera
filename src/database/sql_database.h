@@ -34,7 +34,6 @@
 
 #include <array>
 #include <mutex>
-#include <sstream>
 #include <unordered_set>
 #include <utility>
 
@@ -48,9 +47,6 @@ class SQLResult;
 class SQLEmitter;
 
 #define DBVERSION 13
-
-#define QTB table_quote_begin
-#define QTE table_quote_end
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -99,23 +95,8 @@ public:
     virtual void rollback(const std::string_view& tName) { }
     virtual void commit(const std::string_view& tName) { }
 
-    virtual std::shared_ptr<SQLResult> select(const char* query, size_t length) = 0;
-    virtual int exec(const char* query, size_t length, bool getLastInsertId = false) = 0;
-
-    /* wrapper functions for select and exec */
-    std::shared_ptr<SQLResult> select(const std::string& buf)
-    {
-        return select(buf.c_str(), buf.length());
-    }
-    std::shared_ptr<SQLResult> select(const std::ostringstream& buf)
-    {
-        auto s = buf.str();
-        return select(s.c_str(), s.length());
-    }
-    int exec(const std::string& query, bool getLastInsertId = false)
-    {
-        return exec(query.c_str(), query.length(), getLastInsertId);
-    }
+    virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
+    virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override;
@@ -180,6 +161,7 @@ public:
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
     void init() override;
+    int insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();
@@ -203,13 +185,14 @@ protected:
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
     void upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
-    virtual void _exec(const char* query, int length = -1) = 0;
+    virtual void _exec(const std::string& query) = 0;
 
 private:
     std::string sql_browse_query;
     std::string sql_search_columns;
     std::string sql_search_query;
     std::string sql_meta_query;
+    std::string sql_autoscan_query;
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
 
@@ -250,14 +233,12 @@ private:
     void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
         std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
-    std::ostringstream sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::ostringstream sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::ostringstream sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<int32_t>& objectIDs);
-
-    static std::string toCSV(const std::vector<int>& input);
 
     std::unique_ptr<ChangedContainers> _recursiveRemove(
         const std::vector<int32_t>& items,
