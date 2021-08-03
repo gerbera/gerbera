@@ -29,22 +29,22 @@ function install-cmake() {
 
 function install-fmt {
   echo "::group::Installing fmt"
-  if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
+  #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
     sudo bash scripts/install-fmt.sh static
-  else
-     sudo apt-get install libfmt-dev -y
-  fi
+  #else
+  #   sudo apt-get install libfmt-dev -y
+  #fi
   echo "::endgroup::"
 }
 
 function install-spdlog() {
   echo "::group::Installing spdlog"
 
-  if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
+  #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
     sudo bash scripts/install-spdlog.sh
-  else
-    sudo apt-get install libspdlog-dev -y
-  fi
+  #else
+  #  sudo apt-get install libspdlog-dev -y
+  #fi
   echo "::endgroup::"
 }
 
