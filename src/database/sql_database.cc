@@ -710,8 +710,10 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::id) << '=' << objectID;
 
     beginTransaction("loadObject");
-    if (auto res = select(qb)) {
-        if (auto row = res->nextRow()) {
+    auto res = select(qb);
+    if (res) {
+        auto row = res->nextRow();
+        if (row) {
             auto result = createObjectFromRow(row);
             commit("loadObject");
             return result;
@@ -727,8 +729,10 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     std::ostringstream qb;
     qb << sql_browse_query << " WHERE " << TQBM(BrowseCol::service_id) << '=' << quote(serviceID);
     beginTransaction("loadObjectByServiceID");
-    if (auto res = select(qb)) {
-        if (auto row = res->nextRow()) {
+    auto res = select(qb);
+    if (res) {
+        auto row = res->nextRow();
+        if (row) {
             auto result = createObjectFromRow(row);
             commit("loadObjectByServiceID");
             return result;
@@ -755,7 +759,8 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 
     std::vector<int> objectIDs;
     objectIDs.reserve(res->getNumRows());
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         objectIDs.push_back(row->col_int(0));
     }
 
@@ -852,7 +857,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
     result.reserve(sqlResult->getNumRows());
-    while (auto row = sqlResult->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = sqlResult->nextRow()) {
         result.push_back(createObjectFromRow(row));
     }
 
@@ -924,7 +930,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     auto sqlResult = select(countSQL);
     commit("search");
 
-    if (auto countRow = sqlResult->nextRow()) {
+    auto countRow = sqlResult->nextRow();
+    if (countRow) {
         numMatches = countRow->col_int(0);
     }
 
@@ -958,7 +965,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
 
     std::vector<std::shared_ptr<CdsObject>> result;
     result.reserve(sqlResult->getNumRows());
-    while (auto row = sqlResult->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = sqlResult->nextRow()) {
         result.push_back(createObjectFromSearchRow(row));
     }
 
@@ -990,7 +998,8 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     commit("getChildCount");
 
     if (res) {
-        if (auto row = res->nextRow()) {
+        auto row = res->nextRow();
+        if (row) {
             return row->col_int(0);
         }
     }
@@ -1012,7 +1021,8 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
 
     std::vector<std::string> arr;
     arr.reserve(res->getNumRows());
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         arr.push_back(row->col(0));
     }
 
@@ -1190,7 +1200,8 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
     beginTransaction("addContainerChain");
     auto res = select(qb);
     if (res) {
-        if (auto row = res->nextRow()) {
+        auto row = res->nextRow();
+        if (row) {
             if (containerID)
                 *containerID = row->col_int(0);
             commit("addContainerChain");
@@ -1427,6 +1438,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 {
     if (ids.empty())
         return {};
+
     std::ostringstream inBuf;
 
     bool first = true;
@@ -1460,7 +1472,8 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
     std::vector<std::string> rows;
     rows.reserve(res->getNumRows());
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         std::ostringstream s;
         s << row->col(0) << ',' << row->col(1);
         rows.emplace_back(s.str());
@@ -1468,6 +1481,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
     if (rows.empty())
         return {};
+
     return join(rows, ",");
 }
 
@@ -1482,11 +1496,13 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     auto res = select(q);
     if (!res)
         throw_std_runtime_error("db error");
+
     if (res->getNumRows() == 0)
         return {};
 
     std::unordered_set<int> ret;
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         ret.insert(row->col_int(0));
     }
     return ret;
@@ -1514,7 +1530,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         const int32_t objectID = row->col_int(0);
         const int objectType =   row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
@@ -1871,11 +1888,12 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
       << " WHERE " << TQ("key") << '=' << quote(key);
     auto res = select(q);
     if (!res)
-        return "";
+        return {};
 
     auto row = res->nextRow();
     if (!row)
-        return "";
+        return {};
+
     return row->col(0);
 }
 
@@ -1896,7 +1914,8 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
 
     std::vector<ConfigValue> result;
     result.reserve(res->getNumRows());
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         result.push_back({ row->col(1),
             row->col(0),
             row->col(2),
@@ -2008,7 +2027,8 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
         }
         commit("updateAutoscanList x");
 
-        if (auto row = res->nextRow()) {
+        std::unique_ptr<SQLRow> row = res->nextRow();
+        if (row) {
             ad->setDatabaseID(row->col_int(0));
             updateAutoscanDirectory(ad);
         } else
@@ -2197,6 +2217,7 @@ void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
 {
     if (autoscanID == INVALID_OBJECT_ID)
         return;
+
     int objectID = _getAutoscanObjectID(autoscanID);
     std::ostringstream q;
     q << "DELETE FROM " << TQ(AUTOSCAN_TABLE)
@@ -2215,7 +2236,8 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
     if (!res)
         throw DatabaseException("", "error while doing select on ");
 
-    if (auto row = res->nextRow())
+    std::unique_ptr<SQLRow> row = res->nextRow();
+    if (row)
         return row->col_int(0, INVALID_OBJECT_ID);
 
     return INVALID_OBJECT_ID;
@@ -2244,9 +2266,11 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 {
     if (!adir)
         throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
+
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
         return {};
+
     int databaseID = adir->getDatabaseID();
 
     std::unique_ptr<SQLRow> row;
@@ -2429,7 +2453,8 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
 
     std::vector<std::shared_ptr<CdsResource>> resources;
     resources.reserve(res->getNumRows());
-    while (auto row = res->nextRow()) {
+    std::unique_ptr<SQLRow> row;
+    while (row = res->nextRow()) {
         auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
         resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
         resource->setResId(resources.size());
