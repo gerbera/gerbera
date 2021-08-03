@@ -28,8 +28,8 @@ function install-cmake() {
 }
 
 function install-fmt {
-    echo "::group::Installing fmt"
-  if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
+  echo "::group::Installing fmt"
+  if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
     sudo bash scripts/install-fmt.sh static
   else
      sudo apt-get install libfmt-dev -y
@@ -40,7 +40,7 @@ function install-fmt {
 function install-spdlog() {
   echo "::group::Installing spdlog"
 
-  if [[ "$lsb_codename" == "bionic" || $lsb_codename == "buster" ]]; then
+  if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
     sudo bash scripts/install-spdlog.sh
   else
     sudo apt-get install libspdlog-dev -y
@@ -68,7 +68,7 @@ install-cmake
 libduktape="libduktape205"
 if [[ "$lsb_codename" == "bionic" ]]; then
   libduktape="libduktape202"
-elif [ $lsb_codename == "buster" ]; then
+elif [ "$lsb_codename" == "buster" ]; then
   libduktape="libduktape203"
 fi
 
