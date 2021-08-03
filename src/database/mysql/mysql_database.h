@@ -51,7 +51,7 @@ public:
     MySQLDatabase& operator=(const MySQLDatabase&) = delete;
 
 protected:
-    void _exec(const char* query, int length = -1) override;
+    void _exec(const std::string& query) override;
     void checkMysqlThreadInit() const;
 
     static std::string getError(MYSQL* db);
@@ -74,8 +74,8 @@ private:
     std::string quote(char val) const override { return quote(fmt::to_string(val)); }
     std::string quote(long long val) const override { return fmt::to_string(val); }
 
-    std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
-    int exec(const char* query, size_t length, bool getLastInsertId = false) override;
+    std::shared_ptr<SQLResult> select(const std::string& query) override;
+    int exec(const std::string& query, bool getLastInsertId = false) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
@@ -100,7 +100,7 @@ public:
     void rollback(const std::string_view& tName) override;
     void commit(const std::string_view& tName) override;
 
-    std::shared_ptr<SQLResult> select(const char* query, size_t length) override;
+    std::shared_ptr<SQLResult> select(const std::string& query) override;
 };
 
 class MysqlResult : public SQLResult {

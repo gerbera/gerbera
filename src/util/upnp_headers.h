@@ -36,14 +36,14 @@ public:
     void addHeader(const std::string& key, const std::string& value);
     void writeHeaders(UpnpFileInfo* fileInfo) const;
 
-    static std::unique_ptr<std::map<std::string, std::string>> readHeaders(UpnpFileInfo* fileInfo);
+    static std::map<std::string, std::string> readHeaders(UpnpFileInfo* fileInfo);
 
 private:
     static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
     static std::pair<std::string, std::string> parseHeader(const std::string& header);
     static std::string stripInvalid(const std::string& value);
 
-    std::unique_ptr<std::map<std::string, std::string>> headers;
+    std::map<std::string, std::string> headers;
 };
 
 #endif //GERBERA_HEADERS_H

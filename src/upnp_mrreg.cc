@@ -31,6 +31,8 @@
 
 #include "upnp_mrreg.h" // API
 
+#include <sstream>
+
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "upnp_xml.h"

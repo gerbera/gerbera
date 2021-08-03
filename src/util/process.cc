@@ -35,6 +35,7 @@
 #include <csignal>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <thread>
 
 #include <fcntl.h>
@@ -63,14 +64,14 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
-        log_debug("Failed to open input file {}: {}", input_file.c_str(), std::strerror(errno));
-        throw_std_runtime_error("Failed to open input file {}: {}", input_file.c_str(), std::strerror(errno));
+        log_debug("Failed to open input file {}: {}", input_file, std::strerror(errno));
+        throw_std_runtime_error("Failed to open input file {}: {}", input_file, std::strerror(errno));
     }
     size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
     if (ret < input.length()) {
-        log_debug("Failed to write to {}: {}", input.c_str(), std::strerror(errno));
-        throw_std_runtime_error("Failed to write to {}: {}", input.c_str(), std::strerror(errno));
+        log_debug("Failed to write to {}: {}", input, std::strerror(errno));
+        throw_std_runtime_error("Failed to write to {}: {}", input, std::strerror(errno));
     }
 
     /* touching output file */
@@ -81,18 +82,18 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
-        log_debug("Failed to open output file {}: {}", output_file.c_str(), std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", output_file.c_str(), std::strerror(errno));
+        log_debug("Failed to open output file {}: {}", output_file, std::strerror(errno));
+        throw_std_runtime_error("Failed to open output file {}: {}", output_file, std::strerror(errno));
     }
     close(fd);
 
     /* executing script */
-    std::string command = prog + " " + param + " < " + input_file + " > " + output_file;
-    log_debug("running {}", command.c_str());
+    auto command = fmt::format("{} {} < {} > {}", prog, param, input_file, output_file);
+    log_debug("running {}", command);
     int sysret = system(command.c_str());
     if (sysret == -1) {
-        log_debug("Failed to execute: {}", command.c_str());
-        throw_std_runtime_error("Failed to execute: {}", command.c_str());
+        log_debug("Failed to execute: {}", command);
+        throw_std_runtime_error("Failed to execute: {}", command);
     }
 
     /* reading output file */
@@ -102,11 +103,11 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     file = ::fopen(output_file.c_str(), "r");
 #endif
     if (!file) {
-        log_debug("Could not open output file {}: {}", output_file.c_str(), std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", output_file.c_str(), std::strerror(errno));
+        log_debug("Could not open output file {}: {}", output_file, std::strerror(errno));
+        throw_std_runtime_error("Failed to open output file {}: {}", output_file, std::strerror(errno));
     }
-    std::ostringstream output;
 
+    std::ostringstream output;
     int bytesRead;
     char buf[BUF_SIZE];
     while (true) {

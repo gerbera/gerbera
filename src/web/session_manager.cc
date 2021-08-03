@@ -106,9 +106,11 @@ std::string Session::getUIUpdateIDs()
         updateAll = false;
         return "all";
     }
-    std::string ret = toCSV(uiUpdateIDs);
-    if (!ret.empty())
+    std::string ret;
+    if (!uiUpdateIDs.empty()) {
+        ret = fmt::format("{}", fmt::join(uiUpdateIDs, ","));
         uiUpdateIDs.clear();
+    }
     return ret;
 }
 

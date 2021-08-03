@@ -31,6 +31,8 @@
 
 #include "upnp_xml.h" // API
 
+#include <sstream>
+
 #include "config/config_manager.h"
 #include "content/scripting/script_names.h"
 #include "database/database.h"
