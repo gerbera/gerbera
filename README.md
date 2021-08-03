@@ -53,8 +53,8 @@ sudo make install
 | libiconv      |               | Required      | Charset conversion         |                        |          |                    |
 | sqlite3       | 3.7.0         | Required      | Database storage           |                        |          |                    |
 | zlib          |               | Required      | Data compression           |                        |          |                    |
-| [fmtlib]      | 5.3           | Required      | Fast string formatting     |                        |          | install-fmt.sh     |
-| [spdlog]      |               | Required      | Runtime logging            |                        |          | install-spdlog.sh  |
+| [fmtlib]      | 7.1.3         | Required      | Fast string formatting     |                        |          | install-fmt.sh     |
+| [spdlog]      | 1.8.5         | Required      | Runtime logging            |                        |          | install-spdlog.sh  |
 | [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  | install-duktape.sh |
 | mysql         |               | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |                    |
 | curl          |               | Optional      | Enables web services       | WITH_CURL              | Enabled  |                    |
