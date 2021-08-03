@@ -402,7 +402,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
                 auto res_params = res->getParameters();
                 res_params[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
                 auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(res_params) });
-                return std::pair(url, true);
+                return { url, true };
             }
 
             if (!resObj.empty()) {
@@ -411,7 +411,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
 
                 auto res_params = res->getParameters();
                 auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) });
-                return std::pair(url, true);
+                return { url, true };
             }
         }
     }
@@ -442,7 +442,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& 
                              || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
                              || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL); });
     if (resFound != orderedResources.end()) {
-        return std::pair(renderOneResource(virtualURL, item, *resFound), true);
+        return { renderOneResource(virtualURL, item, *resFound), true };
     }
 
     return {};
@@ -455,7 +455,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& v
         [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
     if (resFound != resources.end()) {
         auto url = renderOneResource(virtualURL, item, *resFound) + renderExtension("", (*resFound)->getAttribute(R_RESOURCE_FILE));
-        return std::pair(url, true);
+        return { url, true };
     }
     return {};
 }
