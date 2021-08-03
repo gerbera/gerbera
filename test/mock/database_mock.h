@@ -22,7 +22,7 @@ public:
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override { }
     void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
         std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override { }
-    fs::path buildContainerPath(int parentID, const std::string& title) override { return ""; }
+    fs::path buildContainerPath(int parentID, const std::string& title) override { return {}; }
 
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
 
@@ -46,7 +46,7 @@ public:
 
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
 
-    std::string getInternalSetting(const std::string& key) override { return ""; }
+    std::string getInternalSetting(const std::string& key) override { return {}; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
 
     std::vector<ConfigValue> getConfigValues() override
@@ -70,7 +70,7 @@ public:
     int ensurePathExistence(const fs::path& path, int* changedContainer) override { return 0; }
 
     void clearFlagInDB(int flag) override { }
-    std::string getFsRootName() override { return ""; }
+    std::string getFsRootName() override { return {}; }
 
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }

@@ -475,7 +475,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         return fmt::format("{}.{}{}", ext, (filename), extension);
     }
 
-    return "";
+    return {};
 }
 
 std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsItem>& item)

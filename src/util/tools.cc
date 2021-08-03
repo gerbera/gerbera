@@ -244,7 +244,7 @@ fs::path findInPath(const fs::path& exec)
 {
     std::string PATH = getenv("PATH");
     if (PATH.empty())
-        return "";
+        return {};
 
     std::error_code ec;
     auto pathAr = splitString(PATH, ':');
@@ -254,7 +254,7 @@ fs::path findInPath(const fs::path& exec)
             return check;
     }
 
-    return "";
+    return {};
 }
 
 std::string renderWebUri(std::string_view ip, int port)
@@ -590,7 +590,7 @@ std::string getMTFromProtocolInfo(std::string_view protocol)
     if (parts.size() > 2)
         return parts[2];
 
-    return "";
+    return {};
 }
 
 std::string getProtocol(const std::string& protocolInfo)
@@ -765,7 +765,7 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::c
 std::string ipToInterface(std::string_view ip)
 {
     if (ip.empty()) {
-        return "";
+        return {};
     }
 
     log_warning("Please provide an interface name instead! LibUPnP does not support specifying an IP in current versions.");
@@ -792,7 +792,7 @@ std::string ipToInterface(std::string_view ip)
                 host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
             if (s != 0) {
                 log_error("getnameinfo() failed: {}", gai_strerror(s));
-                return "";
+                return {};
             }
 
             std::string ipaddr = host;
@@ -805,7 +805,7 @@ std::string ipToInterface(std::string_view ip)
 
     freeifaddrs(ifaddr);
     log_warning("Failed to find interface for IP: {}", ip);
-    return "";
+    return {};
 }
 
 bool validateYesNo(std::string_view value)
@@ -891,7 +891,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     XXXXXX = strstr(tmpl, "XXXXXX");
 
     if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6) != 0) {
-        return "";
+        return {};
     }
 
     /* Get some more or less random data.  */
@@ -920,12 +920,12 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
             if ((errno == ENOENT) || (errno == ENOTDIR))
                 return check;
 
-            return "";
+            return {};
         }
     }
 
     /* We got out of the loop because we ran out of combinations to try.  */
-    return "";
+    return {};
 }
 
 bool isTheora(const fs::path& ogg_filename)
@@ -1071,12 +1071,12 @@ std::string getAVIFourCC(std::string_view avi_filename)
 
     if (strncmp(buffer, "RIFF", 4) != 0) {
         delete[] buffer;
-        return "";
+        return {};
     }
 
     if (strncmp(buffer + 8, "AVI ", 4) != 0) {
         delete[] buffer;
-        return "";
+        return {};
     }
 
     std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
