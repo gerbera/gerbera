@@ -1570,7 +1570,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
 {
-    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(objectID)));
+    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(objectID)));
     if (!res)
         return nullptr;
 
@@ -1819,13 +1819,14 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)
 {
-    auto res = select(fmt::format("SELECT {0}value{1} FROM {0}{2}{1} WHERE {0}key{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, INTERNAL_SETTINGS_TABLE, quote(key)));
+    auto res = select(fmt::format("SELECT {0}value{1} FROM {0}{2}{1} WHERE {0}key{1} = {3}", table_quote_begin, table_quote_end, INTERNAL_SETTINGS_TABLE, quote(key)));
     if (!res)
-        return "";
+        return {};
 
     auto row = res->nextRow();
     if (!row)
-        return "";
+        return {};
+
     return row->col(0);
 }
 
@@ -2216,7 +2217,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     std::vector<int> pathIDs;
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
-        auto res = select(fmt::format("{} {} LIMIT 1", sel, quote(objectID)));
+        auto res = select(fmt::format("{} {}", sel, quote(objectID)));
         if (!res)
             break;
         auto row = res->nextRow();
