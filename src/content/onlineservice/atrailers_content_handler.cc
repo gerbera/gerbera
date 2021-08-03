@@ -42,7 +42,7 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
     service_xml = std::move(service);
     auto root = service_xml->document_element();
 
-    if (std::string(root.name()) != "records")
+    if (std::string_view(root.name()) != "records")
         throw_std_runtime_error("Recieved invalid XML for Apple Trailers service");
 
     trailer_it = root.begin();
@@ -65,7 +65,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
         if (trailer.type() != pugi::node_element)
             continue;
 
-        if (std::string(trailer.name()) != "movieinfo")
+        if (std::string_view(trailer.name()) != "movieinfo")
             continue;
 
         // we know that we have a trailer
@@ -161,7 +161,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         for (auto&& actor : cast.children()) {
             if (actor.type() != pugi::node_element)
                 return nullptr;
-            if (std::string(actor.name()) != "name")
+            if (std::string_view(actor.name()) != "name")
                 return nullptr;
 
             temp = actor.text().as_string();
@@ -183,7 +183,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         for (auto&& gn : genre.children()) {
             if (gn.type() != pugi::node_element)
                 return nullptr;
-            if (std::string(gn.name()) != "name")
+            if (std::string_view(gn.name()) != "name")
                 return nullptr;
 
             temp = gn.text().as_string();

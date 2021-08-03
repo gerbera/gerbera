@@ -423,7 +423,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
         throw ConfigParseException(result.description());
     }
     auto root = xmlDoc.document_element();
-    if (std::string(root.name()) != "upgrade")
+    if (std::string_view(root.name()) != "upgrade")
         throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
 
     size_t version = 1;
