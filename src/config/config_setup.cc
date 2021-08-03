@@ -622,14 +622,17 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
             throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
         }
     }
+
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
-        result.assign(defaultEntries.begin(), defaultEntries.end());
+        return defaultEntries;
     }
-    if (notEmpty && result.empty()) {
+
+    if (notEmpty) {
         throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue);
     }
+
     return result;
 }
 
