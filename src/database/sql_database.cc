@@ -410,7 +410,7 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -423,7 +423,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
         throw ConfigParseException(result.description());
     }
     auto root = xmlDoc.document_element();
-    if (root.name() != std::string_view("upgrade"))
+    if (std::string(root.name()) != "upgrade")
         throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
 
     size_t version = 1;
@@ -1718,8 +1718,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return nullptr;
 
-    constexpr std::string_view tabAlias = "fol";
-    constexpr std::string_view childAlias = "cld";
+    constexpr const char* tabAlias = "fol";
+    constexpr const char* childAlias = "cld";
     std::vector<std::string> fields {
         fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias),
         fmt::format("COUNT({0}{2}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, childAlias),
@@ -2507,7 +2507,7 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
     }
 }
 
-void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
+void SQLDatabase::prepareResourceTable(const std::string& addColumnCmd)
 {
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;
