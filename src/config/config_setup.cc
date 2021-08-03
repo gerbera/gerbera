@@ -363,14 +363,16 @@ std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
 
 bool ConfigIntSetup::CheckSqlLiteSyncValue(std::string& value)
 {
-    auto temp_int = 0;
-    if (value == "off" || value == fmt::to_string(MT_SQLITE_SYNC_OFF))
-        temp_int = MT_SQLITE_SYNC_OFF;
-    else if (value == "normal" || value == fmt::to_string(MT_SQLITE_SYNC_NORMAL))
-        temp_int = MT_SQLITE_SYNC_NORMAL;
-    else if (value == "full" || value == fmt::to_string(MT_SQLITE_SYNC_FULL))
-        temp_int = MT_SQLITE_SYNC_FULL;
-    else
+    auto temp_int = [value] {
+        if (value == "off" || value == fmt::to_string(MT_SQLITE_SYNC_OFF))
+            return MT_SQLITE_SYNC_OFF;
+        if (value == "normal" || value == fmt::to_string(MT_SQLITE_SYNC_NORMAL))
+            return MT_SQLITE_SYNC_NORMAL;
+        if (value == "full" || value == fmt::to_string(MT_SQLITE_SYNC_FULL))
+            return MT_SQLITE_SYNC_FULL;
+        return 0;
+    }();
+    if (temp_int == 0)
         return false;
     value.assign(fmt::to_string(temp_int));
     return true;
