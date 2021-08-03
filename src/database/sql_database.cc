@@ -760,7 +760,7 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     std::vector<int> objectIDs;
     objectIDs.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         objectIDs.push_back(row->col_int(0));
     }
 
@@ -858,7 +858,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     std::vector<std::shared_ptr<CdsObject>> result;
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = sqlResult->nextRow()) {
+    while ((row = sqlResult->nextRow())) {
         result.push_back(createObjectFromRow(row));
     }
 
@@ -966,7 +966,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     std::vector<std::shared_ptr<CdsObject>> result;
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = sqlResult->nextRow()) {
+    while ((row = sqlResult->nextRow())) {
         result.push_back(createObjectFromSearchRow(row));
     }
 
@@ -1022,7 +1022,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     std::vector<std::string> arr;
     arr.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         arr.push_back(row->col(0));
     }
 
@@ -1473,7 +1473,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     std::vector<std::string> rows;
     rows.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         std::ostringstream s;
         s << row->col(0) << ',' << row->col(1);
         rows.emplace_back(s.str());
@@ -1502,7 +1502,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         ret.insert(row->col_int(0));
     }
     return ret;
@@ -1531,7 +1531,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::vector<int32_t> items;
     std::vector<int32_t> containers;
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         const int32_t objectID = row->col_int(0);
         const int objectType =   row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
@@ -1915,7 +1915,7 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
     std::vector<ConfigValue> result;
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         result.push_back({ row->col(1),
             row->col(0),
             row->col(2),
@@ -2454,7 +2454,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     std::vector<std::shared_ptr<CdsResource>> resources;
     resources.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
-    while (row = res->nextRow()) {
+    while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
         resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
         resource->setResId(resources.size());
