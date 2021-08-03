@@ -117,6 +117,6 @@ std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
     // try to match foo
     std::vector<std::string> parts = splitString(mimeType, '/');
     if (parts.size() != 2)
-        return "";
+        return {};
     return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
 }

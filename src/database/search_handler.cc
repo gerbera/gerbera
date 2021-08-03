@@ -538,7 +538,7 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
 std::string SortParser::parse()
 {
     if (sortCrit.empty()) {
-        return "";
+        return {};
     }
     std::vector<std::string> sort;
     for (auto&& seg : splitString(sortCrit, ',')) {

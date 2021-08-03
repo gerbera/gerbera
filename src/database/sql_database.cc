@@ -1200,11 +1200,11 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     auto res = select(fmt::format("SELECT {0}location{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID));
     commit("buildContainerPath");
     if (!res)
-        return "";
+        return {};
 
     auto row = res->nextRow();
     if (!row)
-        return "";
+        return {};
 
     char prefix;
     auto path = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title), &prefix);
@@ -1262,7 +1262,7 @@ fs::path SQLDatabase::stripLocationPrefix(std::string_view dbLocation, char* pre
     if (dbLocation.empty()) {
         if (prefix)
             *prefix = LOC_ILLEGAL_PREFIX;
-        return "";
+        return {};
     }
     if (prefix)
         *prefix = dbLocation.at(0);

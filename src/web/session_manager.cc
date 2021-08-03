@@ -100,7 +100,7 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
 std::string Session::getUIUpdateIDs()
 {
     if (!hasUIUpdateIDs())
-        return "";
+        return {};
     AutoLockR lock(rmutex);
     if (updateAll) {
         updateAll = false;
