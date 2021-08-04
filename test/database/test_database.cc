@@ -72,15 +72,15 @@ class Sqlite3DatabaseTest : public DatabaseTestBase {
 
 public:
     Sqlite3DatabaseTest() {};
-    virtual ~Sqlite3DatabaseTest() {};
+    ~Sqlite3DatabaseTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<SqliteConfigFake>();
         subject = std::make_shared<Sqlite3Database>(config, nullptr, nullptr);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         subject = nullptr;
     }
@@ -140,15 +140,15 @@ class MysqlDatabaseTest : public DatabaseTestBase {
 
 public:
     MysqlDatabaseTest() {};
-    virtual ~MysqlDatabaseTest() {};
+    ~MysqlDatabaseTest() override {};
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<MySQLConfigFake>();
         subject = std::make_shared<MySQLDatabase>(config, nullptr);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 };
