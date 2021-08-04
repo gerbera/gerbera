@@ -71,8 +71,8 @@ void DatabaseTestBase::testUpgrade(config_option_t option)
 class Sqlite3DatabaseTest : public DatabaseTestBase {
 
 public:
-    Sqlite3DatabaseTest() {};
-    ~Sqlite3DatabaseTest() override {};
+    Sqlite3DatabaseTest() = default;
+    ~Sqlite3DatabaseTest() override = default;
 
     void SetUp() override
     {
@@ -139,8 +139,8 @@ TEST_F(DatabaseTest, AddObject)
 class MysqlDatabaseTest : public DatabaseTestBase {
 
 public:
-    MysqlDatabaseTest() {};
-    ~MysqlDatabaseTest() override {};
+    MysqlDatabaseTest() = default;
+    ~MysqlDatabaseTest() override = default;
 
     void SetUp() override
     {
