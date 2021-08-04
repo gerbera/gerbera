@@ -432,8 +432,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
         std::vector<std::pair<std::string, std::string>> versionCmds;
         auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
-            for (auto&& script : versionNode.select_nodes("script")) {
-                const pugi::xml_node& scriptNode = script.node();
+            for (auto&& scriptNode : versionNode.children("script")) {
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
                 versionCmds.emplace_back(migration, trimString(scriptNode.text().as_string()));
             }
@@ -942,9 +941,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
                             resource->addAttribute(R_RESOURCE_FILE, image.string());
                             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-                            dynFolder->addResource(move(resource));
+                            dynFolder->addResource(std::move(resource));
                         }
-                        dynamicContainers[dynId] = dynFolder;
+                        dynamicContainers.emplace(dynId, std::move(dynFolder));
                     }
                     result.push_back(dynamicContainers[dynId]);
                     childCount++;
