@@ -878,7 +878,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         };
 
         if (!getContainers && !getItems) {
-            where.push_back("0 = 1");
+            where.emplace_back("0 = 1");
         } else if (getContainers && !getItems) {
             where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER)));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
