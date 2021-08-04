@@ -460,9 +460,9 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
                 if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
                     actionResult = (*this.*(migActions.at(migrationCmd)))();
                 if (actionResult && !upgradeCmd.empty())
-                    _exec(upgradeCmd.c_str());
+                    _exec(upgradeCmd);
             }
-            _exec(fmt::format(updateVersionCommand, version + 1, version).c_str());
+            _exec(fmt::format(updateVersionCommand, version + 1, version));
             dbVersion = fmt::to_string(version + 1);
             log_info("Database upgrade to version {} successful.", dbVersion.c_str());
         }
@@ -2514,7 +2514,7 @@ void SQLDatabase::prepareResourceTable(const std::string& addColumnCmd)
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto&& resAttrib = MetadataHandler::getResAttrName(resAttrId);
         if (std::find_if(resourceAttributes.begin(), resourceAttributes.end(), [&](auto&& attr) { return attr == resAttrib; }) == resourceAttributes.end()) {
-            _exec(fmt::format(addColumnCmd, resAttrib).c_str());
+            _exec(fmt::format(addColumnCmd, resAttrib));
             resourceAttributes.push_back(resAttrib);
             addedAttribute = true;
         }
