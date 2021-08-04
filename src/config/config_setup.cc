@@ -625,7 +625,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
-        result.assign(defaultEntries.begin(), defaultEntries.end());
+        result = defaultEntries;
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue);
@@ -831,9 +831,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
-        for (auto&& entry : defaultEntries) {
-            result.insert(entry); // this should be an insert without a loop, but Debian 10 doesn't compile.
-        }
+        result = defaultEntries;
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue);

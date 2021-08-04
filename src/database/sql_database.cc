@@ -1625,7 +1625,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
     // collect container for update signals
     if (!containers.empty()) {
-        parentIds.insert(parentIds.end(), containers.begin(), containers.end());
+        std::copy(containers.begin(), containers.end(), std::back_inserter(parentIds));
         auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
         res = select(sql);
         if (!res)
@@ -1641,7 +1641,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
         // collect child entries
         if (!parentIds.empty()) {
             // add ids to remove
-            removeIds.insert(removeIds.end(), parentIds.begin(), parentIds.end());
+            std::copy(parentIds.begin(), parentIds.end(), std::back_inserter(removeIds));
             auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
             res = select(sql);
             if (!res)
@@ -1733,15 +1733,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
     std::unique_ptr<SQLRow> row;
 
-    std::vector<int32_t> selUi;
-    std::vector<int32_t> selUpnp;
-
     ChangedContainers changedContainers;
 
-    auto& uiV = maybeEmpty->ui;
-    selUi.insert(selUi.end(), uiV.begin(), uiV.end());
-    auto& upnpV = maybeEmpty->upnp;
-    selUpnp.insert(selUpnp.end(), upnpV.begin(), upnpV.end());
+    auto selUi = std::vector(maybeEmpty->ui);
+    auto selUpnp = std::vector(maybeEmpty->upnp);
 
     bool again;
     int count = 0;
@@ -1803,11 +1798,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     auto& changedUi = changedContainers.ui;
     auto& changedUpnp = changedContainers.upnp;
     if (!selUi.empty()) {
-        changedUi.insert(changedUi.end(), selUi.begin(), selUi.end());
-        changedUpnp.insert(changedUpnp.end(), selUi.begin(), selUi.end());
+        std::copy(selUi.begin(), selUi.end(), std::back_inserter(changedUi));
+        std::copy(selUi.begin(), selUi.end(), std::back_inserter(changedUpnp));
     }
     if (!selUpnp.empty()) {
-        changedUpnp.insert(changedUpnp.end(), selUpnp.begin(), selUpnp.end());
+        std::copy(selUpnp.begin(), selUpnp.end(), std::back_inserter(changedUpnp));
     }
     // log_debug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
     // log_debug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
