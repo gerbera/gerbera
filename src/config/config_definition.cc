@@ -1252,7 +1252,7 @@ const char* ConfigDefinition::mapConfigOption(config_option_t option)
     if (co != complexOptions.end()) {
         return (*co)->xpath;
     }
-    return {};
+    return "";
 }
 
 bool ConfigDefinition::isDependent(config_option_t option)
