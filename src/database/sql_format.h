@@ -28,22 +28,24 @@
 #include <fmt/format.h>
 #include <string_view>
 
-struct SQLIdentifier
-{
-    SQLIdentifier(const std::string_view& name, char quote)
+struct SQLIdentifier {
+    SQLIdentifier(const std::string_view& name, char quote_begin, char quote_end)
         : name(name)
-        , quote(quote)
-    {}
+        , quote_begin(quote_begin)
+        , quote_end(quote_end)
+    {
+    }
     std::string_view name;
-    char quote;
+    char quote_begin;
+    char quote_end;
 };
 
-template<>
-struct fmt::formatter<SQLIdentifier> : formatter<std::string_view>
-{
+template <>
+struct fmt::formatter<SQLIdentifier> : formatter<std::string_view> {
     template <typename FormatContext>
-    auto format(const SQLIdentifier& tn, FormatContext& ctx) -> decltype(ctx.out()) {
-        return format_to(ctx.out(), "{1}{0}{1}", tn.name, tn.quote);
+    auto format(const SQLIdentifier& tn, FormatContext& ctx) -> decltype(ctx.out())
+    {
+        return format_to(ctx.out(), "{}{}{}", tn.quote_begin, tn.name, tn.quote_end);
     }
 };
 

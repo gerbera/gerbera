@@ -30,7 +30,6 @@
 /// \file sql_database.cc
 
 #include "sql_database.h" // API
-#include "sql_format.h"
 
 #include <algorithm>
 #include <climits>
@@ -1420,7 +1419,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int objectId)
 {
     auto query = fmt::format("{} FROM {} WHERE {} = {}",
-                             sql_meta_query, identifier(METADATA_TABLE), identifier("item_id"), objectId);
+        sql_meta_query, identifier(METADATA_TABLE), identifier("item_id"), objectId);
     auto res = select(query);
     if (!res)
         return {};
