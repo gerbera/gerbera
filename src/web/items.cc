@@ -37,8 +37,9 @@
 #include "server.h"
 #include "upnp_xml.h"
 
-web::items::items(std::shared_ptr<ContentManager> content)
+web::items::items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
+    , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
@@ -131,7 +132,7 @@ void web::items::process()
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 
-        auto [url, artAdded] = UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem);
+        auto [url, artAdded] = xmlBuilder->renderItemImage(server->getVirtualUrl(), objItem);
         if (artAdded) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }

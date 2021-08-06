@@ -37,8 +37,9 @@
 #include "server.h"
 #include "upnp_xml.h"
 
-web::containers::containers(std::shared_ptr<ContentManager> content)
+web::containers::containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
+    , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
@@ -74,7 +75,7 @@ void web::containers::process()
         int autoscanType = cont->getAutoscanType();
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
-        auto [url, artAdded] = UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont);
+        auto [url, artAdded] = xmlBuilder->renderContainerImage(server->getVirtualUrl(), cont);
         if (artAdded) {
             ce.append_attribute("image") = url.c_str();
         }

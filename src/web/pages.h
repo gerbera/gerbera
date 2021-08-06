@@ -41,6 +41,7 @@
 // forward declaration
 class Config;
 class Database;
+class UpnpXMLBuilder;
 
 namespace web {
 
@@ -59,8 +60,11 @@ public:
 
 /// \brief Browser container tree
 class containers : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    explicit containers(std::shared_ptr<ContentManager> content);
+    explicit containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -80,8 +84,11 @@ public:
 
 /// \brief Browser item list
 class items : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    explicit items(std::shared_ptr<ContentManager> content);
+    explicit items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -101,8 +108,11 @@ public:
 
 /// \brief Browser remove item
 class edit_load : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    explicit edit_load(std::shared_ptr<ContentManager> content);
+    explicit edit_load(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -164,6 +174,7 @@ public:
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<ContentManager> content,
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
     std::string_view page);
 
 /// \brief Browse clients list

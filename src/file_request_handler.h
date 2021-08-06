@@ -39,10 +39,10 @@
 
 class FileRequestHandler : public RequestHandler {
 protected:
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit FileRequestHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder);
+    explicit FileRequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;

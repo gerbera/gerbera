@@ -149,7 +149,7 @@ void Server::run()
     std::string presentationURL = getPresentationUrl();
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(context, virtualUrl, presentationURL);
+    xmlbuilder = std::make_shared<UpnpXMLBuilder>(context, virtualUrl, presentationURL);
 
     // register root device with the library
     auto desc = xmlbuilder->renderDeviceDescription();
@@ -493,7 +493,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
-        return std::make_unique<FileRequestHandler>(content, xmlbuilder.get());
+        return std::make_unique<FileRequestHandler>(content, xmlbuilder);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
@@ -507,7 +507,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return web::createWebRequestHandler(content, r_type);
+        return web::createWebRequestHandler(content, xmlbuilder, r_type);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
