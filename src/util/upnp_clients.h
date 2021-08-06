@@ -84,7 +84,7 @@ public:
     explicit Clients(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
-    void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+    const ClientInfo* getInfo(const struct sockaddr_storage* addr, const std::string& userAgent);
 
     void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
     std::shared_ptr<std::vector<ClientCacheEntry>> getClientList() const { return cache; }

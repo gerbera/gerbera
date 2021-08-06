@@ -141,7 +141,7 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
+const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
 {
     const ClientInfo* info = nullptr;
 
@@ -173,8 +173,8 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
         updateCache(addr, userAgent, info);
     }
 
-    *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    return info;
 }
 
 bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
