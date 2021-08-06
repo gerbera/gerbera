@@ -1,8 +1,8 @@
 #ifdef HAVE_JS
 
+#include <duktape.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <duktape.h>
 #include <memory>
 
 #include "cds_objects.h"
@@ -21,7 +21,7 @@ using namespace ::testing;
 class InternalUrlPLSPlaylistTest : public ScriptTestFixture {
 public:
     // As Duktape requires static methods, so must the mock expectations be
-    static unique_ptr<CommonScriptMock> commonScriptMock;
+    static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
     // Used to iterate through `readln` content
     static int readLineCnt;
@@ -38,41 +38,41 @@ public:
     }
 };
 
-unique_ptr<CommonScriptMock> InternalUrlPLSPlaylistTest::commonScriptMock;
+std::unique_ptr<CommonScriptMock> InternalUrlPLSPlaylistTest::commonScriptMock;
 int InternalUrlPLSPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
-    string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
+    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
     return InternalUrlPLSPlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
 }
 
 static duk_ret_t print(duk_context* ctx)
 {
-    string msg = ScriptTestFixture::print(ctx);
+    std::string msg = ScriptTestFixture::print(ctx);
     return InternalUrlPLSPlaylistTest::commonScriptMock->print(msg);
 }
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
-    map<string,string> map = {
+    std::map<std::string, std::string> map {
         { "", "0" },
         { "/Playlists/All Playlists/Playlist Title", "42" },
         { "/Playlists/Directories/of/Playlist Title", "43" },
     };
-    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return InternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
 }
 
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
-    vector<string> array = ScriptTestFixture::createContainerChain(ctx);
+    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
     return InternalUrlPLSPlaylistTest::commonScriptMock->createContainerChain(array);
 }
 
 static duk_ret_t getLastPath(duk_context* ctx)
 {
-    string inputPath = ScriptTestFixture::getLastPath(ctx);
+    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
     return InternalUrlPLSPlaylistTest::commonScriptMock->getLastPath(inputPath);
 }
 
@@ -81,7 +81,7 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    vector<string> lines = {
+    std::vector<std::string> lines {
         "[playlist]",
         "\n",
         "File1=/home/gerbera/example.mp3",
@@ -93,7 +93,7 @@ static duk_ret_t readln(duk_context* ctx)
         "-EOF-" // used to stop processing
     };
 
-    string line = lines.at(InternalUrlPLSPlaylistTest::readLineCnt);
+    std::string line = lines.at(InternalUrlPLSPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     InternalUrlPLSPlaylistTest::readLineCnt++;
@@ -107,24 +107,24 @@ static duk_ret_t readln(duk_context* ctx)
 // expectations.
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
-    vector<string> keys = { "objectType", "location", "title", "playlistOrder" };
+    std::vector<std::string> keys { "objectType", "location", "title", "playlistOrder" };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
     return InternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
 }
 
 static duk_ret_t copyObject(duk_context* ctx)
 {
-    map<string, string> obj = {
-        make_pair("title", "Song from Playlist Title"),
-        make_pair("objectType", "2"),
-        make_pair("location", "/home/gerbera/example.mp3"),
-        make_pair("playlistOrder", "1")
+    std::map<std::string, std::string> obj {
+        { "title", "Song from Playlist Title" },
+        { "objectType", "2" },
+        { "location", "/home/gerbera/example.mp3" },
+        { "playlistOrder", "1" },
     };
-    map<string, string> meta = {
-        make_pair("dc:title", "Song from Playlist Title"),
-        make_pair("upnp:artist", "Artist"),
-        make_pair("upnp:album", "Album"),
-        make_pair("dc:date", "2018")
+    std::map<std::string, std::string> meta {
+        { "dc:title", "Song from Playlist Title" },
+        { "upnp:artist", "Artist" },
+        { "upnp:album", "Album" },
+        { "dc:date", "2018" },
     };
     copyObjectParams params = ScriptTestFixture::copyObject(ctx, obj, meta);
     return InternalUrlPLSPlaylistTest::commonScriptMock->copyObject(params.isObject);
@@ -132,17 +132,17 @@ static duk_ret_t copyObject(duk_context* ctx)
 
 static duk_ret_t getCdsObject(duk_context* ctx)
 {
-    map<string, string> obj = {
-        make_pair("title", "Song from Playlist Title"),
-        make_pair("objectType", "2"),
-        make_pair("location", "/home/gerbera/example.mp3"),
-        make_pair("playlistOrder", "1")
+    std::map<std::string, std::string> obj {
+        { "title", "Song from Playlist Title" },
+        { "objectType", "2" },
+        { "location", "/home/gerbera/example.mp3" },
+        { "playlistOrder", "1" },
     };
-    map<string, string> meta = {
-        make_pair("dc:title", "Song from Playlist Title"),
-        make_pair("upnp:artist", "Artist"),
-        make_pair("upnp:album", "Album"),
-        make_pair("dc:date", "2018")
+    std::map<std::string, std::string> meta {
+        { "dc:title", "Song from Playlist Title" },
+        { "upnp:artist", "Artist" },
+        { "upnp:album", "Album" },
+        { "dc:date", "2018" },
     };
     getCdsObjectParams params = ScriptTestFixture::getCdsObject(ctx, obj, meta);
     return InternalUrlPLSPlaylistTest::commonScriptMock->getCdsObject(params.location);
@@ -183,11 +183,11 @@ TEST_F(InternalUrlPLSPlaylistTest, CreatesDukContextWithPlaylistScript)
 
 TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPlaylistAndDirChains)
 {
-    map<string, string> asPlaylistChain = {
-        make_pair("objectType", "2"),
-        make_pair("location", "/home/gerbera/example.mp3"),
-        make_pair("playlistOrder", "1"),
-        make_pair("title", "Song from Playlist Title")
+    std::map<std::string, std::string> asPlaylistChain {
+        { "objectType", "2" },
+        { "location", "/home/gerbera/example.mp3" },
+        { "playlistOrder", "1" },
+        { "title", "Song from Playlist Title" },
     };
 
     // Expecting the common script calls
