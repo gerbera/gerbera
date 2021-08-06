@@ -37,11 +37,11 @@ protected:
 
     // Code here will be called immediately after the constructor (right
     // before each test).
-    inline void SetUp() override {};
+    inline void SetUp() override {}
 
     // Code here will be called immediately after each test (right
     // before the destructor).
-    inline void TearDown() override {};
+    inline void TearDown() override {}
 };
 
 #endif // __RUNTIME_TEST_H__

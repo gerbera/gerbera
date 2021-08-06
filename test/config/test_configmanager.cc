@@ -58,7 +58,7 @@ public:
         file.close();
 
         subject = nullptr;
-    };
+    }
 
     static fs::path createTempPath()
     {
@@ -71,7 +71,7 @@ public:
     {
         if (mkdir(dir.c_str(), 0777) < 0) {
             throw_std_runtime_error("Failed to create test_config temporary directory for testing: {}", dir.c_str());
-        };
+        }
     }
 
     std::string createConfig()
@@ -84,7 +84,7 @@ public:
     {
         delete subject;
         fs::remove_all(gerberaDir);
-    };
+    }
 
     fs::path gerberaDir;
     fs::path config_file;

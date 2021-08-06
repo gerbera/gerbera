@@ -24,12 +24,12 @@ public:
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "import.js";
         audioLayout = "Structured";
-    };
+    }
 
     ~ImportStructuredScriptTest() override
     {
         commonScriptMock.reset();
-    };
+    }
 
     // As Duktape requires static methods, so must the mock expectations be
     static unique_ptr<CommonScriptMock> commonScriptMock;

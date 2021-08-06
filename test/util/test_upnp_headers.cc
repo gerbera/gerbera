@@ -15,7 +15,7 @@ public:
 #else
         info = UpnpFileInfo_new();
 #endif
-    };
+    }
     ~HeadersHelperTest() override
     {
 #if defined(USING_NPUPNP)
@@ -25,7 +25,7 @@ public:
 
 #endif
         delete subject;
-    };
+    }
 
     UpnpFileInfo* info;
     Headers* subject;
