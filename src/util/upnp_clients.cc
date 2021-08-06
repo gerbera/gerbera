@@ -133,8 +133,8 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
 
-    std::unique_ptr<pugi::xml_document> descXml;
-    if (downloadDescription(descLocation, descXml)) {
+    auto descXml = downloadDescription(descLocation);
+    if (descXml) {
         // TODO: search for FriendlyName + ModelName
         //(void)getInfoByType(userAgent, ClientMatchType::FriendlyName, &info);
     }
@@ -277,27 +277,27 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
     }
 }
 
-bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document> xml)
+std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
 {
 #if defined(USING_NPUPNP)
     std::string description, ct;
     int errCode = UpnpDownloadUrlItem(location, description, ct);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return false;
+        return {};
     }
-    xml = std::make_unique<pugi::xml_document>();
+    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(description.c_str());
 #else
     IXML_Document* descDoc = nullptr;
     int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return false;
+        return {};
     }
 
     DOMString cxml = ixmlPrintDocument(descDoc);
-    xml = std::make_unique<pugi::xml_document>();
+    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(cxml);
 
     ixmlFreeDOMString(cxml);
@@ -306,8 +306,8 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 
     if (ret.status != pugi::xml_parse_status::status_ok) {
         log_debug("Unable to parse xml client description from {}", location);
-        return false;
+        return {};
     }
 
-    return true;
+    return xml;
 }
