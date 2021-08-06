@@ -124,8 +124,6 @@ Clients::Clients(const std::shared_ptr<Config>& config)
         auto client = clientConfig->getClientInfo();
         clientInfo.push_back(*client);
     }
-
-    cache = std::make_shared<std::vector<ClientCacheEntry>>();
 }
 
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
@@ -236,10 +234,10 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
 {
     AutoLock lock(mutex);
 
-    auto it = std::find_if(cache->begin(), cache->end(), [&](auto&& entry) //
+    auto it = std::find_if(cache.begin(), cache.end(), [&](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
-    if (it != cache->end()) {
+    if (it != cache.end()) {
         *ppInfo = it->pInfo;
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
         log_debug("found client by cache (hostname='{}')", hostName.c_str());
@@ -256,14 +254,14 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
 
     // house cleaning, remove old entries
     auto now = currentTime();
-    cache->erase(std::remove_if(cache->begin(), cache->end(),
-                     [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
-        cache->end());
+    cache.erase(std::remove_if(cache.begin(), cache.end(),
+                    [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
+        cache.end());
 
-    auto it = std::find_if(cache->begin(), cache->end(), [=](auto&& entry) //
+    auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
-    if (it != cache->end()) {
+    if (it != cache.end()) {
         it->last = now;
         if (it->pInfo != pInfo) {
             // client info changed, update all
@@ -273,7 +271,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         }
     } else {
         // add new client
-        cache->push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
+        cache.push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
     }
 }
 
