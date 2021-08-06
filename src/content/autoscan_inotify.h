@@ -118,7 +118,7 @@ private:
         {
             descendants.push_back(wd);
         }
-        const std::vector<int>& getDescendants() const { return descendants; }
+        std::vector<int> getDescendants() const { return descendants; }
 
     private:
         std::shared_ptr<AutoscanDirectory> adir;

@@ -726,7 +726,7 @@ void AutoscanInotify::removeDescendants(int wd)
     for (auto&& watch : *wdWatches) {
         if (watch->getType() == WatchType::Autoscan) {
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
-            for (int descWd : watchAs->getDescendants()) {
+            for (auto&& descWd : watchAs->getDescendants()) {
                 inotify->removeWatch(descWd);
             }
         }
