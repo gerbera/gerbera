@@ -196,7 +196,7 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
             cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << endl;
         }
         duk_pop(ctx); // script_under_test
-    };
+    }
 }
 
 vector<string> ScriptTestFixture::createContainerChain(duk_context* ctx)

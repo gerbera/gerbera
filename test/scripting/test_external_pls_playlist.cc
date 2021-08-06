@@ -30,12 +30,12 @@ public:
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
-    };
+    }
 
     ~ExternalUrlPLSPlaylistTest() override
     {
         commonScriptMock.reset();
-    };
+    }
 };
 
 unique_ptr<CommonScriptMock> ExternalUrlPLSPlaylistTest::commonScriptMock;

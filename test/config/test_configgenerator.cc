@@ -27,7 +27,7 @@ public:
     void TearDown() override
     {
         delete subject;
-    };
+    }
 
     static std::string mockConfigXml(const std::string& mockFile)
     {
