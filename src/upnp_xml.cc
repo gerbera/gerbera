@@ -40,8 +40,6 @@
 #include "request_handler.h"
 #include "transcoding/transcoding.h"
 
-std::vector<int> UpnpXMLBuilder::orderedHandler = {};
-
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
     : config(context->getConfig())
@@ -49,13 +47,12 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     , virtualURL(std::move(virtualUrl))
     , presentationURL(std::move(presentationURL))
 {
-    if (orderedHandler.empty())
-        for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
-            auto ch = MetadataHandler::remapContentHandler(entry);
-            if (ch > -1) {
-                orderedHandler.push_back(ch);
-            }
+    for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
+        auto ch = MetadataHandler::remapContentHandler(entry);
+        if (ch > -1) {
+            orderedHandler.push_back(ch);
         }
+    }
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
@@ -390,7 +387,8 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
 
 std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont)
 {
-    for (auto&& res : cont->getResources()) {
+    auto orderedResources = getOrderedResources(cont);
+    for (auto&& res : orderedResources) {
         if (res->isMetaResource(ID3_ALBUM_ART)) {
             auto&& resFile = res->getAttribute(R_RESOURCE_FILE);
             auto&& resObj = res->getAttribute(R_FANART_OBJ_ID);
@@ -478,11 +476,11 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     return {};
 }
 
-std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsItem>& item)
+std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
 {
     // Order resources according to index defined by orderedHandler
     std::vector<std::shared_ptr<CdsResource>> orderedResources;
-    auto&& resources = item->getResources();
+    auto&& resources = object->getResources();
     for (auto&& oh : orderedHandler) {
         std::for_each(resources.begin(), resources.end(), [&](auto res) { if (oh == res->getHandlerType()) orderedResources.push_back(res); });
     }

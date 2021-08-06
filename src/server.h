@@ -147,7 +147,7 @@ protected:
     /// The value is read from the configuration.
     int aliveAdvertisementInterval {};
 
-    std::unique_ptr<UpnpXMLBuilder> xmlbuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlbuilder;
 
     /// \brief ContentDirectoryService instance.
     ///

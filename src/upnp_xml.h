@@ -81,8 +81,8 @@ public:
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
     static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
 
-    static std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
-    static std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
+    std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
+    std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
     static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
     static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
@@ -99,7 +99,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    static std::vector<int> orderedHandler;
+    std::vector<int> orderedHandler;
 
     const std::string virtualURL;
     const std::string presentationURL;
@@ -110,7 +110,7 @@ protected:
         std::string pathBase;
         bool addResID;
     };
-    static std::vector<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsItem>& item);
+    std::vector<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const fs::path& location);

@@ -35,6 +35,7 @@ namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<ContentManager> content,
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
     std::string_view page)
 {
     if (page == "add")
@@ -46,15 +47,15 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "auth")
         return std::make_unique<web::auth>(std::move(content));
     if (page == "containers")
-        return std::make_unique<web::containers>(std::move(content));
+        return std::make_unique<web::containers>(std::move(content), std::move(xmlBuilder));
     if (page == "directories")
         return std::make_unique<web::directories>(std::move(content));
     if (page == "files")
         return std::make_unique<web::files>(std::move(content));
     if (page == "items")
-        return std::make_unique<web::items>(std::move(content));
+        return std::make_unique<web::items>(std::move(content), std::move(xmlBuilder));
     if (page == "edit_load")
-        return std::make_unique<web::edit_load>(std::move(content));
+        return std::make_unique<web::edit_load>(std::move(content), std::move(xmlBuilder));
     if (page == "edit_save")
         return std::make_unique<web::edit_save>(std::move(content));
     if (page == "autoscan")

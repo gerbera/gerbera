@@ -1246,6 +1246,24 @@
 					]
 				},
 				{
+					"item": "/server/upnp/album-properties/upnp-namespace",
+					"caption": "Album-Namespaces",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/album-properties/upnp-namespace/attribute::xmlns",
+							"caption": "xmlns",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/album-properties/upnp-namespace/attribute::uri",
+							"caption": "uri",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/server/upnp/artist-properties/upnp-property",
 					"caption": "Artist-Properties",
 					"type": "List",
@@ -1259,6 +1277,24 @@
 						{
 							"item": "/server/upnp/artist-properties/upnp-property/attribute::meta-data",
 							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/server/upnp/artist-properties/upnp-namespace",
+					"caption": "Artist-Namespaces",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/artist-properties/upnp-namespace/attribute::xmlns",
+							"caption": "xmlns",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/artist-properties/upnp-namespace/attribute::uri",
+							"caption": "uri",
 							"editable": true
 						}
 					]
@@ -1282,6 +1318,24 @@
 					]
 				},
 				{
+					"item": "/server/upnp/genre-properties/upnp-namespace",
+					"caption": "Genre-Namespaces",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/genre-properties/upnp-namespace/attribute::xmlns",
+							"caption": "xmlns",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/genre-properties/upnp-namespace/attribute::uri",
+							"caption": "uri",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/server/upnp/playlist-properties/upnp-property",
 					"caption": "Playlist-Properties",
 					"type": "List",
@@ -1300,6 +1354,24 @@
 					]
 				},
 				{
+					"item": "/server/upnp/playlist-properties/upnp-namespace",
+					"caption": "Playlist-Namespaces",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/playlist-properties/upnp-namespace/attribute::xmlns",
+							"caption": "xmlns",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/playlist-properties/upnp-namespace/attribute::uri",
+							"caption": "uri",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/server/upnp/title-properties/upnp-property",
 					"caption": "Title-Properties",
 					"type": "List",
@@ -1313,6 +1385,24 @@
 						{
 							"item": "/server/upnp/title-properties/upnp-property/attribute::meta-data",
 							"caption": "Metadata",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/server/upnp/title-properties/upnp-namespace",
+					"caption": "Title-Namespaces",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/title-properties/upnp-namespace/attribute::xmlns",
+							"caption": "xmlns",
+							"editable": true
+						},
+						{
+							"item": "/server/upnp/title-properties/upnp-namespace/attribute::uri",
+							"caption": "uri",
 							"editable": true
 						}
 					]
