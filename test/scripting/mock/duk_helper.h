@@ -37,7 +37,7 @@ private:
     // Extracts the property value given a complex associative array key
     // Example: key = `meta['dc:title']`
     // Finds *meta* object, then its child property *dc:title*
-    static std::tuple<std::string, std::string> extractObjectValues(duk_context* ctx, const std::string& key, duk_idx_t idx);
+    static std::pair<std::string, std::string> extractObjectValues(duk_context* ctx, const std::string& key, duk_idx_t idx);
 
     // Returns true if the key is representing javascript array notation
     // true = meta['dc:title']
