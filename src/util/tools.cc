@@ -337,7 +337,7 @@ std::string generateRandomId()
 #endif
 
     log_debug("Generated: {}", uuid_str);
-    std::string uuid_String = std::string(uuid_str);
+    auto uuid_String = std::string(uuid_str);
 #ifdef BSD_NATIVE_UUID
     free(uuid_str);
 #endif
@@ -1079,7 +1079,7 @@ std::string getAVIFourCC(std::string_view avi_filename)
         return {};
     }
 
-    std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
+    auto fourcc = std::string(buffer + FCC_OFFSET, 4);
     delete[] buffer;
 
     return fourcc;
