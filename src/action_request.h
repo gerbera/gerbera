@@ -73,7 +73,7 @@ protected:
     std::string serviceID;
 
     /// \brief Client quirks
-    std::shared_ptr<Quirks> quirks;
+    std::unique_ptr<Quirks> quirks;
 
     /// \brief XML holding the response, we fill it in.
     ///
@@ -98,7 +98,7 @@ public:
     std::unique_ptr<pugi::xml_document> getRequest() const;
 
     /// \brief Returns the client quirks
-    std::shared_ptr<Quirks> getQuirks() const;
+    const std::unique_ptr<Quirks>& getQuirks() const;
 
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
@@ -117,7 +117,7 @@ public:
     /// must be called at the very end before giving *upnp_request back to the SDK.
     void update();
 
-    std::shared_ptr<Quirks> GetQuirks() { return quirks; }
+    const std::unique_ptr<Quirks>& GetQuirks() { return quirks; }
 };
 
 #endif // __ACTION_REQUEST_H__

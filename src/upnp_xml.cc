@@ -118,7 +118,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks)
 {
     auto result = parent->append_child("");
 
@@ -495,7 +495,7 @@ std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(co
     return orderedResources;
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks)
 {
     auto urlBase = getPathBase(item);
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
