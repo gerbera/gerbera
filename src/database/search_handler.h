@@ -66,7 +66,7 @@ enum class TokenType {
 
 class SearchToken {
 public:
-    SearchToken(TokenType type, std::string value)
+    SearchToken(TokenType type, std::string&& value)
         : type(type)
         , value(std::move(value))
     {
@@ -96,7 +96,7 @@ public:
 
 protected:
     std::string nextStringToken(const std::string& input);
-    static std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
+    static std::unique_ptr<SearchToken> makeToken(std::string tokenStr);
     std::string getQuotedValue(const std::string& input);
 
     std::string input;
