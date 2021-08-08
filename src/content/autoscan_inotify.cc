@@ -403,9 +403,9 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                 inotify->removeWatch(removeWd);
                 auto watchToRemove = getStartPoint(wdToRemove);
                 if (watchToRemove) {
-                    std::shared_ptr<AutoscanDirectory> adir = watchToRemove->getAutoscanDirectory();
+                    auto adir = watchToRemove->getAutoscanDirectory();
                     if (adir->persistent()) {
-                        monitorNonexisting(path, adir);
+                        monitorNonexisting(path, std::move(adir));
                         content->handlePeristentAutoscanRemove(adir);
                     }
 

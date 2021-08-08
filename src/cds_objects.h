@@ -292,7 +292,7 @@ public:
     size_t getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
-    std::vector<std::shared_ptr<CdsResource>> getResources() const
+    const std::vector<std::shared_ptr<CdsResource>>& getResources() const
     {
         return resources;
     }

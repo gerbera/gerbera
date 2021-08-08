@@ -65,12 +65,12 @@ void web::autoscan::process()
         if (fromFs) {
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("1");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            std::shared_ptr<AutoscanDirectory> adir = content->getAutoscanDirectory(path);
+            auto adir = content->getAutoscanDirectory(path);
             autoscan2XML(adir, &autoscan);
         } else {
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            std::shared_ptr<AutoscanDirectory> adir = database->getAutoscanDirectory(intParam("object_id"));
+            auto adir = database->getAutoscanDirectory(intParam("object_id"));
             autoscan2XML(adir, &autoscan);
         }
     } else if (action == "as_edit_save") {
