@@ -1063,7 +1063,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     std::vector<std::string> arr;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        arr.push_back(std::string(row->col(0)));
+        arr.push_back(row->col(0));
     }
 
     return arr;

@@ -112,7 +112,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
 
     log_debug("url_path: {}, parameters: {}", url_path.c_str(), parameters.c_str());
 
-    size_t len = (std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER).length();
+    auto len = fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_SERVE_HANDLER).length();
     if (len > url_path.length()) {
         throw_std_runtime_error("There is something wrong with the link {}", url_path.c_str());
     }
