@@ -66,7 +66,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             auto token = std::string(&ch, 1);
             TokenType tokenType = tokenTypes.at(token);
             currentPos++;
-            return std::make_unique<SearchToken>(tokenType, token);
+            return std::make_unique<SearchToken>(tokenType, std::move(token));
         }
         case '>':
         case '<':
@@ -76,12 +76,12 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 token.push_back('=');
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos += 2;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             } else {
                 auto token = std::string(&ch, 1);
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos++;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             }
         case '"':
             if (!inQuotes) {
@@ -152,13 +152,13 @@ std::string SearchLexer::nextStringToken(const std::string& input)
     return input.substr(startPos, currentPos - startPos);
 }
 
-std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
+std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
 {
     auto itr = tokenTypes.find(toLower(tokenStr));
     if (itr != tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, tokenStr);
+        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
     }
-    return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
+    return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
 }
 
 void SearchParser::getNextToken()
