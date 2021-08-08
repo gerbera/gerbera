@@ -476,10 +476,10 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     return {};
 }
 
-std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
+std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
 {
     // Order resources according to index defined by orderedHandler
-    std::vector<std::shared_ptr<CdsResource>> orderedResources;
+    std::deque<std::shared_ptr<CdsResource>> orderedResources;
     auto&& resources = object->getResources();
     for (auto&& oh : orderedHandler) {
         std::for_each(resources.begin(), resources.end(), [&](auto res) { if (oh == res->getHandlerType()) orderedResources.push_back(res); });
@@ -614,7 +614,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 hide_original_resource = true;
 
             if (tp->firstResource()) {
-                orderedResources.insert(orderedResources.begin(), std::move(t_res));
+                orderedResources.push_front(std::move(t_res));
                 original_resource = 0;
             } else
                 orderedResources.push_back(std::move(t_res));
