@@ -106,7 +106,7 @@ void web::items::process()
         }
 
         if (startpoint_id != INVALID_OBJECT_ID) {
-            std::shared_ptr<AutoscanDirectory> startPtDir = database->getAutoscanDirectory(startpoint_id);
+            auto startPtDir = database->getAutoscanDirectory(startpoint_id);
             if (startPtDir && startPtDir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || startPtDir->persistent())
