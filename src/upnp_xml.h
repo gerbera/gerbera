@@ -32,6 +32,7 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
+#include <deque>
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
@@ -110,7 +111,7 @@ protected:
         std::string pathBase;
         bool addResID;
     };
-    std::vector<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object);
+    std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const fs::path& location);
