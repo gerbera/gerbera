@@ -64,7 +64,7 @@ public:
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item
-    void renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks = nullptr);
+    void renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks = nullptr);
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
@@ -87,7 +87,7 @@ public:
     static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
     static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
-    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::shared_ptr<Quirks>& quirks);
+    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks);
 
     /// \brief build path for first resource from item
     /// depending on the item type it returns the url to the media

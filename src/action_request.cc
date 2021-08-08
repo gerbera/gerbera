@@ -44,7 +44,7 @@ ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest
 {
     auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnp_request);
-    quirks = std::make_shared<Quirks>(std::move(context), ctrlPtIPAddr, userAgent);
+    quirks = std::make_unique<Quirks>(std::move(context), ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const
@@ -62,7 +62,7 @@ std::string ActionRequest::getServiceID() const
     return serviceID;
 }
 
-std::shared_ptr<Quirks> ActionRequest::getQuirks() const
+const std::unique_ptr<Quirks>& ActionRequest::getQuirks() const
 {
     return quirks;
 }
