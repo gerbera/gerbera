@@ -173,6 +173,7 @@ add_library(libgerbera STATIC
         src/database/sqlite3/sqlite_database.h
         src/database/sql_database.cc
         src/database/sql_database.h
+        src/database/sql_format.h
         src/database/database.cc
         src/database/database.h
         src/database/search_handler.cc
