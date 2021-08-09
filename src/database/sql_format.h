@@ -3,7 +3,7 @@
 
   sql_format.h - this file is part of Gerbera.
 
-  Copyright (C) 2018-2021 Gerbera Contributors
+  Copyright (C) 2021 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -30,20 +30,12 @@
 
 struct SQLIdentifier
 {
-    struct Traits
-    {
-        Traits(char quote) : quote_begin(quote), quote_end(quote) {}
-        Traits(char quote_begin, char quote_end) : quote_begin(quote_begin), quote_end(quote_end) {}
-        char quote_begin;
-        char quote_end;
-    };
-
-    SQLIdentifier(std::string_view&& name, const Traits& traits)
+    SQLIdentifier(const std::string_view& name, char quote)
         : name(name)
-        , traits(traits)
+        , quote(quote)
     {}
     std::string_view name;
-    const Traits& traits;
+    char quote;
 };
 
 template<>
@@ -51,9 +43,7 @@ struct fmt::formatter<SQLIdentifier> : formatter<std::string_view>
 {
     template <typename FormatContext>
     auto format(const SQLIdentifier& tn, FormatContext& ctx) -> decltype(ctx.out()) {
-        return format_to(ctx.out(),
-            "{}{}{}",
-            tn.traits.quote_begin, tn.name, tn.traits.quote_end);
+        return format_to(ctx.out(), "{1}{0}{1}", tn.name, tn.quote);
     }
 };
 

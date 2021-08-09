@@ -38,6 +38,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "sql_format.h"
 #include "config/config.h"
 #include "database.h"
 
@@ -188,6 +189,9 @@ protected:
     /// \brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
     void migrateResources(int objectId, const std::string& resourcesStr);
+    
+    /// \brief returns a fmt-prinable identifier name
+    SQLIdentifier identifier(const std::string_view& name) const { return SQLIdentifier(name, table_quote_begin); }
 
     std::shared_ptr<Mime> mime;
 

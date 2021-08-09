@@ -1419,8 +1419,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 
 std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int objectId)
 {
-    const SQLIdentifier::Traits t(table_quote_begin, table_quote_end);
-    auto res = select(fmt::format("{} FROM {} WHERE {} = {}", sql_meta_query, SQLIdentifier(METADATA_TABLE, t), SQLIdentifier("item_id", t), objectId));
+    auto query = fmt::format("{} FROM {} WHERE {} = {}",
+                             sql_meta_query, identifier(METADATA_TABLE), identifier("item_id"), objectId);
+    auto res = select(query);
     if (!res)
         return {};
 
@@ -1435,18 +1436,19 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
     auto where = std::vector {
-        fmt::format("{}object_type{} != {}", table_quote_begin, table_quote_end, quote(OBJECT_TYPE_CONTAINER)),
+        fmt::format("{} != {}", identifier("object_type"), quote(OBJECT_TYPE_CONTAINER)),
     };
     if (!mimeType.empty()) {
-        where.push_back(fmt::format("{}mime_type{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", mimeType))));
+        where.push_back(fmt::format("{} LIKE {}", identifier("mime_type"), quote(fmt::format("{}%", mimeType))));
     }
     if (!upnpClass.empty()) {
-        where.push_back(fmt::format("{}upnp_class{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", upnpClass))));
+        where.push_back(fmt::format("{} LIKE {}", identifier("upnp_class"), quote(fmt::format("{}%", upnpClass))));
     }
-    where.push_back(fmt::format("{}location{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("{}%", (isVirtual) ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", identifier("location"), quote(fmt::format("{}%", (isVirtual) ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
     //<< " AND is_virtual = 0";
 
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
+    auto query = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND "));
+    auto res = select(query);
 
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
