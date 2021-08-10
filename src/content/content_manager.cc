@@ -1086,7 +1086,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 {
     std::string tree;
     int result = INVALID_OBJECT_ID;
-    std::vector<int> createdIds;
+    std::deque<int> createdIds;
     bool isNew = false;
 
     for (auto&& item : chain) {
@@ -1127,7 +1127,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
     auto lastMetadata = origObj ? origObj->getMetadata() : std::map<std::string, std::string> {};
-    std::vector<int> updateID;
+    std::deque<int> updateID;
     bool isNew = false;
 
     if (chain.empty())
