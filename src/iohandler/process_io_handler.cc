@@ -46,7 +46,7 @@
 
 #define MAX_TIMEOUTS 2 // maximum allowe consecutive timeouts
 
-ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
+ProcListItem::ProcListItem(std::shared_ptr<Executor>&& exec, bool abortOnDeath)
     : executor(std::move(exec))
     , abort(abortOnDeath)
 {

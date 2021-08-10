@@ -1,7 +1,7 @@
 #ifdef HAVE_JS
+#include <duktape.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <duktape.h>
 #include <memory>
 
 #include "cds_objects.h"
@@ -20,7 +20,7 @@ using namespace ::testing;
 class ExternalUrlM3UPlaylistTest : public ScriptTestFixture {
 public:
     // As Duktape requires static methods, so must the mock expectations be
-    static unique_ptr<CommonScriptMock> commonScriptMock;
+    static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
     // Used to iterate through `readln` content
     static int readLineCnt;
@@ -29,49 +29,49 @@ public:
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
-    };
+    }
 
     ~ExternalUrlM3UPlaylistTest() override
     {
         commonScriptMock.reset();
-    };
+    }
 };
 
-unique_ptr<CommonScriptMock> ExternalUrlM3UPlaylistTest::commonScriptMock;
+std::unique_ptr<CommonScriptMock> ExternalUrlM3UPlaylistTest::commonScriptMock;
 int ExternalUrlM3UPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
-    string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
+    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
 }
 
 static duk_ret_t print(duk_context* ctx)
 {
-    string msg = ScriptTestFixture::print(ctx);
+    std::string msg = ScriptTestFixture::print(ctx);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->print(msg);
 }
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
-    map<string,string> map = {
+    std::map<std::string, std::string> map {
         { "", "0" },
         { "/Playlists/All Playlists/Playlist Title", "42" },
         { "/Playlists/Directories/of/Playlist Title", "43" },
     };
-    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->addContainerTree(tree);
 }
 
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
-    vector<string> array = ScriptTestFixture::createContainerChain(ctx);
+    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->createContainerChain(array);
 }
 
 static duk_ret_t getLastPath(duk_context* ctx)
 {
-    string inputPath = ScriptTestFixture::getLastPath(ctx);
+    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->getLastPath(inputPath);
 }
 
@@ -80,14 +80,14 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    vector<string> lines = {
+    std::vector<std::string> lines {
         "#EXTM3U",
         "#EXTINF:-1,(#1 - 177/750) : Ibiza Global Radio :",
         "http://46.105.171.217:8024",
         "-EOF-" // used to stop processing
     };
 
-    string line = lines.at(ExternalUrlM3UPlaylistTest::readLineCnt);
+    std::string line = lines.at(ExternalUrlM3UPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     ExternalUrlM3UPlaylistTest::readLineCnt++;
@@ -101,9 +101,16 @@ static duk_ret_t readln(duk_context* ctx)
 // expectations.
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
-    vector<string> keys = { "mimetype", "objectType", "location",
-        "title", "protocol", "upnpclass",
-        "description", "playlistOrder" };
+    std::vector<std::string> keys {
+        "mimetype",
+        "objectType",
+        "location",
+        "title",
+        "protocol",
+        "upnpclass",
+        "description",
+        "playlistOrder",
+    };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
     return ExternalUrlM3UPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
 }
@@ -158,29 +165,29 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
 
 TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPlaylistAndDirChains)
 {
-    const string MIME_TYPE_AUDIO_MPEG = "audio/mpeg";
-    const string OBJTYPE_ITEM_EXTERNAL_URL = "8";
+    const std::string MIME_TYPE_AUDIO_MPEG = "audio/mpeg";
+    const std::string OBJTYPE_ITEM_EXTERNAL_URL = "8";
 
-    map<string, string> asPlaylistChain = {
-        make_pair("title", "(#1 - 177/750) : Ibiza Global Radio :"),
-        make_pair("location", "http://46.105.171.217:8024"),
-        make_pair("mimetype", MIME_TYPE_AUDIO_MPEG),
-        make_pair("objectType", OBJTYPE_ITEM_EXTERNAL_URL),
-        make_pair("playlistOrder", "1"),
-        make_pair("protocol", "http-get"),
-        make_pair("description", "Song from Playlist Title"),
-        make_pair("upnpclass", UPNP_CLASS_MUSIC_TRACK)
+    std::map<std::string, std::string> asPlaylistChain {
+        { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
+        { "location", "http://46.105.171.217:8024" },
+        { "mimetype", MIME_TYPE_AUDIO_MPEG },
+        { "objectType", OBJTYPE_ITEM_EXTERNAL_URL },
+        { "playlistOrder", "1" },
+        { "protocol", "http-get" },
+        { "description", "Song from Playlist Title" },
+        { "upnpclass", UPNP_CLASS_MUSIC_TRACK },
     };
 
-    map<string, string> asPlaylistDirChain = {
-        make_pair("title", "(#1 - 177/750) : Ibiza Global Radio :"),
-        make_pair("location", "http://46.105.171.217:8024"),
-        make_pair("mimetype", MIME_TYPE_AUDIO_MPEG),
-        make_pair("objectType", OBJTYPE_ITEM_EXTERNAL_URL),
-        make_pair("playlistOrder", "2"),
-        make_pair("protocol", "http-get"),
-        make_pair("description", "Song from Playlist Title"),
-        make_pair("upnpclass", UPNP_CLASS_MUSIC_TRACK)
+    std::map<std::string, std::string> asPlaylistDirChain {
+        { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
+        { "location", "http://46.105.171.217:8024" },
+        { "mimetype", MIME_TYPE_AUDIO_MPEG },
+        { "objectType", OBJTYPE_ITEM_EXTERNAL_URL },
+        { "playlistOrder", "2" },
+        { "protocol", "http-get" },
+        { "description", "Song from Playlist Title" },
+        { "upnpclass", UPNP_CLASS_MUSIC_TRACK },
     };
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.

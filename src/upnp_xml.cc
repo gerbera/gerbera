@@ -40,8 +40,6 @@
 #include "request_handler.h"
 #include "transcoding/transcoding.h"
 
-std::vector<int> UpnpXMLBuilder::orderedHandler = {};
-
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
     : config(context->getConfig())
@@ -49,13 +47,12 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     , virtualURL(std::move(virtualUrl))
     , presentationURL(std::move(presentationURL))
 {
-    if (orderedHandler.empty())
-        for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
-            auto ch = MetadataHandler::remapContentHandler(entry);
-            if (ch > -1) {
-                orderedHandler.push_back(ch);
-            }
+    for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
+        auto ch = MetadataHandler::remapContentHandler(entry);
+        if (ch > -1) {
+            orderedHandler.push_back(ch);
         }
+    }
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
@@ -390,7 +387,8 @@ std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) 
 
 std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont)
 {
-    for (auto&& res : cont->getResources()) {
+    auto orderedResources = getOrderedResources(cont);
+    for (auto&& res : orderedResources) {
         if (res->isMetaResource(ID3_ALBUM_ART)) {
             auto&& resFile = res->getAttribute(R_RESOURCE_FILE);
             auto&& resObj = res->getAttribute(R_FANART_OBJ_ID);
@@ -402,7 +400,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
                 auto res_params = res->getParameters();
                 res_params[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
                 auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(res_params) });
-                return std::pair(url, true);
+                return { url, true };
             }
 
             if (!resObj.empty()) {
@@ -411,7 +409,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
 
                 auto res_params = res->getParameters();
                 auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) });
-                return std::pair(url, true);
+                return { url, true };
             }
         }
     }
@@ -442,7 +440,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& 
                              || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
                              || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL); });
     if (resFound != orderedResources.end()) {
-        return std::pair(renderOneResource(virtualURL, item, *resFound), true);
+        return { renderOneResource(virtualURL, item, *resFound), true };
     }
 
     return {};
@@ -455,7 +453,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& v
         [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
     if (resFound != resources.end()) {
         auto url = renderOneResource(virtualURL, item, *resFound) + renderExtension("", (*resFound)->getAttribute(R_RESOURCE_FILE));
-        return std::pair(url, true);
+        return { url, true };
     }
     return {};
 }
@@ -475,14 +473,14 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         return fmt::format("{}.{}{}", ext, (filename), extension);
     }
 
-    return "";
+    return {};
 }
 
-std::vector<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsItem>& item)
+std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
 {
     // Order resources according to index defined by orderedHandler
-    std::vector<std::shared_ptr<CdsResource>> orderedResources;
-    auto&& resources = item->getResources();
+    std::deque<std::shared_ptr<CdsResource>> orderedResources;
+    auto&& resources = object->getResources();
     for (auto&& oh : orderedHandler) {
         std::for_each(resources.begin(), resources.end(), [&](auto res) { if (oh == res->getHandlerType()) orderedResources.push_back(res); });
     }
@@ -616,7 +614,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 hide_original_resource = true;
 
             if (tp->firstResource()) {
-                orderedResources.insert(orderedResources.begin(), std::move(t_res));
+                orderedResources.push_front(std::move(t_res));
                 original_resource = 0;
             } else
                 orderedResources.push_back(std::move(t_res));

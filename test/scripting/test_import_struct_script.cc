@@ -1,8 +1,8 @@
 #ifdef HAVE_JS
 
+#include <duktape.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <duktape.h>
 #include <memory>
 
 #include "cds_objects.h"
@@ -24,34 +24,34 @@ public:
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "import.js";
         audioLayout = "Structured";
-    };
+    }
 
     ~ImportStructuredScriptTest() override
     {
         commonScriptMock.reset();
-    };
+    }
 
     // As Duktape requires static methods, so must the mock expectations be
-    static unique_ptr<CommonScriptMock> commonScriptMock;
+    static std::unique_ptr<CommonScriptMock> commonScriptMock;
 };
 
-unique_ptr<CommonScriptMock> ImportStructuredScriptTest::commonScriptMock;
+std::unique_ptr<CommonScriptMock> ImportStructuredScriptTest::commonScriptMock;
 
 static duk_ret_t print(duk_context* ctx)
 {
-    string msg = ScriptTestFixture::print(ctx);
+    std::string msg = ScriptTestFixture::print(ctx);
     return ImportStructuredScriptTest::commonScriptMock->print(msg);
 }
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
-    string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
+    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
     return ImportStructuredScriptTest::commonScriptMock->getPlaylistType(playlistMimeType);
 }
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
-    map<string,string> map = {
+    std::map<std::string, std::string> map {
         { "", "0" },
         { "/-Album-/-ABCD-/A/Album - Artist", "42" },
         { "/-Album-/-ABCD-/-all-/Album - Artist", "43" },
@@ -68,25 +68,25 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/-Year-/2010 - 2019/2018/-all-", "54" },
         { "/-Year-/2010 - 2019/2018/Artist/Album", "55" },
     };
-    vector<string> tree = ScriptTestFixture::addContainerTree(ctx, map);
+    std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportStructuredScriptTest::commonScriptMock->addContainerTree(tree);
 }
 
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
-    vector<string> array = ScriptTestFixture::createContainerChain(ctx);
+    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
     return ImportStructuredScriptTest::commonScriptMock->createContainerChain(array);
 }
 
 static duk_ret_t getLastPath(duk_context* ctx)
 {
-    string inputPath = ScriptTestFixture::getLastPath(ctx);
+    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
     return ImportStructuredScriptTest::commonScriptMock->getLastPath(inputPath);
 }
 
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
-    vector<string> keys = {
+    std::vector<std::string> keys = {
         "title",
         "meta['dc:title']",
         "meta['upnp:artist']",
@@ -102,7 +102,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 
 static duk_ret_t getYear(duk_context* ctx)
 {
-    string date = ScriptTestFixture::getYear(ctx);
+    std::string date = ScriptTestFixture::getYear(ctx);
     return ImportStructuredScriptTest::commonScriptMock->getYear(date);
 }
 
@@ -153,56 +153,56 @@ TEST_F(ImportStructuredScriptTest, CreatesDukContextWithImportScript)
 
 TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 {
-    string title = "Audio Title";
-    string mimetype = "audio/mpeg";
-    string artist = "Artist";
-    string album = "Album";
-    string date = "2018-01-01";
-    string year = "2018";
-    string genre = "Genre";
-    string desc = "Description";
-    string id = "2";
-    string location = "/home/gerbera/audio.mp3";
+    std::string title = "Audio Title";
+    std::string mimetype = "audio/mpeg";
+    std::string artist = "Artist";
+    std::string album = "Album";
+    std::string date = "2018-01-01";
+    std::string year = "2018";
+    std::string genre = "Genre";
+    std::string desc = "Description";
+    std::string id = "2";
+    std::string location = "/home/gerbera/audio.mp3";
     int online_service = 0;
     int theora = 0;
-    map<string, string> aux;
-    map<string, string> res;
+    std::map<std::string, std::string> aux;
+    std::map<std::string, std::string> res;
 
-    map<string, string> meta = {
-        make_pair("dc:title", title),
-        make_pair("upnp:artist", artist),
-        make_pair("upnp:album", album),
-        make_pair("dc:date", date),
-        make_pair("upnp:date", year),
-        make_pair("upnp:genre", genre),
-        make_pair("dc:description", desc)
+    std::map<std::string, std::string> meta {
+        { "dc:title", title },
+        { "upnp:artist", artist },
+        { "upnp:album", album },
+        { "dc:date", date },
+        { "upnp:date", year },
+        { "upnp:genre", genre },
+        { "dc:description", desc },
     };
 
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
-    map<string, string> asAudioAllAudio = {
-        make_pair("title", title),
-        make_pair("meta['dc:title']", title),
-        make_pair("meta['upnp:artist']", artist),
-        make_pair("meta['upnp:album']", album),
-        make_pair("meta['dc:date']", date),
-        make_pair("meta['upnp:date']", year),
-        make_pair("meta['upnp:genre']", genre),
-        make_pair("meta['dc:description']", desc)
+    std::map<std::string, std::string> asAudioAllAudio {
+        { "title", title },
+        { "meta['dc:title']", title },
+        { "meta['upnp:artist']", artist },
+        { "meta['upnp:album']", album },
+        { "meta['dc:date']", date },
+        { "meta['upnp:date']", year },
+        { "meta['upnp:genre']", genre },
+        { "meta['dc:description']", desc },
     };
 
-    map<string, string> asAudioAllFullName;
+    std::map<std::string, std::string> asAudioAllFullName;
     asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllFullName["title"] = "Artist - Album - Audio Title";
 
-    map<string, string> asAudioAllArtistTitle;
+    std::map<std::string, std::string> asAudioAllArtistTitle;
     asAudioAllArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllArtistTitle["title"] = "Audio Title (Album, 2018)";
 
-    map<string, string> asAudioAllAudioTitleArtist;
+    std::map<std::string, std::string> asAudioAllAudioTitleArtist;
     asAudioAllAudioTitleArtist.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllAudioTitleArtist["title"] = "Audio Title - Artist";
 
-    map<string, string> asAudioTrackArtistTitle;
+    std::map<std::string, std::string> asAudioTrackArtistTitle;
     asAudioTrackArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioTrackArtistTitle["title"] = "Audio Title - Artist (Album, 2018)";
 
@@ -262,7 +262,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "Artist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "55", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout",  audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "26" } } );
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "26" } });
 
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
     executeScript(ctx);

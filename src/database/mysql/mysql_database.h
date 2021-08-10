@@ -65,7 +65,6 @@ private:
 
     std::string quote(std::string_view str) const override { return quote(std::string(str)); }
     std::string quote(std::string value) const override;
-    std::string quote(const char* str) const override { return quote(std::string(str)); }
     std::string quote(int val) const override { return fmt::to_string(val); }
     std::string quote(unsigned int val) const override { return fmt::to_string(val); }
     std::string quote(long val) const override { return fmt::to_string(val); }

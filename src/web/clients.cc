@@ -52,8 +52,8 @@ void web::clients::process()
     auto clients = root.append_child("clients");
     xml2JsonHints->setArrayName(clients, "client");
 
-    auto arr = content->getContext()->getClients()->getClientList();
-    for (auto&& obj : *arr) {
+    auto&& arr = content->getContext()->getClients()->getClientList();
+    for (auto&& obj : arr) {
         auto item = clients.append_child("client");
         auto ip = sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&obj.addr));
         item.append_attribute("ip") = ip.c_str();

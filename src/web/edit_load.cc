@@ -41,8 +41,9 @@
 #include "upnp_xml.h"
 #include "util/tools.h"
 
-web::edit_load::edit_load(std::shared_ptr<ContentManager> content)
+web::edit_load::edit_load(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
+    , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
@@ -195,7 +196,7 @@ void web::edit_load::process()
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
 
-        auto [url, artAdded] = UpnpXMLBuilder::renderItemImage(server->getVirtualUrl(), objItem);
+        auto [url, artAdded] = xmlBuilder->renderItemImage(server->getVirtualUrl(), objItem);
         if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();
@@ -212,7 +213,7 @@ void web::edit_load::process()
     // write container meta info
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto [url, artAdded] = UpnpXMLBuilder::renderContainerImage(server->getVirtualUrl(), cont);
+        auto [url, artAdded] = xmlBuilder->renderContainerImage(server->getVirtualUrl(), cont);
         if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();

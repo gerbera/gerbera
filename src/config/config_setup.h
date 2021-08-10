@@ -498,7 +498,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const std::vector<std::string>& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 
     static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 
@@ -572,7 +572,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 class ConfigAutoscanSetup : public ConfigSetup {
@@ -606,7 +606,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 class ConfigTranscodingSetup : public ConfigSetup {
@@ -634,7 +634,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 class ConfigClientSetup : public ConfigSetup {
@@ -663,7 +663,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 class ConfigDirectorySetup : public ConfigSetup {
@@ -690,7 +690,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 /// \brief Setup of dynamic content reader
@@ -718,7 +718,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
-    std::string getCurrentValue() const override { return ""; }
+    std::string getCurrentValue() const override { return {}; }
 };
 
 #endif // __CONFIG_SETUP_H__

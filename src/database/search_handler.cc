@@ -66,7 +66,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             auto token = std::string(&ch, 1);
             TokenType tokenType = tokenTypes.at(token);
             currentPos++;
-            return std::make_unique<SearchToken>(tokenType, token);
+            return std::make_unique<SearchToken>(tokenType, std::move(token));
         }
         case '>':
         case '<':
@@ -76,12 +76,12 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 token.push_back('=');
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos += 2;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             } else {
                 auto token = std::string(&ch, 1);
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos++;
-                return std::make_unique<SearchToken>(tokenType, token);
+                return std::make_unique<SearchToken>(tokenType, std::move(token));
             }
         case '"':
             if (!inQuotes) {
@@ -152,13 +152,13 @@ std::string SearchLexer::nextStringToken(const std::string& input)
     return input.substr(startPos, currentPos - startPos);
 }
 
-std::unique_ptr<SearchToken> SearchLexer::makeToken(const std::string& tokenStr)
+std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
 {
     auto itr = tokenTypes.find(toLower(tokenStr));
     if (itr != tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, tokenStr);
+        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
     }
-    return std::make_unique<SearchToken>(TokenType::PROPERTY, tokenStr);
+    return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
 }
 
 void SearchParser::getNextToken()
@@ -464,15 +464,16 @@ static const std::map<std::string, std::string> logicOperator {
 std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
     if (colMapper && colMapper->hasEntry(property)) {
-        return std::pair(colMapper->mapQuoted(property), colMapper->mapQuotedLower(property));
+        return { colMapper->mapQuoted(property), colMapper->mapQuotedLower(property) };
     }
     if (resMapper && resMapper->hasEntry(property)) {
-        return std::pair(resMapper->mapQuoted(property), resMapper->mapQuotedLower(property));
+        return { resMapper->mapQuoted(property), resMapper->mapQuotedLower(property) };
     }
     if (metaMapper) {
-        return std::pair(
+        return {
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
-            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property));
+            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property)
+        };
     }
     log_info("Property {} not yet supported. Search may return no result!", property);
     return {};
@@ -538,7 +539,7 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
 std::string SortParser::parse()
 {
     if (sortCrit.empty()) {
-        return "";
+        return {};
     }
     std::vector<std::string> sort;
     for (auto&& seg : splitString(sortCrit, ',')) {

@@ -28,7 +28,7 @@
 #include "database/search_handler.h"
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
-decltype(auto) getAllTokens(const std::string& input)
+static decltype(auto) getAllTokens(const std::string& input)
 {
     SearchLexer lexer { input };
     upVecUpST searchTokens = std::make_unique<std::vector<std::unique_ptr<SearchToken>>>();
@@ -200,7 +200,7 @@ TEST(SearchLexer, OneComplexTokenRecognized)
 TEST(SearchLexer, MultipleTokens)
 {
     std::string input = "x=a";
-    std::vector<std::pair<std::string, TokenType>> expectedTokens = {
+    std::vector<std::pair<std::string, TokenType>> expectedTokens {
         { "x", TokenType::PROPERTY },
         { "=", TokenType::COMPAREOP },
         { "a", TokenType::PROPERTY }
@@ -388,7 +388,7 @@ TEST(SearchParser, SearchCriteriaUsingContainsOperator)
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\"", "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('%Midnight%') AND _t_._upnp_class_ IS NOT NULL)"));
 
     // (containsOpExpr or containsOpExpr)
-    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\" OR upnp:artist contains \"HEAVE\"", 
+    EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:album contains \"Midnight\" OR upnp:artist contains \"HEAVE\"",
         "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('%Midnight%') AND _t_._upnp_class_ IS NOT NULL) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_) LIKE LOWER('%HEAVE%') AND _t_._upnp_class_ IS NOT NULL)"));
 }
 
@@ -461,7 +461,7 @@ TEST(SearchParser, SearchCriteriaDynamic)
     auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
     DefaultSQLEmitter sqlEmitter(columnMapper, columnMapper, columnMapper);
     EXPECT_TRUE(executeSearchParserTest(sqlEmitter, "upnp:class derivedfrom \"object.item\" and last_updated > \"@last7\"",
-        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > [0-9]+))", 
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > [0-9]+))",
         R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ > [0-9]+\))")); // regular expression because last7 is dynamic
 }
 

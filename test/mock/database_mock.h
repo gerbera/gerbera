@@ -22,14 +22,14 @@ public:
     void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override { }
     void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
         std::vector<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override { }
-    fs::path buildContainerPath(int parentID, const std::string& title) override { return ""; }
+    fs::path buildContainerPath(int parentID, const std::string& title) override { return {}; }
 
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
 
-    std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override { return std::vector<std::shared_ptr<CdsObject>>(); }
-    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return std::vector<std::shared_ptr<CdsObject>>(); }
+    std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override { return {}; }
+    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override { return {}; }
 
-    std::vector<std::string> getMimeTypes() override { return std::vector<std::string>(); }
+    std::vector<std::string> getMimeTypes() override { return {}; }
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return nullptr; }
     int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
@@ -46,7 +46,7 @@ public:
 
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
 
-    std::string getInternalSetting(const std::string& key) override { return ""; }
+    std::string getInternalSetting(const std::string& key) override { return {}; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
 
     std::vector<ConfigValue> getConfigValues() override
@@ -70,7 +70,7 @@ public:
     int ensurePathExistence(const fs::path& path, int* changedContainer) override { return 0; }
 
     void clearFlagInDB(int flag) override { }
-    std::string getFsRootName() override { return ""; }
+    std::string getFsRootName() override { return {}; }
 
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }

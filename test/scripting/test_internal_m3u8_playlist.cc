@@ -16,9 +16,9 @@
 using namespace ::testing;
 
 // Extends ScriptTestFixture to allow
-// for unique testing of the Internal URL Playlist
+// for unique testing of the Internal URL M3U8 Playlist
 // processing
-class InternalUrlPLSPlaylistTest : public ScriptTestFixture {
+class InternalUrlM3U8PlaylistTest : public ScriptTestFixture {
 public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
@@ -26,31 +26,31 @@ public:
     // Used to iterate through `readln` content
     static int readLineCnt;
 
-    InternalUrlPLSPlaylistTest()
+    InternalUrlM3U8PlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
     }
 
-    ~InternalUrlPLSPlaylistTest() override
+    ~InternalUrlM3U8PlaylistTest() override
     {
         commonScriptMock.reset();
     }
 };
 
-std::unique_ptr<CommonScriptMock> InternalUrlPLSPlaylistTest::commonScriptMock;
-int InternalUrlPLSPlaylistTest::readLineCnt = 0;
+std::unique_ptr<CommonScriptMock> InternalUrlM3U8PlaylistTest::commonScriptMock;
+int InternalUrlM3U8PlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
     std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
 }
 
 static duk_ret_t print(duk_context* ctx)
 {
     std::string msg = ScriptTestFixture::print(ctx);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->print(msg);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->print(msg);
 }
 
 static duk_ret_t addContainerTree(duk_context* ctx)
@@ -61,19 +61,19 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Playlists/Directories/of/Playlist Title", "43" },
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->addContainerTree(tree);
 }
 
 static duk_ret_t createContainerChain(duk_context* ctx)
 {
     std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->createContainerChain(array);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->createContainerChain(array);
 }
 
 static duk_ret_t getLastPath(duk_context* ctx)
 {
     std::string inputPath = ScriptTestFixture::getLastPath(ctx);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->getLastPath(inputPath);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->getLastPath(inputPath);
 }
 
 // Proxy the Duktape script with `readln`
@@ -82,70 +82,60 @@ static duk_ret_t getLastPath(duk_context* ctx)
 static duk_ret_t readln(duk_context* ctx)
 {
     std::vector<std::string> lines {
-        "[playlist]",
-        "\n",
-        "File1=/home/gerbera/example.mp3",
-        "Title1=Song from Playlist Title",
-        "Length1=120",
-        "\n",
-        "NumberOfEntries=1",
-        "Version=2",
-        "-EOF-" // used to stop processing
+        "\xEF\xBB\xBF#EXTM3U",
+        "#EXTINF:123, Example Artist, Thumbs Up Inc. \xF0\x9F\x91\x8D",
+        "/home/gerbera/example\xE2\x9C\x85.mp3",
+        "-EOF-" // used to stop processing :/
     };
 
-    std::string line = lines.at(InternalUrlPLSPlaylistTest::readLineCnt);
+    std::string line = lines.at(InternalUrlM3U8PlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
-    InternalUrlPLSPlaylistTest::readLineCnt++;
-    return InternalUrlPLSPlaylistTest::commonScriptMock->readln(line);
+    InternalUrlM3U8PlaylistTest::readLineCnt++;
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->readln(line);
 }
 
-// Proxy the Duktape script with `addCdsObject`
-// global function.
-// Translates the Duktape value stack to c++
-// and uses the `CommonScriptMock` to track
-// expectations.
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
     std::vector<std::string> keys { "objectType", "location", "title", "playlistOrder" };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
 }
 
 static duk_ret_t copyObject(duk_context* ctx)
 {
     std::map<std::string, std::string> obj {
-        { "title", "Song from Playlist Title" },
+        { "title", "example\xE2\x9C\x85.mp3" },
         { "objectType", "2" },
-        { "location", "/home/gerbera/example.mp3" },
+        { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
         { "playlistOrder", "1" },
     };
     std::map<std::string, std::string> meta {
-        { "dc:title", "Song from Playlist Title" },
+        { "dc:title", "example\xE2\x9C\x85.mp3" },
         { "upnp:artist", "Artist" },
         { "upnp:album", "Album" },
         { "dc:date", "2018" },
     };
     copyObjectParams params = ScriptTestFixture::copyObject(ctx, obj, meta);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->copyObject(params.isObject);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->copyObject(params.isObject);
 }
 
 static duk_ret_t getCdsObject(duk_context* ctx)
 {
     std::map<std::string, std::string> obj {
-        { "title", "Song from Playlist Title" },
+        { "title", "example\xE2\x9C\x85.mp3" },
         { "objectType", "2" },
-        { "location", "/home/gerbera/example.mp3" },
+        { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
         { "playlistOrder", "1" },
     };
     std::map<std::string, std::string> meta {
-        { "dc:title", "Song from Playlist Title" },
+        { "dc:title", "example\xE2\x9C\x85.mp3" },
         { "upnp:artist", "Artist" },
         { "upnp:album", "Album" },
         { "dc:date", "2018" },
     };
     getCdsObjectParams params = ScriptTestFixture::getCdsObject(ctx, obj, meta);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->getCdsObject(params.location);
+    return InternalUrlM3U8PlaylistTest::commonScriptMock->getCdsObject(params.location);
 }
 
 // Mock the Duktape C methods
@@ -176,43 +166,46 @@ MATCHER_P(IsIdenticalMap, control, "Map to be identical")
     }
 }
 
-TEST_F(InternalUrlPLSPlaylistTest, CreatesDukContextWithPlaylistScript)
+TEST_F(InternalUrlM3U8PlaylistTest, CreatesDukContextWithPlaylistScript)
 {
     EXPECT_NE(ctx, nullptr);
 }
 
-TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPlaylistAndDirChains)
+TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromM3U8PlaylistWithInternalUrlPlaylistAndDirChains)
 {
     std::map<std::string, std::string> asPlaylistChain {
         { "objectType", "2" },
-        { "location", "/home/gerbera/example.mp3" },
+        { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
         { "playlistOrder", "1" },
-        { "title", "Song from Playlist Title" },
+        { "title", "example\xE2\x9C\x85.mp3" },
+    };
+
+    std::map<std::string, std::string> asPlaylistDirChain {
+        { "objectType", "2" },
+        { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
+        { "playlistOrder", "2" },
+        { "title", "example\xE2\x9C\x85.mp3" },
     };
 
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-mpegurl"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.m3u8"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u8"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("\n"))).Times(2).WillRepeatedly(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("File1=/home/gerbera/example.mp3"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("Title1=Song from Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("Length1=120"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("\xEF\xBB\xBF#EXTM3U"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:123, Example Artist, Thumbs Up Inc. \xF0\x9F\x91\x8D"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("/home/gerbera/example\xE2\x9C\x85.mp3"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example.mp3"))).WillRepeatedly(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example\xE2\x9C\x85.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
+    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.m3u8", "audio/x-mpegurl");
 
     executeScript(ctx);
 }

@@ -124,8 +124,6 @@ Clients::Clients(const std::shared_ptr<Config>& config)
         auto client = clientConfig->getClientInfo();
         clientInfo.push_back(*client);
     }
-
-    cache = std::make_shared<std::vector<ClientCacheEntry>>();
 }
 
 void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
@@ -133,8 +131,8 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
 
-    std::unique_ptr<pugi::xml_document> descXml;
-    if (downloadDescription(descLocation, descXml)) {
+    auto descXml = downloadDescription(descLocation);
+    if (descXml) {
         // TODO: search for FriendlyName + ModelName
         //(void)getInfoByType(userAgent, ClientMatchType::FriendlyName, &info);
     }
@@ -236,10 +234,10 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
 {
     AutoLock lock(mutex);
 
-    auto it = std::find_if(cache->begin(), cache->end(), [&](auto&& entry) //
+    auto it = std::find_if(cache.begin(), cache.end(), [&](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
-    if (it != cache->end()) {
+    if (it != cache.end()) {
         *ppInfo = it->pInfo;
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
         log_debug("found client by cache (hostname='{}')", hostName.c_str());
@@ -256,14 +254,14 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
 
     // house cleaning, remove old entries
     auto now = currentTime();
-    cache->erase(std::remove_if(cache->begin(), cache->end(),
-                     [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
-        cache->end());
+    cache.erase(std::remove_if(cache.begin(), cache.end(),
+                    [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
+        cache.end());
 
-    auto it = std::find_if(cache->begin(), cache->end(), [=](auto&& entry) //
+    auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
-    if (it != cache->end()) {
+    if (it != cache.end()) {
         it->last = now;
         if (it->pInfo != pInfo) {
             // client info changed, update all
@@ -273,31 +271,31 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         }
     } else {
         // add new client
-        cache->push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
+        cache.push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
     }
 }
 
-bool Clients::downloadDescription(const std::string& location, std::unique_ptr<pugi::xml_document> xml)
+std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
 {
 #if defined(USING_NPUPNP)
     std::string description, ct;
     int errCode = UpnpDownloadUrlItem(location, description, ct);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return false;
+        return {};
     }
-    xml = std::make_unique<pugi::xml_document>();
+    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(description.c_str());
 #else
     IXML_Document* descDoc = nullptr;
     int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return false;
+        return {};
     }
 
     DOMString cxml = ixmlPrintDocument(descDoc);
-    xml = std::make_unique<pugi::xml_document>();
+    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(cxml);
 
     ixmlFreeDOMString(cxml);
@@ -306,8 +304,8 @@ bool Clients::downloadDescription(const std::string& location, std::unique_ptr<p
 
     if (ret.status != pugi::xml_parse_status::status_ok) {
         log_debug("Unable to parse xml client description from {}", location);
-        return false;
+        return {};
     }
 
-    return true;
+    return xml;
 }

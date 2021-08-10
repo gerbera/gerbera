@@ -71,7 +71,7 @@ public:
         const char* c = col_c_str(index);
         if (!c)
             return {};
-        return std::string(c);
+        return { c };
     }
     /// \brief Return the value of column index as an integer value
     int col_int(int index, int null_value = 0) const
@@ -97,7 +97,6 @@ public:
     /* methods to override in subclasses */
     virtual std::string quote(std::string_view str) const = 0;
     virtual std::string quote(std::string str) const = 0;
-    virtual std::string quote(const char* str) const = 0;
     virtual std::string quote(int val) const = 0;
     virtual std::string quote(unsigned int val) const = 0;
     virtual std::string quote(long val) const = 0;

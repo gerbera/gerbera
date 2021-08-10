@@ -42,7 +42,7 @@ void SopCastContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document
     service_xml = std::move(service);
     auto root = service_xml->document_element();
 
-    if (std::string(root.name()) != "channels")
+    if (std::string_view(root.name()) != "channels")
         throw_std_runtime_error("Invalid XML for SopCast service received");
 
     group_it = root.begin();
@@ -75,7 +75,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
         if (group.type() != pugi::node_element)
             continue;
 
-        if (std::string(group.name()) != "group")
+        if (std::string_view(group.name()) != "group")
             continue;
 
         // we know that we have a group
@@ -98,7 +98,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getNextObject()
             if (channel.type() != pugi::node_element)
                 continue;
 
-            if (std::string(channel.name()) != "channel")
+            if (std::string_view(channel.name()) != "channel")
                 continue;
 
             // we know that we have a channel

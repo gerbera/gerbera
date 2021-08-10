@@ -71,16 +71,16 @@ void DatabaseTestBase::testUpgrade(config_option_t option)
 class Sqlite3DatabaseTest : public DatabaseTestBase {
 
 public:
-    Sqlite3DatabaseTest() {};
-    virtual ~Sqlite3DatabaseTest() {};
+    Sqlite3DatabaseTest() = default;
+    ~Sqlite3DatabaseTest() override = default;
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<SqliteConfigFake>();
         subject = std::make_shared<Sqlite3Database>(config, nullptr, nullptr);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
         subject = nullptr;
     }
@@ -139,16 +139,16 @@ TEST_F(DatabaseTest, AddObject)
 class MysqlDatabaseTest : public DatabaseTestBase {
 
 public:
-    MysqlDatabaseTest() {};
-    virtual ~MysqlDatabaseTest() {};
+    MysqlDatabaseTest() = default;
+    ~MysqlDatabaseTest() override = default;
 
-    virtual void SetUp()
+    void SetUp() override
     {
         config = std::make_shared<MySQLConfigFake>();
         subject = std::make_shared<MySQLDatabase>(config, nullptr);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 };

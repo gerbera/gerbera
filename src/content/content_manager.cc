@@ -278,7 +278,7 @@ void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
         return;
 
     if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
-        std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(parameter->getID());
+        auto adir = autoscan_timed->get(parameter->getID());
 
         // do not rescan while other scans are still active
         if (!adir || adir->getActiveScanCount() > 0 || adir->getTaskCount() > 0)
@@ -310,7 +310,7 @@ void ContentManager::shutdown()
         // update modification time for database
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoScanDir {}", i);
-            std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
+            auto dir = autoscan_inotify->get(i);
             if (dir) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
@@ -826,9 +826,9 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     if (!adir) {
         for (size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
-            std::shared_ptr<AutoscanDirectory> dir = autoscan_inotify->get(i);
+            auto dir = autoscan_inotify->get(i);
             if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
-                adir = dir;
+                adir = std::move(dir);
             }
         }
     }
@@ -836,9 +836,9 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     if (!adir) {
         for (size_t i = 0; i < autoscan_timed->size(); i++) {
             log_debug("Timed AutoscanDir {}", i);
-            std::shared_ptr<AutoscanDirectory> dir = autoscan_timed->get(i);
+            auto dir = autoscan_timed->get(i);
             if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
-                adir = dir;
+                adir = std::move(dir);
             }
         }
     }
@@ -1092,7 +1092,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     for (auto&& item : chain) {
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
-            return std::pair(INVALID_OBJECT_ID, false);
+            return { INVALID_OBJECT_ID, false };
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received chain item {}", tree);
@@ -1121,7 +1121,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
         update_manager->containerChanged(result);
         session_manager->containerChangedUI(result);
     }
-    return std::pair(result, isNew);
+    return { result, isNew };
 }
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
@@ -1173,7 +1173,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         session_manager->containerChangedUI(updateID.back());
     }
 
-    return std::pair(containerID, isNew);
+    return { containerID, isNew };
 }
 
 void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj)
@@ -1187,7 +1187,7 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
     }
     int count = 0;
     for (auto&& container : containerList) {
-        const std::vector<std::shared_ptr<CdsResource>>& resources = container->getResources();
+        auto resources = container->getResources();
         auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
         if (fanart == resources.end()) {
             MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
@@ -1602,8 +1602,8 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 rm_list = autoscan_inotify->removeIfSubdir(path);
                 for (size_t i = 0; i < rm_list->size(); i++) {
-                    std::shared_ptr<AutoscanDirectory> dir = rm_list->get(i);
-                    inotify->unmonitor(dir);
+                    auto dir = rm_list->get(i);
+                    inotify->unmonitor(std::move(dir));
                 }
             }
 #endif
@@ -1669,7 +1669,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int obje
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
 {
     // \todo change this when more scanmodes become available
-    std::shared_ptr<AutoscanDirectory> adir = autoscan_timed->get(location);
+    auto adir = autoscan_timed->get(location);
 #if HAVE_INOTIFY
     if (!adir)
         adir = autoscan_inotify->get(location);

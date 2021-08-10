@@ -33,7 +33,7 @@ public:
     void TearDown() override
     {
         delete subject;
-    };
+    }
 
     static void fillAddr(struct sockaddr_storage* addr, const char* ip)
     {

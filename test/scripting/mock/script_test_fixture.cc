@@ -29,7 +29,7 @@ void ScriptTestFixture::SetUp()
     loadCommon(ctx);
 
     fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
-    string scriptContent = readTextFile(scriptFile.c_str());
+    std::string scriptContent = readTextFile(scriptFile.c_str());
     duk_push_thread_stash(ctx, ctx);
     duk_push_string(ctx, scriptFile.c_str());
     duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
@@ -51,21 +51,21 @@ void ScriptTestFixture::loadCommon(duk_context* ctx)
         duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
 
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-            cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << endl;
+            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
         }
         duk_pop(ctx); // commonScript
     }
 }
 
-duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const string& mimetype, const string& id, int theora, const string& title,
-    const map<string, string>& meta, const map<string, string>& aux, const map<string, string>& res,
-    const string& location, int online_service)
+duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
+    const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
+    const std::string& location, int online_service)
 {
     duk_idx_t orig_idx;
     duk_idx_t meta_idx;
     duk_idx_t aux_idx;
     duk_idx_t res_idx;
-    const string OBJECT_NAME = "orig";
+    const std::string OBJECT_NAME = "orig";
     orig_idx = duk_push_object(ctx);
     duk_push_string(ctx, mimetype.c_str());
     duk_put_prop_string(ctx, orig_idx, "mimetype");
@@ -115,9 +115,9 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const string& mimetyp
     return 0;
 }
 
-duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const string& title, const string& location, const string& mimetype)
+duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype)
 {
-    const string OBJECT_NAME = "playlist";
+    const std::string OBJECT_NAME = "playlist";
     duk_push_object(ctx);
     duk_push_string(ctx, location.c_str());
     duk_put_prop_string(ctx, -2, "location");
@@ -156,7 +156,7 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
     }
 
     if (config.empty()) {
-        addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout",  audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } } );
+        addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } });
     } else {
         addConfig(ctx, config);
     }
@@ -181,8 +181,8 @@ void ScriptTestFixture::addConfig(duk_context* ctx, const std::map<std::string_v
 {
     duk_push_object(ctx); // config
     for (auto&& [key, value] : config) {
-      duk_push_string(ctx, value.data());
-      duk_put_prop_string(ctx, -2, key.data());
+        duk_push_string(ctx, value.data());
+        duk_put_prop_string(ctx, -2, key.data());
     }
     duk_put_global_string(ctx, "config");
 }
@@ -193,17 +193,17 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
     duk_get_global_string(ctx, "script_under_test");
     if (duk_is_function(ctx, -1)) {
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-            cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << endl;
+            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
         }
         duk_pop(ctx); // script_under_test
-    };
+    }
 }
 
-vector<string> ScriptTestFixture::createContainerChain(duk_context* ctx)
+std::vector<std::string> ScriptTestFixture::createContainerChain(duk_context* ctx)
 {
-    string path;
+    std::string path;
     DukTestHelper dukHelper;
-    vector<string> array = dukHelper.arrayToVector(ctx, -1);
+    std::vector<std::string> array = dukHelper.arrayToVector(ctx, -1);
     for (auto const& value : array) {
         path.append("\\/" + value);
     }
@@ -211,29 +211,29 @@ vector<string> ScriptTestFixture::createContainerChain(duk_context* ctx)
     return array;
 }
 
-string ScriptTestFixture::getLastPath(duk_context* ctx)
+std::string ScriptTestFixture::getLastPath(duk_context* ctx)
 {
-    string inputPath = duk_to_string(ctx, 0);
-    string path = inputPath;
-    string delimiter = "/";
+    std::string inputPath = duk_to_string(ctx, 0);
+    std::string path = inputPath;
+    std::string delimiter = "/";
 
     size_t pos = 0;
-    string token;
-    vector<string> pathElements;
-    while ((pos = path.find(delimiter)) != string::npos) {
+    std::string token;
+    std::vector<std::string> pathElements;
+    while ((pos = path.find(delimiter)) != std::string::npos) {
         token = path.substr(0, pos);
         pathElements.push_back(token);
         path.erase(0, pos + delimiter.length());
     }
-    string lastPath = pathElements.at(pathElements.size() - 1);
+    std::string lastPath = pathElements.at(pathElements.size() - 1);
     duk_push_string(ctx, lastPath.c_str());
     return inputPath;
 }
 
-string ScriptTestFixture::getPlaylistType(duk_context* ctx)
+std::string ScriptTestFixture::getPlaylistType(duk_context* ctx)
 {
-    string playlistMimeType = duk_to_string(ctx, 0);
-    string type;
+    std::string playlistMimeType = duk_to_string(ctx, 0);
+    std::string type;
     if (playlistMimeType == "audio/x-mpegurl") {
         type = "m3u";
     } else if (playlistMimeType == "audio/x-scpls") {
@@ -245,26 +245,26 @@ string ScriptTestFixture::getPlaylistType(duk_context* ctx)
     return playlistMimeType;
 }
 
-string ScriptTestFixture::print(duk_context* ctx)
+std::string ScriptTestFixture::print(duk_context* ctx)
 {
-    string result = duk_to_string(ctx, 0);
+    std::string result = duk_to_string(ctx, 0);
     return result;
 }
 
-string ScriptTestFixture::getYear(duk_context* ctx)
+std::string ScriptTestFixture::getYear(duk_context* ctx)
 {
-    string date = duk_to_string(ctx, 0);
+    std::string date = duk_to_string(ctx, 0);
     // TODO: parse YYYY...
     duk_push_string(ctx, "2018");
     return date;
 }
 
-vector<string> ScriptTestFixture::addContainerTree(duk_context* ctx, map<string,string> resMap)
+std::vector<std::string> ScriptTestFixture::addContainerTree(duk_context* ctx, std::map<std::string, std::string> resMap)
 {
     DukTestHelper dukHelper;
-    vector<string> array = dukHelper.containerToPath(ctx, 0);
+    std::vector<std::string> array = dukHelper.containerToPath(ctx, 0);
 
-    string result;
+    std::string result;
     for (auto const& value : array) {
         result.append("/" + value);
     }
@@ -273,11 +273,11 @@ vector<string> ScriptTestFixture::addContainerTree(duk_context* ctx, map<string,
     return array;
 }
 
-addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const vector<string>& keys)
+addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const std::vector<std::string>& keys)
 {
-    string containerChain;
-    string objContainer;
-    map<string, string> dukObjValues;
+    std::string containerChain;
+    std::string objContainer;
+    std::map<std::string, std::string> dukObjValues;
     DukTestHelper dukHelper;
 
     // parameter list
@@ -293,7 +293,7 @@ addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const vecto
     return params;
 }
 
-copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta)
+copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, const std::map<std::string, std::string>& obj, const std::map<std::string, std::string>& meta)
 {
     duk_bool_t isObjectParam = duk_is_object(ctx, 0);
     copyObjectParams params;
@@ -305,9 +305,9 @@ copyObjectParams ScriptTestFixture::copyObject(duk_context* ctx, const map<strin
     return params;
 }
 
-getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, const map<string, string>& obj, const map<string, string>& meta)
+getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, const std::map<std::string, std::string>& obj, const std::map<std::string, std::string>& meta)
 {
-    string location = duk_to_string(ctx, 0);
+    std::string location = duk_to_string(ctx, 0);
     getCdsObjectParams params;
     params.location = location;
 
@@ -319,9 +319,9 @@ getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, const map<s
 
 abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
 {
-    string inputValue;
+    std::string inputValue;
     int boxType;
-    string divChar;
+    std::string divChar;
 
     inputValue = duk_to_string(ctx, 0);
     boxType = duk_to_int32(ctx, 1);
@@ -339,9 +339,9 @@ abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
 getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
 {
     duk_idx_t arr_idx;
-    string objScriptPath;
-    string objLocation;
-    string origObjLocation;
+    std::string objScriptPath;
+    std::string objLocation;
+    std::string origObjLocation;
 
     // parameter list
     objScriptPath = duk_to_string(ctx, 0);
@@ -349,10 +349,10 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
     objLocation = origObjLocation;
 
     size_t pos = 0;
-    string token;
-    string delimiter = "/";
-    vector<string> dirs;
-    while ((pos = objLocation.find(delimiter)) != string::npos) {
+    std::string token;
+    std::string delimiter = "/";
+    std::vector<std::string> dirs;
+    while ((pos = objLocation.find(delimiter)) != std::string::npos) {
         token = objLocation.substr(0, pos);
         if (token.length() > 0)
             dirs.push_back(token);
@@ -361,7 +361,7 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
 
     arr_idx = duk_push_array(ctx);
     for (size_t i = 0; i < dirs.size(); i++) {
-        string dir = dirs.at(i);
+        std::string dir = dirs.at(i);
         duk_push_string(ctx, dir.c_str());
         duk_put_prop_index(ctx, arr_idx, static_cast<int>(i));
     }

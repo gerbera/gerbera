@@ -66,7 +66,7 @@ enum class TokenType {
 
 class SearchToken {
 public:
-    SearchToken(TokenType type, std::string value)
+    SearchToken(TokenType type, std::string&& value)
         : type(type)
         , value(std::move(value))
     {
@@ -96,7 +96,7 @@ public:
 
 protected:
     std::string nextStringToken(const std::string& input);
-    static std::unique_ptr<SearchToken> makeToken(const std::string& tokenStr);
+    static std::unique_ptr<SearchToken> makeToken(std::string tokenStr);
     std::string getQuotedValue(const std::string& input);
 
     std::string input;
@@ -396,9 +396,9 @@ public:
     }
 
     std::string emitSQL(const ASTNode* node) const override;
-    std::string emit(const ASTAsterisk* node) const override { return "*"; }
+    std::string emit(const ASTAsterisk* node) const override { return {}; }
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
-    std::string emit(const ASTDQuote* node) const override { return ""; }
+    std::string emit(const ASTDQuote* node) const override { return {}; }
     std::string emit(const ASTCompareOperator* node,
         const std::string& property, const std::string& value) const override;
     std::string emit(const ASTStringOperator* node,
@@ -463,7 +463,7 @@ public:
                 return colMap.at(tag).second;
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(tag).first, colMap.at(tag).second, table_quote_end);
         }
-        return "";
+        return {};
     }
 
     std::string tableQuoted() const override
@@ -479,7 +479,7 @@ public:
                 return colMap.at(it->second).second;
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
-        return "";
+        return {};
     }
     std::string mapQuotedLower(const std::string& tag) const override
     {
@@ -489,7 +489,7 @@ public:
                 return fmt::format("LOWER({})", colMap.at(it->second).second);
             return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
-        return "";
+        return {};
     }
 
 private:
