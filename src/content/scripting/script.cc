@@ -114,8 +114,8 @@ std::vector<std::string> Script::getPropertyNames() const
     duk_enum(ctx, -1, 0);
     while (duk_next(ctx, -1 /*enum_idx*/, 0 /*get_value*/)) {
         /* [ ... enum key ] */
-        auto sym = duk_get_string(ctx, -1);
-        keys.emplace_back(sym);
+        auto sym = std::string(duk_get_string(ctx, -1));
+        keys.push_back(std::move(sym));
         duk_pop(ctx); /* pop_key */
     }
     duk_pop(ctx); // duk_enum

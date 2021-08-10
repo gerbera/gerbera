@@ -126,7 +126,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
         }
     }
     if (result.empty())
-        result.emplace_back("");
+        result.emplace_back();
     return result;
 }
 

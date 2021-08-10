@@ -687,7 +687,9 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
                 log_error("Error in config file: incorrect <{}> value for <{}>", node_name, value.name());
                 return false;
             }
-            result.emplace_back(child.text().as_string());
+
+            auto str = std::string(child.text().as_string());
+            result.push_back(std::move(str));
         }
     }
     return true;

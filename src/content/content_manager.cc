@@ -1159,12 +1159,12 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         for (auto&& contId : updateID) {
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(contId));
             containerMap[container->getLocation()] = container;
-            containerList.emplace_back(container);
+            containerList.push_back(std::move(container));
         }
         isNew = true;
     } else {
         containerID = containerMap[newChain]->getID();
-        containerList.emplace_back(containerMap[newChain]);
+        containerList.push_back(containerMap[newChain]);
     }
 
     if (!updateID.empty()) {
@@ -1603,7 +1603,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
                 rm_list = autoscan_inotify->removeIfSubdir(path);
                 for (size_t i = 0; i < rm_list->size(); i++) {
                     auto dir = rm_list->get(i);
-                    inotify->unmonitor(std::move(dir));
+                    inotify->unmonitor(dir);
                 }
             }
 #endif

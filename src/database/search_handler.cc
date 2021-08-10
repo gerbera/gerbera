@@ -552,7 +552,7 @@ std::string SortParser::parse()
         }
         auto sortSql = colMapper ? colMapper->mapQuoted(seg) : "";
         if (!sortSql.empty()) {
-            sort.emplace_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
+            sort.push_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
         } else {
             log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
         }
