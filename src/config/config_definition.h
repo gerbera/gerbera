@@ -54,7 +54,7 @@ public:
         for (auto&& co : complexOptions) {
             auto tco = std::dynamic_pointer_cast<CS>(co);
             if (tco && tco->getValue()) {
-                result.emplace_back(tco);
+                result.push_back(std::move(tco));
             }
         }
         return result;

@@ -343,8 +343,8 @@ void SQLDatabase::init()
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
-        resourceTagMap.emplace_back(std::pair(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId));
-        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = std::pair(RES_ALIAS, attrName);
+        resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId);
+        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = { RES_ALIAS, attrName };
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
@@ -484,7 +484,7 @@ std::string SQLDatabase::getSortCapabilities()
     std::vector<std::string> sortKeys;
     for (auto&& [key, col] : browseSortMap) {
         if (std::find(sortKeys.begin(), sortKeys.end(), key) == sortKeys.end()) {
-            sortKeys.emplace_back(key);
+            sortKeys.push_back(key);
         }
     }
     return fmt::format("{}", fmt::join(sortKeys, ","));
@@ -501,7 +501,7 @@ std::string SQLDatabase::getSearchCapabilities()
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
-        searchKeys.emplace_back(fmt::format("res@{}", attrName));
+        searchKeys.push_back(fmt::format("res@{}", attrName));
     }
     return fmt::format("{}", fmt::join(searchKeys, ","));
 }
@@ -878,7 +878,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         };
 
         if (!getContainers && !getItems) {
-            where.emplace_back("0 = 1");
+            auto zero = std::string("0 = 1");
+            where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
             where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER)));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
@@ -1471,7 +1472,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     std::vector<std::string> rows;
     rows.reserve(res->getNumRows());
     while ((row = res->nextRow())) {
-        rows.emplace_back(fmt::format("{},{}", row->col(0), row->col(1)));
+        rows.push_back(fmt::format("{},{}", row->col(0), row->col(1)));
     }
 
     if (rows.empty())
@@ -1551,7 +1552,8 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
                 auto location = stripLocationPrefix(row->col(2));
                 exec(fmt::format("UPDATE {0}{2}{1} SET {0}obj_id{1} = {3}, {0}location{1} = {4} WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, SQL_NULL, quote(location.string()), quote(row->col(0))));
             } else {
-                delete_as.emplace_back(row->col_c_str(0));
+                auto col = std::string(row->col_c_str(0));
+                delete_as.push_back(std::move(col));
             }
             log_debug("relevant autoscan: {}; persistent: {}", row->col_c_str(0), persistent);
         }
