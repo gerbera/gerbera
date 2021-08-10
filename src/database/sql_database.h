@@ -33,6 +33,7 @@
 #define __SQL_STORAGE_H__
 
 #include <array>
+#include <cstdlib>
 #include <mutex>
 #include <unordered_set>
 #include <utility>
@@ -58,12 +59,27 @@ class SQLEmitter;
 class SQLRow {
 public:
     virtual ~SQLRow() = default;
+    /// \brief Returns true if the column index contains the value NULL
+    bool isNull(int index) const
+    {
+        const char* c = col_c_str(index);
+        return c == nullptr;
+    }
+    /// \brief Return the value of column index as a string value
     std::string col(int index) const
     {
-        char* c = col_c_str(index);
+        const char* c = col_c_str(index);
         if (!c)
             return {};
         return { c };
+    }
+    /// \brief Return the value of column index as an integer value
+    int col_int(int index, int null_value = 0) const
+    {
+        const char* c = col_c_str(index);
+        if (!c)
+            return null_value;
+        return std::atoi(c);
     }
     virtual char* col_c_str(int index) const = 0;
 };

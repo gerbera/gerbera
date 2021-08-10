@@ -662,8 +662,6 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         cdsObjectSql["mime_type"] = quote(item->getMimeType().substr(0, 40));
     }
 
-    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal;
-
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
@@ -674,7 +672,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
         if (res && (res->nextRow()))
-            return returnVal;
+            return {};
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID) {
@@ -682,6 +680,8 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
+
+    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal;
     returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
@@ -806,9 +806,10 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
         throw_std_runtime_error("db error");
 
     std::vector<int> objectIDs;
+    objectIDs.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        objectIDs.push_back(std::stoi(row->col(0)));
+        objectIDs.push_back(row->col_int(0));
     }
 
     return objectIDs;
@@ -900,12 +901,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     commit("browse");
 
     std::vector<std::shared_ptr<CdsObject>> result;
-
+    result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        auto obj = createObjectFromRow(row);
-        result.push_back(obj);
-        row = nullptr; // clear out content from unique_ptr
+        result.push_back(createObjectFromRow(row));
     }
 
     // update childCount fields
@@ -975,9 +974,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     log_debug("Search count resolves to SQL [{}]", countSQL);
     auto sqlResult = select(countSQL);
     commit("search");
+
     auto countRow = sqlResult->nextRow();
     if (countRow) {
-        *numMatches = std::stoi(countRow->col(0));
+        *numMatches = countRow->col_int(0);
     }
 
     // order by code..
@@ -1007,12 +1007,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_pt
     commit("search 2");
 
     std::vector<std::shared_ptr<CdsObject>> result;
-
+    result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        auto obj = createObjectFromSearchRow(row);
-        result.push_back(obj);
-        row = nullptr; // clear out content from unique_ptr
+        result.push_back(createObjectFromSearchRow(row));
     }
 
     if (result.size() < requestedCount) {
@@ -1044,8 +1042,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            int childCount = std::stoi(row->col(0));
-            return childCount;
+            return row->col_int(0);
         }
     }
     return 0;
@@ -1061,9 +1058,10 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
         throw_std_runtime_error("db error");
 
     std::vector<std::string> arr;
+    arr.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        arr.push_back(std::string(row->col(0)));
+        arr.push_back(row->col(0));
     }
 
     return arr;
@@ -1231,7 +1229,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         auto row = res->nextRow();
         if (row) {
             if (containerID)
-                *containerID = std::stoi(row->col(0));
+                *containerID = row->col_int(0);
             commit("addContainerChain");
             return;
         }
@@ -1448,7 +1446,7 @@ int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, cons
 
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
-        return std::stoi(row->col(0));
+        return row->col_int(0);
     }
     return 0;
 }
@@ -1471,12 +1469,14 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
     std::unique_ptr<SQLRow> row;
     std::vector<std::string> rows;
+    rows.reserve(res->getNumRows());
     while ((row = res->nextRow())) {
         rows.emplace_back(fmt::format("{},{}", row->col(0), row->col(1)));
     }
 
     if (rows.empty())
-        return "";
+        return {};
+
     return fmt::format("{}", fmt::join(rows, ","));
 }
 
@@ -1488,13 +1488,14 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     auto res = select(getSql);
     if (!res)
         throw_std_runtime_error("db error");
+
     if (res->getNumRows() == 0)
         return {};
 
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        ret.insert(std::stoi(row->col(0)));
+        ret.insert(row->col_int(0));
     }
     return ret;
 }
@@ -1518,11 +1519,12 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::vector<int32_t> containers;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        int objectType = std::stoi(row->col(1));
+        const int32_t objectID = row->col_int(0);
+        const int objectType = row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
-            containers.push_back(std::stol(row->col(0)));
+            containers.push_back(objectID);
         else
-            items.push_back(std::stol(row->col(0)));
+            items.push_back(objectID);
     }
 
     auto rr = _recursiveRemove(items, containers, all);
@@ -1575,13 +1577,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     if (!row)
         return nullptr;
 
-    int objectType = std::stoi(row->col(0));
+    const int objectType = row->col_int(0);
     bool isContainer = IS_CDS_CONTAINER(objectType);
     if (all && !isContainer) {
-        std::string ref_id_str = row->col(1);
-        int ref_id;
-        if (!ref_id_str.empty()) {
-            ref_id = std::stoi(ref_id_str);
+        if (!row->isNull(1)) {
+            const int ref_id = row->col_int(1);
             if (!IS_FORBIDDEN_CDS_ID(ref_id))
                 objectID = ref_id;
         }
@@ -1631,7 +1631,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             throw DatabaseException("", fmt::format("Sql error: {}", sql));
         parentIds.clear();
         while ((row = res->nextRow())) {
-            changedContainers.ui.push_back(std::stoi(row->col(0)));
+            changedContainers.ui.push_back(row->col_int(0));
         }
     }
 
@@ -1647,7 +1647,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             parentIds.clear();
             while ((row = res->nextRow())) {
-                changedContainers.upnp.push_back(std::stoi(row->col(0)));
+                changedContainers.upnp.push_back(row->col_int(0));
             }
         }
 
@@ -1659,8 +1659,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             itemIds.clear();
             while ((row = res->nextRow())) {
-                removeIds.push_back(std::stoi(row->col(0)));
-                changedContainers.upnp.push_back(std::stoi(row->col(1)));
+                removeIds.push_back(row->col_int(0));
+                changedContainers.upnp.push_back(row->col_int(1));
             }
         }
 
@@ -1672,24 +1672,25 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             containerIds.clear();
             while ((row = res->nextRow())) {
-                int objectType = std::stoi(row->col(1));
-                if (IS_CDS_CONTAINER(objectType)) {
-                    containerIds.push_back(std::stoi(row->col(0)));
-                    removeIds.push_back(std::stoi(row->col(0)));
+                const int objId = row->col_int(0);
+                const int objType = row->col_int(1);
+                if (IS_CDS_CONTAINER(objType)) {
+                    containerIds.push_back(objId);
+                    removeIds.push_back(objId);
                 } else {
                     if (all) {
-                        std::string refId = row->col(2);
-                        if (!refId.empty()) {
-                            parentIds.push_back(std::stoi(row->col(2)));
-                            itemIds.push_back(std::stoi(row->col(2)));
-                            removeIds.push_back(std::stoi(row->col(2)));
+                        if (!row->isNull(2)) {
+                            const int32_t refId = row->col_int(2);
+                            parentIds.push_back(refId);
+                            itemIds.push_back(refId);
+                            removeIds.push_back(refId);
                         } else {
-                            removeIds.push_back(std::stoi(row->col(0)));
-                            itemIds.push_back(std::stoi(row->col(0)));
+                            removeIds.push_back(objId);
+                            itemIds.push_back(objId);
                         }
                     } else {
-                        removeIds.push_back(std::stoi(row->col(0)));
-                        itemIds.push_back(std::stoi(row->col(0)));
+                        removeIds.push_back(objId);
+                        itemIds.push_back(objId);
                     }
                 }
             }
@@ -1750,14 +1751,14 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             if (!res)
                 throw_std_runtime_error("db error");
             while ((row = res->nextRow())) {
-                int flags = std::stoi(row->col(3));
+                const int flags = row->col_int(3);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers.upnp.push_back(std::stoi(row->col(0)));
+                    changedContainers.upnp.push_back(row->col_int(0));
                 else if (row->col(1) == "0") {
-                    del.push_back(std::stoi(row->col(0)));
-                    selUi.push_back(std::stoi(row->col(2)));
+                    del.push_back(row->col_int(0));
+                    selUi.push_back(row->col_int(2));
                 } else {
-                    selUpnp.push_back(std::stoi(row->col(0)));
+                    selUpnp.push_back(row->col_int(0));
                 }
             }
         }
@@ -1770,15 +1771,15 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             if (!res)
                 throw_std_runtime_error("db error");
             while ((row = res->nextRow())) {
-                int flags = std::stoi(row->col(3));
+                const int flags = row->col_int(3);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers.ui.push_back(std::stoi(row->col(0)));
-                    changedContainers.upnp.push_back(std::stoi(row->col(0)));
+                    changedContainers.ui.push_back(row->col_int(0));
+                    changedContainers.upnp.push_back(row->col_int(0));
                 } else if (row->col(1) == "0") {
-                    del.push_back(std::stoi(row->col(0)));
-                    selUi.push_back(std::stoi(row->col(2)));
+                    del.push_back(row->col_int(0));
+                    selUi.push_back(row->col_int(2));
                 } else {
-                    selUi.push_back(std::stoi(row->col(0)));
+                    selUi.push_back(row->col_int(0));
                 }
             }
         }
@@ -1831,6 +1832,7 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
         return {};
 
     std::vector<ConfigValue> result;
+    result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         result.push_back({ row->col(1),
@@ -1915,7 +1917,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
 
         auto row = res->nextRow();
         if (row) {
-            ad->setDatabaseID(std::stoi(row->col(0)));
+            ad->setDatabaseID(row->col_int(0));
             updateAutoscanDirectory(ad);
         } else
             addAutoscanDirectory(ad);
@@ -1940,7 +1942,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
     while ((row = res->nextRow())) {
         auto adir = _fillAutoscanDirectory(row);
         if (!adir)
-            _removeAutoscanDirectory(std::stoi(row->col(0)));
+            _removeAutoscanDirectory(row->col_int(0));
         else
             ret->add(adir);
     }
@@ -2101,8 +2103,9 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
     if (!res)
         throw DatabaseException("", "error while doing select on ");
     auto row = res->nextRow();
-    if (row && !row->col(0).empty())
-        return std::stoi(row->col(0));
+    if (row && !row->isNull(0))
+        return row->col_int(0);
+
     return INVALID_OBJECT_ID;
 }
 
@@ -2161,7 +2164,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         if (!res)
             throw_std_runtime_error("SQL error");
         if ((row = res->nextRow())) {
-            int objectID = std::stoi(row->col(0));
+            const int objectID = row->col_int(0);
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
             if (!obj)
@@ -2189,7 +2192,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             return pathIDs;
     }
 
-    int objectID = std::stoi(row->col(0));
+    const int objectID = row->col_int(0);
     auto obj = loadObject(objectID);
     if (!obj) {
         throw_std_runtime_error("Referenced object (by Autoscan) not found.");
@@ -2214,7 +2217,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
         auto row = res->nextRow();
         if (!row)
             break;
-        objectID = std::stoi(row->col(0));
+        objectID = row->col_int(0);
     }
     return pathIDs;
 }
@@ -2286,6 +2289,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
         return {};
 
     std::vector<std::shared_ptr<CdsResource>> resources;
+    resources.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
@@ -2298,8 +2302,9 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
                 resource->addAttribute(resAttrId, value);
             }
         }
-        resources.push_back(resource);
+        resources.push_back(std::move(resource));
     }
+
     return resources;
 }
 
@@ -2446,11 +2451,11 @@ bool SQLDatabase::doMetadataMigration()
 {
     log_debug("Checking if metadata migration is required");
     auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}metadata{1} IS NOT NULL", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
-    int expectedConversionCount = std::stoi(res->nextRow()->col(0));
+    int expectedConversionCount = res->nextRow()->col_int(0);
     log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
     res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1}", table_quote_begin, table_quote_end, METADATA_TABLE));
-    int metadataRowCount = std::stoi(res->nextRow()->col(0));
+    int metadataRowCount = res->nextRow()->col_int(0);
     log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
 
     if (expectedConversionCount > 0 && metadataRowCount > 0) {
@@ -2465,7 +2470,7 @@ bool SQLDatabase::doMetadataMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow())) {
-        migrateMetadata(std::stoi(row->col(0)), row->col(1));
+        migrateMetadata(row->col_int(0), row->col(1));
         ++objectsUpdated;
     }
     log_info("Migrated metadata - object count: {}", objectsUpdated);
@@ -2527,13 +2532,13 @@ bool SQLDatabase::doResourceMigration()
     auto res = select(
         fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}resources{1} is not null",
             table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
-    int expectedConversionCount = std::stoi(res->nextRow()->col(0));
+    int expectedConversionCount = res->nextRow()->col_int(0);
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
         fmt::format("SELECT COUNT(*) FROM {0}{2}{1}",
             table_quote_begin, table_quote_end, RESOURCE_TABLE));
-    int resourceRowCount = std::stoi(res->nextRow()->col(0));
+    int resourceRowCount = res->nextRow()->col_int(0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
     if (expectedConversionCount > 0 && resourceRowCount > 0) {
@@ -2550,7 +2555,7 @@ bool SQLDatabase::doResourceMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow())) {
-        migrateResources(std::stoi(row->col(0)), row->col(1));
+        migrateResources(row->col_int(0), row->col(1));
         ++objectsUpdated;
     }
     log_info("Migrated resources - object count: {}", objectsUpdated);
