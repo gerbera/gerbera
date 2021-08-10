@@ -1520,7 +1520,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         const int32_t objectID = row->col_int(0);
-        const int objectType =   row->col_int(1);
+        const int objectType = row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(objectID);
         else
@@ -1672,10 +1672,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             containerIds.clear();
             while ((row = res->nextRow())) {
-                const int objectType = row->col_int(1);
-                if (IS_CDS_CONTAINER(objectType)) {
-                    containerIds.push_back(row->col_int(0));
-                    removeIds.push_back(row->col_int(0));
+                const int objId = row->col_int(0);
+                const int objType = row->col_int(1);
+                if (IS_CDS_CONTAINER(objType)) {
+                    containerIds.push_back(objId);
+                    removeIds.push_back(objId);
                 } else {
                     if (all) {
                         if (!row->isNull(2)) {
@@ -1684,12 +1685,12 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                             itemIds.push_back(refId);
                             removeIds.push_back(refId);
                         } else {
-                            removeIds.push_back(row->col_int(0));
-                            itemIds.push_back(row->col_int(0));
+                            removeIds.push_back(objId);
+                            itemIds.push_back(objId);
                         }
                     } else {
-                        removeIds.push_back(row->col_int(0));
-                        itemIds.push_back(row->col_int(0));
+                        removeIds.push_back(objId);
+                        itemIds.push_back(objId);
                     }
                 }
             }
