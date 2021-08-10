@@ -85,26 +85,10 @@ void Web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, 
 template <typename T>
 void Web::ConfigLoad::setValue(pugi::xml_node& item, const T& value)
 {
-    static_assert(fmt::has_formatter<T, fmt::format_context>::value, "T must be formattable");
-    item.append_attribute("value") = fmt::to_string(value).c_str();
-}
-
-template <>
-void Web::ConfigLoad::setValue(pugi::xml_node& item, const std::string& value)
-{
-    item.append_attribute("value") = value.c_str();
-}
-
-template <>
-void Web::ConfigLoad::setValue(pugi::xml_node& item, const std::string_view& value)
-{
-    item.append_attribute("value") = value.data();
-}
-
-template <>
-void Web::ConfigLoad::setValue(pugi::xml_node& item, const fs::path& value)
-{
-    item.append_attribute("value") = value.c_str();
+    if constexpr (fmt::has_formatter<T, fmt::format_context>::value)
+        item.append_attribute("value") = fmt::to_string(value).c_str();
+    else
+        item.append_attribute("value") = value.c_str();
 }
 
 /// \brief: process config_load request
