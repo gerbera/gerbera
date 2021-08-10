@@ -1520,7 +1520,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         const int32_t objectID = row->col_int(0);
-        const int objectType =   row->col_int(1);
+        const int objectType = row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(objectID);
         else
