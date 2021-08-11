@@ -152,7 +152,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
     if (!tc)
         return taskList;
 
-    taskList.push_back(tc);
+    taskList.push_back(std::move(tc));
 
     std::copy_if(taskQueue.begin(), taskQueue.end(), std::back_inserter(taskList), [](auto&& task) { return task->isValid(); });
 
