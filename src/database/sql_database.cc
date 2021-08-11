@@ -681,8 +681,9 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
-    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> returnVal;
-    returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op));
+    auto returnVal = std::vector {
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op),
+    };
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
@@ -700,7 +701,7 @@ void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContaine
     if (obj->getID() != INVALID_OBJECT_ID)
         throw_std_runtime_error("Tried to add an object with an object ID set");
 
-    std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
+    auto tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
 
     beginTransaction("addObject");
     for (auto&& addUpdateTable : tables) {
@@ -2568,7 +2569,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
 {
     if (!resourcesStr.empty()) {
         log_debug("Migrating resources for cds object {}", objectId);
-        std::vector<std::string> resources = splitString(resourcesStr, RESOURCE_SEP);
+        auto resources = splitString(resourcesStr, RESOURCE_SEP);
         size_t res_id = 0;
         for (auto&& resString : resources) {
             std::map<std::string, std::string> resourceSQLVals;
