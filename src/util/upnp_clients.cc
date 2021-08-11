@@ -253,7 +253,7 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
     return false;
 }
 
-void Clients::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
+void Clients::updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo)
 {
     AutoLock lock(mutex);
 
@@ -271,12 +271,12 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         if (it->pInfo != pInfo) {
             // client info changed, update all
             it->age = now;
-            it->userAgent = userAgent;
+            it->userAgent = std::move(userAgent);
             it->pInfo = pInfo;
         }
     } else {
         // add new client
-        cache.push_back(ClientCacheEntry { *addr, userAgent, now, now, pInfo });
+        cache.emplace_back(*addr, std::move(userAgent), now, now, pInfo);
     }
 }
 

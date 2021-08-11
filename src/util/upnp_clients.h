@@ -72,6 +72,15 @@ struct ClientInfo {
 };
 
 struct ClientCacheEntry {
+    ClientCacheEntry(struct sockaddr_storage addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+        : addr(addr)
+        , userAgent(std::move(userAgent))
+        , last(last)
+        , age(age)
+        , pInfo(pInfo)
+    {
+    }
+
     struct sockaddr_storage addr;
     std::string userAgent;
     std::chrono::seconds last;
@@ -95,7 +104,7 @@ private:
     bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
 
     bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
-    void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
+    void updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo);
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 
