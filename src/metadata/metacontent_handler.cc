@@ -67,7 +67,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
 
                 log_debug("{}: found", found.c_str());
-                result.push_back(found);
+                result.push_back(std::move(found));
             }
         } else {
             std::map<std::string, fs::path> fileNames;

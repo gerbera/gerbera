@@ -538,7 +538,7 @@ bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::
                 throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
             }
             if (!attrValue.empty())
-                result.push_back(attrValue);
+                result.push_back(std::move(attrValue));
         }
     }
     return true;
@@ -641,7 +641,7 @@ bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std
             return false;
         }
         if (!attrValue.empty())
-            result.push_back(attrValue);
+            result.push_back(std::move(attrValue));
     }
     return true;
 }
@@ -670,7 +670,7 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
                 return false;
             }
 
-            result.push_back(mark_content);
+            result.push_back(std::move(mark_content));
         }
     }
     return true;

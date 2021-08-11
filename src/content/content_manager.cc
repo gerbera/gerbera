@@ -380,7 +380,7 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     if (!t)
         return taskList;
 
-    taskList.push_back(t);
+    taskList.push_back(std::move(t));
     std::copy_if(taskQueue1.begin(), taskQueue1.end(), std::back_inserter(taskList), [](auto&& task) { return task->isValid(); });
 
     for (auto&& task : taskQueue2) {
