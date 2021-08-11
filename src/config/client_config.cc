@@ -40,7 +40,7 @@ ClientConfig::ClientConfig()
         ClientMatchType::None,
         "",
     };
-    clientInfo = std::make_shared<ClientInfo>(std::move(cInfo));
+    clientInfo = std::make_unique<ClientInfo>(std::move(cInfo));
 }
 
 ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
@@ -60,7 +60,7 @@ ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view user
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
     cInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
-    clientInfo = std::make_shared<ClientInfo>(std::move(cInfo));
+    clientInfo = std::make_unique<ClientInfo>(std::move(cInfo));
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t index)

@@ -126,8 +126,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
     for (size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
-        auto client = clientConfig->getClientInfo();
-        clientInfo.push_back(*client);
+        clientInfo.push_back(*clientConfig->getClientInfo());
     }
 }
 
