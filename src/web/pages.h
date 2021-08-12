@@ -173,6 +173,7 @@ public:
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
+    std::shared_ptr<Context> context,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
     std::string_view page);
@@ -202,8 +203,11 @@ public:
 
 /// \brief save configuration
 class configSave : public WebRequestHandler {
+protected:
+    std::shared_ptr<Context> context;
+
 public:
-    explicit configSave(std::shared_ptr<ContentManager> content);
+    explicit configSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content);
     void process() override;
 };
 

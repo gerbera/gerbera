@@ -40,8 +40,9 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::configSave::configSave(std::shared_ptr<ContentManager> content)
+web::configSave::configSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
+    , context(std::move(context))
 {
 }
 
@@ -179,4 +180,6 @@ void web::configSave::process()
             }
         }
     }
+
+    context->getClients()->refresh(context->getConfig());
 }

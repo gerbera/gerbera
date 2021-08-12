@@ -34,6 +34,7 @@
 namespace web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
+    std::shared_ptr<Context> context,
     std::shared_ptr<ContentManager> content,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
     std::string_view page)
@@ -71,7 +72,7 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "config_load")
         return std::make_unique<web::configLoad>(std::move(content));
     if (page == "config_save")
-        return std::make_unique<web::configSave>(std::move(content));
+        return std::make_unique<web::configSave>(std::move(context), std::move(content));
 
     throw_std_runtime_error("Unknown page: {}", page);
 }
