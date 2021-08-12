@@ -507,7 +507,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return web::createWebRequestHandler(content, xmlbuilder, r_type);
+        return web::createWebRequestHandler(context, content, xmlbuilder, r_type);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {

@@ -35,6 +35,11 @@
 
 Clients::Clients(const std::shared_ptr<Config>& config)
 {
+    refresh(config);
+}
+
+void Clients::refresh(const std::shared_ptr<Config>& config)
+{
     // table of supported clients (reverse search, sequence of entries matters!)
     clientInfo = {
         // Used for not explicitly listed clients, must be first entry
