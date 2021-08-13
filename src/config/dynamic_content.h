@@ -77,9 +77,15 @@ public:
     explicit DynamicContent(fs::path location)
         : location(std::move(location))
     {
+        if (this->location.empty())
+            this->location = "/Auto";
     }
 
-    void setLocation(const fs::path& location) { this->location = location; }
+    void setLocation(const fs::path& location)
+    {
+        if (!location.empty())
+            this->location = location;
+    }
     fs::path getLocation() const { return location; }
 
     void setOrig(bool orig) { this->isOrig = orig; }
@@ -99,7 +105,7 @@ public:
 
 private:
     /// \brief virtual tree location
-    fs::path location;
+    fs::path location { "/Auto" };
 
     /// \brief title
     std::string title;

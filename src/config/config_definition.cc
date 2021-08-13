@@ -1070,7 +1070,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         true, false),
     std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION,
         "attribute::location", "config-server.html#location",
-        "", true, false, true),
+        "/Auto", true, false, true),
     std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_IMAGE,
         "attribute::image", "config-server.html#image",
         "", true, false),

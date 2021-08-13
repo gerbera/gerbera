@@ -43,9 +43,9 @@ void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, size_
         origSize = list.size() + 1;
         cont->setOrig(true);
     }
-    if (std::any_of(list.begin(), list.end(), [loc = cont->getLocation()](auto&& d) { return d->getLocation() == loc; })) {
+    while (std::any_of(list.begin(), list.end(), [loc = cont->getLocation()](auto&& d) { return d->getLocation() == loc; })) {
         log_error("Duplicate container entry[{}] {}", index, cont->getLocation().string());
-        return;
+        cont->setLocation(fmt::format("{}_2", cont->getLocation().string()));
     }
     list.push_back(cont);
     indexMap[index] = cont;
