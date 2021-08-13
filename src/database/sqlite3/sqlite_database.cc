@@ -364,8 +364,8 @@ void Sqlite3Database::shutdownDriver()
 
 void Sqlite3Database::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    auto command = fmt::format("INSERT OR REPLACE INTO {0}{2}{1} ({0}key{1}, {0}value{1}) VALUES ({3}, {4})",
-        table_quote_begin, table_quote_begin, INTERNAL_SETTINGS_TABLE, quote(key), quote(value));
+    auto command = fmt::format("INSERT OR REPLACE INTO {} ({}, {}) VALUES ({}, {})",
+        identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), identifier("value"), quote(key), quote(value));
     exec(command);
 }
 
