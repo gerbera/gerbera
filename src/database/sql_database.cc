@@ -344,7 +344,7 @@ void SQLDatabase::init()
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId);
-        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = { RES_ALIAS, attrName };
+        resourceColMap[to_underlying(ResourceCol::attributes) + resAttrId] = std::pair(RES_ALIAS, attrName);
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
@@ -359,9 +359,10 @@ void SQLDatabase::init()
         std::vector<std::string> buf;
         buf.reserve(browseColMap.size());
         for (auto&& [key, col] : browseColMap) {
-            buf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
+            buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
         }
-        auto join1 = fmt::format("LEFT JOIN {0}{2}{1} {0}{3}{1} ON {4} = {0}{3}{1}.{0}{5}{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, REF_ALIAS, browseColumnMapper->mapQuoted(BrowseCol::ref_id), browseColMap.at(BrowseCol::id).second);
+        auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
+            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::ref_id), identifier(browseColMap.at(BrowseCol::id).second));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
         this->sql_browse_query = fmt::format("SELECT {} FROM {} {} {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
     }
@@ -370,7 +371,7 @@ void SQLDatabase::init()
         std::vector<std::string> colBuf;
         colBuf.reserve(searchColMap.size());
         for (auto&& [key, col] : searchColMap) {
-            colBuf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
+            colBuf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
@@ -380,10 +381,10 @@ void SQLDatabase::init()
     }
     // Statement for metadata
     {
-        std::vector<std::string> buf;
+        std::vector<SQLIdentifier> buf;
         buf.reserve(metaColMap.size());
         for (auto&& [key, col] : metaColMap) {
-            buf.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, col.second)); // currently no alias
+            buf.push_back(identifier(col.second)); // currently no alias
         }
         this->sql_meta_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
@@ -392,17 +393,17 @@ void SQLDatabase::init()
         std::vector<std::string> buf;
         buf.reserve(autoscanColMap.size());
         for (auto&& [key, col] : autoscanColMap) {
-            buf.push_back(fmt::format("{0}{2}{1}.{0}{3}{1}", table_quote_begin, table_quote_end, col.first, col.second));
+            buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
         }
         auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
         this->sql_autoscan_query = fmt::format("SELECT {} FROM {} {}", fmt::join(buf, ", "), autoscanColumnMapper->tableQuoted(), join);
     }
     // Statement for resource
     {
-        std::vector<std::string> buf;
+        std::vector<SQLIdentifier> buf;
         buf.reserve(resourceColMap.size());
         for (auto&& [key, col] : resourceColMap) {
-            buf.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, col.second)); // currently no alias
+            buf.push_back(identifier(col.second)); // currently no alias
         }
         this->sql_resource_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
@@ -664,12 +665,13 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
-        auto where = std::vector {
-            fmt::format("{}parent_id{}={}", table_quote_begin, table_quote_end, quote(obj->getParentID())),
-            fmt::format("{}ref_id{}={}", table_quote_begin, table_quote_end, quote(refObj->getID())),
-            fmt::format("{}dc_title{}={}", table_quote_begin, table_quote_end, quote(obj->getTitle())),
+        const auto where = {
+            fmt::format("{}={}", identifier("parent_id"), quote(obj->getParentID())),
+            fmt::format("{}={}", identifier("ref_id"), quote(refObj->getID())),
+            fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
         };
-        auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+            identifier("id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
         if (res && (res->nextRow()))
             return {};
@@ -798,7 +800,9 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
 
 std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
-    auto getSql = fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}service_id{1} LIKE {}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(std::string(1, servicePrefix) + '%'));
+    auto getSql = fmt::format("SELECT {} FROM {} WHERE {} LIKE {}",
+        identifier("id"), identifier(CDS_OBJECT_TABLE),
+        identifier("service_id"), quote(std::string(1, servicePrefix) + '%'));
 
     beginTransaction("getServiceObjectIDs");
     auto res = select(getSql);
@@ -1028,17 +1032,17 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
         return 0;
 
     auto where = std::vector {
-        fmt::format("{}parent_id{} = {}", table_quote_begin, table_quote_end, contId)
+        fmt::format("{} = {}", identifier("parent_id"), contId)
     };
     if (containers && !items)
-        where.push_back(fmt::format("{}object_type{} = {}", table_quote_begin, table_quote_end, OBJECT_TYPE_CONTAINER));
+        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
     else if (items && !containers)
-        where.push_back(fmt::format("({0}object_type{1} & {2}) = {2}", table_quote_begin, table_quote_end, OBJECT_TYPE_ITEM));
+        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
     if (contId == CDS_ID_ROOT && hideFsRoot) {
-        where.push_back(fmt::format("{}id{} != {}", table_quote_begin, table_quote_end, quote(CDS_ID_FS_ROOT)));
+        where.push_back(fmt::format("{} != {}", identifier("id"), quote(CDS_ID_FS_ROOT)));
     }
     beginTransaction("getChildCount");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(where, " AND ")));
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
     commit("getChildCount");
 
     if (res) {
@@ -1143,13 +1147,13 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
     auto fields = std::vector {
-        fmt::format("{}parent_id{}", table_quote_begin, table_quote_end),
-        fmt::format("{}object_type{}", table_quote_begin, table_quote_end),
-        fmt::format("{}upnp_class{}", table_quote_begin, table_quote_end),
-        fmt::format("{}dc_title{}", table_quote_begin, table_quote_end),
-        fmt::format("{}location{}", table_quote_begin, table_quote_end),
-        fmt::format("{}location_hash{}", table_quote_begin, table_quote_end),
-        fmt::format("{}ref_id{}", table_quote_begin, table_quote_end),
+        fmt::format("{}", identifier("parent_id")),
+        fmt::format("{}", identifier("object_type")),
+        fmt::format("{}", identifier("upnp_class")),
+        fmt::format("{}", identifier("dc_title")),
+        fmt::format("{}", identifier("location")),
+        fmt::format("{}", identifier("location_hash")),
+        fmt::format("{}", identifier("ref_id")),
     };
     auto values = std::vector {
         fmt::format("{}", parentID),
@@ -1168,9 +1172,9 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     if (!itemMetadata.empty()) {
         for (auto&& [key, val] : itemMetadata) {
             auto mfields = std::vector {
-                fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
-                fmt::format("{}property_name{}", table_quote_begin, table_quote_end),
-                fmt::format("{}property_value{}", table_quote_begin, table_quote_end),
+                fmt::format("{}", identifier("item_id")),
+                fmt::format("{}", identifier("property_name")),
+                fmt::format("{}", identifier("property_value")),
             };
             auto mvalues = std::vector {
                 fmt::format("{}", newId),
@@ -1188,7 +1192,8 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
 
 int SQLDatabase::insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
-    return exec(fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ","), fmt::join(values, ",")), getLastInsertId);
+    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
+    return exec(sql, getLastInsertId);
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -1563,13 +1568,13 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
         }
 
         if (!delete_as.empty()) {
-            auto delAutoscan = fmt::format("DELETE FROM {0}{2}{1} WHERE {0}id{1} IN ({})", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(delete_as, ", "));
+            auto delAutoscan = fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(AUTOSCAN_TABLE), identifier("id"), fmt::join(delete_as, ", "));
             exec(delAutoscan);
             log_debug("deleting autoscans: {}", delAutoscan);
         }
     }
 
-    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(objectIDs, ",")));
+    exec(fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(CDS_OBJECT_TABLE), identifier("id"), fmt::join(objectIDs, ",")));
     commit("_removeObjects");
 }
 
@@ -1854,8 +1859,8 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
 void SQLDatabase::removeConfigValue(const std::string& item)
 {
     auto del = (item == "*") //
-        ? fmt::format("DELETE FROM {0}{2}{1}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE) //
-        : fmt::format("DELETE FROM {0}{2}{1} WHERE {0}item{1} = {3}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item));
+        ? fmt::format("DELETE FROM {}", identifier(CONFIG_VALUE_TABLE)) //
+        : fmt::format("DELETE FROM {} WHERE {} = {}", identifier(CONFIG_VALUE_TABLE), identifier("item"), quote(item));
     log_info("Deleting config item '{}'", item);
     exec(del);
 }
@@ -1865,10 +1870,10 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
     auto res = select(fmt::format("SELECT {0}item{1} FROM {0}{2}{1} WHERE {0}item{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item)));
     if (!res || !res->nextRow()) {
         auto fields = std::vector {
-            fmt::format("{}item{}", table_quote_begin, table_quote_end),
-            fmt::format("{}key{}", table_quote_begin, table_quote_end),
-            fmt::format("{}item_value{}", table_quote_begin, table_quote_end),
-            fmt::format("{}status{}", table_quote_begin, table_quote_end),
+            fmt::format("{}", identifier("item")),
+            fmt::format("{}", identifier("key")),
+            fmt::format("{}", identifier("item_value")),
+            fmt::format("{}", identifier("status")),
         };
         auto values = std::vector {
             quote(item),
@@ -1911,7 +1916,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{}location{} = {}", table_quote_begin, table_quote_end, quote(location)) : fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, quote(objectID));
+        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), quote(objectID));
 
         beginTransaction("updateAutoscanList x");
         auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, where));
@@ -2029,16 +2034,16 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
     _autoscanChangePersistentFlag(objectID, true);
 
     auto fields = std::vector {
-        fmt::format("{}obj_id{}", table_quote_begin, table_quote_end),
-        fmt::format("{}scan_level{}", table_quote_begin, table_quote_end),
-        fmt::format("{}scan_mode{}", table_quote_begin, table_quote_end),
-        fmt::format("{}recursive{}", table_quote_begin, table_quote_end),
-        fmt::format("{}hidden{}", table_quote_begin, table_quote_end),
-        fmt::format("{}interval{}", table_quote_begin, table_quote_end),
-        fmt::format("{}last_modified{}", table_quote_begin, table_quote_end),
-        fmt::format("{}persistent{}", table_quote_begin, table_quote_end),
-        fmt::format("{}location{}", table_quote_begin, table_quote_end),
-        fmt::format("{}path_ids{}", table_quote_begin, table_quote_end),
+        fmt::format("{}", identifier("obj_id")),
+        fmt::format("{}", identifier("scan_level")),
+        fmt::format("{}", identifier("scan_mode")),
+        fmt::format("{}", identifier("recursive")),
+        fmt::format("{}", identifier("hidden")),
+        fmt::format("{}", identifier("interval")),
+        fmt::format("{}", identifier("last_modified")),
+        fmt::format("{}", identifier("persistent")),
+        fmt::format("{}", identifier("location")),
+        fmt::format("{}", identifier("path_ids")),
     };
     auto values = std::vector {
         objectID >= 0 ? quote(objectID) : SQL_NULL,
@@ -2071,21 +2076,22 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         _autoscanChangePersistentFlag(objectID, true);
     }
     auto fields = std::vector {
-        fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? quote(objectID) : SQL_NULL),
-        fmt::format("{}scan_level{} = {}", table_quote_begin, table_quote_end, quote("full")),
-        fmt::format("{}scan_mode{} = {}", table_quote_begin, table_quote_end, quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
-        fmt::format("{}recursive{} = {}", table_quote_begin, table_quote_end, mapBool(adir->getRecursive())),
-        fmt::format("{}hidden{} = {}", table_quote_begin, table_quote_end, mapBool(adir->getHidden())),
-        fmt::format("{}interval{} = {}", table_quote_begin, table_quote_end, quote(adir->getInterval().count())),
-        fmt::format("{}persistent{} = {}", table_quote_begin, table_quote_end, mapBool(adir->persistent())),
-        fmt::format("{}location{} = {}", table_quote_begin, table_quote_end, objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
-        fmt::format("{}path_ids{} = {}", table_quote_begin, table_quote_end, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
-        fmt::format("{}touched{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
+        fmt::format("{} = {}", identifier("obj_id"), objectID >= 0 ? quote(objectID) : SQL_NULL),
+        fmt::format("{} = {}", identifier("scan_level"), quote("full")),
+        fmt::format("{} = {}", identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
+        fmt::format("{} = {}", identifier("recursive"), mapBool(adir->getRecursive())),
+        fmt::format("{} = {}", identifier("hidden"), mapBool(adir->getHidden())),
+        fmt::format("{} = {}", identifier("interval"), quote(adir->getInterval().count())),
+        fmt::format("{} = {}", identifier("persistent"), mapBool(adir->persistent())),
+        fmt::format("{} = {}", identifier("location"), objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
+        fmt::format("{} = {}", identifier("path_ids"), pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
+        fmt::format("{} = {}", identifier("touched"), mapBool(true)),
     };
     if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
-        fields.push_back(fmt::format("{}last_modified{} = {}", table_quote_begin, table_quote_end, quote(adir->getPreviousLMT().count())));
+        fields.push_back(fmt::format("{} = {}", identifier("last_modified"), quote(adir->getPreviousLMT().count())));
     }
-    exec(fmt::format("UPDATE {0}{2}{1} SET {3} WHERE {0}id{1} = {4}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(fields, ","), quote(adir->getDatabaseID())));
+    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}",
+        identifier(AUTOSCAN_TABLE), fmt::join(fields, ","), identifier("id"), quote(adir->getDatabaseID())));
 }
 
 void SQLDatabase::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
