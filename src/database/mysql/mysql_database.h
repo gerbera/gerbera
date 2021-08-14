@@ -84,7 +84,6 @@ private:
     bool threadCleanupRequired() const override { return true; }
 
     pthread_key_t mysql_init_key {};
-    bool mysql_init_key_initialized {};
 };
 
 /// \brief The Database class for using MySQL with transactions
