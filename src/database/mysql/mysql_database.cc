@@ -116,8 +116,6 @@ void MySQLDatabase::init()
         throw_std_runtime_error("mysql_init() failed");
     }
 
-    mysql_init_key_initialized = true;
-
     mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8mb4");
 
     bool my_bool_var = true;
