@@ -172,13 +172,13 @@ void Sqlite3Database::_exec(const std::string& query)
     exec(query, false);
 }
 
-std::string Sqlite3Database::quote(std::string value) const
+std::string Sqlite3Database::quote(const std::string& value) const
 {
     // https://www.sqlite.org/printf.html#percentq:
     // The string is printed with all single quote (') characters doubled so that the string can safely appear inside an SQL string literal.
     // The %Q substitution type also puts single-quotes on both ends of the substituted string.
     char* q = sqlite3_mprintf("%Q", value.c_str());
-    std::string ret = q;
+    auto ret = std::string(q);
     sqlite3_free(q);
     return ret;
 }

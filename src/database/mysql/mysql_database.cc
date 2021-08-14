@@ -197,7 +197,7 @@ std::shared_ptr<Database> MySQLDatabase::getSelf()
     return shared_from_this();
 }
 
-std::string MySQLDatabase::quote(std::string value) const
+std::string MySQLDatabase::quote(const std::string& value) const
 {
     /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
      * chars; we need +1 for the first ' - the second ' will be written over
@@ -208,7 +208,7 @@ std::string MySQLDatabase::quote(std::string value) const
     *q = '\'';
     auto size = mysql_real_escape_string(const_cast<MYSQL*>(&db), q + 1, value.c_str(), value.length());
     q[size + 1] = '\'';
-    std::string ret(q, size + 2);
+    auto ret = std::string(q, size + 2);
     delete[] q;
     return ret;
 }
