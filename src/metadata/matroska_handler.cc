@@ -228,7 +228,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
         log_debug("KaxFileName = {}", fileName);
 
         if (startswith(fileName, "cover")) {
-            auto fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
+            auto&& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             log_debug("KaxFileData (size={})", fileData.GetSize());
 
             if (p_io_handler) {
