@@ -77,11 +77,11 @@ metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldNam
 void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData,
     config_option_t itemProps, config_option_t nsProp)
 {
-    auto&& namespaceMap = config->getDictionaryOption(nsProp);
+    auto namespaceMap = config->getDictionaryOption(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {
         result.append_attribute(fmt::format("xmlns:{}", xmlns).c_str()) = uri.c_str();
     }
-    auto&& propertyMap = config->getDictionaryOption(itemProps);
+    auto propertyMap = config->getDictionaryOption(itemProps);
     for (auto&& [tag, field] : propertyMap) {
         auto metaField = remapMetaDataField(field);
         auto value = (metaField != M_MAX) ? getValueOrDefault(meta, MetadataHandler::getMetaFieldName(metaField)) : getValueOrDefault(auxData, field);
@@ -390,8 +390,8 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
     auto orderedResources = getOrderedResources(cont);
     for (auto&& res : orderedResources) {
         if (res->isMetaResource(ID3_ALBUM_ART)) {
-            auto&& resFile = res->getAttribute(R_RESOURCE_FILE);
-            auto&& resObj = res->getAttribute(R_FANART_OBJ_ID);
+            auto resFile = res->getAttribute(R_RESOURCE_FILE);
+            auto resObj = res->getAttribute(R_FANART_OBJ_ID);
             if (!resFile.empty()) {
                 // found, FanArtHandler deals already with file
                 std::map<std::string, std::string> dict;
@@ -418,7 +418,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
 
 std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res)
 {
-    auto&& res_params = res->getParameters();
+    auto res_params = res->getParameters();
     auto urlBase = getPathBase(item);
     std::string url;
     if (urlBase->addResID) {
@@ -460,7 +460,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& v
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
 {
-    auto&& ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
+    auto ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
         return fmt::format("{}.{}", ext, contentType);
@@ -468,8 +468,8 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 
     if (!location.empty() && location.has_extension()) {
         // make sure that the filename does not contain the separator character
-        auto&& filename = urlEscape(location.filename().stem().string());
-        auto&& extension = location.filename().extension().string();
+        auto filename = urlEscape(location.filename().stem().string());
+        auto extension = location.filename().extension().string();
         return fmt::format("{}.{}{}", ext, (filename), extension);
     }
 
