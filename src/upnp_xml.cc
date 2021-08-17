@@ -344,16 +344,16 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
     /// for each resource once the io handlers are ready    int objectType = ;
     if (item->isExternalItem()) {
         if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
-            return std::make_unique<PathBase>(PathBase { item->getLocation(), false });
+            return std::make_unique<PathBase>(item->getLocation(), false);
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
             auto path = RequestHandler::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-            return std::make_unique<PathBase>(PathBase { path, true });
+            return std::make_unique<PathBase>(path, true);
         }
     }
     auto path = RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-    return std::make_unique<PathBase>(PathBase { path, true });
+    return std::make_unique<PathBase>(path, true);
 }
 
 /// \brief build path for first resource from item
