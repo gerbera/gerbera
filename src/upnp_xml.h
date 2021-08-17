@@ -106,8 +106,12 @@ protected:
     const std::string presentationURL;
 
     /// \brief Holds a part of path and bool which says if we need to append the resource
-    class PathBase {
-    public:
+    struct PathBase {
+        PathBase(std::string pathBase, bool addResID)
+            : pathBase(std::move(pathBase))
+            , addResID(addResID)
+        {
+        }
         std::string pathBase;
         bool addResID;
     };
