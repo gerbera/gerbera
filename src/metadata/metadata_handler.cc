@@ -187,7 +187,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
 }
 
-std::string MetadataHandler::getMimeType()
+std::string MetadataHandler::getMimeType() const
 {
     return MIMETYPE_DEFAULT;
 }

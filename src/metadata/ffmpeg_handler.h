@@ -57,7 +57,7 @@ public:
     }
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
-    std::string getMimeType() override;
+    std::string getMimeType() const override;
 
 private:
     // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
