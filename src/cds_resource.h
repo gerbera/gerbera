@@ -69,7 +69,7 @@ public:
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);
 
-    int getResId() { return resId; }
+    int getResId() const { return resId; }
     void setResId(int rId) { resId = rId; }
     /// \brief Adds a resource attribute.
     ///
