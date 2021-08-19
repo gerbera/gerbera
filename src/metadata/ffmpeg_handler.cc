@@ -408,7 +408,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
 #endif
 }
 
-std::string FfmpegHandler::getMimeType()
+std::string FfmpegHandler::getMimeType() const
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     return getValueOrDefault(mappings, CONTENT_TYPE_JPG, "image/jpeg");
