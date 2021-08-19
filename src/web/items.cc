@@ -67,7 +67,8 @@ void web::items::process()
     auto param = std::make_unique<BrowseParam>(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param->setRange(start, count);
 
-    if ((container->getClass() == UPNP_CLASS_MUSIC_ALBUM) || (container->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
+    auto c = container->getClass();
+    if (c == UPNP_CLASS_MUSIC_ALBUM || c == UPNP_CLASS_PLAYLIST_CONTAINER)
         param->setFlag(BROWSE_TRACK_SORT);
 
     // get contents of request

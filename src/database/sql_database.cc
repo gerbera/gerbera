@@ -2146,7 +2146,8 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         if (!res)
             throw_std_runtime_error("SQL error");
 
-        if ((row = res->nextRow())) {
+        row = res->nextRow();
+        if (row) {
             auto obj = loadObject(checkObjectID);
             if (!obj)
                 throw_std_runtime_error("Referenced object (by Autoscan) not found.");
@@ -2166,7 +2167,8 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         auto res = select(qRec);
         if (!res)
             throw_std_runtime_error("SQL error");
-        if ((row = res->nextRow())) {
+        row = res->nextRow();
+        if (row) {
             const int objectID = row->col_int(0);
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
