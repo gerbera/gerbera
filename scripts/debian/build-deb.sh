@@ -70,7 +70,7 @@ if [[ "$lsb_codename" == "bionic" ]]; then
   libduktape="libduktape202"
 elif [ "$lsb_codename" == "buster" ]; then
   libduktape="libduktape203"
-elif [ "$lsb_codename" == "unstable" ]; then
+elif [ "$lsb_codename" == "unstable" -o "$lsb_codename" == "sid" ]; then
   libduktape="libduktape206"
 fi
 
