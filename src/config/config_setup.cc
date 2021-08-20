@@ -813,9 +813,13 @@ std::string ConfigDictionarySetup::getItemPath(int index, config_option_t propOp
 {
     auto opt = ConfigDefinition::ensureAttribute(propOption);
 
-    return index >= 0 //
-        ? fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt) //
-        : fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    if (index > ITEM_PATH_ROOT)
+        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt);
+    if (index == ITEM_PATH_ROOT)
+        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    if (index == ITEM_PATH_NEW)
+        return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
+    return fmt::format("{}", xpath);
 }
 
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue)
@@ -849,10 +853,14 @@ std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<st
 
 std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
-    return index >= 0 //
-        ? fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption)) //
-        : index > -2 ? fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY)) //
-                     : fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+    if (index > ITEM_PATH_ROOT)
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption));
+    if (index == ITEM_PATH_ROOT)
+        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+    if (index == ITEM_PATH_NEW)
+        return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), ConfigDefinition::ensureAttribute(propOption));
+
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
 }
 
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -1556,8 +1564,14 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
 
 std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
-    if (index < 0) {
+    if (index == ITEM_PATH_ROOT) {
         return ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT);
+    }
+    if (index == ITEM_PATH_NEW) {
+        if (propOption != CFG_MAX) {
+            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOption));
+        }
+        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT));
     }
     if (propOption != CFG_MAX) {
         return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOption));
@@ -1949,8 +1963,14 @@ std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::x
 
 std::string ConfigDynamicContentSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
-    if (index < 0) {
+    if (index == ITEM_PATH_ROOT) {
         return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER));
+    }
+    if (index == ITEM_PATH_NEW) {
+        if (propOption != CFG_MAX) {
+            return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER), ConfigDefinition::ensureAttribute(propOption));
+        }
+        return fmt::format("{}/{}[_]", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER));
     }
     if (propOption != CFG_MAX) {
         return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER), index, ConfigDefinition::ensureAttribute(propOption));

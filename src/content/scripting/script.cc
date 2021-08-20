@@ -275,7 +275,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
-        autoscanItemPath = ascs->getItemPath(-2);
+        autoscanItemPath = ascs->getItemPath(ITEM_PATH_PREFIX); // prefix
     }
     duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
 

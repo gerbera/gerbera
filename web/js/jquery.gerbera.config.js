@@ -232,12 +232,16 @@ $.widget('grb.config', {
           id: "-1",
           item: listValue.parentItem.item + `[${listValue.index}]` + child.item.replace(listValue.parentItem.item, ''),
           status: 'added',
-          value: child.value ? child.value : '',
+          value: child.value ? child.value : (child.defaultValue ? child.defaultValue : ''),
+          defaultValue: child.defaultValue ? child.defaultValue : '',
           source: 'ui',
           origValue: ''
          };
         if (child.editable) {
           this.options.addResultItem(newValue);
+        }
+        if (!child.value) {
+          child.value = child.defaultValue ? child.defaultValue : '';
         }
         values.push(newValue);
       });
@@ -311,6 +315,17 @@ $.widget('grb.config', {
                 entry = result[1];
                 const myVal = Number.parseInt(entry) + 1;
                 itemCount = itemCount>myVal ? itemCount : myVal;
+              } else if (entry.startsWith("[_]") && item.item == xpath + entry.replace("[_]", "")) {
+                item.defaultValue = v.defaultValue;
+                this.meta.forEach((m) => {
+                  if(Number.parseInt(v.aid) === Number.parseInt(m.id)) {
+                    if (!('type' in item) || item.type == undefined || item.type === null || item.type === '') {
+                      item.type = m.type;
+                    }
+                    if (!('help' in item) || item.help == undefined || item.help === null || item.help === '')
+                      item.help = m.help;
+                  }
+                });
               }
             }
           });
@@ -572,7 +587,9 @@ $.widget('grb.config', {
       index: itemCount,
       target: this,
       editor: lineNew,
+      value: item.defaultValue !== '' ? item.defaultValue : item.value,
       status: 'added',
+      type: item.type,
       parentItem: parentItem };
     listValueNew.addItemClicked = function(event) {
       listValueNew.target.addItemClicked (listValueNew, event);
