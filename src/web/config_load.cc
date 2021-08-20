@@ -166,7 +166,7 @@ void web::configLoad::process()
         try {
             auto scs = ConfigDefinition::findConfigSetup(option);
             auto item = values.append_child("item");
-            createItem(item, scs->getItemPath(-1), option, option, scs);
+            createItem(item, scs->getItemPath(ITEM_PATH_ROOT), option, option, scs);
 
             log_debug("    Option {:03d} {} = {}", option, scs->getItemPath(), scs->getCurrentValue().c_str());
             setValue(item, scs->getCurrentValue());
@@ -193,6 +193,16 @@ void web::configLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, cs);
         setValue(item, client->getUserAgent());
+    }
+    if (clientConfig->size() == 0) {
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_CLIENT_FLAGS), cs->option, ATTR_CLIENTS_CLIENT_FLAGS, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_CLIENT_FLAGS));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_CLIENT_IP), cs->option, ATTR_CLIENTS_CLIENT_IP, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_CLIENT_IP));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_CLIENT_USERAGENT));
     }
 
     // write import tweaks
@@ -267,6 +277,22 @@ void web::configLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DYNAMIC_CONTAINER_SORT), cs->option, ATTR_DYNAMIC_CONTAINER_SORT);
         setValue(item, cont->getSort());
+    }
+    if (dynContent->size() == 0) {
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_LOCATION), cs->option, ATTR_DYNAMIC_CONTAINER_LOCATION, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_LOCATION));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_IMAGE), cs->option, ATTR_DYNAMIC_CONTAINER_IMAGE, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_IMAGE));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_TITLE), cs->option, ATTR_DYNAMIC_CONTAINER_TITLE, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_TITLE));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_FILTER), cs->option, ATTR_DYNAMIC_CONTAINER_FILTER, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_FILTER));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_SORT), cs->option, ATTR_DYNAMIC_CONTAINER_SORT, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_SORT));
     }
 
     // write transconding configuration
@@ -417,6 +443,31 @@ void web::configLoad::process()
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+        }
+        if (autoscan->size() == 0) {
+            auto item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_LOCATION));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_MODE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MODE, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_MODE));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_INTERVAL));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_LMT));
         }
     }
 

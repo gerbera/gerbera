@@ -43,6 +43,10 @@ class DirectoryTweak;
 class DynamicContent;
 enum class ScanMode;
 
+#define ITEM_PATH_ROOT -1
+#define ITEM_PATH_NEW -2
+#define ITEM_PATH_PREFIX -3
+
 using StringCheckFunction = bool (*)(std::string& value);
 using ArrayInitFunction = bool (*)(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
 using DictionaryInitFunction = bool (*)(const pugi::xml_node& value, std::map<std::string, std::string>& result);

@@ -1079,7 +1079,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_FILTER,
         "filter", "config-server.html#filter",
-        true, "last_updated < @last31"),
+        true, "last_updated > \"@last31\""),
     std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT,
         "attribute::sort", "config-server.html#sort",
         ""),
