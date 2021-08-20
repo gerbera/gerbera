@@ -138,8 +138,8 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
 
 void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const
 {
-    file_io_callback ebml_file(item->getLocation().c_str());
-    EbmlStream ebml_stream(ebml_file);
+    auto ebml_file = file_io_callback(item->getLocation().c_str());
+    auto ebml_stream = EbmlStream(ebml_file);
 
     auto el_l0 = ebml_stream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);
     while (el_l0) {
