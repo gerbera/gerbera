@@ -159,8 +159,6 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
 
         el_l0 = ebml_stream.FindNextElement(LIBMATROSKA_NAMESPACE::KaxSegment_Context, i_upper_level, ~0, true);
     } // while elementLevel0
-
-    ebml_file.close();
 }
 
 void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, std::unique_ptr<MemIOHandler>* p_io_handler) const
