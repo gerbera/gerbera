@@ -68,7 +68,7 @@ install-cmake
 libduktape="libduktape205"
 if [[ "$lsb_codename" == "bionic" ]]; then
   libduktape="libduktape202"
-elif [ "$lsb_codename" == "buster" ]; then
+elif [ "$lsb_codename" == "buster" -o "$lsb_codename" == "bullseye" ]; then
   libduktape="libduktape203"
 elif [ "$lsb_codename" == "sid" ]; then
   libduktape="libduktape206"
