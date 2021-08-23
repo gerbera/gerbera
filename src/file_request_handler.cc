@@ -54,9 +54,10 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::string& rh)
+static std::pair<bool, std::string> checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, struct stat& statbuf, const std::string& rh)
 {
     bool is_srt = false;
+    std::string mimeType;
 
     if (!rh.empty()) {
         auto res_path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
@@ -73,7 +74,7 @@ static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject
         }
         throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
     }
-    return is_srt;
+    return { is_srt, mimeType };
 }
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
@@ -102,9 +103,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     fs::path path = item ? item->getLocation() : "";
-    std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    auto [is_srt, mimeType] = checkFileAndSubtitle(path, obj, res_id, statbuf, rh);
 
     UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
@@ -235,9 +235,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     fs::path path = item ? item->getLocation() : "";
-    std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    auto [is_srt, mimeTyppe] = checkFileAndSubtitle(path, obj, res_id, statbuf, rh);
 
     // for transcoded resourecs res_id will always be negative
     auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
