@@ -549,14 +549,14 @@ std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
 
     fb.pubseekoff(0, std::ios::beg);
 
-    std::vector<std::byte> result(size);
-    size = fb.sgetn(reinterpret_cast<char*>(result.data()), size);
+    auto result = std::optional<std::vector<std::byte>>(size);
+    size = fb.sgetn(reinterpret_cast<char*>(result->data()), size);
     if (size < 0 || !file)
         throw_std_runtime_error("Failed to read from file {}", path.c_str());
 
-    result.resize(size);
+    result->resize(size);
 
-    return std::move(result);
+    return result;
 }
 
 void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size)
