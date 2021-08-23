@@ -1057,7 +1057,8 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
 std::vector<std::string> SQLDatabase::getMimeTypes()
 {
     beginTransaction("getMimeTypes");
-    auto res = select(fmt::format("SELECT DISTINCT {0}mime_type{1} FROM {0}{2}{1} WHERE {0}mime_type{1} IS NOT NULL ORDER BY {0}mime_type{1}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
+    auto res = select(fmt::format("SELECT DISTINCT {0} FROM {1} WHERE {0} IS NOT NULL ORDER BY {0}",
+        identifier("mime_type"), identifier(CDS_OBJECT_TABLE)));
     commit("getMimeTypes");
 
     if (!res)
@@ -1202,7 +1203,8 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
         return fmt::format("{}{}", VIRTUAL_CONTAINER_SEPARATOR, title);
 
     beginTransaction("buildContainerPath");
-    auto res = select(fmt::format("SELECT {0}location{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID));
+    auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} = {3} LIMIT 1",
+        identifier("location"), identifier(CDS_OBJECT_TABLE), identifier("id"), parentID));
     commit("buildContainerPath");
     if (!res)
         return {};
@@ -1468,9 +1470,11 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
     beginTransaction("incrementUpdateIDs");
 
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}update_id{1} = {0}update_id{1} + 1 WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(ids, ",")));
+    exec(fmt::format("UPDATE {0} SET {1} = {1} + 1 WHERE {2} IN ({3})",
+        identifier(CDS_OBJECT_TABLE), identifier("update_id"), identifier("id"), fmt::join(ids, ",")));
 
-    auto res = select(fmt::format("SELECT {0}id{1}, {0}update_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(ids, ",")));
+    auto res = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {0} IN ({3})",
+        identifier("id"), identifier("update_id"), identifier(CDS_OBJECT_TABLE), fmt::join(ids, ",")));
     if (!res) {
         rollback("incrementUpdateIDs 2");
         throw_std_runtime_error("Error while fetching update ids");
@@ -1732,10 +1736,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     constexpr auto tabAlias = "fol";
     constexpr auto childAlias = "cld";
     auto fields = std::vector {
-        fmt::format("{0}{2}{1}.{0}id{1}", table_quote_begin, table_quote_end, tabAlias),
-        fmt::format("COUNT({0}{2}{1}.{0}parent_id{1})", table_quote_begin, table_quote_end, childAlias),
-        fmt::format("{0}{2}{1}.{0}parent_id{1}", table_quote_begin, table_quote_end, tabAlias),
-        fmt::format("{0}{2}{1}.{0}flags{1}", table_quote_begin, table_quote_end, tabAlias),
+        fmt::format("{}.{}", identifier(tabAlias), identifier("id")),
+        fmt::format("COUNT({}.{})", identifier(childAlias), identifier("parent_id")),
+        fmt::format("{}.{}", identifier(tabAlias), identifier("parent_id")),
+        fmt::format("{}.{}", identifier(tabAlias), identifier("flags")),
     };
     std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {0}{3}{1}.{0}id{1} = {0}{4}{1}.{0}parent_id{1} WHERE {0}{3}{1}.{0}object_type{1} = {6} AND {0}{3}{1}.{0}id{1} ",
         table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, CDS_OBJECT_TABLE, quote(OBJECT_TYPE_CONTAINER));
@@ -1825,7 +1829,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)
 {
-    auto res = select(fmt::format("SELECT {0}value{1} FROM {0}{2}{1} WHERE {0}key{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, INTERNAL_SETTINGS_TABLE, quote(key)));
+    auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} = {3} LIMIT 1",
+        identifier("value"), identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), quote(key)));
     if (!res)
         return "";
 
@@ -1838,7 +1843,13 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
 /* config methods */
 std::vector<ConfigValue> SQLDatabase::getConfigValues()
 {
-    auto res = select(fmt::format("SELECT {0}item{1}, {0}key{1}, {0}item_value{1}, {0}status{1} FROM {0}{2}{1}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE));
+    auto fields = {
+        identifier("item"),
+        identifier("key"),
+        identifier("item_value"),
+        identifier("status"),
+    };
+    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CONFIG_VALUE_TABLE)));
     if (!res)
         return {};
 
@@ -1867,7 +1878,8 @@ void SQLDatabase::removeConfigValue(const std::string& item)
 
 void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
 {
-    auto res = select(fmt::format("SELECT {0}item{1} FROM {0}{2}{1} WHERE {0}item{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item)));
+    auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {0} = {2} LIMIT 1",
+        identifier("item"), identifier(CONFIG_VALUE_TABLE), quote(item)));
     if (!res || !res->nextRow()) {
         auto fields = std::vector {
             identifier("item"),
@@ -2418,22 +2430,22 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
     std::vector<std::string> fields;
     fields.reserve(dict.size());
     for (auto&& [field, value] : dict) {
-        fields.push_back(fmt::format("{0}{2}{1} = {3}", table_quote_begin, table_quote_end, field, value));
+        fields.push_back(fmt::format("{} = {}", identifier(field), value));
     }
 
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
-        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
-        where.push_back(fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]));
+        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict["res_id"]));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
-        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
-        where.push_back(fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second));
+        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
     } else {
-        where.push_back(fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
     }
 
-    return fmt::format("UPDATE {0}{2}{1} SET {3} WHERE {4}", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ", "), fmt::join(where, " AND "));
+    return fmt::format("UPDATE {} SET {} WHERE {}", identifier(tableName), fmt::join(fields, ", "), fmt::join(where, " AND "));
 }
 
 std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2447,28 +2459,28 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
 
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
-        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
-        where.push_back(fmt::format("{}res_id{} = {}", table_quote_begin, table_quote_end, dict["res_id"]));
+        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict["res_id"]));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
-        where.push_back(fmt::format("{}item_id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
-        where.push_back(fmt::format("{}property_name{} = {}", table_quote_begin, table_quote_end, dict.begin()->second));
+        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
     } else {
-        where.push_back(fmt::format("{}id{} = {}", table_quote_begin, table_quote_end, obj->getID()));
+        where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
     }
 
-    return fmt::format("DELETE FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, tableName, fmt::join(where, " AND "));
+    return fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), fmt::join(where, " AND "));
 }
 
 // column metadata is dropped in DBVERSION 12
 bool SQLDatabase::doMetadataMigration()
 {
     log_debug("Checking if metadata migration is required");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}metadata{1} IS NOT NULL", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL", identifier(CDS_OBJECT_TABLE), identifier("metadata")));
     int expectedConversionCount = res->nextRow()->col_int(0);
     log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
-    res = select(fmt::format("SELECT COUNT(*) FROM {0}{2}{1}", table_quote_begin, table_quote_end, METADATA_TABLE));
+    res = select(fmt::format("SELECT COUNT(*) FROM {}", identifier(METADATA_TABLE)));
     int metadataRowCount = res->nextRow()->col_int(0);
     log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
 
@@ -2479,7 +2491,8 @@ bool SQLDatabase::doMetadataMigration()
 
     log_info("About to migrate metadata from mt_cds_object to mt_metadata");
 
-    auto resIds = select(fmt::format("SELECT {0}id{1}, {0}metadata{1} FROM {0}{2}{1} WHERE {0}metadata{1} IS NOT NULL", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
+    auto resIds = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
+        identifier("id"), identifier("metadata"), identifier(CDS_OBJECT_TABLE)));
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
@@ -2544,14 +2557,14 @@ bool SQLDatabase::doResourceMigration()
 
     log_debug("Checking if resources migration is required");
     auto res = select(
-        fmt::format("SELECT COUNT(*) FROM {0}{2}{1} WHERE {0}resources{1} is not null",
-            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
+        fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
+            identifier(CDS_OBJECT_TABLE), identifier("resources")));
     int expectedConversionCount = res->nextRow()->col_int(0);
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
-        fmt::format("SELECT COUNT(*) FROM {0}{2}{1}",
-            table_quote_begin, table_quote_end, RESOURCE_TABLE));
+        fmt::format("SELECT COUNT(*) FROM {}",
+            identifier(RESOURCE_TABLE)));
     int resourceRowCount = res->nextRow()->col_int(0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
@@ -2563,8 +2576,8 @@ bool SQLDatabase::doResourceMigration()
     log_info("About to migrate resources from {} to {}", CDS_OBJECT_TABLE, RESOURCE_TABLE);
 
     auto resIds = select(
-        fmt::format("SELECT {0}id{1}, {0}resources{1} FROM {0}{2}{1} WHERE {0}resources{1} is not null",
-            table_quote_begin, table_quote_end, CDS_OBJECT_TABLE));
+        fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
+            identifier("id"), identifier("resources"), identifier(CDS_OBJECT_TABLE)));
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
