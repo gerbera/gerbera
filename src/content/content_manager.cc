@@ -622,17 +622,17 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    fs::directory_iterator dIter;
+    std::unique_ptr<fs::directory_iterator> dIter;
 
     if (!ec && rootDir.exists(ec) && rootDir.is_directory(ec)) {
-        dIter = fs::directory_iterator(location, ec);
+        dIter = std::make_unique<fs::directory_iterator>(location, ec);
         if (ec) {
             log_error("_rescanDirectory: Failed to iterate {}, {}", location.c_str(), ec.message());
         }
     } else {
         log_error("Could not open {}: {}", location.c_str(), ec.message());
     }
-    if (ec) {
+    if (ec || !dIter) {
         if (adir->persistent()) {
             removeObject(adir, containerID, false);
             if (location == adir->getLocation()) {
@@ -673,7 +673,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     adir->setCurrentLMT(location, std::chrono::seconds::zero());
 
     std::shared_ptr<CdsObject> firstObject;
-    for (auto&& dirEnt : dIter) {
+    for (auto&& dirEnt : *dIter) {
         auto&& newPath = dirEnt.path();
         auto&& name = newPath.filename().string();
         if (name[0] == '.' && !asSetting.hidden) {
