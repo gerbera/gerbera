@@ -87,7 +87,7 @@ void web::directories::process()
                 || (exclude_config_dirs && startswith(filepath.filename().string(), ".")))
                 continue; // skip dir with leading .
         }
-        auto&& dir = fs::directory_iterator(filepath, ec);
+        auto dir = fs::directory_iterator(filepath, ec);
         bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 
         /// \todo replace hexEncode with base64_encode?
@@ -97,7 +97,7 @@ void web::directories::process()
 
     auto f2i = StringConverter::f2i(config);
     for (auto&& [key, val] : filesMap) {
-        auto&& [file, has] = val;
+        auto [file, has] = val;
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
         ce.append_attribute("child_count") = has;
