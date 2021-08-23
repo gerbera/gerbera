@@ -1147,13 +1147,13 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
     auto fields = std::vector {
-        fmt::format("{}", identifier("parent_id")),
-        fmt::format("{}", identifier("object_type")),
-        fmt::format("{}", identifier("upnp_class")),
-        fmt::format("{}", identifier("dc_title")),
-        fmt::format("{}", identifier("location")),
-        fmt::format("{}", identifier("location_hash")),
-        fmt::format("{}", identifier("ref_id")),
+        identifier("parent_id"),
+        identifier("object_type"),
+        identifier("upnp_class"),
+        identifier("dc_title"),
+        identifier("location"),
+        identifier("location_hash"),
+        identifier("ref_id"),
     };
     auto values = std::vector {
         fmt::format("{}", parentID),
@@ -1172,9 +1172,9 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     if (!itemMetadata.empty()) {
         for (auto&& [key, val] : itemMetadata) {
             auto mfields = std::vector {
-                fmt::format("{}", identifier("item_id")),
-                fmt::format("{}", identifier("property_name")),
-                fmt::format("{}", identifier("property_value")),
+                identifier("item_id"),
+                identifier("property_name"),
+                identifier("property_value"),
             };
             auto mvalues = std::vector {
                 fmt::format("{}", newId),
@@ -1190,7 +1190,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     return newId;
 }
 
-int SQLDatabase::insert(const char* tableName, const std::vector<std::string>& fields, const std::vector<std::string>& values, bool getLastInsertId)
+int SQLDatabase::insert(const char* tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
     auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
     return exec(sql, getLastInsertId);
@@ -1870,10 +1870,10 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
     auto res = select(fmt::format("SELECT {0}item{1} FROM {0}{2}{1} WHERE {0}item{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(item)));
     if (!res || !res->nextRow()) {
         auto fields = std::vector {
-            fmt::format("{}", identifier("item")),
-            fmt::format("{}", identifier("key")),
-            fmt::format("{}", identifier("item_value")),
-            fmt::format("{}", identifier("status")),
+            identifier("item"),
+            identifier("key"),
+            identifier("item_value"),
+            identifier("status"),
         };
         auto values = std::vector {
             quote(item),
@@ -2034,16 +2034,16 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
     _autoscanChangePersistentFlag(objectID, true);
 
     auto fields = std::vector {
-        fmt::format("{}", identifier("obj_id")),
-        fmt::format("{}", identifier("scan_level")),
-        fmt::format("{}", identifier("scan_mode")),
-        fmt::format("{}", identifier("recursive")),
-        fmt::format("{}", identifier("hidden")),
-        fmt::format("{}", identifier("interval")),
-        fmt::format("{}", identifier("last_modified")),
-        fmt::format("{}", identifier("persistent")),
-        fmt::format("{}", identifier("location")),
-        fmt::format("{}", identifier("path_ids")),
+        identifier("obj_id"),
+        identifier("scan_level"),
+        identifier("scan_mode"),
+        identifier("recursive"),
+        identifier("hidden"),
+        identifier("interval"),
+        identifier("last_modified"),
+        identifier("persistent"),
+        identifier("location"),
+        identifier("path_ids"),
     };
     auto values = std::vector {
         objectID >= 0 ? quote(objectID) : SQL_NULL,
@@ -2385,17 +2385,17 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
     std::string tableName = addUpdateTable->getTableName();
     auto dict = addUpdateTable->getDict();
 
-    std::vector<std::string> fields;
+    std::vector<SQLIdentifier> fields;
     std::vector<std::string> values;
     fields.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
     values.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
 
     if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
-        fields.push_back(fmt::format("{0}item_id{1}", table_quote_begin, table_quote_end));
+        fields.push_back(identifier("item_id"));
         values.push_back(fmt::format("{}", obj->getID()));
     }
     for (auto&& [field, value] : dict) {
-        fields.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, field));
+        fields.push_back(identifier(field));
         values.push_back(fmt::format("{}", value));
     }
 
@@ -2403,7 +2403,7 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
         throw_std_runtime_error("Attempted to insert new object with ID!");
     }
 
-    return fmt::format("INSERT INTO {0}{2}{1} ({3}) VALUES ({4})", table_quote_begin, table_quote_end, tableName, fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ", "), fmt::join(values, ", "));
 }
 
 std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
@@ -2503,9 +2503,9 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
             metadataSQLVals[quote(key)] = quote(val);
         }
         auto fields = std::vector {
-            fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
-            fmt::format("{}property_name{}", table_quote_begin, table_quote_end),
-            fmt::format("{}property_value{}", table_quote_begin, table_quote_end),
+            identifier("item_id"),
+            identifier("property_name"),
+            identifier("property_value"),
         };
         for (auto&& [key, val] : metadataSQLVals) {
             auto values = std::vector {
@@ -2589,9 +2589,9 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 resourceSQLVals[key] = quote(val);
             }
             auto fields = std::vector {
-                fmt::format("{}item_id{}", table_quote_begin, table_quote_end),
-                fmt::format("{}res_id{}", table_quote_begin, table_quote_end),
-                fmt::format("{}handlerType{}", table_quote_begin, table_quote_end),
+                identifier("item_id"),
+                identifier("res_id"),
+                identifier("handlerType"),
             };
             auto values = std::vector {
                 fmt::format("{}", objectId),
@@ -2600,16 +2600,16 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             };
             auto options = resource->getOptions();
             if (!options.empty()) {
-                fields.push_back(fmt::format("{}options{}", table_quote_begin, table_quote_end));
+                fields.push_back(identifier("options"));
                 values.push_back(fmt::format("{}", quote(dictEncode(options))));
             }
             auto parameters = resource->getParameters();
             if (!parameters.empty()) {
-                fields.push_back(fmt::format("{}parameters{}", table_quote_begin, table_quote_end));
+                fields.push_back(identifier("parameters"));
                 values.push_back(fmt::format("{}", quote(dictEncode(parameters))));
             }
             for (auto&& [key, val] : resourceSQLVals) {
-                fields.push_back(fmt::format("{0}{2}{1}", table_quote_begin, table_quote_end, key));
+                fields.push_back(identifier(key));
                 values.push_back(fmt::format("{}", val));
             }
             insert(RESOURCE_TABLE, fields, values);
