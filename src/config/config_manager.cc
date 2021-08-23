@@ -83,7 +83,7 @@ ConfigManager::ConfigManager(fs::path filename,
     }
 
     std::error_code ec;
-    if (!isRegularFile(this->filename, ec)) {
+    if (!fs::is_regular_file(this->filename, ec)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
         expErrMsg << this->filename << "\n";

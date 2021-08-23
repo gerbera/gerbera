@@ -179,58 +179,6 @@ void replaceAllString(std::string& str, std::string_view from, std::string_view 
     }
 }
 
-bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
-{
-    // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
-#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        ec = std::make_error_code(std::errc(errno));
-        return false;
-    }
-
-    ec.clear();
-    return S_ISREG(statbuf.st_mode);
-#else
-    return fs::is_regular_file(path, ec);
-#endif
-}
-
-bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept
-{
-    // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
-#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
-    struct stat statbuf;
-    int ret = stat(dirEnt.path().c_str(), &statbuf);
-    if (ret != 0) {
-        ec = std::make_error_code(std::errc(errno));
-        return false;
-    }
-
-    ec.clear();
-    return S_ISREG(statbuf.st_mode);
-#else
-    return dirEnt.is_regular_file(ec);
-#endif
-}
-
-off_t getFileSize(const fs::directory_entry& dirEnt)
-{
-    // unfortunately fs::file_size() is broken with old libstdc++ on 32bit systems (see #737)
-#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
-    struct stat statbuf;
-    int ret = stat(dirEnt.path().c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), dirEnt.path().c_str());
-    }
-
-    return statbuf.st_size;
-#else
-    return dirEnt.file_size();
-#endif
-}
-
 bool isExecutable(const fs::path& path, int* err)
 {
     int ret = access(path.c_str(), R_OK | X_OK);
@@ -250,7 +198,7 @@ fs::path findInPath(const fs::path& exec)
     auto pathAr = splitString(PATH, ':');
     for (auto&& path : pathAr) {
         fs::path check = fs::path(path) / exec;
-        if (isRegularFile(check, ec))
+        if (fs::is_regular_file(check, ec))
             return check;
     }
 

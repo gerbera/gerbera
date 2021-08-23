@@ -113,8 +113,8 @@ void web::addObject::process()
 {
     check_request();
 
-    std::string obj_type = param("obj_type");
-    std::string location = param("location");
+    auto obj_type = std::string(param("obj_type"));
+    auto location = fs::path(param("location"));
 
     if (param("title").empty())
         throw_std_runtime_error("empty title");
@@ -134,7 +134,7 @@ void web::addObject::process()
     } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
         if (location.empty())
             throw_std_runtime_error("no location given");
-        if (!isRegularFile(location, ec))
+        if (!fs::is_regular_file(location, ec))
             throw_std_runtime_error("file not found {}", ec.message());
         obj = this->addItem(parentID, std::make_shared<CdsItem>());
         allow_fifo = true;

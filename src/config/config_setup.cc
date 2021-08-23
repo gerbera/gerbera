@@ -184,7 +184,7 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
     if (fs::path(optValue).is_absolute()) {
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
-        if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
+        if (!dirEnt.is_regular_file(ec) && !dirEnt.is_symlink(ec)) {
             log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue.c_str());
             return false;
         }
@@ -226,7 +226,7 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
     if (isFile) {
         if (mustExist) {
             fs::directory_entry dirEnt(path, ec);
-            if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
+            if (!dirEnt.is_regular_file(ec) && !dirEnt.is_symlink(ec)) {
                 throw_std_runtime_error("File '{}' does not exist", path.string());
             }
         } else {

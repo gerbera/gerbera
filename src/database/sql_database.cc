@@ -939,7 +939,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
 
                         auto image = dynConfig->getImage();
                         std::error_code ec;
-                        if (!image.empty() && isRegularFile(image, ec)) {
+                        if (!image.empty() && fs::is_regular_file(image, ec)) {
                             auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
@@ -1078,7 +1078,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
 {
     std::string dbLocation = [&fullpath, wasRegularFile] {
         std::error_code ec;
-        if (isRegularFile(fullpath, ec) || wasRegularFile)
+        if (fs::is_regular_file(fullpath, ec) || wasRegularFile)
             return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
         return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     }();

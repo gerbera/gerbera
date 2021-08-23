@@ -85,13 +85,6 @@ void reduceString(std::string& str, char ch);
 void replaceString(std::string& str, std::string_view from, std::string_view to);
 void replaceAllString(std::string& str, std::string_view from, std::string_view to);
 
-/// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
-bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
-bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept;
-
-/// \brief Returns file size of give file, if it does not exist it will throw an exception
-off_t getFileSize(const fs::directory_entry& dirEnt);
-
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary
 /// \param err if not NULL err will contain the errno result of the check

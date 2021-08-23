@@ -88,7 +88,7 @@ void web::directories::process()
                 continue; // skip dir with leading .
         }
         auto dir = fs::directory_iterator(filepath, ec);
-        bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
+        bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || sub.is_regular_file(ec); });
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());

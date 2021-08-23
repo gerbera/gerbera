@@ -62,7 +62,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             for (auto&& name : files) {
                 auto found = folder / expandName(name, obj);
                 std::error_code ec;
-                bool exists = isRegularFile(found, ec); // no error throwing, please
+                bool exists = fs::is_regular_file(found, ec); // no error throwing, please
                 if (!exists)
                     continue;
 
@@ -73,7 +73,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             std::map<std::string, fs::path> fileNames;
             std::error_code ec;
             for (auto&& p : fs::directory_iterator(folder, ec))
-                if (isRegularFile(p, ec))
+                if (fs::is_regular_file(p, ec))
                     fileNames[toLower(p.path().filename().string())] = p;
 
             for (auto&& name : files) {
@@ -106,7 +106,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
                 }
                 for (auto&& p : fs::directory_iterator(found, ec)) {
-                    if (isRegularFile(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension().string()) == extn))) {
+                    if (fs::is_regular_file(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension().string()) == extn))) {
                         if (!stem.empty()) {
                             replaceAllString(stem, "*", ".*");
                             replaceAllString(stem, ".", "?");
