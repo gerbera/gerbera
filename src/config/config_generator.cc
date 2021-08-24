@@ -186,10 +186,10 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     generateUdn();
 
     fs::path homepath = userHome / configDir;
-    setValue(CFG_SERVER_HOME, homepath.string());
+    setValue(CFG_SERVER_HOME, homepath);
 
     fs::path webRoot = dataDir / DEFAULT_WEB_DIR;
-    setValue(CFG_SERVER_WEBROOT, webRoot.string());
+    setValue(CFG_SERVER_WEBROOT, webRoot);
 
     auto aliveinfo = server->append_child(pugi::node_comment);
     aliveinfo.set_value(fmt::format(R"(
@@ -283,7 +283,7 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
 
 #ifdef HAVE_MAGIC
     if (!magicFile.empty()) {
-        setValue(CFG_IMPORT_MAGIC_FILE, magicFile.string());
+        setValue(CFG_IMPORT_MAGIC_FILE, magicFile);
     }
 #endif
 

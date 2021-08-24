@@ -944,7 +944,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
                             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
-                            resource->addAttribute(R_RESOURCE_FILE, image.string());
+                            resource->addAttribute(R_RESOURCE_FILE, image);
                             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
                             dynFolder->addResource(std::move(resource));
                         }

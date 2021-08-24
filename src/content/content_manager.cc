@@ -479,7 +479,7 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
     }
 
     if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
-        auto parentPath = dirEnt.path().parent_path().string();
+        std::string parentPath = dirEnt.path().parent_path();
         updateAttachedResources(asSetting.adir, obj->getLocation(), parentPath, true);
     }
 
@@ -529,7 +529,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
     if (rescanResource) {
         auto obj = database->loadObject(objectID);
         if (obj && obj->hasResource(CH_RESOURCE)) {
-            auto parentPath = obj->getLocation().parent_path().string();
+            auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj->getLocation(), parentPath, all);
         }
     }

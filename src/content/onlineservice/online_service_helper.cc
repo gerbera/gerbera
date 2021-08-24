@@ -47,12 +47,12 @@ std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExterna
 
 #ifdef SOPCAST
     if (service == OS_SopCast) {
-        return item->getLocation().string();
+        return item->getLocation();
     }
 #endif
 #ifdef ATRAILERS
     if (service == OS_ATrailers) {
-        return item->getLocation().string();
+        return item->getLocation();
     }
 #endif
     throw_std_runtime_error("No handler for this service");
