@@ -380,7 +380,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
         auto f = TagLib::ASF::File(&roStream);
 
         if (!f.isValid())
-            throw_std_runtime_error("Could not open flac file: {}", item->getLocation().c_str());
+            throw_std_runtime_error("Could not open wma file: {}", item->getLocation().c_str());
 
         const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
         if (!attrListMap.contains("WM/Picture"))
@@ -607,19 +607,19 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     auto propertyMap = flac.properties();
     populateAuxTags(item, propertyMap, sc);
 
-    if (flac.pictureList().isEmpty()) {
-        log_debug("TagLibHandler: flac resource has no picture information");
-        return;
-    }
-    const TagLib::FLAC::Picture* pic = flac.pictureList().front();
-    const TagLib::ByteVector& data = pic->data();
-
     auto audioProps = flac.audioProperties();
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(0);
     if (temp > 0) {
         res->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(temp));
     }
+
+    if (flac.pictureList().isEmpty()) {
+        log_debug("TagLibHandler: flac resource has no picture information");
+        return;
+    }
+    const TagLib::FLAC::Picture* pic = flac.pictureList().front();
+    const TagLib::ByteVector& data = pic->data();
 
     std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
     if (!isValidArtworkContentType(art_mimetype)) {
