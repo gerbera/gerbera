@@ -174,7 +174,7 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
     if (rawCheck && !rawCheck(optValue)) {
         return false;
     }
-    pathValue.assign(resolvePath(optValue).string());
+    pathValue.assign(resolvePath(optValue));
     return !(notEmpty && pathValue.empty());
 }
 
@@ -211,7 +211,7 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
 /// \param mustExist file/directory must exist
 fs::path ConfigPathSetup::resolvePath(fs::path path) const
 {
-    if (!resolveEmpty && path.string().empty()) {
+    if (!resolveEmpty && path.empty()) {
         return path;
     }
     if (path.is_absolute() || (Home.is_relative() && path.is_relative()))
@@ -919,7 +919,7 @@ bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const
 
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation().string());
+            config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
         if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
@@ -1385,7 +1385,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
-                    config->setOrigValue(index, entry->getCommand().string());
+                    config->setOrigValue(index, entry->getCommand());
                     entry->setCommand(optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getCommand().string());
                     return true;
@@ -1656,7 +1656,7 @@ bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, cons
     auto index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_LOCATION);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation().string());
+            config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
         if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
@@ -1829,7 +1829,7 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
             auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_TITLE);
             cont->setTitle(cs->getXmlContent(child));
             if (cont->getTitle().empty()) {
-                cont->setTitle(location.filename().string());
+                cont->setTitle(location.filename());
             }
             cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT);
             cont->setSort(cs->getXmlContent(child));
@@ -1861,7 +1861,7 @@ bool ConfigDynamicContentSetup::updateItem(size_t i, const std::string& optItem,
     auto index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_LOCATION);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation().string());
+            config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
         if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);

@@ -468,9 +468,9 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 
     if (!location.empty() && location.has_extension()) {
         // make sure that the filename does not contain the separator character
-        auto filename = urlEscape(location.filename().stem().string());
-        auto extension = location.filename().extension().string();
-        return fmt::format("{}.{}{}", ext, (filename), extension);
+        std::string filename = urlEscape(location.filename().stem().string());
+        std::string extension = location.filename().extension();
+        return fmt::format("{}.{}{}", ext, filename, extension);
     }
 
     return {};

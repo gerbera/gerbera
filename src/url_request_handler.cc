@@ -79,7 +79,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #ifdef ONLINE_SERVICES
         std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
-        std::string url = item->getLocation().string();
+        std::string url = item->getLocation();
 #endif
         log_debug("Online content url: {}", url.c_str());
         try {
@@ -134,7 +134,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 #ifdef ONLINE_SERVICES
     std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
-    std::string url = item->getLocation().string();
+    std::string url = item->getLocation();
 #endif
     log_debug("Online content url: {}", url.c_str());
 
