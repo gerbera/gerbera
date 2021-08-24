@@ -61,16 +61,19 @@ function upload_to_artifactory() {
 export DEBIAN_FRONTEND=noninteractive
 lsb_codename=$(lsb_release -c --short)
 lsb_distro=$(lsb_release -i --short)
+lsb_rel=$(lsb_release -r --short)
 
 install-gcc
 install-cmake
+
+echo "Running $0 $1"
 
 libduktape="libduktape205"
 if [[ "$lsb_codename" == "bionic" ]]; then
   libduktape="libduktape202"
 elif [ "$lsb_codename" == "buster" ]; then
   libduktape="libduktape203"
-elif [ "$lsb_codename" == "sid" ]; then
+elif [ "$lsb_codename" == "sid" -o "$1" == "debian:testing" -o "$1" == "debian:unstable" ]; then
   libduktape="libduktape206"
 fi
 echo "Selecting $libduktape for $lsb_distro $lsb_codename"
