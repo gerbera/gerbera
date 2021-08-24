@@ -41,7 +41,7 @@ jobs:
 
       - name: Build and upload deb
         run: |
-          bash scripts/debian/build-deb.sh
+          bash scripts/debian/build-deb.sh ${{ matrix.os-ver }}
 
       - uses: frabert/replace-string-action@v1.2
         id: replace
