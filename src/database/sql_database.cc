@@ -665,7 +665,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
-        const auto where = {
+        auto where = std::vector {
             fmt::format("{}={}", identifier("parent_id"), quote(obj->getParentID())),
             fmt::format("{}={}", identifier("ref_id"), quote(refObj->getID())),
             fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
@@ -1843,7 +1843,7 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
 /* config methods */
 std::vector<ConfigValue> SQLDatabase::getConfigValues()
 {
-    auto fields = {
+    auto fields = std::vector {
         identifier("item"),
         identifier("key"),
         identifier("item_value"),
