@@ -1171,12 +1171,12 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
     log_debug("Created object row, id: {}", newId);
 
     if (!itemMetadata.empty()) {
+        auto mfields = std::vector {
+            identifier("item_id"),
+            identifier("property_name"),
+            identifier("property_value"),
+        };
         for (auto&& [key, val] : itemMetadata) {
-            auto mfields = std::vector {
-                identifier("item_id"),
-                identifier("property_name"),
-                identifier("property_value"),
-            };
             auto mvalues = std::vector {
                 fmt::format("{}", newId),
                 quote(key),
