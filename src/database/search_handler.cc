@@ -286,7 +286,6 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
     if (currentToken->getType() != TokenType::PROPERTY)
         throw_std_runtime_error("Failed to parse search criteria - expecting a property name");
 
-    auto relationshipExpr = std::shared_ptr<ASTNode>(nullptr);
     auto property = std::make_shared<ASTProperty>(sqlEmitter, currentToken->getValue());
 
     getNextToken();
@@ -294,21 +293,25 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
         auto operatr = std::make_shared<ASTCompareOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
-        relationshipExpr = std::make_shared<ASTCompareExpression>(sqlEmitter, property, operatr, quotedString);
-    } else if (currentToken->getType() == TokenType::STRINGOP) {
+        return std::make_shared<ASTCompareExpression>(sqlEmitter, property, operatr, quotedString);
+    }
+
+    if (currentToken->getType() == TokenType::STRINGOP) {
         auto operatr = std::make_shared<ASTStringOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
-        relationshipExpr = std::make_shared<ASTStringExpression>(sqlEmitter, property, operatr, quotedString);
-    } else if (currentToken->getType() == TokenType::EXISTS) {
+        return std::make_shared<ASTStringExpression>(sqlEmitter, property, operatr, quotedString);
+    }
+
+    if (currentToken->getType() == TokenType::EXISTS) {
         auto operatr = std::make_shared<ASTExistsOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto booleanValue = std::make_shared<ASTBoolean>(sqlEmitter, currentToken->getValue());
-        relationshipExpr = std::make_shared<ASTExistsExpression>(sqlEmitter, property, operatr, booleanValue);
-    } else
-        throw_std_runtime_error("Failed to parse search criteria - expecting a comparison, exists, or string operator");
+        return std::make_shared<ASTExistsExpression>(sqlEmitter, property, operatr, booleanValue);
+    }
 
-    return relationshipExpr;
+    throw_std_runtime_error("Failed to parse search criteria - expecting a comparison, exists, or string operator");
+    return {};
 }
 
 std::shared_ptr<ASTQuotedString> SearchParser::parseQuotedString()

@@ -117,10 +117,8 @@ void TaskProcessor::addTask(const std::shared_ptr<GenericTask>& task)
 
 std::shared_ptr<GenericTask> TaskProcessor::getCurrentTask()
 {
-    std::shared_ptr<GenericTask> task;
     auto lock = threadRunner->lockGuard();
-    task = currentTask;
-    return task;
+    return currentTask;
 }
 
 void TaskProcessor::invalidateTask(unsigned int taskID)
