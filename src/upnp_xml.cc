@@ -482,7 +482,7 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     std::deque<std::shared_ptr<CdsResource>> orderedResources;
     auto&& resources = object->getResources();
     for (auto&& oh : orderedHandler) {
-        std::for_each(resources.begin(), resources.end(), [&](auto res) { if (oh == res->getHandlerType()) orderedResources.push_back(res); });
+        std::copy_if(resources.begin(), resources.end(), std::back_inserter(orderedResources), [&](auto res) { return oh == res->getHandlerType(); });
     }
 
     // Append resources not listed in orderedHandler
