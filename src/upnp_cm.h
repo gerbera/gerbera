@@ -44,7 +44,6 @@
 ///
 /// Handles subscription and action invocation requests for the Connection Manager.
 class ConnectionManagerService {
-
 protected:
     /// \brief UPnP standard defined action: GetCurrentConnectionIDs()
     /// \param request Incoming ActionRequest.
