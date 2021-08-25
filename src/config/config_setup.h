@@ -589,7 +589,7 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, ScanMode scanmode)

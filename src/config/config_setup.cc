@@ -910,7 +910,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
     return true;
 }
 
-bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
+bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
     if (optItem == getUniquePath() && status != STATUS_CHANGED) {
