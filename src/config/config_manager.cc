@@ -123,7 +123,6 @@ void ConfigManager::load(const fs::path& userHome)
 {
     std::map<std::string, std::string> args;
     auto self = getSelf();
-    std::shared_ptr<ConfigSetup> co;
 
     log_info("Loading configuration from: {}", filename.c_str());
     pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
@@ -149,7 +148,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now go through the mandatory parameters,
     // if something is missing we will not start the server
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
+    auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
     // respect command line if available; ignore xml value
     {
         std::string temp = !userHome.empty() ? userHome.string() : co->getXmlContent(root);

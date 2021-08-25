@@ -1736,10 +1736,8 @@ void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<Auto
 
 void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
 {
-    std::shared_ptr<AutoscanDirectory> original;
-
     // We will have to change this for other scan modes
-    original = autoscan_timed->getByObjectID(dir->getObjectID());
+    auto original = autoscan_timed->getByObjectID(dir->getObjectID());
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         if (!original)

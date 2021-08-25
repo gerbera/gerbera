@@ -176,8 +176,7 @@ void web::configLoad::process()
     }
 
     // write client configuration
-    std::shared_ptr<ConfigSetup> cs;
-    cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
+    auto cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
     for (size_t i = 0; i < clientConfig->size(); i++) {
         auto client = clientConfig->get(i);
