@@ -1,5 +1,86 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.9.1
+
+- use const auto&
+- replace for_each with copy_if
+- avoid default nullptr initialization
+- remove some string calls
+- make shared_ptr reference const
+- remove pointless empty line
+- get rid of auto&& with structured bindings
+- simplify bool
+- some auto&& removals
+- add missing std::vector
+-  string_view should not be taken by reference 
+- Build debian with arguments
+- libfmt formatters for quoted SQL identifiers
+- Read flac audio properties even if image does not exist
+- Split CI validation jobs
+- Fix linkage error in on aarch64 with g++-10
+- match return type
+- Add support for default values in config UI
+- improve debian script
+- Use correct codename for unstable debian
+- debian::unstable uses libduktape206
+- add PathBase constructor
+- use some auto
+- simplify while loop slightly
+- avoid doing work in if statements
+- manual const conversions
+- clang-tidy: make member function const
+- more move with push_back
+- use more auto in taglib
+- get rid of unused variable
+- pass std::string by const reference
+- add variout maybe_unused
+- change to auto&&
+- Add validation for DynamicContent::location
+- pass ClientInfo by unique_ptr
+- add ClientCacheEntry constructor
+- use some auto and CTAD
+- remove pointless to_string
+- remove single argument std::string
+- convert vector to deque
+- replace several emplace_back with push_back
+- convert Quirks to unique_ptr
+- Refresh Clients config in ClientList after change of config in UI
+- Code refactoring and performance enhancements in sql_database
+- convert vector to deque
+- rvalue reference conversions
+- several auto conversions
+- Add M3U8 support
+- remove shared_ptr from vector
+- test cleanups
+- get rid of ClientCacheEntry pointer
+- fix bad unique_ptr usage
+- Make UpnpXMLBuilder::orderedHandler nonstatic
+- Fix mapConfigOption return
+- {} conversions
+- prefer xml-node children over xpath
+- add missing move
+- basic clang tidy
+- replace several inserts with std::copy
+- clang-tidy: use emplace_back
+- use std::string_view in if statements
+- remove const char version of quote
+- use auto and CTAD
+- Update required versions for spdlog and libfmt
+- Use fixed spdlog and fmt in all debian systems
+- use newer spdlog and fmt for debian
+- Add dynamic containers setup
+- fmt disallows string_view as format specifier
+- Change generation of SQL statements to format
+- final unique_ptr removals
+- Fix broken upgrade script
+- const ref conversions
+- move unique_ptr removals
+- emplace_back conversions
+- const ref conversions
+- replace temp variable with returns
+- Update Dockerfile
+- return string instead of const char
+
 ### v1.9.0
 
 - fix wrong define
