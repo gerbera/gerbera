@@ -666,8 +666,8 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
-            fmt::format("{}={}", identifier("parent_id"), quote(obj->getParentID())),
-            fmt::format("{}={}", identifier("ref_id"), quote(refObj->getID())),
+            fmt::format("{}={:d}", identifier("parent_id"), obj->getParentID()),
+            fmt::format("{}={:d}", identifier("ref_id"), refObj->getID()),
             fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
         };
         auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
@@ -886,13 +886,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             auto zero = std::string("0 = 1");
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
-            where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER)));
+            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_CONTAINER));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else if (!getContainers && getItems) {
-            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_ITEM)));
+            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), quote(OBJECT_TYPE_CONTAINER), orderByCode());
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_CONTAINER, orderByCode());
         }
         if (doLimit)
             limit = fmt::format(" LIMIT {} OFFSET {}", count, param->getStartingIndex());
@@ -1442,7 +1442,7 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
     auto where = std::vector {
-        fmt::format("{} != {}", identifier("object_type"), quote(OBJECT_TYPE_CONTAINER)),
+        fmt::format("{} != {:d}", identifier("object_type"), OBJECT_TYPE_CONTAINER),
     };
     if (!mimeType.empty()) {
         where.push_back(fmt::format("{} LIKE {}", identifier("mime_type"), quote(fmt::format("{}%", mimeType))));
@@ -1584,7 +1584,7 @@ void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
 {
-    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(objectID)));
+    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, objectID));
     if (!res)
         return nullptr;
 
@@ -1928,7 +1928,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), quote(objectID));
+        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), objectID);
 
         beginTransaction("updateAutoscanList x");
         auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, where));
@@ -1974,7 +1974,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
 
 std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectID)
 {
-    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}id{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, ITM_ALIAS, quote(objectID));
+    std::string selectSql = fmt::format("{} WHERE {}.{} = {}", sql_autoscan_query, identifier(ITM_ALIAS), identifier("id"), objectID);
 
     auto res = select(selectSql);
     if (!res)
@@ -2093,17 +2093,17 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
         fmt::format("{} = {}", identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
         fmt::format("{} = {}", identifier("recursive"), mapBool(adir->getRecursive())),
         fmt::format("{} = {}", identifier("hidden"), mapBool(adir->getHidden())),
-        fmt::format("{} = {}", identifier("interval"), quote(adir->getInterval().count())),
+        fmt::format("{} = {}", identifier("interval"), adir->getInterval().count()),
         fmt::format("{} = {}", identifier("persistent"), mapBool(adir->persistent())),
         fmt::format("{} = {}", identifier("location"), objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
         fmt::format("{} = {}", identifier("path_ids"), pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
         fmt::format("{} = {}", identifier("touched"), mapBool(true)),
     };
     if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
-        fields.push_back(fmt::format("{} = {}", identifier("last_modified"), quote(adir->getPreviousLMT().count())));
+        fields.push_back(fmt::format("{} = {}", identifier("last_modified"), adir->getPreviousLMT().count()));
     }
     exec(fmt::format("UPDATE {} SET {} WHERE {} = {}",
-        identifier(AUTOSCAN_TABLE), fmt::join(fields, ","), identifier("id"), quote(adir->getDatabaseID())));
+        identifier(AUTOSCAN_TABLE), fmt::join(fields, ","), identifier("id"), adir->getDatabaseID()));
 }
 
 void SQLDatabase::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
@@ -2116,14 +2116,15 @@ void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
     if (autoscanID == INVALID_OBJECT_ID)
         return;
     int objectID = _getAutoscanObjectID(autoscanID);
-    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}id{1} = {3}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(autoscanID)));
+    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(AUTOSCAN_TABLE), identifier("id"), autoscanID));
     if (objectID != INVALID_OBJECT_ID)
         _autoscanChangePersistentFlag(objectID, false);
 }
 
 int SQLDatabase::_getAutoscanObjectID(int autoscanID)
 {
-    auto res = select(fmt::format("SELECT {0}obj_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(autoscanID)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} LIMIT 1",
+        identifier("obj_id"), identifier(AUTOSCAN_TABLE), identifier("id"), autoscanID));
     if (!res)
         throw DatabaseException("", "error while doing select on ");
     auto row = res->nextRow();
@@ -2138,7 +2139,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
     if (objectID == INVALID_OBJECT_ID || objectID == INVALID_OBJECT_ID_2)
         return;
 
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, quote(objectID)));
+    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
 }
 
 void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -2158,12 +2159,12 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     std::unique_ptr<SQLRow> row;
     {
         auto where = std::vector {
-            fmt::format("{}obj_id{} = {}", table_quote_begin, table_quote_end, quote(checkObjectID)),
+            fmt::format("{} = {}", identifier("obj_id"), checkObjectID),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{}id{} != {}", table_quote_begin, table_quote_end, quote(databaseID)));
+            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
 
-        auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(where, " AND ")));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {}", identifier("id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
         if (!res)
             throw_std_runtime_error("SQL error");
 
@@ -2179,11 +2180,11 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
     if (adir->getRecursive()) {
         auto where = std::vector {
-            fmt::format("{}path_ids{} LIKE {}", table_quote_begin, table_quote_end, quote(fmt::format("%,{},%", checkObjectID))),
+            fmt::format("{} LIKE {}", identifier("path_ids"), quote(fmt::format("%,{},%", checkObjectID))),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{}id{} != {}", table_quote_begin, table_quote_end, quote(databaseID)));
-        auto qRec = fmt::format("SELECT {0}obj_id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(where, " AND "));
+            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
+        auto qRec = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", identifier("obj_id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND "));
         log_debug("------------ {}", qRec);
         auto res = select(qRec);
         if (!res)
@@ -2206,12 +2207,12 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             throw_std_runtime_error("getPathIDs returned nullptr");
 
         auto where = std::vector {
-            fmt::format("{}obj_id{} IN ({})", table_quote_begin, table_quote_end, fmt::join(pathIDs, ",")),
-            fmt::format("{}recursive{} = {}", table_quote_begin, table_quote_end, mapBool(true)),
+            fmt::format("{} IN ({})", identifier("obj_id"), fmt::join(pathIDs, ",")),
+            fmt::format("{} = {}", identifier("recursive"), mapBool(true)),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{}id{} != {}", table_quote_begin, table_quote_end, quote(databaseID)));
-        auto res = select(fmt::format("SELECT {0}obj_id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, fmt::join(where, " AND ")));
+            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", identifier("obj_id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
         if (!res)
             throw_std_runtime_error("SQL error");
         if (!(row = res->nextRow()))
@@ -2237,7 +2238,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     std::vector<int> pathIDs;
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
-        auto res = select(fmt::format("{} {} LIMIT 1", sel, quote(objectID)));
+        auto res = select(fmt::format("{} {} LIMIT 1", sel, objectID));
         if (!res)
             break;
         auto row = res->nextRow();
