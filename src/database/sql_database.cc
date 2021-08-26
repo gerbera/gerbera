@@ -865,7 +865,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::parent_id), parent->getID()));
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
-            where.push_back(fmt::format("{} != {}", browseColumnMapper->mapQuoted(BrowseCol::id), quote(CDS_ID_FS_ROOT)));
+            where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseCol::id), CDS_ID_FS_ROOT));
 
         // order by code..
         auto orderByCode = [&]() {
@@ -1039,7 +1039,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     else if (items && !containers)
         where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
     if (contId == CDS_ID_ROOT && hideFsRoot) {
-        where.push_back(fmt::format("{} != {}", identifier("id"), quote(CDS_ID_FS_ROOT)));
+        where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
     }
     beginTransaction("getChildCount");
     auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
@@ -1157,13 +1157,13 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         identifier("ref_id"),
     };
     auto values = std::vector {
-        fmt::format("{}", parentID),
-        fmt::format("{}", OBJECT_TYPE_CONTAINER),
-        fmt::format("{}", !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER)),
+        fmt::to_string(parentID),
+        fmt::to_string(OBJECT_TYPE_CONTAINER),
+        !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
         quote(std::move(name)),
         quote(dbLocation),
         quote(stringHash(dbLocation)),
-        (refID > 0) ? fmt::format("{}", refID) : fmt::format("{}", SQL_NULL),
+        (refID > 0) ? fmt::to_string(refID) : fmt::to_string(SQL_NULL),
     };
 
     beginTransaction("createContainer");
@@ -1178,7 +1178,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         };
         for (auto&& [key, val] : itemMetadata) {
             auto mvalues = std::vector {
-                fmt::format("{}", newId),
+                fmt::to_string(newId),
                 quote(key),
                 quote(val),
             };
@@ -2395,6 +2395,11 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
 std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
     std::string tableName = addUpdateTable->getTableName();
+
+    if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
+        throw_std_runtime_error("Attempted to insert new object with ID!");
+    }
+
     auto dict = addUpdateTable->getDict();
 
     std::vector<SQLIdentifier> fields;
@@ -2404,15 +2409,11 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
 
     if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
         fields.push_back(identifier("item_id"));
-        values.push_back(fmt::format("{}", obj->getID()));
+        values.push_back(fmt::to_string(obj->getID()));
     }
     for (auto&& [field, value] : dict) {
         fields.push_back(identifier(field));
-        values.push_back(fmt::format("{}", value));
-    }
-
-    if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
-        throw_std_runtime_error("Attempted to insert new object with ID!");
+        values.push_back(value);
     }
 
     return fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ", "), fmt::join(values, ", "));
@@ -2522,9 +2523,9 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
         };
         for (auto&& [key, val] : metadataSQLVals) {
             auto values = std::vector {
-                fmt::format("{}", objectId),
-                fmt::format("{}", key),
-                fmt::format("{}", val),
+                fmt::to_string(objectId),
+                key,
+                val,
             };
             insert(METADATA_TABLE, fields, values);
         }
@@ -2607,23 +2608,23 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 identifier("handlerType"),
             };
             auto values = std::vector {
-                fmt::format("{}", objectId),
-                fmt::format("{}", res_id),
-                fmt::format("{}", resource->getHandlerType()),
+                fmt::to_string(objectId),
+                fmt::to_string(res_id),
+                fmt::to_string(resource->getHandlerType()),
             };
             auto options = resource->getOptions();
             if (!options.empty()) {
                 fields.push_back(identifier("options"));
-                values.push_back(fmt::format("{}", quote(dictEncode(options))));
+                values.push_back(quote(dictEncode(options)));
             }
             auto parameters = resource->getParameters();
             if (!parameters.empty()) {
                 fields.push_back(identifier("parameters"));
-                values.push_back(fmt::format("{}", quote(dictEncode(parameters))));
+                values.push_back(quote(dictEncode(parameters)));
             }
             for (auto&& [key, val] : resourceSQLVals) {
                 fields.push_back(identifier(key));
-                values.push_back(fmt::format("{}", val));
+                values.push_back(val);
             }
             insert(RESOURCE_TABLE, fields, values);
             res_id++;
