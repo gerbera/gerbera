@@ -698,7 +698,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     return returnVal;
 }
 
-void SQLDatabase::addObject(std::shared_ptr<CdsObject> obj, int* changedContainer)
+void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer)
 {
     if (obj->getID() != INVALID_OBJECT_ID)
         throw_std_runtime_error("Tried to add an object with an object ID set");
