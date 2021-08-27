@@ -219,7 +219,7 @@ protected:
     /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
     static int handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
-    int handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event);
+    int handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Dispatch incoming UPnP client events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
@@ -234,7 +234,7 @@ protected:
     void emptyBookmark();
 
     std::string getPresentationUrl() const;
-    int startupInterface(const std::string& iface, in_port_t port);
+    int startupInterface(const std::string& iface, in_port_t inPort);
 };
 
 #endif // __SERVER_H__

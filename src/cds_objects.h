@@ -353,7 +353,7 @@ public:
 
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
-    static std::string_view mapObjectType(unsigned int objectType);
+    static std::string_view mapObjectType(unsigned int type);
 };
 
 /// \brief An Item in the content directory.
