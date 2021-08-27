@@ -256,13 +256,13 @@ public:
 
     C operator*() { return static_cast<C>(val); }
 
-    EnumIterator begin() { return *this; }
-    EnumIterator end()
+    EnumIterator begin() const { return *this; }
+    EnumIterator end() const
     {
         static const EnumIterator endIter = EnumIterator(endVal);
         return endIter;
     }
-    bool operator!=(const EnumIterator& i)
+    bool operator!=(const EnumIterator& i) const
     {
         return val != i.val;
     }
