@@ -43,7 +43,7 @@ Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* 
     this->context->getClients()->getInfo(addr, userAgent, &pClientInfo);
 }
 
-int Quirks::checkFlags(int flags)
+int Quirks::checkFlags(int flags) const
 {
     return pClientInfo ? pClientInfo->flags & flags : 0;
 }

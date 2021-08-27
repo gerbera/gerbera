@@ -94,7 +94,7 @@ public:
      *
      */
     void getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const;
-    int checkFlags(int flags);
+    int checkFlags(int flags) const;
 
 private:
     std::shared_ptr<Context> context;
