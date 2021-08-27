@@ -32,15 +32,8 @@
 #include "util/upnp_quirks.h"
 
 ClientConfig::ClientConfig()
+    : clientInfo(std::make_unique<ClientInfo>())
 {
-    auto cInfo = ClientInfo {
-        "Unknown",
-        ClientType::Unknown,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::None,
-        "",
-    };
-    clientInfo = std::make_unique<ClientInfo>(std::move(cInfo));
 }
 
 ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
