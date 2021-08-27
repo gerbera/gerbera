@@ -160,7 +160,7 @@ public:
     /// \brief shutdown the Database with its possible threads
     virtual void shutdown() = 0;
 
-    virtual void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) = 0;
+    virtual void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
     /// \param path container path separated by '/'. Slashes in container

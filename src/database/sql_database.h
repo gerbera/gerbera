@@ -114,7 +114,7 @@ public:
     virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
-    void addObject(std::shared_ptr<CdsObject> obj, int* changedContainer) override;
+    void addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
     void updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
