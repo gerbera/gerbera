@@ -67,13 +67,11 @@ void Session::containerChangedUI(int objectID)
         return;
     if (!updateAll) {
         AutoLockR lock(rmutex);
-        if (!updateAll) {
-            if (uiUpdateIDs.size() >= MAX_UI_UPDATE_IDS) {
-                updateAll = true;
-                uiUpdateIDs.clear();
-            } else
-                uiUpdateIDs.insert(objectID);
-        }
+        if (uiUpdateIDs.size() >= MAX_UI_UPDATE_IDS) {
+            updateAll = true;
+            uiUpdateIDs.clear();
+        } else
+            uiUpdateIDs.insert(objectID);
     }
 }
 
