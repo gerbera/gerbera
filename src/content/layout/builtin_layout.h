@@ -68,7 +68,6 @@ protected:
 #endif
     std::map<std::string, std::string> genreMap;
 #ifdef ENABLE_PROFILING
-    bool profiling_initialized;
     profiling_t layout_profiling;
 #endif
 };
