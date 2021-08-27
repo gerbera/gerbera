@@ -341,7 +341,7 @@ void ConfigGenerator::generateOnlineContent()
 
 void ConfigGenerator::generateTranscoding()
 {
-    auto transcoding = setValue(CFG_TRANSCODING_TRANSCODING_ENABLED);
+    setValue(CFG_TRANSCODING_TRANSCODING_ENABLED);
     setDictionary(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
 
     const auto profileTag = ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);

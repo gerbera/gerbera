@@ -108,12 +108,6 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
-    std::string header;
-    log_debug("path: {}", path.c_str());
-    if (!path.filename().empty()) {
-        header = fmt::format("Content-Disposition: attachment; filename=\"{}\"", path.filename().c_str());
-    }
-
     // for transcoded resourecs res_id will always be negative
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 

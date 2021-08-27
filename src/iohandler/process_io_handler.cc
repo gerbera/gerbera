@@ -174,7 +174,7 @@ size_t ProcessIOHandler::read(char* buf, size_t length)
     size_t num_bytes = 0;
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
-    int ret = 0;
+    int ret;
     int timeout_count = 0;
 
     while (true) {
@@ -266,7 +266,7 @@ size_t ProcessIOHandler::write(char* buf, size_t length)
     size_t num_bytes = 0;
     char* p_buffer = buf;
     int exit_status = EXIT_SUCCESS;
-    int ret = 0;
+    int ret;
 
     while (true) {
         FD_ZERO(&writeSet);
