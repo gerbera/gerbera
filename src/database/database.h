@@ -309,7 +309,7 @@ public:
 
 protected:
     /* helper for addContainerChain */
-    static void stripAndUnescapeVirtualContainerFromPath(std::string path, std::string& first, std::string& last);
+    static void stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last);
 
     static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
     friend class Server;

@@ -114,8 +114,8 @@ public:
     virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
-    void addObject(std::shared_ptr<CdsObject> object, int* changedContainer) override;
-    void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override;
+    void addObject(std::shared_ptr<CdsObject> obj, int* changedContainer) override;
+    void updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
@@ -142,7 +142,7 @@ public:
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
-    void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override;
+    void addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override;
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
