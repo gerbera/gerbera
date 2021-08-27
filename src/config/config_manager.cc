@@ -362,7 +362,6 @@ void ConfigManager::load(const fs::path& userHome)
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     co->makeOption(root, self, &args);
     args.clear();
-    auto script_path = co->getValue()->getOption();
 #endif
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_PORT);

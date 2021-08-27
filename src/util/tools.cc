@@ -885,7 +885,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     struct timespec ts;
     static int counter = 0;
     struct stat statbuf;
-    int ret = 0;
+    int ret;
 
     /* find the last occurrence of "XXXXXX" */
     XXXXXX = strstr(tmpl, "XXXXXX");
