@@ -35,7 +35,7 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 
-void web::VoidType::process()
+void Web::VoidType::process()
 {
     check_request();
 }

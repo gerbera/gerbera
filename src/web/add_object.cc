@@ -40,17 +40,17 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-web::AddObject::AddObject(std::shared_ptr<ContentManager> content)
+Web::AddObject::AddObject(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::AddObject::addContainer(int parentID)
+void Web::AddObject::addContainer(int parentID)
 {
     content->addContainer(parentID, param("title"), param("class"));
 }
 
-std::shared_ptr<CdsObject> web::AddObject::addItem(int parentID, const std::shared_ptr<CdsItem>& item)
+std::shared_ptr<CdsObject> Web::AddObject::addItem(int parentID, const std::shared_ptr<CdsItem>& item)
 {
     item->setParentID(parentID);
 
@@ -73,7 +73,7 @@ std::shared_ptr<CdsObject> web::AddObject::addItem(int parentID, const std::shar
     return item;
 }
 
-std::shared_ptr<CdsObject> web::AddObject::addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol)
+std::shared_ptr<CdsObject> Web::AddObject::addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol)
 {
     std::string protocolInfo;
 
@@ -109,7 +109,7 @@ std::shared_ptr<CdsObject> web::AddObject::addUrl(int parentID, const std::share
     return item;
 }
 
-void web::AddObject::process()
+void Web::AddObject::process()
 {
     check_request();
 

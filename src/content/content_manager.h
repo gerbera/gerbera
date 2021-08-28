@@ -319,7 +319,7 @@ protected:
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
-    std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<Web::SessionManager> session_manager;
     std::shared_ptr<Context> context;
     ///\brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;

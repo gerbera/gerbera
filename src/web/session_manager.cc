@@ -41,7 +41,7 @@
 #define UI_UPDATE_ID_HASH_SIZE 61
 #define MAX_UI_UPDATE_IDS 10
 
-namespace web {
+namespace Web {
 
 Session::Session(std::chrono::seconds timeout)
     : timeout(timeout)
@@ -243,4 +243,4 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     }
 }
 
-} // namespace web
+} // namespace Web

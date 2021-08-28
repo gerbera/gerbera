@@ -63,13 +63,13 @@ static bool check_token(const std::string& token, const std::string& password, c
     return (checksum == encPassword);
 }
 
-web::Auth::Auth(std::shared_ptr<ContentManager> content)
+Web::Auth::Auth(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
     , timeout(std::chrono::seconds(60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
 {
 }
 
-void web::Auth::process()
+void Web::Auth::process()
 {
     std::string action = param("action");
     auto root = xmlDoc->document_element();

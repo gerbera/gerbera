@@ -34,7 +34,7 @@
 
 #include <fmt/chrono.h>
 
-web::Clients::Clients(std::shared_ptr<ContentManager> content)
+Web::Clients::Clients(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
@@ -44,7 +44,7 @@ static std::string seconds_to_string(const std::chrono::seconds& t)
     return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));
 }
 
-void web::Clients::process()
+void Web::Clients::process()
 {
     check_request();
     auto root = xmlDoc->document_element();

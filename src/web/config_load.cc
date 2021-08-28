@@ -41,7 +41,7 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)
+Web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
     try {
@@ -55,7 +55,7 @@ web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)
     }
 }
 
-void web::ConfigLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs)
+void Web::ConfigLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs)
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
@@ -65,7 +65,7 @@ void web::ConfigLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
     info.append_attribute("help") = cs->getHelp();
 }
 
-void web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
+void Web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
 {
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
@@ -83,32 +83,32 @@ void web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, 
 }
 
 template <typename T>
-void web::ConfigLoad::setValue(pugi::xml_node& item, const T& value)
+void Web::ConfigLoad::setValue(pugi::xml_node& item, const T& value)
 {
     static_assert(fmt::has_formatter<T, fmt::format_context>::value, "T must be formattable");
     item.append_attribute("value") = fmt::to_string(value).c_str();
 }
 
 template <>
-void web::configLoad::setValue(pugi::xml_node& item, const std::string& value)
+void Web::ConfigLoad::setValue(pugi::xml_node& item, const std::string& value)
 {
     item.append_attribute("value") = value.c_str();
 }
 
 template <>
-void web::configLoad::setValue(pugi::xml_node& item, const std::string_view& value)
+void Web::ConfigLoad::setValue(pugi::xml_node& item, const std::string_view& value)
 {
     item.append_attribute("value") = value.data();
 }
 
 template <>
-void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
+void Web::ConfigLoad::setValue(pugi::xml_node& item, const fs::path& value)
 {
     item.append_attribute("value") = value.c_str();
 }
 
 /// \brief: process config_load request
-void web::ConfigLoad::process()
+void Web::ConfigLoad::process()
 {
     check_request();
     auto root = xmlDoc->document_element();

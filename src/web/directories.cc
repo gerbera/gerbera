@@ -35,14 +35,14 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-web::Directories::Directories(std::shared_ptr<ContentManager> content)
+Web::Directories::Directories(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
 using dirInfo = std::pair<fs::path, bool>;
 
-void web::Directories::process()
+void Web::Directories::process()
 {
     check_request();
 

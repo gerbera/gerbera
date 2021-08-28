@@ -42,7 +42,7 @@
 #include "util/generic_task.h"
 #include "util/xml_to_json.h"
 
-namespace web {
+namespace Web {
 
 class SessionException : public std::runtime_error {
 public:
@@ -65,7 +65,7 @@ class SessionManager;
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler {
 protected:
-    std::shared_ptr<web::SessionManager> sessionManager;
+    std::shared_ptr<Web::SessionManager> sessionManager;
 
     bool checkRequestCalled {};
 
@@ -159,6 +159,6 @@ public:
     virtual void process() = 0;
 };
 
-} // namespace web
+} // namespace Web
 
 #endif // __WEB_REQUEST_HANDLER_H__

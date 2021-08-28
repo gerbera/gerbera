@@ -43,7 +43,7 @@ class Config;
 class Database;
 class UpnpXMLBuilder;
 
-namespace web {
+namespace Web {
 
 // forward declaration
 class SessionManager;
@@ -211,6 +211,6 @@ public:
     void process() override;
 };
 
-} // namespace web
+} // namespace Web
 
 #endif // __WEB_PAGES_H__

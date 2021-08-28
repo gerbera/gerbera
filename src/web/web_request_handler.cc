@@ -41,7 +41,7 @@
 #include "util/xml_to_json.h"
 #include "web/pages.h"
 
-namespace web {
+namespace Web {
 
 WebRequestHandler::WebRequestHandler(std::shared_ptr<ContentManager> content)
     : RequestHandler(std::move(content))
@@ -276,4 +276,4 @@ std::string_view WebRequestHandler::mapAutoscanType(int type)
     return "none";
 }
 
-} // namespace web
+} // namespace Web
