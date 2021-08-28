@@ -37,14 +37,14 @@
 #include "server.h"
 #include "upnp_xml.h"
 
-web::items::items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+web::Items::Items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
     , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
 /// \brief orocess request for item list in ui
-void web::items::process()
+void web::Items::process()
 {
     check_request();
 

@@ -49,84 +49,84 @@ namespace web {
 class SessionManager;
 
 /// \brief Authentication handler (used over AJAX)
-class auth : public WebRequestHandler {
+class Auth : public WebRequestHandler {
 protected:
     std::chrono::seconds timeout {};
 
 public:
-    explicit auth(std::shared_ptr<ContentManager> content);
+    explicit Auth(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser container tree
-class containers : public WebRequestHandler {
+class Containers : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser directory tree
-class directories : public WebRequestHandler {
+class Directories : public WebRequestHandler {
 public:
-    explicit directories(std::shared_ptr<ContentManager> content);
+    explicit Directories(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser file list
-class files : public WebRequestHandler {
+class Files : public WebRequestHandler {
 public:
-    explicit files(std::shared_ptr<ContentManager> content);
+    explicit Files(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser item list
-class items : public WebRequestHandler {
+class Items : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser add item
-class add : public WebRequestHandler {
+class Add : public WebRequestHandler {
 public:
-    explicit add(std::shared_ptr<ContentManager> content);
+    explicit Add(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser remove item
-class remove : public WebRequestHandler {
+class Remove : public WebRequestHandler {
 public:
-    explicit remove(std::shared_ptr<ContentManager> content);
+    explicit Remove(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser remove item
-class edit_load : public WebRequestHandler {
+class EditLoad : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit edit_load(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit EditLoad(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser remove item
-class edit_save : public WebRequestHandler {
+class EditSave : public WebRequestHandler {
 public:
-    explicit edit_save(std::shared_ptr<ContentManager> content);
+    explicit EditSave(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser add object.
-class addObject : public WebRequestHandler {
+class AddObject : public WebRequestHandler {
 public:
-    explicit addObject(std::shared_ptr<ContentManager> content);
+    explicit AddObject(std::shared_ptr<ContentManager> content);
     void process() override;
 
 protected:
@@ -136,9 +136,9 @@ protected:
 };
 
 /// \brief autoscan add and remove
-class autoscan : public WebRequestHandler {
+class Autoscan : public WebRequestHandler {
 public:
-    explicit autoscan(std::shared_ptr<ContentManager> content);
+    explicit Autoscan(std::shared_ptr<ContentManager> content);
     void process() override;
 
 protected:
@@ -146,9 +146,9 @@ protected:
 };
 
 /// \brief nothing :)
-class voidType : public WebRequestHandler {
+class VoidType : public WebRequestHandler {
 public:
-    explicit voidType(std::shared_ptr<ContentManager> content)
+    explicit VoidType(std::shared_ptr<ContentManager> content)
         : WebRequestHandler(std::move(content))
     {
     }
@@ -156,16 +156,16 @@ public:
 };
 
 /// \brief task list and task cancel
-class tasks : public WebRequestHandler {
+class Tasks : public WebRequestHandler {
 public:
-    explicit tasks(std::shared_ptr<ContentManager> content);
+    explicit Tasks(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief UI action button
-class action : public WebRequestHandler {
+class Action : public WebRequestHandler {
 public:
-    explicit action(std::shared_ptr<ContentManager> content);
+    explicit Action(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
@@ -179,14 +179,14 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::string_view page);
 
 /// \brief Browse clients list
-class clients : public WebRequestHandler {
+class Clients : public WebRequestHandler {
 public:
-    explicit clients(std::shared_ptr<ContentManager> content);
+    explicit Clients(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief load configuration
-class configLoad : public WebRequestHandler {
+class ConfigLoad : public WebRequestHandler {
 protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, pugi::xml_node*> allItems;
@@ -197,17 +197,17 @@ protected:
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
-    explicit configLoad(std::shared_ptr<ContentManager> content);
+    explicit ConfigLoad(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief save configuration
-class configSave : public WebRequestHandler {
+class ConfigSave : public WebRequestHandler {
 protected:
     std::shared_ptr<Context> context;
 
 public:
-    explicit configSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content);
+    explicit ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content);
     void process() override;
 };
 

@@ -37,13 +37,13 @@
 #include "server.h"
 #include "upnp_xml.h"
 
-web::containers::containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+web::Containers::Containers(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
     , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
-void web::containers::process()
+void web::Containers::process()
 {
     log_debug(("containers.cc: containers::process()"));
     check_request();

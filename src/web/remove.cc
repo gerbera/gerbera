@@ -37,12 +37,12 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-web::remove::remove(std::shared_ptr<ContentManager> content)
+web::Remove::Remove(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::remove::process()
+void web::Remove::process()
 {
     log_debug("remove: start");
 

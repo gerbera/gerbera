@@ -41,14 +41,14 @@
 #include "upnp_xml.h"
 #include "util/tools.h"
 
-web::edit_load::edit_load(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+web::EditLoad::EditLoad(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(std::move(content))
     , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
 /// \brief: process request 'edit_load' to list contents of a folder
-void web::edit_load::process()
+void web::EditLoad::process()
 {
     check_request();
 
