@@ -37,12 +37,12 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-web::edit_save::edit_save(std::shared_ptr<ContentManager> content)
+web::EditSave::EditSave(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::edit_save::process()
+void web::EditSave::process()
 {
     check_request();
 

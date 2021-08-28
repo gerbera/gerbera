@@ -41,7 +41,7 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::configLoad::configLoad(std::shared_ptr<ContentManager> content)
+web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
     try {
@@ -55,7 +55,7 @@ web::configLoad::configLoad(std::shared_ptr<ContentManager> content)
     }
 }
 
-void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs)
+void web::ConfigLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs)
 {
     auto info = meta.append_child("item");
     info.append_attribute("item") = cs->getUniquePath().c_str();
@@ -65,7 +65,7 @@ void web::configLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
     info.append_attribute("help") = cs->getHelp();
 }
 
-void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
+void web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
 {
     allItems[name] = &item;
     item.append_attribute("item") = name.c_str();
@@ -83,7 +83,7 @@ void web::configLoad::createItem(pugi::xml_node& item, const std::string& name, 
 }
 
 template <typename T>
-void web::configLoad::setValue(pugi::xml_node& item, const T& value)
+void web::ConfigLoad::setValue(pugi::xml_node& item, const T& value)
 {
     static_assert(fmt::has_formatter<T, fmt::format_context>::value, "T must be formattable");
     item.append_attribute("value") = fmt::to_string(value).c_str();
@@ -108,7 +108,7 @@ void web::configLoad::setValue(pugi::xml_node& item, const fs::path& value)
 }
 
 /// \brief: process config_load request
-void web::configLoad::process()
+void web::ConfigLoad::process()
 {
     check_request();
     auto root = xmlDoc->document_element();

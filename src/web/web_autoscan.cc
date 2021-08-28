@@ -35,12 +35,12 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 
-web::autoscan::autoscan(std::shared_ptr<ContentManager> content)
+web::Autoscan::Autoscan(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::autoscan::process()
+void web::Autoscan::process()
 {
     check_request();
 
@@ -136,7 +136,7 @@ void web::autoscan::process()
         throw_std_runtime_error("called with illegal action");
 }
 
-void web::autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
+void web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
 {
     if (!adir) {
         element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");

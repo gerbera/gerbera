@@ -50,12 +50,12 @@
 #include "util/tools.h"
 
 // file managment
-class file_io_callback : public IOCallback {
+class FileIOCallback : public IOCallback {
 private:
     FILE* file;
 
 public:
-    explicit file_io_callback(const char* path)
+    explicit FileIOCallback(const char* path)
 #ifdef __linux__
         : file(::fopen(path, "rbe"))
 #else
@@ -67,13 +67,13 @@ public:
         }
     }
 
-    ~file_io_callback() override
+    ~FileIOCallback() override
     {
         close();
     }
 
-    file_io_callback(const file_io_callback&) = delete;
-    file_io_callback& operator=(const file_io_callback&) = delete;
+    FileIOCallback(const FileIOCallback&) = delete;
+    FileIOCallback& operator=(const FileIOCallback&) = delete;
 
     uint32 read(void* buffer, size_t size) override
     {
@@ -138,7 +138,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
 
 void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const
 {
-    auto ebml_file = file_io_callback(item->getLocation().c_str());
+    auto ebml_file = FileIOCallback(item->getLocation().c_str());
     auto ebml_stream = EbmlStream(ebml_file);
 
     auto el_l0 = ebml_stream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);

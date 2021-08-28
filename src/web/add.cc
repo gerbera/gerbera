@@ -37,12 +37,12 @@
 #include "content/content_manager.h"
 #include "util/tools.h"
 
-web::add::add(std::shared_ptr<ContentManager> content)
+web::Add::Add(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::add::process()
+void web::Add::process()
 {
     log_debug("add: start");
 
