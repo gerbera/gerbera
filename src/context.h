@@ -35,9 +35,9 @@ class Database;
 class Mime;
 class Server;
 class UpdateManager;
-namespace web {
+namespace Web {
 class SessionManager;
-} // namespace web
+} // namespace Web
 
 class Context {
 public:
@@ -46,7 +46,7 @@ public:
         std::shared_ptr<Mime> mime,
         std::shared_ptr<Database> database,
         std::shared_ptr<Server> server,
-        std::shared_ptr<web::SessionManager> session_manager);
+        std::shared_ptr<Web::SessionManager> session_manager);
 
     std::shared_ptr<Config> getConfig() const
     {
@@ -73,7 +73,7 @@ public:
         return server;
     }
 
-    std::shared_ptr<web::SessionManager> getSessionManager() const
+    std::shared_ptr<Web::SessionManager> getSessionManager() const
     {
         return session_manager;
     }
@@ -84,7 +84,7 @@ private:
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<Server> server;
-    std::shared_ptr<web::SessionManager> session_manager;
+    std::shared_ptr<Web::SessionManager> session_manager;
 };
 
 #endif // __CONTEXT_H__

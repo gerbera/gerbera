@@ -34,12 +34,12 @@
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 
-web::Action::Action(std::shared_ptr<ContentManager> content)
+Web::Action::Action(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::Action::process()
+void Web::Action::process()
 {
     log_debug("action: start");
     check_request();

@@ -31,7 +31,7 @@
 
 #include "pages.h" // API
 
-namespace web {
+namespace Web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::shared_ptr<Context> context,
@@ -40,41 +40,41 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     std::string_view page)
 {
     if (page == "add")
-        return std::make_unique<web::Add>(std::move(content));
+        return std::make_unique<Web::Add>(std::move(content));
     if (page == "remove")
-        return std::make_unique<web::Remove>(std::move(content));
+        return std::make_unique<Web::Remove>(std::move(content));
     if (page == "add_object")
-        return std::make_unique<web::AddObject>(std::move(content));
+        return std::make_unique<Web::AddObject>(std::move(content));
     if (page == "auth")
-        return std::make_unique<web::Auth>(std::move(content));
+        return std::make_unique<Web::Auth>(std::move(content));
     if (page == "containers")
-        return std::make_unique<web::Containers>(std::move(content), std::move(xmlBuilder));
+        return std::make_unique<Web::Containers>(std::move(content), std::move(xmlBuilder));
     if (page == "directories")
-        return std::make_unique<web::Directories>(std::move(content));
+        return std::make_unique<Web::Directories>(std::move(content));
     if (page == "files")
-        return std::make_unique<web::Files>(std::move(content));
+        return std::make_unique<Web::Files>(std::move(content));
     if (page == "items")
-        return std::make_unique<web::Items>(std::move(content), std::move(xmlBuilder));
+        return std::make_unique<Web::Items>(std::move(content), std::move(xmlBuilder));
     if (page == "edit_load")
-        return std::make_unique<web::EditLoad>(std::move(content), std::move(xmlBuilder));
+        return std::make_unique<Web::EditLoad>(std::move(content), std::move(xmlBuilder));
     if (page == "edit_save")
-        return std::make_unique<web::EditSave>(std::move(content));
+        return std::make_unique<Web::EditSave>(std::move(content));
     if (page == "autoscan")
-        return std::make_unique<web::Autoscan>(std::move(content));
+        return std::make_unique<Web::Autoscan>(std::move(content));
     if (page == "void")
-        return std::make_unique<web::VoidType>(std::move(content));
+        return std::make_unique<Web::VoidType>(std::move(content));
     if (page == "tasks")
-        return std::make_unique<web::Tasks>(std::move(content));
+        return std::make_unique<Web::Tasks>(std::move(content));
     if (page == "action")
-        return std::make_unique<web::Action>(std::move(content));
+        return std::make_unique<Web::Action>(std::move(content));
     if (page == "clients")
-        return std::make_unique<web::Clients>(std::move(content));
+        return std::make_unique<Web::Clients>(std::move(content));
     if (page == "config_load")
-        return std::make_unique<web::ConfigLoad>(std::move(content));
+        return std::make_unique<Web::ConfigLoad>(std::move(content));
     if (page == "config_save")
-        return std::make_unique<web::ConfigSave>(std::move(context), std::move(content));
+        return std::make_unique<Web::ConfigSave>(std::move(context), std::move(content));
 
     throw_std_runtime_error("Unknown page: {}", page);
 }
 
-} // namespace web
+} // namespace Web

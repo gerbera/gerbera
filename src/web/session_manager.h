@@ -41,7 +41,7 @@
 // forward declaration
 class Config;
 
-namespace web {
+namespace Web {
 
 /// \brief One UI session.
 ///
@@ -171,6 +171,6 @@ public:
     void timerNotify([[maybe_unused]] std::shared_ptr<Timer::Parameter> parameter) override;
 };
 
-} // namespace web
+} // namespace Web
 
 #endif //  __SESSION_MANAGER_H__

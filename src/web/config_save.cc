@@ -40,14 +40,14 @@
 #include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
-web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)
+Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
     , context(std::move(context))
 {
 }
 
 /// \brief: process config_save request
-void web::ConfigSave::process()
+void Web::ConfigSave::process()
 {
     check_request();
     auto root = xmlDoc->document_element();

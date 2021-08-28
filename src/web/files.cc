@@ -35,12 +35,12 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-web::Files::Files(std::shared_ptr<ContentManager> content)
+Web::Files::Files(std::shared_ptr<ContentManager> content)
     : WebRequestHandler(std::move(content))
 {
 }
 
-void web::Files::process()
+void Web::Files::process()
 {
     check_request();
 
