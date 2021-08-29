@@ -179,7 +179,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
-        results = database->search(searchParam, &numMatches);
+        results = database->search(std::move(searchParam), &numMatches);
         log_debug("Found {}/{} items", results.size(), numMatches);
     } catch (const std::runtime_error& e) {
         log_debug(e.what());

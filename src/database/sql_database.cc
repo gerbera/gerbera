@@ -830,7 +830,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             auto srcParam = std::make_unique<SearchParam>(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
                 param->getStartingIndex(), param->getRequestedCount() == 0 ? 1000 : param->getRequestedCount()); // get params from browse
             int numMatches = 0;
-            auto result = this->search(srcParam, &numMatches);
+            auto result = this->search(std::move(srcParam), &numMatches);
             param->setTotalMatches(numMatches);
             return result;
         }
@@ -967,7 +967,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
     return result;
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const std::unique_ptr<SearchParam>& param, int* numMatches)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(std::unique_ptr<SearchParam> param, int* numMatches)
 {
     auto searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser->parse();
