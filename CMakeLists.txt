@@ -469,14 +469,8 @@ if(WITH_MYSQL)
 endif()
 
 if(WITH_CURL)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(CURL QUIET libcurl)
-    if (NOT CURL_FOUND)
-        find_package(CURL REQUIRED)
-    endif()
-
-    target_include_directories(libgerbera PUBLIC ${CURL_INCLUDE_DIRS})
-    target_link_libraries(libgerbera PUBLIC ${CURL_LIBRARIES})
+    find_package(CURL REQUIRED)
+    target_link_libraries(libgerbera PUBLIC CURL::libcurl)
 
     target_compile_definitions(libgerbera PUBLIC
         HAVE_CURL
