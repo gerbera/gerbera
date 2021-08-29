@@ -487,8 +487,7 @@ endif()
 
 if(WITH_TAGLIB)
     find_package(Taglib REQUIRED)
-    target_include_directories(libgerbera PUBLIC ${TAGLIB_INCLUDE_DIRS})
-    target_link_libraries(libgerbera PUBLIC ${TAGLIB_LIBRARIES})
+    target_link_libraries(libgerbera PUBLIC Taglib::Taglib)
     target_compile_definitions(libgerbera PUBLIC HAVE_TAGLIB)
 endif()
 
