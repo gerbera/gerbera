@@ -33,6 +33,7 @@
 #include "autoscan_inotify.h" // API
 
 #include <cassert>
+#include <sstream>
 
 #include "content_manager.h"
 #include "database/database.h"

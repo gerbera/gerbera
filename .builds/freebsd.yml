@@ -16,6 +16,7 @@ packages:
   - libmatroska
   - libiconv
   - sqlite3
+  - libinotify
 sources:
   - https://github.com/gerbera/gerbera
 tasks:
@@ -26,7 +27,7 @@ tasks:
       cd build
       CXXFLAGS="-DLIBICONV_PLUG" cmake ../gerbera \
       -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-      -DWITH_INOTIFY=0 -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 \
+      -DWITH_INOTIFY=1 -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 \
       -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 \
       -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 -DWITH_TESTS=1
       make -j2
