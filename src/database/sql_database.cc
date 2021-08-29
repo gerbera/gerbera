@@ -1176,14 +1176,13 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
             identifier("property_name"),
             identifier("property_value"),
         };
+        std::vector<std::vector<std::string>> valuesets;
+        valuesets.reserve(itemMetadata.size());
+        const std::string newIdStr = fmt::to_string(newId);
         for (auto&& [key, val] : itemMetadata) {
-            auto mvalues = std::vector {
-                fmt::to_string(newId),
-                quote(key),
-                quote(val),
-            };
-            insert(METADATA_TABLE, mfields, mvalues);
+            valuesets.push_back({ newIdStr, quote(key), quote(val) });
         }
+        insertMultipleRows(METADATA_TABLE, mfields, valuesets);
         log_debug("Wrote metadata for cds_object {}", newId);
     }
     commit("createContainer");
@@ -1193,8 +1192,25 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
 
 int SQLDatabase::insert(const char* tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
+    assert(fields.size() == values.size());
     auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
     return exec(sql, getLastInsertId);
+}
+
+void SQLDatabase::insertMultipleRows(const char* tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
+{
+    if (valuesets.size() == 1) {
+        insert(tableName, fields, valuesets.front());
+    } else if (!valuesets.empty()) {
+        std::vector<std::string> tuples;
+        tuples.reserve(valuesets.size());
+        for (const auto& values : valuesets) {
+            assert(fields.size() == values.size());
+            tuples.push_back(fmt::format("({})", fmt::join(values, ",")));
+        }
+        auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(tableName), fmt::join(fields, ","), fmt::join(tuples, ","));
+        exec(sql);
+    }
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -2522,14 +2538,12 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
             identifier("property_name"),
             identifier("property_value"),
         };
+        std::vector<std::vector<std::string>> valuesets;
+        valuesets.reserve(metadataSQLVals.size());
         for (auto&& [key, val] : metadataSQLVals) {
-            auto values = std::vector {
-                fmt::to_string(objectId),
-                key,
-                val,
-            };
-            insert(METADATA_TABLE, fields, values);
+            valuesets.push_back({ fmt::to_string(objectId), key, val });
         }
+        insertMultipleRows(METADATA_TABLE, fields, valuesets);
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", objectId);
     }
