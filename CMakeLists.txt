@@ -520,9 +520,8 @@ if(WITH_EXIF)
 endif()
 
 if(WITH_EXIV2)
-    find_package(EXIV2 REQUIRED)
-    target_include_directories(libgerbera PUBLIC ${EXIV2_INCLUDE_DIRS})
-    target_link_libraries(libgerbera PUBLIC ${EXIV2_LIBRARIES})
+    find_package(LibExiv2 REQUIRED)
+    target_link_libraries(libgerbera PUBLIC LibExiv2::LibExiv2)
     target_compile_definitions(libgerbera PUBLIC HAVE_EXIV2)
     # Exiv still uses std::auto_ptr
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
