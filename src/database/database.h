@@ -71,9 +71,9 @@ protected:
     int totalMatches {};
 
 public:
-    BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
+    BrowseParam(const std::shared_ptr<CdsObject>& object, unsigned int flags)
         : flags(flags)
-        , object(std::move(object))
+        , object(object)
     {
     }
 
