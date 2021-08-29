@@ -292,13 +292,6 @@ target_compile_definitions(libgerbera PUBLIC GERBERA_VERSION="${GERBERA_VERSION}
 
 target_compile_definitions(gerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
 
-# Check for C++17 STL Optional
-include(CheckIncludeFileCXX)
-check_include_file_cxx(optional HAS_STL_OPTIONAL)
-if (NOT HAS_STL_OPTIONAL)
-    message(FATAL_ERROR "gerbera requires C++17 Optional to be available. Check your compiler is >=GCC 7.1 or >=libc++ 5")
-endif()
-
 if (WITH_DEBUG)
     target_compile_definitions(libgerbera PUBLIC TOMBDEBUG)
     target_compile_definitions(libgerbera PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
