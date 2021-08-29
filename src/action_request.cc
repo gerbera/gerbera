@@ -69,19 +69,19 @@ const std::unique_ptr<Quirks>& ActionRequest::getQuirks() const
 
 std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 {
-    auto request = std::make_unique<pugi::xml_document>();
+    pugi::xml_document request;
 #if defined(USING_NPUPNP)
-    auto ret = request->load_string(upnp_request->xmlAction.c_str());
+    auto ret = request.load_string(upnp_request->xmlAction.c_str());
 #else
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
-    auto ret = request->load_string(cxml);
+    auto ret = request.load_string(cxml);
     ixmlFreeDOMString(cxml);
 #endif
 
     if (ret.status != pugi::xml_parse_status::status_ok)
         throw_std_runtime_error("Unable to parse ixml");
 
-    return request;
+    return std::make_unique<pugi::xml_document>(std::move(request));
 }
 
 void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document> response)
