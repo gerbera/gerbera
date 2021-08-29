@@ -132,7 +132,7 @@ public:
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override;
 
     std::vector<std::shared_ptr<CdsObject>> browse(const std::unique_ptr<BrowseParam>& param) override;
-    std::vector<std::shared_ptr<CdsObject>> search(const std::unique_ptr<SearchParam>& param, int* numMatches) override;
+    std::vector<std::shared_ptr<CdsObject>> search(std::unique_ptr<SearchParam> param, int* numMatches) override;
 
     std::vector<std::string> getMimeTypes() override;
 
