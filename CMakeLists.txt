@@ -524,9 +524,14 @@ endif()
 
 if(WITH_MATROSKA)
     find_package(EBML REQUIRED)
-    target_link_libraries(libgerbera PUBLIC EBML::ebml)
+
+    target_include_directories(libgerbera PUBLIC ${EBML_INCLUDE_DIRS})
+    target_link_libraries(libgerbera PUBLIC ${EBML_LIBRARIES})
+
     find_package(Matroska REQUIRED)
-    target_link_libraries(libgerbera PUBLIC Matroska::matroska)
+    target_include_directories(libgerbera PUBLIC ${Matroska_INCLUDE_DIRS})
+    target_link_libraries(libgerbera PUBLIC ${Matroska_LIBRARIES})
+
     target_compile_definitions(libgerbera PUBLIC HAVE_MATROSKA)
 endif()
 
