@@ -453,7 +453,7 @@ public:
     }
     bool hasEntry(const std::string& tag) const override
     {
-        return std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; }) != keyMap.end();
+        return std::any_of(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
     }
     std::string mapQuoted(En tag) const
     {
