@@ -76,7 +76,7 @@ protected:
     std::string filename;
 
     /// \brief We can also always see what mode was requested.
-    enum UpnpOpenFileMode mode;
+    enum UpnpOpenFileMode mode {};
 
     /// \brief This is the xml document, the root node to be populated by process() method.
     std::unique_ptr<pugi::xml_document> xmlDoc;
