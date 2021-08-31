@@ -162,7 +162,7 @@ void Server::run()
     ret = UpnpRegisterRootDevice2(
         UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        size_t(deviceDescription.length()) + 1,
+        deviceDescription.length() + 1,
         true,
         handleUpnpRootDeviceEventCallback,
         this,
