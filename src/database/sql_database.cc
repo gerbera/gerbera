@@ -1388,8 +1388,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     obj->setClass(getCol(row, SearchCol::upnp_class));
 
     auto meta = retrieveMetadataForObject(obj->getID());
-    if (!meta.empty())
+    if (!meta.empty()) {
         obj->setMetadata(meta);
+
+        // Update tile from metadata if present
+        if (meta.count(MetadataHandler::getMetaFieldName(M_TITLE)))
+            obj->setTitle(meta.at(MetadataHandler::getMetaFieldName(M_TITLE)));
+    }
 
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
