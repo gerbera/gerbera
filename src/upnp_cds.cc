@@ -91,11 +91,11 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
-    auto param = std::make_unique<BrowseParam>(parent, flag);
+    auto param = BrowseParam(parent, flag);
 
-    param->setStartingIndex(stoiString(startingIndex));
-    param->setRequestedCount(stoiString(requestedCount));
-    param->setSortCriteria(trimString(sortCriteria));
+    param.setStartingIndex(stoiString(startingIndex));
+    param.setRequestedCount(stoiString(requestedCount));
+    param.setSortCriteria(trimString(sortCriteria));
 
     std::vector<std::shared_ptr<CdsObject>> arr;
     try {
@@ -136,7 +136,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     auto resp_root = response->document_element();
     resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
     resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
-    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param->getTotalMatches()).c_str());
+    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
     resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request->setResponse(std::move(response));
 
@@ -173,13 +173,13 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
-    auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria, sortCriteria,
+    const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount));
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
-        results = database->search(std::move(searchParam), &numMatches);
+        results = database->search(searchParam, &numMatches);
         log_debug("Found {}/{} items", results.size(), numMatches);
     } catch (const std::runtime_error& e) {
         log_debug(e.what());
