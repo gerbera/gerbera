@@ -820,43 +820,43 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     return objectIDs;
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_ptr<BrowseParam>& param)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 {
-    auto parent = param->getObject();
+    const auto parent = param.getObject();
 
     if (dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
-            auto srcParam = std::make_unique<SearchParam>(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
-                param->getStartingIndex(), param->getRequestedCount() == 0 ? 1000 : param->getRequestedCount()); // get params from browse
+            auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
+                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount()); // get params from browse
             int numMatches = 0;
-            auto result = this->search(std::move(srcParam), &numMatches);
-            param->setTotalMatches(numMatches);
+            auto result = this->search(srcParam, &numMatches);
+            param.setTotalMatches(numMatches);
             return result;
         }
         log_warning("Dynamic content {} error '{}'", parent->getID(), parent->getLocation().string());
     }
 
-    bool getContainers = param->getFlag(BROWSE_CONTAINERS);
-    bool getItems = param->getFlag(BROWSE_ITEMS);
-    bool hideFsRoot = param->getFlag(BROWSE_HIDE_FS_ROOT);
+    bool getContainers = param.getFlag(BROWSE_CONTAINERS);
+    bool getItems = param.getFlag(BROWSE_ITEMS);
+    bool hideFsRoot = param.getFlag(BROWSE_HIDE_FS_ROOT);
     int childCount = 1;
-    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         childCount = getChildCount(parent->getID(), getContainers, getItems, hideFsRoot);
-        param->setTotalMatches(childCount);
+        param.setTotalMatches(childCount);
     } else {
-        param->setTotalMatches(1);
+        param.setTotalMatches(1);
     }
 
     std::vector<std::string> where;
     std::string orderBy;
     std::string limit;
 
-    if (param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        int count = param->getRequestedCount();
+    if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        int count = param.getRequestedCount();
         bool doLimit = true;
         if (!count) {
-            if (param->getStartingIndex())
+            if (param.getStartingIndex())
                 count = std::numeric_limits<int>::max();
             else
                 doLimit = false;
@@ -870,10 +870,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         // order by code..
         auto orderByCode = [&]() {
             std::string orderQb;
-            if (param->getFlag(BROWSE_TRACK_SORT)) {
+            if (param.getFlag(BROWSE_TRACK_SORT)) {
                 orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::part_number), browseColumnMapper->mapQuoted(BrowseCol::track_number));
             } else {
-                SortParser sortParser(browseColumnMapper, param->getSortCriteria());
+                SortParser sortParser(browseColumnMapper, param.getSortCriteria());
                 orderQb = sortParser.parse();
             }
             if (orderQb.empty()) {
@@ -895,7 +895,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
             orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_CONTAINER, orderByCode());
         }
         if (doLimit)
-            limit = fmt::format(" LIMIT {} OFFSET {}", count, param->getStartingIndex());
+            limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());
     } else { // metadata
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::id), parent->getID()));
         limit = " LIMIT 1";
@@ -921,7 +921,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
         }
     }
 
-    if (config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param->getStartingIndex() == 0 && param->getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
             for (size_t count = 0; count < dynContent->size(); count++) {
@@ -962,15 +962,15 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(const std::unique_pt
                 }
             }
         }
-        param->setTotalMatches(childCount);
+        param.setTotalMatches(childCount);
     }
     return result;
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(std::unique_ptr<SearchParam> param, int* numMatches)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& param, int* numMatches)
 {
-    auto searchParser = std::make_unique<SearchParser>(*sqlEmitter, param->searchCriteria());
-    std::shared_ptr<ASTNode> rootNode = searchParser->parse();
+    auto searchParser = SearchParser(*sqlEmitter, param.searchCriteria());
+    std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw_std_runtime_error("failed to generate SQL for search");
@@ -988,7 +988,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(std::unique_ptr<Sear
 
     // order by code..
     auto orderByCode = [&]() {
-        SortParser sortParser(searchColumnMapper, param->getSortCriteria());
+        SortParser sortParser(searchColumnMapper, param.getSortCriteria());
         auto orderQb = sortParser.parse();
         if (orderQb.empty()) {
             orderQb = searchColumnMapper->mapQuoted(SearchCol::id);
@@ -999,8 +999,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(std::unique_ptr<Sear
     auto orderBy = fmt::format(" ORDER BY {}", orderByCode());
     std::string limit;
 
-    size_t startingIndex = param->getStartingIndex();
-    size_t requestedCount = param->getRequestedCount();
+    size_t startingIndex = param.getStartingIndex();
+    size_t requestedCount = param.getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
         limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }

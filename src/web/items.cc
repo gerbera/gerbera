@@ -64,19 +64,19 @@ void Web::Items::process()
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(parentID);
-    auto param = std::make_unique<BrowseParam>(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
-    param->setRange(start, count);
+    auto param = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
+    param.setRange(start, count);
 
     auto c = container->getClass();
     if (c == UPNP_CLASS_MUSIC_ALBUM || c == UPNP_CLASS_PLAYLIST_CONTAINER)
-        param->setFlag(BROWSE_TRACK_SORT);
+        param.setFlag(BROWSE_TRACK_SORT);
 
     // get contents of request
     auto arr = database->browse(param);
     items.append_attribute("virtual") = container->isVirtual();
     items.append_attribute("start") = start;
     //items.append_attribute("returned") = arr->size();
-    items.append_attribute("total_matches") = param->getTotalMatches();
+    items.append_attribute("total_matches") = param.getTotalMatches();
 
     bool protectContainer = false;
     bool protectItems = false;
