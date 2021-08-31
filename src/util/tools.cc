@@ -242,10 +242,11 @@ bool isExecutable(const fs::path& path, int* err)
 
 fs::path findInPath(const fs::path& exec)
 {
-    std::string PATH = getenv("PATH");
-    if (PATH.empty())
+    auto p = getenv("PATH");
+    if (!p)
         return {};
 
+    std::string PATH = p;
     std::error_code ec;
     auto pathAr = splitString(PATH, ':');
     for (auto&& path : pathAr) {
