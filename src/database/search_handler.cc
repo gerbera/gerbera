@@ -311,7 +311,6 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
     }
 
     throw_std_runtime_error("Failed to parse search criteria - expecting a comparison, exists, or string operator");
-    return {};
 }
 
 std::shared_ptr<ASTQuotedString> SearchParser::parseQuotedString()
