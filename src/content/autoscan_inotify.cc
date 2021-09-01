@@ -665,18 +665,16 @@ void AutoscanInotify::removeWatchMoves(int wd)
 bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove)
 {
     auto&& wdWatches = wdObj->getWdWatches();
-    for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
-        auto& watch = *it;
-        if (watch == toRemove) {
-            if (wdWatches->size() == 1) {
-                inotify->removeWatch(wdObj->getWd());
-                ++it;
-            } else
-                it = wdWatches->erase(it);
-            return true;
+    auto it = std::find(wdWatches->begin(), wdWatches->end(), toRemove);
+    if (it != wdWatches->end()) {
+        if (wdWatches->size() == 1) {
+            inotify->removeWatch(wdObj->getWd());
+        } else {
+            wdWatches->erase(it);
         }
-        ++it;
+        return true;
     }
+
     return false;
 }
 
