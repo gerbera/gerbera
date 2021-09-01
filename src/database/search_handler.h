@@ -497,8 +497,8 @@ private:
     const char table_quote_end;
     std::string tableAlias;
     std::string tableName;
-    const std::vector<std::pair<std::string, En>>& keyMap;
-    const std::map<En, std::pair<std::string, std::string>>& colMap;
+    const std::vector<std::pair<std::string, En>> keyMap;
+    const std::map<En, std::pair<std::string, std::string>> colMap;
 };
 
 class SortParser {
