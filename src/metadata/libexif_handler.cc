@@ -302,8 +302,8 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<Cd
     if (!(ed->size))
         throw_std_runtime_error("Resource {} has no exif thumbnail", resNum);
 
-    auto h = std::make_unique<MemIOHandler>(ed->data, ed->size);
+    auto io_handler = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);
-    return std::move(h);
+    return io_handler;
 }
 #endif // HAVE_LIBEXIF

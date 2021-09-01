@@ -52,7 +52,7 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
 {
     log_debug("Device description requested");
 
-    auto t = std::make_unique<MemIOHandler>(deviceDescription);
-    t->open(mode);
-    return std::move(t);
+    auto io_handler = std::make_unique<MemIOHandler>(deviceDescription);
+    io_handler->open(mode);
+    return io_handler;
 }

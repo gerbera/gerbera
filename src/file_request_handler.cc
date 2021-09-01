@@ -277,5 +277,5 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     content->triggerPlayHook(obj);
 
     log_debug("end");
-    return std::move(io_handler);
+    return io_handler;
 }

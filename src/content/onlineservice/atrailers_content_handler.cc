@@ -215,7 +215,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     try {
         item->validate();
-        return std::move(item);
+        return item;
     } catch (const std::runtime_error& ex) {
         log_warning("Failed to validate newly created Trailer item: {}",
             ex.what());

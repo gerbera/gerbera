@@ -194,7 +194,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
 
     try {
         item->validate();
-        return std::move(item);
+        return item;
     } catch (const std::runtime_error& ex) {
         log_warning("Failed to validate newly created SopCast item: {}",
             ex.what());
