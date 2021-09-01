@@ -94,9 +94,9 @@ public:
         , MySQLDatabase(std::move(config), std::move(mime))
     {
     }
-    void beginTransaction(const std::string_view& tName) override;
-    void rollback(const std::string_view& tName) override;
-    void commit(const std::string_view& tName) override;
+    void beginTransaction(std::string_view tName) override;
+    void rollback(std::string_view tName) override;
+    void commit(std::string_view tName) override;
 
     std::shared_ptr<SQLResult> select(const std::string& query) override;
 };

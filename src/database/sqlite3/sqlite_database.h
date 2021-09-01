@@ -232,9 +232,9 @@ public:
         , Sqlite3Database(std::move(config), std::move(mime), std::move(timer))
     {
     }
-    void beginTransaction(const std::string_view& tName) override;
-    void rollback(const std::string_view& tName) override;
-    void commit(const std::string_view& tName) override;
+    void beginTransaction(std::string_view tName) override;
+    void rollback(std::string_view tName) override;
+    void commit(std::string_view tName) override;
 };
 
 /// \brief Represents a result of a sqlite3 select

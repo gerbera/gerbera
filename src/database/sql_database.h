@@ -107,9 +107,9 @@ public:
     virtual std::string quote(long long val) const = 0;
 
     // hooks for transactions
-    virtual void beginTransaction(const std::string_view& tName) { }
-    virtual void rollback(const std::string_view& tName) { }
-    virtual void commit(const std::string_view& tName) { }
+    virtual void beginTransaction(std::string_view tName) { }
+    virtual void rollback(std::string_view tName) { }
+    virtual void commit(std::string_view tName) { }
 
     virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
