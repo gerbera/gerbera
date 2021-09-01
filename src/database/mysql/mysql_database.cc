@@ -218,7 +218,7 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return res;
 }
 
-void MySQLDatabaseWithTransactions::beginTransaction(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     log_debug("START TRANSACTION {} {}", tName, inTransaction);
     StdThreadRunner::waitFor(
@@ -230,7 +230,7 @@ void MySQLDatabaseWithTransactions::beginTransaction(const std::string_view& tNa
         _exec("START TRANSACTION");
 }
 
-void MySQLDatabaseWithTransactions::rollback(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::rollback(std::string_view tName)
 {
     log_debug("ROLLBACK {}", tName);
     if (use_transaction && inTransaction && mysql_rollback(&db)) {
@@ -240,7 +240,7 @@ void MySQLDatabaseWithTransactions::rollback(const std::string_view& tName)
     inTransaction = false;
 }
 
-void MySQLDatabaseWithTransactions::commit(const std::string_view& tName)
+void MySQLDatabaseWithTransactions::commit(std::string_view tName)
 {
     log_debug("COMMIT {}", tName);
     SqlAutoLock lock(sqlMutex);

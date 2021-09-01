@@ -29,7 +29,7 @@
 #include <string_view>
 
 struct SQLIdentifier {
-    constexpr SQLIdentifier(const std::string_view& name, char quote_begin, char quote_end)
+    constexpr SQLIdentifier(std::string_view name, char quote_begin, char quote_end)
         : name(name)
         , quote_begin(quote_begin)
         , quote_end(quote_end)
