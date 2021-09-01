@@ -82,7 +82,6 @@ CREATE TABLE `grb_config_value` (
   `item_value` varchar(255) NOT NULL,
   `status` varchar(20) NOT NULL)
   ENGINE=MyISAM CHARSET=utf8;
-CREATE INDEX grb_config_value_item ON grb_config_value(item);
 CREATE TABLE `grb_cds_resource` (
     `id` int(11) primary key auto_increment,
     `item_id` int(11) NOT NULL,

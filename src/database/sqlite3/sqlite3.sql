@@ -82,5 +82,4 @@ CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
 CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id);
 CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
 CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id);
-CREATE INDEX grb_config_value_item ON grb_config_value(item);
 COMMIT;
