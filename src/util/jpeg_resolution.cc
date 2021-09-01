@@ -85,9 +85,7 @@ static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
 
 static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
 {
-    int a;
-
-    a = ioh_fgetc(ioh);
+    int a = ioh_fgetc(ioh);
 
     if (a != 0xff || ioh_fgetc(ioh) != M_SOI)
         throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
@@ -162,7 +160,7 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh)
+std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh)
 {
     int w, h;
     try {
