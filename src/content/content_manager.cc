@@ -480,13 +480,13 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
 
     if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
         std::string parentPath = dirEnt.path().parent_path();
-        updateAttachedResources(asSetting.adir, obj->getLocation(), parentPath, true);
+        updateAttachedResources(asSetting.adir, obj, parentPath, true);
     }
 
     return obj->getID();
 }
 
-bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::string& parentPath, bool all)
+bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const std::string& parentPath, bool all)
 {
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
@@ -507,7 +507,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
-            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), location.string().c_str());
+            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), obj->getLocation().string().c_str());
             parentRemoved = true;
         } else {
             log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
@@ -530,7 +530,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
         auto obj = database->loadObject(objectID);
         if (obj && obj->hasResource(CH_RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path();
-            parentRemoved = updateAttachedResources(adir, obj->getLocation(), parentPath, all);
+            parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
         }
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
