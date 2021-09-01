@@ -130,12 +130,12 @@ public:
         log_debug("ThreadRunner: Notifying all {}", threadName);
         cond.notify_all();
     }
-    AutoLock lockGuard(const std::string& loc = "")
+    AutoLock lockGuard([[maybe_unused]] const std::string& loc = "")
     {
         log_debug("ThreadRunner: Guard for {} - {}", threadName, loc);
         return AutoLock(mutex);
     }
-    AutoLockU uniqueLockS(const std::string& loc = "")
+    AutoLockU uniqueLockS([[maybe_unused]] const std::string& loc = "")
     {
         log_debug("ThreadRunner: Lock {} - {}", threadName, loc);
         return AutoLockU(mutex);
