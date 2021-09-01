@@ -156,13 +156,11 @@ void Timer::notify()
                 toNotify.push_back(element);
                 if (element.isOnce()) {
                     it = subscribers.erase(it);
-                } else {
-                    element.updateNextNotify();
-                    ++it;
+                    continue;
                 }
-            } else {
-                ++it;
+                element.updateNextNotify();
             }
+            ++it;
         }
     }
 
