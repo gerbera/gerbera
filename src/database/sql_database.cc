@@ -1392,7 +1392,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
         obj->setMetadata(meta);
 
         // Update tile from metadata if present
-        if (meta.count(MetadataHandler::getMetaFieldName(M_TITLE)))
+        if (meta.find(MetadataHandler::getMetaFieldName(M_TITLE)) != meta.end())
             obj->setTitle(meta.at(MetadataHandler::getMetaFieldName(M_TITLE)));
     }
 
