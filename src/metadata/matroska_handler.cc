@@ -133,7 +133,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
     std::unique_ptr<MemIOHandler> io_handler;
     parseMKV(item, &io_handler);
 
-    return std::move(io_handler);
+    return io_handler;
 }
 
 void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const
