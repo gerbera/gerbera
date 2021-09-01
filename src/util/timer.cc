@@ -71,7 +71,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds
         throw_std_runtime_error("Tried to add timer with illegal notifyInterval: {}", notifyInterval.count());
 
     auto lock = threadRunner->lockGuard();
-    TimerSubscriberElement element(timerSubscriber, notifyInterval, std::move(parameter), once);
+    auto element = TimerSubscriberElement(timerSubscriber, notifyInterval, std::move(parameter), once);
 
     if (!subscribers.empty()) {
         bool err = std::find(subscribers.begin(), subscribers.end(), element) != subscribers.end();
@@ -89,7 +89,7 @@ void Timer::removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<P
     log_debug("Removing subscriber...");
     auto lock = threadRunner->lockGuard();
     if (!subscribers.empty()) {
-        TimerSubscriberElement element(timerSubscriber, std::chrono::seconds::zero(), std::move(parameter));
+        auto element = TimerSubscriberElement(timerSubscriber, std::chrono::seconds::zero(), std::move(parameter));
         auto it = std::find(subscribers.begin(), subscribers.end(), element);
         if (it != subscribers.end()) {
             subscribers.erase(it);
