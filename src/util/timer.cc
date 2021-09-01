@@ -143,7 +143,7 @@ void Timer::notify()
     auto lock = threadRunner->uniqueLock();
     assert(lock.owns_lock());
 
-    std::list<TimerSubscriberElement> toNotify;
+    std::deque<TimerSubscriberElement> toNotify;
 
     if (!subscribers.empty()) {
         for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
