@@ -44,9 +44,9 @@
 static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, size_t res_num)
 {
     try {
-        auto fio_h = std::unique_ptr<IOHandler>(std::make_unique<FileIOHandler>(item->getLocation()));
+        auto fio_h = std::make_unique<FileIOHandler>(item->getLocation());
         fio_h->open(UPNP_READ);
-        std::string resolution = get_jpeg_resolution(fio_h);
+        const std::string resolution = get_jpeg_resolution(std::move(fio_h));
 
         if (res_num >= item->getResourceCount())
             throw_std_runtime_error("Invalid resource index");
@@ -266,10 +266,10 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     if (ed->size) {
         try {
-            auto io_h = std::unique_ptr<IOHandler>(std::make_unique<MemIOHandler>(ed->data, ed->size));
+            auto io_h = std::make_unique<MemIOHandler>(ed->data, ed->size);
             io_h->open(UPNP_READ);
-            auto&& th_resolution = get_jpeg_resolution(io_h);
-            log_debug("RESOLUTION: {}", th_resolution.c_str());
+            const std::string th_resolution = get_jpeg_resolution(std::move(io_h));
+            log_debug("RESOLUTION: {}", th_resolution);
 
             auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
