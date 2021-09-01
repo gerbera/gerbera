@@ -1848,11 +1848,11 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
     auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} = {3} LIMIT 1",
         identifier("value"), identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), quote(key)));
     if (!res)
-        return "";
+        return {};
 
     auto row = res->nextRow();
     if (!row)
-        return "";
+        return {};
     return row->col(0);
 }
 

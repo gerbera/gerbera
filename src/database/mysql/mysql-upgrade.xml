@@ -76,4 +76,7 @@
         <script>CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`)</script>
         <script migration="resources">ALTER TABLE `mt_cds_object` DROP COLUMN `resources`</script>
     </version>
+    <version number="14" remark="drop redundant index">
+        <script>DROP INDEX `grb_config_value_item` ON `grb_config_value`</script>
+    </version>
 </upgrade>
