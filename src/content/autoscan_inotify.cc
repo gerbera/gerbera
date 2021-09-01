@@ -438,19 +438,19 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, const std::shared_ptr<W
 void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const std::vector<std::string>& pathAr)
 {
     auto&& wdWatches = wdObj->getWdWatches();
-    for (auto it = wdWatches->begin(); it != wdWatches->end(); ++it) {
-        auto& watch = *it;
-        if (watch->getType() == WatchType::Autoscan) {
-            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
-            if (watchAs->getNonexistingPathArray() == pathAr) {
-                if (wdWatches->size() == 1) {
-                    // removeWatch triggers an IN_IGNORED event so watches.erase(wd) is called in threadProc
-                    inotify->removeWatch(wd);
-                } else {
-                    wdWatches->erase(it);
-                }
-                return;
+    auto it = std::find_if(wdWatches->begin(), wdWatches->end(),
+        [&](auto&& watch) {
+            if (watch->getType() == WatchType::Autoscan) {
+                auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
+                return watchAs->getNonexistingPathArray() == pathAr;
             }
+            return false; });
+    if (it != wdWatches->end()) {
+        if (wdWatches->size() == 1) {
+            // removeWatch triggers an IN_IGNORED event so watches.erase(wd) is called in threadProc
+            inotify->removeWatch(wd);
+        } else {
+            wdWatches->erase(it);
         }
     }
 }
