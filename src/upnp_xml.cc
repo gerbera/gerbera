@@ -118,9 +118,9 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
 {
-    auto result = parent->append_child("");
+    auto result = parent.append_child("");
 
     result.append_attribute("id") = obj->getID();
     result.append_attribute("parentID") = obj->getParentID();
@@ -169,7 +169,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             }
         }
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
-        addResources(item, &result, quirks);
+        addResources(item, result, quirks);
 
         result.set_name("item");
     } else if (obj->isContainer()) {
@@ -323,9 +323,9 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent)
+void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node& parent)
 {
-    auto res = parent->append_child("res");
+    auto res = parent.append_child("res");
     res.append_child(pugi::node_pcdata).set_value(URL.c_str());
 
     for (auto&& [key, val] : attributes) {
@@ -495,7 +495,7 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     return orderedResources;
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent, const std::unique_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
 {
     auto urlBase = getPathBase(item);
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
@@ -694,7 +694,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
             || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
         ) {
-            auto aa = parent->append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
+            auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
             aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
 
             /// \todo clean this up, make sure to check the mimetype and
@@ -706,7 +706,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             }
         }
         if (isFirstSub && res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
-            auto vs = parent->append_child("sec:CaptionInfoEx");
+            auto vs = parent.append_child("sec:CaptionInfoEx");
             auto subUrl = url;
             subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
             vs.append_child(pugi::node_pcdata).set_value((virtualURL + subUrl).c_str());
