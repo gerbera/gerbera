@@ -48,23 +48,22 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 {
 }
 
-void RequestHandler::splitUrl(const char* url, char separator, std::string& path, std::string& parameters)
+void RequestHandler::splitUrl(const std::string& url, char separator, std::string& path, std::string& parameters)
 {
-    auto url_s = std::string { url };
     const auto i1 = size_t { [=]() {
         if (separator == '/')
-            return url_s.rfind(separator);
+            return url.rfind(separator);
         if (separator == '?')
-            return url_s.find(separator);
+            return url.find(separator);
         throw_std_runtime_error("Forbidden separator: {}", separator);
     }() };
 
     if (i1 == std::string::npos) {
-        path = std::move(url_s);
+        path = url;
         parameters.clear();
     } else {
-        parameters = url_s.substr(i1 + 1);
-        path = url_s.substr(0, i1);
+        parameters = url.substr(i1 + 1);
+        path = url.substr(0, i1);
     }
 }
 

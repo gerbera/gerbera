@@ -75,7 +75,7 @@ public:
     /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void splitUrl(const char* url, char separator, std::string& path, std::string& parameters);
+    static void splitUrl(const std::string& url, char separator, std::string& path, std::string& parameters);
 
     static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, const std::string& separator = _URL_PARAM_SEPARATOR);
 
