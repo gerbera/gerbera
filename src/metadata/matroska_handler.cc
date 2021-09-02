@@ -234,7 +234,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
                 *p_io_handler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
             } else {
                 // fillMetadata
-                std::string art_mimetype = getContentTypeFromByteVector(&fileData);
+                std::string art_mimetype = getContentTypeFromByteVector(fileData);
                 if (!art_mimetype.empty())
                     addArtworkResource(item, art_mimetype);
             }
@@ -244,10 +244,10 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
     }
 }
 
-std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data) const
+std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData& data) const
 {
 #ifdef HAVE_MAGIC
-    auto art_mimetype = mime->bufferToMimeType(data->GetBuffer(), data->GetSize());
+    auto art_mimetype = mime->bufferToMimeType(data.GetBuffer(), data.GetSize());
     return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
 #else
     return MIMETYPE_DEFAULT;
