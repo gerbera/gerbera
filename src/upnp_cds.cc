@@ -126,7 +126,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        xmlBuilder->renderObject(obj, stringLimit, &didl_lite_root, request->getQuirks());
+        xmlBuilder->renderObject(obj, stringLimit, didl_lite_root, request->getQuirks());
     }
 
     std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
@@ -197,7 +197,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
             cdsObject->setTitle(title);
         }
 
-        xmlBuilder->renderObject(cdsObject, stringLimit, &didl_lite_root);
+        xmlBuilder->renderObject(cdsObject, stringLimit, didl_lite_root);
     }
 
     std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
