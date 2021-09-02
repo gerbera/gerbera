@@ -138,10 +138,10 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
                     log_error("Failed to change location permissions: {}", std::strerror(errno));
                 }
 
-                std::unique_ptr<IOHandler> c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
+                auto c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
                     config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
-                auto p_ioh = std::unique_ptr<IOHandler>(std::make_unique<ProcessIOHandler>(content, location, nullptr));
+                auto p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
                 auto ch = std::make_shared<IOHandlerChainer>(std::move(c_ioh), std::move(p_ioh), 16384);
                 proc_list.push_back(std::make_shared<ProcListItem>(std::move(ch)));
             } catch (const std::runtime_error& ex) {
@@ -198,7 +198,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
     content->triggerPlayHook(obj);
 
-    auto u_ioh = std::unique_ptr<IOHandler>(std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifo_name), std::move(main_proc), std::move(proc_list)));
+    auto u_ioh = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifo_name), std::move(main_proc), std::move(proc_list));
     return std::make_unique<BufferedIOHandler>(
         config, std::move(u_ioh),
         profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
