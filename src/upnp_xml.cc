@@ -301,7 +301,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             const char* controlURL;
             const char* eventSubURL;
         };
-        constexpr std::array<ServiceInfo, 3> services { {
+        constexpr auto services = std::array<ServiceInfo, 3> { {
             // cm
             { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
