@@ -648,13 +648,13 @@ void AutoscanInotify::removeWatchMoves(int wd)
                     auto watchMv = std::static_pointer_cast<WatchMove>(watch);
                     if (watchMv->getRemoveWd() == wd) {
                         log_debug("removing watch move");
-                        if (wdWatches->size() == 1) {
-                            inotify->removeWatch(checkWd);
-                            ++it;
-                        } else
+                        if (wdWatches->size() > 1) {
                             it = wdWatches->erase(it);
-                    } else
-                        ++it;
+                            continue;
+                        }
+                        inotify->removeWatch(checkWd);
+                    }
+                    ++it;
                 }
             }
         }

@@ -170,8 +170,9 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
 
             dir->setScanID(INVALID_SCAN_ID);
             it = list.erase(it);
-        } else
-            ++it;
+            continue;
+        }
+        ++it;
     }
 
     return rm_id_list;
