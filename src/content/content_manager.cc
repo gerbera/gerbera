@@ -933,7 +933,6 @@ void ContentManager::updateCdsObject(std::shared_ptr<T>& item, const std::map<st
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnp_class = getValueOrDefault(parameters, "class");
-    std::string autoscan = getValueOrDefault(parameters, "autoscan");
     std::string mimetype = getValueOrDefault(parameters, "mime-type");
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
