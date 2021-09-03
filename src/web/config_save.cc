@@ -73,7 +73,6 @@ void Web::ConfigSave::process()
             auto key = fmt::format("data[{}][{}]", i, "id");
             auto item = fmt::format("data[{}][{}]", i, "item");
             auto status = fmt::format("data[{}][{}]", i, "status");
-            bool success = false;
             std::shared_ptr<ConfigSetup> cs;
             log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
@@ -88,6 +87,7 @@ void Web::ConfigSave::process()
             }
 
             if (cs) {
+                bool success = false;
                 auto value = fmt::format("data[{}][{}]", i, "value");
                 auto orig = fmt::format("data[{}][{}]", i, "origValue");
                 log_debug("found option to update {}", cs->getUniquePath());
