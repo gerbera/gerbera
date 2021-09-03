@@ -236,8 +236,6 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     }
 
     std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER), "None");
-    std::string conductor = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CONDUCTOR), "None");
-    std::string orchestra = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ORCHESTRA), "None");
 
     auto id = content->addContainerChain("/Audio/All Audio");
     obj->setTitle(title);
