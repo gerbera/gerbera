@@ -177,11 +177,10 @@ void SessionManager::removeSession(const std::string& sessionID)
 
     AutoLock lock(mutex);
 
-    auto sess = std::find_if(sessions.begin(), sessions.end(), [&](auto&& s) { return s->getID() == sessionID; });
-    if (sess != sessions.end()) {
-        sess = sessions.erase(sess);
+    auto it = std::find_if(sessions.begin(), sessions.end(), [&](auto&& s) { return s->getID() == sessionID; });
+    if (it != sessions.end()) {
+        sessions.erase(it);
         checkTimer();
-        return;
     }
 }
 
@@ -236,10 +235,12 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 
         if (getDeltaMillis(session->getLastAccessTime(), now) > session->getTimeout()) {
             log_debug("session timeout: {} - diff: {}", session->getID().c_str(), getDeltaMillis(session->getLastAccessTime(), now).count());
-            it = sessions.erase(it);
             checkTimer();
-        } else
-            ++it;
+            it = sessions.erase(it);
+            continue;
+        }
+
+        ++it;
     }
 }
 
