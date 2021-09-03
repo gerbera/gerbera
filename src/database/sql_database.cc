@@ -687,9 +687,8 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
-    auto returnVal = std::vector {
-        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op),
-    };
+    std::vector<std::shared_ptr<AddUpdateTable>> returnVal;
+    returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op));
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
