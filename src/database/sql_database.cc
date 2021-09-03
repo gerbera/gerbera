@@ -688,7 +688,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
 
     auto returnVal = std::vector {
-        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, op),
+        std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op),
     };
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
@@ -734,7 +734,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
-        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, cdsObjectSql, Operation::Update));
+        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
@@ -2301,7 +2301,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, op));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), op));
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
@@ -2311,7 +2311,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> metadataSql;
             metadataSql["property_name"] = quote(key);
             metadataSql["property_value"] = quote(val);
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, operation));
+            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), operation));
         }
         for (auto&& [key, val] : dbMetadata) {
             if (dict.find(key) == dict.end()) {
@@ -2319,7 +2319,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
                 std::map<std::string, std::string> metadataSql;
                 metadataSql["property_name"] = quote(key);
                 metadataSql["property_value"] = quote(val);
-                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, metadataSql, Operation::Delete));
+                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), Operation::Delete));
             }
         }
     }
@@ -2376,7 +2376,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[key] = quote(val);
             }
-            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, op));
+            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), op));
             res_id++;
         }
     } else {
@@ -2399,7 +2399,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[key] = quote(val);
             }
-            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, operation));
+            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), operation));
             res_id++;
         }
         // res_id in db resources but not obj resources, so needs a delete
@@ -2407,7 +2407,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             if (dbResources.at(res_id)) {
                 std::map<std::string, std::string> resourceSql;
                 resourceSql["res_id"] = quote(res_id);
-                operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, resourceSql, Operation::Delete));
+                operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete));
             }
         }
     }
