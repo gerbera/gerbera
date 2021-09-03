@@ -158,7 +158,6 @@ struct inotify_event* Inotify::nextEvent()
         bytes = 0;
     }
 
-    static ssize_t this_bytes;
     static unsigned int bytes_to_read;
     static int rc;
     static fd_set read_fds;
@@ -192,6 +191,7 @@ struct inotify_event* Inotify::nextEvent()
     }
 
     if (FD_ISSET(inotify_fd, &read_fds)) {
+        static ssize_t this_bytes;
         // wait until we have enough bytes to read
         do {
             rc = ioctl(inotify_fd, FIONREAD, &bytes_to_read);
