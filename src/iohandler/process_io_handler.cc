@@ -86,7 +86,7 @@ void ProcessIOHandler::registerAll()
     for (auto&& i : procList) {
         auto exec = i->getExecutor();
         if (exec)
-            content->registerExecutor(exec);
+            content->registerExecutor(std::move(exec));
     }
 }
 
@@ -98,7 +98,7 @@ void ProcessIOHandler::unregisterAll()
     for (auto&& i : procList) {
         auto exec = i->getExecutor();
         if (exec)
-            content->unregisterExecutor(exec);
+            content->unregisterExecutor(std::move(exec));
     }
 }
 
