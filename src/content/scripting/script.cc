@@ -695,8 +695,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         // stack: js meta_js
 
         auto meta = obj->getMetadata();
-        for (auto&& [key, val] : meta) {
-            setProperty(key, val);
+        for (auto&& [key, attr] : meta) {
+            setProperty(key, attr);
         }
 
         if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
@@ -719,8 +719,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
 #endif
 
-        for (auto&& [key, val] : aux) {
-            setProperty(key, val);
+        for (auto&& [key, attr] : aux) {
+            setProperty(key, attr);
         }
 
         duk_put_prop_string(ctx, -2, "aux");
@@ -737,16 +737,16 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             for (auto&& res : obj->getResources()) {
                 setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(res->getHandlerType()));
                 auto attributes = res->getAttributes();
-                for (auto&& [key, val] : attributes) {
-                    setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), val);
+                for (auto&& [key, attr] : attributes) {
+                    setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), attr);
                 }
                 auto parameters = res->getParameters();
-                for (auto&& [key, val] : parameters) {
-                    setProperty(fmt::format("{}#{}", resCount, key), val);
+                for (auto&& [key, param] : parameters) {
+                    setProperty(fmt::format("{}#{}", resCount, key), param);
                 }
                 auto options = res->getOptions();
-                for (auto&& [key, val] : options) {
-                    setProperty(fmt::format("{}%{}", resCount, key), val);
+                for (auto&& [key, opt] : options) {
+                    setProperty(fmt::format("{}%{}", resCount, key), opt);
                 }
                 resCount++;
             }

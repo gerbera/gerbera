@@ -137,29 +137,27 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         // if there are any auxilary tags that the user wants - add them
         const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         if (!aux.empty()) {
-            std::string value;
-            std::string auxtag;
+            std::string auxval;
 
-            for (auto&& j : aux) {
-                value.clear();
-                auxtag = j;
+            for (auto&& auxtag : aux) {
+                auxval.clear();
                 log_debug("auxtag: {} ", auxtag.c_str());
                 if (auxtag.substr(0, 4) == "Exif") {
-                    const auto md = exifData.findKey(Exiv2::ExifKey(auxtag));
+                    md = exifData.findKey(Exiv2::ExifKey(auxtag));
                     if (md != exifData.end())
-                        value = md->toString();
+                        auxval = md->toString();
                 } else if (auxtag.substr(0, 3) == "Xmp") {
-                    const auto md = xmpData.findKey(Exiv2::XmpKey(auxtag));
-                    if (md != xmpData.end())
-                        value = md->toString();
+                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
+                    if (xmpMd != xmpData.end())
+                        auxval = md->toString();
                 } else {
                     log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;
                 }
-                if (!value.empty()) {
-                    value = sc->convert(value);
-                    item->setAuxData(auxtag, value);
-                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value.c_str());
+                if (!auxval.empty()) {
+                    auxval = sc->convert(auxval);
+                    item->setAuxData(auxtag, auxval);
+                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), auxval.c_str());
                 }
             }
 
