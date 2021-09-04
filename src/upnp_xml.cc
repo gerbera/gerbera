@@ -127,8 +127,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
     auto trimString = [stringLimit](const std::string& s) {
-        // Do nothing if limit is negative, or string is already short enough
-        if (stringLimit < 0 || s.length() <= stringLimit)
+        // Do nothing if disabled, or string is already short enough
+        if (stringLimit == std::string::npos || s.length() <= stringLimit)
             return s;
 
         ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - strlen("..."));
