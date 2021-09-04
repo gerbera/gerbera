@@ -1042,7 +1042,6 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::st
 std::string getAVIFourCC(std::string_view avi_filename)
 {
 #define FCC_OFFSET 0xbc
-    char* buffer;
 
 #ifdef __linux__
     auto f = ::fopen(avi_filename.data(), "rbe");
@@ -1052,7 +1051,7 @@ std::string getAVIFourCC(std::string_view avi_filename)
     if (!f)
         throw_std_runtime_error("Could not open file {}: {}", avi_filename, std::strerror(errno));
 
-    buffer = new char[FCC_OFFSET + 6];
+    auto buffer = new char[FCC_OFFSET + 6];
 
     size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
