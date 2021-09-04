@@ -180,7 +180,6 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
         if (childCount >= 0)
             result.append_attribute("childCount") = childCount;
 
-        std::string upnp_class = obj->getClass();
         log_debug("container is class: {}", upnp_class.c_str());
         auto meta = obj->getMetadata();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
