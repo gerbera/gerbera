@@ -92,7 +92,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
     auto input = str.c_str();
     size_t length = str.length();
-    if (length < (std::numeric_limits<size_t>::max() / 4)) {
+    if (length < (std::string::npos / 4)) {
         length *= 4;
     } else {
         log_debug("Could not determine memory for string conversion!");
