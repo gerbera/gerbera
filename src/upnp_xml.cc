@@ -162,7 +162,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                 addField(result, key, str);
         }
-        
+
         auto [url, artAdded] = renderItemImage(virtualURL, item);
         if (artAdded) {
             meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
