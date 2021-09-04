@@ -153,12 +153,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
         for (auto&& [key, val] : meta) {
             // Trim metadata value as needed
-            auto str = trimString(val).c_str();
+            auto str = trimString(val);
 
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str);
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
             else if ((upnp_class == UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str);
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
             else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                 addField(result, key, str);
         }
