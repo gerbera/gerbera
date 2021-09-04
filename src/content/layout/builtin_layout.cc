@@ -361,7 +361,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
     std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     auto genreAr = splitString(temp, ',');
     for (auto&& genre : genreAr) {
-        genre = trimString(genre);
+        trimStringInPlace(genre);
         genre = mapGenre(genre);
         if (genre.empty())
             continue;

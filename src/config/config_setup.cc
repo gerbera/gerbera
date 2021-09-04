@@ -636,7 +636,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
 bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std::string>& result) const
 {
     for (auto&& attrValue : splitString(value, ',')) {
-        attrValue = trimString(attrValue);
+        trimStringInPlace(attrValue);
         if (itemNotEmpty && attrValue.empty()) {
             return false;
         }

@@ -545,7 +545,7 @@ std::string SortParser::parse()
     }
     std::vector<std::string> sort;
     for (auto&& seg : splitString(sortCrit, ',')) {
-        seg = trimString(seg);
+        trimStringInPlace(seg);
         bool desc = (seg[0] == '-');
         if (seg[0] == '-' || seg[0] == '+') {
             seg = seg.substr(1);
