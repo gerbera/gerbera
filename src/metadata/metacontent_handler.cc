@@ -136,6 +136,7 @@ static constexpr auto metaTags = std::array {
     std::pair("%artist%", M_ARTIST),
     std::pair("%genre%", M_GENRE),
     std::pair("%title%", M_TITLE),
+    std::pair("%composer%", M_COMPOSER),
 };
 
 std::string ContentPathSetup::expandName(std::string_view name, const std::shared_ptr<CdsObject>& obj)
