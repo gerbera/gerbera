@@ -663,6 +663,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         - ``%filename%``: Name of the file without extension or name of the container
         - ``%genre%``: Value of the genre tag
         - ``%title%``: Value of the title tag
+        - ``%composer%``: Value of the composer tag
 
 
 ``add-dir``
