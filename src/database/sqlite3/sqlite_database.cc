@@ -111,7 +111,7 @@ void Sqlite3Database::init()
                     btask->waitForTask();
                     prepare();
                     dbVersion = getInternalSetting("db_version");
-                } catch (const std::runtime_error& e) {
+                } catch (const std::runtime_error& err) {
                 }
             }
         } else {
