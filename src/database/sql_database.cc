@@ -972,7 +972,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         throw_std_runtime_error("failed to generate SQL for search");
 
     beginTransaction("search");
-    auto countSQL = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_search_query, searchSQL);
+    auto countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
     log_debug("Search count resolves to SQL [{}]", countSQL);
     auto sqlResult = select(countSQL);
     commit("search");
