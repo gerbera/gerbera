@@ -126,14 +126,20 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
     result.append_attribute("parentID") = obj->getParentID();
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
-    std::string tmp = obj->getTitle();
-    if ((stringLimit != std::string::npos) && (tmp.length() > stringLimit)) {
-        tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
-        tmp = tmp + "...";
-    }
+    auto trimString = [stringLimit](const std::string& s) {
+        // Do nothing if limit is negative, or string is already short enough
+        if (stringLimit < 0 || s.length() <= stringLimit)
+            return s;
 
-    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(tmp.c_str());
-    result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(obj->getClass().c_str());
+        ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - strlen("..."));
+        return s.substr(0, cutPosition) + "...";
+    };
+
+    const std::string title = obj->getTitle();
+    const std::string upnp_class = obj->getClass();
+
+    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(trimString(title).c_str());
+    result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(upnp_class.c_str());
 
     auto auxData = obj->getAuxData();
 
@@ -144,24 +150,19 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
             quirks->restoreSamsungBookMarkedPosition(item, &result);
 
         auto meta = obj->getMetadata();
-        std::string upnp_class = obj->getClass();
 
         for (auto&& [key, val] : meta) {
-            if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION)) {
-                tmp = val;
-                if ((stringLimit > 0) && (tmp.length() > stringLimit)) {
-                    tmp = tmp.substr(0, getValidUTF8CutPosition(tmp, stringLimit - 3));
-                    tmp.append("...");
-                }
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(tmp.c_str());
-            } else if (key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
-                if (upnp_class == UPNP_CLASS_MUSIC_TRACK) {
-                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
-                }
-            } else if (key != MetadataHandler::getMetaFieldName(M_TITLE)) {
-                addField(result, key, val);
-            }
+            // Trim metadata value as needed
+            const char* str = trimString(val).c_str();
+
+            if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str);
+            else if ((upnp_class == UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str);
+            else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
+                addField(result, key, str);
         }
+        
         {
             auto [url, artAdded] = renderItemImage(virtualURL, item);
             if (artAdded) {
