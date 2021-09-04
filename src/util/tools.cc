@@ -1171,7 +1171,7 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
         close(fd);
 
         retry_count++;
-    } while (retry_count < std::numeric_limits<uint16_t>::max());
+    } while (retry_count < std::numeric_limits<in_port_t>::max());
 
     log_error("Could not find free port on localhost");
 
