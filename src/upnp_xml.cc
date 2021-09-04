@@ -163,12 +163,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
                 addField(result, key, str);
         }
         
-        {
-            auto [url, artAdded] = renderItemImage(virtualURL, item);
-            if (artAdded) {
-                meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
-            }
+        auto [url, artAdded] = renderItemImage(virtualURL, item);
+        if (artAdded) {
+            meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
         }
+
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
         addResources(item, result, quirks);
 
