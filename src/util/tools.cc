@@ -101,20 +101,10 @@ std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
     return ret;
 }
 
-void leftTrimStringInPlace(std::string& str)
-{
-    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));
-}
-
-void rightTrimStringInPlace(std::string& str)
-{
-    str.erase(std::find_if_not(str.rbegin(), str.rend(), ::isspace).base(), str.end());
-}
-
 void trimStringInPlace(std::string& str)
 {
-    leftTrimStringInPlace(str);
-    rightTrimStringInPlace(str);
+    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));
+    str.erase(std::find_if_not(str.rbegin(), str.rend(), ::isspace).base(), str.end());
 }
 
 std::string trimString(std::string str)
@@ -122,8 +112,7 @@ std::string trimString(std::string str)
     if (str.empty())
         return str;
 
-    leftTrimStringInPlace(str);
-    rightTrimStringInPlace(str);
+    trimStringInPlace(str);
     return str;
 }
 

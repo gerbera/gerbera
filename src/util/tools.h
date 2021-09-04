@@ -55,12 +55,6 @@ class IOHandler;
 /// \return array of strings
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty = false);
 
-/// \brief trim from start (in place)
-void leftTrimStringInPlace(std::string& str);
-
-/// \brief trim from end (in place)
-void rightTrimStringInPlace(std::string& str);
-
 /// \brief remove leading and trailing whitespace (in place)
 void trimStringInPlace(std::string& str);
 
