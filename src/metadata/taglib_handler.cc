@@ -160,8 +160,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         value = val.toCString(true);
     }
 
-    value = trimString(value);
-
+    trimStringInPlace(value);
     if (!value.empty()) {
         item->setMetadata(field, sc->convert(value));
         //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
