@@ -153,7 +153,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t 
 
         for (auto&& [key, val] : meta) {
             // Trim metadata value as needed
-            const char* str = trimString(val).c_str();
+            auto str = trimString(val).c_str();
 
             if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
                 result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str);
