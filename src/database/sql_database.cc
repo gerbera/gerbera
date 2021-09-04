@@ -297,11 +297,15 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "obj_location", AutoscanColumn::obj_location },
 };
 
+#ifndef __cpp_lib_to_underlying
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
 {
     return std::underlying_type_t<E>(e);
 }
+#else
+using std::to_underlying;
+#endif
 
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 
