@@ -451,15 +451,15 @@ std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::strin
 //    2: property statement lower case
 //    3: value
 static const std::map<std::string, std::string> logicOperator {
-    { "contains", "({2} LIKE LOWER('%{3}%') AND {0} IS NOT NULL)" }, // lower
-    { "doesnotcontain", "({2} NOT LIKE LOWER('%{3}%') AND {0} IS NOT NULL)" }, // lower
-    { "startswith", "({2} LIKE LOWER('{3}%') AND {0} IS NOT NULL)" }, // lower
+    { "contains", "({2} LIKE LOWER('%{3}%'))" }, // lower
+    { "doesnotcontain", "({2} NOT LIKE LOWER('%{3}%'))" }, // lower
+    { "startswith", "({2} LIKE LOWER('{3}%'))" }, // lower
     { "derivedfrom", "(LOWER({0}) LIKE LOWER('{3}%'))" },
     //{ "derivedfrom", "{0} LIKE LOWER('{3}%')" },
-    { "exists", "({1} IS {3} AND {0} IS NOT NULL)" },
+    { "exists", "({1} IS {3})" },
     { "@exists", "({1} IS {3})" },
     { "newer", "({1} {3})" },
-    { "compare", "({2}LOWER('{3}') AND {0} IS NOT NULL)" }, // lower
+    { "compare", "({2}LOWER('{3}'))" }, // lower
     { "@compare", "({2}LOWER('{3}'))" }, // lower
 };
 
