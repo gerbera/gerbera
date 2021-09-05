@@ -78,7 +78,7 @@ public:
     {
         auto attr = std::string(mapConfigOption(option));
         if (attr.substr(0, ATTRIBUTE.size()) != ATTRIBUTE && check)
-            attr.insert(0, ATTRIBUTE);
+            return fmt::format("{}{}", ATTRIBUTE, attr);
         return attr;
     }
     static std::string removeAttribute(config_option_t option)
