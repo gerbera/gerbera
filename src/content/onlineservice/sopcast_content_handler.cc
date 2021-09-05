@@ -126,7 +126,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
         return nullptr;
     }
 
-    temp.insert(temp.begin(), OnlineService::getDatabasePrefix(OS_SopCast));
+    temp = OnlineService::getDatabasePrefix(OS_SopCast) + temp;
     item->setServiceID(temp);
 
     temp = channel.child("stream_type").text().as_string();
