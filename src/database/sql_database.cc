@@ -2559,7 +2559,7 @@ void SQLDatabase::prepareResourceTable(const std::string& addColumnCmd)
     bool addedAttribute = false;
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto&& resAttrib = MetadataHandler::getResAttrName(resAttrId);
-        if (std::find_if(resourceAttributes.begin(), resourceAttributes.end(), [&](auto&& attr) { return attr == resAttrib; }) == resourceAttributes.end()) {
+        if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
             _exec(fmt::format(addColumnCmd, resAttrib));
             resourceAttributes.push_back(resAttrib);
             addedAttribute = true;
