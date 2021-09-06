@@ -149,7 +149,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                 } else if (auxtag.substr(0, 3) == "Xmp") {
                     auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
                     if (xmpMd != xmpData.end())
-                        auxval = md->toString();
+                        auxval = xmpMd->toString();
                 } else {
                     log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;
