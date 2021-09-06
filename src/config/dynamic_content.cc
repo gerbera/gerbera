@@ -56,7 +56,7 @@ std::size_t DynamicContentList::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
+    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
 std::vector<std::shared_ptr<DynamicContent>> DynamicContentList::getArrayCopy()
@@ -83,7 +83,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edi
 std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location)
 {
     AutoLock lock(mutex);
-    auto entry = std::find_if(list.begin(), list.end(), [&](auto&& c) { return c->getLocation() == location; });
+    auto entry = std::find_if(list.begin(), list.end(), [=](auto&& c) { return c->getLocation() == location; });
     if (entry != list.end() && *entry) {
         return *entry;
     }

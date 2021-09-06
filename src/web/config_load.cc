@@ -71,7 +71,7 @@ void Web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, 
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:03d}", id).c_str();
     item.append_attribute("aid") = fmt::format("{:03d}", aid).c_str();
-    if (std::any_of(dbEntries.begin(), dbEntries.end(), [&](auto&& s) { return s.item == name; })) {
+    if (std::any_of(dbEntries.begin(), dbEntries.end(), [=](auto&& s) { return s.item == name; })) {
         item.append_attribute("status") = "unchanged";
         item.append_attribute("source") = "database";
     } else {

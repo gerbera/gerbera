@@ -70,7 +70,7 @@ void Web::Files::process()
             continue;
         if (!includes_fullpath.empty()
             && std::none_of(includes_fullpath.begin(), includes_fullpath.end(), //
-                [&](auto&& sub) { return startswith(filepath.string(), sub); }))
+                [=](auto&& sub) { return startswith(filepath.string(), sub); }))
             continue; // skip unwanted file
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
