@@ -256,7 +256,7 @@ void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
     process_list.push_back(std::move(exec));
 }
 
-void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
+void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
 {
     // when shutting down we will kill the transcoding processes,
     // which if given enough time will get a close in the io handler and
@@ -269,7 +269,7 @@ void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
 
     auto lock = threadRunner->lockGuard("unregisterExecutor");
 
-    process_list.erase(std::remove(process_list.begin(), process_list.end(), std::move(exec)), process_list.end());
+    process_list.erase(std::remove(process_list.begin(), process_list.end(), exec), process_list.end());
 }
 
 void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
