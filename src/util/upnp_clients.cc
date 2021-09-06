@@ -181,7 +181,7 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
 
 bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
 {
-    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [&](auto&& c) {
+    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP) {
             return false;
         }
@@ -222,7 +222,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
 bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
 {
     if (!match.empty()) {
-        auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [&](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
+        auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
         if (it != clientInfo.rend()) {
             *ppInfo = &(*it);
             log_debug("found client by type (match='{}')", match.c_str());
@@ -238,7 +238,7 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
 {
     AutoLock lock(mutex);
 
-    auto it = std::find_if(cache.begin(), cache.end(), [&](auto&& entry) //
+    auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
     if (it != cache.end()) {

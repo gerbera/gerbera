@@ -1278,7 +1278,7 @@ const std::map<config_option_t, config_option_t> ConfigDefinition::dependencyMap
 
 const char* ConfigDefinition::mapConfigOption(config_option_t option)
 {
-    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& c) { return c->option == option; });
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [=](auto&& c) { return c->option == option; });
     if (co != complexOptions.end()) {
         return (*co)->xpath;
     }
@@ -1292,7 +1292,7 @@ bool ConfigDefinition::isDependent(config_option_t option)
 
 std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetup(config_option_t option, bool save)
 {
-    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->option == option; });
+    auto co = std::find_if(complexOptions.begin(), complexOptions.end(), [=](auto&& s) { return s->option == option; });
     if (co != complexOptions.end()) {
         log_debug("Config: option found: '{}'", (*co)->xpath);
         return *co;

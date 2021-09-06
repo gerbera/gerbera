@@ -76,7 +76,7 @@ std::size_t DirectoryConfigList::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return (*std::max_element(indexMap.begin(), indexMap.end(), [&](auto a, auto b) { return (a.first < b.first); })).first + 1;
+    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
 std::vector<std::shared_ptr<DirectoryTweak>> DirectoryConfigList::getArrayCopy()

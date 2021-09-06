@@ -85,7 +85,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
 
             // look ahead
             bool haveChildAttribute = std::distance(child.attributes().begin(), child.attributes().end()) > 0;
-            bool haveChildElement = std::any_of(child.children().begin(), child.children().end(), [&](auto&& el) { return el.type() == pugi::node_element; });
+            bool haveChildElement = std::any_of(child.children().begin(), child.children().end(), [](auto&& el) { return el.type() == pugi::node_element; });
 
             if (array) {
                 if (nodeName != child.name())
