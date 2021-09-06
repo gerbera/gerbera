@@ -683,7 +683,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
     populateGenericTags(item, mp4);
 
     if (!mp4.hasMP4Tag()) {
-        log_info("TagLibHandler {}: mp4 file has no tag information", item->getLocation().c_str());
+        log_debug("TagLibHandler {}: mp4 file has no tag information", item->getLocation().c_str());
         return;
     }
 
