@@ -170,7 +170,7 @@ void MySQLDatabase::init()
                     throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
                 }
             }
-            _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION).c_str());
+            _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION));
         } else {
             log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
             throw_std_runtime_error("Wrong hash for create script {}", DBVERSION);
