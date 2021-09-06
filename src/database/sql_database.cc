@@ -1132,7 +1132,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::map<std::string, std::string>());
 }
 
-int SQLDatabase::createContainer(int parentID, std::string name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata)
+int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -1156,7 +1156,7 @@ int SQLDatabase::createContainer(int parentID, std::string name, const std::stri
         fmt::to_string(parentID),
         fmt::to_string(OBJECT_TYPE_CONTAINER),
         !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
-        quote(std::move(name)),
+        quote(name),
         quote(dbLocation),
         quote(stringHash(dbLocation)),
         (refID > 0) ? fmt::to_string(refID) : fmt::to_string(SQL_NULL),
