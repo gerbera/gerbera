@@ -1233,7 +1233,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
+void SQLDatabase::addContainerChain(std::string& virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 

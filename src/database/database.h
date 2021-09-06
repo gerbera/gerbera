@@ -178,7 +178,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
+    virtual void addContainerChain(std::string& path, const std::string& lastClass, int lastRefID, int* containerID,
         std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
         = 0;
 
