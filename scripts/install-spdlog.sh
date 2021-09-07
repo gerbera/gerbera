@@ -16,11 +16,16 @@ if [ ! -f spdlog-$VERSION.tgz ]; then
 fi
 tar -xzvf spdlog-$VERSION.tgz
 cd spdlog-$VERSION
-if [ -d spdlogbuild ]; then
-	rm -R spdlogbuild
+if [ -d build ]; then
+    rm -R build
 fi
-mkdir spdlogbuild
-cd spdlogbuild
+mkdir build
+cd build
+
 cmake .. -DSPDLOG_FMT_EXTERNAL=ON -DSPDLOG_BUILD_SHARED=OFF
-make
+if command -v nproc >/dev/null 2>&1; then
+    make "-j$(nproc)"
+else
+    make
+fi
 make install

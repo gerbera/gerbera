@@ -22,11 +22,11 @@ if [ ! -f fmt-$VERSION.tgz ]; then
 fi
 tar -xzvf fmt-$VERSION.tgz
 cd fmt-$VERSION
-if [ -d fmtbuild ]; then
-    rm -R fmtbuild
+if [ -d build ]; then
+    rm -R build
 fi
-mkdir fmtbuild
-cd fmtbuild
+mkdir build
+cd build
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DFMT_TEST=NO
 
 if command -v nproc >/dev/null 2>&1; then
