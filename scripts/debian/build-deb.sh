@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -Eeuo pipefail
+ROOT_DIR=`dirname $0`/../../
+ROOT_DIR=`realpath ${ROOT_DIR}`
 
 function install-gcc {
   echo "::group::Installing GCC"
@@ -30,7 +32,7 @@ function install-cmake() {
 function install-fmt {
   echo "::group::Installing fmt"
   #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
-    sudo bash scripts/install-fmt.sh static
+    sudo bash ${ROOT_DIR}scripts/install-fmt.sh static
   #else
   #   sudo apt-get install libfmt-dev -y
   #fi
@@ -41,10 +43,16 @@ function install-spdlog() {
   echo "::group::Installing spdlog"
 
   #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
-    sudo bash scripts/install-spdlog.sh
+    sudo bash ${ROOT_DIR}scripts/install-spdlog.sh
   #else
   #  sudo apt-get install libspdlog-dev -y
   #fi
+  echo "::endgroup::"
+}
+
+function install-pupnp() {
+  echo "::group::Installing libupnp"
+  sudo bash ${ROOT_DIR}scripts/install-pupnp.sh
   echo "::endgroup::"
 }
 
@@ -65,26 +73,32 @@ lsb_rel=$(lsb_release -r --short)
 
 install-gcc
 install-cmake
+my_sys=${lsb_codename}
+if [ $# -gt 0 ]; then
+  my_sys=$1
+fi
 
-echo "Running $0 $1"
+echo "Running $0 ${my_sys}"
 
 libduktape="libduktape205"
 if [[ "$lsb_codename" == "bionic" ]]; then
   libduktape="libduktape202"
 elif [ "$lsb_codename" == "buster" ]; then
   libduktape="libduktape203"
-elif [ "$lsb_codename" == "sid" -o "$1" == "debian:testing" -o "$1" == "debian:unstable" ]; then
+elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:testing" -o "${my_sys}" == "debian:unstable" ]; then
   libduktape="libduktape206"
 fi
 echo "Selecting $libduktape for $lsb_distro $lsb_codename"
 
 libmysqlclient="libmysqlclient-dev"
-if [ "$lsb_distro" == "Debian" ]; then
+if [ "$lsb_distro" == "Debian" -o "$lsb_distro" == "Raspbian" ]; then
   libmysqlclient="libmariadb-dev-compat"
 fi
 if [[ "$lsb_codename" == "hirsute" ]]; then
   libmysqlclient="libmysql++-dev"
 fi
+
+set -ex
 
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
@@ -94,6 +108,7 @@ if [[ ! -d build-deb ]]; then
   sudo apt-get install -y \
       dpkg-dev \
       systemd \
+      build-essential shtool \
       wget autoconf libtool pkg-config \
       cmake \
       bsdmainutils \
@@ -123,10 +138,7 @@ fi
 
 install-fmt
 install-spdlog
-
-echo "::group::Installing libupnp"
-sudo bash scripts/install-pupnp.sh
-echo "::endgroup::"
+install-pupnp
 
 cd build-deb
 
@@ -145,7 +157,7 @@ deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 if [[ ! -f $deb_name ]]; then
-  cmake ../ \
+  cmake ${ROOT_DIR} \
     -DWITH_MAGIC=ON \
     -DWITH_MYSQL=ON \
     -DWITH_CURL=ON \
