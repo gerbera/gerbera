@@ -571,25 +571,25 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     }
 
     std::map<std::string, std::string> cdsObjectSql;
-    cdsObjectSql["object_type"] = quote(obj->getObjectType());
+    cdsObjectSql.emplace("object_type", quote(obj->getObjectType()));
 
     if (hasReference || playlistRef)
-        cdsObjectSql["ref_id"] = quote(refObj->getID());
+        cdsObjectSql.emplace("ref_id", quote(refObj->getID()));
     else if (op == Operation::Update)
-        cdsObjectSql["ref_id"] = SQL_NULL;
+        cdsObjectSql.emplace("ref_id", SQL_NULL);
 
     if (!hasReference || refObj->getClass() != obj->getClass())
-        cdsObjectSql["upnp_class"] = quote(obj->getClass());
+        cdsObjectSql.emplace("upnp_class", quote(obj->getClass()));
     else if (op == Operation::Update)
-        cdsObjectSql["upnp_class"] = SQL_NULL;
+        cdsObjectSql.emplace("upnp_class", SQL_NULL);
 
     //if (!hasReference || refObj->getTitle() != obj->getTitle())
-    cdsObjectSql["dc_title"] = quote(obj->getTitle());
+    cdsObjectSql.emplace("dc_title", quote(obj->getTitle()));
     //else if (isUpdate)
-    //    cdsObjectSql["dc_title"] = SQL_NULL;
+    //    cdsObjectSql.emplace("dc_title", SQL_NULL);
 
     if (op == Operation::Update)
-        cdsObjectSql["auxdata"] = SQL_NULL;
+        cdsObjectSql.emplace("auxdata", SQL_NULL);
 
     auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
@@ -598,22 +598,20 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    cdsObjectSql["flags"] = quote(obj->getFlags());
+    cdsObjectSql.emplace("flags", quote(obj->getFlags()));
 
     if (obj->getMTime() > std::chrono::seconds::zero()) {
-        cdsObjectSql["last_modified"] = quote(obj->getMTime().count());
+        cdsObjectSql.emplace("last_modified", quote(obj->getMTime().count()));
     } else {
-        cdsObjectSql["last_modified"] = SQL_NULL;
+        cdsObjectSql.emplace("last_modified", SQL_NULL);
     }
-    cdsObjectSql["last_updated"] = quote(to_seconds(std::chrono::system_clock::now()).count());
+    cdsObjectSql.emplace("last_updated", quote(to_seconds(std::chrono::system_clock::now()).count()));
 
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
-        cdsObjectSql["location"] = quote(dbLocation);
-        cdsObjectSql["location_hash"] = quote(stringHash(dbLocation.string()));
-    }
-
-    if (obj->isItem()) {
+        cdsObjectSql.emplace("location", quote(dbLocation));
+        cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
+    } else if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (!hasReference) {
@@ -624,47 +622,42 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
                 int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                 obj->setParentID(parentID);
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
-                cdsObjectSql["location"] = quote(dbLocation);
-                cdsObjectSql["location_hash"] = quote(stringHash(dbLocation.string()));
+                cdsObjectSql.emplace("location", quote(dbLocation));
+                cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
             } else {
                 // URLs
-                cdsObjectSql["location"] = quote(loc);
-                cdsObjectSql["location_hash"] = SQL_NULL;
+                cdsObjectSql.emplace("location", quote(loc));
+                cdsObjectSql.emplace("location_hash", SQL_NULL);
             }
-        } else {
-            if (op == Operation::Update) {
-                cdsObjectSql["location"] = SQL_NULL;
-                cdsObjectSql["location_hash"] = SQL_NULL;
-            }
+        } else if (op == Operation::Update) {
+            cdsObjectSql.emplace("location", SQL_NULL);
+            cdsObjectSql.emplace("location_hash", SQL_NULL);
         }
 
         if (item->getTrackNumber() > 0) {
-            cdsObjectSql["track_number"] = quote(item->getTrackNumber());
-        } else {
-            if (op == Operation::Update)
-                cdsObjectSql["track_number"] = SQL_NULL;
+            cdsObjectSql.emplace("track_number", quote(item->getTrackNumber()));
+        } else if (op == Operation::Update) {
+            cdsObjectSql.emplace("track_number", SQL_NULL);
         }
-
-        cdsObjectSql["bookmark_pos"] = quote(item->getBookMarkPos().count());
 
         if (item->getPartNumber() > 0) {
-            cdsObjectSql["part_number"] = quote(item->getPartNumber());
-        } else {
-            if (op == Operation::Update)
-                cdsObjectSql["part_number"] = SQL_NULL;
+            cdsObjectSql.emplace("part_number", quote(item->getPartNumber()));
+        } else if (op == Operation::Update) {
+            cdsObjectSql.emplace("part_number", SQL_NULL);
         }
+
+        cdsObjectSql.emplace("bookmark_pos", quote(item->getBookMarkPos().count()));
 
         if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
-                cdsObjectSql["service_id"] = quote(item->getServiceID());
+                cdsObjectSql.emplace("service_id", quote(item->getServiceID()));
             else
-                cdsObjectSql["service_id"] = SQL_NULL;
-        } else {
-            if (op == Operation::Update)
-                cdsObjectSql["service_id"] = SQL_NULL;
+                cdsObjectSql.emplace("service_id", SQL_NULL);
+        } else if (op == Operation::Update) {
+            cdsObjectSql.emplace("service_id", SQL_NULL);
         }
 
-        cdsObjectSql["mime_type"] = quote(item->getMimeType().substr(0, 40));
+        cdsObjectSql.emplace("mime_type", quote(item->getMimeType().substr(0, 40)));
     }
 
     // check for a duplicate (virtual) object
@@ -685,7 +678,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
     }
 
-    cdsObjectSql["parent_id"] = fmt::to_string(obj->getParentID());
+    cdsObjectSql.emplace("parent_id", quote(obj->getParentID()));
 
     std::vector<std::shared_ptr<AddUpdateTable>> returnVal;
     returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op));
