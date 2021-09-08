@@ -268,7 +268,7 @@ public:
     }
 
     /// \brief Query entire auxdata dictionary.
-    std::map<std::string, std::string> getAuxData() const { return auxdata; }
+    const std::map<std::string, std::string>& getAuxData() const { return auxdata; }
 
     /// \brief Set a single auxdata value.
     void setAuxData(const std::string& key, const std::string& value)

@@ -591,12 +591,12 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
     if (op == Operation::Update)
         cdsObjectSql["auxdata"] = SQL_NULL;
 
-    auto auxData = obj->getAuxData();
+    auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
         cdsObjectSql["auxdata"] = quote(dictEncode(auxData));
     }
 
-    bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     cdsObjectSql["flags"] = quote(obj->getFlags());
 
@@ -674,10 +674,10 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             fmt::format("{}={:d}", identifier("ref_id"), refObj->getID()),
             fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
         };
-        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
-            identifier("id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+        auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
+            identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
-        if (res && (res->nextRow()))
+        if (res && res->getNumRows() > 0)
             return {};
     }
 
