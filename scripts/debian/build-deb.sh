@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 ROOT_DIR=`dirname $0`/../../
-ROOT_DIR=`realpath ${ROOT_DIR}`
+ROOT_DIR=`realpath ${ROOT_DIR}`/
 
 function install-gcc {
   echo "::group::Installing GCC"
