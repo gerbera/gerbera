@@ -34,11 +34,7 @@
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
-    if (generated.find("") == generated.end()) {
-        auto config = doc.append_child("config");
-        generated[""] = std::make_shared<pugi::xml_node>(config);
-    }
-    return generated[""];
+    return generated[""] = std::make_shared<pugi::xml_node>(doc.append_child("config"));
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag) const
