@@ -187,7 +187,7 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
             resource->addAttribute(R_RESOURCE_FILE, path.string());
             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-            obj->addResource(move(resource));
+            obj->addResource(resource);
         }
     }
 }
@@ -238,7 +238,7 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
             resource->addAttribute(R_RESOURCE_FILE, path.string());
             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
-            obj->addResource(move(resource));
+            obj->addResource(resource);
         }
     }
 }
@@ -296,7 +296,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             resource->addAttribute(R_LANGUAGE, path.stem().string()); // assume file name is related to some language
             resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
             resource->addParameter("type", type);
-            obj->addResource(move(resource));
+            obj->addResource(resource);
         }
     }
 }
@@ -341,7 +341,7 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("res"));
             resource->addAttribute(R_RESOURCE_FILE, path.string());
-            obj->addResource(move(resource));
+            obj->addResource(resource);
         }
     }
 }

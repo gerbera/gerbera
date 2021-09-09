@@ -275,7 +275,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
             std::string resolution = fmt::format("{}x{}", x, y);
             ffres->addAttribute(R_RESOLUTION, resolution);
-            item->addResource(move(ffres));
+            item->addResource(ffres);
             log_debug("Adding resource for video thumbnail");
         }
     }
