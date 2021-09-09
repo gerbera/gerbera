@@ -92,7 +92,7 @@ void Web::Directories::process()
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = { filepath.filename(), hasContent };
+        filesMap.emplace(id, std::pair(filepath.filename(), hasContent));
     }
 
     auto f2i = StringConverter::f2i(config);
