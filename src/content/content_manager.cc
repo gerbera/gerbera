@@ -1733,7 +1733,7 @@ void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<Auto
     database->updateAutoscanDirectory(adir);
 }
 
-void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
+void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory>&& dir)
 {
     // We will have to change this for other scan modes
     auto original = autoscan_timed->getByObjectID(dir->getObjectID());

@@ -270,7 +270,7 @@ public:
 
     /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
-    void setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir);
+    void setAutoscanDirectory(std::shared_ptr<AutoscanDirectory>&& dir);
 
     /// \brief handles the removal of a persistent autoscan directory
     void handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir);
