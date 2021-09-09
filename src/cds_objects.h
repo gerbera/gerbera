@@ -325,10 +325,10 @@ public:
     }
 
     /// \brief Add resource tag
-    void addResource(std::shared_ptr<CdsResource> resource)
+    void addResource(const std::shared_ptr<CdsResource>& resource)
     {
         resource->setResId(resources.size());
-        resources.push_back(move(resource));
+        resources.push_back(resource);
     }
 
     /// \brief Copies all object properties to another object.
