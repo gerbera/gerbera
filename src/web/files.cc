@@ -74,7 +74,7 @@ void Web::Files::process()
             continue; // skip unwanted file
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap[id] = filepath.filename();
+        filesMap.emplace(id, filepath.filename());
     }
 
     auto f2i = StringConverter::f2i(config);

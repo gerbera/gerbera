@@ -308,7 +308,7 @@ void Web::ConfigLoad::process()
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
             setValue(item, name->getName());
-            profiles[name->getName()] = pr;
+            profiles.emplace(name->getName(), pr);
 
             pr++;
         }
