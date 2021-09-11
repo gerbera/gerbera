@@ -258,9 +258,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, std::string userA
 
     // house cleaning, remove old entries
     auto now = currentTime();
-    cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
-        cache.end());
+    cache.remove_if([now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; });
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
@@ -275,7 +273,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, std::string userA
         }
     } else {
         // add new client
-        cache.emplace_back(*addr, std::move(userAgent), now, now, pInfo);
+        cache.emplace_front(*addr, std::move(userAgent), now, now, pInfo);
     }
 }
 

@@ -29,6 +29,7 @@
 #define __UPNP_CLIENTS_H__
 
 #include <chrono>
+#include <forward_list>
 #include <memory>
 #include <mutex>
 #include <pugixml.hpp>
@@ -97,7 +98,7 @@ public:
     void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
 
     void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
-    const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
+    const std::forward_list<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
     bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
@@ -110,7 +111,7 @@ private:
 
     std::mutex mutex;
     using AutoLock = std::lock_guard<std::mutex>;
-    std::vector<ClientCacheEntry> cache;
+    std::forward_list<ClientCacheEntry> cache;
 
     std::vector<ClientInfo> clientInfo;
 };

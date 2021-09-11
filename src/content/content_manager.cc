@@ -253,7 +253,7 @@ ContentManager::~ContentManager() { log_debug("ContentManager destroyed"); }
 void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
 {
     auto lock = threadRunner->lockGuard("registerExecutor");
-    process_list.push_back(std::move(exec));
+    process_list.push_front(std::move(exec));
 }
 
 void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
@@ -269,7 +269,7 @@ void ContentManager::unregisterExecutor(std::shared_ptr<Executor> exec)
 
     auto lock = threadRunner->lockGuard("unregisterExecutor");
 
-    process_list.erase(std::remove(process_list.begin(), process_list.end(), std::move(exec)), process_list.end());
+    process_list.remove(exec);
 }
 
 void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)

@@ -32,6 +32,7 @@
 #define __CONTENT_MANAGER_H__
 
 #include <deque>
+#include <forward_list>
 #include <map>
 #include <memory>
 #include <string>
@@ -337,7 +338,7 @@ protected:
     std::shared_ptr<AutoscanList> autoscan_inotify;
 #endif
 
-    std::vector<std::shared_ptr<Executor>> process_list;
+    std::forward_list<std::shared_ptr<Executor>> process_list;
 
     int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
         AutoScanSetting& asSetting,
