@@ -2408,13 +2408,13 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
 
 std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
 {
-    std::string tableName = addUpdateTable->getTableName();
+    const std::string& tableName = addUpdateTable->getTableName();
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
         throw_std_runtime_error("Attempted to insert new object with ID!");
     }
 
-    auto dict = addUpdateTable->getDict();
+    const auto& dict = addUpdateTable->getDict();
 
     std::vector<SQLIdentifier> fields;
     std::vector<std::string> values;
@@ -2439,8 +2439,8 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw_std_runtime_error("sqlForUpdate called with invalid arguments");
 
-    std::string tableName = addUpdateTable->getTableName();
-    auto dict = addUpdateTable->getDict();
+    const std::string& tableName = addUpdateTable->getTableName();
+    const auto& dict = addUpdateTable->getDict();
 
     std::vector<std::string> fields;
     fields.reserve(dict.size());
@@ -2451,7 +2451,7 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict["res_id"]));
+        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
@@ -2469,13 +2469,13 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
         || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
         throw_std_runtime_error("sqlForDelete called with invalid arguments");
 
-    std::string tableName = addUpdateTable->getTableName();
-    auto dict = addUpdateTable->getDict();
+    const std::string& tableName = addUpdateTable->getTableName();
+    const auto& dict = addUpdateTable->getDict();
 
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict["res_id"]));
+        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
     } else if (tableName == METADATA_TABLE) {
         // relying on only one element when tableName is mt_metadata
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
