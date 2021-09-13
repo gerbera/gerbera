@@ -61,10 +61,10 @@ class SQLRow {
 public:
     virtual ~SQLRow() = default;
     /// \brief Returns true if the column index contains the value NULL
-    bool isNull(int index) const
+    bool isNullOrEmpty(int index) const
     {
         const char* c = col_c_str(index);
-        return c == nullptr;
+        return c == nullptr || *c == '\0';
     }
     /// \brief Return the value of column index as a string value
     std::string col(int index) const
@@ -78,7 +78,7 @@ public:
     int col_int(int index, int null_value = 0) const
     {
         const char* c = col_c_str(index);
-        if (!c)
+        if (!c || *c == '\0')
             return null_value;
         return std::atoi(c);
     }
@@ -87,7 +87,6 @@ public:
 
 class SQLResult {
 public:
-    //SQLResult();
     virtual ~SQLResult() = default;
     virtual std::unique_ptr<SQLRow> nextRow() = 0;
     virtual unsigned long long getNumRows() const = 0;
