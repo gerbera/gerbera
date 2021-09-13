@@ -539,7 +539,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     return findObjectByPath(location);
 }
 
-std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
+std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
 {
     std::shared_ptr<CdsObject> refObj;
     bool hasReference = false;
@@ -680,8 +680,8 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
             return {};
     }
 
-    std::vector<std::shared_ptr<AddUpdateTable>> returnVal;
-    returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op));
+    std::vector<AddUpdateTable> returnVal;
+    returnVal.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op);
 
     if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
         generateMetadataDBOperations(obj, op, returnVal);
@@ -706,7 +706,7 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
         auto qb = sqlForInsert(obj, addUpdateTable);
         log_debug("Generated insert: {}", qb);
 
-        if (addUpdateTable->getTableName() == CDS_OBJECT_TABLE) {
+        if (addUpdateTable.getTableName() == CDS_OBJECT_TABLE) {
             int newId = exec(qb, true);
             obj->setID(newId);
         } else {
@@ -718,7 +718,7 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
 
 void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer)
 {
-    std::vector<std::shared_ptr<AddUpdateTable>> data;
+    std::vector<AddUpdateTable> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
         std::map<std::string, std::string> cdsObjectSql;
 
@@ -726,7 +726,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
-        data.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update));
+        data.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update);
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
@@ -734,9 +734,9 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     }
 
     beginTransaction("updateObject");
-    for (auto&& addUpdateTable : data) {
+    for (const auto& addUpdateTable : data) {
         auto qb = [this, &obj, &addUpdateTable]() {
-            Operation op = addUpdateTable->getOperation();
+            Operation op = addUpdateTable.getOperation();
             switch (op) {
             case Operation::Insert:
                 return sqlForInsert(obj, addUpdateTable);
@@ -2286,15 +2286,16 @@ void SQLDatabase::clearFlagInDB(int flag)
 }
 
 void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
+    std::vector<AddUpdateTable>& operations)
 {
     const auto& dict = obj->getMetadata();
+    operations.reserve(operations.size() + dict.size());
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
             std::map<std::string, std::string> metadataSql;
             metadataSql.emplace("property_name", quote(key));
             metadataSql.emplace("property_value", quote(val));
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), op));
+            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
         }
     } else {
         // get current metadata from DB: if only it really was a dictionary...
@@ -2304,7 +2305,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> metadataSql;
             metadataSql.emplace("property_name", quote(key));
             metadataSql.emplace("property_value", quote(val));
-            operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), operation));
+            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), operation);
         }
         for (auto&& [key, val] : dbMetadata) {
             if (dict.find(key) == dict.end()) {
@@ -2312,7 +2313,7 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
                 std::map<std::string, std::string> metadataSql;
                 metadataSql.emplace("property_name", quote(key));
                 metadataSql.emplace("property_value", quote(val));
-                operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), Operation::Delete));
+                operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Delete);
             }
         }
     }
@@ -2349,9 +2350,10 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
 }
 
 void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-    std::vector<std::shared_ptr<AddUpdateTable>>& operations)
+    std::vector<AddUpdateTable>& operations)
 {
     const auto& resources = obj->getResources();
+    operations.reserve(operations.size() + resources.size());
     if (op == Operation::Insert) {
         size_t res_id = 0;
         for (auto&& resource : resources) {
@@ -2369,7 +2371,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[key] = quote(val);
             }
-            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), op));
+            operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
             res_id++;
         }
     } else {
@@ -2392,7 +2394,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[key] = quote(val);
             }
-            operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), operation));
+            operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
             res_id++;
         }
         // res_id in db resources but not obj resources, so needs a delete
@@ -2400,21 +2402,21 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             if (dbResources.at(res_id)) {
                 std::map<std::string, std::string> resourceSql;
                 resourceSql["res_id"] = quote(res_id);
-                operations.push_back(std::make_shared<AddUpdateTable>(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete));
+                operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete);
             }
         }
     }
 }
 
-std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
 {
-    const std::string& tableName = addUpdateTable->getTableName();
+    const std::string& tableName = addUpdateTable.getTableName();
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
         throw_std_runtime_error("Attempted to insert new object with ID!");
     }
 
-    const auto& dict = addUpdateTable->getDict();
+    const auto& dict = addUpdateTable.getDict();
 
     std::vector<SQLIdentifier> fields;
     std::vector<std::string> values;
@@ -2433,14 +2435,13 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
     return fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ", "), fmt::join(values, ", "));
 }
 
-std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
 {
-    if (!addUpdateTable
-        || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
-        throw_std_runtime_error("sqlForUpdate called with invalid arguments");
+    const std::string& tableName = addUpdateTable.getTableName();
+    const auto& dict = addUpdateTable.getDict();
 
-    const std::string& tableName = addUpdateTable->getTableName();
-    const auto& dict = addUpdateTable->getDict();
+    if (tableName == METADATA_TABLE && dict.size() != 2)
+        throw_std_runtime_error("sqlForUpdate called with invalid arguments");
 
     std::vector<std::string> fields;
     fields.reserve(dict.size());
@@ -2463,14 +2464,13 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
     return fmt::format("UPDATE {} SET {} WHERE {}", identifier(tableName), fmt::join(fields, ", "), fmt::join(where, " AND "));
 }
 
-std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const
+std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
 {
-    if (!addUpdateTable
-        || (addUpdateTable->getTableName() == METADATA_TABLE && addUpdateTable->getDict().size() != 2))
-        throw_std_runtime_error("sqlForDelete called with invalid arguments");
+    const std::string& tableName = addUpdateTable.getTableName();
+    const auto& dict = addUpdateTable.getDict();
 
-    const std::string& tableName = addUpdateTable->getTableName();
-    const auto& dict = addUpdateTable->getDict();
+    if (tableName == METADATA_TABLE && dict.size() != 2)
+        throw_std_runtime_error("sqlForDelete called with invalid arguments");
 
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
