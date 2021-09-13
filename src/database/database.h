@@ -300,7 +300,7 @@ public:
     virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 
     /// \brief clears the given flag in all objects in the DB
-    virtual void clearFlagInDB(int flag) = 0;
+    [[deprecated]] virtual void clearFlagInDB(int flag) = 0;
 
     virtual std::string getFsRootName() = 0;
 
