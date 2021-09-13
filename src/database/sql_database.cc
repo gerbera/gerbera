@@ -979,7 +979,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
 
     auto countRow = sqlResult->nextRow();
     if (countRow) {
-        *numMatches = countRow->col_int(0);
+        *numMatches = countRow->col_int(0, 0);
     }
 
     // order by code..
@@ -1044,7 +1044,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            return row->col_int(0);
+            return row->col_int(0, 0);
         }
     }
     return 0;
@@ -1470,7 +1470,7 @@ int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, cons
 
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
-        return row->col_int(0);
+        return row->col_int(0, 0);
     }
     return 0;
 }
@@ -1546,7 +1546,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         const int32_t objectID = row->col_int(0, INVALID_OBJECT_ID);
-        const int objectType = row->col_int(1);
+        const int objectType = row->col_int(1, 0);
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(objectID);
         else
@@ -1604,7 +1604,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     if (!row)
         return nullptr;
 
-    const int objectType = row->col_int(0);
+    const int objectType = row->col_int(0, 0);
     bool isContainer = IS_CDS_CONTAINER(objectType);
     if (all && !isContainer) {
         if (!row->isNullOrEmpty(1)) {
@@ -1700,7 +1700,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             containerIds.clear();
             while ((row = res->nextRow())) {
                 const int objId = row->col_int(0, INVALID_OBJECT_ID);
-                const int objType = row->col_int(1);
+                const int objType = row->col_int(1, 0);
                 if (IS_CDS_CONTAINER(objType)) {
                     containerIds.push_back(objId);
                     removeIds.push_back(objId);
@@ -1778,7 +1778,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             if (!res)
                 throw_std_runtime_error("db error");
             while ((row = res->nextRow())) {
-                const int flags = row->col_int(3);
+                const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
                     changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 else if (row->col(1) == "0") {
@@ -1798,7 +1798,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             if (!res)
                 throw_std_runtime_error("db error");
             while ((row = res->nextRow())) {
-                const int flags = row->col_int(3);
+                const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
                     changedContainers.ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
                     changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
@@ -2492,11 +2492,11 @@ bool SQLDatabase::doMetadataMigration()
 {
     log_debug("Checking if metadata migration is required");
     auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL", identifier(CDS_OBJECT_TABLE), identifier("metadata")));
-    int expectedConversionCount = res->nextRow()->col_int(0);
+    int expectedConversionCount = res->nextRow()->col_int(0, 0);
     log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
     res = select(fmt::format("SELECT COUNT(*) FROM {}", identifier(METADATA_TABLE)));
-    int metadataRowCount = res->nextRow()->col_int(0);
+    int metadataRowCount = res->nextRow()->col_int(0, 0);
     log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
 
     if (expectedConversionCount > 0 && metadataRowCount > 0) {
@@ -2572,13 +2572,13 @@ bool SQLDatabase::doResourceMigration()
     auto res = select(
         fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
             identifier(CDS_OBJECT_TABLE), identifier("resources")));
-    int expectedConversionCount = res->nextRow()->col_int(0);
+    int expectedConversionCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
         fmt::format("SELECT COUNT(*) FROM {}",
             identifier(RESOURCE_TABLE)));
-    int resourceRowCount = res->nextRow()->col_int(0);
+    int resourceRowCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
     if (expectedConversionCount > 0 && resourceRowCount > 0) {

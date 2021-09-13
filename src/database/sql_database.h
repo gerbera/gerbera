@@ -75,7 +75,7 @@ public:
         return { c };
     }
     /// \brief Return the value of column index as an integer value
-    int col_int(int index, int null_value = 0) const
+    int col_int(int index, int null_value) const
     {
         const char* c = col_c_str(index);
         if (!c || *c == '\0')
