@@ -810,7 +810,7 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     objectIDs.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        objectIDs.push_back(row->col_int(0));
+        objectIDs.push_back(row->col_int(0, INVALID_OBJECT_ID));
     }
 
     return objectIDs;
@@ -1250,7 +1250,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         auto row = res->nextRow();
         if (row) {
             if (containerID)
-                *containerID = row->col_int(0);
+                *containerID = row->col_int(0, INVALID_OBJECT_ID);
             commit("addContainerChain");
             return;
         }
@@ -1521,7 +1521,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     std::unordered_set<int> ret;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        ret.insert(row->col_int(0));
+        ret.insert(row->col_int(0, INVALID_OBJECT_ID));
     }
     return ret;
 }
@@ -1545,7 +1545,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::vector<int32_t> containers;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        const int32_t objectID = row->col_int(0);
+        const int32_t objectID = row->col_int(0, INVALID_OBJECT_ID);
         const int objectType = row->col_int(1);
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(objectID);
@@ -1607,8 +1607,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     const int objectType = row->col_int(0);
     bool isContainer = IS_CDS_CONTAINER(objectType);
     if (all && !isContainer) {
-        if (!row->isNull(1)) {
-            const int ref_id = row->col_int(1);
+        if (!row->isNullOrEmpty(1)) {
+            const int ref_id = row->col_int(1, INVALID_OBJECT_ID);
             if (!IS_FORBIDDEN_CDS_ID(ref_id))
                 objectID = ref_id;
         }
@@ -1658,7 +1658,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
             throw DatabaseException("", fmt::format("Sql error: {}", sql));
         parentIds.clear();
         while ((row = res->nextRow())) {
-            changedContainers.ui.push_back(row->col_int(0));
+            changedContainers.ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
         }
     }
 
@@ -1674,7 +1674,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             parentIds.clear();
             while ((row = res->nextRow())) {
-                changedContainers.upnp.push_back(row->col_int(0));
+                changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
             }
         }
 
@@ -1686,8 +1686,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             itemIds.clear();
             while ((row = res->nextRow())) {
-                removeIds.push_back(row->col_int(0));
-                changedContainers.upnp.push_back(row->col_int(1));
+                removeIds.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                changedContainers.upnp.push_back(row->col_int(1, INVALID_OBJECT_ID));
             }
         }
 
@@ -1699,15 +1699,15 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 throw DatabaseException("", fmt::format("Sql error: {}", sql));
             containerIds.clear();
             while ((row = res->nextRow())) {
-                const int objId = row->col_int(0);
+                const int objId = row->col_int(0, INVALID_OBJECT_ID);
                 const int objType = row->col_int(1);
                 if (IS_CDS_CONTAINER(objType)) {
                     containerIds.push_back(objId);
                     removeIds.push_back(objId);
                 } else {
                     if (all) {
-                        if (!row->isNull(2)) {
-                            const int32_t refId = row->col_int(2);
+                        if (!row->isNullOrEmpty(2)) {
+                            const int32_t refId = row->col_int(2, INVALID_OBJECT_ID);
                             parentIds.push_back(refId);
                             itemIds.push_back(refId);
                             removeIds.push_back(refId);
@@ -1784,12 +1784,12 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers.upnp.push_back(row->col_int(0));
+                    changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 else if (row->col(1) == "0") {
-                    del.push_back(row->col_int(0));
-                    selUi.push_back(row->col_int(2));
+                    del.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    selUi.push_back(row->col_int(2, INVALID_OBJECT_ID));
                 } else {
-                    selUpnp.push_back(row->col_int(0));
+                    selUpnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 }
             }
         }
@@ -1804,13 +1804,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers.ui.push_back(row->col_int(0));
-                    changedContainers.upnp.push_back(row->col_int(0));
+                    changedContainers.ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 } else if (row->col(1) == "0") {
-                    del.push_back(row->col_int(0));
-                    selUi.push_back(row->col_int(2));
+                    del.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    selUi.push_back(row->col_int(2, INVALID_OBJECT_ID));
                 } else {
-                    selUi.push_back(row->col_int(0));
+                    selUi.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 }
             }
         }
@@ -1956,7 +1956,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
 
         auto row = res->nextRow();
         if (row) {
-            ad->setDatabaseID(row->col_int(0));
+            ad->setDatabaseID(row->col_int(0, INVALID_OBJECT_ID));
             updateAutoscanDirectory(ad);
         } else
             addAutoscanDirectory(ad);
@@ -1981,7 +1981,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
     while ((row = res->nextRow())) {
         auto adir = _fillAutoscanDirectory(row);
         if (!adir)
-            _removeAutoscanDirectory(row->col_int(0));
+            _removeAutoscanDirectory(row->col_int(0, INVALID_OBJECT_ID));
         else
             ret->add(adir);
     }
@@ -2144,8 +2144,8 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
     if (!res)
         throw DatabaseException("", "error while doing select on ");
     auto row = res->nextRow();
-    if (row && !row->isNull(0))
-        return row->col_int(0);
+    if (row && !row->isNullOrEmpty(0))
+        return row->col_int(0, INVALID_OBJECT_ID);
 
     return INVALID_OBJECT_ID;
 }
@@ -2207,7 +2207,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             throw_std_runtime_error("SQL error");
         row = res->nextRow();
         if (row) {
-            const int objectID = row->col_int(0);
+            const int objectID = row->col_int(0, INVALID_OBJECT_ID);
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
             if (!obj)
@@ -2235,7 +2235,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             return pathIDs;
     }
 
-    const int objectID = row->col_int(0);
+    const int objectID = row->col_int(0, INVALID_OBJECT_ID);
     auto obj = loadObject(objectID);
     if (!obj) {
         throw_std_runtime_error("Referenced object (by Autoscan) not found.");
@@ -2260,7 +2260,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
         auto row = res->nextRow();
         if (!row)
             break;
-        objectID = row->col_int(0);
+        objectID = row->col_int(0, INVALID_OBJECT_ID);
     }
     return pathIDs;
 }
@@ -2516,7 +2516,7 @@ bool SQLDatabase::doMetadataMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow())) {
-        migrateMetadata(row->col_int(0), row->col(1));
+        migrateMetadata(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
         ++objectsUpdated;
     }
     log_info("Migrated metadata - object count: {}", objectsUpdated);
@@ -2599,7 +2599,7 @@ bool SQLDatabase::doResourceMigration()
 
     int objectsUpdated = 0;
     while ((row = resIds->nextRow())) {
-        migrateResources(row->col_int(0), row->col(1));
+        migrateResources(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
         ++objectsUpdated;
     }
     log_info("Migrated resources - object count: {}", objectsUpdated);
