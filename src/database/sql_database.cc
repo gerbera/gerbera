@@ -593,7 +593,7 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
 
     auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
-        cdsObjectSql["auxdata"] = quote(dictEncode(auxData));
+        cdsObjectSql.insert_or_assign("auxdata", quote(dictEncode(auxData)));
     }
 
     const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
@@ -660,6 +660,12 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         cdsObjectSql.emplace("mime_type", quote(item->getMimeType().substr(0, 40)));
     }
 
+    if (obj->getParentID() == INVALID_OBJECT_ID) {
+        throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
+    }
+
+    cdsObjectSql.emplace("parent_id", quote(obj->getParentID()));
+
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
@@ -673,12 +679,6 @@ std::vector<std::shared_ptr<SQLDatabase::AddUpdateTable>> SQLDatabase::_addUpdat
         if (res && res->getNumRows() > 0)
             return {};
     }
-
-    if (obj->getParentID() == INVALID_OBJECT_ID) {
-        throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
-    }
-
-    cdsObjectSql.emplace("parent_id", quote(obj->getParentID()));
 
     std::vector<std::shared_ptr<AddUpdateTable>> returnVal;
     returnVal.push_back(std::make_shared<AddUpdateTable>(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op));
@@ -2288,12 +2288,12 @@ void SQLDatabase::clearFlagInDB(int flag)
 void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
     std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
-    auto dict = obj->getMetadata();
+    const auto& dict = obj->getMetadata();
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
             std::map<std::string, std::string> metadataSql;
-            metadataSql["property_name"] = quote(key);
-            metadataSql["property_value"] = quote(val);
+            metadataSql.emplace("property_name", quote(key));
+            metadataSql.emplace("property_value", quote(val));
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), op));
         }
     } else {
@@ -2302,16 +2302,16 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
         for (auto&& [key, val] : dict) {
             Operation operation = dbMetadata.find(key) == dbMetadata.end() ? Operation::Insert : Operation::Update;
             std::map<std::string, std::string> metadataSql;
-            metadataSql["property_name"] = quote(key);
-            metadataSql["property_value"] = quote(val);
+            metadataSql.emplace("property_name", quote(key));
+            metadataSql.emplace("property_value", quote(val));
             operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), operation));
         }
         for (auto&& [key, val] : dbMetadata) {
             if (dict.find(key) == dict.end()) {
                 // key in db metadata but not obj metadata, so needs a delete
                 std::map<std::string, std::string> metadataSql;
-                metadataSql["property_name"] = quote(key);
-                metadataSql["property_value"] = quote(val);
+                metadataSql.emplace("property_name", quote(key));
+                metadataSql.emplace("property_value", quote(val));
                 operations.push_back(std::make_shared<AddUpdateTable>(METADATA_TABLE, std::move(metadataSql), Operation::Delete));
             }
         }
@@ -2351,7 +2351,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
 void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
     std::vector<std::shared_ptr<AddUpdateTable>>& operations)
 {
-    auto resources = obj->getResources();
+    const auto& resources = obj->getResources();
     if (op == Operation::Insert) {
         size_t res_id = 0;
         for (auto&& resource : resources) {
