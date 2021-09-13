@@ -238,6 +238,8 @@ private:
             , operation(operation)
         {
         }
+        AddUpdateTable(const AddUpdateTable&) = delete;
+        AddUpdateTable(AddUpdateTable&&) = default;
         [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
         [[nodiscard]] const std::map<std::string, std::string>& getDict() const noexcept { return dict; }
         [[nodiscard]] Operation getOperation() const noexcept { return operation; }
@@ -247,17 +249,17 @@ private:
         std::map<std::string, std::string> dict;
         Operation operation;
     };
-    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
+    std::vector<AddUpdateTable> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
 
     void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
+        std::vector<AddUpdateTable>& operations);
 
     void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
+        std::vector<AddUpdateTable>& operations);
 
-    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
-    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
+    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
+    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
+    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<std::int32_t>& objectIDs);
