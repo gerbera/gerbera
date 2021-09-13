@@ -241,7 +241,7 @@ public:
     }
 
     /// \brief Query entire metadata dictionary.
-    std::map<std::string, std::string> getMetadata() const { return metadata; }
+    const std::map<std::string, std::string>& getMetadata() const { return metadata; }
 
     /// \brief Set entire metadata dictionary.
     void setMetadata(const std::map<std::string, std::string>& metadata)

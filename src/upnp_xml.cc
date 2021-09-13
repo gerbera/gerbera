@@ -447,7 +447,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& 
 
 std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item)
 {
-    auto resources = item->getResources();
+    const auto& resources = item->getResources();
     auto resFound = std::find_if(resources.begin(), resources.end(),
         [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
     if (resFound != resources.end()) {
