@@ -230,15 +230,15 @@ private:
     /* helper class and helper function for addObject and updateObject */
     class AddUpdateTable {
     public:
-        AddUpdateTable(std::string tableName, std::map<std::string, std::string>&& dict, Operation operation)
+        AddUpdateTable(std::string tableName, std::map<std::string, std::string>&& dict, Operation operation) noexcept
             : tableName(std::move(tableName))
             , dict(std::move(dict))
             , operation(operation)
         {
         }
-        [[nodiscard]] std::string getTableName() const { return tableName; }
-        [[nodiscard]] std::map<std::string, std::string> getDict() const { return dict; }
-        [[nodiscard]] Operation getOperation() const { return operation; }
+        [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
+        [[nodiscard]] const std::map<std::string, std::string>& getDict() const noexcept { return dict; }
+        [[nodiscard]] Operation getOperation() const noexcept { return operation; }
 
     protected:
         std::string tableName;
