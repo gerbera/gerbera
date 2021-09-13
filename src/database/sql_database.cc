@@ -2281,7 +2281,8 @@ void SQLDatabase::setFsRootName(const std::string& rootName)
 
 void SQLDatabase::clearFlagInDB(int flag)
 {
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} & ~{3}) WHERE {0}flags{1} & {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, flag));
+    auto sql = fmt::format("UPDATE {0} SET {1} = ({1} & ~{2}) WHERE {1} & {2}", identifier(CDS_OBJECT_TABLE), identifier("flags"), flag);
+    exec(sql);
 }
 
 void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
