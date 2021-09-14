@@ -102,7 +102,7 @@ static void signalHandler(int signum)
 
     if (signum == SIGSEGV) {
         log_error("This should never happen {}:{}, killing Gerbera!", errno, std::strerror(errno));
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         _ctx.shutdown_flag++;
@@ -112,7 +112,7 @@ static void signalHandler(int signum)
             log_info("Gerbera still shutting down, signal again to kill.");
         } else if (_ctx.shutdown_flag > 2) {
             log_error("Clean shutdown failed, killing Gerbera!");
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         }
     } else if (signum == SIGHUP) {
         _ctx.restart_flag = 1;
@@ -178,12 +178,12 @@ int main(int argc, char** argv, char** envp)
 
         if (opts.count("help") > 0) {
             std::cout << options.help({ "", "Group" }) << std::endl;
-            exit(EXIT_SUCCESS);
+            std::exit(EXIT_SUCCESS);
         }
 
         if (opts.count("version") > 0) {
             printCopyright();
-            exit(EXIT_SUCCESS);
+            std::exit(EXIT_SUCCESS);
         }
 
         if (opts.count("compile-info") > 0) {
@@ -201,7 +201,7 @@ int main(int argc, char** argv, char** envp)
                 std::cout << "Git Commit: " << GIT_COMMIT_HASH << std::endl;
             }
 
-            exit(EXIT_SUCCESS);
+            std::exit(EXIT_SUCCESS);
         }
 
         bool debug = opts["debug"].as<bool>();
@@ -242,7 +242,7 @@ int main(int argc, char** argv, char** envp)
             auto user_id = getpwnam(user->c_str());
             if (!user_id) {
                 log_error("Invalid user requested.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // set home according to /etc/passwd entry
@@ -253,7 +253,7 @@ int main(int argc, char** argv, char** envp)
             // we need to be euid root to become requested user/group
             if (actual_euid != 0) {
                 log_error("Need to be root to change user.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // set all uids, gids and add. groups
@@ -267,7 +267,7 @@ int main(int argc, char** argv, char** envp)
             if (0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) || 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
 #endif
                 log_error("Unable to change user.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
             log_info("Dropped to User: {}", user->c_str());
         }
@@ -281,29 +281,29 @@ int main(int argc, char** argv, char** envp)
             pid = fork();
             if (pid < 0) {
                 log_error("Unable to fork.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // terminate parent
             if (pid > 0)
-                exit(EXIT_SUCCESS);
+                std::exit(EXIT_SUCCESS);
 
             // become session leader
             if (setsid() < 0) {
                 log_error("Unable to setsid.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // second fork
             pid = fork();
             if (pid < 0) {
                 log_error("Unable to fork.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
 
             // terminate parent
             if (pid > 0)
-                exit(EXIT_SUCCESS);
+                std::exit(EXIT_SUCCESS);
 
             // set new file permissions
             umask(0);
@@ -311,7 +311,7 @@ int main(int argc, char** argv, char** envp)
             // change dir to /
             if (chdir("/")) {
                 log_error("Unable to chdir to root dir.");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
             // close open filedescriptors belonging to a tty
             for (auto fd = int(sysconf(_SC_OPEN_MAX)); fd >= 0; fd--) {
@@ -383,7 +383,7 @@ int main(int argc, char** argv, char** envp)
 
             if (!home.has_value()) {
                 log_error("Could not determine users home directory");
-                exit(EXIT_FAILURE);
+                std::exit(EXIT_FAILURE);
             }
             log_debug("Home detected as: {}", home->c_str());
         }
@@ -417,7 +417,7 @@ int main(int argc, char** argv, char** envp)
             }
             std::string generated = configGenerator.generate(home.value_or(""), confdir.value_or(""), dataDir.value_or(""), magic.value_or(""));
             std::cout << generated.c_str() << std::endl;
-            exit(EXIT_SUCCESS);
+            std::exit(EXIT_SUCCESS);
         }
 
         std::optional<in_port_t> portnum;
@@ -448,10 +448,10 @@ int main(int argc, char** argv, char** envp)
             portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         }
 
         sigset_t mask_set;
@@ -493,10 +493,10 @@ int main(int argc, char** argv, char** envp)
                 log_error("{}", e.what());
             }
 
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
-            exit(EXIT_FAILURE);
+            std::exit(EXIT_FAILURE);
         }
 
         if (opts.count("add-file") > 0) {
@@ -519,7 +519,7 @@ int main(int argc, char** argv, char** envp)
                     }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
-                    exit(EXIT_FAILURE);
+                    std::exit(EXIT_FAILURE);
                 }
             }
         }
@@ -549,11 +549,11 @@ int main(int argc, char** argv, char** envp)
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit
-                        exit(EXIT_FAILURE);
+                        std::exit(EXIT_FAILURE);
                     } catch (const std::runtime_error& e) {
                         log_error("Error reloading configuration: {}",
                             e.what());
-                        exit(EXIT_FAILURE);
+                        std::exit(EXIT_FAILURE);
                     }
 
                     ///  \todo fix this for SIGHUP
@@ -597,9 +597,9 @@ int main(int argc, char** argv, char** envp)
         }
 
         log_info("Gerbera exiting. Have a nice day.");
-        exit(ret);
+        std::exit(ret);
     } catch (const cxxopts::OptionException& e) {
         std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
 }
