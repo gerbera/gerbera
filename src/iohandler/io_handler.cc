@@ -48,7 +48,7 @@ void IOHandler::open(enum UpnpOpenFileMode mode)
 }
 
 /// \fn static int web_read (UpnpWebFileHandle f, char *buf,
-///                          size_t length)
+///                          std::size_t length)
 /// \brief Reads a previously opened file sequentially.
 /// \param f Handle of the file.
 /// \param buf  This buffer will be filled by fread.
@@ -60,13 +60,13 @@ void IOHandler::open(enum UpnpOpenFileMode mode)
 ///
 /// \retval 0   EOF encountered.
 /// \retval -1  Error.
-size_t IOHandler::read(char* buf, size_t length)
+std::size_t IOHandler::read(char* buf, std::size_t length)
 {
     return -1;
 }
 
 /// \fn static int web_write (UpnpWebFileHandle f,char *buf,
-///                           size_t length)
+///                           std::size_t length)
 /// \brief Writes to a previously opened file sequentially.
 /// \param f Handle of the file.
 /// \param buf This buffer will be filled by fwrite.
@@ -81,7 +81,7 @@ size_t IOHandler::read(char* buf, size_t length)
 /// \retval Actual number of bytes written.
 ///
 /// \warning Currently this function is not supported.
-size_t IOHandler::write(char* buf, size_t length)
+std::size_t IOHandler::write(char* buf, std::size_t length)
 {
     return 0;
 }

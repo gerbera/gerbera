@@ -63,11 +63,9 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
     }
 }
 
-size_t FileIOHandler::read(char* buf, size_t length)
+std::size_t FileIOHandler::read(char* buf, std::size_t length)
 {
-    size_t ret = 0;
-
-    ret = fread(buf, sizeof(char), length, f);
+    std::size_t ret = fread(buf, sizeof(char), length, f);
 
     if (ret == 0) {
         if (feof(f))
@@ -79,13 +77,9 @@ size_t FileIOHandler::read(char* buf, size_t length)
     return ret;
 }
 
-size_t FileIOHandler::write(char* buf, size_t length)
+std::size_t FileIOHandler::write(char* buf, std::size_t length)
 {
-    size_t ret = 0;
-
-    ret = fwrite(buf, sizeof(char), length, f);
-
-    return ret;
+    return fwrite(buf, sizeof(char), length, f);
 }
 
 void FileIOHandler::seek(off_t offset, int whence)

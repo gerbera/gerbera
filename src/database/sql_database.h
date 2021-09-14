@@ -172,7 +172,7 @@ public:
     static std::string getSearchCapabilities();
 
     void clearFlagInDB(int flag) override;
-    unsigned int getHash(size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
+    unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
 
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);

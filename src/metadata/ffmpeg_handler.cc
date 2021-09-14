@@ -206,7 +206,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     // video resolution, audio sampling rate, nr of audio channels
     audioset = false;
     videoset = false;
-    for (size_t i = 0; i < pFormatCtx->nb_streams; i++) {
+    for (std::size_t i = 0; i < pFormatCtx->nb_streams; i++) {
         AVStream* st = pFormatCtx->streams[i];
 
         if ((st) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {

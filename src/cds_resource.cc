@@ -153,7 +153,7 @@ void CdsResource::decode(const std::string& options, const std::string& paramete
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 {
     std::vector<std::string> parts = splitString(serial, RESOURCE_PART_SEP, true);
-    size_t size = parts.size();
+    auto size = parts.size();
     if (size < 2 || size > 4)
         throw_std_runtime_error("Could not parse resources");
 

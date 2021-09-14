@@ -69,7 +69,7 @@ void Database::stripAndUnescapeVirtualContainerFromPath(std::string virtualPath,
     if (virtualPath.at(0) != VIRTUAL_CONTAINER_SEPARATOR) {
         throw_std_runtime_error("Got non-absolute virtual path {}; needs to start with: {}", virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
     }
-    size_t sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR);
+    auto sep = virtualPath.rfind(VIRTUAL_CONTAINER_SEPARATOR);
     if (sep == 0) {
         first = "/";
         last = virtualPath.substr(1);

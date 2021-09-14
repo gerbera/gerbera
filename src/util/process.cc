@@ -67,7 +67,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
         log_debug("Failed to open input file {}: {}", input_file, std::strerror(errno));
         throw_std_runtime_error("Failed to open input file {}: {}", input_file, std::strerror(errno));
     }
-    size_t ret = write(fd, input.c_str(), input.length());
+    std::size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
     if (ret < input.length()) {
         log_debug("Failed to write to {}: {}", input, std::strerror(errno));

@@ -1303,7 +1303,7 @@ std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::
         co = std::find_if(complexOptions.begin(), complexOptions.end(),
             [&](auto&& s) {
                 auto uPath = s->getUniquePath();
-                size_t len = std::min(uPath.length(), key.length());
+                auto len = std::min(uPath.length(), key.length());
                 return key.substr(0, len) == uPath.substr(0, len);
             });
         return (co != complexOptions.end()) ? *co : nullptr;

@@ -57,7 +57,7 @@ public:
 
     ///
     void open(enum UpnpOpenFileMode mode) override;
-    size_t read(char* buf, size_t length) override;
+    std::size_t read(char* buf, std::size_t length) override;
     void seek(off_t offset, int whence) override;
     off_t tell() override;
     void close() override;

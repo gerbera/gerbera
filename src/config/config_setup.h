@@ -81,7 +81,7 @@ protected:
     std::string defaultValue;
     const char* help;
 
-    static size_t extractIndex(const std::string& item);
+    static std::size_t extractIndex(const std::string& item);
 
     void setOption(const std::shared_ptr<Config>& config)
     {
@@ -456,7 +456,7 @@ protected:
     /// This function will create an array like that: ["data", "otherdata"]
     bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status = "") const;
 
 public:
     config_option_t nodeOption;
@@ -529,7 +529,7 @@ protected:
     /// key:value paris: "1":"2", "3":"4"
     bool createOptionFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const;
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
     config_option_t nodeOption {};
@@ -584,7 +584,7 @@ protected:
     /// \param scanmode add only directories with the specified scanmode to the array
     bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, ScanMode scanmode)
@@ -644,7 +644,7 @@ protected:
     /// \param element starting element of the nodeset.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigClientSetup(config_option_t option, const char* xpath, const char* help)
@@ -671,7 +671,7 @@ protected:
     /// \param element starting element of the nodeset.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigDirectorySetup(config_option_t option, const char* xpath, const char* help)
@@ -699,7 +699,7 @@ protected:
     /// \param element starting element of the nodeset.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result);
 
-    bool updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigDynamicContentSetup(config_option_t option, const char* xpath, const char* help)

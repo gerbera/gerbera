@@ -158,14 +158,14 @@ void reduceString(std::string& str, char ch)
 
 void replaceString(std::string& str, std::string_view from, std::string_view to)
 {
-    size_t start_pos = str.find(from);
+    auto start_pos = str.find(from);
     if (start_pos != std::string::npos)
         str.replace(start_pos, from.length(), to);
 }
 
 void replaceAllString(std::string& str, std::string_view from, std::string_view to)
 {
-    size_t start_pos = str.find(from);
+    auto start_pos = str.find(from);
     while (start_pos != std::string::npos) {
         str.replace(start_pos, from.length(), to);
         start_pos = str.find(from, start_pos + to.length());
@@ -344,7 +344,7 @@ static constexpr auto HEX_CHARS2 = "0123456789ABCDEF";
 std::string urlEscape(std::string_view str)
 {
     std::ostringstream buf;
-    for (size_t i = 0; i < str.length();) {
+    for (std::size_t i = 0; i < str.length();) {
         auto c = str[i];
         int cplen = 1;
         if ((c & 0xf8) == 0xf0)
@@ -456,8 +456,8 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
 // object_id=720&res_id=0
 void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* dict)
 {
-    size_t pos;
-    size_t last_pos = 0;
+    std::size_t pos;
+    std::size_t last_pos = 0;
     do {
         pos = url.find('/', last_pos);
         if (pos == std::string::npos || pos < last_pos + 1)
@@ -495,7 +495,7 @@ std::string readTextFile(const fs::path& path)
     }
     std::ostringstream buf;
     std::array<char, 1024> buffer;
-    size_t bytesRead;
+    std::size_t bytesRead;
     while ((bytesRead = std::fread(buffer.data(), 1, buffer.size(), f)) > 0) {
         buf << std::string(buffer.data(), bytesRead);
     }
@@ -514,7 +514,7 @@ void writeTextFile(const fs::path& path, std::string_view contents)
         throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
     }
 
-    size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), f);
+    std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
         fclose(f);
 
@@ -589,7 +589,7 @@ std::string getMTFromProtocolInfo(std::string_view protocol)
 
 std::string getProtocol(const std::string& protocolInfo)
 {
-    size_t pos = protocolInfo.find(':');
+    auto pos = protocolInfo.find(':');
     return (pos == std::string::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
@@ -656,21 +656,21 @@ bool checkResolution(std::string_view resolution, int* x, int* y)
 std::string escape(std::string string, char escape_char, char to_escape)
 {
     std::ostringstream buf;
-    size_t len = string.length();
+    auto len = string.length();
 
     bool possible_more_esc = true;
     bool possible_more_char = true;
 
-    size_t last = 0;
+    std::size_t last = 0;
     do {
-        size_t next_esc = std::string::npos;
+        auto next_esc = std::string::npos;
         if (possible_more_esc) {
             next_esc = string.find(escape_char, last);
             if (next_esc == std::string::npos)
                 possible_more_esc = false;
         }
 
-        size_t next = std::string::npos;
+        auto next = std::string::npos;
         if (possible_more_char) {
             next = string.find(to_escape, last);
             if (next == std::string::npos)
@@ -701,11 +701,11 @@ std::string escape(std::string string, char escape_char, char to_escape)
 std::string unescape(std::string string, char escape)
 {
     std::ostringstream buf;
-    size_t len = string.length();
+    auto len = string.length();
 
-    size_t last = std::string::npos;
+    auto last = std::string::npos;
     do {
-        size_t next = string.find(escape, last + 1);
+        auto next = string.find(escape, last + 1);
         if (next == std::string::npos)
             next = len;
         if (last == std::string::npos)
@@ -819,22 +819,22 @@ std::vector<std::string> populateCommandLine(const std::string& line,
         return params;
 
     for (auto&& param : params) {
-        size_t inPos = param.find("%in");
+        auto inPos = param.find("%in");
         if (inPos != std::string::npos) {
             std::string newParam = param.replace(inPos, 3, in);
         }
 
-        size_t outPos = param.find("%out");
+        auto outPos = param.find("%out");
         if (outPos != std::string::npos) {
             std::string newParam = param.replace(outPos, 4, out);
         }
 
-        size_t rangePos = param.find("%range");
+        auto rangePos = param.find("%range");
         if (rangePos != std::string::npos) {
             std::string newParam = param.replace(rangePos, 6, range);
         }
 
-        size_t titlePos = param.find("%title");
+        auto titlePos = param.find("%title");
         if (titlePos != std::string::npos) {
             std::string newParam = param.replace(titlePos, 6, title);
         }
@@ -978,7 +978,7 @@ fs::path getLastPath(const fs::path& path)
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 {
     ssize_t pos = -1;
-    size_t len = str.length();
+    auto len = str.length();
 
     if ((len == 0) || (cutpos > ssize_t(len)))
         return pos;
@@ -1053,7 +1053,7 @@ std::string getAVIFourCC(std::string_view avi_filename)
 
     auto buffer = new char[FCC_OFFSET + 6];
 
-    size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
+    std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     fclose(f);
     if (rb != FCC_OFFSET + 4) {
         delete[] buffer;

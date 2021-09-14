@@ -97,11 +97,11 @@ public:
     /// \param ifs the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
-    void setBufferOptions(size_t bs, size_t cs, size_t ifs);
+    void setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs);
 
-    size_t getBufferSize() const { return buffer_size; }
-    size_t getBufferChunkSize() const { return chunk_size; }
-    size_t getBufferInitialFillSize() const { return initial_fill_size; }
+    std::size_t getBufferSize() const { return buffer_size; }
+    std::size_t getBufferChunkSize() const { return chunk_size; }
+    std::size_t getBufferInitialFillSize() const { return initial_fill_size; }
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
@@ -197,9 +197,9 @@ protected:
     bool hide_orig_res {};
     bool thumbnail {};
     bool force_chunked { true };
-    size_t buffer_size {};
-    size_t chunk_size {};
-    size_t initial_fill_size {};
+    std::size_t buffer_size {};
+    std::size_t chunk_size {};
+    std::size_t initial_fill_size {};
     transcoding_type_t tr_type;
     int number_of_channels { SOURCE };
     int sample_frequency { SOURCE };
@@ -218,7 +218,7 @@ public:
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType) const;
     std::map<std::string, std::shared_ptr<TranscodingProfileMap>> getList() const { return list; }
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
-    size_t size() const { return list.size(); }
+    std::size_t size() const { return list.size(); }
     void setKey(const std::string& oldKey, const std::string& newKey)
     {
         auto oldValue = list[oldKey];

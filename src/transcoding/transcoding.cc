@@ -39,7 +39,7 @@ TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string n
 {
 }
 
-void TranscodingProfile::setBufferOptions(size_t bs, size_t cs, size_t ifs)
+void TranscodingProfile::setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs)
 {
     buffer_size = bs;
     chunk_size = cs;

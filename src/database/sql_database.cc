@@ -431,7 +431,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     if (std::string_view(root.name()) != "upgrade")
         throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
 
-    size_t version = 1;
+    std::size_t version = 1;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
         std::vector<std::pair<std::string, std::string>> versionCmds;
@@ -920,7 +920,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     if (config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
-            for (size_t count = 0; count < dynContent->size(); count++) {
+            for (std::size_t count = 0; count < dynContent->size(); count++) {
                 auto dynConfig = dynContent->get(count);
                 if (parent->getLocation() == dynConfig->getLocation().parent_path() || (parent->getLocation().empty() && dynConfig->getLocation().parent_path() == "/")) {
                     int dynId = -(parent->getID() + 1) * 10000 - count;
@@ -995,8 +995,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     auto orderBy = fmt::format(" ORDER BY {}", orderByCode());
     std::string limit;
 
-    size_t startingIndex = param.getStartingIndex();
-    size_t requestedCount = param.getRequestedCount();
+    std::size_t startingIndex = param.getStartingIndex();
+    std::size_t requestedCount = param.getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
         limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }
@@ -1528,7 +1528,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
-    size_t count = list.size();
+    std::size_t count = list.size();
     if (count <= 0)
         return nullptr;
 
@@ -1921,9 +1921,9 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<Autoscan
     exec(fmt::format("UPDATE {0}{2}{1} SET {0}touched{1} = {3} WHERE {0}persistent{1} = {4} AND {0}scan_mode{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, mapBool(false), mapBool(true), quote(AutoscanDirectory::mapScanmode(scanmode))));
     commit("updateAutoscanList");
 
-    size_t listSize = list->size();
+    std::size_t listSize = list->size();
     log_debug("updating/adding persistent autoscans (count: {})", listSize);
-    for (size_t i = 0; i < listSize; i++) {
+    for (std::size_t i = 0; i < listSize; i++) {
         log_debug("getting ad {} from list..", i);
         auto ad = list->get(i);
         if (!ad)
@@ -2353,7 +2353,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
 {
     const auto& resources = obj->getResources();
     if (op == Operation::Insert) {
-        size_t res_id = 0;
+        std::size_t res_id = 0;
         for (auto&& resource : resources) {
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(res_id);
@@ -2375,7 +2375,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
     } else {
         // get current resoures from DB
         auto dbResources = retrieveResourcesForObject(obj->getID());
-        size_t res_id = 0;
+        std::size_t res_id = 0;
         for (auto&& resource : resources) {
             Operation operation = res_id < dbResources.size() ? Operation::Update : Operation::Insert;
             std::map<std::string, std::string> resourceSql;
@@ -2607,7 +2607,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
     if (!resourcesStr.empty()) {
         log_debug("Migrating resources for cds object {}", objectId);
         auto resources = splitString(resourcesStr, RESOURCE_SEP);
-        size_t res_id = 0;
+        std::size_t res_id = 0;
         for (auto&& resString : resources) {
             std::map<std::string, std::string> resourceSQLVals;
             auto&& resource = CdsResource::decode(resString);

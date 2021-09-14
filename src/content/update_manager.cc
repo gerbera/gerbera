@@ -88,8 +88,8 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
         this->flushPolicy = flushPolicy;
         signal = true;
     }
-    size_t size = objectIDs.size();
-    size_t hashSize = objectIDHash.size();
+    auto size = objectIDs.size();
+    auto hashSize = objectIDHash.size();
 
     bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
     for (int objectID : objectIDs) {

@@ -102,8 +102,8 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
 {
     // e.g. used for M_ALBUMARTIST
     // name@attr[val] => <name attr="val">
-    std::size_t i = key.find('@');
-    std::size_t j = key.find('[', i + 1);
+    auto i = key.find('@');
+    auto j = key.find('[', i + 1);
     if (i != std::string::npos
         && j != std::string::npos
         && key[key.length() - 1] == ']') {
@@ -118,7 +118,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
 {
     auto result = parent.append_child("");
 
@@ -634,7 +634,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         std::string protocolInfo = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
-        size_t pos = mimeType.find(';');
+        auto pos = mimeType.find(';');
         if (pos != std::string::npos) {
             mimeType = mimeType.substr(0, pos);
         }

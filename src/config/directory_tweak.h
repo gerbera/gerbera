@@ -56,31 +56,31 @@ public:
     ///
     /// \param dir DirectoryTweak to add to the list.
     /// \return scanID of the newly added DirectoryTweak
-    void add(const std::shared_ptr<DirectoryTweak>& dir, size_t index = std::numeric_limits<std::size_t>::max());
+    void add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
 
-    std::shared_ptr<DirectoryTweak> get(size_t id, bool edit = false);
+    std::shared_ptr<DirectoryTweak> get(std::size_t id, bool edit = false);
 
     std::shared_ptr<DirectoryTweak> get(const fs::path& location);
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    size_t size() const { return list.size(); }
+    std::size_t size() const { return list.size(); }
 
     /// \brief removes the DirectoryTweak given by its ID
-    void remove(size_t id, bool edit = false);
+    void remove(std::size_t id, bool edit = false);
 
     /// \brief returns a copy of the directory config list in the form of an array
     std::vector<std::shared_ptr<DirectoryTweak>> getArrayCopy();
 
 protected:
-    size_t origSize {};
-    std::map<size_t, std::shared_ptr<DirectoryTweak>> indexMap;
+    std::size_t origSize {};
+    std::map<std::size_t, std::shared_ptr<DirectoryTweak>> indexMap;
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DirectoryTweak>> list;
-    void _add(const std::shared_ptr<DirectoryTweak>& dir, size_t index);
+    void _add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index);
 };
 
 #define SETTING_FANART "FanArt"

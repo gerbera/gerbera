@@ -50,14 +50,14 @@ public:
     /// \param initialFillSize the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
-    BufferedIOHandler(std::shared_ptr<Config> config, std::unique_ptr<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize);
+    BufferedIOHandler(std::shared_ptr<Config> config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize);
 
     void open(enum UpnpOpenFileMode mode) override;
     void close() override;
 
 private:
     std::unique_ptr<IOHandler> underlyingHandler;
-    size_t maxChunkSize;
+    std::size_t maxChunkSize;
 
     void threadProc() override;
 };

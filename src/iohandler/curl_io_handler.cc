@@ -35,7 +35,7 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& URL, CURL* curl_handle, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
 {
     if (URL.empty())
@@ -139,10 +139,10 @@ void CurlIOHandler::threadProc()
     threadRunner->notify();
 }
 
-size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* data)
+std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t nmemb, void* data)
 {
     auto ego = static_cast<CurlIOHandler*>(data);
-    size_t wantWrite = size * nmemb;
+    std::size_t wantWrite = size * nmemb;
 
     assert(wantWrite <= ego->bufSize);
     auto& threadRunner = ego->threadRunner;
@@ -208,13 +208,13 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
             if (bufFree < 0)
                 bufFree += ego->bufSize;
         }
-    } while (size_t(bufFree) < wantWrite);
+    } while (std::size_t(bufFree) < wantWrite);
 
-    size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
-    size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
-    size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
+    std::size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
+    std::size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
+    std::size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
 
-    size_t bLocal = ego->b;
+    std::size_t bLocal = ego->b;
 
     lock.unlock();
 
@@ -236,7 +236,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
         auto currentFillSize = int(ego->b - ego->a);
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
-        if (size_t(currentFillSize) >= ego->initialFillSize) {
+        if (std::size_t(currentFillSize) >= ego->initialFillSize) {
             log_debug("buffer: initial fillsize reached");
             ego->waitForInitialFillSize = false;
             threadRunner->notify();

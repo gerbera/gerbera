@@ -75,7 +75,7 @@ public:
     FileIOCallback(const FileIOCallback&) = delete;
     FileIOCallback& operator=(const FileIOCallback&) = delete;
 
-    uint32 read(void* buffer, size_t size) override
+    uint32 read(void* buffer, std::size_t size) override
     {
         assert(file);
         if (size == 0)
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    size_t write(const void* p_buffer, size_t i_size) override
+    std::size_t write(const void* p_buffer, std::size_t i_size) override
     {
         // not needed
         return 0;

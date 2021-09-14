@@ -289,7 +289,7 @@ public:
     }
 
     /// \brief Get number of resource tags
-    size_t getResourceCount() const { return resources.size(); }
+    std::size_t getResourceCount() const { return resources.size(); }
 
     /// \brief Query resources
     const std::vector<std::shared_ptr<CdsResource>>& getResources() const
@@ -319,7 +319,7 @@ public:
     }
 
     /// \brief Query resource tag with the given index
-    std::shared_ptr<CdsResource> getResource(size_t index) const
+    std::shared_ptr<CdsResource> getResource(std::size_t index) const
     {
         return resources.at(index);
     }

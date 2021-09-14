@@ -50,13 +50,13 @@ void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const 
         resourcePatterns.push_back(tweak->getResourceFile());
 }
 
-void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
+void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {
     AutoLock lock(mutex);
     _add(dir, index);
 }
 
-void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_t index)
+void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
@@ -71,7 +71,7 @@ void DirectoryConfigList::_add(const std::shared_ptr<DirectoryTweak>& dir, size_
     indexMap[index] = dir;
 }
 
-size_t DirectoryConfigList::getEditSize() const
+std::size_t DirectoryConfigList::getEditSize() const
 {
     if (indexMap.empty()) {
         return 0;
@@ -85,7 +85,7 @@ std::vector<std::shared_ptr<DirectoryTweak>> DirectoryConfigList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(size_t id, bool edit)
+std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -113,7 +113,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& locatio
     return nullptr;
 }
 
-void DirectoryConfigList::remove(size_t id, bool edit)
+void DirectoryConfigList::remove(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
 

@@ -347,13 +347,13 @@ void AutoscanInotify::monitorNonexisting(const fs::path& path, const std::shared
 void AutoscanInotify::recheckNonexistingMonitor(int curWd, const std::vector<std::string>& pathAr, const std::shared_ptr<AutoscanDirectory>& adir)
 {
     bool first = true;
-    for (size_t i = pathAr.size() + 1; i > 0;) {
+    for (std::size_t i = pathAr.size() + 1; i > 0;) {
         i--;
         std::ostringstream buf;
         if (i == 0)
             buf << DIR_SEPARATOR;
         else {
-            for (size_t j = 0; j < i; j++) {
+            for (std::size_t j = 0; j < i; j++) {
                 buf << DIR_SEPARATOR << pathAr.at(j);
                 //                log_debug("adding: {}", pathAr->get(j)->data);
             }

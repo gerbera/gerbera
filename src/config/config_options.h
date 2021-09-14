@@ -145,7 +145,7 @@ public:
         : option(std::move(option))
     {
         this->origSize = this->option.size();
-        size_t i = 0;
+        std::size_t i = 0;
         for (auto&& [key, val] : this->option) {
             this->indexMap[i] = key;
             i++;
@@ -154,21 +154,21 @@ public:
 
     std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const override;
 
-    std::string getKey(size_t index)
+    std::string getKey(std::size_t index)
     {
         return indexMap[index];
     }
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    void setKey(size_t keyIndex, const std::string& newKey);
+    void setKey(std::size_t keyIndex, const std::string& newKey);
 
-    void setValue(size_t keyIndex, const std::string& value);
+    void setValue(std::size_t keyIndex, const std::string& value);
 
 private:
     std::map<std::string, std::string> option;
-    size_t origSize;
-    std::map<size_t, std::string> indexMap;
+    std::size_t origSize;
+    std::map<std::size_t, std::string> indexMap;
 };
 
 class ArrayOption : public ConfigOption {
@@ -177,26 +177,26 @@ public:
         : option(std::move(option))
     {
         this->origSize = this->option.size();
-        for (size_t i = 0; i < this->origSize; i++) {
+        for (std::size_t i = 0; i < this->origSize; i++) {
             this->indexMap[i] = i;
         }
     }
 
     std::vector<std::string> getArrayOption(bool forEdit = false) const override;
 
-    size_t getIndex(size_t index)
+    std::size_t getIndex(std::size_t index)
     {
         return index < indexMap.size() ? indexMap[index] : indexMap.size();
     }
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    void setItem(size_t index, const std::string& value);
+    void setItem(std::size_t index, const std::string& value);
 
 private:
     std::vector<std::string> option;
-    size_t origSize {};
-    std::map<size_t, size_t> indexMap;
+    std::size_t origSize {};
+    std::map<std::size_t, std::size_t> indexMap;
 };
 
 class AutoscanListOption : public ConfigOption {
