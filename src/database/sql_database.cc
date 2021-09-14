@@ -734,7 +734,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     }
 
     beginTransaction("updateObject");
-    for (const auto& addUpdateTable : data) {
+    for (auto&& addUpdateTable : data) {
         auto qb = [this, &obj, &addUpdateTable]() {
             Operation op = addUpdateTable.getOperation();
             switch (op) {
