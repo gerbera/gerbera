@@ -76,6 +76,12 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
+FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
+    : MetadataHandler(context)
+{
+    specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST);
+}
+
 void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
@@ -101,79 +107,75 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 {
     AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
-    metadata_fields_t field;
-    std::string value;
+    metadata_fields_t field = M_MAX;
 
+    auto propertyMap = std::map<metadata_fields_t, std::string> {
+        { M_TITLE, "title" },
+        { M_ARTIST, "artist" },
+        { M_ALBUM, "album" },
+        { M_GENRE, "genre" },
+        { M_DESCRIPTION, "description" },
+        { M_TRACKNUMBER, "track" },
+        { M_PARTNUMBER, "discnumber" },
+        { M_ALBUMARTIST, "album_artist" },
+        { M_COMPOSER, "composer" },
+    };
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
-        value = e->value;
-
-        if (strcmp(e->key, "title") == 0) {
-            log_debug("Identified metadata title: {}", e->value);
-            field = M_TITLE;
-        } else if (strcmp(e->key, "artist") == 0) {
-            log_debug("Identified metadata artist: {}", e->value);
-            field = M_ARTIST;
-        } else if (strcmp(e->key, "album") == 0) {
-            log_debug("Identified metadata album: {}", e->value);
-            field = M_ALBUM;
-        } else if (strcmp(e->key, "date") == 0) {
-            if ((value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
-                value.append("-01-01");
-                log_debug("Identified metadata date: {}", value.c_str());
+        std::string value = e->value;
+        auto it = specialPropertyMap.find(e->key);
+        if (it != specialPropertyMap.end()) {
+            // only use ffmpeg meta data if not found by other handler
+            if (item->getMetadata(it->second).empty()) {
+                log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
+                item->setMetadata(it->second, sc->convert(trimString(value)));
+                continue; // iterate while loop
             }
-            /// \toto parse possible ISO8601 timestamp
-            field = M_DATE;
-        } else if (strcmp(e->key, "creation_time") == 0) {
-            log_debug("Identified metadata creation_time: {}", e->value);
-            field = M_CREATION_DATE;
-            struct tm tm_work;
-            char m_date[] = "YYYY-mm-dd";
-            if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
-                time_t utc_time;
-                // convert creation_time to local time
-                utc_time = timegm(&tm_work);
-                if (utc_time == time_t(-1)) {
-                    continue;
-                }
-                localtime_r(&utc_time, &tm_work);
-            } else if (!strptime(e->value, "%Y-%m-%d", &tm_work)) { // use creation_time as is
-                continue;
-            }
-            strftime(m_date, sizeof(m_date), "%F", &tm_work);
-            value = m_date;
-        } else if (strcmp(e->key, "genre") == 0) {
-            log_debug("Identified metadata genre: {}", e->value);
-            field = M_GENRE;
-        } else if (strcmp(e->key, "description") == 0) {
-            log_debug("Identified metadata description: {}", e->value);
-            field = M_DESCRIPTION;
-        } else if (strcmp(e->key, "track") == 0) {
-            log_debug("Identified metadata track: {}", e->value);
-            field = M_TRACKNUMBER;
-        } else if (strcmp(e->key, "discnumber") == 0) {
-            log_debug("Identified metadata disk: {}", e->value);
-            field = M_PARTNUMBER;
-        } else if (strcmp(e->key, "album_artist") == 0) {
-            log_debug("Identified metadata album_artist: {}", e->value);
-            field = M_ALBUMARTIST;
-        } else if (strcmp(e->key, "composer") == 0) {
-            log_debug("Identified metadata composer: {}", e->value);
-            field = M_COMPOSER;
-        } else if (strcmp(e->key, "performer") == 0) {
-            log_debug("Identified metadata performer: {}", e->value);
-            field = M_CONDUCTOR;
-        } else {
-            continue;
         }
-
-        // only use ffmpeg meta data if not found by other handler
-        if (item->getMetadata(field).empty()) {
-            item->setMetadata(field, sc->convert(trimString(value)));
+        for (auto&& [fld, key] : propertyMap) {
+            if (key == e->key) {
+                // only use ffmpeg meta data if not found by other handler
+                if (item->getMetadata(fld).empty()) {
+                    log_debug("Identified default metadata '{}': {}", key, value);
+                    field = fld;
+                    item->setMetadata(field, sc->convert(trimString(value)));
+                    break; // leave for loop
+                }
+            }
+        }
+        if (field != M_MAX) {
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
-            }
-            if (field == M_PARTNUMBER) {
+            } else if (field == M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
+            }
+        } else if (strcmp(e->key, "date") == 0) {
+            field = M_DATE;
+            /// \todo parse possible ISO8601 timestamp
+            if (item->getMetadata(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
+                value.append("-01-01");
+                log_debug("Identified metadata 'date': {}", value.c_str());
+
+                item->setMetadata(field, value);
+            }
+        } else if (strcmp(e->key, "creation_time") == 0) {
+            field = M_CREATION_DATE;
+            if (item->getMetadata(field).empty()) {
+                log_debug("Identified metadata 'creation_time': {}", e->value);
+                struct tm tm_work;
+                char m_date[] = "YYYY-mm-dd";
+                if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
+                    time_t utc_time;
+                    // convert creation_time to local time
+                    utc_time = timegm(&tm_work);
+                    if (utc_time == time_t(-1)) {
+                        continue;
+                    }
+                    localtime_r(&utc_time, &tm_work);
+                } else if (!strptime(e->value, "%Y-%m-%d", &tm_work)) { // use creation_time as is
+                    continue;
+                }
+                strftime(m_date, sizeof(m_date), "%F", &tm_work);
+                item->setMetadata(field, m_date);
             }
         }
     }

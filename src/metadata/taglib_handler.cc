@@ -58,112 +58,123 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
+    specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST);
 }
 
 void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
 {
-    if (!tag)
-        return;
-
-    if (tag->isEmpty())
+    if (!tag || tag->isEmpty())
         return;
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
     TagLib::String val;
-    TagLib::StringList list;
     std::string value;
-    unsigned int i;
-    bool checkLegacy = true;
+    bool checkLegacy = false;
+
+    auto propertyMap = std::map<metadata_fields_t, std::string> {
+        { M_ALBUMARTIST, "ALBUMARTIST" },
+        { M_COMPOSER, "COMPOSER" },
+        { M_CONDUCTOR, "CONDUCTOR" },
+        { M_ORCHESTRA, "ORCHESTRA" },
+    };
 
     switch (field) {
     case M_TITLE:
         val = tag->title();
-        checkLegacy = false;
         break;
     case M_ARTIST:
         val = tag->artist();
+        checkLegacy = true;
         break;
     case M_ALBUM:
         val = tag->album();
-        checkLegacy = false;
         break;
     case M_DATE:
-    case M_UPNP_DATE:
-        i = tag->year();
+    case M_UPNP_DATE: {
+        unsigned int i = tag->year();
         if (i == 0)
             return;
         value = fmt::format("{}-01-01", i);
         break;
+    }
     case M_GENRE:
         val = tag->genre();
-        checkLegacy = false;
         break;
     case M_DESCRIPTION:
         val = tag->comment();
-        checkLegacy = false;
         break;
-    case M_TRACKNUMBER:
-        i = tag->track();
+    case M_TRACKNUMBER: {
+        unsigned int i = tag->track();
         if (i == 0)
             return;
         value = fmt::to_string(i);
-        item->setTrackNumber(int(i));
         break;
-    case M_PARTNUMBER:
-        list = file.properties()["DISCNUMBER"];
+    }
+    case M_PARTNUMBER: {
+        auto list = file.properties()["DISCNUMBER"];
         if (!list.isEmpty()) {
             value = list[0].toCString(true);
-            item->setPartNumber(stoiString(value));
         } else {
             list = file.properties()["TPOS"];
             if (list.isEmpty())
                 return;
             value = list[0].toCString(true);
-            item->setPartNumber(stoiString(value));
         }
         break;
-    case M_ALBUMARTIST:
+    }
+    default: {
+        auto it = propertyMap.find(field);
+        if (it == propertyMap.end())
+            return;
         // we have to use file.properties() instead of tag->properties()
         // because the latter returns incomplete properties
         // https://mail.kde.org/pipermail/taglib-devel/2015-May/002729.html
-        list = file.properties()["ALBUMARTIST"];
+        auto list = file.properties()[it->second];
         if (list.isEmpty())
             return;
+        checkLegacy = true;
         val = list.toString(entrySeparator);
-        break;
-    case M_COMPOSER:
-        list = file.properties()["COMPOSER"];
-        if (list.isEmpty())
-            return;
-        val = list.toString(entrySeparator);
-        break;
-    case M_CONDUCTOR:
-        list = file.properties()["CONDUCTOR"];
-        if (list.isEmpty())
-            return;
-        val = list.toString(entrySeparator);
-        break;
-    case M_ORCHESTRA:
-        list = file.properties()["ORCHESTRA"];
-        if (list.isEmpty())
-            return;
-        val = list.toString(entrySeparator);
-        break;
-    default:
-        return;
+    }
     }
 
-    if ((field != M_DATE) && (field != M_CREATION_DATE) && (field != M_TRACKNUMBER) && (field != M_PARTNUMBER)) {
+    if (value.empty()) {
         if (!legacyEntrySeparator.empty() && checkLegacy)
             val = val.split(legacyEntrySeparator).toString(entrySeparator);
         value = val.toCString(true);
+    } else if (field == M_TRACKNUMBER) {
+        item->setTrackNumber(stoiString(value));
+    } else if (field == M_PARTNUMBER) {
+        item->setPartNumber(stoiString(value));
     }
 
     trimStringInPlace(value);
     if (!value.empty()) {
         item->setMetadata(field, sc->convert(value));
-        //        log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
+        // log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
+    }
+}
+
+void TagLibHandler::addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
+{
+    if (!tag || tag->isEmpty())
+        return;
+
+    auto sc = StringConverter::i2i(config); // sure is sure
+
+    for (auto&& [key, meta] : specialPropertyMap) {
+        auto list = file.properties()[key];
+        if (list.isEmpty())
+            return;
+        auto val = list.toString(entrySeparator);
+        if (!legacyEntrySeparator.empty())
+            val = val.split(legacyEntrySeparator).toString(entrySeparator);
+        std::string value = val.toCString(true);
+        trimStringInPlace(value);
+        if (!value.empty()) {
+            item->setMetadata(meta, sc->convert(value));
+            log_debug("Setting metadata '{}' on item as '{}': '{}'", key, meta, sc->convert(value));
+        }
     }
 }
 
@@ -173,8 +184,10 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
         return;
 
     const TagLib::Tag* tag = file.tag();
-    for (auto&& key : mt_keys)
-        addField(key.first, file, tag, item);
+    for (auto&& [field, key] : mt_keys)
+        addField(field, file, tag, item);
+
+    addSpecialFields(file, tag, item);
 
     const TagLib::AudioProperties* audioProps = file.audioProperties();
     if (!audioProps)

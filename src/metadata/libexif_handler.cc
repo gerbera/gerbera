@@ -172,7 +172,8 @@ static int getTagFromString(const std::string& tag)
     return result;
 }
 
-void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags)
+void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item,
+    const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags)
 {
     constexpr auto BUFLEN = 4096;
     std::array<char, BUFLEN> exif_entry_buffer;
@@ -221,6 +222,18 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
             break;
         }
 
+        // if there are any metadata tags that the user wants - add them
+        for (auto&& [tag, key] : metatags) {
+            if (!tag.empty()) {
+                if (e->tag == getTagFromString(tag)) {
+                    auto value = trimString(exif_egv(e));
+                    if (!value.empty()) {
+                        item->setMetadata(key, sc->convert(value));
+                        log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
+                    }
+                }
+            }
+        }
         // if there are any auxilary tags that the user wants - add them
         for (auto&& aux : auxtags) {
             if (!aux.empty()) {
@@ -251,10 +264,11 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         return;
     }
 
-    std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
+    auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST);
     for (auto&& i : ed->ifd) {
         if (i)
-            process_ifd(i, item, sc, aux);
+            process_ifd(i, item, sc, aux, meta);
     }
 
     // we got the image resolution so we can add our resource

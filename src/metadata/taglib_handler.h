@@ -62,8 +62,10 @@ public:
 private:
     std::string entrySeparator;
     std::string legacyEntrySeparator;
+    std::map<std::string, std::string> specialPropertyMap;
 
     void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
+    void addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
 
     void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
     void populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const;

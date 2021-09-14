@@ -134,13 +134,39 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         if (!comment.empty())
             item->setMetadata(M_DESCRIPTION, sc->convert(comment));
 
+        // if there are any metadata tags that the user wants - add them
+        const auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
+        if (!meta.empty()) {
+            for (auto&& [metatag, metakey] : meta) {
+                std::string metaval;
+                log_debug("metatag: {} ", metatag.c_str());
+                if (metatag.substr(0, 4) == "Exif") {
+                    md = exifData.findKey(Exiv2::ExifKey(metatag));
+                    if (md != exifData.end())
+                        metaval = md->toString();
+                } else if (metatag.substr(0, 3) == "Xmp") {
+                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(metatag));
+                    if (xmpMd != xmpData.end())
+                        metaval = xmpMd->toString();
+                } else {
+                    log_debug("Invalid meta Tag {}", metatag.c_str());
+                    break;
+                }
+                if (!metaval.empty()) {
+                    metaval = sc->convert(metaval);
+                    item->setMetadata(metakey, metaval);
+                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, metaval);
+                }
+            }
+        } else {
+            log_debug("No aux data requested");
+        }
+
         // if there are any auxilary tags that the user wants - add them
         const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         if (!aux.empty()) {
-            std::string auxval;
-
             for (auto&& auxtag : aux) {
-                auxval.clear();
+                std::string auxval;
                 log_debug("auxtag: {} ", auxtag.c_str());
                 if (auxtag.substr(0, 4) == "Exif") {
                     md = exifData.findKey(Exiv2::ExifKey(auxtag));

@@ -851,6 +851,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
@@ -860,6 +861,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
@@ -869,6 +871,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
@@ -878,6 +881,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
@@ -891,9 +895,18 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="metadata">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-data" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="add-data">
         <xs:complexType>
             <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="key" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

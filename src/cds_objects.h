@@ -239,6 +239,11 @@ public:
     {
         return getValueOrDefault(metadata, MetadataHandler::getMetaFieldName(key));
     }
+    /// \brief Query single metadata value.
+    std::string getMetadata(const std::string& key) const
+    {
+        return getValueOrDefault(metadata, key);
+    }
 
     /// \brief Query entire metadata dictionary.
     const std::map<std::string, std::string>& getMetadata() const { return metadata; }
@@ -253,6 +258,11 @@ public:
     void setMetadata(const metadata_fields_t key, const std::string& value)
     {
         metadata[MetadataHandler::getMetaFieldName(key)] = value;
+    }
+    /// \brief Set a single metadata value.
+    void setMetadata(const std::string& key, const std::string& value)
+    {
+        metadata[key] = value;
     }
 
     /// \brief Removes metadata with the given key

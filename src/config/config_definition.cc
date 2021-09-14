@@ -310,6 +310,16 @@ static std::map<std::string, std::string> upnp_playlist_prop_defaults {
     { "dc:date", "M_UPNP_DATE" },
 };
 
+/// \brief default values for CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
+static std::map<std::string, std::string> id3_specialPropertyMap {
+    { "PERFORMER", "upnp:artist@role[Performer]" },
+};
+
+/// \brief default values for CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
+static std::map<std::string, std::string> ffmpeg_specialPropertyMap {
+    { "performer", "upnp:artist@role[Performer]" },
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -818,32 +828,48 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #endif //HAVE_CURL
 #ifdef HAVE_LIBEXIF
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
-        "/import/library-options/libexif/auxdata", "config-import.html#auxdata",
+        "/import/library-options/libexif/auxdata", "config-import.html#libexif",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST,
+        "/import/library-options/libexif/metadata", "config-import.html#libexif",
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
+        false, true, false),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIF_CHARSET,
         "/import/library-options/libexif/attribute::charset", "config-import.html#charset",
         ""),
 #endif
 #ifdef HAVE_EXIV2
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
-        "/import/library-options/exiv2/auxdata", "config-import.html#library-options",
+        "/import/library-options/exiv2/auxdata", "config-import.html#exiv2",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST,
+        "/import/library-options/exiv2/metadata", "config-import.html#exiv2",
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
+        false, true, false),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET,
         "/import/library-options/exiv2/attribute::charset", "config-import.html#charset",
         ""),
 #endif
 #ifdef HAVE_TAGLIB
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
-        "/import/library-options/id3/auxdata", "config-import.html#id2",
+        "/import/library-options/id3/auxdata", "config-import.html#id3",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST,
+        "/import/library-options/id3/metadata", "config-import.html#id3",
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
+        false, true, false, std::move(id3_specialPropertyMap)),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_ID3_CHARSET,
         "/import/library-options/id3/attribute::charset", "config-import.html#charset",
         ""),
 #endif
 #ifdef HAVE_FFMPEG
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
-        "/import/library-options/ffmpeg/auxdata", "config-import.html#id5",
+        "/import/library-options/ffmpeg/auxdata", "config-import.html#ffmpeg",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST,
+        "/import/library-options/ffmpeg/metadata", "config-import.html#ffmpeg",
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
+        false, true, false, std::move(ffmpeg_specialPropertyMap)),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET,
         "/import/library-options/ffmpeg/attribute::charset", "config-import.html#charset",
         ""),
@@ -1005,6 +1031,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
         "attribute::tag", "config-import.html#auxdata",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
+        "attribute::key", "config-import.html#auxdata",
         ""),
     std::make_shared<ConfigStringSetup>(ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD,
         "attribute::password", "config-server.html#ui",

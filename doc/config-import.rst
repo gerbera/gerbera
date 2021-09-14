@@ -963,7 +963,73 @@ etc.
     This option can be used to import files from legacy tools which did not support multi-valued items.
     The empty string is used to disable legacy handling.
 
+
+**Additional data:**
+
+Gerbera imports a set of common tags by default in order to populate UPnP content. If you need further properties there are two options
+
+* auxdata : Read the value in order to use it in an import script
+* metadata : Read value into in order to send it as UPnP property
+
+The following library sections can contain both of these entries:
+
+**Tags:**
+
+``auxdata``
+-----------
+
+.. code-block:: xml
+
+    <auxdata>
+
+* Optional
+
+Auxdata can be read by the import javascript to gain more control over the media structure. The available tags depend on the respective library.
+
 **Child tags:**
+
+``add-data``
+------------
+
+  .. code-block:: xml
+
+    <add-data tag="tag1"/>
+    <add-data tag="tag2"/>
+    ...
+
+* Optional
+
+If the library was able to extract the data according to the given keyword, it will be added to auxdata.
+You can then use that data in your import scripts.
+
+``metadata``
+------------
+
+.. code-block:: xml
+
+    <metadata>
+
+* Optional
+
+Metadata can be read by the import javascript as ``meta`` to gain more control over the media structure and is automatically added to the UPnP output.
+
+**Child tags:**
+
+``add-data``
+------------
+
+  .. code-block:: xml
+
+    <add-data tag="tag3" key="upnp:Key"/>
+    ...
+
+* Optional
+
+If the library was able to extract the data according to the given keyword, it will be added to metadata.
+The attribute ``key`` sets the UPnP meta property and is only accepted inside a ``metadata`` element.
+
+
+**Library sections:**
 
 ``libexif``
 -----------
@@ -976,35 +1042,7 @@ etc.
 
 Options for the exif library.
 
-**Child tags:**
-
-``auxdata``
------------
-
-.. code-block:: xml
-
-    <auxdata>
-
-* Optional
-
 Currently only adding keywords to auxdata is supported. For a list of keywords/tags see the libexif documentation.
-Auxdata can be read by the import java script to gain more control over the media structure.
-
- **Child tags:**
-
-``add-data``
-------------
-
-  .. code-block:: xml
-
-    <add-data tag="keyword1"/>
-    <add-data tag="keyword2"/>
-    ...
-
-* Optional
-
-If the library was able to extract the data according to the given keyword, it will be added to auxdata.
-You can then use that data in your import scripts.
 
 A sample configuration for the example described above would be:
 
@@ -1028,18 +1066,7 @@ A sample configuration for the example described above would be:
 
 These options apply to id3lib or taglib libraries.
 
-**Child tags:**
-
-``auxdata``
------------
-
-.. code-block:: xml
-
-     <auxdata>
-
-* Optional
-
-Currently only adding keywords to auxdata is supported. The keywords are those defined in the specifications, e.g. 
+The keywords are those defined in the specifications, e.g. 
 `ID3v2.4 <https://id3.org/id3v2.4.0-frames>`_ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`_
 We do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag 
 nothing bad will happen.
@@ -1057,24 +1084,6 @@ ALBUMSORT, ARTISTS, CATALOGNUMBER, COMPOSERSORT, ENCODEDBY, LYRICIST, ORIGINALDA
 
 * any other user defined keyword, for APEv2 or iTunes MP4, see e.g. `table of mapping <https://picard.musicbrainz.org/docs/mappings>`_ between various tagging formats at MusicBrainz.
 
- **Child tags:**
-
-``add-data``
-------------
-
-.. code-block:: xml
-
-    <add-data tag="TXXX:Work"/>
-    <add-data tag="WORK"/>
-    <add-data tag="TMCL"/>
-    <add-data tag="PERFORMER"/>
-    ...
-
-* Optional
-
-If the library was able to extract the data according to the given keyword, it will be added to auxdata.
-You can then use that data in your import scripts.
-
 A sample configuration for the example described above would be:
 
 .. code-block:: xml
@@ -1084,8 +1093,10 @@ A sample configuration for the example described above would be:
           <add-data tag="TXXX:Work"/>
           <add-data tag="WORK"/>
           <add-data tag="TMCL"/>
-          <add-data tag="PERFORMER"/>
       </auxdata>
+      <metadata>
+          <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
+      </metadata>
   </id3>
 
 
@@ -1100,37 +1111,8 @@ A sample configuration for the example described above would be:
 
 These options apply to ffmpeg libraries.
 
-**Child tags:**
-
-``auxdata``
------------
-
-.. code-block:: xml
-
-     <auxdata>
-
-* Optional
-
-Currently only adding keywords to auxdata is supported. `This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_ 
+`This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_ 
 documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
-
- **Child tags:**
-
-``add-data``
-------------
-
-.. code-block:: xml
-
-    <add-data tag="COLLECTION"/>
-    <add-data tag="SHOW"/>
-    <add-data tag="NETWORK"/>
-    <add-data tag="EPISODE-ID"/>
-    ...
-
-* Optional
-
-If the library was able to extract the data according to the given keyword, it will be added to auxdata.
-You can then use that data in your import scripts.
 
 A sample configuration for the example described above would be:
 
@@ -1143,7 +1125,11 @@ A sample configuration for the example described above would be:
           <add-data tag="NETWORK"/>
           <add-data tag="EPISODE-ID"/>
       </auxdata>
+      <metadata>
+          <add-data tag="performer" key="upnp:artist@role[Performer]"/>
+      </metadata>
   </ffmpeg>
+
 
 ``exiv2``
 ----------
@@ -1156,39 +1142,8 @@ A sample configuration for the example described above would be:
 
 These options apply to exiv2 libraries.
 
-**Child tags:**
-
-``auxdata``
------------
-
-.. code-block:: xml
-
-     <auxdata>
-
-* Optional
-
-Currently only adding keywords to auxdata is supported. `This page <https://www.exiv2.org/metadata.html>`_
+`This page <https://www.exiv2.org/metadata.html>`_
 documents all of the metadata keys that exiv2 honors, depending on the format being encoded.
-
- **Child tags:**
-
-``add-data``
-------------
-
-.. code-block:: xml
-
-    <add-data tag="Exif.Image.Model"/>
-    <add-data tag="Exif.Photo.DateTimeOriginal"/>
-    <add-data tag="Exif.Image.Orientation"/>
-    <add-data tag="Exif.Image.Rating"/>
-    <add-data tag="Xmp.xmp.Rating" />
-    <add-data tag="Xmp.dc.subject"/>
-    ...
-
-* Optional
-
-If the library was able to extract the data according to the given keyword, it will be added to auxdata.
-You can then use that data in your import scripts.
 
 A sample configuration for the example described above would be:
 
