@@ -131,7 +131,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         if (stringLimit == std::string::npos || s.length() <= stringLimit)
             return s;
 
-        ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - strlen("..."));
+        ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - std::strlen("..."));
         return s.substr(0, cutPosition) + "...";
     };
 
