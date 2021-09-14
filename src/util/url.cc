@@ -171,11 +171,11 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     return std::make_unique<Stat>(used_url, off_t(cl), mt);
 }
 
-size_t URL::dl(void* buf, size_t size, size_t nmemb, void* data)
+std::size_t URL::dl(void* buf, std::size_t size, std::size_t nmemb, void* data)
 {
     auto& oss = *reinterpret_cast<std::ostringstream*>(data);
 
-    size_t s = size * nmemb;
+    auto s = size * nmemb;
     oss << std::string(reinterpret_cast<const char*>(buf), s);
 
     return s;

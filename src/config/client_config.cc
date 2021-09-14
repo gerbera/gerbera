@@ -56,13 +56,13 @@ ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view user
     clientInfo = std::make_unique<ClientInfo>(std::move(cInfo));
 }
 
-void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, size_t index)
+void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
 {
     AutoLock lock(mutex);
     _add(client, index);
 }
 
-void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, size_t index)
+void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
 {
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
@@ -73,7 +73,7 @@ void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, size_t 
     indexMap[index] = client;
 }
 
-size_t ClientConfigList::getEditSize() const
+std::size_t ClientConfigList::getEditSize() const
 {
     if (indexMap.empty()) {
         return 0;
@@ -87,7 +87,7 @@ std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
+std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -102,7 +102,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(size_t id, bool edit)
     return nullptr;
 }
 
-void ClientConfigList::remove(size_t id, bool edit)
+void ClientConfigList::remove(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
 

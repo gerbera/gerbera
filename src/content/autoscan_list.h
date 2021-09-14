@@ -46,22 +46,22 @@ public:
     ///
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
-    int add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index = std::numeric_limits<std::size_t>::max());
+    int add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
 
     [[maybe_unused]] void addList(const std::shared_ptr<AutoscanList>& list);
 
-    std::shared_ptr<AutoscanDirectory> get(size_t id, bool edit = false);
+    std::shared_ptr<AutoscanDirectory> get(std::size_t id, bool edit = false);
 
     std::shared_ptr<AutoscanDirectory> get(const fs::path& location);
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    size_t size() const { return list.size(); }
+    std::size_t size() const { return list.size(); }
 
     /// \brief removes the AutoscanDirectory given by its scan ID
-    void remove(size_t id, bool edit = false);
+    void remove(std::size_t id, bool edit = false);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
@@ -81,8 +81,8 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
 
 protected:
-    size_t origSize {};
-    std::map<size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
+    std::size_t origSize {};
+    std::map<std::size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
 
     std::shared_ptr<Database> database;
 
@@ -90,7 +90,7 @@ protected:
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<AutoscanDirectory>> list;
-    int _add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index);
+    int _add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index);
 };
 
 #endif //__AUTOSCAN_LIST_H__

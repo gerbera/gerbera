@@ -114,7 +114,7 @@ void ContentManager::run()
     }
 
     auto config_timed_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    for (size_t i = 0; i < config_timed_list->size(); i++) {
+    for (std::size_t i = 0; i < config_timed_list->size(); i++) {
         auto dir = config_timed_list->get(i);
         if (dir) {
             fs::path path = dir->getLocation();
@@ -133,7 +133,7 @@ void ContentManager::run()
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         auto config_inotify_list = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-        for (size_t i = 0; i < config_inotify_list->size(); i++) {
+        for (std::size_t i = 0; i < config_inotify_list->size(); i++) {
             auto dir = config_inotify_list->get(i);
             if (dir) {
                 fs::path path = dir->getLocation();
@@ -226,7 +226,7 @@ void ContentManager::run()
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         /// \todo change this (we need a new autoscan architecture)
-        for (size_t i = 0; i < autoscan_inotify->size(); i++) {
+        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
             auto adir = autoscan_inotify->get(i);
             if (!adir) {
                 continue;
@@ -240,7 +240,7 @@ void ContentManager::run()
     }
 #endif
 
-    for (size_t i = 0; i < autoscan_timed->size(); i++) {
+    for (std::size_t i = 0; i < autoscan_timed->size(); i++) {
         auto adir = autoscan_timed->get(i);
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
         log_debug("Adding timed scan with interval {}", adir->getInterval().count());
@@ -308,7 +308,7 @@ void ContentManager::shutdown()
 #ifdef HAVE_INOTIFY
     if (autoscan_inotify) {
         // update modification time for database
-        for (size_t i = 0; i < autoscan_inotify->size(); i++) {
+        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoScanDir {}", i);
             auto dir = autoscan_inotify->get(i);
             if (dir) {
@@ -824,7 +824,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 #ifdef HAVE_INOTIFY
     if (!adir) {
-        for (size_t i = 0; i < autoscan_inotify->size(); i++) {
+        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
             auto dir = autoscan_inotify->get(i);
             if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
@@ -834,7 +834,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 #endif
     if (!adir) {
-        for (size_t i = 0; i < autoscan_timed->size(); i++) {
+        for (std::size_t i = 0; i < autoscan_timed->size(); i++) {
             log_debug("Timed AutoscanDir {}", i);
             auto dir = autoscan_timed->get(i);
             if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
@@ -1575,7 +1575,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
         std::ostringstream desc;
         desc << "Removing ";
         // skip root container, start from 1
-        for (size_t i = 1; i < objectPath->size(); i++)
+        for (std::size_t i = 1; i < objectPath->size(); i++)
             desc << '/' << objectPath->get(i)->getTitle();
         */
         auto self = shared_from_this();
@@ -1594,13 +1594,13 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
         if (obj->isContainer()) {
             // make sure to remove possible child autoscan directories from the scanlist
             std::shared_ptr<AutoscanList> rm_list = autoscan_timed->removeIfSubdir(path);
-            for (size_t i = 0; i < rm_list->size(); i++) {
+            for (std::size_t i = 0; i < rm_list->size(); i++) {
                 timer->removeTimerSubscriber(this, rm_list->get(i)->getTimerParameter(), true);
             }
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 rm_list = autoscan_inotify->removeIfSubdir(path);
-                for (size_t i = 0; i < rm_list->size(); i++) {
+                for (std::size_t i = 0; i < rm_list->size(); i++) {
                     auto dir = rm_list->get(i);
                     inotify->unmonitor(dir);
                 }

@@ -54,7 +54,7 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::string& rh)
+static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::string& rh)
 {
     bool is_srt = false;
 
@@ -93,7 +93,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // determining which resource to serve
     auto res_id_it = params.find(URL_RESOURCE_ID);
-    size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
+    std::size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);

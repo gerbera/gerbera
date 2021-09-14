@@ -61,13 +61,13 @@ public:
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    size_t read(char* buf, size_t length) override;
+    std::size_t read(char* buf, std::size_t length) override;
 
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
     /// \param length Number of bytes to be written from the buffer.
     /// \return number of bytes written.
-    size_t write(char* buf, size_t length) override;
+    std::size_t write(char* buf, std::size_t length) override;
 
     /// \brief Performs seek on an open file.
     /// \param offset Number of bytes to move in the file. For seeking forwards

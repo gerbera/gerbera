@@ -30,20 +30,20 @@
 void AutoscanList::updateLMinDB()
 {
     AutoLock lock(mutex);
-    for (size_t i = 0; i < list.size(); i++) {
+    for (std::size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
         auto ad = list[i];
         database->updateAutoscanDirectory(ad);
     }
 }
 
-int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index)
+int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index)
 {
     AutoLock lock(mutex);
     return _add(dir, index);
 }
 
-int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, size_t index)
+int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index)
 {
     if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](auto&& item) { return loc == item->getLocation(); })) {
         throw_std_runtime_error("Attempted to add same autoscan path twice");
@@ -71,7 +71,7 @@ void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
     }
 }
 
-size_t AutoscanList::getEditSize() const
+std::size_t AutoscanList::getEditSize() const
 {
     if (indexMap.empty()) {
         return 0;
@@ -86,7 +86,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(size_t id, bool edit)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -117,7 +117,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
     return it != list.end() ? *it : nullptr;
 }
 
-void AutoscanList::remove(size_t id, bool edit)
+void AutoscanList::remove(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
 

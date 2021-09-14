@@ -52,7 +52,7 @@ StringConverter::~StringConverter()
 
 std::string StringConverter::convert(std::string str, bool validate)
 {
-    size_t stoppedAt = 0;
+    std::size_t stoppedAt = 0;
     std::string ret;
 
     if (str.empty())
@@ -86,12 +86,12 @@ bool StringConverter::validate(const std::string& str)
 }
 
 std::string StringConverter::_convert(const std::string& str, bool validate,
-    size_t* stoppedAt)
+    std::size_t* stoppedAt)
 {
     std::string ret_str;
 
     auto input = str.c_str();
-    size_t length = str.length();
+    auto length = str.length();
     if (length < (std::string::npos / 4)) {
         length *= 4;
     } else {

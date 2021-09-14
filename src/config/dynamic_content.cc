@@ -30,13 +30,13 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
-void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, size_t index)
+void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {
     AutoLock lock(mutex);
     _add(cont, index);
 }
 
-void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, size_t index)
+void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
@@ -51,7 +51,7 @@ void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, size_
     indexMap[index] = cont;
 }
 
-size_t DynamicContentList::getEditSize() const
+std::size_t DynamicContentList::getEditSize() const
 {
     if (indexMap.empty()) {
         return 0;
@@ -65,7 +65,7 @@ std::vector<std::shared_ptr<DynamicContent>> DynamicContentList::getArrayCopy()
     return list;
 }
 
-std::shared_ptr<DynamicContent> DynamicContentList::get(size_t id, bool edit)
+std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -90,7 +90,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location
     return nullptr;
 }
 
-void DynamicContentList::remove(size_t id, bool edit)
+void DynamicContentList::remove(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
 

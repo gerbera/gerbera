@@ -35,7 +35,7 @@
 
 #include "config/config_manager.h"
 
-IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize)
+IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize)
     : config(std::move(config))
     , bufSize(bufSize)
     , initialFillSize(initialFillSize)
@@ -63,7 +63,7 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
         close();
 }
 
-size_t IOHandlerBufferHelper::read(char* buf, size_t length)
+std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);
@@ -85,17 +85,17 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     if (empty && eof)
         return 0;
 
-    size_t bLocal = b;
+    std::size_t bLocal = b;
     lock.unlock();
 
     // we ensured with the while above that the buffer isn't empty
     auto currentFillSize = int(bLocal - a);
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
-    auto maxRead1 = size_t(a < bLocal ? bLocal - a : bufSize - a);
-    auto read1 = size_t(maxRead1 > length ? length : maxRead1);
-    auto maxRead2 = size_t(currentFillSize - read1);
-    auto read2 = size_t(read1 < length ? length - read1 : 0);
+    auto maxRead1 = std::size_t(a < bLocal ? bLocal - a : bufSize - a);
+    auto read1 = std::size_t(maxRead1 > length ? length : maxRead1);
+    auto maxRead2 = std::size_t(currentFillSize - read1);
+    auto read2 = std::size_t(read1 < length ? length - read1 : 0);
     if (read2 > maxRead2)
         read2 = maxRead2;
 
@@ -103,7 +103,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     if (read2)
         memcpy(buf + read1, buffer, read2);
 
-    size_t didRead = read1 + read2;
+    std::size_t didRead = read1 + read2;
 
     lock.lock();
 

@@ -52,7 +52,7 @@ public:
     Mime& operator=(const Mime&) = delete;
 
     /// \brief Extracts mimetype from a buffer using filemagic
-    std::string bufferToMimeType(const void* buffer, size_t length);
+    std::string bufferToMimeType(const void* buffer, std::size_t length);
 #endif // HAVE_MAGIC
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);

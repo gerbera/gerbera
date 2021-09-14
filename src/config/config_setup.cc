@@ -135,9 +135,9 @@ void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>
     setOption(config);
 }
 
-size_t ConfigSetup::extractIndex(const std::string& item)
+std::size_t ConfigSetup::extractIndex(const std::string& item)
 {
-    size_t i = std::numeric_limits<std::size_t>::max();
+    auto i = std::numeric_limits<std::size_t>::max();
     if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos) {
         auto startPos = item.find_first_of('[') + 1;
         auto endPos = item.find_first_of(']', startPos);
@@ -550,7 +550,7 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, const std::shared_
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
+bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i);
     if (optItem == index || !status.empty()) {
@@ -574,7 +574,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         auto value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
 
-        size_t i = extractIndex(optItem);
+        std::size_t i = extractIndex(optItem);
         if (i < std::numeric_limits<std::size_t>::max()) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
@@ -743,7 +743,7 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
+bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
 {
     auto keyIndex = getItemPath(i, keyOption);
     auto valIndex = getItemPath(i, valOption);
@@ -776,7 +776,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         auto value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
 
-        size_t i = extractIndex(optItem);
+        std::size_t i = extractIndex(optItem);
         if (i < std::numeric_limits<std::size_t>::max()) {
             if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
@@ -910,7 +910,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
     return true;
 }
 
-bool ConfigAutoscanSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
+bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
 {
     auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
     if (optItem == getUniquePath() && status != STATUS_CHANGED) {
@@ -1129,9 +1129,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
 
         // set buffer options
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
-        size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
-        size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
-        size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
+        std::size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
+        std::size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
+        std::size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
 
         if (chunk > buffer) {
             log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName().c_str());
@@ -1344,9 +1344,9 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update buffer options
-            size_t buffer = entry->getBufferSize();
-            size_t chunk = entry->getBufferChunkSize();
-            size_t fill = entry->getBufferInitialFillSize();
+            std::size_t buffer = entry->getBufferSize();
+            std::size_t chunk = entry->getBufferChunkSize();
+            std::size_t fill = entry->getBufferInitialFillSize();
             bool setBuffer = false;
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
             if (optItem == index) {
@@ -1476,7 +1476,7 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared
     setOption(config);
 }
 
-bool ConfigClientSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
+bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -1541,7 +1541,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
                 return true;
             }
         }
-        for (size_t client = 0; client < list->size(); client++) {
+        for (std::size_t client = 0; client < list->size(); client++) {
             auto entry = value->getClientConfigListOption()->get(client);
             if (updateItem(client, optItem, config, entry, optValue)) {
                 return true;
@@ -1647,7 +1647,7 @@ void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigDirectorySetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -1775,7 +1775,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
                 return true;
             }
         }
-        for (size_t tweak = 0; tweak < list->size(); tweak++) {
+        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
             auto entry = value->getDirectoryTweakOption()->get(tweak);
             if (updateItem(tweak, optItem, config, entry, optValue)) {
                 return true;
@@ -1852,7 +1852,7 @@ void ConfigDynamicContentSetup::makeOption(const pugi::xml_node& root, const std
     setOption(config);
 }
 
-bool ConfigDynamicContentSetup::updateItem(size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -1940,7 +1940,7 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::st
                 return true;
             }
         }
-        for (size_t tweak = 0; tweak < list->size(); tweak++) {
+        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
             auto entry = value->getDynamicContentListOption()->get(tweak);
             if (updateItem(tweak, optItem, config, entry, optValue)) {
                 return true;

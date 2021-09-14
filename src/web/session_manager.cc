@@ -82,7 +82,7 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
     if (updateAll)
         return;
 
-    size_t arSize = objectIDs.size();
+    auto arSize = objectIDs.size();
     AutoLockR lock(rmutex);
 
     if (updateAll)

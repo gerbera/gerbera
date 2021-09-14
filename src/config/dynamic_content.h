@@ -43,31 +43,31 @@ public:
     ///
     /// \param cont DynamicContent to add to the list.
     /// \return index of the newly added DynamicContent
-    void add(const std::shared_ptr<DynamicContent>& cont, size_t index = std::numeric_limits<std::size_t>::max());
+    void add(const std::shared_ptr<DynamicContent>& cont, std::size_t index = std::numeric_limits<std::size_t>::max());
 
-    std::shared_ptr<DynamicContent> get(size_t id, bool edit = false);
+    std::shared_ptr<DynamicContent> get(std::size_t id, bool edit = false);
 
     std::shared_ptr<DynamicContent> get(const fs::path& location);
 
-    size_t getEditSize() const;
+    std::size_t getEditSize() const;
 
-    size_t size() const { return list.size(); }
+    std::size_t size() const { return list.size(); }
 
     /// \brief removes the DynamicContent given by its ID
-    void remove(size_t id, bool edit = false);
+    void remove(std::size_t id, bool edit = false);
 
     /// \brief returns a copy of the directory config list in the form of an array
     std::vector<std::shared_ptr<DynamicContent>> getArrayCopy();
 
 protected:
-    size_t origSize {};
-    std::map<size_t, std::shared_ptr<DynamicContent>> indexMap;
+    std::size_t origSize {};
+    std::map<std::size_t, std::shared_ptr<DynamicContent>> indexMap;
 
     std::recursive_mutex mutex;
     using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DynamicContent>> list;
-    void _add(const std::shared_ptr<DynamicContent>& cont, size_t index);
+    void _add(const std::shared_ptr<DynamicContent>& cont, std::size_t index);
 };
 
 /// \brief dynamic content reader

@@ -85,8 +85,8 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CREATION_DATE));
     if (!date.empty()) {
         std::string year, month;
-        size_t m = -1;
-        size_t y = date.find('-');
+        auto m = std::numeric_limits<std::size_t>::max();
+        auto y = date.find('-');
         if (y != std::string::npos) {
             year = date.substr(0, y);
             month = date.substr(y + 1);
@@ -139,8 +139,8 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (!date.empty()) {
         std::string year, month;
-        size_t m = -1;
-        size_t y = date.find('-');
+        auto m = std::numeric_limits<std::size_t>::max();
+        auto y = date.find('-');
         if (y != std::string::npos) {
             year = date.substr(0, y);
             month = date.substr(y + 1);
@@ -209,7 +209,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     std::string albumDate;
     if (!date.empty()) {
-        size_t i = date.find('-');
+        auto i = date.find('-');
         if (i != std::string::npos)
             date = date.substr(0, i);
 

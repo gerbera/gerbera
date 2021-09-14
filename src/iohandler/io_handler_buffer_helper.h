@@ -51,7 +51,7 @@ public:
     /// \param initialFillSize the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
-    IOHandlerBufferHelper(std::shared_ptr<Config> config, size_t bufSize, size_t initialFillSize);
+    IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize);
     ~IOHandlerBufferHelper() noexcept override;
 
     IOHandlerBufferHelper(const IOHandlerBufferHelper&) = delete;
@@ -59,14 +59,14 @@ public:
 
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;
-    size_t read(char* buf, size_t length) override;
+    std::size_t read(char* buf, std::size_t length) override;
     void seek(off_t offset, int whence) override;
     void close() override;
 
 protected:
     std::shared_ptr<Config> config;
-    size_t bufSize;
-    size_t initialFillSize;
+    std::size_t bufSize;
+    std::size_t initialFillSize;
     char* buffer {};
     bool isOpen {};
     bool eof {};
@@ -77,8 +77,8 @@ protected:
 
     // buffer stuff..
     bool empty { true };
-    size_t a {};
-    size_t b {};
+    std::size_t a {};
+    std::size_t b {};
     off_t posRead {};
 
     // seek stuff...

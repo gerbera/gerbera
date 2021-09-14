@@ -37,7 +37,7 @@
 
 class Config;
 
-BufferedIOHandler::BufferedIOHandler(std::shared_ptr<Config> config, std::unique_ptr<IOHandler> underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
+BufferedIOHandler::BufferedIOHandler(std::shared_ptr<Config> config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
 {
     if (!underlyingHandler)
@@ -68,7 +68,7 @@ void BufferedIOHandler::close()
 void BufferedIOHandler::threadProc()
 {
     int readBytes = 0;
-    size_t maxWrite;
+    std::size_t maxWrite;
 
 #ifdef TOMBDEBUG
     std::chrono::milliseconds last_log;
@@ -145,7 +145,7 @@ void BufferedIOHandler::threadProc()
             threadRunner->wait(lock);
         } else {
             lock.unlock();
-            size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
+            std::size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
             readBytes = underlyingHandler->read(buffer + b, chunkSize);
             lock.lock();
             if (readBytes > 0) {
@@ -161,7 +161,7 @@ void BufferedIOHandler::threadProc()
                     auto currentFillSize = int(b - a);
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if (size_t(currentFillSize) >= initialFillSize) {
+                    if (std::size_t(currentFillSize) >= initialFillSize) {
                         log_debug("buffer: initial fillsize reached");
                         waitForInitialFillSize = false;
                         threadRunner->notify();
