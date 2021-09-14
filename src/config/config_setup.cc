@@ -570,7 +570,7 @@ bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, con
 
 bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath && optionValue) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath && optionValue) {
         auto value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
 
@@ -772,7 +772,7 @@ bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem
 
 bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath && optionValue) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath && optionValue) {
         auto value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
 
@@ -1212,7 +1212,7 @@ std::string ConfigTranscodingSetup::getItemPath(int index, config_option_t propO
 
 bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath) {
         auto value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
         std::map<std::string, int> profiles;
@@ -1516,7 +1516,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
 
 bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath) {
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
         auto list = value->getClientConfigListOption();
@@ -1750,7 +1750,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
 
 bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath) {
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
         auto list = value->getDirectoryTweakOption();
@@ -1915,7 +1915,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
 
 bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (optItem.substr(0, strlen(xpath)) == xpath) {
+    if (optItem.substr(0, std::strlen(xpath)) == xpath) {
         log_debug("Updating DynamicContent Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DynamicContentListOption>(optionValue);
         auto list = value->getDynamicContentListOption();
