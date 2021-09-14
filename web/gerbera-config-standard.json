@@ -603,7 +603,25 @@
 						{
 							"item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"editable": true
+							"editable": false
+						}
+					]
+				},
+				{
+					"item": "/import/library-options/libexif/metadata/add-data",
+					"caption": "libexif metadata",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/library-options/libexif/metadata/add-data/attribute::tag",
+							"caption": "Tag Name",
+							"editable": false
+						},
+						{
+							"item": "/import/library-options/libexif/metadata/add-data/attribute::key",
+							"caption": "Upnp metadata entry",
+							"editable": false
 						}
 					]
 				},
@@ -616,7 +634,25 @@
 						{
 							"item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"editable": true
+							"editable": false
+						}
+					]
+				},
+				{
+					"item": "/import/library-options/id3/metadata/add-data",
+					"caption": "taglib metadata",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/library-options/id3/metadata/add-data/attribute::tag",
+							"caption": "Tag Name",
+							"editable": false
+						},
+						{
+							"item": "/import/library-options/id3/metadata/add-data/attribute::key",
+							"caption": "Upnp metadata entry",
+							"editable": false
 						}
 					]
 				},
@@ -629,7 +665,25 @@
 						{
 							"item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"editable": true
+							"editable": false
+						}
+					]
+				},
+				{
+					"item": "/import/library-options/exiv2/metadata/add-data",
+					"caption": "exiv2 metadata",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/library-options/exiv2/metadata/add-data/attribute::tag",
+							"caption": "Tag Name",
+							"editable": false
+						},
+						{
+							"item": "/import/library-options/exiv2/metadata/add-data/attribute::key",
+							"caption": "Upnp metadata entry",
+							"editable": false
 						}
 					]
 				},
@@ -642,7 +696,25 @@
 						{
 							"item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
 							"caption": "Tag Name",
-							"editable": true
+							"editable": false
+						}
+					]
+				},
+				{
+					"item": "/import/library-options/ffmpeg/metadata/add-data",
+					"caption": "ffmpeg metadata",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/library-options/ffmpeg/metadata/add-data/attribute::tag",
+							"caption": "Tag Name",
+							"editable": false
+						},
+						{
+							"item": "/import/library-options/ffmpeg/metadata/add-data/attribute::key",
+							"caption": "Upnp metadata entry",
+							"editable": false
 						}
 					]
 				}

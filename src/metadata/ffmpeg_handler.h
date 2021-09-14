@@ -51,10 +51,7 @@ struct AVFormatContext;
 /// \brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MetadataHandler {
 public:
-    explicit FfmpegHandler(const std::shared_ptr<Context>& context)
-        : MetadataHandler(context)
-    {
-    }
+    explicit FfmpegHandler(const std::shared_ptr<Context>& context);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
     std::string getMimeType() const override;
@@ -63,6 +60,7 @@ private:
     // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
     // Add a lock around the usage to avoid crashing randomly.
     std::mutex thumb_mutex;
+    std::map<std::string, std::string> specialPropertyMap;
 
     void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;

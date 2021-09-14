@@ -56,7 +56,8 @@ private:
     std::string imageX;
     std::string imageY;
 
-    void process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags);
+    void process_ifd(ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc,
+        const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
 
 public:
     explicit LibExifHandler(const std::shared_ptr<Context>& context)
