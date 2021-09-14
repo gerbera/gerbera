@@ -90,7 +90,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     /* executing script */
     auto command = fmt::format("{} {} < {} > {}", prog, param, input_file, output_file);
     log_debug("running {}", command);
-    int sysret = system(command.c_str());
+    int sysret = std::system(command.c_str());
     if (sysret == -1) {
         log_debug("Failed to execute: {}", command);
         throw_std_runtime_error("Failed to execute: {}", command);
