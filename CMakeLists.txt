@@ -393,7 +393,7 @@ endif()
 find_package(fmt 7.1.3 REQUIRED)
 target_link_libraries(libgerbera PUBLIC fmt::fmt)
 
-find_package(spdlog 1.8.2 REQUIRED)
+find_package(spdlog 1.8.1 REQUIRED)
 target_link_libraries(libgerbera PUBLIC spdlog::spdlog)
 
 find_package(pugixml REQUIRED)
