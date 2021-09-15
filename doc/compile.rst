@@ -35,7 +35,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | fmtlib              | 7.1.3         | Required      | Fast string formatting     |                         |          | install-fmt.sh     |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| spdlog              | 1.8.5         | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
+| spdlog              | 1.8.2         | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | duktape             | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
@@ -186,9 +186,9 @@ Build and install libupnp with the ``--enable-ipv6`` and ``--enable-reuseaddr`` 
 
 ::
 
-  wget "https://downloads.sourceforge.net/project/pupnp/pupnp/libupnp-1.12.1/libupnp-1.12.1.tar.bz2?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fpupnp%2Ffiles%2Flatest%2Fdownload&ts=1588248015" -O libupnp-1.12.1.tar.bz2
-  tar -xf libupnp-1.12.1.tar.bz2
-  cd libupnp-1.12.1
+  wget "https://github.com/pupnp/pupnp/releases/download/release-1.14.10/libupnp-1.14.10.tar.bz2" -O libupnp-1.14.10.tar.bz2
+  tar -xf libupnp-1.14.10.tar.bz2
+  cd libupnp-1.14.10
   ./configure --enable-ipv6 --enable-reuseaddr
   make
   sudo make install
