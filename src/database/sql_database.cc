@@ -1741,9 +1741,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
+#if SPDLOG_VERSION >= 10802
     log_debug("start upnp: {}; ui: {}", fmt::join(maybeEmpty->upnp, ","), fmt::join(maybeEmpty->ui, ","));
+#else
+    log_debug("start upnp: {}; ui: {}", fmt::format("{}", fmt::join(maybeEmpty->upnp, ",")), fmt::format("{}", fmt::join(maybeEmpty->ui, ",")));
+#endif
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
-        return nullptr;
+        return {};
 
     constexpr auto tabAlias = "fol";
     constexpr auto childAlias = "cld";
