@@ -504,7 +504,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 // log_debug("TXXX Tag: {}", subTag.c_str());
 
                 if (desiredSubTag == subTag) {
-                    if (content.substr(0, subTag.length()) == subTag)
+                    if (startswith(content, subTag))
                         content = content.substr(subTag.length() + 1); // Avoid leading tag for options unknown to taglib
 
                     log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, content);

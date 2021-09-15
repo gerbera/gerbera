@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "config.h"
+#include "util/tools.h"
 
 class ConfigSetup;
 
@@ -77,14 +78,14 @@ public:
     static std::string ensureAttribute(config_option_t option, bool check = true)
     {
         auto attr = std::string(mapConfigOption(option));
-        if (attr.substr(0, ATTRIBUTE.size()) != ATTRIBUTE && check)
+        if (!startswith(attr, ATTRIBUTE) && check)
             return fmt::format("{}{}", ATTRIBUTE, attr);
         return attr;
     }
     static std::string removeAttribute(config_option_t option)
     {
         auto attr = std::string(mapConfigOption(option));
-        if (attr.size() > ATTRIBUTE.size() && attr.substr(0, ATTRIBUTE.size()) == ATTRIBUTE)
+        if (attr.size() > ATTRIBUTE.size() && startswith(attr, ATTRIBUTE))
             attr = attr.substr(ATTRIBUTE.size());
         return attr;
     }

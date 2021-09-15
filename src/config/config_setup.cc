@@ -966,7 +966,7 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
 bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     auto uPath = getUniquePath();
-    if (optItem.substr(0, uPath.length()) == uPath) {
+    if (startswith(optItem, uPath)) {
         log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue.c_str());
         auto value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
 

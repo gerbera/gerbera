@@ -59,7 +59,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
         for (auto&& part : split) {
             nodeKey += "/" + part;
             if (generated.find(nodeKey) == generated.end()) {
-                if (part.substr(0, ConfigDefinition::ATTRIBUTE.size()) == ConfigDefinition::ATTRIBUTE) {
+                if (startswith(part, ConfigDefinition::ATTRIBUTE)) {
                     attribute = part.substr(ConfigDefinition::ATTRIBUTE.size()); // last attribute gets the value
                 } else {
                     auto newNode = generated[parent]->append_child(part.c_str());
@@ -100,7 +100,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value)
 {
     auto cs = std::string(ConfigDefinition::mapConfigOption(option));
-    if (cs.substr(0, ConfigDefinition::ATTRIBUTE.size()) == ConfigDefinition::ATTRIBUTE) {
+    if (startswith(cs, ConfigDefinition::ATTRIBUTE)) {
         cs = ConfigDefinition::removeAttribute(option);
         parent->append_attribute(cs.c_str()) = value.c_str();
     } else {

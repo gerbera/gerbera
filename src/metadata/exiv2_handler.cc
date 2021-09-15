@@ -140,11 +140,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
             for (auto&& [metatag, metakey] : meta) {
                 std::string metaval;
                 log_debug("metatag: {} ", metatag.c_str());
-                if (metatag.substr(0, 4) == "Exif") {
+                if (startswith(metatag, "Exif")) {
                     md = exifData.findKey(Exiv2::ExifKey(metatag));
                     if (md != exifData.end())
                         metaval = md->toString();
-                } else if (metatag.substr(0, 3) == "Xmp") {
+                } else if (startswith(metatag, "Xmp")) {
                     auto xmpMd = xmpData.findKey(Exiv2::XmpKey(metatag));
                     if (xmpMd != xmpData.end())
                         metaval = xmpMd->toString();
@@ -168,11 +168,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
             for (auto&& auxtag : aux) {
                 std::string auxval;
                 log_debug("auxtag: {} ", auxtag.c_str());
-                if (auxtag.substr(0, 4) == "Exif") {
+                if (startswith(auxtag, "Exif")) {
                     md = exifData.findKey(Exiv2::ExifKey(auxtag));
                     if (md != exifData.end())
                         auxval = md->toString();
-                } else if (auxtag.substr(0, 3) == "Xmp") {
+                } else if (startswith(auxtag, "Xmp")) {
                     auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
                     if (xmpMd != xmpData.end())
                         auxval = xmpMd->toString();
