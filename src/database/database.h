@@ -226,8 +226,8 @@ public:
     class ChangedContainers {
     public:
         // Signed because IDs start at -1.
-        std::vector<int32_t> upnp;
-        std::vector<int32_t> ui;
+        std::vector<std::int32_t> upnp;
+        std::vector<std::int32_t> ui;
     };
 
     /// \brief Removes the object identified by the objectID from the database.

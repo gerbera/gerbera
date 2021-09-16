@@ -75,7 +75,7 @@ public:
     void setIntProperty(const std::string& name, int value);
     std::vector<std::string> getPropertyNames() const;
 
-    void defineFunction(const std::string& name, duk_c_function function, uint32_t numParams);
+    void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
     void load(const std::string& scriptPath);
     void load(std::string scriptText, std::string scriptPath);
