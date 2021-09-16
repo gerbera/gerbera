@@ -176,12 +176,12 @@ public:
     void clearFlagInDB(int flag) override;
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
 
-    int insert(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
-    void insertMultipleRows(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
-    void deleteAll(const std::string_view& tableName);
+    int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
+    void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
+    void deleteAll(std::string_view tableName);
     template <typename T>
-    void deleteRow(const std::string_view& tableName, const std::string_view& where_key, const T& where_value);
-    void deleteRows(const std::string_view& tableName, const std::string_view& where_key, const std::vector<int>& where_values);
+    void deleteRow(std::string_view tableName, std::string_view where_key, const T& where_value);
+    void deleteRows(std::string_view tableName, std::string_view where_key, const std::vector<int>& where_values);
 
 protected:
     explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
@@ -301,6 +301,12 @@ private:
 
     using AutoLock = std::lock_guard<std::mutex>;
 };
+
+template <typename T>
+void SQLDatabase::deleteRow(std::string_view tableName, std::string_view key, const T& value)
+{
+    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(tableName), identifier(key), quote(value)));
+}
 
 class SqlWithTransactions {
 protected:

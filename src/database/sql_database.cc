@@ -1186,14 +1186,14 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     return newId;
 }
 
-int SQLDatabase::insert(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
+int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
     assert(fields.size() == values.size());
     auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
     return exec(sql, getLastInsertId);
 }
 
-void SQLDatabase::insertMultipleRows(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
+void SQLDatabase::insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
 {
     if (valuesets.size() == 1) {
         insert(tableName, fields, valuesets.front());
@@ -1209,18 +1209,12 @@ void SQLDatabase::insertMultipleRows(const std::string_view& tableName, const st
     }
 }
 
-void SQLDatabase::deleteAll(const std::string_view& tableName)
+void SQLDatabase::deleteAll(std::string_view tableName)
 {
     exec(fmt::format("DELETE FROM {}", identifier(tableName)));
 }
 
-template <typename T>
-void SQLDatabase::deleteRow(const std::string_view& tableName, const std::string_view& key, const T& value)
-{
-    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(tableName), identifier(key), quote(value)));
-}
-
-void SQLDatabase::deleteRows(const std::string_view& tableName, const std::string_view& key, const std::vector<int>& values)
+void SQLDatabase::deleteRows(std::string_view tableName, std::string_view key, const std::vector<int>& values)
 {
     exec(fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(tableName), identifier(key), fmt::join(values, ",")));
 }
