@@ -176,15 +176,16 @@ public:
     void clearFlagInDB(int flag) override;
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
 
-protected:
-    explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
-    void init() override;
     int insert(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
     void insertMultipleRows(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
     void deleteAll(const std::string_view& tableName);
     template <typename T>
     void deleteRow(const std::string_view& tableName, const std::string_view& where_key, const T& where_value);
     void deleteRows(const std::string_view& tableName, const std::string_view& where_key, const std::vector<int>& where_values);
+
+protected:
+    explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    void init() override;
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();

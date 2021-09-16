@@ -1,6 +1,7 @@
 add_executable(testdb
     main.cc
     test_database.cc
+    test_sql_generators.cc
     mysql_config_fake.h
     sqlite_config_fake.h)
 
