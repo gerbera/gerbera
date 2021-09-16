@@ -1585,24 +1585,23 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     auto res = select(sel);
     if (res) {
         log_debug("relevant autoscans!");
-        std::vector<std::string> delete_as;
+        std::vector<int> delete_as;
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
-            bool persistent = remapBool(row->col(1));
+            bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
                 auto location = stripLocationPrefix(row->col(2));
                 exec(fmt::format("UPDATE {0}{2}{1} SET {0}obj_id{1} = {3}, {0}location{1} = {4} WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, SQL_NULL, quote(location.string()), quote(row->col(0))));
             } else {
-                auto col = std::string(row->col_c_str(0));
-                delete_as.push_back(std::move(col));
+                auto col_id = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
+                delete_as.push_back(col_id);
             }
             log_debug("relevant autoscan: {}; persistent: {}", row->col_c_str(0), persistent);
         }
 
         if (!delete_as.empty()) {
-            auto delAutoscan = fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(AUTOSCAN_TABLE), identifier("id"), fmt::join(delete_as, ", "));
-            exec(delAutoscan);
-            log_debug("deleting autoscans: {}", delAutoscan);
+            deleteRows(AUTOSCAN_TABLE, "id", delete_as);
+            log_debug("deleting autoscans: {}", fmt::to_string(fmt::join(delete_as, ", ")));
         }
     }
 
@@ -1757,11 +1756,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
 {
-#if SPDLOG_VERSION >= 10802
-    log_debug("start upnp: {}; ui: {}", fmt::join(maybeEmpty->upnp, ","), fmt::join(maybeEmpty->ui, ","));
-#else
-    log_debug("start upnp: {}; ui: {}", fmt::format("{}", fmt::join(maybeEmpty->upnp, ",")), fmt::format("{}", fmt::join(maybeEmpty->ui, ",")));
-#endif
+    log_debug("start upnp: {}; ui: {}", fmt::to_string(fmt::join(maybeEmpty->upnp, ",")), fmt::to_string(fmt::join(maybeEmpty->ui, ",")));
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return {};
 

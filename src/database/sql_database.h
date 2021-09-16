@@ -291,6 +291,7 @@ private:
 
     std::string mapBool(bool val) const { return quote((val ? 1 : 0)); }
     static bool remapBool(const std::string& field) { return field == "1"; }
+    static bool remapBool(int field) { return field == 1; }
 
     void setFsRootName(const std::string& rootName = "");
 
