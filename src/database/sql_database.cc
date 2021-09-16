@@ -1186,14 +1186,14 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     return newId;
 }
 
-int SQLDatabase::insert(const char* tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
+int SQLDatabase::insert(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
     assert(fields.size() == values.size());
     auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
     return exec(sql, getLastInsertId);
 }
 
-void SQLDatabase::insertMultipleRows(const char* tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
+void SQLDatabase::insertMultipleRows(const std::string_view& tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
 {
     if (valuesets.size() == 1) {
         insert(tableName, fields, valuesets.front());
@@ -1207,6 +1207,22 @@ void SQLDatabase::insertMultipleRows(const char* tableName, const std::vector<SQ
         auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(tableName), fmt::join(fields, ","), fmt::join(tuples, ","));
         exec(sql);
     }
+}
+
+void SQLDatabase::deleteAll(const std::string_view& tableName)
+{
+    exec(fmt::format("DELETE FROM {}", identifier(tableName)));
+}
+
+template <typename T>
+void SQLDatabase::deleteRow(const std::string_view& tableName, const std::string_view& key, const T& value)
+{
+    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(tableName), identifier(key), quote(value)));
+}
+
+void SQLDatabase::deleteRows(const std::string_view& tableName, const std::string_view& key, const std::vector<int>& values)
+{
+    exec(fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(tableName), identifier(key), fmt::join(values, ",")));
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -1590,7 +1606,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
         }
     }
 
-    exec(fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(CDS_OBJECT_TABLE), identifier("id"), fmt::join(objectIDs, ",")));
+    deleteRows(CDS_OBJECT_TABLE, "id", objectIDs);
     commit("_removeObjects");
 }
 
@@ -1885,18 +1901,19 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
 
 void SQLDatabase::removeConfigValue(const std::string& item)
 {
-    auto del = (item == "*") //
-        ? fmt::format("DELETE FROM {}", identifier(CONFIG_VALUE_TABLE)) //
-        : fmt::format("DELETE FROM {} WHERE {} = {}", identifier(CONFIG_VALUE_TABLE), identifier("item"), quote(item));
     log_info("Deleting config item '{}'", item);
-    exec(del);
+    if (item == "*") {
+        deleteAll(CONFIG_VALUE_TABLE);
+    } else {
+        deleteRow(CONFIG_VALUE_TABLE, "item", item);
+    }
 }
 
 void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
 {
-    auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {0} = {2} LIMIT 1",
-        identifier("item"), identifier(CONFIG_VALUE_TABLE), quote(item)));
-    if (!res || !res->nextRow()) {
+    auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} = {} LIMIT 1",
+        identifier(CONFIG_VALUE_TABLE), identifier("item"), quote(item)));
+    if (!res || res->getNumRows() == 0) {
         auto fields = std::vector {
             identifier("item"),
             identifier("key"),
@@ -1910,10 +1927,10 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
             quote(status),
         };
         insert(CONFIG_VALUE_TABLE, fields, values);
-        log_debug("inserted for {} as {} {}", key, item, value);
+        log_debug("inserted for {} as {} = {}", key, item, value);
     } else {
-        exec(fmt::format("UPDATE {0}{2}{1} SET {0}item_value{1} = {3} WHERE {0}item{1} = {4}", table_quote_begin, table_quote_end, CONFIG_VALUE_TABLE, quote(value), quote(item)));
-        log_debug("updated for {} as {} {}", key, item, value);
+        exec(fmt::format("UPDATE {} SET {} = {} WHERE {} = {}", identifier(CONFIG_VALUE_TABLE), identifier("item_value"), quote(value), identifier("item"), quote(item)));
+        log_debug("updated for {} as {} = {}", key, item, value);
     }
 }
 
@@ -2132,7 +2149,7 @@ void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
     if (autoscanID == INVALID_OBJECT_ID)
         return;
     int objectID = _getAutoscanObjectID(autoscanID);
-    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(AUTOSCAN_TABLE), identifier("id"), autoscanID));
+    deleteRow(AUTOSCAN_TABLE, "id", autoscanID);
     if (objectID != INVALID_OBJECT_ID)
         _autoscanChangePersistentFlag(objectID, false);
 }
