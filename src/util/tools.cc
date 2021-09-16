@@ -316,7 +316,7 @@ std::string generateRandomId()
 {
 #ifdef BSD_NATIVE_UUID
     char* uuid_str;
-    uint32_t status;
+    std::uint32_t status;
 #else
     char uuid_str[37];
 #endif

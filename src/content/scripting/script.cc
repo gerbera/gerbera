@@ -326,7 +326,7 @@ Script* Script::getContextScript(duk_context* ctx)
     return self;
 }
 
-void Script::defineFunction(const std::string& name, duk_c_function function, uint32_t numParams)
+void Script::defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams)
 {
     duk_push_c_function(ctx, function, numParams);
     duk_put_global_string(ctx, name.c_str());

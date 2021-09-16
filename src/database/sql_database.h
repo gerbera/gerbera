@@ -260,11 +260,11 @@ private:
     std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<AddUpdateTable>& addUpdateTable) const;
 
     /* helper for removeObject(s) */
-    void _removeObjects(const std::vector<int32_t>& objectIDs);
+    void _removeObjects(const std::vector<std::int32_t>& objectIDs);
 
     std::unique_ptr<ChangedContainers> _recursiveRemove(
-        const std::vector<int32_t>& items,
-        const std::vector<int32_t>& containers, bool all);
+        const std::vector<std::int32_t>& items,
+        const std::vector<std::int32_t>& containers, bool all);
 
     virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty);
 

@@ -1541,11 +1541,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     if (!res)
         throw_std_runtime_error("sql error");
 
-    std::vector<int32_t> items;
-    std::vector<int32_t> containers;
+    std::vector<std::int32_t> items;
+    std::vector<std::int32_t> containers;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        const int32_t objectID = row->col_int(0, INVALID_OBJECT_ID);
+        const std::int32_t objectID = row->col_int(0, INVALID_OBJECT_ID);
         const int objectType = row->col_int(1, 0);
         if (IS_CDS_CONTAINER(objectType))
             containers.push_back(objectID);
@@ -1557,7 +1557,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     return _purgeEmptyContainers(rr);
 }
 
-void SQLDatabase::_removeObjects(const std::vector<int32_t>& objectIDs)
+void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
 {
     auto sel = fmt::format("SELECT {}, {}, {} FROM {} JOIN {} ON {} = {} WHERE {} IN ({})",
         asColumnMapper->mapQuoted(AutoscanCol::id), asColumnMapper->mapQuoted(AutoscanCol::persistent), browseColumnMapper->mapQuoted(BrowseCol::location),
@@ -1615,8 +1615,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", objectID);
-    std::vector<int32_t> itemIds;
-    std::vector<int32_t> containerIds;
+    std::vector<std::int32_t> itemIds;
+    std::vector<std::int32_t> containerIds;
     if (isContainer) {
         containerIds.push_back(objectID);
     } else {
@@ -1627,7 +1627,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
 }
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
-    const std::vector<int32_t>& items, const std::vector<int32_t>& containers,
+    const std::vector<std::int32_t>& items, const std::vector<std::int32_t>& containers,
     bool all)
 {
     log_debug("start");
@@ -1707,7 +1707,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
                 } else {
                     if (all) {
                         if (!row->isNullOrEmpty(2)) {
-                            const int32_t refId = row->col_int(2, INVALID_OBJECT_ID);
+                            const std::int32_t refId = row->col_int(2, INVALID_OBJECT_ID);
                             parentIds.push_back(refId);
                             itemIds.push_back(refId);
                             removeIds.push_back(refId);
@@ -1760,7 +1760,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {0}{3}{1}.{0}id{1} = {0}{4}{1}.{0}parent_id{1} WHERE {0}{3}{1}.{0}object_type{1} = {6} AND {0}{3}{1}.{0}id{1} ",
         table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, CDS_OBJECT_TABLE, quote(OBJECT_TYPE_CONTAINER));
 
-    std::vector<int32_t> del;
+    std::vector<std::int32_t> del;
 
     std::unique_ptr<SQLRow> row;
 
