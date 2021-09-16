@@ -35,9 +35,9 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
-#include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fmt/core.h>
 #include <mutex>
 #include <spdlog/sinks/basic_file_sink.h>
 
@@ -83,10 +83,10 @@ static struct {
 
 static void printCopyright()
 {
-    printf("\nGerbera UPnP Server %s\n"
-           "Copyright 2016-2021 Gerbera Contributors.\n"
-           "Licence GPLv2: GNU GPL version 2.\n"
-           "This is free software: you are free to change and redistribute it.\n\n",
+    fmt::print("\nGerbera UPnP Server {}\n"
+               "Copyright 2016-2021 Gerbera Contributors.\n"
+               "Licence GPLv2: GNU GPL version 2.\n"
+               "This is free software: you are free to change and redistribute it.\n\n",
         GERBERA_VERSION);
 }
 
@@ -180,7 +180,7 @@ int main(int argc, char** argv, char** envp)
         cxxopts::ParseResult opts = options.parse(argc, argv);
 
         if (opts.count("help") > 0) {
-            std::cout << options.help({ "", "Group" }) << std::endl;
+            fmt::print("{}\n", options.help({ "", "Group" }));
             std::exit(EXIT_SUCCESS);
         }
 
@@ -191,17 +191,20 @@ int main(int argc, char** argv, char** envp)
 
         if (opts.count("compile-info") > 0) {
             printCopyright();
-            std::cout << "Compile info" << std::endl
-                      << "-------------" << std::endl
-                      << COMPILE_INFO << std::endl
-                      << std::endl;
+            fmt::print(
+                "Compile info\n"
+                "-------------\n"
+                "{}\n\n",
+                COMPILE_INFO);
             if (!git_branch.empty()) {
-                std::cout << "Git info:" << std::endl
-                          << "-------------" << std::endl
-                          << "Git Branch: " << GIT_BRANCH << std::endl;
+                fmt::print(
+                    "Git info:\n"
+                    "-------------\n"
+                    "Git Branch: {}\n",
+                    git_branch);
             }
             if (!git_commit_hash.empty()) {
-                std::cout << "Git Commit: " << GIT_COMMIT_HASH << std::endl;
+                fmt::print("Git Commit: {}\n", git_commit_hash);
             }
 
             std::exit(EXIT_SUCCESS);
@@ -419,7 +422,7 @@ int main(int argc, char** argv, char** envp)
                 confdir = "";
             }
             std::string generated = configGenerator.generate(home.value_or(""), confdir.value_or(""), dataDir.value_or(""), magic.value_or(""));
-            std::cout << generated.c_str() << std::endl;
+            fmt::print("{}\n", generated);
             std::exit(EXIT_SUCCESS);
         }
 
@@ -602,7 +605,7 @@ int main(int argc, char** argv, char** envp)
         log_info("Gerbera exiting. Have a nice day.");
         std::exit(ret);
     } catch (const cxxopts::OptionException& e) {
-        std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
+        fmt::print(stderr, "Failed to parse arguments: {}\n", e.what());
         std::exit(EXIT_FAILURE);
     }
 }
