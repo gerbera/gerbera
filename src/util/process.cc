@@ -50,7 +50,7 @@
 
 std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::string& prog, const std::string& param, const std::string& input)
 {
-    FILE* file;
+    std::FILE* file;
     int fd;
 
     /* creating input file */
@@ -98,9 +98,9 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 
     /* reading output file */
 #ifdef __linux__
-    file = ::fopen(output_file.c_str(), "re");
+    file = std::fopen(output_file.c_str(), "re");
 #else
-    file = ::fopen(output_file.c_str(), "r");
+    file = std::fopen(output_file.c_str(), "r");
 #endif
     if (!file) {
         log_debug("Could not open output file {}: {}", output_file, std::strerror(errno));
@@ -111,13 +111,13 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     int bytesRead;
     char buf[BUF_SIZE];
     while (true) {
-        bytesRead = fread(buf, 1, BUF_SIZE, file);
+        bytesRead = std::fread(buf, 1, BUF_SIZE, file);
         if (bytesRead > 0)
             output << std::string(buf, bytesRead);
         else
             break;
     }
-    fclose(file);
+    std::fclose(file);
 
     /* removing input and output files */
     unlink(input_file.c_str());

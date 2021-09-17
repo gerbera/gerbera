@@ -50,9 +50,9 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode == UPNP_READ) {
 #ifdef __linux__
-        f = ::fopen(filename.c_str(), "rbe");
+        f = std::fopen(filename.c_str(), "rbe");
 #else
-        f = ::fopen(filename.c_str(), "rb");
+        f = std::fopen(filename.c_str(), "rb");
 #endif
     } else {
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
@@ -65,12 +65,12 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
 
 std::size_t FileIOHandler::read(char* buf, std::size_t length)
 {
-    std::size_t ret = fread(buf, sizeof(char), length, f);
+    std::size_t ret = std::fread(buf, sizeof(char), length, f);
 
     if (ret == 0) {
-        if (feof(f))
+        if (std::feof(f))
             return 0;
-        if (ferror(f))
+        if (std::ferror(f))
             return -1;
     }
 
@@ -79,7 +79,7 @@ std::size_t FileIOHandler::read(char* buf, std::size_t length)
 
 std::size_t FileIOHandler::write(char* buf, std::size_t length)
 {
-    return fwrite(buf, sizeof(char), length, f);
+    return std::fwrite(buf, sizeof(char), length, f);
 }
 
 void FileIOHandler::seek(off_t offset, int whence)
@@ -96,7 +96,7 @@ off_t FileIOHandler::tell()
 
 void FileIOHandler::close()
 {
-    if (f && fclose(f) != 0) {
+    if (f && std::fclose(f) != 0) {
         log_error("fclose failed");
     }
     f = nullptr;

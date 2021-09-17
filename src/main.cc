@@ -333,7 +333,7 @@ int main(int argc, char** argv, char** envp)
             pidfile = opts["pidfile"].as<std::string>();
 
             // x will make it fail if file exists
-            auto pidf = ::fopen(pidfile->c_str(), "wx");
+            auto pidf = std::fopen(pidfile->c_str(), "wx");
             if (!pidf) {
                 log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
                 log_error("running or the file is a leftover from an unclean shutdown.");
@@ -356,7 +356,7 @@ int main(int argc, char** argv, char** envp)
                 std::exit(EXIT_FAILURE);
             }
             log_debug("Wrote pidfile {}.", pidfile->c_str());
-            ::fclose(pidf);
+            std::fclose(pidf);
         }
 
         std::optional<std::string> config_file;
