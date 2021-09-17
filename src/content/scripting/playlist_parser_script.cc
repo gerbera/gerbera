@@ -157,9 +157,9 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     currentLine[0] = '\0';
 
 #ifdef __linux__
-    currentHandle = ::fopen(obj->getLocation().c_str(), "re");
+    currentHandle = std::fopen(obj->getLocation().c_str(), "re");
 #else
-    currentHandle = ::fopen(obj->getLocation().c_str(), "r");
+    currentHandle = std::fopen(obj->getLocation().c_str(), "r");
 #endif
     if (!currentHandle) {
         currentObjectID = INVALID_OBJECT_ID;
@@ -183,7 +183,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         duk_del_prop_string(ctx, -1, "playlist");
         duk_pop(ctx);
 
-        fclose(currentHandle);
+        std::fclose(currentHandle);
         currentHandle = nullptr;
 
         delete[] currentLine;
@@ -195,7 +195,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw e;
     }
 
-    fclose(currentHandle);
+    std::fclose(currentHandle);
     currentHandle = nullptr;
 
     delete[] currentLine;

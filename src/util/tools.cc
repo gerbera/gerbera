@@ -486,9 +486,9 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 std::string readTextFile(const fs::path& path)
 {
 #ifdef __linux__
-    auto f = ::fopen(path.c_str(), "rte");
+    auto f = std::fopen(path.c_str(), "rte");
 #else
-    auto f = ::fopen(path.c_str(), "rt");
+    auto f = std::fopen(path.c_str(), "rt");
 #endif
     if (!f) {
         throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
@@ -499,16 +499,16 @@ std::string readTextFile(const fs::path& path)
     while ((bytesRead = std::fread(buffer.data(), 1, buffer.size(), f)) > 0) {
         buf << std::string(buffer.data(), bytesRead);
     }
-    fclose(f);
+    std::fclose(f);
     return buf.str();
 }
 
 void writeTextFile(const fs::path& path, std::string_view contents)
 {
 #ifdef __linux__
-    auto f = ::fopen(path.c_str(), "wte");
+    auto f = std::fopen(path.c_str(), "wte");
 #else
-    auto f = ::fopen(path.c_str(), "wt");
+    auto f = std::fopen(path.c_str(), "wt");
 #endif
     if (!f) {
         throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
@@ -516,18 +516,18 @@ void writeTextFile(const fs::path& path, std::string_view contents)
 
     std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), f);
     if (bytesWritten < contents.length()) {
-        fclose(f);
+        std::fclose(f);
 
         throw_std_runtime_error("Error writing to {}: {}", path.c_str(), std::strerror(errno));
     }
-    fclose(f);
+    std::fclose(f);
 }
 
 std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
 {
     static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
 
-    std::ifstream file { path, std::ios::in | std::ios::binary };
+    auto file = std::ifstream(path, std::ios::in | std::ios::binary);
     if (!file)
         return std::nullopt;
 
@@ -927,40 +927,40 @@ bool isTheora(const fs::path& ogg_filename)
     char buffer[7];
 
 #ifdef __linux__
-    auto f = ::fopen(ogg_filename.c_str(), "rbe");
+    auto f = std::fopen(ogg_filename.c_str(), "rbe");
 #else
-    auto f = ::fopen(ogg_filename.c_str(), "rb");
+    auto f = std::fopen(ogg_filename.c_str(), "rb");
 #endif
     if (!f) {
         throw_std_runtime_error("Error opening {}: {}", ogg_filename.c_str(), std::strerror(errno));
     }
 
     if (std::fread(buffer, 1, 4, f) != 4) {
-        fclose(f);
+        std::fclose(f);
         throw_std_runtime_error("Error reading {}", ogg_filename.c_str());
     }
 
-    if (memcmp(buffer, "OggS", 4) != 0) {
-        fclose(f);
+    if (std::memcmp(buffer, "OggS", 4) != 0) {
+        std::fclose(f);
         return false;
     }
 
-    if (fseek(f, 28, SEEK_SET) != 0) {
-        fclose(f);
+    if (std::fseek(f, 28, SEEK_SET) != 0) {
+        std::fclose(f);
         throw_std_runtime_error("Incomplete file {}", ogg_filename.c_str());
     }
 
     if (std::fread(buffer, 1, 7, f) != 7) {
-        fclose(f);
+        std::fclose(f);
         throw_std_runtime_error("Error reading {}", ogg_filename.c_str());
     }
 
-    if (memcmp(buffer, "\x80theora", 7) != 0) {
-        fclose(f);
+    if (std::memcmp(buffer, "\x80theora", 7) != 0) {
+        std::fclose(f);
         return false;
     }
 
-    fclose(f);
+    std::fclose(f);
     return true;
 }
 
@@ -1044,9 +1044,9 @@ std::string getAVIFourCC(std::string_view avi_filename)
 #define FCC_OFFSET 0xbc
 
 #ifdef __linux__
-    auto f = ::fopen(avi_filename.data(), "rbe");
+    auto f = std::fopen(avi_filename.data(), "rbe");
 #else
-    auto f = ::fopen(avi_filename.data(), "rb");
+    auto f = std::fopen(avi_filename.data(), "rb");
 #endif
     if (!f)
         throw_std_runtime_error("Could not open file {}: {}", avi_filename, std::strerror(errno));
@@ -1054,7 +1054,7 @@ std::string getAVIFourCC(std::string_view avi_filename)
     auto buffer = new char[FCC_OFFSET + 6];
 
     std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
-    fclose(f);
+    std::fclose(f);
     if (rb != FCC_OFFSET + 4) {
         delete[] buffer;
         throw_std_runtime_error("Could not read header of {}: {}", avi_filename, std::strerror(errno));

@@ -52,14 +52,14 @@
 // file managment
 class FileIOCallback : public IOCallback {
 private:
-    FILE* file;
+    std::FILE* file;
 
 public:
     explicit FileIOCallback(const char* path)
 #ifdef __linux__
-        : file(::fopen(path, "rbe"))
+        : file(std::fopen(path, "rbe"))
 #else
-        : file(fopen(path, "rb"))
+        : file(std::fopen(path, "rb"))
 #endif
     {
         if (!file) {
@@ -80,7 +80,7 @@ public:
         assert(file);
         if (size == 0)
             return 0;
-        return fread(buffer, 1, size, file);
+        return std::fread(buffer, 1, size, file);
     }
 
     void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
@@ -108,7 +108,7 @@ public:
     {
         if (!file)
             return;
-        if (fclose(file) != 0) {
+        if (std::fclose(file) != 0) {
             log_error("fclose failed");
         }
         file = nullptr;
