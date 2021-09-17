@@ -148,7 +148,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             } else if (field == M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
             }
-        } else if (strcmp(e->key, "date") == 0) {
+        } else if (std::strcmp(e->key, "date") == 0) {
             field = M_DATE;
             /// \todo parse possible ISO8601 timestamp
             if (item->getMetadata(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
@@ -157,7 +157,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 
                 item->setMetadata(field, value);
             }
-        } else if (strcmp(e->key, "creation_time") == 0) {
+        } else if (std::strcmp(e->key, "creation_time") == 0) {
             field = M_CREATION_DATE;
             if (item->getMetadata(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
