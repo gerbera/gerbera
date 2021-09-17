@@ -99,9 +99,9 @@ std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
     if (read2 > maxRead2)
         read2 = maxRead2;
 
-    memcpy(buf, buffer + a, read1);
+    std::memcpy(buf, buffer + a, read1);
     if (read2)
-        memcpy(buf + read1, buffer, read2);
+        std::memcpy(buf + read1, buffer, read2);
 
     std::size_t didRead = read1 + read2;
 

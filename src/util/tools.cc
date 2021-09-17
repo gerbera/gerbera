@@ -884,7 +884,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     /* find the last occurrence of "XXXXXX" */
     XXXXXX = strstr(tmpl, "XXXXXX");
 
-    if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6) != 0) {
+    if (!XXXXXX || std::strncmp(XXXXXX, "XXXXXX", 6) != 0) {
         return {};
     }
 
@@ -1062,12 +1062,12 @@ std::string getAVIFourCC(std::string_view avi_filename)
 
     buffer[FCC_OFFSET + 5] = '\0';
 
-    if (strncmp(buffer, "RIFF", 4) != 0) {
+    if (std::strncmp(buffer, "RIFF", 4) != 0) {
         delete[] buffer;
         return {};
     }
 
-    if (strncmp(buffer + 8, "AVI ", 4) != 0) {
+    if (std::strncmp(buffer + 8, "AVI ", 4) != 0) {
         delete[] buffer;
         return {};
     }
@@ -1102,7 +1102,7 @@ int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
     }
 
     if (sa->sa_family == AF_INET6) {
-        return memcmp(reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sa))), reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sb))), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
+        return std::memcmp(reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sa))), reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sb))), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
     }
 
     throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);
@@ -1157,7 +1157,7 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
 
         server_addr = {};
         server_addr.sin_family = AF_INET;
-        memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
+        std::memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
         server_addr.sin_port = htons(port);
 
         if (connect(fd, reinterpret_cast<struct sockaddr*>(&server_addr),

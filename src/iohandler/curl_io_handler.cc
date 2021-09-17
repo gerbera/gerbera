@@ -218,9 +218,9 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
 
     lock.unlock();
 
-    memcpy(ego->buffer + bLocal, ptr, write1);
+    std::memcpy(ego->buffer + bLocal, ptr, write1);
     if (write2)
-        memcpy(ego->buffer, static_cast<char*>(ptr) + maxWrite, write2);
+        std::memcpy(ego->buffer, static_cast<char*>(ptr) + maxWrite, write2);
 
     lock.lock();
 
