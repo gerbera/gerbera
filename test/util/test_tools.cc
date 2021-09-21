@@ -56,3 +56,46 @@ TEST(ToolsTest, renderWebUriV6)
 {
     EXPECT_EQ(renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
 }
+
+TEST(ToolsTest, splitStringTest)
+{
+    auto parts = splitString("", ',');
+    EXPECT_EQ(parts.size(), 0);
+
+    parts = splitString("", ',', true);
+    EXPECT_EQ(parts.size(), 0);
+
+    parts = splitString("A", ',');
+    ASSERT_EQ(parts.size(), 1);
+    EXPECT_EQ(parts[0], "A");
+
+    parts = splitString("A,", ',', false);
+    ASSERT_EQ(parts.size(), 1);
+    EXPECT_EQ(parts[0], "A");
+
+    parts = splitString("A,", ',', true);
+    ASSERT_EQ(parts.size(), 1); // TODO: should this not be 2 (last element is an empty string)
+    EXPECT_EQ(parts[0], "A");
+
+    parts = splitString(",A", ',', true);
+    ASSERT_EQ(parts.size(), 2);
+    EXPECT_EQ(parts[0], "");
+    EXPECT_EQ(parts[1], "A");
+
+    parts = splitString("A,B,C", ',');
+    ASSERT_EQ(parts.size(), 3);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "B");
+    EXPECT_EQ(parts[2], "C");
+
+    parts = splitString("A,,C", ',', false);
+    ASSERT_EQ(parts.size(), 2);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "C");
+
+    parts = splitString("A,,C", ',', true);
+    ASSERT_EQ(parts.size(), 3);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "");
+    EXPECT_EQ(parts[2], "C");
+}
