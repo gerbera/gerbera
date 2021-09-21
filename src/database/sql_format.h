@@ -49,4 +49,24 @@ struct fmt::formatter<SQLIdentifier> : formatter<std::string_view> {
     }
 };
 
+struct ColumnUpdate
+{
+    ColumnUpdate(const SQLIdentifier& column, std::string value)
+        : column(column)
+        , value(std::move(value))
+    {
+    }
+    SQLIdentifier column;
+    std::string value;
+};
+
+template <>
+struct fmt::formatter<ColumnUpdate> : formatter<std::string_view> {
+    template <typename FormatContext>
+    auto format(const ColumnUpdate& a, FormatContext& ctx) -> decltype(ctx.out())
+    {
+        return format_to(ctx.out(), "{} = {}", a.column, a.value);
+    }
+};
+
 #endif
