@@ -178,6 +178,8 @@ public:
 
     int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
     void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
+    template <typename T>
+    void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view where_key, const T& where_value);
     void deleteAll(std::string_view tableName);
     template <typename T>
     void deleteRow(std::string_view tableName, std::string_view where_key, const T& where_value);
@@ -301,6 +303,12 @@ private:
 
     using AutoLock = std::lock_guard<std::mutex>;
 };
+
+template <typename T>
+void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view where_key, const T& where_value)
+{
+    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(tableName), fmt::join(values, ", "), identifier(where_key), quote(where_value)));
+}
 
 template <typename T>
 void SQLDatabase::deleteRow(std::string_view tableName, std::string_view key, const T& value)
