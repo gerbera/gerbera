@@ -101,7 +101,7 @@ TEST_F(DatabaseTest, UpdateTest)
 {
     database->updateRow(
         "Table",
-        {ColumnUpdate(database->identifier("a"), "4"), ColumnUpdate(database->identifier("b"), "101")},
+        { ColumnUpdate(database->identifier("a"), "4"), ColumnUpdate(database->identifier("b"), "101") },
         "id", 1234);
     EXPECT_EQ(database->last_statement, "UPDATE [Table] SET [a] = 4, [b] = 101 WHERE [id] = 1234");
 }

@@ -49,8 +49,7 @@ struct fmt::formatter<SQLIdentifier> : formatter<std::string_view> {
     }
 };
 
-struct ColumnUpdate
-{
+struct ColumnUpdate {
     ColumnUpdate(const SQLIdentifier& column, std::string value)
         : column(column)
         , value(std::move(value))
