@@ -292,7 +292,6 @@ private:
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);
 
-    std::string mapBool(bool val) const { return quote((val ? 1 : 0)); }
     static bool remapBool(const std::string& field) { return field == "1"; }
     static bool remapBool(int field) { return field == 1; }
 
