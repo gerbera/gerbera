@@ -80,24 +80,22 @@ static constexpr auto HEX_CHARS = "0123456789abcdef";
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
 {
     std::vector<std::string> ret;
-    const char* data = str.data();
-    const char* end = data + str.length();
-    while (data < end) {
-        auto pos = std::strchr(data, sep);
-        if (!pos) {
-            std::string part = data;
-            ret.push_back(part);
-            data = end;
-        } else if (pos == data) {
-            data++;
-            if ((data < end) && empty)
-                ret.emplace_back();
+
+    std::size_t pos = 0;
+    while (pos < str.size()) {
+        if (str[pos] == sep) {
+            if (pos > 0 || empty)
+                ret.emplace_back(str.substr(0, pos));
+            str = str.substr(pos + 1);
+            pos = 0;
         } else {
-            std::string part(data, pos - data);
-            ret.push_back(part);
-            data = pos + 1;
+            ++pos;
         }
     }
+
+    if (pos > 0) // note: an empty string at the end is not added
+        ret.emplace_back(str);
+
     return ret;
 }
 
