@@ -63,7 +63,7 @@ TEST(ToolsTest, splitStringTest)
     EXPECT_EQ(parts.size(), 0);
 
     parts = splitString("", ',', true);
-    EXPECT_EQ(parts.size(), 0);
+    EXPECT_EQ(parts.size(), 1);
 
     parts = splitString("A", ',');
     ASSERT_EQ(parts.size(), 1);
@@ -74,8 +74,9 @@ TEST(ToolsTest, splitStringTest)
     EXPECT_EQ(parts[0], "A");
 
     parts = splitString("A,", ',', true);
-    ASSERT_EQ(parts.size(), 1); // TODO: should this not be 2 (last element is an empty string)
+    ASSERT_EQ(parts.size(), 2);
     EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "");
 
     parts = splitString(",A", ',', true);
     ASSERT_EQ(parts.size(), 2);
@@ -98,4 +99,13 @@ TEST(ToolsTest, splitStringTest)
     EXPECT_EQ(parts[0], "A");
     EXPECT_EQ(parts[1], "");
     EXPECT_EQ(parts[2], "C");
+
+    // Test splitString on last usecase where 'empty' is in use
+    auto resource_string = "0~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=3327x2039&size=732150~~|1~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=170x256~rct=EX_TH~";
+    auto resource_parts = splitString(resource_string, '|');
+    ASSERT_EQ(resource_parts.size(), 2);
+    auto parts0 = splitString(resource_parts[0], '~', true);
+    auto parts1 = splitString(resource_parts[1], '~', true);
+    ASSERT_EQ(parts0.size(), 4);
+    ASSERT_EQ(parts1.size(), 4);
 }
