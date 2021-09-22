@@ -502,7 +502,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
 
         std::map<std::string, std::string> params;
-        dictDecode(parameters, &params);
+        dictDecode(parameters, params);
 
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";

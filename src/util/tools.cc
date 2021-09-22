@@ -426,7 +426,7 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
     return dictEncode(dict, '/', '/');
 }
 
-void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, bool unEscape)
+void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, bool unEscape)
 {
     auto data = url.data();
     auto dataEnd = data + url.length();
@@ -444,7 +444,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
                 value = urlUnescape(value);
             }
 
-            dict->emplace(key, value);
+            dict.emplace(key, value);
         }
         data = ampPos + 1;
     }
@@ -452,7 +452,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* dict)
+void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>& dict)
 {
     std::size_t pos;
     std::size_t last_pos = 0;
@@ -472,7 +472,7 @@ void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* 
         std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
         last_pos = pos + 1;
 
-        dict->emplace(key, value);
+        dict.emplace(key, value);
     } while (last_pos < url.length());
 }
 
