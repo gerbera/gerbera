@@ -93,7 +93,7 @@ std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
         }
     }
 
-    if (pos > 0) // note: an empty string at the end is not added
+    if (pos > 0 || empty)
         ret.emplace_back(str);
 
     return ret;
