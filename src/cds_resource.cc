@@ -145,9 +145,9 @@ std::string CdsResource::encode()
 void CdsResource::decode(const std::string& options, const std::string& parameters)
 {
     if (!options.empty())
-        dictDecode(options, &this->options);
+        dictDecode(options, this->options);
     if (!parameters.empty())
-        dictDecode(parameters, &this->parameters);
+        dictDecode(parameters, this->parameters);
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
@@ -160,15 +160,16 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     int handlerType = std::stoi(parts[0]);
 
     std::map<std::string, std::string> attr;
-    dictDecode(parts[1], &attr);
-
     std::map<std::string, std::string> par;
-    if (size >= 3)
-        dictDecode(parts[2], &par);
-
     std::map<std::string, std::string> opt;
-    if (size >= 4)
-        dictDecode(parts[3], &opt);
 
-    return std::make_shared<CdsResource>(handlerType, attr, par, opt);
+    dictDecode(parts[1], attr);
+
+    if (size >= 3)
+        dictDecode(parts[2], par);
+
+    if (size >= 4)
+        dictDecode(parts[3], opt);
+
+    return std::make_shared<CdsResource>(handlerType, std::move(attr), std::move(par), std::move(opt));
 }

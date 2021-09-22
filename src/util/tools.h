@@ -138,8 +138,8 @@ std::string urlUnescape(std::string_view str);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
-void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, bool unEscape = true);
-void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* dict);
+void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, bool unEscape = true);
+void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>& dict);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted

@@ -1325,7 +1325,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::ref_auxdata));
     std::map<std::string, std::string> aux;
-    dictDecode(auxdataStr, &aux);
+    dictDecode(auxdataStr, aux);
     obj->setAuxData(aux);
 
     auto resources = retrieveResourcesForObject(obj->getID());
@@ -2538,7 +2538,7 @@ bool SQLDatabase::doMetadataMigration()
 void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 {
     std::map<std::string, std::string> dict;
-    dictDecode(metadataStr, &dict);
+    dictDecode(metadataStr, dict);
 
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", objectId);
