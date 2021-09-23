@@ -682,13 +682,34 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
 ::
 
-    <upnp>
+    <upnp multi-value="yes">
 
 * Optional
 
 Modify the settings for UPnP items.
 
 This section defines the properties which are send to UPnP clients as part of the response.
+
+    **Attributes**
+    ::
+
+        multi-value="no"
+
+    * Optional
+
+    * Default: **yes**
+
+    Enables sending multi-valued metadata in separate items. If set to **no** all values are concatenated by CFG_IMPORT_LIBOPTS_ENTRY_SEP. Otherwise each item is added separately.
+
+    * Example:
+    The follow data is sent if set to **no**
+    ::
+        <upnp:artist>First Artist / Second Artist</upnp:artist>
+
+    The follow data is sent if set to **yes**
+    ::
+        <upnp:artist>First Artist</upnp:artist>
+        <upnp:artist>Second Artist</upnp:artist>
 
     **Child tags:**
 

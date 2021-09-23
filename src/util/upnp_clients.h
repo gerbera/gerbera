@@ -72,7 +72,7 @@ struct ClientInfo {
 };
 
 struct ClientCacheEntry {
-    ClientCacheEntry(struct sockaddr_storage addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+    ClientCacheEntry(const struct sockaddr_storage& addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
         : addr(addr)
         , userAgent(std::move(userAgent))
         , last(last)

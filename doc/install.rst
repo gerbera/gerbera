@@ -12,6 +12,8 @@ Docker
 
 Docker images are provided on `Docker Hub <https://hub.docker.com/r/gerbera/gerbera>`_, we recommend running a tagged version.
 
+On Raspbian the container must be run with ``privileged: true`` to get time sync running.
+
 .. code-block:: sh
 
     docker pull gerbera/gerbera

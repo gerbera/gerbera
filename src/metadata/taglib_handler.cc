@@ -58,6 +58,9 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
+    trimStringInPlace(legacyEntrySeparator);
+    if (legacyEntrySeparator.empty())
+        legacyEntrySeparator = "\n";
     specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST);
 }
 
@@ -68,11 +71,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    TagLib::String val;
-    std::string value;
-    bool checkLegacy = false;
+    std::vector<std::string> value;
 
     auto propertyMap = std::map<metadata_fields_t, std::string> {
+        { M_ARTIST, "ARTIST" },
         { M_ALBUMARTIST, "ALBUMARTIST" },
         { M_COMPOSER, "COMPOSER" },
         { M_CONDUCTOR, "CONDUCTOR" },
@@ -81,46 +83,44 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     switch (field) {
     case M_TITLE:
-        val = tag->title();
-        break;
-    case M_ARTIST:
-        val = tag->artist();
-        checkLegacy = true;
+        value.push_back(tag->title().toCString(true));
         break;
     case M_ALBUM:
-        val = tag->album();
+        value.push_back(tag->album().toCString(true));
         break;
     case M_DATE:
     case M_UPNP_DATE: {
         unsigned int i = tag->year();
         if (i == 0)
             return;
-        value = fmt::format("{}-01-01", i);
+        value.push_back(fmt::format("{}-01-01", i));
         break;
     }
     case M_GENRE:
-        val = tag->genre();
+        value.push_back(tag->genre().toCString(true));
         break;
     case M_DESCRIPTION:
-        val = tag->comment();
+        value.push_back(tag->comment().toCString(true));
         break;
     case M_TRACKNUMBER: {
         unsigned int i = tag->track();
         if (i == 0)
             return;
-        value = fmt::to_string(i);
+        value.push_back(fmt::to_string(i));
+        item->setTrackNumber(i);
         break;
     }
     case M_PARTNUMBER: {
         auto list = file.properties()["DISCNUMBER"];
         if (!list.isEmpty()) {
-            value = list[0].toCString(true);
+            value.push_back(list[0].toCString(true));
         } else {
             list = file.properties()["TPOS"];
             if (list.isEmpty())
                 return;
-            value = list[0].toCString(true);
+            value.push_back(list[0].toCString(true));
         }
+        item->setPartNumber(stoiString(value[0]));
         break;
     }
     default: {
@@ -133,25 +133,20 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         auto list = file.properties()[it->second];
         if (list.isEmpty())
             return;
-        checkLegacy = true;
-        val = list.toString(entrySeparator);
+        for (auto&& entry : list) {
+            for (auto&& val : entry.split(legacyEntrySeparator))
+                value.push_back(val.toCString(true));
+        }
     }
     }
 
-    if (value.empty()) {
-        if (!legacyEntrySeparator.empty() && checkLegacy)
-            val = val.split(legacyEntrySeparator).toString(entrySeparator);
-        value = val.toCString(true);
-    } else if (field == M_TRACKNUMBER) {
-        item->setTrackNumber(stoiString(value));
-    } else if (field == M_PARTNUMBER) {
-        item->setPartNumber(stoiString(value));
-    }
-
-    trimStringInPlace(value);
     if (!value.empty()) {
-        item->setMetadata(field, sc->convert(value));
-        // log_debug("Setting metadata on item: {}, {}", field, sc->convert(value).c_str());
+        for (auto&& entry : value) {
+            trimStringInPlace(entry);
+            if (!entry.empty())
+                item->addMetaData(field, sc->convert(entry));
+        }
+        // [log_debug("Setting metadata on item: {} = {}", field, sc->convert(value).c_str());]
     }
 }
 
@@ -166,14 +161,13 @@ void TagLibHandler::addSpecialFields(const TagLib::File& file, const TagLib::Tag
         auto list = file.properties()[key];
         if (list.isEmpty())
             return;
-        auto val = list.toString(entrySeparator);
-        if (!legacyEntrySeparator.empty())
-            val = val.split(legacyEntrySeparator).toString(entrySeparator);
-        std::string value = val.toCString(true);
-        trimStringInPlace(value);
-        if (!value.empty()) {
-            item->setMetadata(meta, sc->convert(value));
-            log_debug("Setting metadata '{}' on item as '{}': '{}'", key, meta, sc->convert(value));
+        for (auto&& val : list) {
+            for (auto&& entrySeg : val.split(legacyEntrySeparator)) {
+                std::string entry = entrySeg.toCString(true);
+                trimStringInPlace(entry);
+                if (!entry.empty())
+                    item->addMetaData(meta, sc->convert(entry));
+            }
         }
     }
 }
@@ -461,20 +455,23 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
             if (frameList.isEmpty())
                 continue;
 
-            std::string value;
+            std::vector<std::string> content;
             for (auto&& frame : frameList) {
                 auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (!textFrame)
                     continue;
-                auto frameContents = textFrame->fieldList().toString(entrySeparator);
-                if (!value.empty())
-                    value += entrySeparator;
-                if (!legacyEntrySeparator.empty())
-                    frameContents = frameContents.split(legacyEntrySeparator).toString(entrySeparator);
-                value += sc->convert(frameContents.toCString(true));
+                for (auto&& field : textFrame->fieldList()) {
+                    if (legacyEntrySeparator.empty())
+                        content.push_back(sc->convert(field.toCString(true)));
+                    else
+                        for (auto&& val : field.split(legacyEntrySeparator))
+                            content.push_back(sc->convert(val.toCString(true)));
+                }
             }
-            log_debug("Adding auxdata: {} with value {}", desiredFrame.c_str(), value.c_str());
-            item->setAuxData(desiredFrame, value);
+            if (!content.empty()) {
+                log_debug("Adding auxdata: {} with value '{}'", desiredFrame, fmt::join(content, entrySeparator));
+                item->setAuxData(desiredFrame, fmt::format("{}", fmt::join(content, entrySeparator)));
+            }
         } else if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
             auto&& frameList = frameListMap["TXXX"];
             //log_debug("TXXX Frame list has {} elements", frameList.size());
@@ -487,28 +484,27 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 const auto textFrame = dynamic_cast<const TagLib::ID3v2::TextIdentificationFrame*>(frame);
                 if (!textFrame)
                     continue;
-                std::string content;
+                std::vector<std::string> content;
                 std::string subTag;
                 for (auto&& field : textFrame->fieldList()) {
                     if (subTag.empty()) {
                         // first element is subTag name
-                        subTag = field.toCString(true);
+                        subTag = sc->convert(field.toCString(true));
+                    } else if (legacyEntrySeparator.empty()) {
+                        content.push_back(sc->convert(field.toCString(true)));
                     } else {
-                        content = fmt::format("{}{}{}", content, field.toCString(true), entrySeparator);
+                        for (auto&& val : field.split(legacyEntrySeparator))
+                            content.push_back(sc->convert(val.toCString(true)));
                     }
                 }
+                log_debug("TXXX Tag: {}", subTag.c_str());
 
-                // remove entrySeparator at the end again
-                if (content.length() > entrySeparator.length())
-                    content = content.substr(0, content.length() - entrySeparator.length());
-                // log_debug("TXXX Tag: {}", subTag.c_str());
+                if (desiredSubTag == subTag && !content.empty()) {
+                    if (content[0] == subTag)
+                        content.erase(content.begin()); // Avoid leading tag for options unknown to taglib
 
-                if (desiredSubTag == subTag) {
-                    if (startswith(content, subTag))
-                        content = content.substr(subTag.length() + 1); // Avoid leading tag for options unknown to taglib
-
-                    log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, content);
-                    item->setAuxData(desiredFrame, content);
+                    log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, fmt::join(content, entrySeparator));
+                    item->setAuxData(desiredFrame, fmt::format("{}", fmt::join(content, entrySeparator)));
                     break;
                 }
             }

@@ -104,7 +104,7 @@ void Web::EditLoad::process()
     xml2JsonHints->setArrayName(metaData, "metadata");
     xml2JsonHints->setFieldType("metavalue", "string");
 
-    for (auto&& [key, val] : obj->getMetadata()) {
+    for (auto&& [key, val] : obj->getMetaData()) {
         auto metaEntry = metaData.append_child("metadata");
         metaEntry.append_attribute("metaname") = key.c_str();
         metaEntry.append_attribute("metavalue") = val.c_str();
@@ -185,7 +185,7 @@ void Web::EditLoad::process()
     // write item meta info
     if (obj->isItem()) {
         auto description = item.append_child("description");
-        description.append_attribute("value") = objItem->getMetadata(M_DESCRIPTION).c_str();
+        description.append_attribute("value") = objItem->getMetaData(M_DESCRIPTION).c_str();
         description.append_attribute("editable") = true;
 
         auto location = item.append_child("location");

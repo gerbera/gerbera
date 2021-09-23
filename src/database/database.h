@@ -179,7 +179,7 @@ public:
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
     virtual void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
-        std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
+        std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
         = 0;
 
     /// \brief Builds the container path. Fetches the path of the

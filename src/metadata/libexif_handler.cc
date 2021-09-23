@@ -192,7 +192,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
                 // convert date to ISO 8601 as required in the UPnP spec
                 // from YYYY:MM:DD to YYYY-MM-DD
                 if (value.length() >= 11) {
-                    item->setMetadata(M_DATE, fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2)));
+                    item->addMetaData(M_DATE, fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2)));
                 }
             }
             break;
@@ -200,7 +200,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
         case EXIF_TAG_USER_COMMENT: {
             auto value = trimString(exif_egv(e));
             if (!value.empty()) {
-                item->setMetadata(M_DESCRIPTION, sc->convert(value));
+                item->addMetaData(M_DESCRIPTION, sc->convert(value));
             }
             break;
         }
@@ -228,7 +228,7 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
                 if (e->tag == getTagFromString(tag)) {
                     auto value = trimString(exif_egv(e));
                     if (!value.empty()) {
-                        item->setMetadata(key, sc->convert(value));
+                        item->addMetaData(key, sc->convert(value));
                         log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
                     }
                 }

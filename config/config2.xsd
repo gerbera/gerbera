@@ -401,6 +401,7 @@
                 <xs:element ref="playlist-properties" minOccurs="0"/>
                 <xs:element ref="title-properties" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="multi-value" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

@@ -82,7 +82,7 @@ void BufferedIOHandler::threadProc()
             if (first_log)
                 first_log = false;
             last_log = currentTimeMS();
-            float percentFillLevel = 0;
+            [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
                 auto currentFillSize = int(b - a);
                 if (currentFillSize <= 0)

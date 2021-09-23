@@ -125,19 +125,19 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         auto it = specialPropertyMap.find(e->key);
         if (it != specialPropertyMap.end()) {
             // only use ffmpeg meta data if not found by other handler
-            if (item->getMetadata(it->second).empty()) {
+            if (item->getMetaData(it->second).empty()) {
                 log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
-                item->setMetadata(it->second, sc->convert(trimString(value)));
+                item->addMetaData(it->second, sc->convert(trimString(value)));
                 continue; // iterate while loop
             }
         }
         for (auto&& [fld, key] : propertyMap) {
             if (key == e->key) {
                 // only use ffmpeg meta data if not found by other handler
-                if (item->getMetadata(fld).empty()) {
+                if (item->getMetaData(fld).empty()) {
                     log_debug("Identified default metadata '{}': {}", key, value);
                     field = fld;
-                    item->setMetadata(field, sc->convert(trimString(value)));
+                    item->addMetaData(field, sc->convert(trimString(value)));
                     break; // leave for loop
                 }
             }
@@ -151,15 +151,15 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         } else if (std::strcmp(e->key, "date") == 0) {
             field = M_DATE;
             /// \todo parse possible ISO8601 timestamp
-            if (item->getMetadata(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
+            if (item->getMetaData(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
                 value.append("-01-01");
                 log_debug("Identified metadata 'date': {}", value.c_str());
 
-                item->setMetadata(field, value);
+                item->addMetaData(field, value);
             }
         } else if (std::strcmp(e->key, "creation_time") == 0) {
             field = M_CREATION_DATE;
-            if (item->getMetadata(field).empty()) {
+            if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
                 struct tm tm_work;
                 char m_date[] = "YYYY-mm-dd";
@@ -175,7 +175,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                     continue;
                 }
                 strftime(m_date, sizeof(m_date), "%F", &tm_work);
-                item->setMetadata(field, m_date);
+                item->addMetaData(field, m_date);
             }
         }
     }

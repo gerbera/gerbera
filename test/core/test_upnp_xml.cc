@@ -51,11 +51,11 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
-    obj->setMetadata(M_ALBUMARTIST, "Creator");
-    obj->setMetadata(M_COMPOSER, "Composer");
-    obj->setMetadata(M_CONDUCTOR, "Conductor");
-    obj->setMetadata(M_ORCHESTRA, "Orchestra");
-    obj->setMetadata(M_UPNP_DATE, "2001-01-01");
+    obj->addMetaData(M_ALBUMARTIST, "Creator");
+    obj->addMetaData(M_COMPOSER, "Composer");
+    obj->addMetaData(M_CONDUCTOR, "Conductor");
+    obj->addMetaData(M_ORCHESTRA, "Orchestra");
+    obj->addMetaData(M_UPNP_DATE, "2001-01-01");
 
     // albumArtURI
     auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
@@ -102,9 +102,9 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->setMetadata(M_DESCRIPTION, "Description");
-    obj->setMetadata(M_TRACKNUMBER, "10");
-    obj->setMetadata(M_ALBUM, "Album");
+    obj->addMetaData(M_DESCRIPTION, "Description");
+    obj->addMetaData(M_ALBUM, "Album");
+    obj->addMetaData(M_TRACKNUMBER, "10");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -117,6 +117,8 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
+    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+        .WillRepeatedly(Return(" / "));
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
@@ -141,9 +143,9 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->setMetadata(M_DESCRIPTION, "Description");
-    obj->setMetadata(M_TRACKNUMBER, "7");
-    obj->setMetadata(M_ALBUM, "Album");
+    obj->addMetaData(M_DESCRIPTION, "Description");
+    obj->addMetaData(M_ALBUM, "Album");
+    obj->addMetaData(M_TRACKNUMBER, "7");
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(R_PROTOCOLINFO, "http-get:*:audio/mpeg:*");
@@ -183,6 +185,8 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
+    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+        .WillRepeatedly(Return(" / "));
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 

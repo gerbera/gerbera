@@ -144,7 +144,7 @@ std::string ContentPathSetup::expandName(std::string_view name, const std::share
     std::string copy(name);
 
     for (auto&& [key, val] : metaTags)
-        replaceString(copy, key, obj->getMetadata(val));
+        replaceString(copy, key, obj->getMetaData(val));
 
     if (obj->isItem()) {
         fs::path location = obj->getLocation();

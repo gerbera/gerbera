@@ -88,13 +88,13 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 {
     std::vector<std::string> keys = {
         "title",
-        "meta['dc:title']",
-        "meta['upnp:artist']",
-        "meta['upnp:album']",
-        "meta['dc:date']",
-        "meta['upnp:date']",
-        "meta['upnp:genre']",
-        "meta['dc:description']"
+        "metaData['dc:title']",
+        "metaData['upnp:artist']",
+        "metaData['upnp:album']",
+        "metaData['dc:date']",
+        "metaData['upnp:date']",
+        "metaData['upnp:genre']",
+        "metaData['dc:description']"
     };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
     return ImportStructuredScriptTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
@@ -181,13 +181,13 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
     std::map<std::string, std::string> asAudioAllAudio {
         { "title", title },
-        { "meta['dc:title']", title },
-        { "meta['upnp:artist']", artist },
-        { "meta['upnp:album']", album },
-        { "meta['dc:date']", date },
-        { "meta['upnp:date']", year },
-        { "meta['upnp:genre']", genre },
-        { "meta['dc:description']", desc },
+        { "metaData['dc:title']", title },
+        { "metaData['upnp:artist']", artist },
+        { "metaData['upnp:album']", album },
+        { "metaData['dc:date']", date },
+        { "metaData['upnp:date']", year },
+        { "metaData['upnp:genre']", genre },
+        { "metaData['dc:description']", desc },
     };
 
     std::map<std::string, std::string> asAudioAllFullName;
