@@ -416,7 +416,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -436,13 +436,10 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
     }
     if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
-            if (rootPath.empty() && (task))
-                rootPath = task->getRootPath();
-
-            layout->processCdsObject(obj, rootPath);
-
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
+
+            layout->processCdsObject(obj, rootPath, mimetype, content_type);
 
 #ifdef HAVE_JS
             try {
@@ -473,6 +470,8 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
     if (config->getConfigFilename() == dirEnt.path())
         return INVALID_OBJECT_ID;
 
+    if (rootPath.empty() && task)
+        rootPath = task->getRootPath();
     // checkDatabase, don't process existing
     auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, task);
     if (!obj) // object ignored
@@ -880,7 +879,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
 
         try {
-            fs::path rootPath("");
+            fs::path rootPath = (task) ? task->getRootPath() : "";
             // check database if parent, process existing
             auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
 

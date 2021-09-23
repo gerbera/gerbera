@@ -298,11 +298,8 @@ function addAudio(obj) {
         desc = desc + ', ' + genre;
     }
 
-    var description;
     if (!obj.metaData[M_DESCRIPTION] || !obj.metaData[M_DESCRIPTION][0]) {
         obj.description = desc;
-    } else {
-        description = obj.metaData[M_DESCRIPTION][0];
     }
 
     var composer = 'None';
@@ -702,7 +699,7 @@ function addVideo(obj) {
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat({ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
         }
-        tree[tree.length-1].metaData = []
+        tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = obj.res;
         tree[tree.length-1].aux = obj.aux;
         tree[tree.length-1].refID = obj.id;
