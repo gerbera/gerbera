@@ -50,7 +50,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
-    obj->setMetadata(metadata);
+    obj->setMetaData(metaData);
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
@@ -70,7 +70,7 @@ bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) cons
     if (!resourcesEqual(obj))
         return false;
 
-    if (metadata != obj->getMetadata())
+    if (metaData != obj->getMetaData())
         return false;
 
     return !(exactly

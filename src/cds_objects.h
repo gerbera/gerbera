@@ -117,7 +117,7 @@ protected:
     /// \brief flag that allows to sort objects within a container
     int sortPriority {};
 
-    std::map<std::string, std::string> metadata;
+    std::vector<std::pair<std::string, std::string>> metaData;
     std::map<std::string, std::string> auxdata;
     std::vector<std::shared_ptr<CdsResource>> resources;
 
@@ -235,40 +235,57 @@ public:
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    std::string getMetadata(const metadata_fields_t key) const
+    std::string getMetaData(const metadata_fields_t key) const
     {
-        return getValueOrDefault(metadata, MetadataHandler::getMetaFieldName(key));
+        auto field = MetadataHandler::getMetaFieldName(key);
+        auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
+        return it != metaData.end() ? it->second : std::string();
     }
     /// \brief Query single metadata value.
-    std::string getMetadata(const std::string& key) const
+    std::string getMetaData(const std::string& field) const
     {
-        return getValueOrDefault(metadata, key);
+        auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
+        return it != metaData.end() ? it->second : std::string();
+    }
+    std::map<std::string, std::vector<std::string>> getMetaGroups() const
+    {
+        std::map<std::string, std::vector<std::string>> metaGroups;
+        for (auto&& [mkey, mvalue] : metaData) {
+            if (metaGroups.find(mkey) == metaGroups.end()) {
+                metaGroups[mkey] = std::vector<std::string>();
+            }
+            metaGroups[mkey].push_back(mvalue);
+        }
+        return metaGroups;
     }
 
     /// \brief Query entire metadata dictionary.
-    const std::map<std::string, std::string>& getMetadata() const { return metadata; }
+    const std::vector<std::pair<std::string, std::string>>& getMetaData() const { return metaData; }
+    void clearMetaData() { metaData.clear(); }
 
     /// \brief Set entire metadata dictionary.
-    void setMetadata(const std::map<std::string, std::string>& metadata)
+    void setMetaData(const std::vector<std::pair<std::string, std::string>>& metaData)
     {
-        this->metadata = metadata;
+        this->metaData = metaData;
     }
 
-    /// \brief Set a single metadata value.
-    void setMetadata(const metadata_fields_t key, const std::string& value)
+    /// \brief Add a single metadata value.
+    void addMetaData(const metadata_fields_t key, const std::string& value)
     {
-        metadata[MetadataHandler::getMetaFieldName(key)] = value;
+        metaData.emplace_back(MetadataHandler::getMetaFieldName(key), value);
     }
-    /// \brief Set a single metadata value.
-    void setMetadata(const std::string& key, const std::string& value)
+    /// \brief Add a single metadata value.
+    void addMetaData(const std::string& key, const std::string& value)
     {
-        metadata[key] = value;
+        metaData.emplace_back(key, value);
     }
 
     /// \brief Removes metadata with the given key
-    void removeMetadata(const metadata_fields_t key)
+    void removeMetaData(const metadata_fields_t key)
     {
-        metadata.erase(MetadataHandler::getMetaFieldName(key));
+        auto&& field = MetadataHandler::getMetaFieldName(key);
+        if (std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }) != metaData.end())
+            metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }));
     }
 
     /// \brief Query single auxdata value.

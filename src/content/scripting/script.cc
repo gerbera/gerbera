@@ -108,11 +108,38 @@ int Script::getIntProperty(const std::string& name, int def) const
     return ret;
 }
 
+std::vector<std::string> Script::getArrayProperty(const std::string& name) const
+{
+    if (!duk_is_object_coercible(ctx, -1))
+        return {};
+    duk_get_prop_string(ctx, -1, name.c_str());
+    if (duk_is_null_or_undefined(ctx, -1)) {
+        duk_pop(ctx);
+        return {};
+    }
+    std::vector<std::string> result;
+    duk_enum(ctx, -1, 0);
+    while (duk_next(ctx, -1, 1 /* get_value */)) {
+        duk_get_string(ctx, -1);
+        if (duk_is_null_or_undefined(ctx, -1)) {
+            duk_pop_2(ctx);
+            continue;
+        }
+        // [key = duk_to_string(ctx, -2)]
+        auto val = std::string(duk_to_string(ctx, -1));
+        result.push_back(std::move(val));
+        duk_pop_2(ctx); /* pop_key */
+    }
+    duk_pop(ctx); // duk_enum
+    duk_pop(ctx); // property
+    return result;
+}
+
 std::vector<std::string> Script::getPropertyNames() const
 {
     std::vector<std::string> keys;
     duk_enum(ctx, -1, 0);
-    while (duk_next(ctx, -1 /*enum_idx*/, 0 /*get_value*/)) {
+    while (duk_next(ctx, -1, 0 /*get_key*/)) {
         /* [ ... enum key ] */
         auto sym = std::string(duk_get_string(ctx, -1));
         keys.push_back(std::move(sym));
@@ -144,6 +171,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
     , runtime(runtime)
     , name(name)
 {
+    entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
@@ -454,35 +482,37 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (b >= 0)
         obj->setRestricted(b);
 
-    duk_get_prop_string(ctx, -1, "meta");
+    duk_get_prop_string(ctx, -1, "metaData");
     if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
-        // only metadata enumerated in mt_keys is allowed
-        for (auto&& [sym, upnp] : mt_keys) {
-            val = getProperty(upnp);
-            if (!val.empty()) {
-                if (sym == M_TRACKNUMBER) {
-                    int j = stoiString(val, 0);
-                    if (j > 0) {
-                        obj->setMetadata(sym, val);
-                        std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
-                    } else
-                        std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
-                } else if (sym == M_PARTNUMBER) {
-                    int j = stoiString(val, 0);
-                    if (j > 0) {
-                        obj->setMetadata(sym, val);
-                        std::static_pointer_cast<CdsItem>(obj)->setPartNumber(j);
-                    } else
-                        std::static_pointer_cast<CdsItem>(obj)->setPartNumber(0);
-                } else {
-                    val = sc->convert(val);
-                    obj->setMetadata(sym, val);
+        auto keys = getPropertyNames();
+        for (auto&& sym : keys) {
+            auto arrayVal = getArrayProperty(sym);
+            for (auto&& val : arrayVal) {
+                if (!val.empty()) {
+                    if (sym == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
+                        int j = stoiString(val, 0);
+                        if (j > 0) {
+                            obj->addMetaData(sym, val);
+                            std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
+                        } else
+                            std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
+                    } else if (sym == MetadataHandler::getMetaFieldName(M_PARTNUMBER)) {
+                        int j = stoiString(val, 0);
+                        if (j > 0) {
+                            obj->addMetaData(sym, val);
+                            std::static_pointer_cast<CdsItem>(obj)->setPartNumber(j);
+                        } else
+                            std::static_pointer_cast<CdsItem>(obj)->setPartNumber(0);
+                    } else {
+                        val = sc->convert(val);
+                        obj->addMetaData(sym, val);
+                    }
                 }
             }
         }
     }
-    duk_pop(ctx);
+    duk_pop(ctx); // metaData
 
     // stuff that has not been exported to js
     if (pcd) {
@@ -577,15 +607,15 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setServiceID(val);
         }
 
-        /// \todo check what this is doing here, wasn't it already handled
+        /// copy value from extra description property
         /// in the mt_keys loop?
         val = getProperty("description");
         if (!val.empty()) {
             val = sc->convert(val);
-            item->setMetadata(M_DESCRIPTION, val);
-        } else {
-            if (pcd)
-                item->setMetadata(M_DESCRIPTION, pcd_item->getMetadata(M_DESCRIPTION));
+            item->removeMetaData(M_DESCRIPTION);
+            item->addMetaData(M_DESCRIPTION, val);
+        } else if (pcd && item->getMetaData(M_DESCRIPTION).empty()) {
+            item->addMetaData(M_DESCRIPTION, pcd_item->getMetaData(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
             item->setTrackNumber(getIntProperty("playlistOrder", 0));
@@ -689,20 +719,46 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 #endif
         setIntProperty("onlineservice", 0);
 
-    // setting metadata
+    // setting legacy metadata
+
+    auto metaGroups = obj->getMetaGroups();
     {
         duk_push_object(ctx);
         // stack: js meta_js
 
-        auto meta = obj->getMetadata();
-        for (auto&& [key, attr] : meta) {
-            setProperty(key, attr);
+        for (auto&& [key, attr] : metaGroups) {
+            setProperty(key, fmt::format("{}", fmt::join(attr, entrySeparator)));
         }
 
         if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
             setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()));
 
+        if (std::static_pointer_cast<CdsItem>(obj)->getPartNumber() > 0)
+            setProperty(MetadataHandler::getMetaFieldName(M_PARTNUMBER), fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()));
+
         duk_put_prop_string(ctx, -2, "meta");
+        // stack: js
+    }
+    // setting metadata
+    {
+        duk_push_object(ctx);
+        // stack: js meta_js
+        if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0) {
+            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = std::vector<std::string> { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()) };
+        }
+        if (std::static_pointer_cast<CdsItem>(obj)->getPartNumber() > 0) {
+            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = std::vector<std::string> { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()) };
+        }
+        for (auto&& [key, array] : metaGroups) {
+            auto duk_array = duk_push_array(ctx);
+            for (std::size_t i = 0; i < array.size(); i++) {
+                duk_push_string(ctx, array[i].c_str());
+                duk_put_prop_index(ctx, duk_array, i);
+            }
+            duk_put_prop_string(ctx, -2, key.c_str());
+        }
+
+        duk_put_prop_string(ctx, -2, "metaData");
         // stack: js
     }
 

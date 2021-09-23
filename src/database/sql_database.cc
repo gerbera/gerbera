@@ -345,10 +345,19 @@ void SQLDatabase::init()
         { to_underlying(ResourceCol::options), { RES_ALIAS, "options" } },
         { to_underlying(ResourceCol::parameters), { RES_ALIAS, "parameters" } },
     };
+
+    /// \brief List of column names to be used in insert and update to ensure correct order of columns
+    // only columns listed here are added to the insert and update statements
+    tableColumnOrder = std::map<std::string, std::vector<std::string>> {
+        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "bookmark_pos", "last_modified", "last_updated" } },
+        { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
+        { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },
+    };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::attributes) + resAttrId);
         resourceColMap.emplace(to_underlying(ResourceCol::attributes) + resAttrId, std::pair(RES_ALIAS, attrName));
+        tableColumnOrder[RESOURCE_TABLE].emplace_back(attrName);
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
@@ -683,8 +692,8 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     std::vector<AddUpdateTable> returnVal;
     returnVal.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op);
 
-    if (!hasReference || obj->getMetadata() != refObj->getMetadata()) {
-        generateMetadataDBOperations(obj, op, returnVal);
+    if (!hasReference || obj->getMetaData() != refObj->getMetaData()) {
+        generateMetaDataDBOperations(obj, op, returnVal);
     }
 
     if (!hasReference || (!useResourceRef && !refObj->resourcesEqual(obj))) {
@@ -1129,10 +1138,10 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (changedContainer && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::map<std::string, std::string>());
+    return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::vector<std::pair<std::string, std::string>>());
 }
 
-int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata)
+int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -1243,7 +1252,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata)
+void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
@@ -1275,7 +1284,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         newClass = classes.back();
         classes.pop_back();
     }
-    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), INVALID_OBJECT_ID, &parentContainerID, updateID, std::map<std::string, std::string>());
+    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), INVALID_OBJECT_ID, &parentContainerID, updateID, std::vector<std::pair<std::string, std::string>>());
 
     *containerID = createContainer(parentContainerID, container, virtualPath, true, newClass, lastRefID, lastMetadata);
     updateID.push_front(*containerID);
@@ -1314,13 +1323,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_modified))));
     obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_updated))));
 
-    auto meta = retrieveMetadataForObject(obj->getID());
-    if (!meta.empty()) {
-        obj->setMetadata(meta);
+    auto metaData = retrieveMetaDataForObject(obj->getID());
+    if (!metaData.empty()) {
+        obj->setMetaData(metaData);
     } else if (obj->getRefID() != CDS_ID_ROOT) {
-        meta = retrieveMetadataForObject(obj->getRefID());
-        if (!meta.empty())
-            obj->setMetadata(meta);
+        metaData = retrieveMetaDataForObject(obj->getRefID());
+        if (!metaData.empty())
+            obj->setMetaData(metaData);
     }
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::ref_auxdata));
@@ -1409,9 +1418,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     obj->setTitle(getCol(row, SearchCol::dc_title));
     obj->setClass(getCol(row, SearchCol::upnp_class));
 
-    auto meta = retrieveMetadataForObject(obj->getID());
-    if (!meta.empty())
-        obj->setMetadata(meta);
+    auto metaData = retrieveMetaDataForObject(obj->getID());
+    if (!metaData.empty())
+        obj->setMetaData(metaData);
 
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
@@ -1445,7 +1454,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     return obj;
 }
 
-std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int objectId)
+std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataForObject(int objectId)
 {
     auto query = fmt::format("{} FROM {} WHERE {} = {}",
         sql_meta_query, identifier(METADATA_TABLE), identifier("item_id"), objectId);
@@ -1453,12 +1462,12 @@ std::map<std::string, std::string> SQLDatabase::retrieveMetadataForObject(int ob
     if (!res)
         return {};
 
-    std::map<std::string, std::string> metadata;
+    std::vector<std::pair<std::string, std::string>> metaData;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        metadata[getCol(row, MetadataCol::property_name)] = getCol(row, MetadataCol::property_value);
+        metaData.emplace_back(getCol(row, MetadataCol::property_name), getCol(row, MetadataCol::property_value));
     }
-    return metadata;
+    return metaData;
 }
 
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
@@ -2301,10 +2310,9 @@ void SQLDatabase::clearFlagInDB(int flag)
     exec(sql);
 }
 
-void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-    std::vector<AddUpdateTable>& operations)
+void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations)
 {
-    const auto& dict = obj->getMetadata();
+    const auto& dict = obj->getMetaData();
     operations.reserve(operations.size() + dict.size());
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
@@ -2314,23 +2322,13 @@ void SQLDatabase::generateMetadataDBOperations(const std::shared_ptr<CdsObject>&
             operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
         }
     } else {
-        // get current metadata from DB: if only it really was a dictionary...
-        auto dbMetadata = retrieveMetadataForObject(obj->getID());
+        // delete current metadata from DB
+        operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string>(), Operation::Delete);
         for (auto&& [key, val] : dict) {
-            Operation operation = dbMetadata.find(key) == dbMetadata.end() ? Operation::Insert : Operation::Update;
             std::map<std::string, std::string> metadataSql;
             metadataSql.emplace("property_name", quote(key));
             metadataSql.emplace("property_value", quote(val));
-            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), operation);
-        }
-        for (auto&& [key, val] : dbMetadata) {
-            if (dict.find(key) == dict.end()) {
-                // key in db metadata but not obj metadata, so needs a delete
-                std::map<std::string, std::string> metadataSql;
-                metadataSql.emplace("property_name", quote(key));
-                metadataSql.emplace("property_value", quote(val));
-                operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Delete);
-            }
+            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
         }
     }
 }
@@ -2443,9 +2441,11 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
         fields.push_back(identifier("item_id"));
         values.push_back(fmt::to_string(obj->getID()));
     }
-    for (auto&& [field, value] : dict) {
-        fields.push_back(identifier(field));
-        values.push_back(value);
+    for (auto&& field : tableColumnOrder.at(tableName)) {
+        if (dict.find(field) != dict.end()) {
+            fields.push_back(identifier(field));
+            values.push_back(dict.at(field));
+        }
     }
 
     return fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ", "), fmt::join(values, ", "));
@@ -2461,8 +2461,10 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
 
     std::vector<std::string> fields;
     fields.reserve(dict.size());
-    for (auto&& [field, value] : dict) {
-        fields.push_back(fmt::format("{} = {}", identifier(field), value));
+    for (auto&& field : tableColumnOrder.at(tableName)) {
+        if (dict.find(field) != dict.end()) {
+            fields.push_back(fmt::format("{} = {}", identifier(field), dict.at(field)));
+        }
     }
 
     std::vector<std::string> where;
@@ -2485,17 +2487,17 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
     const std::string& tableName = addUpdateTable.getTableName();
     const auto& dict = addUpdateTable.getDict();
 
-    if (tableName == METADATA_TABLE && dict.size() != 2)
-        throw_std_runtime_error("sqlForDelete called with invalid arguments");
-
     std::vector<std::string> where;
     if (tableName == RESOURCE_TABLE) {
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
         where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
     } else if (tableName == METADATA_TABLE) {
+        if (dict.size() != 0 && dict.size() != 2)
+            throw_std_runtime_error("sqlForDelete called with invalid arguments");
         // relying on only one element when tableName is mt_metadata
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
+        if (dict.size() > 0)
+            where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
     } else {
         where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
     }

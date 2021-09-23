@@ -92,16 +92,16 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 {
     std::vector<std::string> keys {
         "title",
-        "meta['dc:title']",
-        "meta['upnp:artist']",
-        "meta['upnp:album']",
-        "meta['dc:date']",
-        "meta['upnp:date']",
-        "meta['upnp:genre']",
-        "meta['dc:description']",
-        "meta['upnp:composer']",
-        "meta['upnp:conductor']",
-        "meta['upnp:orchestra']"
+        "metaData['dc:title']",
+        "metaData['upnp:artist']",
+        "metaData['upnp:album']",
+        "metaData['dc:date']",
+        "metaData['upnp:date']",
+        "metaData['upnp:genre']",
+        "metaData['dc:description']",
+        "metaData['upnp:composer']",
+        "metaData['upnp:conductor']",
+        "metaData['upnp:orchestra']",
     };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
     return ImportScriptTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
@@ -172,15 +172,15 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     std::map<std::string, std::string> aux;
 
     std::map<std::string, std::string> meta {
-        { "dc:title", title },
-        { "upnp:artist", artist },
-        { "upnp:album", album },
         { "dc:date", date },
-        { "upnp:date", year },
-        { "upnp:genre", genre },
         { "dc:description", desc },
+        { "dc:title", title },
+        { "upnp:album", album },
+        { "upnp:artist", artist },
         { "upnp:composer", composer },
         { "upnp:conductor", conductor },
+        { "upnp:date", year },
+        { "upnp:genre", genre },
         { "upnp:orchestra", orchestra },
     };
 
@@ -190,17 +190,17 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
 
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
     std::map<std::string, std::string> asAudioAllAudio {
+        { "metaData['dc:date']", date },
+        { "metaData['dc:description']", desc },
+        { "metaData['dc:title']", title },
+        { "metaData['upnp:album']", album },
+        { "metaData['upnp:artist']", artist },
+        { "metaData['upnp:composer']", composer },
+        { "metaData['upnp:conductor']", conductor },
+        { "metaData['upnp:date']", year },
+        { "metaData['upnp:genre']", genre },
+        { "metaData['upnp:orchestra']", orchestra },
         { "title", title },
-        { "meta['dc:title']", title },
-        { "meta['upnp:artist']", artist },
-        { "meta['upnp:album']", album },
-        { "meta['dc:date']", date },
-        { "meta['upnp:date']", year },
-        { "meta['upnp:genre']", genre },
-        { "meta['dc:description']", desc },
-        { "meta['upnp:composer']", composer },
-        { "meta['upnp:conductor']", conductor },
-        { "meta['upnp:orchestra']", orchestra },
     };
 
     std::map<std::string, std::string> asAudioAllFullName;
@@ -304,8 +304,8 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
     std::map<std::string, std::string> asVideoAllVideo {
         { "title", title },
-        { "meta['dc:date']", date },
-        { "meta['upnp:genre']", genre },
+        { "metaData['dc:date']", date },
+        { "metaData['upnp:genre']", genre },
     };
 
     // Expecting the common script calls
@@ -350,7 +350,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
     std::map<std::string, std::string> asImagePhotos {
         { "title", title },
-        { "meta['dc:date']", date },
+        { "metaData['dc:date']", date },
     };
 
     // Expecting the common script calls
@@ -451,17 +451,17 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
 
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
     std::map<std::string, std::string> asAudioAllAudio {
+        { "metaData['dc:date']", date },
+        { "metaData['dc:description']", desc },
+        { "metaData['dc:title']", title },
+        { "metaData['upnp:album']", album },
+        { "metaData['upnp:artist']", artist },
+        { "metaData['upnp:composer']", composer },
+        { "metaData['upnp:conductor']", conductor },
+        { "metaData['upnp:date']", year },
+        { "metaData['upnp:genre']", genre },
+        { "metaData['upnp:orchestra']", orchestra },
         { "title", title },
-        { "meta['dc:title']", title },
-        { "meta['upnp:artist']", artist },
-        { "meta['upnp:album']", album },
-        { "meta['dc:date']", date },
-        { "meta['upnp:date']", year },
-        { "meta['upnp:genre']", genre },
-        { "meta['dc:description']", desc },
-        { "meta['upnp:composer']", composer },
-        { "meta['upnp:conductor']", conductor },
-        { "meta['upnp:orchestra']", orchestra },
     };
 
     std::map<std::string, std::string> asAudioAllFullName;

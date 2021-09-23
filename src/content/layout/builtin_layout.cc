@@ -80,7 +80,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         obj->setRefID(obj->getID());
     }
 
-    auto meta = obj->getMetadata();
+    auto meta = obj->getMetaData();
 
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CREATION_DATE));
     if (!date.empty()) {
@@ -134,7 +134,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
         obj->setRefID(obj->getID());
     }
 
-    auto meta = obj->getMetadata();
+    auto meta = obj->getMetaData();
 
     std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (!date.empty()) {
@@ -181,11 +181,11 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
     std::string desc;
 
-    auto meta = obj->getMetadata();
+    std::string title = obj->getMetaData(M_TITLE);
+    if (title.empty())
+        title = obj->getTitle();
 
-    std::string title = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_TITLE), obj->getTitle());
-
-    std::string artist = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ARTIST));
+    std::string artist = obj->getMetaData(M_ARTIST);
     std::string artist_full;
     if (!artist.empty()) {
         artist_full = artist;
@@ -193,7 +193,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     } else
         artist = "Unknown";
 
-    std::string album = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_ALBUM));
+    std::string album = obj->getMetaData(M_ALBUM);
     std::string album_full;
     if (!album.empty()) {
         desc = fmt::format("{}, {}", desc, album);
@@ -206,7 +206,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         desc = fmt::format("{}, ", desc);
     desc = fmt::format("{}{}", desc, title);
 
-    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
+    std::string date = obj->getMetaData(M_DATE);
     std::string albumDate;
     if (!date.empty()) {
         auto i = date.find('-');
@@ -219,9 +219,10 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         date = "Unknown";
         albumDate = "Unknown";
     }
-    meta[MetadataHandler::getMetaFieldName(M_UPNP_DATE)] = albumDate;
+    obj->removeMetaData(M_UPNP_DATE);
+    obj->addMetaData(M_UPNP_DATE, albumDate);
 
-    std::string genre = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
+    std::string genre = obj->getMetaData(M_GENRE);
     if (!genre.empty()) {
         genre = mapGenre(genre);
         desc = fmt::format("{}, {}", desc, genre);
@@ -229,13 +230,14 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         genre = "Unknown";
     }
 
-    std::string description = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DESCRIPTION));
+    std::string description = obj->getMetaData(M_DESCRIPTION);
     if (description.empty()) {
-        meta[MetadataHandler::getMetaFieldName(M_DESCRIPTION)] = desc;
-        obj->setMetadata(meta);
+        obj->addMetaData(M_DESCRIPTION, desc);
     }
 
-    std::string composer = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_COMPOSER), "None");
+    std::string composer = obj->getMetaData(M_COMPOSER);
+    if (composer.empty())
+        composer = "None";
 
     auto id = content->addContainerChain("/Audio/All Audio");
     obj->setTitle(title);
@@ -356,7 +358,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         obj->setRefID(obj->getID());
     }
 
-    auto meta = obj->getMetadata();
+    auto meta = obj->getMetaData();
 
     std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
     auto genreAr = splitString(temp, ',');

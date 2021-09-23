@@ -79,6 +79,7 @@ void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const
     resource->addAttribute(R_SIZE, fmt::to_string(filesize));
 
     item->addResource(resource);
+    item->clearMetaData();
 
     auto mappings = context->getConfig()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string content_type = getValueOrDefault(mappings, mimetype);

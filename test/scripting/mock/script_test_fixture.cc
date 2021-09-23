@@ -61,12 +61,8 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
     const std::string& location, int online_service)
 {
-    duk_idx_t orig_idx;
-    duk_idx_t meta_idx;
-    duk_idx_t aux_idx;
-    duk_idx_t res_idx;
     const std::string OBJECT_NAME = "orig";
-    orig_idx = duk_push_object(ctx);
+    duk_idx_t orig_idx = duk_push_object(ctx);
     duk_push_string(ctx, mimetype.c_str());
     duk_put_prop_string(ctx, orig_idx, "mimetype");
     duk_push_string(ctx, id.c_str());
@@ -80,17 +76,37 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     duk_push_int(ctx, theora);
     duk_put_prop_string(ctx, orig_idx, "theora");
 
+    std::map<std::string, std::vector<std::string>> metaGroups;
+    for (auto&& [mkey, mvalue] : meta) {
+        if (metaGroups.find(mkey) == metaGroups.end()) {
+            metaGroups[mkey] = std::vector<std::string>();
+        }
+        metaGroups[mkey].push_back(mvalue);
+    }
+
     // obj.meta
-    meta_idx = duk_push_object(ctx);
-    for (auto const& val : meta) {
-        duk_push_string(ctx, val.second.c_str());
-        duk_put_prop_string(ctx, meta_idx, val.first.c_str());
+    duk_idx_t meta_idx = duk_push_object(ctx);
+    for (auto&& [key, array] : metaGroups) {
+        duk_push_string(ctx,  fmt::format("{}", fmt::join(array, "/")).c_str());
+        duk_put_prop_string(ctx, meta_idx, key.c_str());
     }
     duk_put_prop_string(ctx, orig_idx, "meta");
 
+    meta_idx = duk_push_object(ctx);
+    // obj.metaData
+    for (auto&& [key, array] : metaGroups) {
+        auto duk_array = duk_push_array(ctx);
+        for (std::size_t i = 0; i < array.size(); i++) {
+            duk_push_string(ctx, array[i].c_str());
+            duk_put_prop_index(ctx, duk_array, i);
+        }
+        duk_put_prop_string(ctx, meta_idx, key.c_str());
+    }
+    duk_put_prop_string(ctx, orig_idx, "metaData");
+
     // obj.res
     if (!res.empty()) {
-        res_idx = duk_push_object(ctx);
+        duk_idx_t res_idx = duk_push_object(ctx);
         for (auto const& val : res) {
             duk_push_string(ctx, val.second.c_str());
             duk_put_prop_string(ctx, res_idx, val.first.c_str());
@@ -100,7 +116,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
 
     // obj.aux
     if (!aux.empty()) {
-        aux_idx = duk_push_object(ctx);
+        duk_idx_t aux_idx = duk_push_object(ctx);
         for (auto const& val : aux) {
             duk_push_string(ctx, val.second.c_str());
             duk_put_prop_string(ctx, aux_idx, val.first.c_str());

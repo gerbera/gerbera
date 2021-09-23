@@ -445,12 +445,16 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             std::string content_type = getValueOrDefault(mimetype_contenttype_map, mimetype);
 
 #ifdef HAVE_JS
-            if ((playlist_parser_script) && (content_type == CONTENT_TYPE_PLAYLIST))
-                playlist_parser_script->processPlaylistObject(obj, task);
+            try {
+                if (playlist_parser_script && content_type == CONTENT_TYPE_PLAYLIST)
+                    playlist_parser_script->processPlaylistObject(obj, task);
+            } catch (const std::runtime_error& e) {
+                log_error("{}", e.what());
+            }
 #else
             if (content_type == CONTENT_TYPE_PLAYLIST)
                 log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", obj->getLocation().c_str());
-#endif // JS
+#endif // HAVE_JS
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
         }
@@ -1014,9 +1018,9 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
     }
 
     if (!description.empty()) {
-        cloned_item->setMetadata(M_DESCRIPTION, description);
+        cloned_item->addMetaData(M_DESCRIPTION, description);
     } else {
-        cloned_item->removeMetadata(M_DESCRIPTION);
+        cloned_item->removeMetaData(M_DESCRIPTION);
     }
 
     log_debug("updateCdsObject: checking equality of item {}", item->getTitle().c_str());
@@ -1099,8 +1103,9 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             tree = std::regex_replace(tree, std::regex(key), val);
         }
         if (containerMap.find(tree) == containerMap.end()) {
-            item->setMetadata(M_TITLE, item->getTitle());
-            database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetadata());
+            item->removeMetaData(M_TITLE);
+            item->addMetaData(M_TITLE, item->getTitle());
+            database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetaData());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
             containerMap[tree] = container;
             if (item->getMTime() > container->getMTime()) {
@@ -1125,7 +1130,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 
 std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain, const std::string& lastClass, int lastRefID, const std::shared_ptr<CdsObject>& origObj)
 {
-    auto lastMetadata = origObj ? origObj->getMetadata() : std::map<std::string, std::string> {};
+    auto lastMetadata = origObj ? origObj->getMetaData() : std::vector<std::pair<std::string, std::string>> {};
     std::deque<int> updateID;
     bool isNew = false;
 
@@ -1137,22 +1142,22 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         newChain = std::regex_replace(newChain, std::regex(key), val);
     }
 
-    log_debug("Received chain: {} -> {} ({}) [{}]", chain.c_str(), newChain.c_str(), lastClass.c_str(), dictEncodeSimple(lastMetadata).c_str());
+    log_debug("Received chain: {} -> {} ({}) [{}]", chain, newChain, lastClass, lastMetadata.size());
     // copy artist to album artist if empty
-    const auto aaItm = lastMetadata.find(MetadataHandler::getMetaFieldName(M_ALBUMARTIST));
-    const auto taItm = lastMetadata.find(MetadataHandler::getMetaFieldName(M_ARTIST));
+    const auto aaItm = std::find_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == MetadataHandler::getMetaFieldName(M_ALBUMARTIST); });
+    const auto taItm = std::find_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == MetadataHandler::getMetaFieldName(M_ARTIST); });
     if (aaItm == lastMetadata.end() && taItm != lastMetadata.end()) {
-        lastMetadata[MetadataHandler::getMetaFieldName(M_ALBUMARTIST)] = taItm->second;
+        lastMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTIST), taItm->second);
     }
 
     constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
     for (auto&& unw : unwanted) {
-        lastMetadata.erase(MetadataHandler::getMetaFieldName(unw));
+        lastMetadata.erase(std::remove_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == MetadataHandler::getMetaFieldName(unw); }));
     }
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
     if (containerMap.find(newChain) == containerMap.end()) {
-        lastMetadata[MetadataHandler::getMetaFieldName(M_TITLE)] = splitString(newChain, '/').back();
+        lastMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_TITLE), splitString(newChain, '/').back());
         database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
 
         for (auto&& contId : updateID) {

@@ -70,6 +70,7 @@ public:
     std::string getProperty(const std::string& name) const;
     int getBoolProperty(const std::string& name) const;
     int getIntProperty(const std::string& name, int def) const;
+    std::vector<std::string> getArrayProperty(const std::string& name) const;
 
     void setProperty(const std::string& name, const std::string& value);
     void setIntProperty(const std::string& name, int value);
@@ -114,6 +115,7 @@ protected:
     std::shared_ptr<ScriptingRuntime> runtime;
 
 private:
+    std::string entrySeparator;
     std::string name;
     void _load(const std::string& scriptPath);
     void _execute();

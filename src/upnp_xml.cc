@@ -53,6 +53,8 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
             orderedHandler.push_back(ch);
         }
     }
+    entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    multiValue = config->getBoolOption(CFG_UPNP_MULTI_VALUES_ENABLED);
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
@@ -74,7 +76,7 @@ metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldNam
     return M_MAX;
 }
 
-void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& auxData,
+void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
     config_option_t itemProps, config_option_t nsProp)
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
@@ -84,9 +86,18 @@ void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::map<std:
     auto propertyMap = config->getDictionaryOption(itemProps);
     for (auto&& [tag, field] : propertyMap) {
         auto metaField = remapMetaDataField(field);
-        auto value = (metaField != M_MAX) ? getValueOrDefault(meta, MetadataHandler::getMetaFieldName(metaField)) : getValueOrDefault(auxData, field);
-        if (!value.empty()) {
-            addField(result, tag, value);
+        bool wasMeta = false;
+        for (auto&& [mkey, mvalue] : meta) {
+            if ((metaField != M_MAX && mkey == MetadataHandler::getMetaFieldName(metaField)) || mkey == field) {
+                addField(result, tag, mvalue);
+                wasMeta = true;
+            }
+        }
+        if (!wasMeta) {
+            auto avalue = getValueOrDefault(auxData, field);
+            if (!avalue.empty()) {
+                addField(result, tag, avalue);
+            }
         }
     }
 }
@@ -126,7 +137,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     result.append_attribute("parentID") = obj->getParentID();
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
-    auto trimString = [stringLimit](const std::string& s) {
+    auto limitString = [stringLimit](const std::string& s) {
         // Do nothing if disabled, or string is already short enough
         if (stringLimit == std::string::npos || s.length() <= stringLimit)
             return s;
@@ -138,7 +149,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     const std::string title = obj->getTitle();
     const std::string upnp_class = obj->getClass();
 
-    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(trimString(title).c_str());
+    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(limitString(title).c_str());
     result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(upnp_class.c_str());
 
     auto auxData = obj->getAuxData();
@@ -149,23 +160,35 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         if (quirks)
             quirks->restoreSamsungBookMarkedPosition(item, &result);
 
-        auto meta = obj->getMetadata();
+        auto metaGroups = obj->getMetaGroups();
 
-        for (auto&& [key, val] : meta) {
-            // Trim metadata value as needed
-            auto str = trimString(val);
-
-            if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-            else if ((upnp_class == UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
-                result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-            else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
-                addField(result, key, str);
+        for (auto&& [key, group] : metaGroups) {
+            if (multiValue) {
+                for (auto&& val : group) {
+                    // Trim metadata value as needed
+                    auto str = limitString(val);
+                    if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
+                        result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                    else if (upnp_class == UPNP_CLASS_MUSIC_TRACK && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                        result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                    else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
+                        addField(result, key, limitString(str));
+                }
+            } else {
+                // Trim metadata value as needed
+                auto str = limitString(fmt::format("{}", fmt::join(group, entrySeparator)));
+                if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                else if (upnp_class == UPNP_CLASS_MUSIC_TRACK && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                    result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
+                    addField(result, key, limitString(str));
+            }
         }
-
+        auto meta = obj->getMetaData();
         auto [url, artAdded] = renderItemImage(virtualURL, item);
         if (artAdded) {
-            meta[MetadataHandler::getMetaFieldName(M_ALBUMARTURI)] = url;
+            meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), url);
         }
 
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
@@ -181,7 +204,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             result.append_attribute("childCount") = childCount;
 
         log_debug("container is class: {}", upnp_class.c_str());
-        auto meta = obj->getMetadata();
+        auto meta = obj->getMetaData();
         if (upnp_class == UPNP_CLASS_MUSIC_ALBUM) {
             addPropertyList(result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
         } else if (upnp_class == UPNP_CLASS_MUSIC_ARTIST) {

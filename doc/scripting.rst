@@ -205,31 +205,38 @@ object.
 
 .. js:attribute:: orig.meta
 
+    **R**
+
+    Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information). The array only contains the first value if multiple were extracted.
+
+
+.. js:attribute:: orig.metaData
+
     **RW**
 
-    Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information)
+    Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information). Each value is a list of strings regardless whether the source tag is multi valued or not.
 
 
-    .. js:attribute:: orig.meta[M_TITLE]
+    .. js:attribute:: orig.metaData[M_TITLE]
 
         **RW**
 
         Extracted title (for example the id3 title if the object is an mp3 file), if you want that your new
-        virtual object is displayed under this title you will have to set `obj.title = orig.meta[M_TITLE]`
+        virtual object is displayed under this title you will have to set `obj.title = orig.meta[M_TITLE][0]`
 
-    .. js:attribute:: orig.meta[M_ARTIST]
+    .. js:attribute:: orig.metaData[M_ARTIST]
 
         **RW**
 
         Artist information, this corresponds to ``upnp:artist`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_ALBUM]
+    .. js:attribute:: orig.metaData[M_ALBUM]
 
         **RW**
 
         Album information, this corresponds to ``upnp:album`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_DATE]
+    .. js:attribute:: orig.metaData[M_DATE]
 
         **RW**
 
@@ -237,67 +244,67 @@ object.
         DIDL-Lite XML.
 
 
-    .. js:attribute:: orig.meta[M_GENRE]
+    .. js:attribute:: orig.metaData[M_GENRE]
 
         **RW**
 
         Genre of the item, this corresponds to ``upnp:genre`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_DESCRIPTION]
+    .. js:attribute:: orig.metaData[M_DESCRIPTION]
 
         **RW**
 
         Description of the item, this corresponds to ``dc:description`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_REGION]
+    .. js:attribute:: orig.metaData[M_REGION]
 
         **RW**
 
         Region description of the item, this corresponds to ``upnp:region`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_TRACKNUMBER]
+    .. js:attribute:: orig.metaData[M_TRACKNUMBER]
 
         **RW**
 
         Track number of the item, this corresponds to ``upnp:originalTrackNumber`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_PARTNUMBER]
+    .. js:attribute:: orig.metaData[M_PARTNUMBER]
 
         **RW**
 
         Part number of the item. This contains the disc number for audio tracks.
 
-    .. js:attribute:: orig.meta[M_AUTHOR]
+    .. js:attribute:: orig.metaData[M_AUTHOR]
 
         **RW**
 
         Author of the media, this corresponds to ``upnp:author`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_DIRECTOR]
+    .. js:attribute:: orig.metaData[M_DIRECTOR]
 
         **RW**
 
         Director of the media, this corresponds to ``upnp:director`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_PUBLISHER]
+    .. js:attribute:: orig.metaData[M_PUBLISHER]
 
         **RW**
 
         Publisher of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_RATING]
+    .. js:attribute:: orig.metaData[M_RATING]
 
         **RW**
     
         Rating of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_ACTOR]
+    .. js:attribute:: orig.metaData[M_ACTOR]
 
         **RW**
 
         Actor of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
 
-    .. js:attribute:: orig.meta[M_PRODUCER]
+    .. js:attribute:: orig.metaData[M_PRODUCER]
 
         **RW**
 

@@ -144,7 +144,7 @@ public:
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
-    void addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::map<std::string, std::string>& lastMetadata) override;
+    void addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata) override;
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
@@ -224,10 +224,13 @@ private:
     std::string sql_autoscan_query;
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
+    /// \brief List of column names to be used in insert and update to ensure correct order of columns
+    // only columns listed here are added to the insert and update statements
+    std::map<std::string, std::vector<std::string>> tableColumnOrder;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
-    std::map<std::string, std::string> retrieveMetadataForObject(int objectId);
+    std::vector<std::pair<std::string, std::string>> retrieveMetaDataForObject(int objectId);
     std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 
     enum class Operation {
@@ -258,11 +261,8 @@ private:
     };
     std::vector<AddUpdateTable> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
 
-    void generateMetadataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-        std::vector<AddUpdateTable>& operations);
-
-    void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-        std::vector<AddUpdateTable>& operations);
+    void generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations);
+    void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations);
 
     std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
     std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
@@ -290,7 +290,8 @@ private:
     static fs::path stripLocationPrefix(std::string_view dbLocation, char* prefix = nullptr);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
-    int createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::map<std::string, std::string>& itemMetadata);
+    int createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID,
+        const std::vector<std::pair<std::string, std::string>>& itemMetadata);
 
     static bool remapBool(const std::string& field) { return field == "1"; }
     static bool remapBool(int field) { return field == 1; }

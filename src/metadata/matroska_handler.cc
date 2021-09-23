@@ -197,7 +197,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             }
             std::string title(UTFstring(*title_el).GetUTF8());
             log_debug("KaxTitle = {}", title);
-            item->setMetadata(M_TITLE, sc->convert(title));
+            item->addMetaData(M_TITLE, sc->convert(title));
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
             auto date_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
             if (!date_el) {
@@ -207,7 +207,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(date_el->GetEpochDate()));
             if (!f_date.empty()) {
                 log_debug("KaxDateUTC = {}", f_date);
-                item->setMetadata(M_DATE, sc->convert(f_date));
+                item->addMetaData(M_DATE, sc->convert(f_date));
             }
         }
     }

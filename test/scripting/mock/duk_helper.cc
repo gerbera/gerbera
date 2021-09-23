@@ -3,6 +3,8 @@
 #include "duk_helper.h"
 #include <duk_config.h>
 #include <duktape.h>
+#include <fmt/core.h>
+#include <fmt/format.h>
 #include <regex>
 
 std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_t idx)
@@ -86,26 +88,36 @@ std::pair<std::string, std::string> DukTestHelper::extractObjectValues(duk_conte
     std::regex associative_array_reg("^(.*)\\['(.*)'\\]$");
     std::cmatch pieces;
 
-    std::string value;
-    std::string objName;
-    std::string objProp;
-
     if (std::regex_match(key.c_str(), pieces, associative_array_reg)) {
         if (pieces.size() == 3) {
-            objName = pieces.str(1);
-            objProp = pieces.str(2);
+            std::string objName = pieces.str(1);
+            std::string objProp = pieces.str(2);
+
             duk_get_prop_string(ctx, idx, objName.c_str());
             if (duk_is_object(ctx, -1)) {
                 duk_to_object(ctx, -1);
                 duk_get_prop_string(ctx, -1, objProp.c_str());
                 if (duk_is_null_or_undefined(ctx, -1)) {
-                    duk_pop(ctx); // objName
                     duk_pop(ctx); // objProp
-                } else {
-                    value = duk_get_string(ctx, -1);
                     duk_pop(ctx); // objName
+                } else if (duk_to_string(ctx, -1)) {
+                    std::string value = duk_get_string(ctx, -1);
                     duk_pop(ctx); // objProp
+                    duk_pop(ctx); // objName
                     return { key, value };
+                } else {
+                    duk_pop(ctx); // objProp not string
+                    std::vector<std::string> result;
+                    duk_enum(ctx, -1, 0);
+                    while (duk_next(ctx, -1, 1 /* get_value */)) {
+                        auto val = std::string(duk_get_string(ctx, -1));
+                        result.push_back(std::move(val));
+                        duk_pop_2(ctx); /* pop_key */
+                    }
+                    duk_pop(ctx); // duk_enum
+                    duk_pop(ctx); // objProp
+                    duk_pop(ctx); // objName
+                    return { key, fmt::format("{}", fmt::join(result, "/")) };
                 }
             }
         }
@@ -124,14 +136,36 @@ void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, s
         }
     }
 
+    std::map<std::string, std::vector<std::string>> metaGroups;
+    for (auto&& [mkey, mvalue] : metaProps) {
+        if (metaGroups.find(mkey) == metaGroups.end()) {
+            metaGroups[mkey] = std::vector<std::string>();
+        }
+        metaGroups[mkey].push_back(mvalue);
+    }
+
     // obj.meta
     {
         duk_push_object(ctx);
-        for (auto&& x : metaProps) {
-            duk_push_string(ctx, x.second.c_str());
-            duk_put_prop_string(ctx, -2, x.first.c_str());
+        for (auto&& [key, attr] : metaGroups) {
+            duk_push_string(ctx, fmt::format("{}", fmt::join(attr, "/")).c_str());
+            duk_put_prop_string(ctx, -2, key.c_str());
         }
         duk_put_prop_string(ctx, -2, "meta");
+    }
+
+    // obj.metaData
+    {
+        duk_push_object(ctx);
+        for (auto&& [key, array] : metaGroups) {
+            auto duk_array = duk_push_array(ctx);
+            for (std::size_t i = 0; i < array.size(); i++) {
+                duk_push_string(ctx, array[i].c_str());
+                duk_put_prop_index(ctx, duk_array, i);
+            }
+            duk_put_prop_string(ctx, -2 , key.c_str());
+        }
+        duk_put_prop_string(ctx, -2, "metaData");
     }
 }
 #endif //HAVE_JS

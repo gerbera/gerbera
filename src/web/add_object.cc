@@ -59,8 +59,9 @@ std::shared_ptr<CdsObject> Web::AddObject::addItem(int parentID, const std::shar
     item->setClass(param("class"));
 
     std::string tmp = param("description");
-    if (!tmp.empty())
-        item->setMetadata(M_DESCRIPTION, tmp);
+    if (!tmp.empty()) {
+        item->addMetaData(M_DESCRIPTION, tmp);
+    }
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
@@ -84,8 +85,9 @@ std::shared_ptr<CdsObject> Web::AddObject::addUrl(int parentID, const std::share
     item->setClass(param("class"));
 
     std::string tmp = param("description");
-    if (!tmp.empty())
-        item->setMetadata(M_DESCRIPTION, tmp);
+    if (!tmp.empty()) {
+        item->addMetaData(M_DESCRIPTION, tmp);
+    }
 
     /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");

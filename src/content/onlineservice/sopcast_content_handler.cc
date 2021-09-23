@@ -174,13 +174,15 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
     tmp_el = channel.child("region");
     if (tmp_el) {
         temp = tmp_el.attribute("en").as_string();
-        if (!temp.empty())
-            item->setMetadata(M_REGION, temp);
+        if (!temp.empty()) {
+            item->addMetaData(M_REGION, temp);
+        }
     }
 
     temp = channel.child("description").text().as_string();
-    if (!temp.empty())
-        item->setMetadata(M_DESCRIPTION, temp);
+    if (!temp.empty()) {
+        item->addMetaData(M_DESCRIPTION, temp);
+    }
 
     temp = channel.attribute("language").as_string();
     if (!temp.empty())

@@ -69,7 +69,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
             if (value.length() >= 11) {
                 value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
                 log_debug("date: {}", value.c_str());
-                item->setMetadata(M_DATE, value);
+                item->addMetaData(M_DATE, value);
             }
         }
 
@@ -131,8 +131,9 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         log_debug("Fabricated Comment: {}", comment.c_str());
         }  */
 
-        if (!comment.empty())
-            item->setMetadata(M_DESCRIPTION, sc->convert(comment));
+        if (!comment.empty()) {
+            item->addMetaData(M_DESCRIPTION, sc->convert(comment));
+        }
 
         // if there are any metadata tags that the user wants - add them
         const auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
@@ -154,7 +155,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                 }
                 if (!metaval.empty()) {
                     metaval = sc->convert(metaval);
-                    item->setMetadata(metakey, metaval);
+                    item->addMetaData(metakey, metaval);
                     log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, metaval);
                 }
             }
