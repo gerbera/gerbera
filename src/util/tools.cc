@@ -452,13 +452,14 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, 
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>& dict)
+std::map<std::string, std::string> dictDecodeSimple(std::string_view url)
 {
+    std::map<std::string, std::string> dict;
     std::size_t pos;
     std::size_t last_pos = 0;
     do {
         pos = url.find('/', last_pos);
-        if (pos == std::string::npos || pos < last_pos + 1)
+        if (pos == std::string_view::npos || pos < last_pos + 1)
             break;
 
         std::string key = urlUnescape(url.substr(last_pos, pos - last_pos));
@@ -474,6 +475,8 @@ void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>& 
 
         dict.emplace(key, value);
     } while (last_pos < url.length());
+
+    return dict;
 }
 
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)

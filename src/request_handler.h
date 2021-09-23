@@ -38,6 +38,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <vector>
 
 #include "common.h"
 #include "context.h"
@@ -78,10 +79,10 @@ public:
     /// parameters = "object_id=12345&transcode=wav"
     static std::tuple<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
 
-    static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, const std::string& separator = _URL_PARAM_SEPARATOR);
+    static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = _URL_PARAM_SEPARATOR);
 
-    static std::map<std::string, std::string> parseParameters(const char* filename, const char* baseLink);
-    std::shared_ptr<CdsObject> getObjectById(std::map<std::string, std::string> params) const;
+    static std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
+    std::shared_ptr<CdsObject> getObjectById(const std::map<std::string, std::string>& params) const;
 
 protected:
     std::shared_ptr<ContentManager> content;
