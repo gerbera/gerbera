@@ -31,12 +31,11 @@
 
 #include "request_handler.h" // API
 
-#include <numeric>
-#include <vector>
-
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/tools.h"
+
+#include <fmt/core.h>
 
 RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
     : content(std::move(content))
@@ -69,30 +68,28 @@ std::tuple<std::string_view, std::string_view> RequestHandler::splitUrl(std::str
     }
 }
 
-std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, const std::string& separator)
+std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, std::string_view separator)
 {
-    return !components.empty()
-        ? (std::accumulate(next(components.begin()), components.end(), separator + components[0], [=](auto&& a, auto&& b) { return a + separator + b; }) + (addToEnd ? separator : ""))
-        : "/";
+    if (components.empty()) {
+        return std::string(separator);
+    } else {
+        return fmt::format("{}{}{}", separator, fmt::join(components, separator), (addToEnd ? separator : ""));
+    }
 }
 
-std::map<std::string, std::string> RequestHandler::parseParameters(const char* filename, const char* baseLink)
+std::map<std::string, std::string> RequestHandler::parseParameters(std::string_view filename, std::string_view baseLink)
 {
-    std::map<std::string, std::string> params;
-
-    const auto parameters = std::string(filename + std::strlen(baseLink));
-    dictDecodeSimple(parameters, params);
-    log_debug("filename: {} -> parameters: {}", filename, parameters.c_str());
-
-    return params;
+    const auto parameters = filename.substr(baseLink.size());
+    //log_debug("filename: {} -> parameters: {}", filename, parameters);
+    return dictDecodeSimple(parameters);
 }
 
-std::shared_ptr<CdsObject> RequestHandler::getObjectById(std::map<std::string, std::string> params) const
+std::shared_ptr<CdsObject> RequestHandler::getObjectById(const std::map<std::string, std::string>& params) const
 {
     auto it = params.find("object_id");
     if (it == params.end()) {
         //log_error("object_id not found in url");
-        throw_std_runtime_error("getInfo: object_id not found");
+        throw_std_runtime_error("getObjectById: object_id not found");
     }
 
     int objectID = std::stoi(it->second);

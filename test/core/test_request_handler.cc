@@ -45,3 +45,29 @@ TEST_F(RequestHandlerTest, SplitUrlTest)
     EXPECT_EQ(path, "a/very/long");
     EXPECT_EQ(parameters, "path");
 }
+
+TEST_F(RequestHandlerTest, JoinUrlTest)
+{
+    auto components = std::vector<std::string> {
+        "A", "B", "C", "D"
+    };
+    auto url = RequestHandler::joinUrl(components, false);
+    EXPECT_EQ(url, "/A/B/C/D");
+
+    url = RequestHandler::joinUrl(components, false, "&");
+    EXPECT_EQ(url, "&A&B&C&D");
+
+    url = RequestHandler::joinUrl(components, true);
+    EXPECT_EQ(url, "/A/B/C/D/");
+
+    url = RequestHandler::joinUrl({}, true);
+    EXPECT_EQ(url, "/");
+}
+
+TEST_F(RequestHandlerTest, ParseParametersTest)
+{
+    auto m = RequestHandler::parseParameters("url/paramA/value%201/paramB/2", "url/");
+    ASSERT_EQ(m.size(), 2);
+    EXPECT_EQ(m["paramA"], "value 1");
+    EXPECT_EQ(m["paramB"], "2");
+}
