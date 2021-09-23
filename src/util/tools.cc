@@ -80,24 +80,22 @@ static constexpr auto HEX_CHARS = "0123456789abcdef";
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
 {
     std::vector<std::string> ret;
-    const char* data = str.data();
-    const char* end = data + str.length();
-    while (data < end) {
-        auto pos = std::strchr(data, sep);
-        if (!pos) {
-            std::string part = data;
-            ret.push_back(part);
-            data = end;
-        } else if (pos == data) {
-            data++;
-            if ((data < end) && empty)
-                ret.emplace_back();
+
+    std::size_t pos = 0;
+    while (pos < str.size()) {
+        if (str[pos] == sep) {
+            if (pos > 0 || empty)
+                ret.emplace_back(str.substr(0, pos));
+            str = str.substr(pos + 1);
+            pos = 0;
         } else {
-            std::string part(data, pos - data);
-            ret.push_back(part);
-            data = pos + 1;
+            ++pos;
         }
     }
+
+    if (pos > 0 || empty)
+        ret.emplace_back(str);
+
     return ret;
 }
 
@@ -428,7 +426,7 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
     return dictEncode(dict, '/', '/');
 }
 
-void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, bool unEscape)
+void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, bool unEscape)
 {
     auto data = url.data();
     auto dataEnd = data + url.length();
@@ -446,7 +444,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
                 value = urlUnescape(value);
             }
 
-            dict->emplace(key, value);
+            dict.emplace(key, value);
         }
         data = ampPos + 1;
     }
@@ -454,7 +452,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>* dict, 
 
 // this is somewhat tricky as we need an exact amount of pairs
 // object_id=720&res_id=0
-void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* dict)
+void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>& dict)
 {
     std::size_t pos;
     std::size_t last_pos = 0;
@@ -474,7 +472,7 @@ void dictDecodeSimple(std::string_view url, std::map<std::string, std::string>* 
         std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
         last_pos = pos + 1;
 
-        dict->emplace(key, value);
+        dict.emplace(key, value);
     } while (last_pos < url.length());
 }
 

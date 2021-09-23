@@ -56,3 +56,56 @@ TEST(ToolsTest, renderWebUriV6)
 {
     EXPECT_EQ(renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
 }
+
+TEST(ToolsTest, splitStringTest)
+{
+    auto parts = splitString("", ',');
+    EXPECT_EQ(parts.size(), 0);
+
+    parts = splitString("", ',', true);
+    EXPECT_EQ(parts.size(), 1);
+
+    parts = splitString("A", ',');
+    ASSERT_EQ(parts.size(), 1);
+    EXPECT_EQ(parts[0], "A");
+
+    parts = splitString("A,", ',', false);
+    ASSERT_EQ(parts.size(), 1);
+    EXPECT_EQ(parts[0], "A");
+
+    parts = splitString("A,", ',', true);
+    ASSERT_EQ(parts.size(), 2);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "");
+
+    parts = splitString(",A", ',', true);
+    ASSERT_EQ(parts.size(), 2);
+    EXPECT_EQ(parts[0], "");
+    EXPECT_EQ(parts[1], "A");
+
+    parts = splitString("A,B,C", ',');
+    ASSERT_EQ(parts.size(), 3);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "B");
+    EXPECT_EQ(parts[2], "C");
+
+    parts = splitString("A,,C", ',', false);
+    ASSERT_EQ(parts.size(), 2);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "C");
+
+    parts = splitString("A,,C", ',', true);
+    ASSERT_EQ(parts.size(), 3);
+    EXPECT_EQ(parts[0], "A");
+    EXPECT_EQ(parts[1], "");
+    EXPECT_EQ(parts[2], "C");
+
+    // Test splitString on last usecase where 'empty' is in use
+    auto resource_string = "0~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=3327x2039&size=732150~~|1~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=170x256~rct=EX_TH~";
+    auto resource_parts = splitString(resource_string, '|');
+    ASSERT_EQ(resource_parts.size(), 2);
+    auto parts0 = splitString(resource_parts[0], '~', true);
+    auto parts1 = splitString(resource_parts[1], '~', true);
+    ASSERT_EQ(parts0.size(), 4);
+    ASSERT_EQ(parts1.size(), 4);
+}
