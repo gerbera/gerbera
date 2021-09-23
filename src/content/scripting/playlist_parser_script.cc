@@ -80,7 +80,7 @@ js_getCdsObject(duk_context* ctx)
         return 0;
 
     std::error_code ec;
-    fs::path path = fs::weakly_canonical(duk_to_string(ctx, 0), ec)
+    fs::path path = fs::weakly_canonical(duk_to_string(ctx, 0), ec);
     duk_pop(ctx);
 
     if (ec || path.empty())
