@@ -47,40 +47,36 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 {
 }
 
-std::tuple<std::string_view, std::string_view> RequestHandler::splitUrl(std::string_view url, char separator)
+std::pair<std::string_view, std::string_view> RequestHandler::splitUrl(std::string_view url, char separator)
 {
-    std::size_t i1 = 0;
+    std::size_t splitPos = std::string_view::npos;
     switch (separator) {
     case '/':
-        i1 = url.rfind('/');
+        splitPos = url.rfind('/');
         break;
     case '?':
-        i1 = url.find('?');
+        splitPos = url.find('?');
         break;
     default:
         throw_std_runtime_error("Forbidden separator: {}", separator);
     }
 
-    if (i1 == std::string::npos) {
+    if (splitPos == std::string_view::npos)
         return { url, std::string_view() };
-    } else {
-        return { url.substr(0, i1), url.substr(i1 + 1) };
-    }
+
+    return { url.substr(0, splitPos), url.substr(splitPos + 1) };
 }
 
 std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, std::string_view separator)
 {
-    if (components.empty()) {
+    if (components.empty())
         return std::string(separator);
-    } else {
-        return fmt::format("{}{}{}", separator, fmt::join(components, separator), (addToEnd ? separator : ""));
-    }
+    return fmt::format("{}{}{}", separator, fmt::join(components, separator), (addToEnd ? separator : ""));
 }
 
 std::map<std::string, std::string> RequestHandler::parseParameters(std::string_view filename, std::string_view baseLink)
 {
     const auto parameters = filename.substr(baseLink.size());
-    //log_debug("filename: {} -> parameters: {}", filename, parameters);
     return dictDecodeSimple(parameters);
 }
 
@@ -88,11 +84,9 @@ std::shared_ptr<CdsObject> RequestHandler::getObjectById(const std::map<std::str
 {
     auto it = params.find("object_id");
     if (it == params.end()) {
-        //log_error("object_id not found in url");
         throw_std_runtime_error("getObjectById: object_id not found");
     }
 
     int objectID = std::stoi(it->second);
-    //log_debug("load objectID: {}", objectID);
     return database->loadObject(objectID);
 }
