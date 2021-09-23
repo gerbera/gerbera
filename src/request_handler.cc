@@ -48,22 +48,24 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 {
 }
 
-void RequestHandler::splitUrl(const std::string& url, char separator, std::string& path, std::string& parameters)
+std::tuple<std::string_view, std::string_view> RequestHandler::splitUrl(std::string_view url, char separator)
 {
-    const auto i1 = std::size_t { [=]() {
-        if (separator == '/')
-            return url.rfind(separator);
-        if (separator == '?')
-            return url.find(separator);
+    std::size_t i1 = 0;
+    switch (separator) {
+    case '/':
+        i1 = url.rfind('/');
+        break;
+    case '?':
+        i1 = url.find('?');
+        break;
+    default:
         throw_std_runtime_error("Forbidden separator: {}", separator);
-    }() };
+    }
 
     if (i1 == std::string::npos) {
-        path = url;
-        parameters.clear();
+        return { url, std::string_view() };
     } else {
-        parameters = url.substr(i1 + 1);
-        path = url.substr(0, i1);
+        return { url.substr(0, i1), url.substr(i1 + 1) };
     }
 }
 
