@@ -252,7 +252,7 @@ public:
         std::map<std::string, std::vector<std::string>> metaGroups;
         for (auto&& [mkey, mvalue] : metaData) {
             if (metaGroups.find(mkey) == metaGroups.end()) {
-                metaGroups[mkey] = std::vector<std::string>();
+                metaGroups[mkey] = {};
             }
             metaGroups[mkey].push_back(mvalue);
         }

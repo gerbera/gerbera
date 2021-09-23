@@ -129,7 +129,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     item->setClass("object.item.videoItem");
 
-    auto propertyMap = std::map<std::string, metadata_fields_t> {
+    auto propertyMap = std::vector<std::pair<std::string, metadata_fields_t>> {
         { "rating", M_RATING },
         { "studio", M_PRODUCER },
         { "director", M_DIRECTOR },

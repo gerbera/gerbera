@@ -405,7 +405,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
     return genre;
 }
 
-void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type)
 {
     log_debug("Process CDS Object: {}", obj->getTitle().c_str());
 #ifdef ENABLE_PROFILING
@@ -437,11 +437,6 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
         }
     } else {
 #endif
-
-        std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
-        auto mappings = config->getDictionaryOption(
-            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string content_type = getValueOrDefault(mappings, mimetype);
 
         if (startswith(mimetype, "video"))
             addVideo(clone, rootpath);
