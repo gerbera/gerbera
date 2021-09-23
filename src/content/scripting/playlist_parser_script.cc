@@ -79,17 +79,18 @@ js_getCdsObject(duk_context* ctx)
     if (!duk_is_string(ctx, 0))
         return 0;
 
-    fs::path path = duk_to_string(ctx, 0);
+    std::error_code ec;
+    fs::path path = fs::weakly_canonical(duk_to_string(ctx, 0), ec)
     duk_pop(ctx);
 
-    if (path.empty())
+    if (ec || path.empty())
         return 0;
 
     auto database = self->getDatabase();
     auto obj = database->findObjectByPath(path);
     if (!obj) {
         auto cm = self->getContent();
-        std::error_code ec;
+        ec.clear();
         auto dirEnt = fs::directory_entry(path, ec);
         if (!ec) {
             obj = cm->createObjectFromFile(dirEnt, false);
