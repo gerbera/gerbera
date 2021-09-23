@@ -36,6 +36,8 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
+#include <tuple>
 
 #include "common.h"
 #include "context.h"
@@ -68,14 +70,13 @@ public:
     /// Only '?' and '/' separators are allowed, otherwise an exception will
     /// be thrown.
     /// \param url URL that has to be processed
-    /// \param path variable where the path portion will be saved
-    /// \param parameters variable where the parameters portion will be saved
+    /// \return tuple of path and parameters which reference the input-view of url
     ///
-    /// This function splits the url into it's path and parameter components.
+    /// This function splits the url into its path and parameter components.
     /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
     /// path = "content/media"
     /// parameters = "object_id=12345&transcode=wav"
-    static void splitUrl(const std::string& url, char separator, std::string& path, std::string& parameters);
+    static std::tuple<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
 
     static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, const std::string& separator = _URL_PARAM_SEPARATOR);
 
