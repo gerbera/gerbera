@@ -410,7 +410,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     switch (eventType) {
     case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
     case UPNP_DISCOVERY_SEARCH_RESULT: {
-        auto d_event = reinterpret_cast<const UpnpDiscovery*>(event);
+        auto d_event = static_cast<const UpnpDiscovery*>(event);
         const char* userAgent = UpnpDiscovery_get_Os_cstr(d_event);
         const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
         const char* location = UpnpDiscovery_get_Location_cstr(d_event);

@@ -431,7 +431,7 @@ void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, 
     auto data = url.data();
     auto dataEnd = data + url.length();
     while (data < dataEnd) {
-        auto ampPos = reinterpret_cast<const char*>(std::strchr(data, '&'));
+        auto ampPos = static_cast<const char*>(std::strchr(data, '&'));
         if (!ampPos) {
             ampPos = dataEnd;
         }
@@ -1100,7 +1100,7 @@ int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
     }
 
     if (sa->sa_family == AF_INET6) {
-        return std::memcmp(reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sa))), reinterpret_cast<const char*>(&(SOCK_ADDR_IN6_ADDR(sb))), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
+        return std::memcmp(&(SOCK_ADDR_IN6_ADDR(sa)), &(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
     }
 
     throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);
