@@ -48,6 +48,9 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
     , deviceHandle(deviceHandle)
     , xmlBuilder(xmlBuilder)
 {
+    titleSegments = this->config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
+    resultSeparator = this->config->getOption(CFG_UPNP_SEARCH_SEPARATOR);
+    searchableContainers = this->config->getBoolOption(CFG_UPNP_SEARCH_CONTAINER_FLAG);
 }
 
 void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
@@ -63,7 +66,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 #endif
     std::string objID = req_root.child("ObjectID").text().as_string();
     std::string browseFlag = req_root.child("BrowseFlag").text().as_string();
-    //std::string Filter; // not yet supported
+    //std::string filter; // not yet supported
     std::string startingIndex = req_root.child("StartingIndex").text().as_string();
     std::string requestedCount = req_root.child("RequestedCount").text().as_string();
     std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
@@ -174,7 +177,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
-        stoiString(startingIndex), stoiString(requestedCount));
+        stoiString(startingIndex), stoiString(requestedCount), searchableContainers);
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
@@ -185,22 +188,20 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
-    auto titleSegs = config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
-    auto resultSep = config->getOption(CFG_UPNP_SEARCH_SEPARATOR);
 
     for (auto&& cdsObject : results) {
         if (cdsObject->isItem()) {
             std::string title = cdsObject->getTitle();
-            if (!titleSegs.empty()) {
+            if (!titleSegments.empty()) {
                 auto values = std::vector<std::string>();
-                for (auto&& segment : titleSegs) {
+                for (auto&& segment : titleSegments) {
                     auto mtField = MetadataHandler::remapMetaDataField(segment);
                     auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
                     if (!value.empty())
-                        values.emplace_back(value);
+                        values.push_back(value);
                 }
                 if (!values.empty())
-                    title = fmt::format("{}", fmt::join(values, resultSep));
+                    title = fmt::format("{}", fmt::join(values, resultSeparator));
             }
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
                 if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))

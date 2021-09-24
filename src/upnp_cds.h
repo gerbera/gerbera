@@ -45,7 +45,7 @@
 ///
 /// Handles subscription and action invocation requests for the CDS.
 class ContentDirectoryService {
-protected:
+private:
     /// \brief The system update ID indicates changes in the content directory.
     ///
     /// Whenever something in the content directory changes, the value of
@@ -115,6 +115,10 @@ protected:
 
     UpnpDevice_Handle deviceHandle;
     UpnpXMLBuilder* xmlBuilder;
+
+    std::vector<std::string> titleSegments;
+    std::string resultSeparator;
+    bool searchableContainers { false };
 
 public:
     /// \brief Constructor for the CDS, saves the service type and service id

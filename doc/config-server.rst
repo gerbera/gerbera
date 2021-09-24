@@ -693,6 +693,16 @@ This section defines the properties which are send to UPnP clients as part of th
     **Attributes**
         ::
 
+            searchable-container-flag="yes"
+
+        * Optional
+
+        * Default: **"no"**
+
+        Only return containers that have the flag **searchable** set.
+
+        ::
+
             search-result-separator=" : "
 
         * Optional

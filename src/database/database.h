@@ -130,19 +130,22 @@ protected:
     std::string sortCrit;
     int startingIndex;
     int requestedCount;
+    bool searchableContainers;
 
 public:
     SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
-        int requestedCount)
+        int requestedCount, bool searchableContainers)
         : containerID(std::move(containerID))
         , searchCrit(std::move(searchCriteria))
         , sortCrit(std::move(sortCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
+        , searchableContainers(searchableContainers)
     {
     }
     const std::string& getContainerId() const { return containerID; }
     const std::string& searchCriteria() const { return searchCrit; }
+    bool getSearchableContainers() const { return searchableContainers; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
     const std::string& getSortCriteria() const { return sortCrit; }
@@ -178,7 +181,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(std::string path, const std::string& lastClass, int lastRefID, int* containerID,
+    virtual void addContainerChain(std::string path, const std::string& lastClass, int flags, int lastRefID, int* containerID,
         std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
         = 0;
 

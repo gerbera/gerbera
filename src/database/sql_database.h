@@ -144,7 +144,7 @@ public:
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
-    void addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata) override;
+    void addContainerChain(std::string virtualPath, const std::string& lastClass, int flags, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata) override;
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
@@ -290,7 +290,7 @@ private:
     static fs::path stripLocationPrefix(std::string_view dbLocation, char* prefix = nullptr);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
-    int createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID,
+    int createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID,
         const std::vector<std::pair<std::string, std::string>>& itemMetadata);
 
     static bool remapBool(const std::string& field) { return field == "1"; }
