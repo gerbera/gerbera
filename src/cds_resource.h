@@ -63,7 +63,7 @@ public:
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
     /// \param handler_type id of the associated handler
-    explicit CdsResource(int handlerType);
+    CdsResource(int handlerType, std::string_view options = {}, std::string_view parameters = {});
     CdsResource(int handlerType,
         std::map<std::string, std::string> attributes,
         std::map<std::string, std::string> parameters,
@@ -105,9 +105,9 @@ public:
     void addOption(std::string name, std::string value);
 
     int getHandlerType() const;
-    std::map<std::string, std::string> getAttributes() const;
-    std::map<std::string, std::string> getParameters() const;
-    std::map<std::string, std::string> getOptions() const;
+    const std::map<std::string, std::string>& getAttributes() const;
+    const std::map<std::string, std::string>& getParameters() const;
+    const std::map<std::string, std::string>& getOptions() const;
     std::string getAttribute(resource_attributes_t res) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
@@ -120,9 +120,8 @@ public:
     std::shared_ptr<CdsResource> clone();
 
     /// \brief urlencode into string
-    std::string encode();
+    [[deprecated]] std::string encode() const;
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
-    void decode(const std::string& options, const std::string& parameters);
 };
 
 #endif // __CDS_RESOURCE_H__

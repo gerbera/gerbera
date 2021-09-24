@@ -93,7 +93,12 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-    dictDecode(parameters, params);
+    auto decodedParams = dictDecode(parameters);
+    if (params.empty()) {
+        params = std::move(decodedParams);
+    } else {
+        dictMerge(params, decodedParams);
+    }
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
 
@@ -101,9 +106,9 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
-    std::string returnType = param("return_type");
-    std::string mimetype = (returnType == "xml") ? MIMETYPE_XML : MIMETYPE_JSON;
-    std::string contentType = mimetype + "; charset=" + DEFAULT_INTERNAL_CHARSET;
+    auto returnType = param("return_type");
+    auto mimetype = (returnType == "xml") ? MIMETYPE_XML : MIMETYPE_JSON;
+    std::string contentType = fmt::format("{}; charset={}", mimetype, DEFAULT_INTERNAL_CHARSET);
 
 #ifdef USING_NPUPNP
     info->content_type = std::move(contentType);
@@ -222,7 +227,12 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
 
     auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-    dictDecode(parameters, params);
+    auto decodedParams = dictDecode(parameters);
+    if (params.empty()) {
+        params = std::move(decodedParams);
+    } else {
+        dictMerge(params, decodedParams);
+    }
 
     return open(mode);
 }

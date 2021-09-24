@@ -110,7 +110,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
     std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range, obj->getTitle());
 
-    log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::join(arglist, " "));
+    log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
     auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
     main_proc->removeFile(fifo_name);
     if (isURL && (!profile->acceptURL())) {

@@ -723,9 +723,9 @@ bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& optValue,
             std::string value = child.attribute(valAttr.c_str()).as_string();
             if (!key.empty() && !value.empty()) {
                 if (tolower) {
-                    key = toLower(key);
+                    toLowerInPlace(key);
                 }
-                result[key] = value;
+                result[key] = std::move(value);
             } else if (itemNotEmpty) {
                 return false;
             }

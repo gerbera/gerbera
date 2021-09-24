@@ -65,7 +65,10 @@ std::string trimString(std::string str);
 bool startswith(std::string_view str, std::string_view check);
 
 /// \brief returns lowercase of str
-std::string toLower(std::string_view str);
+std::string toLower(std::string str);
+
+/// \brief makes str lowercase in-place and returns a reference to it
+std::string& toLowerInPlace(std::string& str);
 
 /// \brief convert string to integer
 int stoiString(const std::string& str, int def = 0, int base = 10);
@@ -111,7 +114,7 @@ std::string httpRedirectTo(std::string_view addr, std::string_view page = "");
 /// \param data Buffer that is holding the data
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
-std::string hexEncode(const void* data, int len);
+std::string hexEncode(const void* data, std::size_t len);
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
@@ -123,7 +126,7 @@ std::string hexDecodeString(std::string_view encoded);
 std::string generateRandomId();
 
 /// \brief Generates hex md5 sum of the given data.
-std::string hexMd5(const void* data, int length);
+std::string hexMd5(const void* data, std::size_t length);
 
 /// \brief Generates hex md5 sum of the given string.
 std::string hexStringMd5(std::string_view str);
@@ -138,8 +141,11 @@ std::string urlUnescape(std::string_view str);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
-void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, bool unEscape = true);
+std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
 std::map<std::string, std::string> dictDecodeSimple(std::string_view url);
+
+/// \brief Adds elements from source to result if they do not yet exist in result
+void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted

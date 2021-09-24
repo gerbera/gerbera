@@ -1341,8 +1341,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     }
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::ref_auxdata));
-    std::map<std::string, std::string> aux;
-    dictDecode(auxdataStr, aux);
+    std::map<std::string, std::string> aux = dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
     auto resources = retrieveResourcesForObject(obj->getID());
@@ -2356,8 +2355,10 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     resources.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        auto resource = std::make_shared<CdsResource>(std::stoi(getCol(row, ResourceCol::handlerType)));
-        resource->decode(getCol(row, ResourceCol::options), getCol(row, ResourceCol::parameters));
+        auto resource = std::make_shared<CdsResource>(
+            std::stoi(getCol(row, ResourceCol::handlerType)),
+            getCol(row, ResourceCol::options),
+            getCol(row, ResourceCol::parameters));
         resource->setResId(resources.size());
         for (auto&& resAttrId : ResourceAttributeIterator()) {
             auto index = to_underlying(ResourceCol::attributes) + to_underlying(resAttrId);
@@ -2383,11 +2384,11 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(res_id);
             resourceSql["handlerType"] = quote(resource->getHandlerType());
-            auto options = resource->getOptions();
+            auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
             }
-            auto parameters = resource->getParameters();
+            auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
                 resourceSql["parameters"] = quote(dictEncode(parameters));
             }
@@ -2406,11 +2407,11 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(res_id);
             resourceSql["handlerType"] = quote(resource->getHandlerType());
-            auto options = resource->getOptions();
+            auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
             }
-            auto parameters = resource->getParameters();
+            auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
                 resourceSql["parameters"] = quote(dictEncode(parameters));
             }
@@ -2548,8 +2549,7 @@ bool SQLDatabase::doMetadataMigration()
 
 void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 {
-    std::map<std::string, std::string> dict;
-    dictDecode(metadataStr, dict);
+    std::map<std::string, std::string> dict = dictDecode(metadataStr);
 
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", objectId);
@@ -2651,12 +2651,12 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 fmt::to_string(res_id),
                 fmt::to_string(resource->getHandlerType()),
             };
-            auto options = resource->getOptions();
+            auto&& options = resource->getOptions();
             if (!options.empty()) {
                 fields.push_back(identifier("options"));
                 values.push_back(quote(dictEncode(options)));
             }
-            auto parameters = resource->getParameters();
+            auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
                 fields.push_back(identifier("parameters"));
                 values.push_back(quote(dictEncode(parameters)));

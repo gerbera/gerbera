@@ -109,3 +109,80 @@ TEST(ToolsTest, splitStringTest)
     ASSERT_EQ(parts0.size(), 4);
     ASSERT_EQ(parts1.size(), 4);
 }
+
+TEST(ToolsTest, trimStringTest)
+{
+    EXPECT_EQ(trimString(""), "");
+    EXPECT_EQ(trimString("AB"), "AB");
+    EXPECT_EQ(trimString("  AB  "), "AB");
+}
+
+TEST(ToolsTest, startswithTest)
+{
+    EXPECT_EQ(startswith("AB", "AB"), true);
+    EXPECT_EQ(startswith("ABCD", "AB"), true);
+    EXPECT_EQ(startswith("AB", "ABC"), false);
+    EXPECT_EQ(startswith("ABC", "BC"), false);
+    EXPECT_EQ(startswith("ABAB", "AB"), true);
+}
+
+TEST(ToolsTest, toLowerTest)
+{
+    EXPECT_EQ(toLower("AbC"), "abc");
+
+    std::string test = "TestString";
+    EXPECT_EQ(toLowerInPlace(test), "teststring");
+    EXPECT_EQ(test, "teststring");
+}
+
+TEST(ToolsTest, hexEncodeTest)
+{
+    const std::uint8_t data[] = { 0x60, 0x0D, 0xC0, 0xDE };
+    EXPECT_EQ(hexEncode(data, sizeof(data)), "600dc0de");
+
+    EXPECT_EQ(hexEncode(nullptr, 0), "");
+}
+
+TEST(ToolsTest, hexDecodeTest)
+{
+    EXPECT_EQ(hexDecodeString("476f6f64436f6465"), "GoodCode");
+}
+
+TEST(ToolsTest, dictEncodeTest)
+{
+    std::map<std::string, std::string> values;
+    values.emplace("Key 1", "Value 1");
+    values.emplace("Key2", "Value 2");
+    EXPECT_EQ(dictEncode(values), "Key%201=Value%201&Key2=Value%202");
+}
+
+TEST(ToolsTest, dictDecodeTest)
+{
+    std::map<std::string, std::string> values = dictDecode("Key%201=Value%201&Key2=Value%202");
+    ASSERT_EQ(values.size(), 2);
+    EXPECT_EQ(values["Key 1"], "Value 1");
+    EXPECT_EQ(values["Key2"], "Value 2");
+
+    values = dictDecode("");
+    EXPECT_EQ(values.size(), 0);
+}
+
+TEST(ToolsTest, dictMergeTest)
+{
+    std::map<std::string, std::string> result;
+    result.emplace("A", "1");
+    result.emplace("B", "2");
+
+    std::map<std::string, std::string> source;
+    source.emplace("A", "10");
+    source.emplace("C", "3");
+
+    EXPECT_EQ(result.size(), 2);
+
+    dictMerge(result, source);
+
+    EXPECT_EQ(result.size(), 3);
+    EXPECT_EQ(result["A"], "1");
+    EXPECT_EQ(result["B"], "2");
+    EXPECT_EQ(result["C"], "3");
+}
