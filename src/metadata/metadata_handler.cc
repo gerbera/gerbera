@@ -35,6 +35,7 @@
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
+#include "content/scripting/script_names.h"
 #include "util/tools.h"
 
 #ifdef HAVE_EXIV2
@@ -233,4 +234,14 @@ std::string MetadataHandler::mapContentHandler2String(int ch)
         return ch_entry->second;
     }
     return "Unknown";
+}
+
+metadata_fields_t MetadataHandler::remapMetaDataField(const std::string& fieldName)
+{
+    for (auto&& [f, s] : mt_names) {
+        if (s == fieldName) {
+            return f;
+        }
+    }
+    return M_MAX;
 }

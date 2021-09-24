@@ -680,9 +680,9 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 ``upnp``
 ~~~~~~~~
 
-::
+.. code-block:: xml
 
-    <upnp multi-value="yes">
+    <upnp multi-value="yes" search-result-separator=" : ">
 
 * Optional
 
@@ -691,29 +691,54 @@ Modify the settings for UPnP items.
 This section defines the properties which are send to UPnP clients as part of the response.
 
     **Attributes**
-    ::
+        ::
 
-        multi-value="yes"
+            search-result-separator=" : "
 
-    * Optional
+        * Optional
 
-    * Default: **no**
+        * Default: **" - "**
 
-    Enables sending multi-valued metadata in separate items. If set to **no** all values are concatenated by CFG_IMPORT_LIBOPTS_ENTRY_SEP. Otherwise each item is added separately.
+        String used to concatenate result segments as defined in ``search-item-result``
 
-    * Example:
-    The follow data is sent if set to **no**
-    ::
-        <upnp:artist>First Artist / Second Artist</upnp:artist>
+        ::
 
-    The follow data is sent if set to **yes**
-    ::
-        <upnp:artist>First Artist</upnp:artist>
-        <upnp:artist>Second Artist</upnp:artist>
+            multi-value="yes"
+
+        * Optional
+
+        * Default: **no**
+
+        Enables sending multi-valued metadata in separate items. If set to **no** all values are concatenated by CFG_IMPORT_LIBOPTS_ENTRY_SEP. Otherwise each item is added separately.
+
+        * Example:
+            The follow data is sent if set to **no**
+
+            .. code-block:: xml
+
+                <upnp:artist>First Artist / Second Artist</upnp:artist>
+
+            The follow data is sent if set to **yes**
+
+            .. code-block:: xml
+
+                <upnp:artist>First Artist</upnp:artist>
+                <upnp:artist>Second Artist</upnp:artist>
 
     **Child tags:**
 
-    ::
+    .. code-block:: xml
+
+        <search-item-result>
+            <add-data tag="M_ARTIST"/>
+            <add-data tag="M_TITLE"/>
+        </search-item-result>
+
+    * Optional
+
+    Set the meta-data search tags to use in search result for title. The default settings as shown above produces ``artist - title`` in the result list.
+
+    .. code-block:: xml
 
         <album-properties>...</album-properties>
         <artist-properties>...</artist-properties>
@@ -727,7 +752,7 @@ This section defines the properties which are send to UPnP clients as part of th
 
     It contains the following entries.
 
-    ::
+    .. code-block:: xml
 
         <upnp-namespace xmlns="gerbera" uri="https://gerbera.io"/>
         <upnp-property upnp-tag="gerbera:artist" meta-data="M_ARTIST"/>
@@ -889,7 +914,7 @@ This section defines the properties which are send to UPnP clients as part of th
 ``containers``
 ~~~~~~~~~~~~~~
 
-::
+.. code-block:: xml
 
     <containers enabled="yes">
 
@@ -925,7 +950,7 @@ This section sets the rules for additional containers which have calculated cont
 
     It contains the following entries.
 
-        ::
+        .. code-block:: xml
 
             <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
 

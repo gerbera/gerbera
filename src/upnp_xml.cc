@@ -34,7 +34,6 @@
 #include <sstream>
 
 #include "config/config_manager.h"
-#include "content/scripting/script_names.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
@@ -66,16 +65,6 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-metadata_fields_t UpnpXMLBuilder::remapMetaDataField(const std::string& fieldName)
-{
-    for (auto&& [f, s] : mt_names) {
-        if (s == fieldName) {
-            return f;
-        }
-    }
-    return M_MAX;
-}
-
 void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
     config_option_t itemProps, config_option_t nsProp)
 {
@@ -85,7 +74,7 @@ void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<s
     }
     auto propertyMap = config->getDictionaryOption(itemProps);
     for (auto&& [tag, field] : propertyMap) {
-        auto metaField = remapMetaDataField(field);
+        auto metaField = MetadataHandler::remapMetaDataField(field);
         bool wasMeta = false;
         for (auto&& [mkey, mvalue] : meta) {
             if ((metaField != M_MAX && mkey == MetadataHandler::getMetaFieldName(metaField)) || mkey == field) {
