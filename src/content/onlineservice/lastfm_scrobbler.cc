@@ -77,12 +77,12 @@ void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
     currentTrackId = item->getID();
 
     log_debug("Artist:\t{}",
-        item->getMetadata(M_ARTIST).c_str());
+        item->getMetaData(M_ARTIST).c_str());
     log_debug("Title:\t{}",
-        item->getMetadata(M_TITLE).c_str());
+        item->getMetaData(M_TITLE).c_str());
 
-    std::string artist = item->getMetadata(M_ARTIST);
-    std::string title = item->getMetadata(M_TITLE);
+    std::string artist = item->getMetaData(M_ARTIST);
+    std::string title = item->getMetaData(M_TITLE);
 
     if (artist.empty() || title.empty()) {
         scrobbler->finishedPlaying();
@@ -92,11 +92,11 @@ void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
 
     auto info = SubmissionInfo(artist, title);
 
-    std::string album = item->getMetadata(M_ALBUM);
+    std::string album = item->getMetaData(M_ALBUM);
     if (!album.empty())
         info.setAlbum(album);
 
-    std::string trackNr = item->getMetadata(M_TRACKNUMBER);
+    std::string trackNr = item->getMetaData(M_TRACKNUMBER);
     if (!trackNr.empty())
         info.setTrackNr(std::stoi(trackNr));
 
