@@ -123,11 +123,16 @@ bool startswith(std::string_view str, std::string_view check)
 #endif
 }
 
-std::string toLower(std::string_view str)
+std::string& toLowerInPlace(std::string& str)
 {
-    std::string lower(str);
-    std::transform(str.begin(), str.end(), lower.begin(), ::tolower);
-    return lower;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
+std::string toLower(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
 }
 
 int stoiString(const std::string& str, int def, int base)
@@ -259,43 +264,41 @@ std::string httpRedirectTo(std::string_view addr, std::string_view page)
     return fmt::format(R"(<html><head><meta http-equiv="Refresh" content="0;URL={}/{}"></head><body bgcolor="#dddddd"></body></html>)", addr, page);
 }
 
-std::string hexEncode(const void* data, int len)
+std::string hexEncode(const void* data, std::size_t len)
 {
-    const unsigned char* chars;
-    int i;
-    unsigned char hi, lo;
+    std::string buf(2 * len, '\0');
 
-    std::ostringstream buf;
-
-    chars = static_cast<unsigned char*>(const_cast<void*>(data));
-    for (i = 0; i < len; i++) {
+    const unsigned char* chars = static_cast<const unsigned char*>(data);
+    for (std::size_t i = 0; i < len; i++) {
         unsigned char c = chars[i];
-        hi = c >> 4;
-        lo = c & 0xF;
-        buf << HEX_CHARS[hi] << HEX_CHARS[lo];
+        unsigned char hi = c >> 4;
+        unsigned char lo = c & 0xF;
+        buf[2 * i + 0] = HEX_CHARS[hi];
+        buf[2 * i + 1] = HEX_CHARS[lo];
     }
-    return buf.str();
+
+    return buf;
 }
 
 std::string hexDecodeString(std::string_view encoded)
 {
-    auto ptr = const_cast<char*>(encoded.data());
-    int len = encoded.length();
+    const char* ptr = encoded.data();
+    std::size_t len = encoded.length();
 
-    std::ostringstream buf;
-    for (int i = 0; i < len; i += 2) {
+    std::string buf(len / 2, '\0');
+    for (std::size_t i = 0; i < len; i += 2) {
         auto chi = std::strchr(HEX_CHARS, ptr[i]);
         auto clo = std::strchr(HEX_CHARS, ptr[i + 1]);
-        int hi = chi ? chi - HEX_CHARS : 0;
-        int lo = clo ? clo - HEX_CHARS : 0;
+        std::size_t hi = chi ? chi - HEX_CHARS : 0;
+        std::size_t lo = clo ? clo - HEX_CHARS : 0;
 
-        auto ch = char(hi << 4 | lo);
-        buf << ch;
+        auto ch = static_cast<char>(hi << 4 | lo);
+        buf[i / 2] = ch;
     }
-    return buf.str();
+    return buf;
 }
 
-std::string hexMd5(const void* data, int length)
+std::string hexMd5(const void* data, std::size_t length)
 {
     char md5buf[16];
 
@@ -306,10 +309,12 @@ std::string hexMd5(const void* data, int length)
 
     return hexEncode(md5buf, 16);
 }
+
 std::string hexStringMd5(std::string_view str)
 {
     return hexMd5(str.data(), str.length());
 }
+
 std::string generateRandomId()
 {
 #ifdef BSD_NATIVE_UUID
@@ -407,7 +412,7 @@ std::string urlUnescape(std::string_view str)
 static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
-    for (auto it = dict.begin(); it != dict.end(); it++) {
+    for (auto it = dict.begin(); it != dict.end(); ++it) {
         if (it != dict.begin())
             buf << sep1;
         buf << urlEscape(it->first) << sep2
@@ -426,28 +431,29 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
     return dictEncode(dict, '/', '/');
 }
 
-void dictDecode(std::string_view url, std::map<std::string, std::string>& dict, bool unEscape)
+std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape)
 {
-    auto data = url.data();
-    auto dataEnd = data + url.length();
+    std::map<std::string, std::string> dict;
+    const char* data = url.data();
+    const char* dataEnd = data + url.length();
     while (data < dataEnd) {
-        auto ampPos = static_cast<const char*>(std::strchr(data, '&'));
+        const char* ampPos = std::strchr(data, '&');
         if (!ampPos) {
             ampPos = dataEnd;
         }
-        auto eqPos = std::strchr(data, '=');
+        const char* eqPos = std::strchr(data, '=');
         if (eqPos && eqPos < ampPos) {
-            std::string key(data, eqPos - data);
-            std::string value(eqPos + 1, ampPos - eqPos - 1);
+            std::string_view key(data, eqPos - data);
+            std::string_view value(eqPos + 1, ampPos - eqPos - 1);
             if (unEscape) {
-                key = urlUnescape(key);
-                value = urlUnescape(value);
+                dict.emplace(urlUnescape(key), urlUnescape(value));
+            } else {
+                dict.emplace(key, value);
             }
-
-            dict.emplace(key, value);
         }
         data = ampPos + 1;
     }
+    return dict;
 }
 
 // this is somewhat tricky as we need an exact amount of pairs
@@ -477,6 +483,13 @@ std::map<std::string, std::string> dictDecodeSimple(std::string_view url)
     } while (last_pos < url.length());
 
     return dict;
+}
+
+void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source)
+{
+    for (auto&& [key, value] : source) {
+        result.emplace(key, value);
+    }
 }
 
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)

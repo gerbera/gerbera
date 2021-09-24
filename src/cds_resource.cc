@@ -37,10 +37,13 @@
 
 #define RESOURCE_PART_SEP '~'
 
-CdsResource::CdsResource(int handlerType)
+CdsResource::CdsResource(int handlerType, std::string_view options, std::string_view parameters)
     : handlerType(handlerType)
 {
+    this->options = dictDecode(options);
+    this->parameters = dictDecode(parameters);
 }
+
 CdsResource::CdsResource(int handlerType,
     std::map<std::string, std::string> attributes,
     std::map<std::string, std::string> parameters,
@@ -84,17 +87,17 @@ int CdsResource::getHandlerType() const
     return handlerType;
 }
 
-std::map<std::string, std::string> CdsResource::getAttributes() const
+const std::map<std::string, std::string>& CdsResource::getAttributes() const
 {
     return attributes;
 }
 
-std::map<std::string, std::string> CdsResource::getParameters() const
+const std::map<std::string, std::string>& CdsResource::getParameters() const
 {
     return parameters;
 }
 
-std::map<std::string, std::string> CdsResource::getOptions() const
+const std::map<std::string, std::string>& CdsResource::getOptions() const
 {
     return options;
 }
@@ -128,7 +131,7 @@ std::shared_ptr<CdsResource> CdsResource::clone()
     return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
 }
 
-std::string CdsResource::encode()
+std::string CdsResource::encode() const
 {
     // encode resources
     std::ostringstream buf;
@@ -140,14 +143,6 @@ std::string CdsResource::encode()
     buf << RESOURCE_PART_SEP;
     buf << dictEncode(options);
     return buf.str();
-}
-
-void CdsResource::decode(const std::string& options, const std::string& parameters)
-{
-    if (!options.empty())
-        dictDecode(options, this->options);
-    if (!parameters.empty())
-        dictDecode(parameters, this->parameters);
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
@@ -163,13 +158,13 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     std::map<std::string, std::string> par;
     std::map<std::string, std::string> opt;
 
-    dictDecode(parts[1], attr);
+    attr = dictDecode(parts[1]);
 
     if (size >= 3)
-        dictDecode(parts[2], par);
+        par = dictDecode(parts[2]);
 
     if (size >= 4)
-        dictDecode(parts[3], opt);
+        opt = dictDecode(parts[3]);
 
     return std::make_shared<CdsResource>(handlerType, std::move(attr), std::move(par), std::move(opt));
 }

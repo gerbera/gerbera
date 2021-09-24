@@ -499,8 +499,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
         auto&& [path, parameters] = RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-        std::map<std::string, std::string> params;
-        dictDecode(parameters, params);
+        auto params = dictDecode(parameters);
 
         auto it = params.find(URL_REQUEST_TYPE);
         std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
