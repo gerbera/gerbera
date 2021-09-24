@@ -92,7 +92,7 @@ public:
 protected:
     /// \brief This function is installed as a callback for libcurl, when
     /// we download data from a remote site.
-    static std::size_t dl(void* buf, std::size_t size, std::size_t nmemb, void* data);
+    static std::size_t dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data);
 };
 
 #endif //__URL_H__
