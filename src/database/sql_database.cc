@@ -2492,11 +2492,11 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
         where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
     } else if (tableName == METADATA_TABLE) {
-        if (dict.size() != 0 && dict.size() != 2)
+        if (!dict.empty() && dict.size() != 2)
             throw_std_runtime_error("sqlForDelete called with invalid arguments");
         // relying on only one element when tableName is mt_metadata
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        if (dict.size() > 0)
+        if (!dict.empty())
             where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
     } else {
         where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
