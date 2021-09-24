@@ -2310,7 +2310,7 @@ void SQLDatabase::clearFlagInDB(int flag)
     exec(sql);
 }
 
-void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations)
+void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const
 {
     const auto& dict = obj->getMetaData();
     operations.reserve(operations.size() + dict.size());
