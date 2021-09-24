@@ -1104,7 +1104,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
         if (containerMap.find(tree) == containerMap.end()) {
             item->removeMetaData(M_TITLE);
             item->addMetaData(M_TITLE, item->getTitle());
-            database->addContainerChain(tree, item->getClass(), INVALID_OBJECT_ID, &result, createdIds, item->getMetaData());
+            database->addContainerChain(tree, item->getClass(), item->getFlags(), INVALID_OBJECT_ID, &result, createdIds, item->getMetaData());
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
             containerMap[tree] = container;
             if (item->getMTime() > container->getMTime()) {
@@ -1157,7 +1157,7 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
     std::vector<std::shared_ptr<CdsContainer>> containerList;
     if (containerMap.find(newChain) == containerMap.end()) {
         lastMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_TITLE), splitString(newChain, '/').back());
-        database->addContainerChain(newChain, lastClass, lastRefID, &containerID, updateID, lastMetadata);
+        database->addContainerChain(newChain, lastClass, OBJECT_FLAG_SEARCHABLE, lastRefID, &containerID, updateID, lastMetadata);
 
         for (auto&& contId : updateID) {
             auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(contId));

@@ -20,15 +20,13 @@
   $Id$
 */
 
-function escapeSlash(name)
-{
+function escapeSlash(name) {
     name = name.replace(/\\/g, "\\\\");
     name = name.replace(/\//g, "\\/");
     return name;
 }
 
-function createContainerChain(arr)
-{
+function createContainerChain(arr) {
     var path = '';
     for (var i = 0; i < arr.length; i++)
     {
@@ -37,8 +35,7 @@ function createContainerChain(arr)
     return path;
 }
 
-function getYear(date)
-{
+function getYear(date) {
     var matches = date.match(/^([0-9]{4})-/);
     if (matches)
         return matches[1];
@@ -46,8 +43,7 @@ function getYear(date)
         return date;
 }
 
-function getPlaylistType(mimetype)
-{
+function getPlaylistType(mimetype) {
     if (mimetype == 'audio/x-mpegurl')
         return 'm3u';
     if (mimetype == 'audio/x-scpls')
@@ -55,8 +51,7 @@ function getPlaylistType(mimetype)
     return '';
 }
 
-function getLastPath(location)
-{
+function getLastPath(location) {
     var path = location.split('/');
     if ((path.length > 1) && (path[path.length - 2]))
         return path[path.length - 2];
@@ -64,8 +59,7 @@ function getLastPath(location)
         return '';
 }
 
-function getRootPath(rootpath, location)
-{
+function getRootPath(rootpath, location) {
     var path = new Array();
 
     if (rootpath && rootpath.length !== 0)
@@ -108,8 +102,7 @@ function getRootPath(rootpath, location)
 // -T-           <-- tends to be big
 // -UVWXYZ-
 // -^&#'!-
-function abcbox(stringtobox, boxtype, divchar)
-{
+function abcbox(stringtobox, boxtype, divchar) {
     var boxReplace = stringFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::skip-chars', '');
     if (boxReplace !== '') {
         stringtobox = stringtobox.replace(RegExp('^[' + boxReplace + ']', 'i'), "");
@@ -372,8 +365,8 @@ function addAudio(obj) {
         allComposers: { title: 'Composers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allSongs: { title: 'All Songs', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        artist: { title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        artist: { searchable: false, title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        album: { searchable: false, title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
         genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
         year: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
         composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
@@ -422,14 +415,17 @@ function addAudio(obj) {
     obj.title = track + title;
     for (i = 0; i < artCnt; i++) {
         chain.artist.title = artist[i];
+        chain.artist.searchable = true;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
         addCdsObject(obj, container);
     }
 
+    chain.album.searchable = true;
     container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
     obj.title = track + title;
     addCdsObject(obj, container);
 
+    chain.genre.searchable = true;
     container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
     addCdsObject(obj, container);
 
@@ -595,9 +591,11 @@ function addAudioStructured(obj) {
     var i;
     for (i = 0; i < artCnt; i++) {
         chain.artist.title = artist[i];
+        chain.artist.searchable = true;
         container = addContainerTree([chain.allArtists, chain.entryAll, chain.artist]);
         addCdsObject(obj, container);
     }
+    chain.artist.searchable = false;
 
     for (i = 0; i < artCnt; i++) {
         chain.abc.title = abcbox(artist[i], boxConfig.artist, boxConfig.divChar);
@@ -617,8 +615,10 @@ function addAudioStructured(obj) {
 
     obj.title = tracktitle;
     chain.album.title = album + ' (' + date + ')';
+    chain.album.searchable = true;
     container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
     addCdsObject(obj, container);
+    chain.album.searchable = false;
 
     // Genre
 
@@ -631,9 +631,12 @@ function addAudioStructured(obj) {
     for (i = 0; i < artCnt; i++) {
         chain.abc.title = abcbox(artist[i], boxConfig.genre, boxConfig.divChar);
         isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
+        chain.album_artist.searchable = true;
         container = addContainerTree(isSingleCharBox ? [chain.allGenres, chain.genre, chain.abc, chain.album_artist] : [chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
         addCdsObject(obj, container);
     }
+    chain.album_artist.searchable = false;
+        
 
     // Tracks
 
@@ -662,6 +665,7 @@ function addAudioStructured(obj) {
 
     obj.title = tracktitle;
     chain.album.title = album;
+    chain.album.searchable = true;
     container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
     addCdsObject(obj, container);
 }
@@ -676,9 +680,9 @@ function addVideo(obj) {
         allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
-        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
+        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
     };
     var container = addContainerTree([chain.video, chain.allVideo]);
     addCdsObject(obj, container);
@@ -720,9 +724,9 @@ function addImage(obj) {
         allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
-        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
+        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
     };
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
     if (obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
@@ -759,11 +763,11 @@ function addTrailer(obj) {
         allTrailers: { title: 'All Trailers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
         allGenres: { title: 'Genres', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        genre: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [] },
+        genre: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [] },
 
         relDate: { title: 'Release Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         postDate: { title: 'Post Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
+        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
     };
     // First we will add the item to the 'All Trailers' container, so
     // that we get a nice long playlist:

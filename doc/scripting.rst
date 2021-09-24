@@ -159,6 +159,12 @@ object.
 
     The object ID of the parent container.
 
+.. js:attribute:: orig.searchable
+
+    **RW**
+
+    If set to true for a container it can be found by a UPnP search if config option /server/upnp/searchable-container-flag is set to yes.
+
 .. js:attribute:: orig.upnpclass
 
     **RW**

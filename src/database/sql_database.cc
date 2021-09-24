@@ -102,6 +102,7 @@ enum class SearchCol {
     upnp_class,
     dc_title,
     mime_type,
+    flags,
     part_number,
     track_number,
     location,
@@ -189,6 +190,7 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::upnp_class, { SRC_ALIAS, "upnp_class" } },
     { SearchCol::dc_title, { SRC_ALIAS, "dc_title" } },
     { SearchCol::mime_type, { SRC_ALIAS, "mime_type" } },
+    { SearchCol::flags, { SRC_ALIAS, "flags" } },
     { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
     { SearchCol::track_number, { SRC_ALIAS, "track_number" } },
     { SearchCol::location, { SRC_ALIAS, "location" } },
@@ -833,7 +835,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
-                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount()); // get params from browse
+                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount(), false); // get params from browse
             int numMatches = 0;
             auto result = this->search(srcParam, &numMatches);
             param.setTotalMatches(numMatches);
@@ -979,6 +981,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw_std_runtime_error("failed to generate SQL for search");
+    if (param.getSearchableContainers()) {
+        searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
+            searchColumnMapper->mapQuoted(SearchCol::flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::object_type), OBJECT_TYPE_CONTAINER));
+    }
 
     beginTransaction("search");
     auto countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
@@ -1138,10 +1144,10 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (changedContainer && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(path.filename()), path, false, "", INVALID_OBJECT_ID, std::vector<std::pair<std::string, std::string>>());
+    return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, std::vector<std::pair<std::string, std::string>>());
 }
 
-int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata)
+int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -1155,6 +1161,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     auto fields = std::vector {
         identifier("parent_id"),
         identifier("object_type"),
+        identifier("flags"),
         identifier("upnp_class"),
         identifier("dc_title"),
         identifier("location"),
@@ -1164,6 +1171,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     auto values = std::vector {
         fmt::to_string(parentID),
         fmt::to_string(OBJECT_TYPE_CONTAINER),
+        fmt::to_string(flags),
         !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
         quote(name),
         quote(dbLocation),
@@ -1252,7 +1260,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
+void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int flags, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
 {
     log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
 
@@ -1284,9 +1292,9 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
         newClass = classes.back();
         classes.pop_back();
     }
-    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), INVALID_OBJECT_ID, &parentContainerID, updateID, std::vector<std::pair<std::string, std::string>>());
+    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), OBJECT_FLAG_RESTRICTED, INVALID_OBJECT_ID, &parentContainerID, updateID, std::vector<std::pair<std::string, std::string>>());
 
-    *containerID = createContainer(parentContainerID, container, virtualPath, true, newClass, lastRefID, lastMetadata);
+    *containerID = createContainer(parentContainerID, container, virtualPath, flags, true, newClass, lastRefID, lastMetadata);
     updateID.push_front(*containerID);
 }
 
@@ -1417,6 +1425,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
     obj->setParentID(std::stoi(getCol(row, SearchCol::parent_id)));
     obj->setTitle(getCol(row, SearchCol::dc_title));
     obj->setClass(getCol(row, SearchCol::upnp_class));
+    obj->setFlags(std::stoi(getCol(row, SearchCol::flags)));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty())
