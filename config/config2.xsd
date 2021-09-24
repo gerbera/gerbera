@@ -395,6 +395,7 @@
     <xs:element name="upnp">
         <xs:complexType>
             <xs:all>
+                <xs:element ref="search-item-result" minOccurs="0"/>
                 <xs:element ref="album-properties" minOccurs="0"/>
                 <xs:element ref="artist-properties" minOccurs="0"/>
                 <xs:element ref="genre-properties" minOccurs="0"/>
@@ -402,6 +403,15 @@
                 <xs:element ref="title-properties" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
+            <xs:attribute name="search-result-separator" type="xs:string" default=" - "/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="search-item-result">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-data" minOccurs="0"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 

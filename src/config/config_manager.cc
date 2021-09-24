@@ -398,6 +398,7 @@ void ConfigManager::load(const fs::path& userHome)
     // read import options
     args["trim"] = "false";
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);
+    setOption(root, CFG_UPNP_SEARCH_SEPARATOR, &args);
     setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
     args.clear();
 

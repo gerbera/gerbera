@@ -185,15 +185,29 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
+    auto titleSegs = config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
+    auto resultSep = config->getOption(CFG_UPNP_SEARCH_SEPARATOR);
 
     for (auto&& cdsObject : results) {
-        if (cdsObject->isItem() && config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
+        if (cdsObject->isItem()) {
             std::string title = cdsObject->getTitle();
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-            else
-                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-
+            if (!titleSegs.empty()) {
+                auto values = std::vector<std::string>();
+                for (auto&& segment : titleSegs) {
+                    auto mtField = MetadataHandler::remapMetaDataField(segment);
+                    auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
+                    if (!value.empty())
+                        values.emplace_back(value);
+                }
+                if (!values.empty())
+                    title = fmt::format("{}", fmt::join(values, resultSep));
+            }
+            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
+                if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                    title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+                else
+                    title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+            }
             cdsObject->setTitle(title);
         }
 

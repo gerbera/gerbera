@@ -278,6 +278,12 @@ static std::map<std::string, std::string> tr_mt_defaults {
     { "audio/ogg", "ogg2mp3" },
 };
 
+/// \brief default values for CFG_UPNP_SEARCH_SEGMENTS
+static std::vector<std::string> upnp_search_segment_defaults {
+    "M_ARTIST",
+    "M_TITLE",
+};
+
 /// \brief default values for CFG_UPNP_ALBUM_PROPERTIES
 static std::map<std::string, std::string> upnp_album_prop_defaults {
     { "dc:creator", "M_ALBUMARTIST" },
@@ -1045,6 +1051,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_MULTI_VALUES_ENABLED,
         "/server/upnp/attribute::multi-value", "config-server.html#upnp",
         NO),
+    std::make_shared<ConfigStringSetup>(CFG_UPNP_SEARCH_SEPARATOR,
+        "/server/upnp/attribute::search-result-separator", "config-server.html#upnp",
+        " - "),
+    std::make_shared<ConfigArraySetup>(CFG_UPNP_SEARCH_ITEM_SEGMENTS,
+        "/server/upnp/search-item-result", "config-server.html#upnpf",
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
+        false, false, std::move(upnp_search_segment_defaults)),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_PROPERTIES,
         "/server/upnp/album-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
