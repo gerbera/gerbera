@@ -35,7 +35,6 @@
 #include <csignal>
 #include <cstdio>
 #include <cstring>
-#include <filesystem>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -65,16 +64,11 @@ TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ContentManage
 }
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_ptr<TranscodingProfile> profile,
-    std::string location,
-    std::shared_ptr<CdsObject> obj,
-    std::string range)
+    std::string location, std::shared_ptr<CdsObject> obj, std::string range)
 {
-    log_debug("Start transcoding file: {}", location.c_str());
-
+    log_debug("Start transcoding file: {}", location);
     if (!profile)
-        throw_std_runtime_error("Transcoding of file {} requested but no profile given", location.c_str());
-
-    bool isURL = obj->isExternalItem();
+        throw_std_runtime_error("Transcoding of file {} requested but no profile given", location);
 
 #if 0
     std::string mimeType = profile->getTargetMimeType();
@@ -95,67 +89,62 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     }
 #endif
 
+    std::vector<std::shared_ptr<ProcListItem>> proc_list;
+    bool isConnected = false;
+#ifdef SOPCAST
+    isConnected = startSopcastConnector(obj, location, proc_list);
+#endif
+
+    bool isURL = obj->isExternalItem();
+    if (!isConnected && isURL && (!profile->acceptURL())) {
+        //FIXME: #warning check if we can use "accept url" with sopcast
+#ifdef HAVE_CURL
+        openCurlFifo(location, proc_list);
+#else
+        throw_std_runtime_error("Compiled without libcurl support, data proxying for profile {} is not available", profile->getName());
+#endif
+    }
+
+    checkTranscoder(profile);
+    fs::path fifo_name = makeFifo();
+
+    std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range, obj->getTitle());
+
+    log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::join(arglist, " "));
+    auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
+    main_proc->removeFile(fifo_name);
+    if (isURL && (!profile->acceptURL())) {
+        main_proc->removeFile(location);
+    }
+
+    content->triggerPlayHook(obj);
+
+    auto u_ioh = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifo_name), std::move(main_proc), std::move(proc_list));
+    return std::make_unique<BufferedIOHandler>(
+        config, std::move(u_ioh),
+        profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
+}
+
+fs::path TranscodeExternalHandler::makeFifo()
+{
     char fifo_template[] = "grb_transcode_XXXXXX";
     fs::path fifo_name = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
-    std::vector<std::string> arglist;
-    std::vector<std::shared_ptr<ProcListItem>> proc_list;
-
-#ifdef SOPCAST
-    service_type_t service = OS_None;
-    if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        service = service_type_t(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
+    log_debug("creating fifo: {}", fifo_name.c_str());
+    int err = mkfifo(fifo_name.c_str(), O_RDWR);
+    if (err != 0) {
+        log_error("Failed to create fifo for the transcoding process!: {}", std::strerror(errno));
+        throw_std_runtime_error("Could not create fifo");
     }
 
-    if (service == OS_SopCast) {
-        std::vector<std::string> sop_args;
-        int p1 = find_local_port(45000, 65500);
-        int p2 = find_local_port(45000, 65500);
-        sop_args = populateCommandLine(fmt::format("{} {} {}", location.c_str(), p1, p2));
-        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
-        proc_list.push_back(std::make_shared<ProcListItem>(std::move(spsc)));
-        location = fmt::format("http://localhost:{}/tv.asf", p2);
-
-        //FIXME: #warning check if socket is ready
-        sleep(15);
-    } else {
-        //FIXME: #warning check if we can use "accept url" with sopcast
-#endif
-        if (isURL && (!profile->acceptURL())) {
-#ifdef HAVE_CURL
-            std::string url = location;
-            strcpy(fifo_template, "mt_transcode_XXXXXX");
-            location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
-            log_debug("creating reader fifo: {}", location.c_str());
-            auto r = mkfifo(location.c_str(), O_RDWR);
-            if (r != 0) {
-                log_error("Failed to create fifo for the remote content reading thread: {}", std::strerror(errno));
-                throw_std_runtime_error("Could not create reader fifo");
-            }
-
-            try {
-                auto ret = chmod(location.c_str(), S_IWUSR | S_IRUSR);
-                if (ret != 0) {
-                    log_error("Failed to change location permissions: {}", std::strerror(errno));
-                }
-
-                auto c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
-                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
-                    config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
-                auto p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
-                auto ch = std::make_shared<IOHandlerChainer>(std::move(c_ioh), std::move(p_ioh), 16384);
-                proc_list.push_back(std::make_shared<ProcListItem>(std::move(ch)));
-            } catch (const std::runtime_error& ex) {
-                unlink(location.c_str());
-                throw ex;
-            }
-#else
-        throw_std_runtime_error("Compiled without libcurl support, data proxying is not available");
-#endif
-        }
-#ifdef SOPCAST
+    err = chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
+    if (err != 0) {
+        log_error("Failed to change location permissions: {}", std::strerror(errno));
     }
-#endif
+    return fifo_name;
+}
 
+void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile)
+{
     fs::path check;
     if (profile->getCommand().is_absolute()) {
         std::error_code ec;
@@ -173,33 +162,61 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     int err = 0;
     if (!isExecutable(check, &err))
         throw_std_runtime_error("Transcoder {} is not executable: {}", profile->getCommand().c_str(), std::strerror(err));
-
-    log_debug("creating fifo: {}", fifo_name.c_str());
-    err = mkfifo(fifo_name.c_str(), O_RDWR);
-    if (err != 0) {
-        log_error("Failed to create fifo for the transcoding process!: {}", std::strerror(errno));
-        throw_std_runtime_error("Could not create fifo");
-    }
-
-    err = chmod(fifo_name.c_str(), S_IWUSR | S_IRUSR);
-    if (err != 0) {
-        log_error("Failed to change location permissions: {}", std::strerror(errno));
-    }
-
-    arglist = populateCommandLine(profile->getArguments(), location, fifo_name, range, obj->getTitle());
-
-    log_debug("Command: {}", profile->getCommand().c_str());
-    log_debug("Arguments: {}", profile->getArguments().c_str());
-    auto main_proc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
-    main_proc->removeFile(fifo_name);
-    if (isURL && (!profile->acceptURL())) {
-        main_proc->removeFile(location);
-    }
-
-    content->triggerPlayHook(obj);
-
-    auto u_ioh = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifo_name), std::move(main_proc), std::move(proc_list));
-    return std::make_unique<BufferedIOHandler>(
-        config, std::move(u_ioh),
-        profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
 }
+
+#ifdef SOPCAST
+bool TranscodeExternalHandler::startSopcastConnector(const std::shared_ptr<CdsObject>& obj, std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
+{
+    service_type_t service = OS_None;
+    if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
+        service = service_type_t(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
+    }
+
+    if (service == OS_SopCast) {
+        std::vector<std::string> sop_args;
+        int p1 = find_local_port(45000, 65500);
+        int p2 = find_local_port(45000, 65500);
+        sop_args = populateCommandLine(fmt::format("{} {} {}", location.c_str(), p1, p2));
+        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sop_args);
+        procList.push_back(std::make_shared<ProcListItem>(std::move(spsc)));
+        location = fmt::format("http://localhost:{}/tv.asf", p2);
+
+        //FIXME: #warning check if socket is ready
+        sleep(15);
+        return true;
+    }
+    return false;
+}
+#endif
+
+#ifdef HAVE_CURL
+void TranscodeExternalHandler::openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
+{
+    std::string url = location;
+    char fifo_template[] = "grb_curl_transcode_XXXXXX";
+    location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifo_template);
+    log_debug("creating reader fifo: {}", location.c_str());
+    auto r = mkfifo(location.c_str(), O_RDWR);
+    if (r != 0) {
+        log_error("Failed to create fifo {} for the remote content reading thread: {}", location, std::strerror(errno));
+        throw_std_runtime_error("Could not create reader fifo");
+    }
+
+    try {
+        auto ret = chmod(location.c_str(), S_IWUSR | S_IRUSR);
+        if (ret != 0) {
+            log_error("Failed to change location {} permissions: {}", location, std::strerror(errno));
+        }
+
+        auto c_ioh = std::make_unique<CurlIOHandler>(config, url, nullptr,
+            config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
+            config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
+        auto p_ioh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
+        auto ch = std::make_shared<IOHandlerChainer>(std::move(c_ioh), std::move(p_ioh), 16384);
+        procList.push_back(std::make_shared<ProcListItem>(std::move(ch)));
+    } catch (const std::runtime_error& ex) {
+        unlink(location.c_str());
+        throw ex;
+    }
+}
+#endif
