@@ -1044,7 +1044,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_MULTI_VALUES_ENABLED,
         "/server/upnp/attribute::multi-value", "config-server.html#upnp",
-        YES),
+        NO),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_PROPERTIES,
         "/server/upnp/album-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
