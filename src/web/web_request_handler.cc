@@ -91,8 +91,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     this->filename = filename;
 
-    std::string path, parameters;
-    splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
     dictDecode(parameters, params);
 
@@ -221,8 +220,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
     this->filename = filename;
     this->mode = mode;
 
-    std::string path, parameters;
-    splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
     dictDecode(parameters, params);
 
