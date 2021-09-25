@@ -165,14 +165,14 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
 
 TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPlaylistAndDirChains)
 {
-    const std::string MIME_TYPE_AUDIO_MPEG = "audio/mpeg";
-    const std::string OBJTYPE_ITEM_EXTERNAL_URL = "8";
+    const std::string mimeTypeAudioMpeg = "audio/mpeg";
+    const std::string objtypeItemExternalUrl = "8";
 
     std::map<std::string, std::string> asPlaylistChain {
         { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", MIME_TYPE_AUDIO_MPEG },
-        { "objectType", OBJTYPE_ITEM_EXTERNAL_URL },
+        { "mimetype", mimeTypeAudioMpeg },
+        { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "1" },
         { "protocol", "http-get" },
         { "description", "Song from Playlist Title" },
@@ -182,8 +182,8 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
     std::map<std::string, std::string> asPlaylistDirChain {
         { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", MIME_TYPE_AUDIO_MPEG },
-        { "objectType", OBJTYPE_ITEM_EXTERNAL_URL },
+        { "mimetype", mimeTypeAudioMpeg },
+        { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "2" },
         { "protocol", "http-get" },
         { "description", "Song from Playlist Title" },

@@ -378,9 +378,9 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;
 
-    const auto cache_enabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
+    const auto cacheEnabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
 
-    if (cache_enabled) {
+    if (cacheEnabled) {
         if (auto data = readThumbnailCacheFile(item->getLocation())) {
             log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
             return std::make_unique<MemIOHandler>(data->data(), data->size());
@@ -399,7 +399,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
     log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
 
     th.generateThumbnail(item->getLocation().c_str(), Jpeg, img);
-    if (cache_enabled) {
+    if (cacheEnabled) {
         writeThumbnailCacheFile(item->getLocation(),
             reinterpret_cast<std::byte*>(img.data()), img.size());
     }

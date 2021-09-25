@@ -63,7 +63,7 @@ void Web::Directories::process()
     auto&& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
     auto&& includes_fullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
-    constexpr auto excludes_dirname = std::array {
+    constexpr auto excludesDirname = std::array {
         "lost+found",
     };
     bool exclude_config_dirs = true;
@@ -83,7 +83,7 @@ void Web::Directories::process()
         if (includes_fullpath.empty()) {
             if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
                 continue; // skip excluded dir
-            if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
+            if (std::find(excludesDirname.begin(), excludesDirname.end(), filepath.filename()) != excludesDirname.end()
                 || (exclude_config_dirs && startswith(filepath.filename().string(), ".")))
                 continue; // skip dir with leading .
         }

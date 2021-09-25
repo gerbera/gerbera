@@ -40,7 +40,7 @@
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
-static constexpr auto service_prefixes = std::array { '\0', 'Y', 'S', 'W', 'T', '\0' };
+static constexpr auto servicePrefixes = std::array { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& service)
 {
@@ -74,7 +74,7 @@ char OnlineService::getDatabasePrefix(service_type_t service)
     if (service >= OS_Max)
         throw_std_runtime_error("Illegal service requested");
 
-    return service_prefixes.at(service);
+    return servicePrefixes.at(service);
 }
 
 char OnlineService::getDatabasePrefix() const

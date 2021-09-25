@@ -39,8 +39,8 @@
 #include "upnp_cds.h"
 #include "util/tools.h"
 
-static constexpr auto SPEC_INTERVAL = std::chrono::seconds(2);
-static constexpr auto MIN_SLEEP = std::chrono::milliseconds(1);
+static constexpr auto specInterval = std::chrono::seconds(2);
+static constexpr auto minSleep = std::chrono::milliseconds(1);
 
 #define MAX_OBJECT_IDS 1000
 #define MAX_OBJECT_IDS_OVERLOAD 30
@@ -168,14 +168,14 @@ void UpdateManager::threadProc()
             auto timeDiff = getDeltaMillis(lastUpdate, now);
             switch (flushPolicy) {
             case FLUSH_SPEC:
-                sleepMillis = SPEC_INTERVAL - timeDiff;
+                sleepMillis = specInterval - timeDiff;
                 break;
             case FLUSH_ASAP:
                 sleepMillis = {};
                 break;
             }
             bool sendUpdates = true;
-            if (sleepMillis >= MIN_SLEEP && objectIDHash.size() < MAX_OBJECT_IDS) {
+            if (sleepMillis >= minSleep && objectIDHash.size() < MAX_OBJECT_IDS) {
                 log_debug("threadProc: sleeping for {} millis", sleepMillis.count());
                 auto ret = threadRunner->waitFor(lock, sleepMillis);
 
