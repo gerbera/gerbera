@@ -2312,7 +2312,7 @@ void SQLDatabase::clearFlagInDB(int flag)
 
 void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const
 {
-    const auto& dict = obj->getMetaData();
+    auto dict = obj->getMetaData();
     operations.reserve(operations.size() + dict.size());
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {

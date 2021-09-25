@@ -188,7 +188,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         auto meta = obj->getMetaData();
         auto [url, artAdded] = renderItemImage(virtualURL, item);
         if (artAdded) {
-            meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), url);
+            obj->addMetaData(M_ALBUMARTURI, url);
         }
 
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
