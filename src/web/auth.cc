@@ -37,7 +37,7 @@
 #include "session_manager.h"
 #include "util/tools.h"
 
-static constexpr auto LOGIN_TIMEOUT = std::chrono::seconds(10);
+static constexpr auto loginTimeout = std::chrono::seconds(10);
 
 static std::chrono::seconds get_time()
 {
@@ -46,7 +46,7 @@ static std::chrono::seconds get_time()
 
 static std::string generate_token()
 {
-    auto expiration = get_time() + LOGIN_TIMEOUT;
+    auto expiration = get_time() + loginTimeout;
     std::string salt = generateRandomId();
     return fmt::format("{}_{}", expiration.count(), salt);
 }

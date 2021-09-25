@@ -282,12 +282,12 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         try {
             auto io_h = std::make_unique<MemIOHandler>(ed->data, ed->size);
             io_h->open(UPNP_READ);
-            const std::string th_resolution = get_jpeg_resolution(std::move(io_h));
-            log_debug("RESOLUTION: {}", th_resolution);
+            const std::string thResolution = get_jpeg_resolution(std::move(io_h));
+            log_debug("RESOLUTION: {}", thResolution);
 
             auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
-            resource->addAttribute(R_RESOLUTION, th_resolution);
+            resource->addAttribute(R_RESOLUTION, thResolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const std::runtime_error& e) {

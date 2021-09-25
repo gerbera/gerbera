@@ -194,7 +194,7 @@ std::string MetadataHandler::getMimeType() const
     return MIMETYPE_DEFAULT;
 }
 
-static constexpr std::array ch_keys = {
+static constexpr std::array chKeys = {
     std::pair(CH_DEFAULT, "Default"),
 #ifdef HAVE_LIBEXIF
     std::pair(CH_LIBEXIF, "LibExif"),
@@ -220,8 +220,8 @@ static constexpr std::array ch_keys = {
 
 int MetadataHandler::remapContentHandler(const std::string& contHandler)
 {
-    auto ch_entry = std::find_if(ch_keys.begin(), ch_keys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    if (ch_entry != ch_keys.end()) {
+    auto ch_entry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
+    if (ch_entry != chKeys.end()) {
         return ch_entry->first;
     }
     return -1;
@@ -229,8 +229,8 @@ int MetadataHandler::remapContentHandler(const std::string& contHandler)
 
 std::string MetadataHandler::mapContentHandler2String(int ch)
 {
-    auto ch_entry = std::find_if(ch_keys.begin(), ch_keys.end(), [ch](auto&& entry) { return ch == entry.first; });
-    if (ch_entry != ch_keys.end()) {
+    auto ch_entry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
+    if (ch_entry != chKeys.end()) {
         return ch_entry->second;
     }
     return "Unknown";

@@ -68,61 +68,61 @@
 /// enum for createObjectFromRow's mode parameter
 enum class BrowseCol {
     id = 0,
-    ref_id,
-    parent_id,
-    object_type,
-    upnp_class,
-    dc_title,
+    refId,
+    parentId,
+    objectType,
+    upnpClass,
+    dcTitle,
     location,
-    location_hash,
+    locationHash,
     auxdata,
-    update_id,
-    mime_type,
+    updateId,
+    mimeType,
     flags,
-    part_number,
-    track_number,
-    service_id,
-    bookmark_pos,
-    last_modified,
-    last_updated,
-    ref_upnp_class,
-    ref_location,
-    ref_auxdata,
-    ref_mime_type,
-    ref_service_id,
-    as_persistent
+    partNumber,
+    trackNumber,
+    serviceId,
+    bookmarkPos,
+    lastModified,
+    lastUpdated,
+    refUpnpClass,
+    refLocation,
+    refAuxdata,
+    refMimeType,
+    refServiceId,
+    asPersistent
 };
 
 /// \brief search column ids
 enum class SearchCol {
     id = 0,
-    ref_id,
-    parent_id,
-    object_type,
-    upnp_class,
-    dc_title,
-    mime_type,
+    refId,
+    parentId,
+    objectType,
+    upnpClass,
+    dcTitle,
+    mimeType,
     flags,
-    part_number,
-    track_number,
+    partNumber,
+    trackNumber,
     location,
-    last_modified,
-    last_updated,
+    lastModified,
+    lastUpdated,
 };
 
 /// \brief meta column ids
 enum class MetadataCol {
     id = 0,
-    item_id,
-    property_name,
-    property_value
+    itemId,
+    propertyName,
+    propertyValue
 };
 
 /// \brief resource column ids
 enum class ResourceCol {
     id = 0,
-    item_id,
-    res_id,
+    itemId,
+    resId,
     handlerType,
     options,
     parameters,
@@ -132,86 +132,86 @@ enum class ResourceCol {
 /// \brief autoscan column ids
 enum class AutoscanCol {
     id = 0,
-    obj_id,
+    objId,
     persistent,
 };
 
 /// \brief autoscan column ids
 enum class AutoscanColumn {
     id = 0,
-    obj_id,
-    scan_level,
-    scan_mode,
+    objId,
+    scanLevel,
+    scanMode,
     recursive,
     hidden,
     interval,
-    last_modified,
+    lastModified,
     persistent,
     location,
-    obj_location,
+    objLocation,
 };
 
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap {
     { BrowseCol::id, { ITM_ALIAS, "id" } },
-    { BrowseCol::ref_id, { ITM_ALIAS, "ref_id" } },
-    { BrowseCol::parent_id, { ITM_ALIAS, "parent_id" } },
-    { BrowseCol::object_type, { ITM_ALIAS, "object_type" } },
-    { BrowseCol::upnp_class, { ITM_ALIAS, "upnp_class" } },
-    { BrowseCol::dc_title, { ITM_ALIAS, "dc_title" } },
+    { BrowseCol::refId, { ITM_ALIAS, "ref_id" } },
+    { BrowseCol::parentId, { ITM_ALIAS, "parent_id" } },
+    { BrowseCol::objectType, { ITM_ALIAS, "object_type" } },
+    { BrowseCol::upnpClass, { ITM_ALIAS, "upnp_class" } },
+    { BrowseCol::dcTitle, { ITM_ALIAS, "dc_title" } },
     { BrowseCol::location, { ITM_ALIAS, "location" } },
-    { BrowseCol::location_hash, { ITM_ALIAS, "location_hash" } },
+    { BrowseCol::locationHash, { ITM_ALIAS, "location_hash" } },
     { BrowseCol::auxdata, { ITM_ALIAS, "auxdata" } },
-    { BrowseCol::update_id, { ITM_ALIAS, "update_id" } },
-    { BrowseCol::mime_type, { ITM_ALIAS, "mime_type" } },
+    { BrowseCol::updateId, { ITM_ALIAS, "update_id" } },
+    { BrowseCol::mimeType, { ITM_ALIAS, "mime_type" } },
     { BrowseCol::flags, { ITM_ALIAS, "flags" } },
-    { BrowseCol::part_number, { ITM_ALIAS, "part_number" } },
-    { BrowseCol::track_number, { ITM_ALIAS, "track_number" } },
-    { BrowseCol::service_id, { ITM_ALIAS, "service_id" } },
-    { BrowseCol::bookmark_pos, { ITM_ALIAS, "bookmark_pos" } },
-    { BrowseCol::last_modified, { ITM_ALIAS, "last_modified" } },
-    { BrowseCol::last_updated, { ITM_ALIAS, "last_updated" } },
-    { BrowseCol::ref_upnp_class, { REF_ALIAS, "upnp_class" } },
-    { BrowseCol::ref_location, { REF_ALIAS, "location" } },
-    { BrowseCol::ref_auxdata, { REF_ALIAS, "auxdata" } },
-    { BrowseCol::ref_mime_type, { REF_ALIAS, "mime_type" } },
-    { BrowseCol::ref_service_id, { REF_ALIAS, "service_id" } },
-    { BrowseCol::as_persistent, { AUS_ALIAS, "persistent" } },
+    { BrowseCol::partNumber, { ITM_ALIAS, "part_number" } },
+    { BrowseCol::trackNumber, { ITM_ALIAS, "track_number" } },
+    { BrowseCol::serviceId, { ITM_ALIAS, "service_id" } },
+    { BrowseCol::bookmarkPos, { ITM_ALIAS, "bookmark_pos" } },
+    { BrowseCol::lastModified, { ITM_ALIAS, "last_modified" } },
+    { BrowseCol::lastUpdated, { ITM_ALIAS, "last_updated" } },
+    { BrowseCol::refUpnpClass, { REF_ALIAS, "upnp_class" } },
+    { BrowseCol::refLocation, { REF_ALIAS, "location" } },
+    { BrowseCol::refAuxdata, { REF_ALIAS, "auxdata" } },
+    { BrowseCol::refMimeType, { REF_ALIAS, "mime_type" } },
+    { BrowseCol::refServiceId, { REF_ALIAS, "service_id" } },
+    { BrowseCol::asPersistent, { AUS_ALIAS, "persistent" } },
 };
 
 /// \brief Map search oolumn ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
 static const std::map<SearchCol, std::pair<std::string, std::string>> searchColMap {
     { SearchCol::id, { SRC_ALIAS, "id" } },
-    { SearchCol::ref_id, { SRC_ALIAS, "ref_id" } },
-    { SearchCol::parent_id, { SRC_ALIAS, "parent_id" } },
-    { SearchCol::object_type, { SRC_ALIAS, "object_type" } },
-    { SearchCol::upnp_class, { SRC_ALIAS, "upnp_class" } },
-    { SearchCol::dc_title, { SRC_ALIAS, "dc_title" } },
-    { SearchCol::mime_type, { SRC_ALIAS, "mime_type" } },
+    { SearchCol::refId, { SRC_ALIAS, "ref_id" } },
+    { SearchCol::parentId, { SRC_ALIAS, "parent_id" } },
+    { SearchCol::objectType, { SRC_ALIAS, "object_type" } },
+    { SearchCol::upnpClass, { SRC_ALIAS, "upnp_class" } },
+    { SearchCol::dcTitle, { SRC_ALIAS, "dc_title" } },
+    { SearchCol::mimeType, { SRC_ALIAS, "mime_type" } },
     { SearchCol::flags, { SRC_ALIAS, "flags" } },
-    { SearchCol::part_number, { SRC_ALIAS, "part_number" } },
-    { SearchCol::track_number, { SRC_ALIAS, "track_number" } },
+    { SearchCol::partNumber, { SRC_ALIAS, "part_number" } },
+    { SearchCol::trackNumber, { SRC_ALIAS, "track_number" } },
     { SearchCol::location, { SRC_ALIAS, "location" } },
-    { SearchCol::last_modified, { SRC_ALIAS, "last_modified" } },
-    { SearchCol::last_updated, { SRC_ALIAS, "last_updated" } },
+    { SearchCol::lastModified, { SRC_ALIAS, "last_modified" } },
+    { SearchCol::lastUpdated, { SRC_ALIAS, "last_updated" } },
 };
 
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
 static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap {
     { MetadataCol::id, { MTA_ALIAS, "id" } },
-    { MetadataCol::item_id, { MTA_ALIAS, "item_id" } },
-    { MetadataCol::property_name, { MTA_ALIAS, "property_name" } },
-    { MetadataCol::property_value, { MTA_ALIAS, "property_value" } },
+    { MetadataCol::itemId, { MTA_ALIAS, "item_id" } },
+    { MetadataCol::propertyName, { MTA_ALIAS, "property_name" } },
+    { MetadataCol::propertyValue, { MTA_ALIAS, "property_value" } },
 };
 
 /// \brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanCol must be present
 static const std::map<AutoscanCol, std::pair<std::string, std::string>> asColMap {
     { AutoscanCol::id, { AUS_ALIAS, "id" } },
-    { AutoscanCol::obj_id, { AUS_ALIAS, "obj_id" } },
+    { AutoscanCol::objId, { AUS_ALIAS, "obj_id" } },
     { AutoscanCol::persistent, { AUS_ALIAS, "persistent" } },
 };
 
@@ -219,48 +219,48 @@ static const std::map<AutoscanCol, std::pair<std::string, std::string>> asColMap
 // map ensures entries are in correct order, each value of AutoscanColumn must be present
 static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autoscanColMap {
     { AutoscanColumn::id, { AUS_ALIAS, "id" } },
-    { AutoscanColumn::obj_id, { AUS_ALIAS, "obj_id" } },
-    { AutoscanColumn::scan_level, { AUS_ALIAS, "scan_level" } },
-    { AutoscanColumn::scan_mode, { AUS_ALIAS, "scan_mode" } },
+    { AutoscanColumn::objId, { AUS_ALIAS, "obj_id" } },
+    { AutoscanColumn::scanLevel, { AUS_ALIAS, "scan_level" } },
+    { AutoscanColumn::scanMode, { AUS_ALIAS, "scan_mode" } },
     { AutoscanColumn::recursive, { AUS_ALIAS, "recursive" } },
     { AutoscanColumn::hidden, { AUS_ALIAS, "hidden" } },
     { AutoscanColumn::interval, { AUS_ALIAS, "interval" } },
-    { AutoscanColumn::last_modified, { AUS_ALIAS, "last_modified" } },
+    { AutoscanColumn::lastModified, { AUS_ALIAS, "last_modified" } },
     { AutoscanColumn::persistent, { AUS_ALIAS, "persistent" } },
     { AutoscanColumn::location, { AUS_ALIAS, "location" } },
-    { AutoscanColumn::obj_location, { ITM_ALIAS, "location" } },
+    { AutoscanColumn::objLocation, { ITM_ALIAS, "location" } },
 };
 
 /// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap {
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::part_number },
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::track_number },
-    { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::dc_title },
-    { UPNP_SEARCH_CLASS, BrowseCol::upnp_class },
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::partNumber },
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::trackNumber },
+    { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::dcTitle },
+    { UPNP_SEARCH_CLASS, BrowseCol::upnpClass },
     { UPNP_SEARCH_PATH, BrowseCol::location },
-    { UPNP_SEARCH_REFID, BrowseCol::ref_id },
-    { UPNP_SEARCH_PARENTID, BrowseCol::parent_id },
+    { UPNP_SEARCH_REFID, BrowseCol::refId },
+    { UPNP_SEARCH_PARENTID, BrowseCol::parentId },
     { UPNP_SEARCH_ID, BrowseCol::id },
-    { UPNP_SEARCH_LAST_UPDATED, BrowseCol::last_updated },
-    { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::last_modified },
+    { UPNP_SEARCH_LAST_UPDATED, BrowseCol::lastUpdated },
+    { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::lastModified },
 };
 
 /// \brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::part_number },
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::track_number },
-    { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::dc_title },
-    { UPNP_SEARCH_CLASS, SearchCol::upnp_class },
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::partNumber },
+    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::trackNumber },
+    { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::dcTitle },
+    { UPNP_SEARCH_CLASS, SearchCol::upnpClass },
     { UPNP_SEARCH_PATH, SearchCol::location },
-    { UPNP_SEARCH_REFID, SearchCol::ref_id },
-    { UPNP_SEARCH_PARENTID, SearchCol::parent_id },
+    { UPNP_SEARCH_REFID, SearchCol::refId },
+    { UPNP_SEARCH_PARENTID, SearchCol::parentId },
     { UPNP_SEARCH_ID, SearchCol::id },
-    { UPNP_SEARCH_LAST_UPDATED, SearchCol::last_updated },
-    { UPNP_SEARCH_LAST_MODIFIED, SearchCol::last_modified },
+    { UPNP_SEARCH_LAST_UPDATED, SearchCol::lastUpdated },
+    { UPNP_SEARCH_LAST_MODIFIED, SearchCol::lastModified },
 };
 
 /// \brief Map meta search keys to column ids
@@ -268,9 +268,9 @@ static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
     { "id", MetadataCol::id },
-    { UPNP_SEARCH_ID, MetadataCol::item_id },
-    { META_NAME, MetadataCol::property_name },
-    { META_VALUE, MetadataCol::property_value },
+    { UPNP_SEARCH_ID, MetadataCol::itemId },
+    { META_NAME, MetadataCol::propertyName },
+    { META_VALUE, MetadataCol::propertyValue },
 };
 
 /// \brief Map meta search keys to column ids
@@ -278,7 +278,7 @@ static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, AutoscanCol>> asTagMap {
     { "id", AutoscanCol::id },
-    { "obj_id", AutoscanCol::obj_id },
+    { "obj_id", AutoscanCol::objId },
     { "persistent", AutoscanCol::persistent },
 };
 
@@ -287,16 +287,16 @@ static const std::vector<std::pair<std::string, AutoscanCol>> asTagMap {
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap {
     { "id", AutoscanColumn::id },
-    { "obj_id", AutoscanColumn::obj_id },
-    { "scan_level", AutoscanColumn::scan_level },
-    { "scan_mode", AutoscanColumn::scan_mode },
+    { "obj_id", AutoscanColumn::objId },
+    { "scan_level", AutoscanColumn::scanLevel },
+    { "scan_mode", AutoscanColumn::scanMode },
     { "recursive", AutoscanColumn::recursive },
     { "hidden", AutoscanColumn::hidden },
     { "interval", AutoscanColumn::interval },
-    { "last_modified", AutoscanColumn::last_modified },
+    { "last_modified", AutoscanColumn::lastModified },
     { "persistent", AutoscanColumn::persistent },
     { "location", AutoscanColumn::location },
-    { "obj_location", AutoscanColumn::obj_location },
+    { "obj_location", AutoscanColumn::objLocation },
 };
 
 #ifndef __cpp_lib_to_underlying
@@ -334,15 +334,15 @@ void SQLDatabase::init()
     // duplicate entries are added to statement in same order if key is present in SortCriteria
     std::vector<std::pair<std::string, int>> resourceTagMap {
         { "id", to_underlying(ResourceCol::id) },
-        { UPNP_SEARCH_ID, to_underlying(ResourceCol::item_id) },
-        { "res@id", to_underlying(ResourceCol::res_id) },
+        { UPNP_SEARCH_ID, to_underlying(ResourceCol::itemId) },
+        { "res@id", to_underlying(ResourceCol::resId) },
     };
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, std::pair<std::string, std::string>> resourceColMap {
         { to_underlying(ResourceCol::id), { RES_ALIAS, "id" } },
-        { to_underlying(ResourceCol::item_id), { RES_ALIAS, "item_id" } },
-        { to_underlying(ResourceCol::res_id), { RES_ALIAS, "res_id" } },
+        { to_underlying(ResourceCol::itemId), { RES_ALIAS, "item_id" } },
+        { to_underlying(ResourceCol::resId), { RES_ALIAS, "res_id" } },
         { to_underlying(ResourceCol::handlerType), { RES_ALIAS, "handlerType" } },
         { to_underlying(ResourceCol::options), { RES_ALIAS, "options" } },
         { to_underlying(ResourceCol::parameters), { RES_ALIAS, "parameters" } },
@@ -377,8 +377,8 @@ void SQLDatabase::init()
             buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
         }
         auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
-            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::ref_id), identifier(browseColMap.at(BrowseCol::id).second));
-        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
+            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::refId), identifier(browseColMap.at(BrowseCol::id).second));
+        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::objId), browseColumnMapper->mapQuoted(BrowseCol::id));
         this->sql_browse_query = fmt::format("SELECT {} FROM {} {} {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for UPnP search
@@ -410,7 +410,7 @@ void SQLDatabase::init()
         for (auto&& [key, col] : autoscanColMap) {
             buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
         }
-        auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id));
+        auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::objId), browseColumnMapper->mapQuoted(BrowseCol::id));
         this->sql_autoscan_query = fmt::format("SELECT {} FROM {} {}", fmt::join(buf, ", "), autoscanColumnMapper->tableQuoted(), join);
     }
     // Statement for resource
@@ -790,7 +790,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
 {
-    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::service_id), quote(serviceID));
+    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::serviceId), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
     auto res = select(loadSql);
     if (res) {
@@ -870,7 +870,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                 doLimit = false;
         }
 
-        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::parent_id), parent->getID()));
+        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::parentId), parent->getID()));
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
             where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseCol::id), CDS_ID_FS_ROOT));
@@ -879,13 +879,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         auto orderByCode = [&]() {
             std::string orderQb;
             if (param.getFlag(BROWSE_TRACK_SORT)) {
-                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::part_number), browseColumnMapper->mapQuoted(BrowseCol::track_number));
+                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::partNumber), browseColumnMapper->mapQuoted(BrowseCol::trackNumber));
             } else {
                 SortParser sortParser(browseColumnMapper, param.getSortCriteria());
                 orderQb = sortParser.parse();
             }
             if (orderQb.empty()) {
-                orderQb = browseColumnMapper->mapQuoted(BrowseCol::dc_title);
+                orderQb = browseColumnMapper->mapQuoted(BrowseCol::dcTitle);
             }
             return orderQb;
         };
@@ -894,13 +894,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             auto zero = std::string("0 = 1");
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
-            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_CONTAINER));
+            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::objectType), OBJECT_TYPE_CONTAINER));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else if (!getContainers && getItems) {
-            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_ITEM));
+            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::objectType), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::object_type), OBJECT_TYPE_CONTAINER, orderByCode());
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::objectType), OBJECT_TYPE_CONTAINER, orderByCode());
         }
         if (doLimit)
             limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());
@@ -984,7 +984,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         throw_std_runtime_error("failed to generate SQL for search");
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
-            searchColumnMapper->mapQuoted(SearchCol::flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::object_type), OBJECT_TYPE_CONTAINER));
+            searchColumnMapper->mapQuoted(SearchCol::flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::objectType), OBJECT_TYPE_CONTAINER));
     }
 
     beginTransaction("search");
@@ -1096,9 +1096,9 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
     }();
 
     auto where = std::vector {
-        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location_hash), quote(stringHash(dbLocation))),
+        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::locationHash), quote(stringHash(dbLocation))),
         fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::location), quote(dbLocation)),
-        fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::ref_id)),
+        fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::refId)),
     };
     auto findSql = fmt::format("{} WHERE {} LIMIT 1", sql_browse_query, fmt::join(where, " AND "));
 
@@ -1318,19 +1318,19 @@ fs::path SQLDatabase::stripLocationPrefix(std::string_view dbLocation, char* pre
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
 {
-    int objectType = std::stoi(getCol(row, BrowseCol::object_type));
+    int objectType = std::stoi(getCol(row, BrowseCol::objectType));
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
     obj->setID(std::stoi(getCol(row, BrowseCol::id)));
-    obj->setRefID(stoiString(getCol(row, BrowseCol::ref_id)));
+    obj->setRefID(stoiString(getCol(row, BrowseCol::refId)));
 
-    obj->setParentID(std::stoi(getCol(row, BrowseCol::parent_id)));
-    obj->setTitle(getCol(row, BrowseCol::dc_title));
-    obj->setClass(fallbackString(getCol(row, BrowseCol::upnp_class), getCol(row, BrowseCol::ref_upnp_class)));
+    obj->setParentID(std::stoi(getCol(row, BrowseCol::parentId)));
+    obj->setTitle(getCol(row, BrowseCol::dcTitle));
+    obj->setClass(fallbackString(getCol(row, BrowseCol::upnpClass), getCol(row, BrowseCol::refUpnpClass)));
     obj->setFlags(std::stoi(getCol(row, BrowseCol::flags)));
-    obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_modified))));
-    obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::last_updated))));
+    obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::lastModified))));
+    obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::lastUpdated))));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty()) {
@@ -1341,7 +1341,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
             obj->setMetaData(metaData);
     }
 
-    std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::ref_auxdata));
+    std::string auxdataStr = fallbackString(getCol(row, BrowseCol::auxdata), getCol(row, BrowseCol::refAuxdata));
     std::map<std::string, std::string> aux = dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
@@ -1361,13 +1361,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        cont->setUpdateID(std::stoi(getCol(row, BrowseCol::update_id)));
+        cont->setUpdateID(std::stoi(getCol(row, BrowseCol::updateId)));
         char locationPrefix;
         cont->setLocation(stripLocationPrefix(getCol(row, BrowseCol::location), &locationPrefix));
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
 
-        std::string autoscanPersistent = getCol(row, BrowseCol::as_persistent);
+        std::string autoscanPersistent = getCol(row, BrowseCol::asPersistent);
         if (!autoscanPersistent.empty()) {
             if (remapBool(autoscanPersistent))
                 cont->setAutoscanType(OBJECT_AUTOSCAN_CFG);
@@ -1383,25 +1383,25 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        item->setMimeType(fallbackString(getCol(row, BrowseCol::mime_type), getCol(row, BrowseCol::ref_mime_type)));
+        item->setMimeType(fallbackString(getCol(row, BrowseCol::mimeType), getCol(row, BrowseCol::refMimeType)));
         if (obj->isPureItem()) {
             if (!obj->isVirtual())
                 item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::location)));
             else
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::ref_location)));
+                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::refLocation)));
         } else // URLs
         {
-            item->setLocation(fallbackString(getCol(row, BrowseCol::location), getCol(row, BrowseCol::ref_location)));
+            item->setLocation(fallbackString(getCol(row, BrowseCol::location), getCol(row, BrowseCol::refLocation)));
         }
 
-        item->setTrackNumber(stoiString(getCol(row, BrowseCol::track_number)));
-        item->setBookMarkPos(std::chrono::milliseconds(stoulString(getCol(row, BrowseCol::bookmark_pos))));
-        item->setPartNumber(stoiString(getCol(row, BrowseCol::part_number)));
+        item->setTrackNumber(stoiString(getCol(row, BrowseCol::trackNumber)));
+        item->setBookMarkPos(std::chrono::milliseconds(stoulString(getCol(row, BrowseCol::bookmarkPos))));
+        item->setPartNumber(stoiString(getCol(row, BrowseCol::partNumber)));
 
-        if (!getCol(row, BrowseCol::ref_service_id).empty())
-            item->setServiceID(getCol(row, BrowseCol::ref_service_id));
+        if (!getCol(row, BrowseCol::refServiceId).empty())
+            item->setServiceID(getCol(row, BrowseCol::refServiceId));
         else
-            item->setServiceID(getCol(row, BrowseCol::service_id));
+            item->setServiceID(getCol(row, BrowseCol::serviceId));
 
         matched_types++;
     }
@@ -1415,16 +1415,16 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row)
 {
-    int objectType = std::stoi(getCol(row, SearchCol::object_type));
+    int objectType = std::stoi(getCol(row, SearchCol::objectType));
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
     obj->setID(std::stoi(getCol(row, SearchCol::id)));
-    obj->setRefID(stoiString(getCol(row, SearchCol::ref_id)));
+    obj->setRefID(stoiString(getCol(row, SearchCol::refId)));
 
-    obj->setParentID(std::stoi(getCol(row, SearchCol::parent_id)));
-    obj->setTitle(getCol(row, SearchCol::dc_title));
-    obj->setClass(getCol(row, SearchCol::upnp_class));
+    obj->setParentID(std::stoi(getCol(row, SearchCol::parentId)));
+    obj->setTitle(getCol(row, SearchCol::dcTitle));
+    obj->setClass(getCol(row, SearchCol::upnpClass));
     obj->setFlags(std::stoi(getCol(row, SearchCol::flags)));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
@@ -1447,15 +1447,15 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        item->setMimeType(getCol(row, SearchCol::mime_type));
+        item->setMimeType(getCol(row, SearchCol::mimeType));
         if (obj->isPureItem()) {
             item->setLocation(stripLocationPrefix(getCol(row, SearchCol::location)));
         } else { // URLs
             item->setLocation(getCol(row, SearchCol::location));
         }
 
-        item->setPartNumber(stoiString(getCol(row, SearchCol::part_number)));
-        item->setTrackNumber(stoiString(getCol(row, SearchCol::track_number)));
+        item->setPartNumber(stoiString(getCol(row, SearchCol::partNumber)));
+        item->setTrackNumber(stoiString(getCol(row, SearchCol::trackNumber)));
     } else if (!obj->isContainer()) {
         throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
@@ -1474,7 +1474,7 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
     std::vector<std::pair<std::string, std::string>> metaData;
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        metaData.emplace_back(getCol(row, MetadataCol::property_name), getCol(row, MetadataCol::property_value));
+        metaData.emplace_back(getCol(row, MetadataCol::propertyName), getCol(row, MetadataCol::propertyValue));
     }
     return metaData;
 }
@@ -1590,7 +1590,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     auto sel = fmt::format("SELECT {}, {}, {} FROM {} JOIN {} ON {} = {} WHERE {} IN ({})",
         asColumnMapper->mapQuoted(AutoscanCol::id), asColumnMapper->mapQuoted(AutoscanCol::persistent), browseColumnMapper->mapQuoted(BrowseCol::location),
         asColumnMapper->tableQuoted(), browseColumnMapper->tableQuoted(),
-        browseColumnMapper->mapQuoted(BrowseCol::id), asColumnMapper->mapQuoted(AutoscanCol::obj_id), browseColumnMapper->mapQuoted(BrowseCol::id), fmt::join(objectIDs, ","));
+        browseColumnMapper->mapQuoted(BrowseCol::id), asColumnMapper->mapQuoted(AutoscanCol::objId), browseColumnMapper->mapQuoted(BrowseCol::id), fmt::join(objectIDs, ","));
     log_debug("{}", sel);
 
     beginTransaction("_removeObjects");
@@ -1600,7 +1600,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
         std::vector<int> delete_as;
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
-            const int col_id = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
+            const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
                 auto location = stripLocationPrefix(row->col(2));
@@ -1608,11 +1608,11 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
                     ColumnUpdate(identifier("obj_id"), SQL_NULL),
                     ColumnUpdate(identifier("location"), quote(location.string())),
                 };
-                updateRow(AUTOSCAN_TABLE, values, "id", col_id);
+                updateRow(AUTOSCAN_TABLE, values, "id", colId);
             } else {
-                delete_as.push_back(col_id);
+                delete_as.push_back(colId);
             }
-            log_debug("relevant autoscan: {}; persistent: {}", col_id, persistent);
+            log_debug("relevant autoscan: {}; persistent: {}", colId, persistent);
         }
 
         if (!delete_as.empty()) {
@@ -1639,9 +1639,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     bool isContainer = IS_CDS_CONTAINER(objectType);
     if (all && !isContainer) {
         if (!row->isNullOrEmpty(1)) {
-            const int ref_id = row->col_int(1, INVALID_OBJECT_ID);
-            if (!IS_FORBIDDEN_CDS_ID(ref_id))
-                objectID = ref_id;
+            const int refId = row->col_int(1, INVALID_OBJECT_ID);
+            if (!IS_FORBIDDEN_CDS_ID(refId))
+                objectID = refId;
         }
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
@@ -2037,7 +2037,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectI
 std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row)
 {
     int objectID = INVALID_OBJECT_ID;
-    std::string objectIDstr = getCol(row, AutoscanColumn::obj_id);
+    std::string objectIDstr = getCol(row, AutoscanColumn::objId);
     if (!objectIDstr.empty())
         objectID = std::stoi(objectIDstr);
     int databaseID = std::stoi(getCol(row, AutoscanColumn::id));
@@ -2047,19 +2047,19 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         location = getCol(row, AutoscanColumn::location);
     } else {
         char prefix;
-        location = stripLocationPrefix(getCol(row, AutoscanColumn::obj_location), &prefix);
+        location = stripLocationPrefix(getCol(row, AutoscanColumn::objLocation), &prefix);
         if (prefix != LOC_DIR_PREFIX)
             return nullptr;
     }
 
-    ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::scan_mode));
+    ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::scanMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::recursive));
     bool hidden = remapBool(getCol(row, AutoscanColumn::hidden));
     bool persistent = remapBool(getCol(row, AutoscanColumn::persistent));
     int interval = 0;
     if (mode == ScanMode::Timed)
         interval = std::stoi(getCol(row, AutoscanColumn::interval));
-    auto last_modified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::last_modified)));
+    auto last_modified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::lastModified)));
 
     log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified.count())) : "unset");
 

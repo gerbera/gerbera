@@ -164,14 +164,14 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
 
 TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPlaylistAndDirChains)
 {
-    const std::string MIME_TYPE_AUDIO_MPEG = "audio/mpeg";
-    const std::string OBJTYPE_ITEM_EXTERNAL_URL = "8";
+    const std::string mimeTypeAudioMpeg = "audio/mpeg";
+    const std::string objtypeItemExternalUrl = "8";
 
     std::map<std::string, std::string> asPlaylistChain {
         { "title", "Song from Playlist Title" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", MIME_TYPE_AUDIO_MPEG },
-        { "objectType", OBJTYPE_ITEM_EXTERNAL_URL },
+        { "mimetype", mimeTypeAudioMpeg },
+        { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "1" },
         { "protocol", "http-get" },
         { "description", "Song from Playlist Title" },

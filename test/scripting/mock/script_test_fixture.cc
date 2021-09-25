@@ -61,7 +61,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
     const std::string& location, int online_service)
 {
-    const std::string OBJECT_NAME = "orig";
+    const std::string objectName = "orig";
     duk_idx_t orig_idx = duk_push_object(ctx);
     duk_push_string(ctx, mimetype.c_str());
     duk_put_prop_string(ctx, orig_idx, "mimetype");
@@ -123,7 +123,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
         }
         duk_put_prop_string(ctx, orig_idx, "aux");
     }
-    duk_put_global_string(ctx, OBJECT_NAME.c_str());
+    duk_put_global_string(ctx, objectName.c_str());
 
     // TODO: parameterize?
     duk_push_string(ctx, "object/script/path");
@@ -133,7 +133,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
 
 duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype)
 {
-    const std::string OBJECT_NAME = "playlist";
+    const std::string objectName = "playlist";
     duk_push_object(ctx);
     duk_push_string(ctx, location.c_str());
     duk_put_prop_string(ctx, -2, "location");
@@ -141,7 +141,7 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string
     duk_put_prop_string(ctx, -2, "mimetype");
     duk_push_string(ctx, title.c_str());
     duk_put_prop_string(ctx, -2, "title");
-    duk_put_global_string(ctx, OBJECT_NAME.c_str());
+    duk_put_global_string(ctx, objectName.c_str());
     return 0;
 }
 

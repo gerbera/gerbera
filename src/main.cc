@@ -68,8 +68,8 @@
 #include "contrib/cxxopts.hpp"
 #include "server.h"
 
-static constexpr auto git_branch = std::string_view(GIT_BRANCH);
-static constexpr auto git_commit_hash = std::string_view(GIT_COMMIT_HASH);
+static constexpr auto gitBranch = std::string_view(GIT_BRANCH);
+static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);
 
 static struct {
     int shutdown_flag = 0;
@@ -196,15 +196,15 @@ int main(int argc, char** argv, char** envp)
                 "-------------\n"
                 "{}\n\n",
                 COMPILE_INFO);
-            if (!git_branch.empty()) {
+            if (!gitBranch.empty()) {
                 fmt::print(
                     "Git info:\n"
                     "-------------\n"
                     "Git Branch: {}\n",
-                    git_branch);
+                    gitBranch);
             }
-            if (!git_commit_hash.empty()) {
-                fmt::print("Git Commit: {}\n", git_commit_hash);
+            if (!gitCommitHash.empty()) {
+                fmt::print("Git Commit: {}\n", gitCommitHash);
             }
 
             std::exit(EXIT_SUCCESS);

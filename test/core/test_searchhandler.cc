@@ -45,33 +45,33 @@ static decltype(auto) getAllTokens(const std::string& input)
 
 enum class TestCol {
     id = 0,
-    item_id,
-    property_name,
-    property_value,
-    upnp_class,
-    ref_id,
+    itemId,
+    propertyName,
+    propertyValue,
+    upnpClass,
+    refId,
     last7,
-    last_updated,
+    lastUpdated,
 };
 
 const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
     { TestCol::id, { "t", "id" } },
-    { TestCol::item_id, { "t", "item_id" } },
-    { TestCol::property_name, { "t", "property_name" } },
-    { TestCol::property_value, { "t", "property_value" } },
-    { TestCol::upnp_class, { "t", "upnp_class" } },
-    { TestCol::ref_id, { "t", "ref_id" } },
-    { TestCol::last_updated, { "t", "last_updated" } },
+    { TestCol::itemId, { "t", "item_id" } },
+    { TestCol::propertyName, { "t", "property_name" } },
+    { TestCol::propertyValue, { "t", "property_value" } },
+    { TestCol::upnpClass, { "t", "upnp_class" } },
+    { TestCol::refId, { "t", "ref_id" } },
+    { TestCol::lastUpdated, { "t", "last_updated" } },
 };
 
 const std::vector<std::pair<std::string, TestCol>> testSortMap = {
     { "id", TestCol::id },
-    { UPNP_SEARCH_ID, TestCol::item_id },
-    { META_NAME, TestCol::property_name },
-    { META_VALUE, TestCol::property_value },
-    { UPNP_SEARCH_CLASS, TestCol::upnp_class },
-    { UPNP_SEARCH_REFID, TestCol::ref_id },
-    { UPNP_SEARCH_LAST_UPDATED, TestCol::last_updated },
+    { UPNP_SEARCH_ID, TestCol::itemId },
+    { META_NAME, TestCol::propertyName },
+    { META_VALUE, TestCol::propertyValue },
+    { UPNP_SEARCH_CLASS, TestCol::upnpClass },
+    { UPNP_SEARCH_REFID, TestCol::refId },
+    { UPNP_SEARCH_LAST_UPDATED, TestCol::lastUpdated },
 };
 
 ::testing::AssertionResult executeSearchLexerTest(const std::string& input,

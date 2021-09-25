@@ -54,7 +54,7 @@
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr auto js_global_functions = std::array {
+static constexpr auto jsGlobalFunctions = std::array {
     duk_function_list_entry { "print", js_print, DUK_VARARGS },
     duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },
     duk_function_list_entry { "addContainerTree", js_addContainerTree, 1 },
@@ -309,7 +309,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     duk_put_global_string(ctx, "config");
 
-    defineFunctions(js_global_functions.data());
+    defineFunctions(jsGlobalFunctions.data());
 
     std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 

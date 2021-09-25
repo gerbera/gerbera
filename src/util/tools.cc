@@ -75,7 +75,7 @@
 
 #define WHITE_SPACE " \t\r\n"
 
-static constexpr auto HEX_CHARS = "0123456789abcdef";
+static constexpr auto hexChars = "0123456789abcdef";
 
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
 {
@@ -273,8 +273,8 @@ std::string hexEncode(const void* data, std::size_t len)
         unsigned char c = chars[i];
         unsigned char hi = c >> 4;
         unsigned char lo = c & 0xF;
-        buf[2 * i + 0] = HEX_CHARS[hi];
-        buf[2 * i + 1] = HEX_CHARS[lo];
+        buf[2 * i + 0] = hexChars[hi];
+        buf[2 * i + 1] = hexChars[lo];
     }
 
     return buf;
@@ -287,10 +287,10 @@ std::string hexDecodeString(std::string_view encoded)
 
     std::string buf(len / 2, '\0');
     for (std::size_t i = 0; i < len; i += 2) {
-        auto chi = std::strchr(HEX_CHARS, ptr[i]);
-        auto clo = std::strchr(HEX_CHARS, ptr[i + 1]);
-        std::size_t hi = chi ? chi - HEX_CHARS : 0;
-        std::size_t lo = clo ? clo - HEX_CHARS : 0;
+        auto chi = std::strchr(hexChars, ptr[i]);
+        auto clo = std::strchr(hexChars, ptr[i + 1]);
+        std::size_t hi = chi ? chi - hexChars : 0;
+        std::size_t lo = clo ? clo - hexChars : 0;
 
         auto ch = static_cast<char>(hi << 4 | lo);
         buf[i / 2] = ch;
@@ -342,7 +342,7 @@ std::string generateRandomId()
     return uuid_String;
 }
 
-static constexpr auto HEX_CHARS2 = "0123456789ABCDEF";
+static constexpr auto hexCharS2 = "0123456789ABCDEF";
 
 std::string urlEscape(std::string_view str)
 {
@@ -367,7 +367,7 @@ std::string urlEscape(std::string_view str)
             if (cplen > 1)
                 buf << str.substr(i, cplen);
             else
-                buf << '%' << HEX_CHARS2[hi] << HEX_CHARS2[lo];
+                buf << '%' << hexCharS2[hi] << hexCharS2[lo];
         }
         i += cplen;
     }
@@ -392,11 +392,11 @@ std::string urlUnescape(std::string_view str)
 
             const char* pos;
 
-            pos = std::strchr(HEX_CHARS2, chi);
-            hi = pos ? pos - HEX_CHARS2 : 0;
+            pos = std::strchr(hexCharS2, chi);
+            hi = pos ? pos - hexCharS2 : 0;
 
-            pos = std::strchr(HEX_CHARS2, clo);
-            lo = pos ? pos - HEX_CHARS2 : 0;
+            pos = std::strchr(hexCharS2, clo);
+            lo = pos ? pos - hexCharS2 : 0;
 
             int ascii = (hi << 4) | lo;
             buf << char(ascii);
@@ -893,7 +893,7 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     char* XXXXXX;
     int count;
     static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static const int NLETTERS = sizeof(letters) - 1;
+    static const int nletters = sizeof(letters) - 1;
     long value;
     struct timespec ts;
     static int counter = 0;
@@ -915,17 +915,17 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
         long v = value;
 
         /* Fill in the random bits.  */
-        XXXXXX[0] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[1] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[2] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[3] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[4] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[5] = letters[v % NLETTERS];
+        XXXXXX[0] = letters[v % nletters];
+        v /= nletters;
+        XXXXXX[1] = letters[v % nletters];
+        v /= nletters;
+        XXXXXX[2] = letters[v % nletters];
+        v /= nletters;
+        XXXXXX[3] = letters[v % nletters];
+        v /= nletters;
+        XXXXXX[4] = letters[v % nletters];
+        v /= nletters;
+        XXXXXX[5] = letters[v % nletters];
 
         fs::path check = leadPath / tmpl;
         ret = stat(check.c_str(), &statbuf);
