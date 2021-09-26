@@ -349,7 +349,7 @@ void SQLDatabase::init()
 
     /// \brief List of column names to be used in insert and update to ensure correct order of columns
     // only columns listed here are added to the insert and update statements
-    tableColumnOrder = std::map<std::string, std::vector<std::string>> {
+    tableColumnOrder = {
         { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "bookmark_pos", "last_modified", "last_updated" } },
         { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },

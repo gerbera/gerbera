@@ -266,7 +266,7 @@ std::string httpRedirectTo(std::string_view addr, std::string_view page)
 
 std::string hexEncode(const void* data, std::size_t len)
 {
-    std::string buf(2 * len, '\0');
+    auto buf = std::string(2 * len, '\0');
 
     const unsigned char* chars = static_cast<const unsigned char*>(data);
     for (std::size_t i = 0; i < len; i++) {
@@ -285,7 +285,7 @@ std::string hexDecodeString(std::string_view encoded)
     const char* ptr = encoded.data();
     std::size_t len = encoded.length();
 
-    std::string buf(len / 2, '\0');
+    auto buf = std::string(len / 2, '\0');
     for (std::size_t i = 0; i < len; i += 2) {
         auto chi = std::strchr(hexChars, ptr[i]);
         auto clo = std::strchr(hexChars, ptr[i + 1]);
