@@ -195,7 +195,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
                 log_error("Malformed MKV file; KaxTitle cast failed!");
                 continue;
             }
-            std::string title(UTFstring(*titleEl).GetUTF8());
+            auto title = std::string(UTFstring(*titleEl).GetUTF8());
             log_debug("KaxTitle = {}", title);
             item->addMetaData(M_TITLE, sc->convert(title));
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
@@ -222,7 +222,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
 
     auto attachedFile = FindChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
-        std::string fileName(UTFstring(GetChild<LIBMATROSKA_NAMESPACE::KaxFileName>(*attachedFile)).GetUTF8());
+        auto fileName = std::string(UTFstring(GetChild<LIBMATROSKA_NAMESPACE::KaxFileName>(*attachedFile)).GetUTF8());
         log_debug("KaxFileName = {}", fileName);
 
         if (startswith(fileName, "cover")) {

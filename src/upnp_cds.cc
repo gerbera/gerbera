@@ -199,7 +199,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
         if (cdsObject->isItem()) {
             std::string title = cdsObject->getTitle();
             if (!titleSegments.empty()) {
-                auto values = std::vector<std::string>();
+                std::vector<std::string> values;
                 for (auto&& segment : titleSegments) {
                     auto mtField = MetadataHandler::remapMetaDataField(segment);
                     auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
