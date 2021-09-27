@@ -432,7 +432,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::setMetadata(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
+        MetadataHandler::extractMetaData(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
     }
     if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
@@ -1149,9 +1149,13 @@ std::pair<int, bool> ContentManager::addContainerChain(const std::string& chain,
         lastMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTIST), taItm->second);
     }
 
-    constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
-    for (auto&& unw : unwanted) {
-        lastMetadata.erase(std::remove_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == MetadataHandler::getMetaFieldName(unw); }));
+    if (!lastMetadata.empty()) {
+        constexpr auto unwanted = std::array { M_DESCRIPTION, M_TITLE, M_TRACKNUMBER, M_ARTIST }; // not wanted for container!
+        for (auto&& unw : unwanted) {
+            auto metaField = MetadataHandler::getMetaFieldName(unw);
+            while (std::find_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == metaField; }) != lastMetadata.end())
+                lastMetadata.erase(std::remove_if(lastMetadata.begin(), lastMetadata.end(), [=](auto&& m) { return m.first == metaField; }));
+        }
     }
     int containerID = INVALID_OBJECT_ID;
     std::vector<std::shared_ptr<CdsContainer>> containerList;
@@ -1299,7 +1303,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         }
         obj->setTitle(f2i->convert(title));
 
-        MetadataHandler::setMetadata(context, item, dirEnt);
+        MetadataHandler::extractMetaData(context, item, dirEnt);
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
