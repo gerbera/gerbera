@@ -284,7 +284,7 @@ public:
     void removeMetaData(const metadata_fields_t key)
     {
         auto&& field = MetadataHandler::getMetaFieldName(key);
-        if (std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }) != metaData.end())
+        while (std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }) != metaData.end())
             metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }));
     }
 

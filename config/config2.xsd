@@ -965,6 +965,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="mimetype"/>
+                <xs:element ref="dlna-profile"/>
                 <xs:element ref="accept-url" minOccurs="0"/>
                 <xs:element ref="first-resource" minOccurs="0"/>
                 <xs:element ref="hide-original-resource" minOccurs="0"/>
@@ -986,6 +987,8 @@
             </xs:attribute>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="dlna-profile" type="xs:string"/>
 
     <xs:element name="mimetype" type="xs:string"/>
 

@@ -621,6 +621,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
             t_res->mergeAttributes(tp->getAttributes());
 
+            t_res->addParameter("dlnaProfile", tp->dlnaProfile());
+
             if (tp->hideOriginalResource())
                 hide_original_resource = true;
 
@@ -741,6 +743,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
 
         std::string extend;
+        std::string dlnaProfile = res->getParameter("dlnaProfile");
+
         if (contentType == CONTENT_TYPE_JPG) {
             std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
             int x;
@@ -757,7 +761,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             }
         } else {
             /* handle audio/video content */
-            extend = getDLNAprofileString(config, contentType);
+            extend = dlnaProfile.empty() ? getDLNAprofileString(config, contentType, res->getAttribute(R_VIDEOCODEC), res->getAttribute(R_AUDIOCODEC)) : fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
         }
 
         // we do not support seeking at all, so 00

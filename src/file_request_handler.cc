@@ -172,7 +172,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         quirks->addCaptionInfo(item, headers);
 
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()));
+        auto resource = item->getResource(0);
+        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
         if (!dlnaContentHeader.empty()) {
             headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }

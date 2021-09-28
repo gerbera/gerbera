@@ -1013,18 +1013,20 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
     return pos;
 }
 
-std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType)
+std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
 {
     // get profiles from <contenttype-dlnaprofile> mappings
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
-    auto profile = getValueOrDefault(mappings, contentType, "");
+    auto profile = getValueOrDefault(mappings, fmt::format("{}-{}-{}", contentType, vCodec, aCodec), "");
+    if (profile.empty())
+        profile = getValueOrDefault(mappings, contentType, "");
 
     return profile.empty() ? "" : fmt::format("{}={};", UPNP_DLNA_PROFILE, profile);
 }
 
-std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType)
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
 {
-    std::string content_parameter = getDLNAprofileString(config, contentType);
+    std::string content_parameter = getDLNAprofileString(config, contentType, vCodec, aCodec);
     return fmt::format("{}{}={};{}={};{}={}", content_parameter, //
         UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
         UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
