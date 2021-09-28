@@ -71,7 +71,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (!tp)
-            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", tr_profile.c_str());
+            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", tr_profile);
 
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
@@ -81,12 +81,12 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #else
         std::string url = item->getLocation();
 #endif
-        log_debug("Online content url: {}", url.c_str());
+        log_debug("Online content url: {}", url);
         try {
             auto st = URL::getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
             header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: {}", st->getURL().c_str());
+            log_debug("URL used for request: {}", st->getURL());
         } catch (const std::runtime_error& ex) {
             log_warning("{}", ex.what());
             UpnpFileInfo_set_FileLength(info, -1);
@@ -136,14 +136,14 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 #else
     std::string url = item->getLocation();
 #endif
-    log_debug("Online content url: {}", url.c_str());
+    log_debug("Online content url: {}", url);
 
     std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!tr_profile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (!tp)
-            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url.c_str(), tr_profile.c_str());
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, tr_profile);
 
         auto tr_d = std::make_unique<TranscodeDispatcher>(content);
         auto io_handler = tr_d->serveContent(tp, url, item, "");

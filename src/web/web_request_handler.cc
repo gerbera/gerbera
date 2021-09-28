@@ -247,7 +247,7 @@ void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pu
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (!updateIDs.empty()) {
-        log_debug("UI: sending update ids: {}", updateIDs.c_str());
+        log_debug("UI: sending update ids: {}", updateIDs);
         updateIDsEl->append_attribute("ids") = updateIDs.c_str();
         updateIDsEl->append_attribute("updates") = true;
     }

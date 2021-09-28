@@ -164,7 +164,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             break;
         }
         *output_copy = 0;
-        log_error("{}", err.c_str());
+        log_error("{}", err);
         //        log_debug("iconv: input: {}", input);
         //        log_debug("iconv: converted part:  {}", output);
         dirty = true;

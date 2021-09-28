@@ -257,7 +257,7 @@ void ConfigManager::load(const fs::path& userHome)
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
     if (setlocale(LC_ALL, "")) {
         defaultCharSet = nl_langinfo(CODESET);
-        log_debug("received {} from nl_langinfo", defaultCharSet.c_str());
+        log_debug("received {} from nl_langinfo", defaultCharSet);
     }
 #endif
     // check if the one we take as default is actually available
@@ -275,7 +275,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: unsupported filesystem-charset specified: {}\n{}", charset, e.what());
     }
-    log_debug("Setting filesystem import charset to {}", charset.c_str());
+    log_debug("Setting filesystem import charset to {}", charset);
     co->makeOption(charset, self);
 
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
@@ -286,7 +286,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: unsupported metadata-charset specified: {}\n{}", charset, e.what());
     }
-    log_debug("Setting metadata import charset to {}", charset.c_str());
+    log_debug("Setting metadata import charset to {}", charset);
     co->makeOption(charset, self);
 
     // read playlist options
@@ -298,7 +298,7 @@ void ConfigManager::load(const fs::path& userHome)
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: unsupported playlist-charset specified: {}\n{}", charset, e.what());
     }
-    log_debug("Setting playlist charset to {}", charset.c_str());
+    log_debug("Setting playlist charset to {}", charset);
     co->makeOption(charset, self);
 
     // read network options
@@ -319,7 +319,7 @@ void ConfigManager::load(const fs::path& userHome)
             throw_std_runtime_error("Error in config file: \"append-to\" attribute "
                                     "value in <presentationURL> tag is set to \"{}\""
                                     "but no URL is specified",
-                temp.c_str());
+                temp);
         }
     }
 #ifdef HAVE_JS
@@ -480,7 +480,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     std::ostringstream buf;
     xmlDoc->print(buf, "  ");
-    log_debug("Config file dump after validation: {}", buf.str().c_str());
+    log_debug("Config file dump after validation: {}", buf.str());
 
     // now the XML is no longer needed we can destroy it
     xmlDoc = nullptr;

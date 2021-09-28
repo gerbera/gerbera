@@ -161,7 +161,7 @@ void AutoscanInotify::threadProc()
                 int wd = event->wd;
                 int mask = event->mask;
                 std::string name = event->name;
-                log_debug("inotify event: {} 0x{:x} {}", wd, mask, name.c_str());
+                log_debug("inotify event: {} 0x{:x} {}", wd, mask, name);
 
                 std::shared_ptr<Wd> wdObj;
                 try {

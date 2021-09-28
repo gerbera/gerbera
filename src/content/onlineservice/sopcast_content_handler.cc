@@ -140,7 +140,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
     std::string mt = getValueOrDefault(mappings, temp, "*");
     if (mt == "*") {
         mt = getValueOrDefault(mappings, "*");
-        log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp.c_str());
+        log_warning("Could not determine mimetype for SopCast channel (stream_type: {})", temp);
     }
 
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mt, SOPCAST_PROTOCOL));

@@ -479,7 +479,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
             }
             _exec(fmt::format(updateVersionCommand, version + 1, version));
             dbVersion = fmt::to_string(version + 1);
-            log_info("Database upgrade to version {} successful.", dbVersion.c_str());
+            log_info("Database upgrade to version {} successful.", dbVersion);
         }
         version++;
     }
@@ -1300,7 +1300,7 @@ void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& 
 
 std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
 {
-    return fmt::format("{}{}", prefix, path.string().c_str());
+    return fmt::format("{}{}", prefix, path.string());
 }
 
 fs::path SQLDatabase::stripLocationPrefix(std::string_view dbLocation, char* prefix)

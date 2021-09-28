@@ -56,19 +56,19 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     process_id = fork();
     switch (process_id) {
     case -1:
-        throw_std_runtime_error("Failed to launch process {}", command.c_str());
+        throw_std_runtime_error("Failed to launch process {}", command);
 
     case 0:
         sigset_t mask_set;
         pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
-        log_debug("Launching process: {}", command.c_str());
+        log_debug("Launching process: {}", command);
         execvp(command.c_str(), const_cast<char**>(argv));
         break;
     default:
         break;
     }
 
-    log_debug("Launched process {}, pid: {}", command.c_str(), process_id);
+    log_debug("Launched process {}, pid: {}", command, process_id);
 }
 
 bool ProcessExecutor::isAlive()

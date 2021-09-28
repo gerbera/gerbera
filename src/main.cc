@@ -275,7 +275,7 @@ int main(int argc, char** argv, char** envp)
                 log_error("Unable to change user.");
                 std::exit(EXIT_FAILURE);
             }
-            log_info("Dropped to User: {}", user->c_str());
+            log_info("Dropped to User: {}", *user);
         }
 
         // are we requested to daemonize?
@@ -453,7 +453,7 @@ int main(int argc, char** argv, char** envp)
             configManager->load(home.value_or(""));
             portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
-            log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
+            log_error("Error parsing config file '{}': {}", (*config_file), ce.what());
             std::exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
@@ -521,7 +521,7 @@ int main(int argc, char** argv, char** envp)
                         asSetting.mergeOptions(configManager, f);
                         server->getContent()->addFile(dirEnt, asSetting, true);
                     } else {
-                        log_error("Failed to read {}: {}", f.c_str(), ec.message());
+                        log_error("Failed to read {}: {}", f, ec.message());
                     }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
@@ -551,7 +551,7 @@ int main(int argc, char** argv, char** envp)
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                             debug);
                     } catch (const ConfigParseException& ce) {
-                        log_error("Error parsing config file '{}': {}", (*config_file).c_str(), ce.what());
+                        log_error("Error parsing config file '{}': {}", (*config_file), ce.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit
@@ -594,7 +594,7 @@ int main(int argc, char** argv, char** envp)
         }
 
         // remove pidfile if one was written
-        if (opts.count("pidfile") > 0) {
+        if (pidfile) {
             if (fs::remove(*pidfile)) {
                 log_debug("Pidfile {} removed.", pidfile->c_str());
             } else {

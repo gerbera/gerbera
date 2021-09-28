@@ -469,7 +469,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 }
             }
             if (!content.empty()) {
-                log_debug("Adding auxdata: {} with value '{}'", desiredFrame, fmt::join(content, entrySeparator));
+                log_debug("Adding auxdata: {} with value '{}'", desiredFrame, fmt::to_string(fmt::join(content, entrySeparator)));
                 item->setAuxData(desiredFrame, fmt::format("{}", fmt::join(content, entrySeparator)));
             }
         } else if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
@@ -497,13 +497,13 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                             content.push_back(sc->convert(val.toCString(true)));
                     }
                 }
-                log_debug("TXXX Tag: {}", subTag.c_str());
+                log_debug("TXXX Tag: {}", subTag);
 
                 if (desiredSubTag == subTag && !content.empty()) {
                     if (content[0] == subTag)
                         content.erase(content.begin()); // Avoid leading tag for options unknown to taglib
 
-                    log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, fmt::join(content, entrySeparator));
+                    log_debug("Adding auxdata: '{}' with value '{}'", desiredFrame, fmt::to_string(fmt::join(content, entrySeparator)));
                     item->setAuxData(desiredFrame, fmt::format("{}", fmt::join(content, entrySeparator)));
                     break;
                 }

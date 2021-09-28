@@ -102,7 +102,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     if (temp.empty()) {
         log_warning("Failed to retrieve Trailer ID for \"{}\", "
                     "skipping...\n",
-            item->getTitle().c_str());
+            item->getTitle());
         return nullptr;
     }
 
@@ -113,7 +113,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     if (!preview) {
         log_warning("Failed to retrieve Trailer location for \"{}\", "
                     "skipping...\n",
-            item->getTitle().c_str());
+            item->getTitle());
         return nullptr;
     }
 
@@ -123,7 +123,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     } else {
         log_error("Could not get location for Trailers item {}, "
                   "skipping.\n",
-            item->getTitle().c_str());
+            item->getTitle());
         return nullptr;
     }
 

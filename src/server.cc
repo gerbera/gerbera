@@ -114,7 +114,7 @@ void Server::run()
         iface = ipToInterface(ip);
 
     if (!ip.empty() && iface.empty())
-        throw_std_runtime_error("Could not find IP: {}", ip.c_str());
+        throw_std_runtime_error("Could not find IP: {}", ip);
 
     // check webroot directory
     std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
@@ -132,9 +132,9 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpSetWebServerRootDir failed {}", web_root));
     }
 
-    log_debug("webroot: {}", web_root.c_str());
+    log_debug("webroot: {}", web_root);
 
-    log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
+    log_debug("Setting virtual dir to: {}", virtual_directory);
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpAddVirtualDir failed {}", virtual_directory));
@@ -272,7 +272,7 @@ void Server::writeBookmark(const std::string& addr)
 
 void Server::emptyBookmark()
 {
-    const std::string data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
+    const std::string_view data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
@@ -458,8 +458,7 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
     // make sure that the request is for our device
     if (request->getUDN() != serverUDN) {
         // not for us
-        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}",
-            request->getUDN().c_str(), serverUDN.c_str());
+        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request->getUDN(), serverUDN);
         throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 

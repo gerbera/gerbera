@@ -116,7 +116,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Video/Directories/{}", dir.string().c_str()));
+        id = content->addContainerChain(fmt::format("/Video/Directories/{}", dir.string()));
         add(obj, id);
     }
 }
@@ -170,7 +170,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Photos/Directories/{}", dir.string().c_str()));
+        id = content->addContainerChain(fmt::format("/Photos/Directories/{}", dir.string()));
         add(obj, id);
     }
 }
@@ -313,7 +313,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         dir = esc(f2i->convert(getLastPath(obj->getLocation())));
 
     if (!dir.empty()) {
-        id = content->addContainerChain(fmt::format("/Audio/Directories/{}", dir.string().c_str()));
+        id = content->addContainerChain(fmt::format("/Audio/Directories/{}", dir.string()));
         add(obj, id);
     }
 }
@@ -407,7 +407,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
 
 void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type)
 {
-    log_debug("Process CDS Object: {}", obj->getTitle().c_str());
+    log_debug("Process CDS Object: {}", obj->getTitle());
 #ifdef ENABLE_PROFILING
     PROF_START(&layout_profiling);
 #endif

@@ -80,7 +80,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                 auto fileName = toLower(expandName(name, obj));
                 for (auto&& [f, s] : fileNames) {
                     if (f == fileName) {
-                        log_debug("{}: found", f.c_str());
+                        log_debug("{}: found", f);
                         result.push_back(s);
                     }
                 }
@@ -94,8 +94,8 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                 if (extn.has_extension()) {
                     extn = isCaseSensitive ? extn.extension().string() : toLower(extn.extension().string());
                 } else {
-                    extn = isCaseSensitive ? fmt::format(".{}", ext) : toLower(fmt::format(".{}", ext));
-                    stem = "";
+                    extn = fmt::format(".{}", isCaseSensitive ? ext : toLower(ext));
+                    stem.clear();
                 }
                 std::error_code ec;
                 if (found.is_relative()) {
@@ -148,14 +148,14 @@ std::string ContentPathSetup::expandName(std::string_view name, const std::share
 
     if (obj->isItem()) {
         fs::path location = obj->getLocation();
-        replaceString(copy, "%filename%", location.stem().string().c_str());
+        replaceString(copy, "%filename%", location.stem().string());
     }
     if (obj->isContainer()) {
         auto title = obj->getTitle();
         if (!title.empty())
             replaceString(copy, "%filename%", title);
         fs::path location = obj->getLocation();
-        replaceString(copy, "%filename%", location.filename().string().c_str());
+        replaceString(copy, "%filename%", location.filename().string());
     }
     return copy;
 }
@@ -335,7 +335,7 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         obj->removeResource(CH_RESOURCE);
 
     for (auto&& path : pathList) {
-        log_debug("Running resource handler check on {} -> {}", obj->getLocation().string().c_str(), path.string().c_str());
+        log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
 
         if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
             auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
@@ -352,11 +352,11 @@ std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<C
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_RESOURCE)[0];
     }
-    log_debug("Resource: Opening name: {}", path.c_str());
+    log_debug("Resource: Opening name: {}", path.string());
     struct stat statbuf;
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        log_warning("File does not exist: {} ({})", path.c_str(), std::strerror(errno));
+        log_warning("File does not exist: {} ({})", path.string(), std::strerror(errno));
         return nullptr;
     }
     return std::make_unique<FileIOHandler>(path);

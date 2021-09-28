@@ -66,7 +66,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
     std::string buffer;
 
     try {
-        log_debug("DOWNLOADING URL: {}", service_url.c_str());
+        log_debug("DOWNLOADING URL: {}", service_url);
         buffer = URL::download(service_url, &retcode,
             curl_handle, false, true, true);
     } catch (const std::runtime_error& ex) {
@@ -80,7 +80,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER{}", buffer.c_str());
+    log_debug("GOT BUFFER{}", buffer);
     auto doc = std::make_unique<pugi::xml_document>();
     pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {

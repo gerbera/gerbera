@@ -211,7 +211,7 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
     if (it != clientInfo.end()) {
         *ppInfo = &(*it);
         auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
-        log_debug("found client by IP (ip='{}')", ip.c_str());
+        log_debug("found client by IP (ip='{}')", ip);
         return true;
     }
 
@@ -225,7 +225,7 @@ bool Clients::getInfoByType(const std::string& match, ClientMatchType type, cons
         auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
         if (it != clientInfo.rend()) {
             *ppInfo = &(*it);
-            log_debug("found client by type (match='{}')", match.c_str());
+            log_debug("found client by type (match='{}')", match);
             return true;
         }
     }
@@ -244,7 +244,7 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
     if (it != cache.end()) {
         *ppInfo = it->pInfo;
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
-        log_debug("found client by cache (hostname='{}')", hostName.c_str());
+        log_debug("found client by cache (hostname='{}')", hostName);
         return true;
     }
 
