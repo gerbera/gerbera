@@ -59,7 +59,7 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
 {
     auto response = std::make_unique<pugi::xml_document>();
-    auto root = response->append_child(fmt::format("u:{}Response", actionName.c_str()).c_str());
+    auto root = response->append_child(fmt::format("u:{}Response", actionName).c_str());
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
@@ -378,11 +378,11 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     }
 
     if (urlBase->addResID) { // a proxy, remote, resource
-        return fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase.c_str());
+        return fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase);
     }
 
     // a local resource
-    return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase.c_str());
+    return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase);
 }
 
 std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) const
@@ -433,7 +433,7 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
     auto urlBase = getPathBase(item);
     std::string url;
     if (urlBase->addResID) {
-        url = fmt::format("{}{}{}{}", virtualURL.c_str(), urlBase->pathBase.c_str(), res->getResId(), _URL_PARAM_SEPARATOR);
+        url = fmt::format("{}{}{}{}", virtualURL, urlBase->pathBase, res->getResId(), _URL_PARAM_SEPARATOR);
     } else
         url = virtualURL + urlBase->pathBase;
 

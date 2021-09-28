@@ -510,10 +510,10 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
-            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), obj->getLocation().string().c_str());
+            log_debug("Forced rescan of {} for resource {}", parentPath, obj->getLocation().string());
             parentRemoved = true;
         } else {
-            log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
+            log_error("Failed to read {}: {}", parentPath, ec.message());
         }
     }
     return parentRemoved;
@@ -875,7 +875,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
 
         // For the Web UI
         if (task) {
-            task->setDescription(fmt::format("Importing: {}", newPath.string().c_str()));
+            task->setDescription(fmt::format("Importing: {}", newPath.string()));
         }
 
         try {
@@ -1021,14 +1021,14 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
         cloned_item->addMetaData(M_DESCRIPTION, description);
     }
 
-    log_debug("updateCdsObject: checking equality of item {}", item->getTitle().c_str());
+    log_debug("updateCdsObject: checking equality of item {}", item->getTitle());
     if (!item->equals(cloned_item, true)) {
         cloned_item->validate();
         int containerChanged = INVALID_OBJECT_ID;
         database->updateObject(clone, &containerChanged);
         update_manager->containerChanged(containerChanged);
         session_manager->containerChangedUI(containerChanged);
-        log_debug("updateObject: calling containerChanged on item {}", item->getTitle().c_str());
+        log_debug("updateObject: calling containerChanged on item {}", item->getTitle());
         update_manager->containerChanged(item->getParentID());
     }
 }
@@ -1415,7 +1415,7 @@ void ContentManager::threadProc()
         currentTask = task;
         lock.unlock();
 
-        // log_debug("content manager Async START {}", task->getDescription().c_str());
+        // log_debug("content manager Async START {}", task->getDescription());
         try {
             if (task->isValid())
                 task->run();
@@ -1424,7 +1424,7 @@ void ContentManager::threadProc()
         } catch (const std::runtime_error& e) {
             log_error("Exception caught: {}", e.what());
         }
-        // log_debug("content manager ASYNC STOP  {}", task->getDescription().c_str());
+        // log_debug("content manager ASYNC STOP  {}", task->getDescription());
 
         if (!shutdownFlag) {
             lock.lock();
@@ -1473,7 +1473,7 @@ int ContentManager::addFileInternal(
     if (async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
-        task->setDescription(fmt::format("Importing: {}", dirEnt.path().string().c_str()));
+        task->setDescription(fmt::format("Importing: {}", dirEnt.path().string()));
         task->setParentID(parentTaskID);
         addTask(task, lowPriority);
         return INVALID_OBJECT_ID;
@@ -1502,7 +1502,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
 
 void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineService>& service)
 {
-    log_debug("Finished fetch cycle for service: {}", service->getServiceName().c_str());
+    log_debug("Finished fetch cycle for service: {}", service->getServiceName());
 
     if (service->getItemPurgeInterval() > std::chrono::seconds::zero()) {
         auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
@@ -1523,7 +1523,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
             last = std::chrono::seconds(std::stoll(temp));
 
             if ((service->getItemPurgeInterval() > std::chrono::seconds::zero()) && ((current - last) > service->getItemPurgeInterval())) {
-                log_debug("Purging old online service object {}", obj->getTitle().c_str());
+                log_debug("Purging old online service object {}", obj->getTitle());
                 removeObject(nullptr, object_id, false);
             }
         }
@@ -1649,7 +1649,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
     if (descPath.empty())
         descPath = adir->getLocation();
 
-    task->setDescription(fmt::format("Scan: {}", descPath.string().c_str()));
+    task->setDescription(fmt::format("Scan: {}", descPath.string()));
     addTask(task, true); // adding with low priority
 }
 
@@ -1853,7 +1853,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
             obj->setFlag(OBJECT_FLAG_PLAYED);
 
             bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-            log_debug("Marking object {} as played", obj->getTitle().c_str());
+            log_debug("Marking object {} as played", obj->getTitle());
             updateObject(obj, !supress);
         }
     }

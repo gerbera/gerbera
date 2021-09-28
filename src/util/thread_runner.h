@@ -57,7 +57,7 @@ public:
 
     ~ThreadRunner() override
     {
-        log_debug("ThreadRunner: Destroying {}", threadName.c_str());
+        log_debug("ThreadRunner: Destroying {}", threadName);
         if (attr) {
             pthread_attr_destroy(attr);
             delete attr;
@@ -171,7 +171,7 @@ protected:
     void threadProc() override
     {
         targetProc(target);
-        log_debug("ThreadRunner: Terminating {}", threadName.c_str());
+        log_debug("ThreadRunner: Terminating {}", threadName);
     }
 
     /// \brief start the thread
@@ -197,7 +197,7 @@ protected:
             this);
 
         if (ret != 0) {
-            log_error("Could not start thread {}: {}", threadName.c_str(), std::strerror(ret));
+            log_error("Could not start thread {}: {}", threadName, std::strerror(ret));
         } else {
             threadRunning = true;
         }

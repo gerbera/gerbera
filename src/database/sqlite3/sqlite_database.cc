@@ -70,7 +70,7 @@ void Sqlite3Database::init()
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath, std::strerror(errno)));
 
     taskQueueOpen = true;
     threadRunner = std::make_unique<StdThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
@@ -399,7 +399,7 @@ void SLTask::waitForTask()
     }
 
     if (!getError().empty()) {
-        log_debug("{}", getError().c_str());
+        log_debug("{}", getError());
         throw_std_runtime_error(getError());
     }
 }
@@ -417,7 +417,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-    log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+    log_debug("Loading initialisation SQL from: {}", sqlFilePath);
     auto sql = readTextFile(sqlFilePath);
     auto&& myHash = stringHash(sql);
 

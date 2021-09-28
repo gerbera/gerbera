@@ -170,7 +170,7 @@ void Web::ConfigSave::process()
                 taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();
                 log_info("Rescanning directory {}", target);
             } else {
-                log_error("No such autoscan or dir: {} ({})", target.c_str(), objectID);
+                log_error("No such autoscan or dir: {} ({})", target, objectID);
             }
         } else {
             auto autoScans = content->getAutoscanDirectories();

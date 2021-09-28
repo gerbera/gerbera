@@ -186,8 +186,7 @@ void TPFetchOnlineContentTask::run()
     try {
         //cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
         if (service->refreshServiceData(layout) && (isValid())) {
-            log_debug("Scheduling another task for online service: {}",
-                service->getServiceName().c_str());
+            log_debug("Scheduling another task for online service: {}", service->getServiceName());
 
             if ((service->getRefreshInterval() > std::chrono::seconds::zero()) || unscheduled_refresh) {
                 auto t = std::make_shared<TPFetchOnlineContentTask>(

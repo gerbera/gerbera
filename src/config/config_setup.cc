@@ -93,7 +93,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (root.attribute(xAttr.c_str())) {
         std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xAttr.c_str(), optValue.c_str());
+            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xAttr, optValue);
         }
         return optValue;
     }
@@ -101,7 +101,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (root.child(xpath)) {
         std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue.c_str());
+            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue);
         }
         return optValue;
     }
@@ -109,7 +109,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (required)
         throw_std_runtime_error("Error in config file: {}/{} not found", root.path(), xpath);
 
-    log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue.c_str());
+    log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue);
 
     useDefault = true;
     return defaultValue;
@@ -163,7 +163,7 @@ void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared
 std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& optValue)
 {
     if (notEmpty && optValue.empty()) {
-        throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue.c_str());
+        throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<Option>(optValue);
     return optionValue;
@@ -185,21 +185,21 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
         if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
-            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue.c_str());
+            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue);
             return false;
         }
         tmp_path = optValue;
     } else {
         tmp_path = findInPath(optValue);
         if (tmp_path.empty()) {
-            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\" in $PATH", optValue.c_str());
+            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\" in $PATH", optValue);
             return false;
         }
     }
 
     int err = 0;
     if (!isExecutable(tmp_path, &err)) {
-        log_error("Error in configuration, transcoding profile: transcoder {} is not executable: {}", optValue.c_str(), std::strerror(err));
+        log_error("Error in configuration, transcoding profile: transcoder {} is not executable: {}", optValue, std::strerror(err));
         return false;
     }
     return true;
@@ -283,7 +283,7 @@ std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
     if (!checkPathValue(optValue, pathValue)) {
-        throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue.c_str());
+        throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<Option>(pathValue);
     return optionValue;
@@ -301,22 +301,22 @@ void ConfigIntSetup::makeOption(std::string optValue, const std::shared_ptr<Conf
 {
     if (rawCheck) {
         if (!rawCheck(optValue)) {
-            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue.c_str());
+            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (valueCheck) {
         if (!valueCheck(std::stoi(optValue))) {
-            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue.c_str());
+            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (minCheck) {
         if (!minCheck(std::stoi(optValue), minValue)) {
-            throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue.c_str(), minValue);
+            throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue);
         }
     }
     try {
         optionValue = std::make_shared<IntOption>(std::stoi(optValue));
         setOption(config);
     } catch (const std::runtime_error& e) {
-        throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue.c_str());
+        throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue);
     }
 }
 
@@ -345,7 +345,7 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
 int ConfigIntSetup::getXmlContent(const pugi::xml_node& root)
 {
     std::string sVal = ConfigSetup::getXmlContent(root, true);
-    log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal.c_str());
+    log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal);
     return checkIntValue(sVal, root.path());
 }
 
@@ -426,7 +426,7 @@ static bool validateTrueFalse(const std::string& optValue)
 void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw_std_runtime_error("Invalid {} value {}", xpath, optValue.c_str());
+        throw_std_runtime_error("Invalid {} value {}", xpath, optValue);
     optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == "true");
     setOption(config);
 }
@@ -441,12 +441,12 @@ bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathN
 {
     if (rawCheck) {
         if (!rawCheck(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue.c_str());
+            throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue);
         }
     }
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, optValue.c_str());
+        throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, optValue);
     return optValue == YES || optValue == "true";
 }
 
@@ -572,7 +572,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
-        log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue.c_str());
+        log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue);
 
         std::size_t i = extractIndex(optItem);
         if (i < std::numeric_limits<std::size_t>::max()) {
@@ -758,7 +758,7 @@ bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem
             value->setValue(i, config->getOrigValue(valIndex));
             log_debug("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
         }
-        log_debug("New Dictionary key {} {}", keyIndex, optValue.c_str());
+        log_debug("New Dictionary key {} {}", keyIndex, optValue);
         return true;
     }
     if (optItem == valIndex) {
@@ -774,7 +774,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
-        log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue.c_str());
+        log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
         std::size_t i = extractIndex(optItem);
         if (i < std::numeric_limits<std::size_t>::max()) {
@@ -902,7 +902,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
-            log_error("Could not add {}: {}", location.string().c_str(), e.what());
+            log_error("Could not add {}: {}", location.string(), e.what());
             return false;
         }
     }
@@ -967,7 +967,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
 {
     auto uPath = getUniquePath();
     if (startswith(optItem, uPath)) {
-        log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue.c_str());
+        log_debug("Updating Autoscan Detail {} {} {}", uPath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<AutoscanListOption>(optionValue);
 
         auto list = value->getAutoscanListOption();
@@ -1139,11 +1139,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         std::size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
 
         if (chunk > buffer) {
-            log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName().c_str());
+            log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName());
             return false;
         }
         if (fill > buffer) {
-            log_error("Error in configuration: transcoding profile \"{}\" fill size can not be greater than buffer size", prof->getName().c_str());
+            log_error("Error in configuration: transcoding profile \"{}\" fill size can not be greater than buffer size", prof->getName());
             return false;
         }
 
@@ -1158,7 +1158,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
 
         if (!set) {
-            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName().c_str());
+            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName());
             if (!allow_unused_profiles) {
                 return false;
             }
@@ -1169,7 +1169,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     auto tpl = result->getList();
     for (auto&& [key, val] : mt_mappings) {
         if (tpl.find(key) == tpl.end()) {
-            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val.c_str(), key.c_str());
+            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val, key);
             if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
                 return false;
             }
@@ -1219,7 +1219,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
-        log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue.c_str());
+        log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
         std::map<std::string, int> profiles;
         int i = 0;
 
@@ -1428,7 +1428,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
-                config->setOrigValue(index, std::accumulate(next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a.c_str(), b.c_str()); }));
+                config->setOrigValue(index, std::accumulate(next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
                 fcc_list.clear();
                 if (ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
                     set4cc = true;

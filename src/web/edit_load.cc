@@ -162,21 +162,21 @@ void Web::EditLoad::process()
         // write resource parameters
         for (auto&& [key, val] : resItem->getParameters()) {
             auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format(".{}", key.c_str()).c_str();
+            resEntry.append_attribute("resname") = fmt::format(".{}", key).c_str();
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
         // write resource attributes
         for (auto&& [key, val] : resItem->getAttributes()) {
             auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format(" {}", key.c_str()).c_str();
+            resEntry.append_attribute("resname") = fmt::format(" {}", key).c_str();
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
         // write resource options
         for (auto&& [key, val] : resItem->getOptions()) {
             auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format("-{}", key.c_str()).c_str();
+            resEntry.append_attribute("resname") = fmt::format("-{}", key).c_str();
             resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }

@@ -95,7 +95,7 @@ void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionReques
         doIsValidated(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action {}", request->getActionName().c_str());
+        log_debug("unrecognized action {}", request->getActionName());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
         //throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }

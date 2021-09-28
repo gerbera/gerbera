@@ -203,7 +203,7 @@ void UpdateManager::threadProc()
                 lock.unlock(); // we don't need to hold the lock during the sending of the updates
                 if (!updateString.empty()) {
                     try {
-                        log_debug("updates sent: \"{}\"", updateString.c_str());
+                        log_debug("updates sent: \"{}\"", updateString);
                         server->sendCDSSubscriptionUpdate(updateString);
                         lastUpdate = currentTimeMS();
                     } catch (const std::runtime_error& e) {

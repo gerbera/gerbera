@@ -147,7 +147,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
                       ->getByName(tr_profile);
         if (!tp)
-            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), tr_profile.c_str());
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), tr_profile);
 
         mimeType = tp->getTargetMimeType();
 

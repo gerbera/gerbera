@@ -497,7 +497,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                             content.push_back(sc->convert(val.toCString(true)));
                     }
                 }
-                log_debug("TXXX Tag: {}", subTag.c_str());
+                log_debug("TXXX Tag: {}", subTag);
 
                 if (desiredSubTag == subTag && !content.empty()) {
                     if (content[0] == subTag)

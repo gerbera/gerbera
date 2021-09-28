@@ -63,7 +63,7 @@ void Headers::addHeader(const std::string& key, const std::string& value)
         return;
     }
 
-    log_debug("Adding header: '{}: {}'", cleanKey.c_str(), cleanValue.c_str());
+    log_debug("Adding header: '{}: {}'", cleanKey, cleanValue);
     headers.emplace(cleanKey, cleanValue);
 }
 

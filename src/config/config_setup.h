@@ -239,7 +239,7 @@ public:
     En getXmlContent(const pugi::xml_node& root)
     {
         std::string optValue = ConfigSetup::getXmlContent(root, true);
-        log_debug("Config: option: '{}' value: '{}'", xpath, optValue.c_str());
+        log_debug("Config: option: '{}' value: '{}'", xpath, optValue);
         if (notEmpty && optValue.empty()) {
             throw_std_runtime_error("Error in config file: Invalid {}/{} empty value '{}'", root.path(), xpath, optValue);
         }

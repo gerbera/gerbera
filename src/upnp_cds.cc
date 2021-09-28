@@ -72,7 +72,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
 
     log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
-        objID.c_str(), browseFlag.c_str(), startingIndex.c_str(), requestedCount.c_str(), sortCriteria.c_str());
+        objID, browseFlag, startingIndex, requestedCount, sortCriteria);
 
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
@@ -164,7 +164,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
 
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
-        containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str(), requestedCount.c_str());
+        containerID, searchCriteria, startingIndex, requestedCount, requestedCount);
 
     pugi::xml_document didl_lite;
     auto decl = didl_lite.prepend_child(pugi::node_declaration);

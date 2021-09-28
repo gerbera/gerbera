@@ -100,7 +100,7 @@ void ActionRequest::update()
         std::ostringstream buf;
         response->print(buf, "", 0);
         std::string xml = buf.str();
-        log_debug("ActionRequest::update(): {}", xml.c_str());
+        log_debug("ActionRequest::update(): {}", xml);
 
 #if defined(USING_NPUPNP)
         UpnpActionRequest_set_xmlResponse(upnp_request, xml);
@@ -127,6 +127,6 @@ void ActionRequest::update()
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         }
 
-        log_error("ActionRequest::update(): response is nullptr, code {} for {}", errCode, actionName.c_str());
+        log_error("ActionRequest::update(): response is nullptr, code {} for {}", errCode, actionName);
     }
 }

@@ -320,8 +320,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
             _load(common_scr_path);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", common_scr_path.c_str(),
-                e.what());
+            log_js("Unable to load {}: {}", common_scr_path, e.what());
         }
     }
     std::string custom_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
@@ -330,8 +329,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
             _load(custom_scr_path);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", custom_scr_path.c_str(),
-                e.what());
+            log_js("Unable to load {}: {}", custom_scr_path, e.what());
         }
     }
 }
@@ -384,7 +382,7 @@ void Script::_load(const std::string& scriptPath)
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
         log_error("Failed to load script: {}", duk_safe_to_string(ctx, -1));
-        throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
+        throw_std_runtime_error("Scripting: failed to compile {}", scriptPath);
     }
 }
 

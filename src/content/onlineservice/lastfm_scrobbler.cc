@@ -76,13 +76,11 @@ void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
 
     currentTrackId = item->getID();
 
-    log_debug("Artist:\t{}",
-        item->getMetaData(M_ARTIST).c_str());
-    log_debug("Title:\t{}",
-        item->getMetaData(M_TITLE).c_str());
-
     std::string artist = item->getMetaData(M_ARTIST);
     std::string title = item->getMetaData(M_TITLE);
+
+    log_debug("Artist:\t{}", artist);
+    log_debug("Title:\t{}", title);
 
     if (artist.empty() || title.empty()) {
         scrobbler->finishedPlaying();

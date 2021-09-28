@@ -192,7 +192,7 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
         return ClientType::Unknown;
     }
 
-    throw_std_runtime_error("clientType {} invalid", clientType.c_str());
+    throw_std_runtime_error("clientType {} invalid", clientType);
 }
 
 int ClientConfig::remapFlag(const std::string& flag)

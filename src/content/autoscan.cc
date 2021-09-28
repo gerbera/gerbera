@@ -137,7 +137,7 @@ ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
     if (scanmode == "inotify")
         return ScanMode::INotify;
 
-    throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode.c_str());
+    throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode);
 }
 
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const

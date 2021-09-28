@@ -168,7 +168,7 @@ static int getTagFromString(const std::string& tag)
     auto result = getValueOrDefault(exifTagMap, tag, -1);
 
     if (result == -1)
-        log_warning("Ignoring unknown libexif tag: {}", tag.c_str());
+        log_warning("Ignoring unknown libexif tag: {}", tag);
     return result;
 }
 
