@@ -212,12 +212,12 @@ static std::map<std::string, std::string> mt_ct_defaults {
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
 static std::map<std::string, std::string> ct_dlna_defaults {
-    { CONTENT_TYPE_MP4, UPNP_DLNA_PROFILE_AVC_MP4_EU },
-    { CONTENT_TYPE_MKV, UPNP_DLNA_PROFILE_MKV },
-    { CONTENT_TYPE_AVI, UPNP_DLNA_PROFILE_AVI },
-    { CONTENT_TYPE_MPEG, UPNP_DLNA_PROFILE_MPEG_PS_PAL },
-    { CONTENT_TYPE_MP3, UPNP_DLNA_PROFILE_MP3 },
-    { CONTENT_TYPE_PCM, UPNP_DLNA_PROFILE_LPCM },
+    { CONTENT_TYPE_MP4, "AVC_MP4_EU" },
+    { CONTENT_TYPE_MKV, "MKV" },
+    { CONTENT_TYPE_AVI, "AVI" },
+    { CONTENT_TYPE_MPEG, "MPEG_PS_PAL" },
+    { CONTENT_TYPE_MP3, "MP3" },
+    { CONTENT_TYPE_PCM, "LPCM" },
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
@@ -906,6 +906,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS,
         "attribute::client-flags", "config-transcode.html#profiles",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNA,
+        "attribute::dlna-profile", "config-transcode.html#profiles",
         ""),
     std::make_shared<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED,
         "attribute::enabled", "config-transcode.html#profiles"),

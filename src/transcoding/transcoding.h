@@ -145,6 +145,9 @@ public:
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() const { return accept_url; }
 
+    void setDlnaProfile(const std::string& dlna) { dlnaProf = dlna; }
+    std::string dlnaProfile() const { return dlnaProf; }
+
     /// \brief Specifies if the output of the profile is a thumbnail,
     /// this will add appropriate DLNA tags to the XML.
     void setThumbnail(bool th) { thumbnail = th; }
@@ -207,6 +210,7 @@ protected:
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode { FCC_None };
     int clientFlags { 0 };
+    std::string dlnaProf;
 };
 
 /// \brief this class allows access to available transcoding profiles.

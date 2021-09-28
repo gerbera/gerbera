@@ -1300,6 +1300,24 @@
 			"editable": true,
 			"children": [
 				{
+					"item": "/server/upnp/attribute::multi-value",
+					"caption": "Enable Multi Value",
+					"editable": true
+				},
+				{
+					"item": "/server/upnp/search-item-result/add-data",
+					"caption": "Title Result Item",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/server/upnp/search-item-result/add-data/attribute::tag",
+							"caption": "Metadata tag",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/server/upnp/album-properties/upnp-property",
 					"caption": "Album-Properties",
 					"type": "List",

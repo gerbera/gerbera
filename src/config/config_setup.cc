@@ -1087,6 +1087,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
         // read profile options
         {
+            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNA);
+            if (cs->hasXmlElement(child))
+                prof->setDlnaProfile(cs->getXmlContent(child));
+        }
+        {
             auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);
             if (cs->hasXmlElement(child))
                 prof->setAcceptURL(cs->getXmlContent(child));
@@ -1299,6 +1304,15 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 entry->setAcceptURL(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
                 return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_DLNA);
+            if (optItem == index) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNA)->checkValue(optValue)) {
+                    config->setOrigValue(index, entry->dlnaProfile());
+                    entry->setDlnaProfile(optValue);
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->dlnaProfile());
+                    return true;
+                }
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
             if (optItem == index) {

@@ -165,6 +165,14 @@ This section defines the various transcoding profiles.
 
     .. code-block:: xml
 
+        <dlna-profile>AVC_MKV_HP_HD_AC3</dlna-profile>
+
+    * Optional
+
+    Defines the DLNA profile string of the transcoding result (i.e. of the transcoded stream). If empty, it is determined from the mime type.
+
+    .. code-block:: xml
+
         <accept-url>yes</accept-url>
 
     * Optional
