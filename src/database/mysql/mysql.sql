@@ -83,16 +83,15 @@ CREATE TABLE `grb_config_value` (
   `status` varchar(20) NOT NULL)
   ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `grb_cds_resource` (
-    `id` int(11) primary key auto_increment,
     `item_id` int(11) NOT NULL,
     `res_id` int(11) NOT NULL,
     `handlerType` int(11) NOT NULL,
     `options` text default NULL,
     `parameters` text default NULL,
+    PRIMARY KEY (`item_id`, `res_id`),
     CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
 INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '');
-CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`);
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
