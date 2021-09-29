@@ -120,8 +120,7 @@ enum class MetadataCol {
 
 /// \brief resource column ids
 enum class ResourceCol {
-    Id = 0,
-    ItemId,
+    ItemId = 0,
     ResId,
     HandlerType,
     Options,
@@ -332,14 +331,12 @@ void SQLDatabase::init()
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
     std::vector<std::pair<std::string, int>> resourceTagMap {
-        { "id", to_underlying(ResourceCol::Id) },
         { UPNP_SEARCH_ID, to_underlying(ResourceCol::ItemId) },
         { "res@id", to_underlying(ResourceCol::ResId) },
     };
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, std::pair<std::string, std::string>> resourceColMap {
-        { to_underlying(ResourceCol::Id), { RES_ALIAS, "id" } },
         { to_underlying(ResourceCol::ItemId), { RES_ALIAS, "item_id" } },
         { to_underlying(ResourceCol::ResId), { RES_ALIAS, "res_id" } },
         { to_underlying(ResourceCol::HandlerType), { RES_ALIAS, "handlerType" } },
@@ -2347,8 +2344,8 @@ void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>&
 
 std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObject(int objectId)
 {
-    auto rsql = fmt::format("{3} FROM {0}{2}{1} WHERE {0}item_id{1} = {4} ORDER BY {0}res_id{1}",
-        table_quote_begin, table_quote_end, RESOURCE_TABLE, sql_resource_query, objectId);
+    auto rsql = fmt::format("{} FROM {} WHERE {} = {} ORDER BY {}",
+        sql_resource_query, identifier(RESOURCE_TABLE), identifier("item_id"), objectId, identifier("res_id"));
     log_debug("SQLDatabase::retrieveResourcesForObject {}", rsql);
     auto&& res = select(rsql);
 
@@ -2607,8 +2604,7 @@ bool SQLDatabase::doResourceMigration()
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
-        fmt::format("SELECT COUNT(*) FROM {}",
-            identifier(RESOURCE_TABLE)));
+        fmt::format("SELECT COUNT(*) FROM {}", identifier(RESOURCE_TABLE)));
     int resourceRowCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
