@@ -50,7 +50,7 @@
 #include <iso/limits_iso.h>
 #endif
 
-// those are needed for -P pidfile, -u user and -d daemonize options
+// those are needed for -u user and -d daemonize options
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -328,9 +328,9 @@ int main(int argc, char** argv, char** envp)
         }
 
         // are we requested to write a pidfile ?
-        std::optional<std::string> pidfile;
+        std::optional<fs::path> pidfile;
         if (opts.count("pidfile") > 0) {
-            pidfile = opts["pidfile"].as<std::string>();
+            pidfile = opts["pidfile"].as<fs::path>();
 
             // x will make it fail if file exists
             auto pidf = std::fopen(pidfile->c_str(), "wx");
@@ -595,7 +595,7 @@ int main(int argc, char** argv, char** envp)
 
         // remove pidfile if one was written
         if (opts.count("pidfile") > 0) {
-            if (0 == remove(pidfile->c_str())) {
+            if (fs::remove(*pidfile)) {
                 log_debug("Pidfile {} removed.", pidfile->c_str());
             } else {
                 log_info("Could not remove pidfile {}", pidfile->c_str());
