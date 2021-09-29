@@ -249,7 +249,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
     if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
-        auto res_handler = int { !rh.empty() ? std::stoi(rh) : obj->getResource(res_id)->getHandlerType() };
+        auto res_handler = int(!rh.empty() ? std::stoi(rh) : obj->getResource(res_id)->getHandlerType());
 
         auto h = MetadataHandler::createHandler(context, res_handler);
         auto io_handler = h->serveContent(obj, res_id);

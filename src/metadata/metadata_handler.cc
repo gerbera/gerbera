@@ -66,7 +66,7 @@ MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void MetadataHandler::setMetadata(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
+void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))

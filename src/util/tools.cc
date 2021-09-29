@@ -558,7 +558,7 @@ void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t si
 {
     static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
 
-    std::ofstream file { path, std::ios::out | std::ios::binary | std::ios::trunc };
+    auto file = std::ofstream(path, std::ios::out | std::ios::binary | std::ios::trunc);
     if (!file)
         throw_std_runtime_error("Failed to open {}", path.c_str());
 

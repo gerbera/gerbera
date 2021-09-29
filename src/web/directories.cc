@@ -47,7 +47,7 @@ void Web::Directories::process()
     check_request();
 
     std::string parentID = param("parent_id");
-    auto path = fs::path { (parentID.empty() || parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID) };
+    auto path = fs::path(parentID.empty() || parentID == "0" ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
 
     auto root = xmlDoc->document_element();
 
