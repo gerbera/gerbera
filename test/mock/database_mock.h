@@ -36,6 +36,7 @@ public:
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
+    std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override { return {}; }
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return nullptr; }
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override { return {}; }

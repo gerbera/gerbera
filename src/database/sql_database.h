@@ -121,6 +121,7 @@ public:
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
+    std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
 
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
 
