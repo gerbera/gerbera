@@ -225,6 +225,7 @@ public:
     /* utility methods */
     virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
+    virtual std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
 
     class ChangedContainers {
     public:

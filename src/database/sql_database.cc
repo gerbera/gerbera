@@ -918,17 +918,25 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     commit("browse");
 
     std::vector<std::shared_ptr<CdsObject>> result;
+    std::vector<int> contIds;
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        result.push_back(createObjectFromRow(row));
+        auto obj = createObjectFromRow(row);
+        if (obj->isContainer()) {
+            contIds.push_back(obj->getID());
+        }
+        result.push_back(std::move(obj));
     }
 
-    // update childCount fields
-    for (auto&& obj : result) {
-        if (obj->isContainer()) {
-            auto cont = std::static_pointer_cast<CdsContainer>(obj);
-            cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
+    // update childCount fields (query all containers in one batch)
+    if (!contIds.empty()) {
+        auto child_counts = getChildCounts(contIds, getContainers, getItems, hideFsRoot);
+        for (auto&& obj : result) {
+            if (obj->isContainer()) {
+                auto cont = std::static_pointer_cast<CdsContainer>(obj);
+                cont->setChildCount(child_counts[cont->getID()]);
+            }
         }
     }
 
@@ -1056,6 +1064,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (contId == CDS_ID_ROOT && hideFsRoot) {
         where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
     }
+
     beginTransaction("getChildCount");
     auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
     commit("getChildCount");
@@ -1067,6 +1076,41 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
         }
     }
     return 0;
+}
+
+std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot)
+{
+    if (!containers && !items)
+        return {};
+
+    if (contId.empty())
+        return {};
+
+    auto where = std::vector {
+        fmt::format("{} IN ({})", identifier("parent_id"), fmt::join(contId, ","))
+    };
+    if (containers && !items)
+        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+    else if (items && !containers)
+        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+    bool hasRootId = std::find(contId.begin(), contId.end(), CDS_ID_ROOT) != contId.end();
+    if (hasRootId && hideFsRoot) {
+        where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
+    }
+
+    beginTransaction("getChildCounts");
+    auto res = select(fmt::format("SELECT {0}, COUNT(*) FROM {1} WHERE {2} GROUP BY {0}",
+        identifier("parent_id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+    commit("getChildCounts");
+
+    std::map<int, int> result;
+    if (res) {
+        std::unique_ptr<SQLRow> row;
+        while ((row = res->nextRow())) {
+            result.emplace(row->col_int(0, 0), row->col_int(1, 0));
+        }
+    }
+    return result;
 }
 
 std::vector<std::string> SQLDatabase::getMimeTypes()
