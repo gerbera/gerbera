@@ -112,8 +112,7 @@ enum class SearchCol {
 
 /// \brief meta column ids
 enum class MetadataCol {
-    Id = 0,
-    ItemId,
+    ItemId = 0,
     PropertyName,
     PropertyValue
 };
@@ -200,7 +199,6 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
 static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap {
-    { MetadataCol::Id, { MTA_ALIAS, "id" } },
     { MetadataCol::ItemId, { MTA_ALIAS, "item_id" } },
     { MetadataCol::PropertyName, { MTA_ALIAS, "property_name" } },
     { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value" } },
@@ -265,7 +263,6 @@ static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
-    { "id", MetadataCol::Id },
     { UPNP_SEARCH_ID, MetadataCol::ItemId },
     { META_NAME, MetadataCol::PropertyName },
     { META_VALUE, MetadataCol::PropertyValue },
