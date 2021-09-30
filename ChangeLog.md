@@ -1,5 +1,112 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.9.2
+
+- replace POSIX remove with fs::remove
+- Don't erase from empty vector
+- replace some {} with ()
+- Make title of search result configurable + set searchable container flag
+- fix lastfm compilation
+- small fmt::format conversion
+- clang-tidy
+- Handle multi-valued meta data
+- Refactor TranscodeExternalHandler
+- Modernize parts of the request handling with C++17 and add UTs
+- std::find conversion
+- static_cast conversions
+- Canonicalize path from playlist file
+- Rewrite split string
+- Update command generator method
+- std mem conversions
+- Unify simple SQL queries
+- std file conversions
+- capture several lambda refs by value
+- Replace stdio with fmt calls
+- Simplify AddUpdateTable vectors without shared_ptr
+- replace several substr calls with startswith
+- use std::int32_t
+- Allow adding metadata from media file tags
+- replace substr with startswith
+- use std::exit
+- use std::abort
+- Fix regressions of 1.9.1
+- Downgrade libspdlog dependency to 1.8.1
+- Update instructions to match CMake requirements
+- use std::system
+- use std::strlen
+- change size_t to std
+- const ref conversion
+- more emplace conversions
+- taglib: demote warning to debug
+- rvalue conversions
+- move variables down
+- clang-tidy: remove redundant c_str
+- simplify it loop slightly
+- remove dead assignments
+- clang-tidy: performance fixes
+- fix wrong value being assigned
+- remove std::insert
+- replace loop with std::find
+- simplify loop
+- Only count items with distinct IDs in TotalMatches search result.
+- Optimize CdsObject creation/updates
+- Ensure Root dir teminates with /
+- Update build scripts to run on Raspbian
+- fix some weird memory leak
+- remove last std::list
+- remove some lambdas
+- std::shared_ptr<Executor> value conversions
+- add std::move for some maps
+- use auto for Timer constructors
+- rename several shadowed variables
+- use auto
+- splitUrl: use std::string
+- remove sort of redundant std::move
+- use string::npos
+- use C++ macro to check for starts_with
+- trimString changes
+- use C++ macro to check for to_underlying
+- Add Composer Tag to Metacontent Handler
+- Use lambda in UpnpXMLBuilder::renderObject to trim strings
+- gitignore: Add buildconfig
+- use auto with constexpr
+- remove unused variables
+- replace pointers with references
+- remove unique_ptr casts to base class
+- some matroska cleanups
+- remove return after throw
+- remove pointless size_t casts
+- add maybe_unused for builds without DEBUG
+- Refactor database schema to remove unused indices
+- Remove unique_ptr objects where stack memory is sufficient
+- Ensure EnumMapper creates its own copies
+- don't pass string_view by reference
+- default init mode
+- don't assign nullptr to std::string
+- replace find_if with any_of
+- move getLocation call down
+- Batch inserts to metadata table
+- Revert "use targets for libmatroska and libebml"
+- Update README.md
+- update FindFilesystem.cmake
+- convert reference to value
+- use targets for libmatroska and libebml
+- remove optional check
+- use updated FindLibExiv2
+- use normal libcurl search
+- CamelCase changes
+- Conan: Require CMake >=3.18
+- Fix FreeBSD with libinotify, add to CI
+- use updated FindTagLib.cmake
+- const ref conversion
+- Simplify or remove unnecessary fmt::format calls
+- remove unused assigned values
+- remove unused variable
+- cppcheck: add const
+- default init some members
+- cppcheck: fix inconsistent declarations
+- avoid nullptr assignment
+
 ### v1.9.1
 
 - use const auto&
