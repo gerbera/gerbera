@@ -64,6 +64,7 @@ static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const c
     std::pair(M_PARTNUMBER, "M_PARTNUMBER"),
     std::pair(M_ALBUMARTURI, "M_ALBUMARTURI"),
     std::pair(M_REGION, "M_REGION"),
+    std::pair(M_CREATOR, "M_CREATOR"),
     std::pair(M_AUTHOR, "M_AUTHOR"),
     std::pair(M_DIRECTOR, "M_DIRECTOR"),
     std::pair(M_PUBLISHER, "M_PUBLISHER"),

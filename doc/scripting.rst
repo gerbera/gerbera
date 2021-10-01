@@ -222,99 +222,47 @@ object.
 
     Array holding the metadata that was extracted from the object (i.e. id3/exif/etc. information). Each value is a list of strings regardless whether the source tag is multi valued or not.
 
+    +---------------+--------------------------------------------------------+------------------------------+
+    | Key           | Description                                            | DIDL-Lite XML element        |
+    +===============+========================================================+==============================+
+    | M_TITLE       | | Extracted title (for example the id3 title if the    | ``dc:title``                 |
+    |               | | object is an mp3 file), if you want that your new    |                              |
+    |               | | virtual object is displayed under this title you will|                              |
+    |               | | have to set ``obj.title = orig.meta[M_TITLE][0]``    |                              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_ARTIST      | Artist information                                     | ``upnp:artist``              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_ALBUM       | Album information                                      | ``upnp:album``               |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_DATE        | Date, must be in the format of **YYYY-MM-DD**          | ``dc:date``                  |
+    |               | (required by the UPnP spec)                            |                              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_GENRE       | Genre of the item                                      | ``upnp:genre``               |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_DESCRIPTION | Description of the item                                | ``dc:description``           |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_REGION      | Region description of the item                         | ``upnp:region``              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_TRACKNUMBER | Track number of the item                               | ``upnp:originalTrackNumber`` |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_PARTNUMBER  | Part number of the item.                               | ``upnp:episodeSeason``       |
+    |               | This contains the disc number for audio tracks.        |                              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_CREATOR     | Creator of the media                                   | ``dc:creator``               |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_AUTHOR      | Author of the media                                    | ``upnp:author``              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_DIRECTOR    | Director of the media                                  | ``upnp:director``            |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_PUBLISHER   | Publisher of the media                                 | ``dc:publisher``             |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_RATING      | Rating of the media                                    | ``upnp:rating``              |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_ACTOR       | Actor of the media                                     | ``upnp:actor``               |
+    +---------------+--------------------------------------------------------+------------------------------+
+    | M_PRODUCER    | Producer of the media                                  | ``upnp:producer``            |
+    +---------------+--------------------------------------------------------+------------------------------+
 
-    .. js:attribute:: orig.metaData[M_TITLE]
-
-        **RW**
-
-        Extracted title (for example the id3 title if the object is an mp3 file), if you want that your new
-        virtual object is displayed under this title you will have to set `obj.title = orig.meta[M_TITLE][0]`
-
-    .. js:attribute:: orig.metaData[M_ARTIST]
-
-        **RW**
-
-        Artist information, this corresponds to ``upnp:artist`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_ALBUM]
-
-        **RW**
-
-        Album information, this corresponds to ``upnp:album`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_DATE]
-
-        **RW**
-
-        Date, must be in the format of **YYYY-MM-DD** (required by the UPnP spec), this corresponds to ``dc:date`` in the
-        DIDL-Lite XML.
-
-
-    .. js:attribute:: orig.metaData[M_GENRE]
-
-        **RW**
-
-        Genre of the item, this corresponds to ``upnp:genre`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_DESCRIPTION]
-
-        **RW**
-
-        Description of the item, this corresponds to ``dc:description`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_REGION]
-
-        **RW**
-
-        Region description of the item, this corresponds to ``upnp:region`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_TRACKNUMBER]
-
-        **RW**
-
-        Track number of the item, this corresponds to ``upnp:originalTrackNumber`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_PARTNUMBER]
-
-        **RW**
-
-        Part number of the item. This contains the disc number for audio tracks.
-
-    .. js:attribute:: orig.metaData[M_AUTHOR]
-
-        **RW**
-
-        Author of the media, this corresponds to ``upnp:author`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_DIRECTOR]
-
-        **RW**
-
-        Director of the media, this corresponds to ``upnp:director`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_PUBLISHER]
-
-        **RW**
-
-        Publisher of the media, this corresponds to ``dc:publisher`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_RATING]
-
-        **RW**
-    
-        Rating of the media, this corresponds to ``upnp:rating`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_ACTOR]
-
-        **RW**
-
-        Actor of the media, this corresponds to ``upnp:actor`` in the DIDL-Lite XML.
-
-    .. js:attribute:: orig.metaData[M_PRODUCER]
-
-        **RW**
-
-        Producer of the media, this corresponds to ``upnp:producer`` in the DIDL-Lite XML.
 
 .. js:attribute:: orig.aux
 

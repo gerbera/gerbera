@@ -805,7 +805,7 @@ This section defines the properties which are send to UPnP clients as part of th
 
         Name of the metadata tag to export in upnp response. The following values are supported: 
         M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION, 
-        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
+        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_CREATOR, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
         M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
 
         Instead of metadata, you may also use auxdata entries as defined in ``library-options``.
