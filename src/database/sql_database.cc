@@ -510,14 +510,12 @@ std::string SQLDatabase::getSearchCapabilities()
 {
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
-        MetadataHandler::getMetaFieldName(M_TITLE),
-        MetadataHandler::getMetaFieldName(M_CREATOR), // required by HEOS for artist search
-        MetadataHandler::getMetaFieldName(M_ARTIST),
-        MetadataHandler::getMetaFieldName(M_ALBUMARTIST),
-        MetadataHandler::getMetaFieldName(M_ALBUM),
-        MetadataHandler::getMetaFieldName(M_GENRE),
-        std::string("res"),
     };
+    searchKeys.reserve(M_MAX + R_MAX);
+    for (auto&& [field, meta] : mt_keys) {
+        searchKeys.emplace_back(meta);
+    }
+    searchKeys.emplace_back("res");
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
         searchKeys.push_back(fmt::format("res@{}", attrName));
