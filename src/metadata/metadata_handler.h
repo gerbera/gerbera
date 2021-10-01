@@ -104,6 +104,7 @@ enum metadata_fields_t {
     M_ALBUMARTURI,
     M_REGION,
     /// \todo make sure that those are only used with appropriate upnp classes
+    M_CREATOR,
     M_AUTHOR,
     M_DIRECTOR,
     M_PUBLISHER,
@@ -134,6 +135,7 @@ static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const ch
     std::pair(M_TRACKNUMBER, "upnp:originalTrackNumber"),
     std::pair(M_ALBUMARTURI, "upnp:albumArtURI"),
     std::pair(M_REGION, "upnp:region"),
+    std::pair(M_CREATOR, "dc:creator"),
     std::pair(M_AUTHOR, "upnp:author"),
     std::pair(M_DIRECTOR, "upnp:director"),
     std::pair(M_PUBLISHER, "dc:publisher"),
