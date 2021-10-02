@@ -50,11 +50,11 @@ protected:
 class TPFetchOnlineContentTask : public GenericTask {
 public:
     TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<TaskProcessor> task_processor,
+        std::shared_ptr<TaskProcessor> taskProcessor,
         std::shared_ptr<Timer> timer,
         std::shared_ptr<OnlineService> service,
         std::shared_ptr<Layout> layout, bool cancellable,
-        bool unscheduled_refresh);
+        bool unscheduledRefresh);
     void run() override;
 
 protected:

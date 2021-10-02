@@ -87,7 +87,7 @@ bool Inotify::supported()
 #ifdef __linux__
     int testFd = inotify_init1(IN_CLOEXEC);
 #else
-    int test_fd = inotify_init();
+    int testFd = inotify_init();
 #endif
     if (testFd < 0)
         return false;

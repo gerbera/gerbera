@@ -58,7 +58,7 @@ enum avi_fourcc_listmode_t {
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile {
 public:
-    TranscodingProfile(transcoding_type_t tr_type, std::string name);
+    TranscodingProfile(transcoding_type_t trType, std::string name);
 
     int getClientFlags() const { return clientFlags; }
     void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }

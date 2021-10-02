@@ -131,10 +131,10 @@ protected:
 
 public:
     CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<TaskProcessor> task_processor,
+        std::shared_ptr<TaskProcessor> taskProcessor,
         std::shared_ptr<Timer> timer,
         std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
-        bool cancellable, bool unscheduled_refresh);
+        bool cancellable, bool unscheduledRefresh);
     void run() override;
 };
 #endif
@@ -198,14 +198,14 @@ public:
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allow_fifo = false);
+    std::shared_ptr<CdsObject> createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false);
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
     /// online service (like YouTube, SopCast, etc.)
     void fetchOnlineContent(service_type_t serviceType, bool lowPriority = true,
         bool cancellable = true,
-        bool unscheduled_refresh = false);
+        bool unscheduledRefresh = false);
 
     void cleanupOnlineServiceObjects(const std::shared_ptr<OnlineService>& service);
 
@@ -219,7 +219,7 @@ public:
     /// This function makes sure that the file is first added to
     /// PC-Directory, however without the scripting execution.
     /// It then adds the user defined virtual item to the database.
-    void addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allow_fifo = false);
+    void addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allowFifo = false);
 
     /// \brief Adds an object to the database.
     /// \param obj object to add
@@ -251,7 +251,7 @@ public:
 
     /// \brief Updates an object in the database.
     /// \param obj the object to update
-    void updateObject(const std::shared_ptr<CdsObject>& obj, bool send_updates = true);
+    void updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates = true);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;

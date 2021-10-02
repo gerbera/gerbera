@@ -52,17 +52,17 @@
 // file managment
 class FileIOCallback : public IOCallback {
 private:
-    std::FILE* m_file;
+    std::FILE* mediaFile;
 
 public:
     explicit FileIOCallback(const char* path)
 #ifdef __linux__
-        : m_file(std::fopen(path, "rbe"))
+        : mediaFile(std::fopen(path, "rbe"))
 #else
-        : file(std::fopen(path, "rb"))
+        : mediaFile(std::fopen(path, "rb"))
 #endif
     {
-        if (!m_file) {
+        if (!mediaFile) {
             throw_std_runtime_error("Could not fopen {}", path);
         }
     }
@@ -77,17 +77,17 @@ public:
 
     uint32 read(void* buffer, std::size_t size) override
     {
-        assert(m_file);
+        assert(mediaFile);
         if (size == 0)
             return 0;
-        return std::fread(buffer, 1, size, m_file);
+        return std::fread(buffer, 1, size, mediaFile);
     }
 
     void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
     {
-        assert(m_file);
+        assert(mediaFile);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
-        if (fseeko(m_file, offset, mode) != 0) {
+        if (fseeko(mediaFile, offset, mode) != 0) {
             throw_std_runtime_error("fseek failed");
         }
     }
@@ -100,18 +100,18 @@ public:
 
     uint64 getFilePointer() override
     {
-        assert(m_file);
-        return ftello(m_file);
+        assert(mediaFile);
+        return ftello(mediaFile);
     }
 
     void close() override
     {
-        if (!m_file)
+        if (!mediaFile)
             return;
-        if (std::fclose(m_file) != 0) {
+        if (std::fclose(mediaFile) != 0) {
             log_error("fclose failed");
         }
-        m_file = nullptr;
+        mediaFile = nullptr;
     }
 };
 

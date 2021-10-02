@@ -101,7 +101,7 @@ public:
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocol_CSV);
+    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
 };
 
 #endif // __UPNP_CM_H__

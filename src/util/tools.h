@@ -204,7 +204,7 @@ std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh);
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
 bool checkResolution(std::string_view resolution, int* x = nullptr, int* y = nullptr);
 
-std::string escape(std::string string, char escape_char, char to_escape);
+std::string escape(std::string string, char escapeChar, char toEscape);
 
 /// \brief Unescapes the given String.
 /// \param string the string to unescape
@@ -322,7 +322,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 fs::path tempName(const fs::path& leadPath, char* tmpl);
 
 /// \brief Determines if the particular ogg file contains a video (theora)
-bool isTheora(const fs::path& ogg_filename);
+bool isTheora(const fs::path& oggFilename);
 
 /// \brief Gets an absolute filename as a parameter and returns the last parent
 ///
@@ -357,7 +357,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa);
 
 #ifdef SOPCAST
 /// \brief Finds a free port between range_min and range_max on localhost.
-int find_local_port(in_port_t range_min, in_port_t range_max);
+int find_local_port(in_port_t rangeMin, in_port_t rangeMax);
 #endif
 
 #endif // __TOOLS_H__
