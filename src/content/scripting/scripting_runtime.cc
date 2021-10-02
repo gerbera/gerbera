@@ -32,14 +32,14 @@
 #ifdef HAVE_JS
 #include "scripting_runtime.h" // API
 
-[[noreturn]] static void fatal_handler([[maybe_unused]] void* udata, const char* msg)
+[[noreturn]] static void fatalHandler([[maybe_unused]] void* udata, const char* msg)
 {
     log_error("Fatal Duktape error: {}", msg ? msg : "no message");
     std::abort();
 }
 
 ScriptingRuntime::ScriptingRuntime()
-    : ctx(duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatal_handler))
+    : ctx(duk_create_heap(nullptr, nullptr, nullptr, nullptr, fatalHandler))
 {
 }
 

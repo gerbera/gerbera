@@ -45,7 +45,7 @@
 extern "C" {
 
 static duk_ret_t
-js_readln(duk_context* ctx)
+jsReadln(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
     if (!self) {
@@ -69,7 +69,7 @@ js_readln(duk_context* ctx)
 }
 
 static duk_ret_t
-js_getCdsObject(duk_context* ctx)
+jsGetCdsObject(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
     if (!self) {
@@ -113,8 +113,8 @@ PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> conte
 {
     try {
         ScriptingRuntime::AutoLock lock(runtime->getMutex());
-        defineFunction("readln", js_readln, 0);
-        defineFunction("getCdsObject", js_getCdsObject, 1);
+        defineFunction("readln", jsReadln, 0);
+        defineFunction("getCdsObject", jsGetCdsObject, 1);
 
         std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
         load(scriptPath);
