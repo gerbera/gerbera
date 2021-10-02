@@ -88,7 +88,6 @@ add_library(libgerbera STATIC
         src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc
         src/content/layout/js_layout.h
-        src/content/layout/layout.cc
         src/content/layout/layout.h
         src/content/onlineservice/atrailers_content_handler.cc
         src/content/onlineservice/atrailers_content_handler.h

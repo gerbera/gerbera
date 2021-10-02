@@ -37,23 +37,19 @@
 
 #include "layout.h"
 
-#ifdef ENABLE_PROFILING
-#include "util/tools.h"
-#endif
-
 // forward declaration
 class CdsObject;
 
 class BuiltinLayout : public Layout {
 public:
     explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
-#ifdef ENABLE_PROFILING
-    virtual ~BuiltinLayout();
-#endif
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type) override;
 
 protected:
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
+
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool use_ref = true);
     static std::string esc(std::string str);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
@@ -67,9 +63,6 @@ protected:
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
     std::map<std::string, std::string> genreMap;
-#ifdef ENABLE_PROFILING
-    profiling_t layout_profiling;
-#endif
 };
 
 #endif // __BUILTIN_LAYOUT_H__

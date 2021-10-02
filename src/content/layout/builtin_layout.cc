@@ -2,7 +2,7 @@
     
     MediaTomb - http://www.mediatomb.cc/
     
-    fallback_layout.cc - this file is part of MediaTomb.
+    builtin_layout.cc - this file is part of MediaTomb.
     
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -33,7 +33,6 @@
 
 #include <regex>
 
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
@@ -390,9 +389,6 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     : Layout(std::move(content))
     , genreMap(config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
-#ifdef ENABLE_PROFILING
-    PROF_INIT_GLOBAL(layout_profiling, "builtin layout");
-#endif
 }
 
 std::string BuiltinLayout::mapGenre(const std::string& genre)
@@ -408,9 +404,6 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
 void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type)
 {
     log_debug("Process CDS Object: {}", obj->getTitle());
-#ifdef ENABLE_PROFILING
-    PROF_START(&layout_profiling);
-#endif
     auto clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
     clone->setVirtual(true);
@@ -454,14 +447,4 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
 #ifdef ONLINE_SERVICES
     }
 #endif
-#ifdef ENABLE_PROFILING
-    PROF_END(&layout_profiling);
-#endif
 }
-
-#ifdef ENABLE_PROFILING
-BuiltinLayout::~BuiltinLayout()
-{
-    PROF_PRINT(&layout_profiling);
-}
-#endif
