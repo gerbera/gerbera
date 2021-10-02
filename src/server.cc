@@ -164,7 +164,7 @@ void Server::run()
         deviceDescription.c_str(),
         deviceDescription.length() + 1,
         true,
-        [](Upnp_EventType eventType, const void* event, void* cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
+        [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
         &rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -172,7 +172,7 @@ void Server::run()
     }
 
     ret = UpnpRegisterClient(
-        [](Upnp_EventType eventType, const void* event, void* cookie) { return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event); },
+        [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event); },
         this,
         &clientHandle);
     if (ret != UPNP_E_SUCCESS) {
