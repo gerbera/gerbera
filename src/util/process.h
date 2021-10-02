@@ -44,6 +44,6 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 
 bool is_alive(pid_t pid, int* status = nullptr);
 
-bool kill_proc(pid_t kill_pid);
+bool kill_proc(pid_t killPid);
 
 #endif // __PROCESS_H__

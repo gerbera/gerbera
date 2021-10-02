@@ -61,7 +61,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 #ifdef __linux__
     fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
 #else
-    fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
         log_debug("Failed to open input file {}: {}", inputFile, std::strerror(errno));
@@ -79,7 +79,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 #ifdef __linux__
     fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
 #else
-    fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+    fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
         log_debug("Failed to open output file {}: {}", outputFile, std::strerror(errno));
@@ -100,7 +100,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 #ifdef __linux__
     file = std::fopen(outputFile.c_str(), "re");
 #else
-    file = std::fopen(output_file.c_str(), "r");
+    file = std::fopen(outputFile.c_str(), "r");
 #endif
     if (!file) {
         log_debug("Could not open output file {}: {}", outputFile, std::strerror(errno));

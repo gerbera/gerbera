@@ -46,7 +46,7 @@ public:
         std::shared_ptr<Mime> mime,
         std::shared_ptr<Database> database,
         std::shared_ptr<Server> server,
-        std::shared_ptr<Web::SessionManager> session_manager);
+        std::shared_ptr<Web::SessionManager> sessionManager);
 
     std::shared_ptr<Config> getConfig() const
     {

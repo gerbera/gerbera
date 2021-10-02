@@ -499,9 +499,9 @@ public:
 
     std::string getCurrentValue() const override { return {}; }
 
-    static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
+    static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName);
 
-    static bool InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
+    static bool InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName);
 };
 
 class ConfigDictionarySetup : public ConfigSetup {

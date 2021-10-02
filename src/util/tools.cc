@@ -242,9 +242,9 @@ fs::path findInPath(const fs::path& exec)
     if (!p)
         return {};
 
-    std::string path = p;
+    std::string envPath = p;
     std::error_code ec;
-    auto pathAr = splitString(path, ':');
+    auto pathAr = splitString(envPath, ':');
     for (auto&& path : pathAr) {
         fs::path check = fs::path(path) / exec;
         if (isRegularFile(check, ec))
@@ -318,7 +318,7 @@ std::string hexStringMd5(std::string_view str)
 std::string generateRandomId()
 {
 #ifdef BSD_NATIVE_UUID
-    char* uuid_str;
+    char* uuidStr;
     std::uint32_t status;
 #else
     char uuidStr[37];
@@ -327,7 +327,7 @@ std::string generateRandomId()
 
 #ifdef BSD_NATIVE_UUID
     uuid_create(&uuid, &status);
-    uuid_to_string(&uuid, &uuid_str, &status);
+    uuid_to_string(&uuid, &uuidStr, &status);
 #else
     uuid_generate(uuid);
     uuid_unparse(uuid, uuidStr);
@@ -336,7 +336,7 @@ std::string generateRandomId()
     log_debug("Generated: {}", uuidStr);
     auto uuidString = std::string(uuidStr);
 #ifdef BSD_NATIVE_UUID
-    free(uuid_str);
+    free(uuidStr);
 #endif
 
     return uuidString;
@@ -892,8 +892,8 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
 {
     char* xxxxxx;
     int count;
-    static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static const int nletters = sizeof(letters) - 1;
+    static constexpr char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static constexpr int nletters = sizeof(letters) - 1;
     long value;
     struct timespec ts;
     static int counter = 0;
@@ -948,7 +948,7 @@ bool isTheora(const fs::path& oggFilename)
 #ifdef __linux__
     auto f = std::fopen(oggFilename.c_str(), "rbe");
 #else
-    auto f = std::fopen(ogg_filename.c_str(), "rb");
+    auto f = std::fopen(oggFilename.c_str(), "rb");
 #endif
     if (!f) {
         throw_std_runtime_error("Error opening {}: {}", oggFilename.c_str(), std::strerror(errno));
@@ -1067,7 +1067,7 @@ std::string getAVIFourCC(std::string_view aviFilename)
 #ifdef __linux__
     auto f = std::fopen(aviFilename.data(), "rbe");
 #else
-    auto f = std::fopen(avi_filename.data(), "rb");
+    auto f = std::fopen(aviFilename.data(), "rb");
 #endif
     if (!f)
         throw_std_runtime_error("Could not open file {}: {}", aviFilename, std::strerror(errno));

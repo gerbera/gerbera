@@ -69,9 +69,9 @@ private:
 
     void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
     void populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const;
-    static bool isValidArtworkContentType(std::string_view art_mimetype);
+    static bool isValidArtworkContentType(std::string_view artMimetype);
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
-    static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);
+    static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
     void extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
