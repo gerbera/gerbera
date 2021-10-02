@@ -164,7 +164,7 @@ void Server::run()
         deviceDescription.c_str(),
         deviceDescription.length() + 1,
         true,
-        handleUpnpRootDeviceEventCallback,
+        [](Upnp_EventType eventType, const void* event, void* cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
         &rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -172,7 +172,7 @@ void Server::run()
     }
 
     ret = UpnpRegisterClient(
-        handleUpnpClientEventCallback,
+        [](Upnp_EventType eventType, const void* event, void* cookie) { return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event); },
         this,
         &clientHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -339,11 +339,6 @@ void Server::shutdown()
     clients = nullptr;
 }
 
-int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event);
-}
-
 int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
@@ -392,11 +387,6 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
 
     log_debug("returning {}", ret);
     return ret;
-}
-
-int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
 }
 
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
