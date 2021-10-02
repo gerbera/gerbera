@@ -51,10 +51,10 @@
 
 #endif //ONLINE_SERVICES
 
-void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool use_ref)
+void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef)
 {
     obj->setParentID(parentID.first);
-    if (use_ref)
+    if (useRef)
         obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->setID(INVALID_OBJECT_ID);
 
@@ -401,7 +401,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
     return genre;
 }
 
-void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type)
+void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& contentType)
 {
     log_debug("Process CDS Object: {}", obj->getTitle());
     auto clone = CdsObject::createObject(obj->getObjectType());
@@ -435,9 +435,9 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
             addVideo(clone, rootpath);
         else if (startswith(mimetype, "image"))
             addImage(clone, rootpath);
-        else if ((startswith(mimetype, "audio") && (content_type != CONTENT_TYPE_PLAYLIST)))
+        else if ((startswith(mimetype, "audio") && (contentType != CONTENT_TYPE_PLAYLIST)))
             addAudio(clone, rootpath);
-        else if (content_type == CONTENT_TYPE_OGG) {
+        else if (contentType == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone, rootpath);
             else

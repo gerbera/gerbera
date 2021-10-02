@@ -54,12 +54,12 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& res_id, std::string& mimeType, struct stat& statbuf, const std::string& rh)
+static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& resId, std::string& mimeType, struct stat& statbuf, const std::string& rh)
 {
     bool is_srt = false;
 
     if (!rh.empty()) {
-        auto res_path = obj->getResource(res_id)->getAttribute(R_RESOURCE_FILE);
+        auto res_path = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
         mimeType = MIMETYPE_TEXT;
         is_srt = !res_path.empty();
         if (is_srt) {

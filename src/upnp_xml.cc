@@ -334,10 +334,10 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node& parent)
+void UpnpXMLBuilder::renderResource(const std::string& url, const std::map<std::string, std::string>& attributes, pugi::xml_node& parent)
 {
     auto res = parent.append_child("res");
-    res.append_child(pugi::node_pcdata).set_value(URL.c_str());
+    res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
     for (auto&& [key, val] : attributes) {
         res.append_attribute(key.c_str()) = val.c_str();

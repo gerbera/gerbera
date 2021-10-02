@@ -33,9 +33,9 @@
 
 #include "util/tools.h"
 
-TranscodingProfile::TranscodingProfile(transcoding_type_t tr_type, std::string name)
+TranscodingProfile::TranscodingProfile(transcoding_type_t trType, std::string name)
     : name(std::move(name))
-    , tr_type(tr_type)
+    , tr_type(trType)
 {
 }
 

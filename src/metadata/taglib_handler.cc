@@ -270,11 +270,11 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     log_debug("TagLib handler done.");
 }
 
-bool TagLibHandler::isValidArtworkContentType(std::string_view art_mimetype)
+bool TagLibHandler::isValidArtworkContentType(std::string_view artMimetype)
 {
     // saw that simply "PNG" was used with some mp3's, so mimetype setting
     // was probably invalid
-    return art_mimetype.find('/') != std::string_view::npos;
+    return artMimetype.find('/') != std::string_view::npos;
 }
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
@@ -287,15 +287,15 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 #endif
 }
 
-void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype)
+void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
-    log_debug("Found artwork of type {} in file {}", art_mimetype.c_str(), item->getLocation().c_str());
+    log_debug("Found artwork of type {} in file {}", artMimetype.c_str(), item->getLocation().c_str());
 
-    if (art_mimetype != MIMETYPE_DEFAULT) {
+    if (artMimetype != MIMETYPE_DEFAULT) {
         auto resource = std::make_shared<CdsResource>(CH_ID3);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(art_mimetype));
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(artMimetype));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }

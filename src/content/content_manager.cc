@@ -391,7 +391,7 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     return taskList;
 }
 
-void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allow_fifo)
+void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allowFifo)
 {
     obj->validate();
     fs::path path = obj->getLocation();
@@ -403,7 +403,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
     auto pcdir = database->findObjectByPath(path);
     if (!pcdir) {
-        pcdir = createObjectFromFile(dirEnt, true, allow_fifo);
+        pcdir = createObjectFromFile(dirEnt, true, allowFifo);
         if (!pcdir) {
             throw_std_runtime_error("Could not add {}", path.c_str());
         }
@@ -1231,14 +1231,14 @@ void ContentManager::assignFanArt(const std::vector<std::shared_ptr<CdsContainer
     }
 }
 
-void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool send_updates)
+void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates)
 {
     obj->validate();
 
     int containerChanged = INVALID_OBJECT_ID;
     database->updateObject(obj, &containerChanged);
 
-    if (send_updates) {
+    if (sendUpdates) {
         update_manager->containerChanged(containerChanged);
         session_manager->containerChangedUI(containerChanged);
 
@@ -1248,7 +1248,7 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
     }
 }
 
-std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allow_fifo)
+std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo)
 {
     std::error_code ec;
 
@@ -1261,7 +1261,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         return nullptr;
 
     std::shared_ptr<CdsObject> obj;
-    if (isRegularFile(dirEnt, ec) || (allow_fifo && dirEnt.is_fifo(ec))) { // item
+    if (isRegularFile(dirEnt, ec) || (allowFifo && dirEnt.is_fifo(ec))) { // item
         /* retrieve information about item and decide if it should be included */
         std::string mimetype = mime->getMimeType(dirEnt.path(), MIMETYPE_DEFAULT);
         if (mimetype.empty()) {
@@ -1481,7 +1481,7 @@ int ContentManager::addFileInternal(
 }
 
 #ifdef ONLINE_SERVICES
-void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPriority, bool cancellable, bool unscheduled_refresh)
+void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPriority, bool cancellable, bool unscheduledRefresh)
 {
     auto service = online_services->getService(serviceType);
     if (!service) {
@@ -1492,7 +1492,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
     unsigned int parentTaskID = 0;
 
     auto self = shared_from_this();
-    auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
+    auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduledRefresh);
     task->setDescription(fmt::format("Updating content from {}", service->getServiceName()));
     task->setParentID(parentTaskID);
     service->incTaskCount();
@@ -1942,15 +1942,15 @@ void CMRescanDirectoryTask::run()
 
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
-    std::shared_ptr<TaskProcessor> task_processor, std::shared_ptr<Timer> timer,
-    std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduled_refresh)
+    std::shared_ptr<TaskProcessor> taskProcessor, std::shared_ptr<Timer> timer,
+    std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduledRefresh)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
-    , task_processor(std::move(task_processor))
+    , task_processor(std::move(taskProcessor))
     , timer(std::move(timer))
     , service(std::move(service))
     , layout(std::move(layout))
-    , unscheduled_refresh(unscheduled_refresh)
+    , unscheduled_refresh(unscheduledRefresh)
 {
     this->cancellable = cancellable;
     this->taskType = FetchOnlineContent;

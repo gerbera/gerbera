@@ -37,24 +37,24 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-std::string URL::download(const std::string& URL, long* HTTP_retcode,
-    CURL* curl_handle, bool only_header,
+std::string URL::download(const std::string& url, long* httpRetcode,
+    CURL* curlHandle, bool onlyHeader,
     bool verbose, bool redirect)
 {
     CURLcode res;
     bool cleanup = false;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
 
-    if (!curl_handle) {
-        curl_handle = curl_easy_init();
+    if (!curlHandle) {
+        curlHandle = curl_easy_init();
         cleanup = true;
-        if (!curl_handle)
+        if (!curlHandle)
             throw_std_runtime_error("Invalid curl handle");
     }
 
     std::ostringstream buffer;
 
-    curl_easy_reset(curl_handle);
+    curl_easy_reset(curlHandle);
 
     if (verbose) {
         bool logEnabled;
@@ -64,55 +64,55 @@ std::string URL::download(const std::string& URL, long* HTTP_retcode,
         logEnabled = ConfigManager::isDebugLogging();
 #endif
         if (logEnabled)
-            curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+            curl_easy_setopt(curlHandle, CURLOPT_VERBOSE, 1);
     }
     // some web sites send unexpected stuff, seems they need a user agent
     // that they know...
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
+    curl_easy_setopt(curlHandle, CURLOPT_USERAGENT,
         "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");
-    curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
-    curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
-    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
+    curl_easy_setopt(curlHandle, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curlHandle, CURLOPT_ERRORBUFFER, error_buffer);
+    curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
     /// \todo it would be a good idea to allow both variants, i.e. retrieve
     /// the headers and data in one go when needed
-    if (only_header) {
-        curl_easy_setopt(curl_handle, CURLOPT_NOBODY, 1);
-        curl_easy_setopt(curl_handle, CURLOPT_HEADERFUNCTION, URL::dl);
-        curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, &buffer);
+    if (onlyHeader) {
+        curl_easy_setopt(curlHandle, CURLOPT_NOBODY, 1);
+        curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, URL::dl);
+        curl_easy_setopt(curlHandle, CURLOPT_HEADERDATA, &buffer);
     } else {
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, URL::dl);
-        curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &buffer);
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, URL::dl);
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &buffer);
     }
 
     if (redirect) {
-        curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
-        curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
+        curl_easy_setopt(curlHandle, CURLOPT_FOLLOWLOCATION, 1);
+        curl_easy_setopt(curlHandle, CURLOPT_MAXREDIRS, -1);
     }
 
-    res = curl_easy_perform(curl_handle);
+    res = curl_easy_perform(curlHandle);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
+            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(error_buffer);
     }
 
-    res = curl_easy_getinfo(curl_handle, CURLINFO_RESPONSE_CODE, HTTP_retcode);
+    res = curl_easy_getinfo(curlHandle, CURLINFO_RESPONSE_CODE, httpRetcode);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
+            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(error_buffer);
     }
 
     if (cleanup)
-        curl_easy_cleanup(curl_handle);
+        curl_easy_cleanup(curlHandle);
 
     return buffer.str();
 }
 
-std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handle)
+std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle)
 {
     long retcode;
     bool cleanup = false;
@@ -122,51 +122,51 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& URL, CURL* curl_handl
     char* c_url;
     char error_buffer[CURL_ERROR_SIZE] = { '\0' };
 
-    if (!curl_handle) {
-        curl_handle = curl_easy_init();
+    if (!curlHandle) {
+        curlHandle = curl_easy_init();
         cleanup = true;
-        if (!curl_handle)
+        if (!curlHandle)
             throw_std_runtime_error("Invalid curl handle");
     }
 
-    download(URL, &retcode, curl_handle, true, true, true);
+    download(url, &retcode, curlHandle, true, true, true);
     if (retcode != 200) {
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
-        throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", URL.c_str(), retcode);
+            curl_easy_cleanup(curlHandle);
+        throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", url.c_str(), retcode);
     }
 
-    res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
+    res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
+            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(error_buffer);
     }
 
-    res = curl_easy_getinfo(curl_handle, CURLINFO_CONTENT_TYPE, &ct);
+    res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_TYPE, &ct);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
+            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(error_buffer);
     }
 
     std::string mt = ct ? ct : MIMETYPE_DEFAULT;
     log_debug("Extracted content length: {}", cl);
 
-    res = curl_easy_getinfo(curl_handle, CURLINFO_EFFECTIVE_URL, &c_url);
+    res = curl_easy_getinfo(curlHandle, CURLINFO_EFFECTIVE_URL, &c_url);
     if (res != CURLE_OK) {
         log_error("{}", error_buffer);
         if (cleanup)
-            curl_easy_cleanup(curl_handle);
+            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(error_buffer);
     }
 
-    std::string used_url = c_url ? c_url : URL;
+    std::string used_url = c_url ? c_url : url;
 
     if (cleanup)
-        curl_easy_cleanup(curl_handle);
+        curl_easy_cleanup(curlHandle);
 
     return std::make_unique<Stat>(used_url, off_t(cl), mt);
 }

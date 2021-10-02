@@ -667,7 +667,7 @@ bool checkResolution(std::string_view resolution, int* x, int* y)
     return false;
 }
 
-std::string escape(std::string string, char escape_char, char to_escape)
+std::string escape(std::string string, char escapeChar, char toEscape)
 {
     std::ostringstream buf;
     auto len = string.length();
@@ -679,14 +679,14 @@ std::string escape(std::string string, char escape_char, char to_escape)
     do {
         auto next_esc = std::string::npos;
         if (possible_more_esc) {
-            next_esc = string.find(escape_char, last);
+            next_esc = string.find(escapeChar, last);
             if (next_esc == std::string::npos)
                 possible_more_esc = false;
         }
 
         auto next = std::string::npos;
         if (possible_more_char) {
-            next = string.find(to_escape, last);
+            next = string.find(toEscape, last);
             if (next == std::string::npos)
                 possible_more_char = false;
         }
@@ -941,22 +941,22 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     return {};
 }
 
-bool isTheora(const fs::path& ogg_filename)
+bool isTheora(const fs::path& oggFilename)
 {
     char buffer[7];
 
 #ifdef __linux__
-    auto f = std::fopen(ogg_filename.c_str(), "rbe");
+    auto f = std::fopen(oggFilename.c_str(), "rbe");
 #else
     auto f = std::fopen(ogg_filename.c_str(), "rb");
 #endif
     if (!f) {
-        throw_std_runtime_error("Error opening {}: {}", ogg_filename.c_str(), std::strerror(errno));
+        throw_std_runtime_error("Error opening {}: {}", oggFilename.c_str(), std::strerror(errno));
     }
 
     if (std::fread(buffer, 1, 4, f) != 4) {
         std::fclose(f);
-        throw_std_runtime_error("Error reading {}", ogg_filename.c_str());
+        throw_std_runtime_error("Error reading {}", oggFilename.c_str());
     }
 
     if (std::memcmp(buffer, "OggS", 4) != 0) {
@@ -966,12 +966,12 @@ bool isTheora(const fs::path& ogg_filename)
 
     if (std::fseek(f, 28, SEEK_SET) != 0) {
         std::fclose(f);
-        throw_std_runtime_error("Incomplete file {}", ogg_filename.c_str());
+        throw_std_runtime_error("Incomplete file {}", oggFilename.c_str());
     }
 
     if (std::fread(buffer, 1, 7, f) != 7) {
         std::fclose(f);
-        throw_std_runtime_error("Error reading {}", ogg_filename.c_str());
+        throw_std_runtime_error("Error reading {}", oggFilename.c_str());
     }
 
     if (std::memcmp(buffer, "\x80theora", 7) != 0) {
@@ -1060,17 +1060,17 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::st
 }
 
 #ifndef HAVE_FFMPEG
-std::string getAVIFourCC(std::string_view avi_filename)
+std::string getAVIFourCC(std::string_view aviFilename)
 {
 #define FCC_OFFSET 0xbc
 
 #ifdef __linux__
-    auto f = std::fopen(avi_filename.data(), "rbe");
+    auto f = std::fopen(aviFilename.data(), "rbe");
 #else
     auto f = std::fopen(avi_filename.data(), "rb");
 #endif
     if (!f)
-        throw_std_runtime_error("Could not open file {}: {}", avi_filename, std::strerror(errno));
+        throw_std_runtime_error("Could not open file {}: {}", aviFilename, std::strerror(errno));
 
     auto buffer = new char[FCC_OFFSET + 6];
 
@@ -1078,7 +1078,7 @@ std::string getAVIFourCC(std::string_view avi_filename)
     std::fclose(f);
     if (rb != FCC_OFFSET + 4) {
         delete[] buffer;
-        throw_std_runtime_error("Could not read header of {}: {}", avi_filename, std::strerror(errno));
+        throw_std_runtime_error("Could not read header of {}: {}", aviFilename, std::strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
@@ -1144,7 +1144,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 
 #ifdef SOPCAST
 /// \brief
-int find_local_port(in_port_t range_min, in_port_t range_max)
+int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
 {
     int fd;
     int retry_count = 0;
@@ -1152,13 +1152,13 @@ int find_local_port(in_port_t range_min, in_port_t range_max)
     struct sockaddr_in server_addr;
     struct hostent* server;
 
-    if (range_min > range_max) {
+    if (rangeMin > rangeMax) {
         log_error("min port range > max port range!");
         return -1;
     }
 
     std::mt19937 rng;
-    std::uniform_int_distribution<in_port_t> gen(range_min, range_max);
+    std::uniform_int_distribution<in_port_t> gen(rangeMin, rangeMax);
 
     do {
         port = gen(rng);
