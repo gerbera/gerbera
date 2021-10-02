@@ -1061,7 +1061,6 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
 
     update_manager->containerChanged(containerChanged);
     session_manager->containerChangedUI(containerChanged);
-
     int parent_id = obj->getParentID();
     // this is the first entry, so the container is new also, send update for parent of parent
     if (firstChild) {

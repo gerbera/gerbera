@@ -44,14 +44,16 @@ class ContentManager;
 
 class Layout {
 public:
-    explicit Layout(std::shared_ptr<ContentManager> content);
+    explicit Layout(std::shared_ptr<ContentManager> content)
+        : content(std::move(content))
+    {
+    }
+
     virtual ~Layout() = default;
 
     virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& content_type) = 0;
 
 protected:
-    std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
 };
 
