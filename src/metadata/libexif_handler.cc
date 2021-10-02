@@ -41,17 +41,17 @@
 #include "util/tools.h"
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
-static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t res_num)
+static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t resNum)
 {
     try {
         auto fio_h = std::make_unique<FileIOHandler>(item->getLocation());
         fio_h->open(UPNP_READ);
         const std::string resolution = get_jpeg_resolution(std::move(fio_h));
 
-        if (res_num >= item->getResourceCount())
+        if (resNum >= item->getResourceCount())
             throw_std_runtime_error("Invalid resource index");
 
-        item->getResource(res_num)->addAttribute(R_RESOLUTION, resolution);
+        item->getResource(resNum)->addAttribute(R_RESOLUTION, resolution);
     } catch (const std::runtime_error& e) {
         log_error("Exception! {}", e.what());
     }

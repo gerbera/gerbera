@@ -158,19 +158,19 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
 }
 
 TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
-    std::shared_ptr<TaskProcessor> task_processor,
+    std::shared_ptr<TaskProcessor> taskProcessor,
     std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service,
     std::shared_ptr<Layout> layout,
     bool cancellable,
-    bool unscheduled_refresh)
+    bool unscheduledRefresh)
     : GenericTask(TaskProcessorTask)
     , content(std::move(content))
-    , task_processor(std::move(task_processor))
+    , task_processor(std::move(taskProcessor))
     , timer(std::move(timer))
     , service(std::move(service))
     , layout(std::move(layout))
-    , unscheduled_refresh(unscheduled_refresh)
+    , unscheduled_refresh(unscheduledRefresh)
 {
     this->cancellable = cancellable;
     this->taskType = FetchOnlineContent;

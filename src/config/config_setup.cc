@@ -652,20 +652,20 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
     return optionValue;
 }
 
-bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
+bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName)
 {
     if (value && !value.empty()) {
-        for (auto&& it : value.select_nodes(node_name)) {
+        for (auto&& it : value.select_nodes(nodeName)) {
             const pugi::xml_node& content = it.node();
             std::string mark_content = content.text().as_string();
             if (mark_content.empty()) {
-                log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), node_name);
+                log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), nodeName);
                 return false;
             }
 
             if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE)) {
                 log_error("(error in configuration, <{}>, invalid <{}> parameter! Allowed values are '{}', '{}', '{}')",
-                    value.name(), node_name,
+                    value.name(), nodeName,
                     DEFAULT_MARK_PLAYED_CONTENT_VIDEO, DEFAULT_MARK_PLAYED_CONTENT_AUDIO, DEFAULT_MARK_PLAYED_CONTENT_IMAGE);
                 return false;
             }
@@ -676,15 +676,15 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
     return true;
 }
 
-bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)
+bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName)
 {
     if (value && !value.empty()) {
         // create the array from user settings
-        for (auto&& it : value.select_nodes(node_name)) {
+        for (auto&& it : value.select_nodes(nodeName)) {
             const pugi::xml_node& child = it.node();
             int i = child.text().as_int();
             if (i < 1) {
-                log_error("Error in config file: incorrect <{}> value for <{}>", node_name, value.name());
+                log_error("Error in config file: incorrect <{}> value for <{}>", nodeName, value.name());
                 return false;
             }
 

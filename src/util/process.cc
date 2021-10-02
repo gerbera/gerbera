@@ -131,28 +131,28 @@ bool is_alive(pid_t pid, int* status)
     return waitpid(pid, status, WNOHANG) == 0;
 }
 
-bool kill_proc(pid_t kill_pid)
+bool kill_proc(pid_t killPid)
 {
-    if (!is_alive(kill_pid))
+    if (!is_alive(killPid))
         return true;
 
-    log_debug("KILLING TERM PID: {}", kill_pid);
-    kill(kill_pid, SIGTERM);
+    log_debug("KILLING TERM PID: {}", killPid);
+    kill(killPid, SIGTERM);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    if (!is_alive(kill_pid))
+    if (!is_alive(killPid))
         return true;
 
-    log_debug("KILLING INT PID: {}", kill_pid);
-    kill(kill_pid, SIGINT);
+    log_debug("KILLING INT PID: {}", killPid);
+    kill(killPid, SIGINT);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    if (!is_alive(kill_pid))
+    if (!is_alive(killPid))
         return true;
 
-    log_debug("KILLING KILL PID: {}", kill_pid);
-    kill(kill_pid, SIGKILL);
+    log_debug("KILLING KILL PID: {}", killPid);
+    kill(killPid, SIGKILL);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    return !is_alive(kill_pid);
+    return !is_alive(killPid);
 }

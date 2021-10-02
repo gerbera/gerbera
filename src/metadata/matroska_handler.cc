@@ -52,17 +52,17 @@
 // file managment
 class FileIOCallback : public IOCallback {
 private:
-    std::FILE* file;
+    std::FILE* m_file;
 
 public:
     explicit FileIOCallback(const char* path)
 #ifdef __linux__
-        : file(std::fopen(path, "rbe"))
+        : m_file(std::fopen(path, "rbe"))
 #else
         : file(std::fopen(path, "rb"))
 #endif
     {
-        if (!file) {
+        if (!m_file) {
             throw_std_runtime_error("Could not fopen {}", path);
         }
     }
@@ -77,22 +77,22 @@ public:
 
     uint32 read(void* buffer, std::size_t size) override
     {
-        assert(file);
+        assert(m_file);
         if (size == 0)
             return 0;
-        return std::fread(buffer, 1, size, file);
+        return std::fread(buffer, 1, size, m_file);
     }
 
     void setFilePointer(int64_t offset, seek_mode mode = seek_beginning) override
     {
-        assert(file);
+        assert(m_file);
         assert(mode == SEEK_CUR || mode == SEEK_END || mode == SEEK_SET);
-        if (fseeko(file, offset, mode) != 0) {
+        if (fseeko(m_file, offset, mode) != 0) {
             throw_std_runtime_error("fseek failed");
         }
     }
 
-    std::size_t write(const void* p_buffer, std::size_t i_size) override
+    std::size_t write(const void* pBuffer, std::size_t iSize) override
     {
         // not needed
         return 0;
@@ -100,18 +100,18 @@ public:
 
     uint64 getFilePointer() override
     {
-        assert(file);
-        return ftello(file);
+        assert(m_file);
+        return ftello(m_file);
     }
 
     void close() override
     {
-        if (!file)
+        if (!m_file)
             return;
-        if (std::fclose(file) != 0) {
+        if (std::fclose(m_file) != 0) {
             log_error("fclose failed");
         }
-        file = nullptr;
+        m_file = nullptr;
     }
 };
 
@@ -136,7 +136,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
     return io_handler;
 }
 
-void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* p_io_handler) const
+void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler) const
 {
     auto ebml_file = FileIOCallback(item->getLocation().c_str());
     auto ebml_stream = EbmlStream(ebml_file);
@@ -146,7 +146,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
         int i_upper_level = 0;
         EbmlElement* el_l1;
         while ((el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true))) {
-            parseLevel1Element(item, ebml_stream, el_l1, p_io_handler);
+            parseLevel1Element(item, ebml_stream, el_l1, pIoHandler);
 
             el_l1->SkipData(ebml_stream, el_l1->Generic().Context);
             delete el_l1;
@@ -161,30 +161,30 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
     ebml_file.close();
 }
 
-void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlElement* el_l1, std::unique_ptr<MemIOHandler>* p_io_handler) const
+void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler) const
 {
     // Looking at just at EbmlId is not reliable since it can be a dummy element.
-    if (!el_l1->IsMaster())
+    if (!elL1->IsMaster())
         return;
-    auto master = dynamic_cast<EbmlMaster*>(el_l1);
+    auto master = dynamic_cast<EbmlMaster*>(elL1);
     if (!master) {
         log_debug("dynamic_cast unexpectedly returned nullptr, seems to be broken");
         return;
     }
     if (EbmlId(*master) == LIBMATROSKA_NAMESPACE::KaxInfo::ClassInfos.GlobalId) {
-        parseInfo(item, ebml_stream, master);
+        parseInfo(item, ebmlStream, master);
     } else if (EbmlId(*master) == LIBMATROSKA_NAMESPACE::KaxAttachments::ClassInfos.GlobalId) {
-        parseAttachments(item, ebml_stream, master, p_io_handler);
+        parseAttachments(item, ebmlStream, master, pIoHandler);
     }
 }
 
-void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* info) const
+void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlMaster* info) const
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
 
     // master elements
-    info->Read(ebml_stream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
+    info->Read(ebmlStream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
@@ -213,12 +213,12 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     }
 }
 
-void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* p_io_handler) const
+void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler) const
 {
     EbmlElement* dummy_el;
     int i_upper_level = 0;
 
-    attachments->Read(ebml_stream, EBML_CONTEXT(attachments), i_upper_level, dummy_el, true);
+    attachments->Read(ebmlStream, EBML_CONTEXT(attachments), i_upper_level, dummy_el, true);
 
     auto attachedFile = FindChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
@@ -229,9 +229,9 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
             const auto& fileData = GetChild<LIBMATROSKA_NAMESPACE::KaxFileData>(*attachedFile);
             log_debug("KaxFileData (size={})", fileData.GetSize());
 
-            if (p_io_handler) {
+            if (pIoHandler) {
                 // serveContent
-                *p_io_handler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
+                *pIoHandler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
             } else {
                 // fillMetadata
                 std::string art_mimetype = getContentTypeFromByteVector(fileData);
@@ -254,15 +254,15 @@ std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAME
 #endif
 }
 
-void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype)
+void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
-    log_debug("Found artwork of type {} in file {}", art_mimetype, item->getLocation().c_str());
+    log_debug("Found artwork of type {} in file {}", artMimetype, item->getLocation().c_str());
 
-    if (art_mimetype != MIMETYPE_DEFAULT) {
+    if (artMimetype != MIMETYPE_DEFAULT) {
         auto resource = std::make_shared<CdsResource>(CH_MATROSKA);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(art_mimetype));
+        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(artMimetype));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }

@@ -35,17 +35,17 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& URL, CURL* curl_handle, std::size_t bufSize, std::size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
 {
-    if (URL.empty())
+    if (url.empty())
         throw_std_runtime_error("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
         throw_std_runtime_error("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE);
 
-    this->URL = URL;
-    this->external_curl_handle = (curl_handle);
-    this->curl_handle = curl_handle;
+    this->URL = url;
+    this->external_curl_handle = (curlHandle);
+    this->curl_handle = curlHandle;
     //bytesCurl = 0;
     signalAfterEveryRead = true;
 

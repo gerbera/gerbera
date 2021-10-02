@@ -372,8 +372,8 @@ std::unique_ptr<SQLRow> MysqlResult::nextRow()
 
 /* MysqlRow */
 
-MysqlRow::MysqlRow(MYSQL_ROW mysql_row)
-    : mysql_row(mysql_row)
+MysqlRow::MysqlRow(MYSQL_ROW mysqlRow)
+    : mysql_row(mysqlRow)
 {
 }
 

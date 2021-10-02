@@ -139,11 +139,11 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
 #endif
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocol_CSV)
+void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);
