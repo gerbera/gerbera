@@ -83,10 +83,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     switch (field) {
     case M_TITLE:
-        value.push_back(tag->title().toCString(true));
+        value.push_back(tag->title().to8Bit(true));
         break;
     case M_ALBUM:
-        value.push_back(tag->album().toCString(true));
+        value.push_back(tag->album().to8Bit(true));
         break;
     case M_DATE:
     case M_UPNP_DATE: {
@@ -97,10 +97,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         break;
     }
     case M_GENRE:
-        value.push_back(tag->genre().toCString(true));
+        value.push_back(tag->genre().to8Bit(true));
         break;
     case M_DESCRIPTION:
-        value.push_back(tag->comment().toCString(true));
+        value.push_back(tag->comment().to8Bit(true));
         break;
     case M_TRACKNUMBER: {
         unsigned int i = tag->track();
@@ -113,12 +113,12 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
     case M_PARTNUMBER: {
         auto list = file.properties()["DISCNUMBER"];
         if (!list.isEmpty()) {
-            value.push_back(list[0].toCString(true));
+            value.push_back(list[0].to8Bit(true));
         } else {
             list = file.properties()["TPOS"];
             if (list.isEmpty())
                 return;
-            value.push_back(list[0].toCString(true));
+            value.push_back(list[0].to8Bit(true));
         }
         item->setPartNumber(stoiString(value[0]));
         break;
@@ -135,7 +135,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
             return;
         for (auto&& entry : list) {
             for (auto&& val : entry.split(legacyEntrySeparator))
-                value.push_back(val.toCString(true));
+                value.push_back(val.to8Bit(true));
         }
     }
     }
@@ -163,7 +163,7 @@ void TagLibHandler::addSpecialFields(const TagLib::File& file, const TagLib::Tag
             return;
         for (auto&& val : list) {
             for (auto&& entrySeg : val.split(legacyEntrySeparator)) {
-                std::string entry = entrySeg.toCString(true);
+                std::string entry = entrySeg.to8Bit(true);
                 trimStringInPlace(entry);
                 if (!entry.empty())
                     item->addMetaData(meta, sc->convert(entry));
@@ -227,7 +227,7 @@ void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const 
             auto val = property.toString(entrySeparator);
             if (!legacyEntrySeparator.empty())
                 val = val.split(legacyEntrySeparator).toString(entrySeparator);
-            std::string value(val.toCString(true));
+            std::string value(val.to8Bit(true));
             value = sc->convert(value);
             log_debug("Adding auxdata: {} with value {}", desiredTag.c_str(), value.c_str());
             item->setAuxData(desiredTag, value);
@@ -462,10 +462,10 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                     continue;
                 for (auto&& field : textFrame->fieldList()) {
                     if (legacyEntrySeparator.empty())
-                        content.push_back(sc->convert(field.toCString(true)));
+                        content.push_back(sc->convert(field.to8Bit(true)));
                     else
                         for (auto&& val : field.split(legacyEntrySeparator))
-                            content.push_back(sc->convert(val.toCString(true)));
+                            content.push_back(sc->convert(val.to8Bit(true)));
                 }
             }
             if (!content.empty()) {
@@ -489,12 +489,12 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
                 for (auto&& field : textFrame->fieldList()) {
                     if (subTag.empty()) {
                         // first element is subTag name
-                        subTag = sc->convert(field.toCString(true));
+                        subTag = sc->convert(field.to8Bit(true));
                     } else if (legacyEntrySeparator.empty()) {
-                        content.push_back(sc->convert(field.toCString(true)));
+                        content.push_back(sc->convert(field.to8Bit(true)));
                     } else {
                         for (auto&& val : field.split(legacyEntrySeparator))
-                            content.push_back(sc->convert(val.toCString(true)));
+                            content.push_back(sc->convert(val.to8Bit(true)));
                     }
                 }
                 log_debug("TXXX Tag: {}", subTag);
@@ -519,7 +519,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
         }
 
         auto pic = art->picture();
-        std::string art_mimetype = sc->convert(art->mimeType().toCString(true));
+        std::string art_mimetype = sc->convert(art->mimeType().to8Bit(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(pic);
         }
@@ -555,7 +555,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
-    std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
+    std::string art_mimetype = sc->convert(pic->mimeType().to8Bit(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
     }
@@ -593,7 +593,7 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
         if (!wmpic.isValid())
             return;
 
-        std::string art_mimetype = sc->convert(wmpic.mimeType().toCString(true));
+        std::string art_mimetype = sc->convert(wmpic.mimeType().to8Bit(true));
         if (!isValidArtworkContentType(art_mimetype)) {
             art_mimetype = getContentTypeFromByteVector(wmpic.picture());
         }
@@ -629,7 +629,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     const TagLib::FLAC::Picture* pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
-    std::string art_mimetype = sc->convert(pic->mimeType().toCString(true));
+    std::string art_mimetype = sc->convert(pic->mimeType().to8Bit(true));
     if (!isValidArtworkContentType(art_mimetype)) {
         art_mimetype = getContentTypeFromByteVector(data);
     }
