@@ -69,12 +69,12 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int Get16m(const void* Short)
+static int get16m(const void* Short)
 {
     return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
 }
 
-static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
+static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
 {
     uchar c[1] = { 0 };
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
@@ -83,11 +83,11 @@ static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
     return int(c[0]);
 }
 
-static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
+static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
 {
-    int a = ioh_fgetc(ioh);
+    int a = iohFgetc(ioh);
 
-    if (a != 0xff || ioh_fgetc(ioh) != M_SOI)
+    if (a != 0xff || iohFgetc(ioh) != M_SOI)
         throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
 
     for (;;) {
@@ -98,7 +98,7 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
         uchar Data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
-            marker = ioh_fgetc(ioh);
+            marker = iohFgetc(ioh);
             if (marker != 0xff)
                 break;
 
@@ -111,8 +111,8 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
             throw_std_runtime_error("get_jpeg_resolution: too many padding bytes");
 
         // Read the length of the section.
-        lh = ioh_fgetc(ioh);
-        ll = ioh_fgetc(ioh);
+        lh = iohFgetc(ioh);
+        ll = iohFgetc(ioh);
 
         itemlen = (lh << 8) | ll;
 
@@ -151,8 +151,8 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            *w = Get16m(Data + 5);
-            *h = Get16m(Data + 3);
+            *w = get16m(Data + 5);
+            *h = get16m(Data + 3);
             return;
         }
     }
@@ -164,7 +164,7 @@ std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh)
 {
     int w, h;
     try {
-        get_jpeg_resolution(ioh, &w, &h);
+        getJpegResolution(ioh, &w, &h);
     } catch (const std::runtime_error& e) {
         ioh->close();
         throw e;

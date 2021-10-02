@@ -39,25 +39,25 @@
 
 static constexpr auto loginTimeout = std::chrono::seconds(10);
 
-static std::chrono::seconds get_time()
+static std::chrono::seconds getTime()
 {
     return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
 }
 
-static std::string generate_token()
+static std::string generateToken()
 {
-    auto expiration = get_time() + loginTimeout;
+    auto expiration = getTime() + loginTimeout;
     std::string salt = generateRandomId();
     return fmt::format("{}_{}", expiration.count(), salt);
 }
 
-static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
+static bool checkToken(const std::string& token, const std::string& password, const std::string& encPassword)
 {
     std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
     auto expiration = std::chrono::seconds(std::stol(parts[0]));
-    if (expiration < get_time())
+    if (expiration < getTime())
         return false;
     std::string checksum = hexStringMd5(token + password);
     return (checksum == encPassword);
@@ -142,7 +142,7 @@ void Web::Auth::process()
         check_request(false);
 
         // sending token
-        std::string token = generate_token();
+        std::string token = generateToken();
         session->put("token", token);
         root.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
     } else if (action == "login") {
@@ -162,7 +162,7 @@ void Web::Auth::process()
 
         std::string correctPassword = sessionManager->getUserPassword(username);
 
-        if (correctPassword.empty() || !check_token(session->get("token"), correctPassword, encPassword))
+        if (correctPassword.empty() || !checkToken(session->get("token"), correctPassword, encPassword))
             throw LoginException("Invalid username or password");
 
         session->logIn();

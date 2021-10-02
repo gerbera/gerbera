@@ -36,8 +36,8 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-static constexpr bool IS_CDS_ITEM(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
-static constexpr bool IS_CDS_PURE_ITEM(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
+static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
+static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
 
 void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
@@ -111,7 +111,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
         return std::make_shared<CdsItemExternalURL>();
     }
 
-    if (IS_CDS_ITEM(objectType)) {
+    if (isCdsItem(objectType)) {
         return std::make_shared<CdsItem>();
     }
 
@@ -218,7 +218,7 @@ std::string_view CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;
-    if (IS_CDS_PURE_ITEM(type))
+    if (isCdsPureItem(type))
         return STRING_OBJECT_TYPE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;

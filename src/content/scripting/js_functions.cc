@@ -246,7 +246,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     return 0;
 }
 
-static duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr)
+static duk_ret_t convertCharsetGeneric(duk_context* ctx, charset_convert_t chr)
 {
     auto* self = Script::getContextScript(ctx);
     if (duk_get_top(ctx) != 1)
@@ -271,22 +271,22 @@ static duk_ret_t convert_charset_generic(duk_context* ctx, charset_convert_t chr
 
 duk_ret_t js_f2i(duk_context* ctx)
 {
-    return convert_charset_generic(ctx, F2I);
+    return convertCharsetGeneric(ctx, F2I);
 }
 
 duk_ret_t js_m2i(duk_context* ctx)
 {
-    return convert_charset_generic(ctx, M2I);
+    return convertCharsetGeneric(ctx, M2I);
 }
 
 duk_ret_t js_p2i(duk_context* ctx)
 {
-    return convert_charset_generic(ctx, P2I);
+    return convertCharsetGeneric(ctx, P2I);
 }
 
 duk_ret_t js_j2i(duk_context* ctx)
 {
-    return convert_charset_generic(ctx, J2I);
+    return convertCharsetGeneric(ctx, J2I);
 }
 
 //} // extern "C"
