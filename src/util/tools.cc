@@ -264,13 +264,12 @@ std::string httpRedirectTo(std::string_view addr, std::string_view page)
     return fmt::format(R"(<html><head><meta http-equiv="Refresh" content="0;URL={}/{}"></head><body bgcolor="#dddddd"></body></html>)", addr, page);
 }
 
-std::string hexEncode(const void* data, std::size_t len)
+std::string hexEncode(const char* data, std::size_t len)
 {
     std::string buf(2 * len, '\0');
 
-    const unsigned char* chars = static_cast<const unsigned char*>(data);
     for (std::size_t i = 0; i < len; i++) {
-        unsigned char c = chars[i];
+        unsigned char c = data[i];
         unsigned char hi = c >> 4;
         unsigned char lo = c & 0xF;
         buf[2 * i + 0] = HEX_CHARS[hi];

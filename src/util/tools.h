@@ -114,7 +114,7 @@ std::string httpRedirectTo(std::string_view addr, std::string_view page = "");
 /// \param data Buffer that is holding the data
 /// \param len Length of the buffer.
 /// \return string of the data in hex representation.
-std::string hexEncode(const void* data, std::size_t len);
+std::string hexEncode(const char* data, std::size_t len);
 
 /// \brief Decodes hex encoded string.
 /// \param encoded hex-encoded string.
