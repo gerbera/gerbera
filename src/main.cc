@@ -72,9 +72,9 @@ static constexpr auto gitBranch = std::string_view(GIT_BRANCH);
 static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);
 
 static struct {
-    int shutdown_flag = 0;
-    int restart_flag = 0;
-    pthread_t main_thread_id;
+    int shutdownFlag = 0;
+    int restartFlag = 0;
+    pthread_t mainThreadId;
 
     std::mutex mutex;
     std::unique_lock<std::mutex> lock { mutex };
@@ -99,7 +99,7 @@ static void logCopyright()
 
 static void signalHandler(int signum)
 {
-    if (_ctx.main_thread_id != pthread_self()) {
+    if (_ctx.mainThreadId != pthread_self()) {
         return;
     }
 
@@ -108,17 +108,17 @@ static void signalHandler(int signum)
         std::exit(EXIT_FAILURE);
     }
     if ((signum == SIGINT) || (signum == SIGTERM)) {
-        _ctx.shutdown_flag++;
-        if (_ctx.shutdown_flag == 1) {
+        _ctx.shutdownFlag++;
+        if (_ctx.shutdownFlag == 1) {
             log_info("Gerbera shutting down. Please wait...");
-        } else if (_ctx.shutdown_flag == 2) {
+        } else if (_ctx.shutdownFlag == 2) {
             log_info("Gerbera still shutting down, signal again to kill.");
-        } else if (_ctx.shutdown_flag > 2) {
+        } else if (_ctx.shutdownFlag > 2) {
             log_error("Clean shutdown failed, killing Gerbera!");
             std::exit(EXIT_FAILURE);
         }
     } else if (signum == SIGHUP) {
-        _ctx.restart_flag = 1;
+        _ctx.restartFlag = 1;
     }
 
     _ctx.cond.notify_one();
@@ -126,7 +126,7 @@ static void signalHandler(int signum)
 
 static void installSignalHandler()
 {
-    _ctx.main_thread_id = pthread_self();
+    _ctx.mainThreadId = pthread_self();
 
     struct sigaction action = {};
     action.sa_handler = signalHandler;
@@ -221,8 +221,8 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<std::string> logfile;
         if (opts.count("logfile") > 0) {
-            auto file_logger = spdlog::basic_logger_mt("basic_logger", opts["logfile"].as<std::string>());
-            spdlog::set_default_logger(file_logger);
+            auto fileLogger = spdlog::basic_logger_mt("basic_logger", opts["logfile"].as<std::string>());
+            spdlog::set_default_logger(fileLogger);
             spdlog::flush_on(spdlog::level::trace);
         }
 
@@ -242,22 +242,22 @@ int main(int argc, char** argv, char** envp)
             user = opts["user"].as<std::string>();
 
             // get actual euid/egid of process
-            uid_t actual_euid = geteuid();
+            uid_t actualEuid = geteuid();
 
             // get user info of requested user from passwd
-            auto user_id = getpwnam(user->c_str());
-            if (!user_id) {
+            auto userId = getpwnam(user->c_str());
+            if (!userId) {
                 log_error("Invalid user requested.");
                 std::exit(EXIT_FAILURE);
             }
 
             // set home according to /etc/passwd entry
             if (!home.has_value()) {
-                home = user_id->pw_dir;
+                home = userId->pw_dir;
             }
 
             // we need to be euid root to become requested user/group
-            if (actual_euid != 0) {
+            if (actualEuid != 0) {
                 log_error("Need to be root to change user.");
                 std::exit(EXIT_FAILURE);
             }
@@ -270,7 +270,7 @@ int main(int argc, char** argv, char** envp)
             // set group-ids, then add. groups, last user-ids, all need to succeed
             if (0 != setgid(user_id->pw_gid) || 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 0 != setuid(user_id->pw_uid)) {
 #else
-            if (0 != setresgid(user_id->pw_gid, user_id->pw_gid, user_id->pw_gid) || 0 != initgroups(user_id->pw_name, user_id->pw_gid) || 0 != setresuid(user_id->pw_uid, user_id->pw_uid, user_id->pw_uid)) {
+            if (0 != setresgid(userId->pw_gid, userId->pw_gid, userId->pw_gid) || 0 != initgroups(userId->pw_name, userId->pw_gid) || 0 != setresuid(userId->pw_uid, userId->pw_uid, userId->pw_uid)) {
 #endif
                 log_error("Unable to change user.");
                 std::exit(EXIT_FAILURE);
@@ -359,9 +359,9 @@ int main(int argc, char** argv, char** envp)
             std::fclose(pidf);
         }
 
-        std::optional<std::string> config_file;
+        std::optional<std::string> configFile;
         if (opts.count("config") > 0) {
-            config_file = opts["config"].as<std::string>();
+            configFile = opts["config"].as<std::string>();
         }
 
         std::optional<std::string> confdir;
@@ -374,7 +374,7 @@ int main(int argc, char** argv, char** envp)
         }
 
         // If home is not given by the user, get it from the environment
-        if (!config_file.has_value() && !home.has_value()) {
+        if (!configFile.has_value() && !home.has_value()) {
             // Check XDG first
             const char* h = std::getenv("XDG_CONFIG_HOME");
             if (h) {
@@ -446,23 +446,23 @@ int main(int argc, char** argv, char** envp)
         std::shared_ptr<ConfigManager> configManager;
         try {
             configManager = std::make_shared<ConfigManager>(
-                config_file.value_or(""), home.value_or(""), confdir.value_or(""),
+                configFile.value_or(""), home.value_or(""), confdir.value_or(""),
                 dataDir.value_or(""), magic.value_or(""),
                 ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
             portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
-            log_error("Error parsing config file '{}': {}", (*config_file), ce.what());
+            log_error("Error parsing config file '{}': {}", (*configFile), ce.what());
             std::exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
             std::exit(EXIT_FAILURE);
         }
 
-        sigset_t mask_set;
-        sigfillset(&mask_set);
-        pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
+        sigset_t maskSet;
+        sigfillset(&maskSet);
+        pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
 
         installSignalHandler();
 
@@ -473,8 +473,8 @@ int main(int argc, char** argv, char** envp)
             server->init();
             server->run();
         } catch (const UpnpException& ue) {
-            sigemptyset(&mask_set);
-            pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
+            sigemptyset(&maskSet);
+            pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
 
             if (ue.getErrorCode() == UPNP_E_SOCKET_BIND) {
                 log_error("LibUPnP could not bind to socket");
@@ -530,14 +530,14 @@ int main(int argc, char** argv, char** envp)
             }
         }
 
-        sigemptyset(&mask_set);
-        pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
+        sigemptyset(&maskSet);
+        pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
 
         // wait until signalled to terminate
-        while (!_ctx.shutdown_flag) {
+        while (!_ctx.shutdownFlag) {
             _ctx.cond.wait(_ctx.lock);
 
-            if (_ctx.restart_flag != 0) {
+            if (_ctx.restartFlag != 0) {
                 log_info("Restarting Gerbera!");
                 try {
                     server->shutdown();
@@ -546,12 +546,12 @@ int main(int argc, char** argv, char** envp)
 
                     try {
                         configManager = std::make_shared<ConfigManager>(
-                            config_file.value_or(""), home.value_or(""), confdir.value_or(""),
+                            configFile.value_or(""), home.value_or(""), confdir.value_or(""),
                             dataDir.value_or(""), magic.value_or(""),
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                             debug);
                     } catch (const ConfigParseException& ce) {
-                        log_error("Error parsing config file '{}': {}", (*config_file), ce.what());
+                        log_error("Error parsing config file '{}': {}", (*configFile), ce.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // so it is safe to exit
@@ -568,12 +568,12 @@ int main(int argc, char** argv, char** envp)
                     server->init();
                     server->run();
 
-                    _ctx.restart_flag = 0;
+                    _ctx.restartFlag = 0;
                 } catch (const std::runtime_error& e) {
-                    _ctx.restart_flag = 0;
-                    _ctx.shutdown_flag = 1;
-                    sigemptyset(&mask_set);
-                    pthread_sigmask(SIG_SETMASK, &mask_set, nullptr);
+                    _ctx.restartFlag = 0;
+                    _ctx.shutdownFlag = 1;
+                    sigemptyset(&maskSet);
+                    pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
                     log_error("Could not restart Gerbera");
                 }
             }
@@ -585,8 +585,8 @@ int main(int argc, char** argv, char** envp)
             server->shutdown();
             server = nullptr;
             configManager = nullptr;
-        } catch (const UpnpException& upnp_e) {
-            log_error("main: upnp error {}", upnp_e.getErrorCode());
+        } catch (const UpnpException& upnpE) {
+            log_error("main: upnp error {}", upnpE.getErrorCode());
             ret = EXIT_FAILURE;
         } catch (const std::runtime_error& e) {
             log_error("main: error {}", e.what());

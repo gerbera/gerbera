@@ -95,7 +95,7 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int
         off_t skip;
         int marker = 0;
         int ll, lh, got;
-        uchar Data[ITEM_BUF_SIZE];
+        uchar data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
             marker = iohFgetc(ioh);
@@ -126,10 +126,10 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int
         }
 
         // Store first two pre-read bytes.
-        Data[0] = uchar(lh);
-        Data[1] = uchar(ll);
+        data[0] = uchar(lh);
+        data[1] = uchar(ll);
 
-        got = ioh->read(reinterpret_cast<char*>(Data + 2), itemlen - 2);
+        got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
         if (got != itemlen - 2)
             throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
 
@@ -151,8 +151,8 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            *w = get16m(Data + 5);
-            *h = get16m(Data + 3);
+            *w = get16m(data + 5);
+            *h = get16m(data + 3);
             return;
         }
     }

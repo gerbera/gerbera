@@ -213,8 +213,8 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
 
 void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const
 {
-    auto aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (auto&& desiredTag : aux_tags_list) {
+    auto auxTagsList = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    for (auto&& desiredTag : auxTagsList) {
         if (desiredTag.empty()) {
             continue;
         }
@@ -244,28 +244,28 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         return;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
+    std::string contentType = getValueOrDefault(mappings, item->getMimeType());
 
     auto fs = TagLib::FileStream(item->getLocation().c_str(), true); // true = Read only
 
-    if (content_type == CONTENT_TYPE_MP3) {
+    if (contentType == CONTENT_TYPE_MP3) {
         extractMP3(&fs, item);
-    } else if (content_type == CONTENT_TYPE_FLAC) {
+    } else if (contentType == CONTENT_TYPE_FLAC) {
         extractFLAC(&fs, item);
-    } else if (content_type == CONTENT_TYPE_MP4) {
+    } else if (contentType == CONTENT_TYPE_MP4) {
         extractMP4(&fs, item);
-    } else if (content_type == CONTENT_TYPE_OGG) {
+    } else if (contentType == CONTENT_TYPE_OGG) {
         extractOgg(&fs, item);
-    } else if (content_type == CONTENT_TYPE_APE) {
+    } else if (contentType == CONTENT_TYPE_APE) {
         extractAPE(&fs, item);
-    } else if (content_type == CONTENT_TYPE_WMA) {
+    } else if (contentType == CONTENT_TYPE_WMA) {
         extractASF(&fs, item);
-    } else if (content_type == CONTENT_TYPE_WAVPACK) {
+    } else if (contentType == CONTENT_TYPE_WAVPACK) {
         extractWavPack(&fs, item);
-    } else if (content_type == CONTENT_TYPE_AIFF) {
+    } else if (contentType == CONTENT_TYPE_AIFF) {
         extractAiff(&fs, item);
     } else {
-        log_warning("TagLibHandler {}: Does not handle the {} content type", item->getLocation().c_str(), content_type.c_str());
+        log_warning("TagLibHandler {}: Does not handle the {} content type", item->getLocation().c_str(), contentType.c_str());
     }
     log_debug("TagLib handler done.");
 }
@@ -280,8 +280,8 @@ bool TagLibHandler::isValidArtworkContentType(std::string_view artMimetype)
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
 #ifdef HAVE_MAGIC
-    auto art_mimetype = mime->bufferToMimeType(data.data(), data.size());
-    return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
+    auto artMimetype = mime->bufferToMimeType(data.data(), data.size());
+    return artMimetype.empty() ? MIMETYPE_DEFAULT : artMimetype;
 #else
     return MIMETYPE_DEFAULT;
 #endif
@@ -312,11 +312,11 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
         return nullptr;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = getValueOrDefault(mappings, item->getMimeType());
+    std::string contentType = getValueOrDefault(mappings, item->getMimeType());
 
     auto roStream = TagLib::FileStream(item->getLocation().c_str(), true); // Open read only
 
-    if (content_type == CONTENT_TYPE_MP3) {
+    if (contentType == CONTENT_TYPE_MP3) {
         // stream album art from MP3 file
         auto f = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
@@ -337,7 +337,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
     }
-    if (content_type == CONTENT_TYPE_FLAC) {
+    if (contentType == CONTENT_TYPE_FLAC) {
         // stream album art from FLAC file
         auto f = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
@@ -352,7 +352,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
-    if (content_type == CONTENT_TYPE_MP4) {
+    if (contentType == CONTENT_TYPE_MP4) {
         // stream album art from MP4 file
         auto f = TagLib::MP4::File(&roStream);
 
@@ -381,7 +381,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
-    if (content_type == CONTENT_TYPE_WMA) {
+    if (contentType == CONTENT_TYPE_WMA) {
         // stream album art from WMA file
         auto f = TagLib::ASF::File(&roStream);
 
@@ -404,7 +404,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
-    if (content_type == CONTENT_TYPE_OGG) {
+    if (contentType == CONTENT_TYPE_OGG) {
         // stream album art from Ogg/Vorbis file
         auto f = TagLib::Ogg::Vorbis::File(&roStream);
 
@@ -421,7 +421,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
 
-    throw_std_runtime_error("Unsupported content_type: {}", content_type.c_str());
+    throw_std_runtime_error("Unsupported content_type: {}", contentType.c_str());
 }
 
 void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
@@ -444,8 +444,8 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
     bool hasTXXXFrames = frameListMap.contains("TXXX");
 
-    std::vector<std::string> aux_tags_list = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (auto&& desiredFrame : aux_tags_list) {
+    std::vector<std::string> auxTagsList = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    for (auto&& desiredFrame : auxTagsList) {
         if (desiredFrame.empty()) {
             continue;
         }
@@ -519,12 +519,12 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
         }
 
         auto pic = art->picture();
-        std::string art_mimetype = sc->convert(art->mimeType().to8Bit(true));
-        if (!isValidArtworkContentType(art_mimetype)) {
-            art_mimetype = getContentTypeFromByteVector(pic);
+        std::string artMimetype = sc->convert(art->mimeType().to8Bit(true));
+        if (!isValidArtworkContentType(artMimetype)) {
+            artMimetype = getContentTypeFromByteVector(pic);
         }
 
-        addArtworkResource(item, art_mimetype);
+        addArtworkResource(item, artMimetype);
     }
 }
 
@@ -555,11 +555,11 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     const TagLib::FLAC::Picture* pic = picList.front();
     const TagLib::ByteVector& data = pic->data();
 
-    std::string art_mimetype = sc->convert(pic->mimeType().to8Bit(true));
-    if (!isValidArtworkContentType(art_mimetype)) {
-        art_mimetype = getContentTypeFromByteVector(data);
+    std::string artMimetype = sc->convert(pic->mimeType().to8Bit(true));
+    if (!isValidArtworkContentType(artMimetype)) {
+        artMimetype = getContentTypeFromByteVector(data);
     }
-    addArtworkResource(item, art_mimetype);
+    addArtworkResource(item, artMimetype);
 }
 
 void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
@@ -593,11 +593,11 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
         if (!wmpic.isValid())
             return;
 
-        std::string art_mimetype = sc->convert(wmpic.mimeType().to8Bit(true));
-        if (!isValidArtworkContentType(art_mimetype)) {
-            art_mimetype = getContentTypeFromByteVector(wmpic.picture());
+        std::string artMimetype = sc->convert(wmpic.mimeType().to8Bit(true));
+        if (!isValidArtworkContentType(artMimetype)) {
+            artMimetype = getContentTypeFromByteVector(wmpic.picture());
         }
-        addArtworkResource(item, art_mimetype);
+        addArtworkResource(item, artMimetype);
     }
 }
 
@@ -629,11 +629,11 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     const TagLib::FLAC::Picture* pic = flac.pictureList().front();
     const TagLib::ByteVector& data = pic->data();
 
-    std::string art_mimetype = sc->convert(pic->mimeType().to8Bit(true));
-    if (!isValidArtworkContentType(art_mimetype)) {
-        art_mimetype = getContentTypeFromByteVector(data);
+    std::string artMimetype = sc->convert(pic->mimeType().to8Bit(true));
+    if (!isValidArtworkContentType(artMimetype)) {
+        artMimetype = getContentTypeFromByteVector(data);
     }
-    addArtworkResource(item, art_mimetype);
+    addArtworkResource(item, artMimetype);
 }
 
 void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
@@ -717,9 +717,9 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
         }
 
         auto& coverArt = coverArtList.front();
-        auto art_mimetype = getContentTypeFromByteVector(coverArt.data());
-        if (!art_mimetype.empty()) {
-            addArtworkResource(item, art_mimetype);
+        auto artMimetype = getContentTypeFromByteVector(coverArt.data());
+        if (!artMimetype.empty()) {
+            addArtworkResource(item, artMimetype);
         }
     } else {
         log_debug("TagLibHandler {}: mp4 file has no 'covr' item",

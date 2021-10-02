@@ -159,8 +159,8 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     // checking database driver options
-    bool mysql_en = false;
-    bool sqlite3_en = false;
+    bool mysqlEn = false;
+    bool sqlite3En = false;
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
@@ -168,26 +168,26 @@ void ConfigManager::load(const fs::path& userHome)
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
-        mysql_en = setOption(root, CFG_SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
+        mysqlEn = setOption(root, CFG_SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
     }
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE);
     if (co->hasXmlElement(root)) {
-        sqlite3_en = setOption(root, CFG_SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
+        sqlite3En = setOption(root, CFG_SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
 
-    if (sqlite3_en && mysql_en)
+    if (sqlite3En && mysqlEn)
         throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
                                 "only one database driver may be active at a time");
 
-    if (!sqlite3_en && !mysql_en)
+    if (!sqlite3En && !mysqlEn)
         throw_std_runtime_error("You disabled both sqlite3 and mysql but "
                                 "one database driver must be active");
 
     std::string dbDriver;
 
 #ifdef HAVE_MYSQL
-    if (mysql_en) {
+    if (mysqlEn) {
         // read mysql options
         setOption(root, CFG_SERVER_STORAGE_MYSQL_HOST);
         setOption(root, CFG_SERVER_STORAGE_MYSQL_DATABASE);
@@ -205,14 +205,14 @@ void ConfigManager::load(const fs::path& userHome)
         dbDriver = "mysql";
     }
 #else
-    if (mysql_en) {
+    if (mysqlEn) {
         throw_std_runtime_error("You enabled MySQL database in configuration, "
                                 "however this version of Gerbera was compiled "
                                 "without MySQL support!");
     }
 #endif // HAVE_MYSQL
 
-    if (sqlite3_en) {
+    if (sqlite3En) {
         // read sqlite options
         setOption(root, CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
@@ -233,17 +233,17 @@ void ConfigManager::load(const fs::path& userHome)
     co->makeOption(dbDriver, self);
 
     // now go through the optional settings and fix them if anything is missing
-    auto def_ipp = setOption(root, CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)->getIntOption();
+    auto defIpp = setOption(root, CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)->getIntOption();
 
     // now get the option list for the drop down menu
-    auto menu_opts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::find(menu_opts.begin(), menu_opts.end(), fmt::to_string(def_ipp)) == menu_opts.end())
+    auto menuOpts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
+    if (std::find(menuOpts.begin(), menuOpts.end(), fmt::to_string(defIpp)) == menuOpts.end())
         throw_std_runtime_error("Error in config file: at least one <option> "
                                 "under <items-per-page> must match the "
                                 "<items-per-page default=\"\" /> attribute");
 
-    bool cl_en = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
-    args["isEnabled"] = cl_en ? "true" : "false";
+    bool clEn = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
+    args["isEnabled"] = clEn ? "true" : "false";
     setOption(root, CFG_CLIENTS_LIST, &args);
     args.clear();
 
@@ -383,13 +383,13 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
     // read transcoding options
-    auto tr_en = setOption(root, CFG_TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
-    args["isEnabled"] = tr_en ? "true" : "false";
+    auto trEn = setOption(root, CFG_TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
+    args["isEnabled"] = trEn ? "true" : "false";
     setOption(root, CFG_TRANSCODING_PROFILE_LIST, &args);
     args.clear();
 
 #ifdef HAVE_CURL
-    if (tr_en) {
+    if (trEn) {
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
     }
@@ -422,8 +422,8 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
 #if defined(HAVE_LASTFMLIB)
-    auto lfm_en = setOption(root, CFG_SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
-    if (lfm_en) {
+    auto lfmEn = setOption(root, CFG_SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
+    if (lfmEn) {
         setOption(root, CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
         setOption(root, CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
     }
@@ -438,14 +438,14 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
 #ifdef HAVE_INOTIFY
-    auto config_timed_list = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    auto config_inotify_list = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+    auto configTimedList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+    auto configInotifyList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
-    for (std::size_t i = 0; i < config_inotify_list->size(); i++) {
-        auto i_dir = config_inotify_list->get(i);
-        for (std::size_t j = 0; j < config_timed_list->size(); j++) {
-            auto t_dir = config_timed_list->get(j);
-            if (i_dir->getLocation() == t_dir->getLocation())
+    for (std::size_t i = 0; i < configInotifyList->size(); i++) {
+        auto iDir = configInotifyList->get(i);
+        for (std::size_t j = 0; j < configTimedList->size(); j++) {
+            auto tDir = configTimedList->get(j);
+            if (iDir->getLocation() == tDir->getLocation())
                 throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");
         }
     }
@@ -453,20 +453,20 @@ void ConfigManager::load(const fs::path& userHome)
 
     // read online content options
 #ifdef SOPCAST
-    int sopcast_refresh = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_REFRESH)->getIntOption();
-    int sopcast_purge = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER)->getIntOption();
+    int sopcastRefresh = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_REFRESH)->getIntOption();
+    int sopcastPurge = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER)->getIntOption();
 
-    if (sopcast_refresh >= sopcast_purge) {
-        if (sopcast_purge != 0)
+    if (sopcastRefresh >= sopcastPurge) {
+        if (sopcastPurge != 0)
             throw_std_runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
     }
 #endif
 
 #ifdef ATRAILERS
-    int atrailers_refresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
+    int atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
     co = ConfigDefinition::findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
-    co->makeOption(fmt::to_string(atrailers_refresh), self);
+    co->makeOption(fmt::to_string(atrailersRefresh), self);
 #endif
 
     // read options that do not have special requirement and that are not yet loaded

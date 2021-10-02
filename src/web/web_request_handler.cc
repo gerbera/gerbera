@@ -131,7 +131,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     xml2JsonHints = std::make_unique<Xml2Json::Hints>();
 
     std::string error;
-    int error_code = 0;
+    int errorCode = 0;
 
     std::string output;
     // processing page, creating output
@@ -139,7 +139,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
             log_warning("The UI is disabled in the configuration file. See README.");
             error = "The UI is disabled in the configuration file. See README.";
-            error_code = 900;
+            errorCode = 900;
         } else {
             process();
 
@@ -152,19 +152,19 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         }
     } catch (const LoginException& e) {
         error = e.what();
-        error_code = 300;
+        errorCode = 300;
     } catch (const ObjectNotFoundException& e) {
         error = e.what();
-        error_code = 200;
+        errorCode = 200;
     } catch (const SessionException& e) {
         error = e.what();
-        error_code = 400;
+        errorCode = 400;
     } catch (const DatabaseException& e) {
         error = e.getUserMessage();
-        error_code = 500;
+        errorCode = 500;
     } catch (const std::runtime_error& e) {
         error = fmt::format("Error: {}", e.what());
-        error_code = 800;
+        errorCode = 800;
     }
 
     if (error.empty()) {
@@ -175,11 +175,11 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         auto errorEl = root.append_child("error");
         errorEl.append_attribute("text") = error.c_str();
 
-        if (error_code == 0)
-            error_code = 899;
-        errorEl.append_attribute("code") = error_code;
+        if (errorCode == 0)
+            errorCode = 899;
+        errorEl.append_attribute("code") = errorCode;
 
-        log_warning("Web Error: {} {}", error_code, error);
+        log_warning("Web Error: {} {}", errorCode, error);
     }
 
     std::string returnType = param("return_type");
@@ -215,9 +215,9 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
     log_debug("output-----------------------{}", output);
 
-    auto io_handler = std::make_unique<MemIOHandler>(output);
-    io_handler->open(mode);
-    return io_handler;
+    auto ioHandler = std::make_unique<MemIOHandler>(output);
+    ioHandler->open(mode);
+    return ioHandler;
 }
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)

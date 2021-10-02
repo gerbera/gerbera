@@ -83,42 +83,42 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     item->clearMetaData();
 
     auto mappings = context->getConfig()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string content_type = getValueOrDefault(mappings, mimetype);
+    std::string contentType = getValueOrDefault(mappings, mimetype);
 
-    if ((content_type == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
+    if ((contentType == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
     }
 
 #ifdef HAVE_TAGLIB
-    if ((content_type == CONTENT_TYPE_MP3) || ((content_type == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (content_type == CONTENT_TYPE_WMA) || (content_type == CONTENT_TYPE_WAVPACK) || (content_type == CONTENT_TYPE_FLAC) || (content_type == CONTENT_TYPE_PCM) || (content_type == CONTENT_TYPE_AIFF) || (content_type == CONTENT_TYPE_APE) || (content_type == CONTENT_TYPE_MP4)) {
+    if ((contentType == CONTENT_TYPE_MP3) || ((contentType == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (contentType == CONTENT_TYPE_WMA) || (contentType == CONTENT_TYPE_WAVPACK) || (contentType == CONTENT_TYPE_FLAC) || (contentType == CONTENT_TYPE_PCM) || (contentType == CONTENT_TYPE_AIFF) || (contentType == CONTENT_TYPE_APE) || (contentType == CONTENT_TYPE_MP4)) {
         TagLibHandler(context).fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
-    if (content_type == CONTENT_TYPE_JPG) {
+    if (contentType == CONTENT_TYPE_JPG) {
         Exiv2Handler(context).fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_LIBEXIF
-    if (content_type == CONTENT_TYPE_JPG) {
+    if (contentType == CONTENT_TYPE_JPG) {
         LibExifHandler(context).fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_MATROSKA
-    if (content_type == CONTENT_TYPE_MKV) {
+    if (contentType == CONTENT_TYPE_MKV) {
         MatroskaHandler(context).fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (content_type != CONTENT_TYPE_PLAYLIST && ((content_type == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
+    if (contentType != CONTENT_TYPE_PLAYLIST && ((contentType == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
         FfmpegHandler(context).fillMetadata(item);
     }
 #else
-    if (content_type == CONTENT_TYPE_AVI) {
+    if (contentType == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(dirEnt.path().string());
         if (!fourcc.empty()) {
             item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
@@ -220,18 +220,18 @@ static constexpr std::array chKeys = {
 
 int MetadataHandler::remapContentHandler(const std::string& contHandler)
 {
-    auto ch_entry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    if (ch_entry != chKeys.end()) {
-        return ch_entry->first;
+    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
+    if (chEntry != chKeys.end()) {
+        return chEntry->first;
     }
     return -1;
 }
 
 std::string MetadataHandler::mapContentHandler2String(int ch)
 {
-    auto ch_entry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
-    if (ch_entry != chKeys.end()) {
-        return ch_entry->second;
+    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
+    if (chEntry != chKeys.end()) {
+        return chEntry->second;
     }
     return "Unknown";
 }

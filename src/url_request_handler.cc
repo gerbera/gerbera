@@ -62,16 +62,16 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     std::string header;
     std::string mimeType;
 
-    if (!tr_profile.empty()) {
+    if (!trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
+                      ->getByName(trProfile);
         if (!tp)
-            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", tr_profile);
+            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", trProfile);
 
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
@@ -138,26 +138,26 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 #endif
     log_debug("Online content url: {}", url);
 
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-    if (!tr_profile.empty()) {
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (!trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
+                      ->getByName(trProfile);
         if (!tp)
-            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, tr_profile);
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, trProfile);
 
-        auto tr_d = std::make_unique<TranscodeDispatcher>(content);
-        auto io_handler = tr_d->serveContent(tp, url, item, "");
-        io_handler->open(mode);
+        auto trD = std::make_unique<TranscodeDispatcher>(content);
+        auto ioHandler = trD->serveContent(tp, url, item, "");
+        ioHandler->open(mode);
 
         log_debug("end");
-        return io_handler;
+        return ioHandler;
     }
 
     ///\todo make curl io handler configurable for url request handler
-    auto io_handler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
-    io_handler->open(mode);
+    auto ioHandler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
+    ioHandler->open(mode);
     content->triggerPlayHook(obj);
-    return io_handler;
+    return ioHandler;
 }
 
 #endif // HAVE_CURL

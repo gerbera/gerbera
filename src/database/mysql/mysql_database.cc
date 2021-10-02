@@ -111,15 +111,15 @@ void MySQLDatabase::init()
     mysql_server_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1));
 
-    MYSQL* res_mysql = mysql_init(&db);
-    if (!res_mysql) {
+    MYSQL* resMysql = mysql_init(&db);
+    if (!resMysql) {
         throw_std_runtime_error("mysql_init() failed");
     }
 
     mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8mb4");
 
-    bool my_bool_var = true;
-    mysql_options(&db, MYSQL_OPT_RECONNECT, &my_bool_var);
+    bool myBoolVar = true;
+    mysql_options(&db, MYSQL_OPT_RECONNECT, &myBoolVar);
 
     std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
     std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
@@ -128,7 +128,7 @@ void MySQLDatabase::init()
     std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
     std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
 
-    res_mysql = mysql_real_connect(&db,
+    resMysql = mysql_real_connect(&db,
         dbHost.c_str(),
         dbUser.c_str(),
         (dbPass.empty() ? nullptr : dbPass.c_str()),
@@ -137,7 +137,7 @@ void MySQLDatabase::init()
         (dbSock.empty() ? nullptr : dbSock.c_str()), // socket
         0 // flags
     );
-    if (!res_mysql) {
+    if (!resMysql) {
         throw_std_runtime_error("Connecting to database {}:{}/{} failed: {}", dbHost, dbPort, dbName, getError(&db));
     }
 
@@ -272,8 +272,8 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
 
-    MYSQL_RES* mysql_res = mysql_store_result(&db);
-    if (!mysql_res && mysql_field_count(&db)) {
+    MYSQL_RES* mysqlRes = mysql_store_result(&db);
+    if (!mysqlRes && mysql_field_count(&db)) {
         std::string myError = getError(&db);
         rollback("");
         throw DatabaseException(myError, fmt::format("Mysql: mysql_store_result() failed: {}; query: {}", myError, query));
@@ -282,7 +282,7 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
         inTransaction = false;
     }
 
-    return std::make_shared<MysqlResult>(mysql_res);
+    return std::make_shared<MysqlResult>(mysqlRes);
 }
 
 std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
@@ -297,13 +297,13 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
 
-    MYSQL_RES* mysql_res = mysql_store_result(&db);
-    if (!mysql_res && mysql_field_count(&db)) {
+    MYSQL_RES* mysqlRes = mysql_store_result(&db);
+    if (!mysqlRes && mysql_field_count(&db)) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: mysql_store_result() failed: {}; query: {}", myError, query));
     }
 
-    return std::make_shared<MysqlResult>(mysql_res);
+    return std::make_shared<MysqlResult>(mysqlRes);
 }
 
 int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
@@ -321,10 +321,10 @@ int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
         rollback("");
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
-    int insert_id = -1;
+    int insertId = -1;
     if (getLastInsertId)
-        insert_id = mysql_insert_id(&db);
-    return insert_id;
+        insertId = mysql_insert_id(&db);
+    return insertId;
 }
 
 void MySQLDatabase::shutdownDriver()
@@ -361,8 +361,8 @@ MysqlResult::~MysqlResult()
 
 std::unique_ptr<SQLRow> MysqlResult::nextRow()
 {
-    if (auto mysql_row = mysql_fetch_row(mysql_res); mysql_row) {
-        return std::make_unique<MysqlRow>(mysql_row);
+    if (auto mysqlRow = mysql_fetch_row(mysql_res); mysqlRow) {
+        return std::make_unique<MysqlRow>(mysqlRow);
     }
     nullRead = true;
     mysql_free_result(mysql_res);

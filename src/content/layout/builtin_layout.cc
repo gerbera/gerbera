@@ -185,18 +185,18 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         title = obj->getTitle();
 
     std::string artist = obj->getMetaData(M_ARTIST);
-    std::string artist_full;
+    std::string artistFull;
     if (!artist.empty()) {
-        artist_full = artist;
+        artistFull = artist;
         desc = artist;
     } else
         artist = "Unknown";
 
     std::string album = obj->getMetaData(M_ALBUM);
-    std::string album_full;
+    std::string albumFull;
     if (!album.empty()) {
         desc = fmt::format("{}, {}", desc, album);
-        album_full = album;
+        albumFull = album;
     } else {
         album = "Unknown";
     }
@@ -264,11 +264,11 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     add(obj, id);
 
     std::string temp;
-    if (!artist_full.empty())
-        temp = artist_full;
+    if (!artistFull.empty())
+        temp = artistFull;
 
-    if (!album_full.empty())
-        temp = fmt::format("{} - {} - ", temp, album_full);
+    if (!albumFull.empty())
+        temp = fmt::format("{} - {} - ", temp, albumFull);
     else
         temp = fmt::format("{} - ", temp);
 
@@ -321,24 +321,24 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
 void BuiltinLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
 {
 #define SP_VPATH "/Online Services/SopCast"
-    bool ref_set = false;
+    bool refSet = false;
 
     if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
-        ref_set = true;
+        refSet = true;
     }
 
     auto id = content->addContainerChain(SP_VPATH "/All Channels");
-    add(obj, id, ref_set);
-    if (!ref_set) {
+    add(obj, id, refSet);
+    if (!refSet) {
         obj->setRefID(obj->getID());
-        ref_set = true;
+        refSet = true;
     }
 
     auto temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
     if (!temp.empty()) {
         id = content->addContainerChain(fmt::format(SP_VPATH "/Groups/{}", esc(temp)));
-        add(obj, id, ref_set);
+        add(obj, id, refSet);
     }
 }
 #endif

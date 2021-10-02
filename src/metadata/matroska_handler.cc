@@ -130,35 +130,35 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
     if (!item)
         return nullptr;
 
-    std::unique_ptr<MemIOHandler> io_handler;
-    parseMKV(item, &io_handler);
+    std::unique_ptr<MemIOHandler> ioHandler;
+    parseMKV(item, &ioHandler);
 
-    return io_handler;
+    return ioHandler;
 }
 
 void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler) const
 {
-    auto ebml_file = FileIOCallback(item->getLocation().c_str());
-    auto ebml_stream = EbmlStream(ebml_file);
+    auto ebmlFile = FileIOCallback(item->getLocation().c_str());
+    auto ebmlStream = EbmlStream(ebmlFile);
 
-    auto el_l0 = ebml_stream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);
-    while (el_l0) {
-        int i_upper_level = 0;
-        EbmlElement* el_l1;
-        while ((el_l1 = ebml_stream.FindNextElement(el_l0->Generic().Context, i_upper_level, ~0, true))) {
-            parseLevel1Element(item, ebml_stream, el_l1, pIoHandler);
+    auto elL0 = ebmlStream.FindNextID(LIBMATROSKA_NAMESPACE::KaxSegment::ClassInfos, ~0);
+    while (elL0) {
+        int iUpperLevel = 0;
+        EbmlElement* elL1;
+        while ((elL1 = ebmlStream.FindNextElement(elL0->Generic().Context, iUpperLevel, ~0, true))) {
+            parseLevel1Element(item, ebmlStream, elL1, pIoHandler);
 
-            el_l1->SkipData(ebml_stream, el_l1->Generic().Context);
-            delete el_l1;
+            elL1->SkipData(ebmlStream, elL1->Generic().Context);
+            delete elL1;
         } // while elementLevel1
 
-        el_l0->SkipData(ebml_stream, LIBMATROSKA_NAMESPACE::KaxSegment_Context);
-        delete el_l0;
+        elL0->SkipData(ebmlStream, LIBMATROSKA_NAMESPACE::KaxSegment_Context);
+        delete elL0;
 
-        el_l0 = ebml_stream.FindNextElement(LIBMATROSKA_NAMESPACE::KaxSegment_Context, i_upper_level, ~0, true);
+        elL0 = ebmlStream.FindNextElement(LIBMATROSKA_NAMESPACE::KaxSegment_Context, iUpperLevel, ~0, true);
     } // while elementLevel0
 
-    ebml_file.close();
+    ebmlFile.close();
 }
 
 void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler) const
@@ -180,34 +180,34 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, E
 
 void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlMaster* info) const
 {
-    EbmlElement* dummy_el;
-    int i_upper_level = 0;
+    EbmlElement* dummyEl;
+    int iUpperLevel = 0;
 
     // master elements
-    info->Read(ebmlStream, EBML_CONTEXT(info), i_upper_level, dummy_el, true);
+    info->Read(ebmlStream, EBML_CONTEXT(info), iUpperLevel, dummyEl, true);
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
     for (auto&& el : *info) {
         if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxTitle::ClassInfos.GlobalId) {
-            auto title_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxTitle*>(el);
-            if (!title_el) {
+            auto titleEl = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxTitle*>(el);
+            if (!titleEl) {
                 log_error("Malformed MKV file; KaxTitle cast failed!");
                 continue;
             }
-            std::string title(UTFstring(*title_el).GetUTF8());
+            std::string title(UTFstring(*titleEl).GetUTF8());
             log_debug("KaxTitle = {}", title);
             item->addMetaData(M_TITLE, sc->convert(title));
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
-            auto date_el = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
-            if (!date_el) {
+            auto dateEl = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
+            if (!dateEl) {
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }
-            auto f_date = fmt::format("{:%Y-%m-%d}", fmt::gmtime(date_el->GetEpochDate()));
-            if (!f_date.empty()) {
-                log_debug("KaxDateUTC = {}", f_date);
-                item->addMetaData(M_DATE, sc->convert(f_date));
+            auto fDate = fmt::format("{:%Y-%m-%d}", fmt::gmtime(dateEl->GetEpochDate()));
+            if (!fDate.empty()) {
+                log_debug("KaxDateUTC = {}", fDate);
+                item->addMetaData(M_DATE, sc->convert(fDate));
             }
         }
     }
@@ -215,10 +215,10 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
 
 void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, EbmlStream& ebmlStream, EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler) const
 {
-    EbmlElement* dummy_el;
-    int i_upper_level = 0;
+    EbmlElement* dummyEl;
+    int iUpperLevel = 0;
 
-    attachments->Read(ebmlStream, EBML_CONTEXT(attachments), i_upper_level, dummy_el, true);
+    attachments->Read(ebmlStream, EBML_CONTEXT(attachments), iUpperLevel, dummyEl, true);
 
     auto attachedFile = FindChild<LIBMATROSKA_NAMESPACE::KaxAttached>(*attachments);
     while (attachedFile && (attachedFile->GetSize() > 0)) {
@@ -234,9 +234,9 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
                 *pIoHandler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
             } else {
                 // fillMetadata
-                std::string art_mimetype = getContentTypeFromByteVector(fileData);
-                if (!art_mimetype.empty())
-                    addArtworkResource(item, art_mimetype);
+                std::string artMimetype = getContentTypeFromByteVector(fileData);
+                if (!artMimetype.empty())
+                    addArtworkResource(item, artMimetype);
             }
         }
 
@@ -247,8 +247,8 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, Ebm
 std::string MatroskaHandler::getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData& data) const
 {
 #ifdef HAVE_MAGIC
-    auto art_mimetype = mime->bufferToMimeType(data.GetBuffer(), data.GetSize());
-    return art_mimetype.empty() ? MIMETYPE_DEFAULT : art_mimetype;
+    auto artMimetype = mime->bufferToMimeType(data.GetBuffer(), data.GetSize());
+    return artMimetype.empty() ? MIMETYPE_DEFAULT : artMimetype;
 #else
     return MIMETYPE_DEFAULT;
 #endif

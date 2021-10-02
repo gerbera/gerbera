@@ -117,9 +117,9 @@ void Server::run()
         throw_std_runtime_error("Could not find IP: {}", ip);
 
     // check webroot directory
-    std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
-    if (web_root.empty()) {
-        throw_std_runtime_error("Invalid web server root directory {}", web_root);
+    std::string webRoot = config->getOption(CFG_SERVER_WEBROOT);
+    if (webRoot.empty()) {
+        throw_std_runtime_error("Invalid web server root directory {}", webRoot);
     }
 
     auto ret = startupInterface(iface, in_port_t(config->getIntOption(CFG_SERVER_PORT)));
@@ -127,12 +127,12 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpInit failed {} {}", iface, port));
     }
 
-    ret = UpnpSetWebServerRootDir(web_root.c_str());
+    ret = UpnpSetWebServerRootDir(webRoot.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("run: UpnpSetWebServerRootDir failed {}", web_root));
+        throw UpnpException(ret, fmt::format("run: UpnpSetWebServerRootDir failed {}", webRoot));
     }
 
-    log_debug("webroot: {}", web_root);
+    log_debug("webroot: {}", webRoot);
 
     log_debug("Setting virtual dir to: {}", virtual_directory);
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
@@ -359,8 +359,8 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
             auto request = std::make_unique<ActionRequest>(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
-        } catch (const UpnpException& upnp_e) {
-            ret = upnp_e.getErrorCode();
+        } catch (const UpnpException& upnpE) {
+            ret = upnpE.getErrorCode();
             UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
         } catch (const std::runtime_error& e) {
             log_info("Exception: {}", e.what());
@@ -372,9 +372,9 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
         try {
             auto request = std::make_unique<SubscriptionRequest>(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
             routeSubscriptionRequest(request);
-        } catch (const UpnpException& upnp_e) {
-            log_warning("Subscription exception: {}", upnp_e.what());
-            ret = upnp_e.getErrorCode();
+        } catch (const UpnpException& upnpE) {
+            log_warning("Subscription exception: {}", upnpE.what());
+            ret = upnpE.getErrorCode();
         }
         break;
 
@@ -400,10 +400,10 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     switch (eventType) {
     case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
     case UPNP_DISCOVERY_SEARCH_RESULT: {
-        auto d_event = static_cast<const UpnpDiscovery*>(event);
-        const char* userAgent = UpnpDiscovery_get_Os_cstr(d_event);
-        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
-        const char* location = UpnpDiscovery_get_Location_cstr(d_event);
+        auto dEvent = static_cast<const UpnpDiscovery*>(event);
+        const char* userAgent = UpnpDiscovery_get_Os_cstr(dEvent);
+        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(dEvent);
+        const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
         clients->addClientByDiscovery(destAddr, userAgent, location);
         break;
@@ -491,9 +491,9 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto params = dictDecode(parameters);
 
         auto it = params.find(URL_REQUEST_TYPE);
-        std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
+        std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return Web::createWebRequestHandler(context, content, xmlbuilder, r_type);
+        return Web::createWebRequestHandler(context, content, xmlbuilder, rType);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
@@ -599,16 +599,16 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir CloseCallback");
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
         //log_debug("{} close()", f);
-        int ret_close = 0;
+        int retClose = 0;
         auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
         try {
             handler->close();
         } catch (const std::runtime_error& e) {
             log_error("Exception during close: {}", e.what());
-            ret_close = -1;
+            retClose = -1;
         }
 
-        return ret_close;
+        return retClose;
     });
 
     return ret;

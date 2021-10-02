@@ -92,22 +92,22 @@ void Web::Items::process()
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         // check for inotify mode
-        int startpoint_id = INVALID_OBJECT_ID;
+        int startpointId = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
             auto pathIDs = database->getPathIDs(parentID);
             for (int pathId : pathIDs) {
                 auto pathDir = database->getAutoscanDirectory(pathId);
                 if (pathDir && pathDir->getRecursive()) {
-                    startpoint_id = pathId;
+                    startpointId = pathId;
                     break;
                 }
             }
         } else {
-            startpoint_id = parentID;
+            startpointId = parentID;
         }
 
-        if (startpoint_id != INVALID_OBJECT_ID) {
-            auto startPtDir = database->getAutoscanDirectory(startpoint_id);
+        if (startpointId != INVALID_OBJECT_ID) {
+            auto startPtDir = database->getAutoscanDirectory(startpointId);
             if (startPtDir && startPtDir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || startPtDir->persistent())

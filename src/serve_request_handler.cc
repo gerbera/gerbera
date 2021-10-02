@@ -128,7 +128,7 @@ std::unique_ptr<IOHandler> ServeRequestHandler::open(const char* filename, enum 
         throw_std_runtime_error("Not a regular file: {}", path);
     }
 
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    io_handler->open(mode);
-    return io_handler;
+    auto ioHandler = std::make_unique<FileIOHandler>(path);
+    ioHandler->open(mode);
+    return ioHandler;
 }

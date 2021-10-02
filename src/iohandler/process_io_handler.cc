@@ -170,12 +170,12 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
 {
     fd_set readSet;
     struct timespec timeout;
-    ssize_t bytes_read = 0;
-    std::size_t num_bytes = 0;
-    char* p_buffer = buf;
-    int exit_status = EXIT_SUCCESS;
+    ssize_t bytesRead = 0;
+    std::size_t numBytes = 0;
+    char* pBuffer = buf;
+    int exitStatus = EXIT_SUCCESS;
     int ret;
-    int timeout_count = 0;
+    int timeoutCount = 0;
 
     while (true) {
         FD_ZERO(&readSet);
@@ -193,13 +193,13 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
         // timeout
         if (ret == 0) {
             if (mainProc) {
-                bool main_ok = mainProc->isAlive();
-                if (!main_ok || abort()) {
-                    if (!main_ok) {
-                        exit_status = mainProc->getStatus();
-                        log_debug("process exited with status {}", exit_status);
+                bool mainOk = mainProc->isAlive();
+                if (!mainOk || abort()) {
+                    if (!mainOk) {
+                        exitStatus = mainProc->getStatus();
+                        log_debug("process exited with status {}", exitStatus);
                         killAll();
-                        return (exit_status == EXIT_SUCCESS) ? 0 : -1;
+                        return (exitStatus == EXIT_SUCCESS) ? 0 : -1;
                     }
                     mainProc->kill();
                     killAll();
@@ -210,35 +210,35 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
                 return 0;
             }
 
-            timeout_count++;
-            if (timeout_count > MAX_TIMEOUTS) {
+            timeoutCount++;
+            if (timeoutCount > MAX_TIMEOUTS) {
                 log_debug("max timeouts, checking socket!");
                 return CHECK_SOCKET;
             }
         }
 
         if (FD_ISSET(fd, &readSet)) {
-            timeout_count = 0;
-            bytes_read = ::read(fd, p_buffer, length);
-            if (bytes_read == 0)
+            timeoutCount = 0;
+            bytesRead = ::read(fd, pBuffer, length);
+            if (bytesRead == 0)
                 break;
 
-            if (bytes_read < 0) {
+            if (bytesRead < 0) {
                 log_debug("aborting read!!!");
                 return -1;
             }
 
-            num_bytes = num_bytes + bytes_read;
-            length = length - bytes_read;
+            numBytes = numBytes + bytesRead;
+            length = length - bytesRead;
 
             if (length == 0)
                 break;
 
-            p_buffer = buf + num_bytes;
+            pBuffer = buf + numBytes;
         }
     }
 
-    if (num_bytes == 0) {
+    if (numBytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
@@ -255,17 +255,17 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
         return ret;
     }
 
-    return num_bytes;
+    return numBytes;
 }
 
 std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
 {
     fd_set writeSet;
     struct timespec timeout;
-    ssize_t bytes_written = 0;
-    std::size_t num_bytes = 0;
-    char* p_buffer = buf;
-    int exit_status = EXIT_SUCCESS;
+    ssize_t bytesWritten = 0;
+    std::size_t numBytes = 0;
+    char* pBuffer = buf;
+    int exitStatus = EXIT_SUCCESS;
     int ret;
 
     while (true) {
@@ -285,13 +285,13 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
         // timeout
         if (ret == 0) {
             if (mainProc) {
-                bool main_ok = mainProc->isAlive();
-                if (!main_ok || abort()) {
-                    if (!main_ok) {
-                        exit_status = mainProc->getStatus();
-                        log_debug("process exited with status {}", exit_status);
+                bool mainOk = mainProc->isAlive();
+                if (!mainOk || abort()) {
+                    if (!mainOk) {
+                        exitStatus = mainProc->getStatus();
+                        log_debug("process exited with status {}", exitStatus);
                         killAll();
-                        return (exit_status == EXIT_SUCCESS) ? 0 : -1;
+                        return (exitStatus == EXIT_SUCCESS) ? 0 : -1;
                     }
 
                     mainProc->kill();
@@ -305,25 +305,25 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
         }
 
         if (FD_ISSET(fd, &writeSet)) {
-            bytes_written = ::write(fd, p_buffer, length);
-            if (bytes_written == 0)
+            bytesWritten = ::write(fd, pBuffer, length);
+            if (bytesWritten == 0)
                 break;
 
-            if (bytes_written < 0) {
+            if (bytesWritten < 0) {
                 log_debug("aborting write!!!");
                 return -1;
             }
 
-            num_bytes = num_bytes + bytes_written;
-            length = length - bytes_written;
+            numBytes = numBytes + bytesWritten;
+            length = length - bytesWritten;
             if (length == 0)
                 break;
 
-            p_buffer = buf + num_bytes;
+            pBuffer = buf + numBytes;
         }
     }
 
-    if (num_bytes == 0) {
+    if (numBytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
         ret = -1;
@@ -343,7 +343,7 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
         return ret;
     }
 
-    return num_bytes;
+    return numBytes;
 }
 
 void ProcessIOHandler::seek(off_t offset, int whence)
