@@ -54,18 +54,18 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     int fd;
 
     /* creating input file */
-    char temp_in[] = "mt_in_XXXXXX";
-    char temp_out[] = "mt_out_XXXXXX";
+    char tempIn[] = "mt_in_XXXXXX";
+    char tempOut[] = "mt_out_XXXXXX";
 
-    std::string input_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_in);
+    std::string inputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempIn);
 #ifdef __linux__
-    fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
 #else
     fd = open(input_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
-        log_debug("Failed to open input file {}: {}", input_file, std::strerror(errno));
-        throw_std_runtime_error("Failed to open input file {}: {}", input_file, std::strerror(errno));
+        log_debug("Failed to open input file {}: {}", inputFile, std::strerror(errno));
+        throw_std_runtime_error("Failed to open input file {}: {}", inputFile, std::strerror(errno));
     }
     std::size_t ret = write(fd, input.c_str(), input.length());
     close(fd);
@@ -75,20 +75,20 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     }
 
     /* touching output file */
-    std::string output_file = tempName(cfg->getOption(CFG_SERVER_TMPDIR), temp_out);
+    std::string outputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempOut);
 #ifdef __linux__
-    fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
+    fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
 #else
     fd = open(output_file.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 #endif
     if (fd == -1) {
-        log_debug("Failed to open output file {}: {}", output_file, std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", output_file, std::strerror(errno));
+        log_debug("Failed to open output file {}: {}", outputFile, std::strerror(errno));
+        throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
     }
     close(fd);
 
     /* executing script */
-    auto command = fmt::format("{} {} < {} > {}", prog, param, input_file, output_file);
+    auto command = fmt::format("{} {} < {} > {}", prog, param, inputFile, outputFile);
     log_debug("running {}", command);
     int sysret = std::system(command.c_str());
     if (sysret == -1) {
@@ -98,13 +98,13 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 
     /* reading output file */
 #ifdef __linux__
-    file = std::fopen(output_file.c_str(), "re");
+    file = std::fopen(outputFile.c_str(), "re");
 #else
     file = std::fopen(output_file.c_str(), "r");
 #endif
     if (!file) {
-        log_debug("Could not open output file {}: {}", output_file, std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", output_file, std::strerror(errno));
+        log_debug("Could not open output file {}: {}", outputFile, std::strerror(errno));
+        throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
     }
 
     std::ostringstream output;
@@ -120,8 +120,8 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     std::fclose(file);
 
     /* removing input and output files */
-    unlink(input_file.c_str());
-    unlink(output_file.c_str());
+    unlink(inputFile.c_str());
+    unlink(outputFile.c_str());
 
     return output.str();
 }

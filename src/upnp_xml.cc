@@ -107,11 +107,11 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     if (i != std::string::npos
         && j != std::string::npos
         && key[key.length() - 1] == ']') {
-        std::string attr_name = key.substr(i + 1, j - i - 1);
-        std::string attr_value = key.substr(j + 1, key.length() - j - 2);
+        std::string attrName = key.substr(i + 1, j - i - 1);
+        std::string attrValue = key.substr(j + 1, key.length() - j - 2);
         std::string name = key.substr(0, i);
         auto node = entry.append_child(name.c_str());
-        node.append_attribute(attr_name.c_str()) = attr_value.c_str();
+        node.append_attribute(attrName.c_str()) = attrValue.c_str();
         node.append_child(pugi::node_pcdata).set_value(val.c_str());
     } else {
         entry.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
@@ -308,7 +308,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
         struct ServiceInfo {
             const char* serviceType;
             const char* serviceId;
-            const char* SCPDURL;
+            const char* scpdurl;
             const char* controlURL;
             const char* eventSubURL;
         };
@@ -325,7 +325,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
             auto service = serviceList.append_child("service");
             service.append_child("serviceType").append_child(pugi::node_pcdata).set_value(s.serviceType);
             service.append_child("serviceId").append_child(pugi::node_pcdata).set_value(s.serviceId);
-            service.append_child("SCPDURL").append_child(pugi::node_pcdata).set_value(s.SCPDURL);
+            service.append_child("SCPDURL").append_child(pugi::node_pcdata).set_value(s.scpdurl);
             service.append_child("controlURL").append_child(pugi::node_pcdata).set_value(s.controlURL);
             service.append_child("eventSubURL").append_child(pugi::node_pcdata).set_value(s.eventSubURL);
         }
@@ -408,9 +408,9 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
 
-                auto res_params = res->getParameters();
-                res_params[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
-                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(res_params) });
+                auto resParams = res->getParameters();
+                resParams[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
+                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
                 return { url, true };
             }
 
@@ -418,8 +418,8 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
                 std::map<std::string, std::string> dict;
                 dict[URL_OBJECT_ID] = resObj;
 
-                auto res_params = res->getParameters();
-                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(res_params) });
+                auto resParams = res->getParameters();
+                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(resParams) });
                 return { url, true };
             }
         }
@@ -429,7 +429,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
 
 std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res)
 {
-    auto res_params = res->getParameters();
+    auto resParams = res->getParameters();
     auto urlBase = getPathBase(item);
     std::string url;
     if (urlBase->addResID) {
@@ -437,8 +437,8 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
     } else
         url = virtualURL + urlBase->pathBase;
 
-    if (!res_params.empty()) {
-        url.append(dictEncodeSimple(res_params));
+    if (!resParams.empty()) {
+        url.append(dictEncodeSimple(resParams));
     }
     return url;
 }
@@ -516,10 +516,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
-    bool hide_original_resource = false;
-    int original_resource = -1;
+    bool hideOriginalResource = false;
+    int originalResource = -1;
 
-    std::unique_ptr<PathBase> urlBase_tr;
+    std::unique_ptr<PathBase> urlBaseTr;
 
     // once proxying is a feature that can be turned off or on in
     // config manager we should use that setting
@@ -529,9 +529,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
     // now get the profile
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
-    auto tp_mt = tlist->get(item->getMimeType());
-    if (tp_mt) {
-        for (auto&& [key, tp] : *tp_mt) {
+    auto tpMt = tlist->get(item->getMimeType());
+    if (tpMt) {
+        for (auto&& [key, tp] : *tpMt) {
             if (!tp)
                 throw_std_runtime_error("Invalid profile encountered");
             // check for client profile prop and filter if no match
@@ -544,41 +544,41 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 }
             } else if (ct == CONTENT_TYPE_AVI) {
                 // check user fourcc settings
-                avi_fourcc_listmode_t fcc_mode = tp->getAVIFourCCListMode();
+                avi_fourcc_listmode_t fccMode = tp->getAVIFourCCListMode();
 
-                std::vector<std::string> fcc_list = tp->getAVIFourCCList();
+                std::vector<std::string> fccList = tp->getAVIFourCCList();
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
-                if (fcc_mode != FCC_None) {
-                    std::string current_fcc = item->getResource(0)->getOption(RESOURCE_OPTION_FOURCC);
+                if (fccMode != FCC_None) {
+                    std::string currentFcc = item->getResource(0)->getOption(RESOURCE_OPTION_FOURCC);
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
-                    if (current_fcc.empty()) {
+                    if (currentFcc.empty()) {
                         // the process mode specifies that we will transcode
                         // ONLY if the fourcc matches the list; since an invalid
                         // fourcc can not match anything we will skip the item
-                        if (fcc_mode == FCC_Process)
+                        if (fccMode == FCC_Process)
                             continue;
                     } else {
                         // we have the current and hopefully valid fcc string
                         // let's have a look if it matches the list
-                        bool fcc_match = std::find(fcc_list.begin(), fcc_list.end(), current_fcc) != fcc_list.end();
-                        if (!fcc_match && (fcc_mode == FCC_Process))
+                        bool fccMatch = std::find(fccList.begin(), fccList.end(), currentFcc) != fccList.end();
+                        if (!fccMatch && (fccMode == FCC_Process))
                             continue;
 
-                        if (fcc_match && (fcc_mode == FCC_Ignore))
+                        if (fccMatch && (fccMode == FCC_Ignore))
                             continue;
                     }
                 }
             }
 
-            auto t_res = std::make_shared<CdsResource>(CH_TRANSCODE);
-            t_res->setResId(std::numeric_limits<int>::max());
-            t_res->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
+            auto tRes = std::make_shared<CdsResource>(CH_TRANSCODE);
+            tRes->setResId(std::numeric_limits<int>::max());
+            tRes->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
             // after transcoding resource was added we can not rely on
             // index 0, so we will make sure the ogg option is there
-            t_res->addOption(CONTENT_TYPE_OGG, item->getResource(0)->getOption(CONTENT_TYPE_OGG));
-            t_res->addParameter(URL_PARAM_TRANSCODE, URL_VALUE_TRANSCODE);
+            tRes->addOption(CONTENT_TYPE_OGG, item->getResource(0)->getOption(CONTENT_TYPE_OGG));
+            tRes->addParameter(URL_PARAM_TRANSCODE, URL_VALUE_TRANSCODE);
 
             std::string targetMimeType = tp->getTargetMimeType();
 
@@ -587,17 +587,17 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 // take the value from the original resource
                 std::string duration = item->getResource(0)->getAttribute(R_DURATION);
                 if (!duration.empty())
-                    t_res->addAttribute(R_DURATION, duration);
+                    tRes->addAttribute(R_DURATION, duration);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
                     std::string frequency = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
                     if (!frequency.empty()) {
-                        t_res->addAttribute(R_SAMPLEFREQUENCY, frequency);
+                        tRes->addAttribute(R_SAMPLEFREQUENCY, frequency);
                         targetMimeType.append(fmt::format(";rate={}", frequency));
                     }
                 } else if (freq != OFF) {
-                    t_res->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(freq));
+                    tRes->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(freq));
                     targetMimeType.append(fmt::format(";rate={}", freq));
                 }
 
@@ -605,36 +605,36 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 if (chan == SOURCE) {
                     std::string nchannels = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
                     if (!nchannels.empty()) {
-                        t_res->addAttribute(R_NRAUDIOCHANNELS, nchannels);
+                        tRes->addAttribute(R_NRAUDIOCHANNELS, nchannels);
                         targetMimeType.append(fmt::format(";channels={}", nchannels));
                     }
                 } else if (chan != OFF) {
-                    t_res->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(chan));
+                    tRes->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(chan));
                     targetMimeType.append(fmt::format(";channels={}", chan));
                 }
             }
 
-            t_res->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(targetMimeType));
+            tRes->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(targetMimeType));
 
             if (tp->isThumbnail())
-                t_res->addOption(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
+                tRes->addOption(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
 
-            t_res->mergeAttributes(tp->getAttributes());
+            tRes->mergeAttributes(tp->getAttributes());
 
-            t_res->addParameter("dlnaProfile", tp->dlnaProfile());
+            tRes->addParameter("dlnaProfile", tp->dlnaProfile());
 
             if (tp->hideOriginalResource())
-                hide_original_resource = true;
+                hideOriginalResource = true;
 
             if (tp->firstResource()) {
-                orderedResources.push_front(std::move(t_res));
-                original_resource = 0;
+                orderedResources.push_front(std::move(tRes));
+                originalResource = 0;
             } else
-                orderedResources.push_back(std::move(t_res));
+                orderedResources.push_back(std::move(tRes));
         }
 
         if (skipURL)
-            urlBase_tr = getPathBase(item, true);
+            urlBaseTr = getPathBase(item, true);
     }
 
     bool isFirstSub = true;
@@ -643,9 +643,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         /*        std::string mimeType = item->getMimeType();
                   if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */
 
-        auto res_attrs = res->getAttributes();
-        auto res_params = res->getParameters();
-        std::string protocolInfo = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+        auto resAttrs = res->getAttributes();
+        auto resParams = res->getParameters();
+        std::string protocolInfo = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
         auto pos = mimeType.find(';');
@@ -671,7 +671,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // for transcoded resources the res_id can be safely ignored,
         // because a transcoded resource is identified by the profile name
         // flag if we are dealing with the transcoded resource
-        bool transcoded = (getValueOrDefault(res_params, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
+        bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         if (!transcoded) {
             if (urlBase->addResID) {
                 url = fmt::format("{}{}", urlBase->pathBase, res->getResId());
@@ -681,13 +681,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!skipURL)
                 url = urlBase->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
             else {
-                assert(urlBase_tr);
-                url = urlBase_tr->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
+                assert(urlBaseTr);
+                url = urlBaseTr->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
             }
         }
-        if (!res_params.empty()) {
+        if (!resParams.empty()) {
             url.append(_URL_PARAM_SEPARATOR);
-            url.append(dictEncodeSimple(res_params));
+            url.append(dictEncodeSimple(resParams));
         }
 
         // ok this really sucks, I guess another rewrite of the resource manager
@@ -746,7 +746,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         std::string dlnaProfile = res->getParameter("dlnaProfile");
 
         if (contentType == CONTENT_TYPE_JPG) {
-            std::string resolution = getValueOrDefault(res_attrs, MetadataHandler::getResAttrName(R_RESOLUTION));
+            std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
             int x;
             int y;
             if ((res->getResId() > 0) && !resolution.empty() && checkResolution(resolution, &x, &y)) {
@@ -776,16 +776,16 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
 
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
-        res_attrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
+        resAttrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
 
         log_debug("protocolInfo: {}", protocolInfo.c_str());
 
         // URL is path until now
-        if (!item->isExternalItem() || (hide_original_resource && item->isExternalItem())) {
+        if (!item->isExternalItem() || (hideOriginalResource && item->isExternalItem())) {
             url = virtualURL + url;
         }
 
-        if (!hide_original_resource || transcoded || (hide_original_resource && (original_resource != res->getResId())))
-            renderResource(url, res_attrs, parent);
+        if (!hideOriginalResource || transcoded || (hideOriginalResource && (originalResource != res->getResId())))
+            renderResource(url, resAttrs, parent);
     }
 }

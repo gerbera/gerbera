@@ -60,13 +60,13 @@ void Web::Directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    auto&& excludes_fullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
-    auto&& includes_fullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
+    auto&& excludesFullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
+    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
     constexpr auto excludesDirname = std::array {
         "lost+found",
     };
-    bool exclude_config_dirs = true;
+    bool excludeConfigDirs = true;
 
     std::error_code ec;
     std::map<std::string, dirInfo> filesMap;
@@ -76,15 +76,15 @@ void Web::Directories::process()
 
         if (!it.is_directory(ec))
             continue;
-        if (!includes_fullpath.empty()
-            && std::none_of(includes_fullpath.begin(), includes_fullpath.end(), //
+        if (!includesFullpath.empty()
+            && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
                 [&](auto&& sub) { return startswith(filepath.string(), sub) || startswith(sub, filepath.string()); }))
             continue; // skip unwanted dir
-        if (includes_fullpath.empty()) {
-            if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
+        if (includesFullpath.empty()) {
+            if (std::find(excludesFullpath.begin(), excludesFullpath.end(), filepath) != excludesFullpath.end())
                 continue; // skip excluded dir
             if (std::find(excludesDirname.begin(), excludesDirname.end(), filepath.filename()) != excludesDirname.end()
-                || (exclude_config_dirs && startswith(filepath.filename().string(), ".")))
+                || (excludeConfigDirs && startswith(filepath.filename().string(), ".")))
                 continue; // skip dir with leading .
         }
         auto dir = fs::directory_iterator(filepath, ec);

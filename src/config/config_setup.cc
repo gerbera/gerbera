@@ -180,7 +180,7 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
 
 bool ConfigPathSetup::checkAgentPath(std::string& optValue)
 {
-    fs::path tmp_path;
+    fs::path tmpPath;
     if (fs::path(optValue).is_absolute()) {
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
@@ -188,17 +188,17 @@ bool ConfigPathSetup::checkAgentPath(std::string& optValue)
             log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue);
             return false;
         }
-        tmp_path = optValue;
+        tmpPath = optValue;
     } else {
-        tmp_path = findInPath(optValue);
-        if (tmp_path.empty()) {
+        tmpPath = findInPath(optValue);
+        if (tmpPath.empty()) {
             log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\" in $PATH", optValue);
             return false;
         }
     }
 
     int err = 0;
-    if (!isExecutable(tmp_path, &err)) {
+    if (!isExecutable(tmpPath, &err)) {
         log_error("Error in configuration, transcoding profile: transcoder {} is not executable: {}", optValue, std::strerror(err));
         return false;
     }
@@ -363,32 +363,32 @@ std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
 
 bool ConfigIntSetup::CheckSqlLiteSyncValue(std::string& value)
 {
-    auto temp_int = 0;
+    auto tempInt = 0;
     if (value == "off" || value == fmt::to_string(MT_SQLITE_SYNC_OFF))
-        temp_int = MT_SQLITE_SYNC_OFF;
+        tempInt = MT_SQLITE_SYNC_OFF;
     else if (value == "normal" || value == fmt::to_string(MT_SQLITE_SYNC_NORMAL))
-        temp_int = MT_SQLITE_SYNC_NORMAL;
+        tempInt = MT_SQLITE_SYNC_NORMAL;
     else if (value == "full" || value == fmt::to_string(MT_SQLITE_SYNC_FULL))
-        temp_int = MT_SQLITE_SYNC_FULL;
+        tempInt = MT_SQLITE_SYNC_FULL;
     else
         return false;
-    value.assign(fmt::to_string(temp_int));
+    value.assign(fmt::to_string(tempInt));
     return true;
 }
 
 bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
 {
-    auto temp_int = 0;
+    auto tempInt = 0;
     if (value == "source" || value == fmt::to_string(SOURCE))
-        temp_int = SOURCE;
+        tempInt = SOURCE;
     else if (value == "off" || value == fmt::to_string(OFF))
-        temp_int = OFF;
+        tempInt = OFF;
     else {
-        temp_int = std::stoi(value);
-        if (temp_int <= 0)
+        tempInt = std::stoi(value);
+        if (tempInt <= 0)
             return false;
     }
-    value.assign(fmt::to_string(temp_int));
+    value.assign(fmt::to_string(tempInt));
     return true;
 }
 
@@ -458,39 +458,39 @@ std::shared_ptr<ConfigOption> ConfigBoolSetup::newOption(bool optValue)
 
 bool ConfigBoolSetup::CheckSqlLiteRestoreValue(std::string& value)
 {
-    bool tmp_bool = true;
+    bool tmpBool = true;
     if (value == "restore" || value == YES)
-        tmp_bool = true;
+        tmpBool = true;
     else if (value == "fail" || value == NO)
-        tmp_bool = false;
+        tmpBool = false;
     else
         return false;
 
-    value.assign(tmp_bool ? YES : NO);
+    value.assign(tmpBool ? YES : NO);
     return true;
 }
 
 bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 {
-    bool temp_bool = false;
+    bool tempBool = false;
     if ((value != "auto") && !validateYesNo(value)) {
         log_error("Error in config file: incorrect parameter for \"<autoscan use-inotify=\" attribute");
         return false;
     }
 
 #ifdef HAVE_INOTIFY
-    bool inotify_supported = Inotify::supported();
-    temp_bool = (inotify_supported && value == "auto") ? true : temp_bool;
+    bool inotifySupported = Inotify::supported();
+    tempBool = (inotifySupported && value == "auto") ? true : tempBool;
 #endif
 
     if (value == YES) {
 #ifdef HAVE_INOTIFY
-        if (!inotify_supported) {
+        if (!inotifySupported) {
             log_error("You specified \"yes\" in \"<autoscan use-inotify=\"\">"
                       " however your system does not have inotify support");
             return false;
         }
-        temp_bool = true;
+        tempBool = true;
 #else
         log_error("You specified \"yes\" in \"<autoscan use-inotify=\"\">"
                   " however this version of Gerbera was compiled without inotify support");
@@ -498,20 +498,20 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 #endif
     }
 
-    value.assign(temp_bool ? YES : NO);
+    value.assign(tempBool ? YES : NO);
     return true;
 }
 
 bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 {
-    bool tmp_bool = true;
+    bool tmpBool = true;
     if (value == "prepend" || value == DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE || value == YES)
-        tmp_bool = true;
+        tmpBool = true;
     else if (value == "append" || value == NO)
-        tmp_bool = false;
+        tmpBool = false;
     else
         return false;
-    value.assign(tmp_bool ? YES : NO);
+    value.assign(tmpBool ? YES : NO);
     return true;
 }
 
@@ -657,20 +657,20 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
     if (value && !value.empty()) {
         for (auto&& it : value.select_nodes(nodeName)) {
             const pugi::xml_node& content = it.node();
-            std::string mark_content = content.text().as_string();
-            if (mark_content.empty()) {
+            std::string markContent = content.text().as_string();
+            if (markContent.empty()) {
                 log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), nodeName);
                 return false;
             }
 
-            if ((mark_content != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (mark_content != DEFAULT_MARK_PLAYED_CONTENT_IMAGE)) {
+            if ((markContent != DEFAULT_MARK_PLAYED_CONTENT_VIDEO) && (markContent != DEFAULT_MARK_PLAYED_CONTENT_AUDIO) && (markContent != DEFAULT_MARK_PLAYED_CONTENT_IMAGE)) {
                 log_error("(error in configuration, <{}>, invalid <{}> parameter! Allowed values are '{}', '{}', '{}')",
                     value.name(), nodeName,
                     DEFAULT_MARK_PLAYED_CONTENT_VIDEO, DEFAULT_MARK_PLAYED_CONTENT_AUDIO, DEFAULT_MARK_PLAYED_CONTENT_IMAGE);
                 return false;
             }
 
-            result.push_back(std::move(mark_content));
+            result.push_back(std::move(markContent));
         }
     }
     return true;
@@ -1032,11 +1032,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     const pugi::xml_node& root = element.root();
 
     // initialize mapping dictionary
-    std::map<std::string, std::string> mt_mappings;
+    std::map<std::string, std::string> mtMappings;
     {
         auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
         if (cs->hasXmlElement(root)) {
-            mt_mappings = cs->getXmlContent(cs->getXmlElement(root));
+            mtMappings = cs->getXmlContent(cs->getXmlElement(root));
         }
     }
 
@@ -1045,8 +1045,8 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     if (profileNodes.empty())
         return true;
 
-    bool allow_unused_profiles = !ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
-    if (!allow_unused_profiles && mt_mappings.empty()) {
+    bool allowUnusedProfiles = !ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
+    if (!allowUnusedProfiles && mtMappings.empty()) {
         log_error("error in configuration: transcoding "
                   "profiles exist, but no mimetype to profile mappings specified");
         return false;
@@ -1079,9 +1079,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             auto cs = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC);
             if (cs->hasXmlElement(child)) {
                 sub = cs->getXmlElement(child);
-                avi_fourcc_listmode_t fcc_mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
-                if (fcc_mode != FCC_None) {
-                    prof->setAVIFourCCList(cs->getXmlContent(sub), fcc_mode);
+                avi_fourcc_listmode_t fccMode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
+                if (fccMode != FCC_None) {
+                    prof->setAVIFourCCList(cs->getXmlContent(sub), fccMode);
                 }
             }
         }
@@ -1150,7 +1150,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         prof->setBufferOptions(buffer, chunk, fill);
 
         bool set = false;
-        for (auto&& [key, val] : mt_mappings) {
+        for (auto&& [key, val] : mtMappings) {
             if (val == prof->getName()) {
                 result->add(key, prof);
                 set = true;
@@ -1159,7 +1159,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
 
         if (!set) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName());
-            if (!allow_unused_profiles) {
+            if (!allowUnusedProfiles) {
                 return false;
             }
         }
@@ -1167,7 +1167,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
 
     // validate profiles
     auto tpl = result->getList();
-    for (auto&& [key, val] : mt_mappings) {
+    for (auto&& [key, val] : mtMappings) {
         if (tpl.find(key) == tpl.end()) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val, key);
             if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
@@ -1416,26 +1416,26 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update 4cc options
-            avi_fourcc_listmode_t fcc_mode = entry->getAVIFourCCListMode();
-            auto fcc_list = entry->getAVIFourCCList();
+            avi_fourcc_listmode_t fccMode = entry->getAVIFourCCListMode();
+            auto fccList = entry->getAVIFourCCList();
             bool set4cc = false;
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             if (optItem == index) {
-                config->setOrigValue(index, TranscodingProfile::mapFourCcMode(fcc_mode));
-                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fcc_mode)) {
+                config->setOrigValue(index, TranscodingProfile::mapFourCcMode(fccMode));
+                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fccMode)) {
                     set4cc = true;
                 }
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
             if (optItem == index) {
-                config->setOrigValue(index, std::accumulate(next(fcc_list.begin()), fcc_list.end(), fcc_list[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
-                fcc_list.clear();
-                if (ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fcc_list)) {
+                config->setOrigValue(index, std::accumulate(next(fccList.begin()), fccList.end(), fccList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
+                fccList.clear();
+                if (ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC)->checkArrayValue(optValue, fccList)) {
                     set4cc = true;
                 }
             }
             if (set4cc) {
-                entry->setAVIFourCCList(fcc_list, fcc_mode);
+                entry->setAVIFourCCList(fccList, fccMode);
                 return true;
             }
             i++;

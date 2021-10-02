@@ -74,8 +74,8 @@ void Web::Autoscan::process()
             autoscan2XML(adir, &autoscan);
         }
     } else if (action == "as_edit_save") {
-        std::string scan_mode_str = param("scan_mode");
-        if (scan_mode_str == "none") {
+        std::string scanModeStr = param("scan_mode");
+        if (scanModeStr == "none") {
             // remove...
             try {
                 auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
@@ -89,9 +89,9 @@ void Web::Autoscan::process()
             bool hidden = boolParam("hidden");
             //bool persistent = boolParam("persistent");
 
-            ScanMode scan_mode = AutoscanDirectory::remapScanmode(scan_mode_str);
+            ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
             int interval = intParam("interval", 0);
-            if (scan_mode == ScanMode::Timed && interval <= 0)
+            if (scanMode == ScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
@@ -102,7 +102,7 @@ void Web::Autoscan::process()
 
             auto autoscan = std::make_shared<AutoscanDirectory>(
                 "", //location
-                scan_mode,
+                scanMode,
                 recursive,
                 false, // persistent
                 INVALID_SCAN_ID, // autoscan id - used only internally by CM

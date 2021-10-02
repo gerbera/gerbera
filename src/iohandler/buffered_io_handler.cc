@@ -71,17 +71,17 @@ void BufferedIOHandler::threadProc()
     std::size_t maxWrite;
 
 #ifdef TOMBDEBUG
-    std::chrono::milliseconds last_log;
-    bool first_log = true;
+    std::chrono::milliseconds lastLog;
+    bool firstLog = true;
 #endif
 
     auto lock = threadRunner->uniqueLock();
     do {
 #ifdef TOMBDEBUG
-        if (first_log || getDeltaMillis(last_log) > std::chrono::seconds(1)) {
-            if (first_log)
-                first_log = false;
-            last_log = currentTimeMS();
+        if (firstLog || getDeltaMillis(lastLog) > std::chrono::seconds(1)) {
+            if (firstLog)
+                firstLog = false;
+            lastLog = currentTimeMS();
             [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
                 auto currentFillSize = int(b - a);

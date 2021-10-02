@@ -115,8 +115,8 @@ void Web::AddObject::process()
 {
     check_request();
 
-    std::string obj_type = param("obj_type");
-    std::string location = param("location");
+    auto objType = std::string(param("obj_type"));
+    auto location = fs::path(param("location"));
 
     if (param("title").empty())
         throw_std_runtime_error("empty title");
@@ -128,30 +128,30 @@ void Web::AddObject::process()
 
     std::shared_ptr<CdsObject> obj;
 
-    bool allow_fifo = false;
+    bool allowFifo = false;
     std::error_code ec;
 
-    if (obj_type == STRING_OBJECT_TYPE_CONTAINER) {
+    if (objType == STRING_OBJECT_TYPE_CONTAINER) {
         this->addContainer(parentID);
-    } else if (obj_type == STRING_OBJECT_TYPE_ITEM) {
+    } else if (objType == STRING_OBJECT_TYPE_ITEM) {
         if (location.empty())
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found {}", ec.message());
         obj = this->addItem(parentID, std::make_shared<CdsItem>());
-        allow_fifo = true;
-    } else if (obj_type == STRING_OBJECT_TYPE_EXTERNAL_URL) {
+        allowFifo = true;
+    } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(), true);
     } else {
-        throw_std_runtime_error("Unknown object type: {}", obj_type.c_str());
+        throw_std_runtime_error("Unknown object type: {}", objType.c_str());
     }
 
     if (obj) {
         obj->setVirtual(true);
-        if (obj_type == STRING_OBJECT_TYPE_ITEM) {
-            content->addVirtualItem(obj, allow_fifo);
+        if (objType == STRING_OBJECT_TYPE_ITEM) {
+            content->addVirtualItem(obj, allowFifo);
         } else {
             content->addObject(obj, true);
         }

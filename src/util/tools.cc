@@ -153,25 +153,25 @@ unsigned long stoulString(const std::string& str, int def, int base)
 
 void reduceString(std::string& str, char ch)
 {
-    auto new_end = std::unique(str.begin(), str.end(),
+    auto newEnd = std::unique(str.begin(), str.end(),
         [=](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
 
-    str.erase(new_end, str.end());
+    str.erase(newEnd, str.end());
 }
 
 void replaceString(std::string& str, std::string_view from, std::string_view to)
 {
-    auto start_pos = str.find(from);
-    if (start_pos != std::string::npos)
-        str.replace(start_pos, from.length(), to);
+    auto startPos = str.find(from);
+    if (startPos != std::string::npos)
+        str.replace(startPos, from.length(), to);
 }
 
 void replaceAllString(std::string& str, std::string_view from, std::string_view to)
 {
-    auto start_pos = str.find(from);
-    while (start_pos != std::string::npos) {
-        str.replace(start_pos, from.length(), to);
-        start_pos = str.find(from, start_pos + to.length());
+    auto startPos = str.find(from);
+    while (startPos != std::string::npos) {
+        str.replace(startPos, from.length(), to);
+        startPos = str.find(from, startPos + to.length());
     }
 }
 
@@ -242,9 +242,9 @@ fs::path findInPath(const fs::path& exec)
     if (!p)
         return {};
 
-    std::string PATH = p;
+    std::string path = p;
     std::error_code ec;
-    auto pathAr = splitString(PATH, ':');
+    auto pathAr = splitString(path, ':');
     for (auto&& path : pathAr) {
         fs::path check = fs::path(path) / exec;
         if (isRegularFile(check, ec))
@@ -321,7 +321,7 @@ std::string generateRandomId()
     char* uuid_str;
     std::uint32_t status;
 #else
-    char uuid_str[37];
+    char uuidStr[37];
 #endif
     uuid_t uuid;
 
@@ -330,16 +330,16 @@ std::string generateRandomId()
     uuid_to_string(&uuid, &uuid_str, &status);
 #else
     uuid_generate(uuid);
-    uuid_unparse(uuid, uuid_str);
+    uuid_unparse(uuid, uuidStr);
 #endif
 
-    log_debug("Generated: {}", uuid_str);
-    auto uuid_String = std::string(uuid_str);
+    log_debug("Generated: {}", uuidStr);
+    auto uuidString = std::string(uuidStr);
 #ifdef BSD_NATIVE_UUID
     free(uuid_str);
 #endif
 
-    return uuid_String;
+    return uuidString;
 }
 
 static constexpr auto hexCharS2 = "0123456789ABCDEF";
@@ -462,25 +462,25 @@ std::map<std::string, std::string> dictDecodeSimple(std::string_view url)
 {
     std::map<std::string, std::string> dict;
     std::size_t pos;
-    std::size_t last_pos = 0;
+    std::size_t lastPos = 0;
     do {
-        pos = url.find('/', last_pos);
-        if (pos == std::string_view::npos || pos < last_pos + 1)
+        pos = url.find('/', lastPos);
+        if (pos == std::string_view::npos || pos < lastPos + 1)
             break;
 
-        std::string key = urlUnescape(url.substr(last_pos, pos - last_pos));
-        last_pos = pos + 1;
-        pos = url.find('/', last_pos);
+        std::string key = urlUnescape(url.substr(lastPos, pos - lastPos));
+        lastPos = pos + 1;
+        pos = url.find('/', lastPos);
         if (pos == std::string::npos)
             pos = url.length();
-        if (pos < last_pos + 1)
+        if (pos < lastPos + 1)
             break;
 
-        std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
-        last_pos = pos + 1;
+        std::string value = urlUnescape(url.substr(lastPos, pos - lastPos));
+        lastPos = pos + 1;
 
         dict.emplace(key, value);
-    } while (last_pos < url.length());
+    } while (lastPos < url.length());
 
     return dict;
 }
@@ -672,27 +672,27 @@ std::string escape(std::string string, char escapeChar, char toEscape)
     std::ostringstream buf;
     auto len = string.length();
 
-    bool possible_more_esc = true;
-    bool possible_more_char = true;
+    bool possibleMoreEsc = true;
+    bool possibleMoreChar = true;
 
     std::size_t last = 0;
     do {
-        auto next_esc = std::string::npos;
-        if (possible_more_esc) {
-            next_esc = string.find(escapeChar, last);
-            if (next_esc == std::string::npos)
-                possible_more_esc = false;
+        auto nextEsc = std::string::npos;
+        if (possibleMoreEsc) {
+            nextEsc = string.find(escapeChar, last);
+            if (nextEsc == std::string::npos)
+                possibleMoreEsc = false;
         }
 
         auto next = std::string::npos;
-        if (possible_more_char) {
+        if (possibleMoreChar) {
             next = string.find(toEscape, last);
             if (next == std::string::npos)
-                possible_more_char = false;
+                possibleMoreChar = false;
         }
 
-        if (next == std::string::npos || (next_esc != std::string::npos && next_esc < next)) {
-            next = next_esc;
+        if (next == std::string::npos || (nextEsc != std::string::npos && nextEsc < next)) {
+            next = nextEsc;
         }
 
         if (next == std::string::npos)
@@ -890,7 +890,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 // tempName is based on create_temp_file, see (C) above
 fs::path tempName(const fs::path& leadPath, char* tmpl)
 {
-    char* XXXXXX;
+    char* xxxxxx;
     int count;
     static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     static const int nletters = sizeof(letters) - 1;
@@ -901,9 +901,9 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     int ret;
 
     /* find the last occurrence of "XXXXXX" */
-    XXXXXX = strstr(tmpl, "XXXXXX");
+    xxxxxx = strstr(tmpl, "XXXXXX");
 
-    if (!XXXXXX || std::strncmp(XXXXXX, "XXXXXX", 6) != 0) {
+    if (!xxxxxx || std::strncmp(xxxxxx, "XXXXXX", 6) != 0) {
         return {};
     }
 
@@ -915,17 +915,17 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
         long v = value;
 
         /* Fill in the random bits.  */
-        XXXXXX[0] = letters[v % nletters];
+        xxxxxx[0] = letters[v % nletters];
         v /= nletters;
-        XXXXXX[1] = letters[v % nletters];
+        xxxxxx[1] = letters[v % nletters];
         v /= nletters;
-        XXXXXX[2] = letters[v % nletters];
+        xxxxxx[2] = letters[v % nletters];
         v /= nletters;
-        XXXXXX[3] = letters[v % nletters];
+        xxxxxx[3] = letters[v % nletters];
         v /= nletters;
-        XXXXXX[4] = letters[v % nletters];
+        xxxxxx[4] = letters[v % nletters];
         v /= nletters;
-        XXXXXX[5] = letters[v % nletters];
+        xxxxxx[5] = letters[v % nletters];
 
         fs::path check = leadPath / tmpl;
         ret = stat(check.c_str(), &statbuf);
@@ -1039,8 +1039,8 @@ std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const st
 
 std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
 {
-    std::string content_parameter = getDLNAprofileString(config, contentType, vCodec, aCodec);
-    return fmt::format("{}{}={};{}={};{}={}", content_parameter, //
+    std::string contentParameter = getDLNAprofileString(config, contentType, vCodec, aCodec);
+    return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
         UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
         UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
         UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
@@ -1147,9 +1147,9 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
 {
     int fd;
-    int retry_count = 0;
+    int retryCount = 0;
     in_port_t port;
-    struct sockaddr_in server_addr;
+    struct sockaddr_in serverAddr;
     struct hostent* server;
 
     if (rangeMin > rangeMax) {
@@ -1176,13 +1176,13 @@ int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
             return -1;
         }
 
-        server_addr = {};
-        server_addr.sin_family = AF_INET;
-        std::memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
-        server_addr.sin_port = htons(port);
+        serverAddr = {};
+        serverAddr.sin_family = AF_INET;
+        std::memcpy(&serverAddr.sin_addr.s_addr, server->h_addr, server->h_length);
+        serverAddr.sin_port = htons(port);
 
-        if (connect(fd, reinterpret_cast<struct sockaddr*>(&server_addr),
-                sizeof(server_addr))
+        if (connect(fd, reinterpret_cast<struct sockaddr*>(&serverAddr),
+                sizeof(serverAddr))
             == -1) {
             close(fd);
             return port;
@@ -1190,8 +1190,8 @@ int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
 
         close(fd);
 
-        retry_count++;
-    } while (retry_count < std::numeric_limits<in_port_t>::max());
+        retryCount++;
+    } while (retryCount < std::numeric_limits<in_port_t>::max());
 
     log_error("Could not find free port on localhost");
 

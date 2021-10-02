@@ -152,7 +152,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
 {
     AutoLock lock(mutex);
 
-    auto rm_id_list = std::make_shared<AutoscanList>(database);
+    auto rmIdList = std::make_shared<AutoscanList>(database);
 
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
         auto& dir = *it;
@@ -166,7 +166,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
             auto copy = std::make_shared<AutoscanDirectory>();
             dir->copyTo(copy);
             copy->setScanID(dir->getScanID());
-            rm_id_list->add(copy);
+            rmIdList->add(copy);
 
             dir->setScanID(INVALID_SCAN_ID);
             it = list.erase(it);
@@ -175,7 +175,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
         ++it;
     }
 
-    return rm_id_list;
+    return rmIdList;
 }
 
 void AutoscanList::notifyAll(Timer::Subscriber* sub)

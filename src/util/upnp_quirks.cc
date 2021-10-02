@@ -70,8 +70,8 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    pugi::xml_document resp_root;
-    auto features = resp_root.append_child("Features");
+    pugi::xml_document respRoot;
+    auto features = respRoot.append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
     features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
     features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
@@ -92,7 +92,7 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
         container.append_attribute("type") = type;
     }
 
-    response->document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(resp_root, "", 0).c_str());
+    response->document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
     request->setResponse(std::move(response));
 }
 
@@ -103,12 +103,12 @@ void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& r
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
-    auto req_root = request->getRequest()->document_element();
+    auto reqRoot = request->getRequest()->document_element();
 
-    log_debug("request {}", UpnpXMLBuilder::printXml(req_root, " "));
+    log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-    [[maybe_unused]] auto categoryType = req_root.child("CategoryType").text().as_string();
-    [[maybe_unused]] auto index = req_root.child("Index").text().as_string();
+    [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
+    [[maybe_unused]] auto index = reqRoot.child("Index").text().as_string();
 
     log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
 
@@ -123,12 +123,12 @@ void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& reques
         return;
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
-    auto req_root = request->getRequest()->document_element();
+    auto reqRoot = request->getRequest()->document_element();
 
-    log_debug("request {}", UpnpXMLBuilder::printXml(req_root, " "));
+    log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-    [[maybe_unused]] auto categoryType = req_root.child("CategoryType").text().as_string();
-    [[maybe_unused]] auto rID = req_root.child("RID").text().as_string();
+    [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
+    [[maybe_unused]] auto rID = reqRoot.child("RID").text().as_string();
 
     log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
 
@@ -159,11 +159,11 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
         log_debug("saveSamsungBookMarkedPosition called, but it is not enabled for this client");
     } else {
         auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
-        auto req_root = request->getRequest()->document_element();
-        auto objectID = req_root.child("ObjectID").text().as_string();
-        auto bookMarkPos = std::to_string(stoiString(req_root.child("PosSecond").text().as_string()) / divider);
-        [[maybe_unused]] auto categoryType = req_root.child("CategoryType").text().as_string();
-        [[maybe_unused]] auto rID = req_root.child("RID").text().as_string();
+        auto reqRoot = request->getRequest()->document_element();
+        auto objectID = reqRoot.child("ObjectID").text().as_string();
+        auto bookMarkPos = std::to_string(stoiString(reqRoot.child("PosSecond").text().as_string()) / divider);
+        [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
+        [[maybe_unused]] auto rID = reqRoot.child("RID").text().as_string();
 
         log_debug("saveSamsungBookMarkedPosition: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
 

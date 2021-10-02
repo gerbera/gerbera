@@ -1356,11 +1356,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         if (!resources.empty())
             obj->setResources(resources);
     }
-    auto resource_zero_ok = !resources.empty();
+    auto resourceZeroOk = !resources.empty();
 
     obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
-    int matched_types = 0;
+    int matchedTypes = 0;
 
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -1378,11 +1378,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
                 cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
         } else
             cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
-        matched_types++;
+        matchedTypes++;
     }
 
     if (obj->isItem()) {
-        if (!resource_zero_ok)
+        if (!resourceZeroOk)
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -1406,10 +1406,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         else
             item->setServiceID(getCol(row, BrowseCol::ServiceId));
 
-        matched_types++;
+        matchedTypes++;
     }
 
-    if (!matched_types) {
+    if (!matchedTypes) {
         throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
 
@@ -1443,10 +1443,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
             obj->setResources(resources);
     }
 
-    auto resource_zero_ok = !resources.empty();
+    auto resourceZeroOk = !resources.empty();
 
     if (obj->isItem()) {
-        if (!resource_zero_ok)
+        if (!resourceZeroOk)
             throw_std_runtime_error("tried to create object without at least one resource");
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -1600,7 +1600,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     auto res = select(sel);
     if (res) {
         log_debug("relevant autoscans!");
-        std::vector<int> delete_as;
+        std::vector<int> deleteAs;
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
             const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
@@ -1613,14 +1613,14 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
                 };
                 updateRow(AUTOSCAN_TABLE, values, "id", colId);
             } else {
-                delete_as.push_back(colId);
+                deleteAs.push_back(colId);
             }
             log_debug("relevant autoscan: {}; persistent: {}", colId, persistent);
         }
 
-        if (!delete_as.empty()) {
-            deleteRows(AUTOSCAN_TABLE, "id", delete_as);
-            log_debug("deleting autoscans: {}", fmt::to_string(fmt::join(delete_as, ", ")));
+        if (!deleteAs.empty()) {
+            deleteRows(AUTOSCAN_TABLE, "id", deleteAs);
+            log_debug("deleting autoscans: {}", fmt::to_string(fmt::join(deleteAs, ", ")));
         }
     }
 
@@ -2062,16 +2062,16 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     int interval = 0;
     if (mode == ScanMode::Timed)
         interval = std::stoi(getCol(row, AutoscanColumn::Interval));
-    auto last_modified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::LastModified)));
+    auto lastModified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::LastModified)));
 
-    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, last_modified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(last_modified.count())) : "unset");
+    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
-    dir->setCurrentLMT("", last_modified);
-    if (last_modified > std::chrono::seconds::zero()) {
-        dir->setCurrentLMT(location, last_modified);
+    dir->setCurrentLMT("", lastModified);
+    if (lastModified > std::chrono::seconds::zero()) {
+        dir->setCurrentLMT(location, lastModified);
     }
     dir->updateLMT();
     return dir;
@@ -2383,10 +2383,10 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
     const auto& resources = obj->getResources();
     operations.reserve(operations.size() + resources.size());
     if (op == Operation::Insert) {
-        std::size_t res_id = 0;
+        std::size_t resId = 0;
         for (auto&& resource : resources) {
             std::map<std::string, std::string> resourceSql;
-            resourceSql["res_id"] = quote(res_id);
+            resourceSql["res_id"] = quote(resId);
             resourceSql["handlerType"] = quote(resource->getHandlerType());
             auto&& options = resource->getOptions();
             if (!options.empty()) {
@@ -2400,16 +2400,16 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql[key] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
-            res_id++;
+            resId++;
         }
     } else {
         // get current resoures from DB
         auto dbResources = retrieveResourcesForObject(obj->getID());
-        std::size_t res_id = 0;
+        std::size_t resId = 0;
         for (auto&& resource : resources) {
-            Operation operation = res_id < dbResources.size() ? Operation::Update : Operation::Insert;
+            Operation operation = resId < dbResources.size() ? Operation::Update : Operation::Insert;
             std::map<std::string, std::string> resourceSql;
-            resourceSql["res_id"] = quote(res_id);
+            resourceSql["res_id"] = quote(resId);
             resourceSql["handlerType"] = quote(resource->getHandlerType());
             auto&& options = resource->getOptions();
             if (!options.empty()) {
@@ -2423,13 +2423,13 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql[key] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
-            res_id++;
+            resId++;
         }
         // res_id in db resources but not obj resources, so needs a delete
-        for (; res_id < dbResources.size(); res_id++) {
-            if (dbResources.at(res_id)) {
+        for (; resId < dbResources.size(); resId++) {
+            if (dbResources.at(resId)) {
                 std::map<std::string, std::string> resourceSql;
-                resourceSql["res_id"] = quote(res_id);
+                resourceSql["res_id"] = quote(resId);
                 operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete);
             }
         }
@@ -2638,7 +2638,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
     if (!resourcesStr.empty()) {
         log_debug("Migrating resources for cds object {}", objectId);
         auto resources = splitString(resourcesStr, RESOURCE_SEP);
-        std::size_t res_id = 0;
+        std::size_t resId = 0;
         for (auto&& resString : resources) {
             std::map<std::string, std::string> resourceSQLVals;
             auto&& resource = CdsResource::decode(resString);
@@ -2652,7 +2652,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             };
             auto values = std::vector {
                 fmt::to_string(objectId),
-                fmt::to_string(res_id),
+                fmt::to_string(resId),
                 fmt::to_string(resource->getHandlerType()),
             };
             auto&& options = resource->getOptions();
@@ -2670,7 +2670,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 values.push_back(val);
             }
             insert(RESOURCE_TABLE, fields, values);
-            res_id++;
+            resId++;
         }
     } else {
         log_debug("Skipping migration - no resources for cds object {}", objectId);

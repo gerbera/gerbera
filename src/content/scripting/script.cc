@@ -274,11 +274,11 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
-        auto duk_array = duk_push_array(ctx);
+        auto dukArray = duk_push_array(ctx);
         for (std::size_t i = 0; i < array.size(); i++) {
             auto entry = array[i];
             duk_push_string(ctx, entry.c_str());
-            duk_put_prop_index(ctx, duk_array, i);
+            duk_put_prop_index(ctx, dukArray, i);
         }
         duk_put_prop_string(ctx, -2, acs->getItemPath(-1).c_str());
     }
@@ -311,25 +311,25 @@ Script::Script(std::shared_ptr<ContentManager> content,
 
     defineFunctions(jsGlobalFunctions.data());
 
-    std::string common_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
+    std::string commonScrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
 
-    if (common_scr_path.empty()) {
+    if (commonScrPath.empty()) {
         log_js("Common script disabled in configuration");
     } else {
         try {
-            _load(common_scr_path);
+            _load(commonScrPath);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", common_scr_path, e.what());
+            log_js("Unable to load {}: {}", commonScrPath, e.what());
         }
     }
-    std::string custom_scr_path = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
-    if (!custom_scr_path.empty()) {
+    std::string customScrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    if (!customScrPath.empty()) {
         try {
-            _load(custom_scr_path);
+            _load(customScrPath);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", custom_scr_path, e.what());
+            log_js("Unable to load {}: {}", customScrPath, e.what());
         }
     }
 }
@@ -585,10 +585,10 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     // CdsItem
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        std::shared_ptr<CdsItem> pcd_item;
+        std::shared_ptr<CdsItem> pcdItem;
 
         if (pcd)
-            pcd_item = std::static_pointer_cast<CdsItem>(pcd);
+            pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
         val = getProperty("mimetype");
         if (!val.empty()) {
@@ -596,7 +596,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setMimeType(val);
         } else {
             if (pcd)
-                item->setMimeType(pcd_item->getMimeType());
+                item->setMimeType(pcdItem->getMimeType());
         }
 
         val = getProperty("serviceID");
@@ -613,7 +613,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->removeMetaData(M_DESCRIPTION);
             item->addMetaData(M_DESCRIPTION, val);
         } else if (pcd && item->getMetaData(M_DESCRIPTION).empty()) {
-            item->addMetaData(M_DESCRIPTION, pcd_item->getMetaData(M_DESCRIPTION));
+            item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
             item->setTrackNumber(getIntProperty("playlistOrder", 0));
@@ -748,10 +748,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = std::vector<std::string> { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()) };
         }
         for (auto&& [key, array] : metaGroups) {
-            auto duk_array = duk_push_array(ctx);
+            auto dukArray = duk_push_array(ctx);
             for (std::size_t i = 0; i < array.size(); i++) {
                 duk_push_string(ctx, array[i].c_str());
-                duk_put_prop_index(ctx, duk_array, i);
+                duk_put_prop_index(ctx, dukArray, i);
             }
             duk_put_prop_string(ctx, -2, key.c_str());
         }

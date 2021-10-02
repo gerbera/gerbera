@@ -38,17 +38,18 @@
 
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {
-    std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
-    bool use_transaction = config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS);
     auto database = [&]() -> std::shared_ptr<Database> {
-        if (type == "sqlite3" && use_transaction) {
+        std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
+        bool useTransaction = config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS);
+
+        if (type == "sqlite3" && useTransaction) {
             return std::make_shared<Sqlite3DatabaseWithTransactions>(config, mime, timer);
         }
         if (type == "sqlite3") {
             return std::make_shared<Sqlite3Database>(config, mime, timer);
         }
 #ifdef HAVE_MYSQL
-        if (type == "mysql" && use_transaction) {
+        if (type == "mysql" && useTransaction) {
             return std::make_shared<MySQLDatabaseWithTransactions>(config, mime);
         }
         if (type == "mysql") {

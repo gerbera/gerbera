@@ -57,8 +57,8 @@ duk_ret_t js_copyObject(duk_context* ctx)
     auto* self = Script::getContextScript(ctx);
     if (!duk_is_object(ctx, 0))
         return duk_error(ctx, DUK_ERR_TYPE_ERROR, "copyObject argument is not an object");
-    auto cds_obj = self->dukObject2cdsObject(nullptr);
-    self->cdsObject2dukObject(cds_obj);
+    auto cdsObj = self->dukObject2cdsObject(nullptr);
+    self->cdsObject2dukObject(cdsObj);
     return 1;
 }
 
@@ -82,9 +82,9 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
                 break;
             }
             duk_to_object(ctx, -1);
-            auto cds_obj = self->dukObject2cdsObject(nullptr);
-            if (cds_obj) {
-                result.push_back(std::move(cds_obj));
+            auto cdsObj = self->dukObject2cdsObject(nullptr);
+            if (cdsObj) {
+                result.push_back(std::move(cdsObj));
             } else {
                 log_js("js_addContainerTree: no CdsObject at {}", i);
             }
@@ -149,13 +149,13 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        auto orig_object = self->dukObject2cdsObject(self->getProcessedObject());
-        if (!orig_object)
+        auto origObject = self->dukObject2cdsObject(self->getProcessedObject());
+        if (!origObject)
             return 0;
 
-        std::shared_ptr<CdsObject> cds_obj;
+        std::shared_ptr<CdsObject> cdsObj;
         auto cm = self->getContent();
-        int pcd_id = INVALID_OBJECT_ID;
+        int pcdId = INVALID_OBJECT_ID;
 
         duk_swap_top(ctx, 0);
         //stack: js_orig_obj path containerclass js_cds_obj
@@ -178,21 +178,21 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                     asSetting.rescanResource = false;
                     asSetting.mergeOptions(config, loc);
 
-                    pcd_id = cm->addFile(dirEnt, asSetting, false);
-                    if (pcd_id == INVALID_OBJECT_ID) {
+                    pcdId = cm->addFile(dirEnt, asSetting, false);
+                    if (pcdId == INVALID_OBJECT_ID) {
                         return 0;
                     }
-                    auto mainObj = self->getDatabase()->loadObject(pcd_id);
-                    cds_obj = self->dukObject2cdsObject(mainObj);
+                    auto mainObj = self->getDatabase()->loadObject(pcdId);
+                    cdsObj = self->dukObject2cdsObject(mainObj);
                 } else {
                     log_error("Failed to read {}: {}", loc.c_str(), ec.message());
                 }
             } else
-                cds_obj = self->dukObject2cdsObject(orig_object);
+                cdsObj = self->dukObject2cdsObject(origObject);
         } else
-            cds_obj = self->dukObject2cdsObject(orig_object);
+            cdsObj = self->dukObject2cdsObject(origObject);
 
-        if (!cds_obj) {
+        if (!cdsObj) {
             return 0;
         }
 
@@ -201,37 +201,37 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         if (parentId.first <= 0) {
             if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
                 path = p2i->convert(path);
-                parentId = cm->addContainerChain(path, containerclass, orig_object->getID());
+                parentId = cm->addContainerChain(path, containerclass, origObject->getID());
             } else {
                 path = (self->whoami() == S_PLAYLIST) ? p2i->convert(path) : i2i->convert(path);
-                parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, orig_object);
+                parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, origObject);
             }
         }
 
-        cds_obj->setParentID(parentId.first);
-        if (!cds_obj->isExternalItem()) {
+        cdsObj->setParentID(parentId.first);
+        if (!cdsObj->isExternalItem()) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
             /// there?
 
             if (self->whoami() == S_PLAYLIST) {
-                if (pcd_id == INVALID_OBJECT_ID) {
+                if (pcdId == INVALID_OBJECT_ID) {
                     return 0;
                 }
-                cds_obj->setRefID(pcd_id);
+                cdsObj->setRefID(pcdId);
             } else
-                cds_obj->setRefID(orig_object->getID());
+                cdsObj->setRefID(origObject->getID());
 
-            cds_obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-        } else if (cds_obj->isExternalItem()) {
+            cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        } else if (cdsObj->isExternalItem()) {
             if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
-                cds_obj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-                cds_obj->setRefID(orig_object->getID());
+                cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+                cdsObj->setRefID(origObject->getID());
             }
         }
 
-        cds_obj->setID(INVALID_OBJECT_ID);
-        cm->addObject(cds_obj, parentId.second);
+        cdsObj->setID(INVALID_OBJECT_ID);
+        cm->addObject(cdsObj, parentId.second);
 
         /* setting object ID as return value */
         std::string tmp = fmt::to_string(parentId.first);

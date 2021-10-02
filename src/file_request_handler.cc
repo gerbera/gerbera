@@ -56,24 +56,24 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 
 static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& resId, std::string& mimeType, struct stat& statbuf, const std::string& rh)
 {
-    bool is_srt = false;
+    bool isSrt = false;
 
     if (!rh.empty()) {
-        auto res_path = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
+        auto resPath = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
         mimeType = MIMETYPE_TEXT;
-        is_srt = !res_path.empty();
-        if (is_srt) {
-            path = res_path;
+        isSrt = !resPath.empty();
+        if (isSrt) {
+            path = resPath;
         }
     }
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        if (is_srt) {
+        if (isSrt) {
             throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
         }
         throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
     }
-    return is_srt;
+    return isSrt;
 }
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
@@ -92,8 +92,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
-    auto res_id_it = params.find(URL_RESOURCE_ID);
-    std::size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
+    auto resIdIt = params.find(URL_RESOURCE_ID);
+    std::size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(resIdIt->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
@@ -104,45 +104,45 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     fs::path path = item ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    bool isSrt = checkFileAndSubtitle(path, obj, resId, mimeType, statbuf, rh);
 
     UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
     // for transcoded resourecs res_id will always be negative
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    log_debug("fetching resource id {}", res_id);
+    log_debug("fetching resource id {}", resId);
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
-        auto resource = obj->getResource(res_id);
-        int res_handler = (!rh.empty()) ? std::stoi(rh) : resource->getHandlerType();
+    if ((resId > 0 && resId < obj->getResourceCount()) || !rh.empty()) {
+        auto resource = obj->getResource(resId);
+        int resHandler = (!rh.empty()) ? std::stoi(rh) : resource->getHandlerType();
         // http-get:*:image/jpeg:*
         std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
         if (!protocolInfo.empty()) {
             mimeType = getMTFromProtocolInfo(protocolInfo);
         }
 
-        auto h = MetadataHandler::createHandler(context, res_handler);
+        auto h = MetadataHandler::createHandler(context, resHandler);
         if (mimeType.empty())
             mimeType = h->getMimeType();
 
-        auto io_handler = h->serveContent(obj, res_id);
+        auto ioHandler = h->serveContent(obj, resId);
 
         // get size
-        io_handler->open(UPNP_READ);
-        io_handler->seek(0L, SEEK_END);
-        off_t size = io_handler->tell();
-        io_handler->close();
+        ioHandler->open(UPNP_READ);
+        ioHandler->seek(0L, SEEK_END);
+        off_t size = ioHandler->tell();
+        ioHandler->close();
 
         UpnpFileInfo_set_FileLength(info, size);
-    } else if (!is_srt && !tr_profile.empty()) {
+    } else if (!isSrt && !trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
+                      ->getByName(trProfile);
         if (!tp)
-            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), tr_profile);
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 
         mimeType = tp->getTargetMimeType();
 
@@ -215,8 +215,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
 
     // determining which resource to serve
-    auto res_id_it = params.find(URL_RESOURCE_ID);
-    size_t res_id = (res_id_it != params.end() && res_id_it->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(res_id_it->second) : std::numeric_limits<std::size_t>::max();
+    auto resIdIt = params.find(URL_RESOURCE_ID);
+    size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(resIdIt->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("requested object {} is not an item", filename);
@@ -227,51 +227,51 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     fs::path path = item ? item->getLocation() : "";
     std::string mimeType;
     struct stat statbuf;
-    bool is_srt = checkFileAndSubtitle(path, obj, res_id, mimeType, statbuf, rh);
+    bool isSrt = checkFileAndSubtitle(path, obj, resId, mimeType, statbuf, rh);
 
     // for transcoded resourecs res_id will always be negative
-    auto tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-    if (!tr_profile.empty()) {
-        if (res_id != std::numeric_limits<std::size_t>::max())
+    auto trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (!trProfile.empty()) {
+        if (resId != std::numeric_limits<std::size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     } else {
-        if (res_id == std::numeric_limits<std::size_t>::max())
+        if (resId == std::numeric_limits<std::size_t>::max())
             throw_std_runtime_error("Invalid resource ID given");
     }
-    log_debug("fetching resource id {}", res_id);
+    log_debug("fetching resource id {}", resId);
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
-        auto res_handler = int(!rh.empty() ? std::stoi(rh) : obj->getResource(res_id)->getHandlerType());
+    if ((resId > 0 && resId < obj->getResourceCount()) || !rh.empty()) {
+        auto resHandler = int(!rh.empty() ? std::stoi(rh) : obj->getResource(resId)->getHandlerType());
 
-        auto h = MetadataHandler::createHandler(context, res_handler);
-        auto io_handler = h->serveContent(obj, res_id);
-        io_handler->open(mode);
+        auto h = MetadataHandler::createHandler(context, resHandler);
+        auto ioHandler = h->serveContent(obj, resId);
+        ioHandler->open(mode);
 
         log_debug("end");
-        return io_handler;
+        return ioHandler;
     }
 
-    if (!is_srt && !tr_profile.empty()) {
+    if (!isSrt && !trProfile.empty()) {
         std::string range = getValueOrDefault(params, "range");
 
-        auto tr_d = std::make_unique<TranscodeDispatcher>(content);
+        auto trD = std::make_unique<TranscodeDispatcher>(content);
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
+                      ->getByName(trProfile);
 
-        auto io_handler = tr_d->serveContent(tp, path, item, range);
-        io_handler->open(mode);
+        auto ioHandler = trD->serveContent(tp, path, item, range);
+        ioHandler->open(mode);
 
         log_debug("end");
-        return io_handler;
+        return ioHandler;
     }
 
-    auto io_handler = std::make_unique<FileIOHandler>(path);
-    io_handler->open(mode);
+    auto ioHandler = std::make_unique<FileIOHandler>(path);
+    ioHandler->open(mode);
     content->triggerPlayHook(obj);
 
     log_debug("end");
-    return io_handler;
+    return ioHandler;
 }

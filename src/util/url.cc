@@ -43,7 +43,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
 {
     CURLcode res;
     bool cleanup = false;
-    char error_buffer[CURL_ERROR_SIZE] = { '\0' };
+    char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
 
     if (!curlHandle) {
         curlHandle = curl_easy_init();
@@ -71,7 +71,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     curl_easy_setopt(curlHandle, CURLOPT_USERAGENT,
         "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");
     curl_easy_setopt(curlHandle, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curlHandle, CURLOPT_ERRORBUFFER, error_buffer);
+    curl_easy_setopt(curlHandle, CURLOPT_ERRORBUFFER, errorBuffer);
     curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
     /// \todo it would be a good idea to allow both variants, i.e. retrieve
@@ -92,18 +92,18 @@ std::string URL::download(const std::string& url, long* httpRetcode,
 
     res = curl_easy_perform(curlHandle);
     if (res != CURLE_OK) {
-        log_error("{}", error_buffer);
+        log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(error_buffer);
+        throw_std_runtime_error(errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_RESPONSE_CODE, httpRetcode);
     if (res != CURLE_OK) {
-        log_error("{}", error_buffer);
+        log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(error_buffer);
+        throw_std_runtime_error(errorBuffer);
     }
 
     if (cleanup)
@@ -119,8 +119,8 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle
     CURLcode res;
     curl_off_t cl;
     char* ct;
-    char* c_url;
-    char error_buffer[CURL_ERROR_SIZE] = { '\0' };
+    char* cUrl;
+    char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
 
     if (!curlHandle) {
         curlHandle = curl_easy_init();
@@ -138,37 +138,37 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if (res != CURLE_OK) {
-        log_error("{}", error_buffer);
+        log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(error_buffer);
+        throw_std_runtime_error(errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_TYPE, &ct);
     if (res != CURLE_OK) {
-        log_error("{}", error_buffer);
+        log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(error_buffer);
+        throw_std_runtime_error(errorBuffer);
     }
 
     std::string mt = ct ? ct : MIMETYPE_DEFAULT;
     log_debug("Extracted content length: {}", cl);
 
-    res = curl_easy_getinfo(curlHandle, CURLINFO_EFFECTIVE_URL, &c_url);
+    res = curl_easy_getinfo(curlHandle, CURLINFO_EFFECTIVE_URL, &cUrl);
     if (res != CURLE_OK) {
-        log_error("{}", error_buffer);
+        log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(error_buffer);
+        throw_std_runtime_error(errorBuffer);
     }
 
-    std::string used_url = c_url ? c_url : url;
+    std::string usedUrl = cUrl ? cUrl : url;
 
     if (cleanup)
         curl_easy_cleanup(curlHandle);
 
-    return std::make_unique<Stat>(used_url, off_t(cl), mt);
+    return std::make_unique<Stat>(usedUrl, off_t(cl), mt);
 }
 
 std::size_t URL::dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data)

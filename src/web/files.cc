@@ -55,21 +55,21 @@ void Web::Files::process()
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 
-    bool exclude_config_files = true;
+    bool excludeConfigFiles = true;
 
     std::error_code ec;
     std::map<std::string, fs::path> filesMap;
-    auto&& includes_fullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
+    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
         if (!isRegularFile(it, ec))
             continue;
-        if (exclude_config_files && startswith(filepath.filename().string(), "."))
+        if (excludeConfigFiles && startswith(filepath.filename().string(), "."))
             continue;
-        if (!includes_fullpath.empty()
-            && std::none_of(includes_fullpath.begin(), includes_fullpath.end(), //
+        if (!includesFullpath.empty()
+            && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
                 [=](auto&& sub) { return startswith(filepath.string(), sub); }))
             continue; // skip unwanted file
 

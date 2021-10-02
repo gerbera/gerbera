@@ -58,18 +58,18 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     log_debug("start");
 
     auto req = request->getRequest();
-    auto req_root = req->document_element();
+    auto reqRoot = req->document_element();
 #ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
         log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     }
 #endif
-    std::string objID = req_root.child("ObjectID").text().as_string();
-    std::string browseFlag = req_root.child("BrowseFlag").text().as_string();
+    std::string objID = reqRoot.child("ObjectID").text().as_string();
+    std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
     //std::string filter; // not yet supported
-    std::string startingIndex = req_root.child("StartingIndex").text().as_string();
-    std::string requestedCount = req_root.child("RequestedCount").text().as_string();
-    std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
+    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
     log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
         objID, browseFlag, startingIndex, requestedCount, sortCriteria);
@@ -109,17 +109,17 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     }
 
     auto&& quirks = request->getQuirks();
-    pugi::xml_document didl_lite;
+    pugi::xml_document didlLite;
     if (!quirks->blockXmlDeclaration()) {
-        auto decl = didl_lite.prepend_child(pugi::node_declaration);
+        auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
     }
-    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    auto didlLiteRoot = didlLite.append_child("DIDL-Lite");
+    didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     for (auto&& obj : arr) {
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
@@ -132,18 +132,18 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
             obj->setTitle(title);
         }
 
-        xmlBuilder->renderObject(obj, stringLimit, didl_lite_root, quirks);
+        xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
     }
 
-    std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
-    log_debug("didl {}", didl_lite_xml);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    log_debug("didl {}", didlLiteXml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
-    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
-    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
-    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    auto respRoot = response->document_element();
+    respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
+    respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
+    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
+    respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request->setResponse(std::move(response));
 
     log_debug("end");
@@ -154,33 +154,33 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     log_debug("start");
 
     auto req = request->getRequest();
-    auto req_root = req->document_element();
+    auto reqRoot = req->document_element();
 #ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
         log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     }
 #endif
-    std::string containerID = req_root.child("ContainerID").text().as_string();
-    std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
-    std::string startingIndex = req_root.child("StartingIndex").text().as_string();
-    std::string requestedCount = req_root.child("RequestedCount").text().as_string();
-    std::string sortCriteria = req_root.child("SortCriteria").text().as_string();
+    std::string containerID = reqRoot.child("ContainerID").text().as_string();
+    std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
+    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
         containerID, searchCriteria, startingIndex, requestedCount, requestedCount);
 
     auto&& quirks = request->getQuirks();
-    pugi::xml_document didl_lite;
+    pugi::xml_document didlLite;
     if (!quirks->blockXmlDeclaration()) {
-        auto decl = didl_lite.prepend_child(pugi::node_declaration);
+        auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
     }
-    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
-    didl_lite_root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    auto didlLiteRoot = didlLite.append_child("DIDL-Lite");
+    didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers);
@@ -218,18 +218,18 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
             cdsObject->setTitle(title);
         }
 
-        xmlBuilder->renderObject(cdsObject, stringLimit, didl_lite_root);
+        xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
     }
 
-    std::string didl_lite_xml = UpnpXMLBuilder::printXml(didl_lite, "", 0);
-    log_debug("didl {}", didl_lite_xml);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    log_debug("didl {}", didlLiteXml);
 
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
-    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
-    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
-    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    auto respRoot = response->document_element();
+    respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
+    respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
+    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
+    respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request->setResponse(std::move(response));
 
     log_debug("end");

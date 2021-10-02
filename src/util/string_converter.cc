@@ -88,7 +88,7 @@ bool StringConverter::validate(const std::string& str)
 std::string StringConverter::_convert(const std::string& str, bool validate,
     std::size_t* stoppedAt)
 {
-    std::string ret_str;
+    std::string retStr;
 
     auto input = str.c_str();
     auto length = str.length();
@@ -106,14 +106,14 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         log_debug("Could not allocate memory for string conversion!\n{}", ex.what());
         throw_std_runtime_error("Could not allocate memory for string conversion");
     }
-    const char* input_copy = input;
-    char* output_copy = output;
+    const char* inputCopy = input;
+    char* outputCopy = output;
 
-    const char** input_ptr = &input_copy;
-    char** output_ptr = &output_copy;
+    const char** inputPtr = &inputCopy;
+    char** outputPtr = &outputCopy;
 
-    auto input_bytes = str.length();
-    auto output_bytes = length;
+    auto inputBytes = str.length();
+    auto outputBytes = length;
 
     int ret;
 
@@ -129,8 +129,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     ret = iconv(cd, input_ptr, &input_bytes,
         output_ptr, &output_bytes);
 #else
-    ret = iconv(cd, const_cast<char**>(input_ptr), &input_bytes,
-        output_ptr, &output_bytes);
+    ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
+        outputPtr, &outputBytes);
 #endif
 
     if (ret == -1) {
@@ -149,12 +149,12 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             }
 
             if (stoppedAt)
-                *stoppedAt = str.length() - input_bytes;
-            ret_str = std::string(output, output_copy - output);
+                *stoppedAt = str.length() - inputBytes;
+            retStr = std::string(output, outputCopy - output);
             dirty = true;
-            *output_copy = 0;
+            *outputCopy = 0;
             delete[] output;
-            return ret_str;
+            return retStr;
         case E2BIG:
             /// \todo should encode the whole string anyway
             err = "iconv: Insufficient space in output buffer";
@@ -163,7 +163,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             err = fmt::format("iconv: {}", std::strerror(errno));
             break;
         }
-        *output_copy = 0;
+        *outputCopy = 0;
         log_error("{}", err);
         //        log_debug("iconv: input: {}", input);
         //        log_debug("iconv: converted part:  {}", output);
@@ -176,11 +176,11 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     //       input_bytes, output_bytes);
     //log_debug("iconv: returned {}", ret);
 
-    ret_str = std::string(output, output_copy - output);
+    retStr = std::string(output, outputCopy - output);
     delete[] output;
     if (stoppedAt)
         *stoppedAt = 0; // no error
-    return ret_str;
+    return retStr;
 }
 
 /// \todo iconv caching

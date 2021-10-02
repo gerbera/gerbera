@@ -51,8 +51,8 @@ ScriptingRuntime::~ScriptingRuntime()
 duk_context* ScriptingRuntime::createContext(const std::string& name)
 {
     duk_push_heap_stash(ctx);
-    duk_idx_t thread_idx = duk_push_thread_new_globalenv(ctx);
-    duk_context* newctx = duk_get_context(ctx, thread_idx);
+    duk_idx_t threadIdx = duk_push_thread_new_globalenv(ctx);
+    duk_context* newctx = duk_get_context(ctx, threadIdx);
     duk_put_prop_string(ctx, -2, name.c_str());
     duk_pop(ctx);
     return newctx;

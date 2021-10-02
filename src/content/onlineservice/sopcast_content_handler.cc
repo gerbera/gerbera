@@ -146,34 +146,34 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
     resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mt, SOPCAST_PROTOCOL));
     item->setMimeType(mt);
 
-    auto tmp_el = channel.child("sop_address");
-    if (!tmp_el) {
+    auto tmpEl = channel.child("sop_address");
+    if (!tmpEl) {
         log_warning("Failed to retrieve SopCast channel URL");
         return nullptr;
     }
 
-    temp = tmp_el.child("item").text().as_string();
+    temp = tmpEl.child("item").text().as_string();
     if (temp.empty()) {
         log_warning("Failed to retrieve SopCast channel URL");
         return nullptr;
     }
     item->setURL(temp);
 
-    tmp_el = channel.child("name");
-    if (!tmp_el) {
+    tmpEl = channel.child("name");
+    if (!tmpEl) {
         log_warning("Failed to retrieve SopCast channel name");
         return nullptr;
     }
 
-    temp = tmp_el.attribute("en").as_string();
+    temp = tmpEl.attribute("en").as_string();
     if (!temp.empty())
         item->setTitle(temp);
     else
         item->setTitle("Unknown");
 
-    tmp_el = channel.child("region");
-    if (tmp_el) {
-        temp = tmp_el.attribute("en").as_string();
+    tmpEl = channel.child("region");
+    if (tmpEl) {
+        temp = tmpEl.attribute("en").as_string();
         if (!temp.empty()) {
             item->addMetaData(M_REGION, temp);
         }
