@@ -117,17 +117,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
     if ((res_id > 0 && res_id < obj->getResourceCount()) || !rh.empty()) {
-        int res_handler;
-        if (!rh.empty())
-            res_handler = std::stoi(rh);
-        else {
-            auto resource = obj->getResource(res_id);
-            res_handler = resource->getHandlerType();
-            // http-get:*:image/jpeg:*
-            std::string protocolInfo = getValueOrDefault(obj->getResource(res_id)->getAttributes(), "protocolInfo");
-            if (!protocolInfo.empty()) {
-                mimeType = getMTFromProtocolInfo(protocolInfo);
-            }
+        auto resource = obj->getResource(res_id);
+        int res_handler = (!rh.empty()) ? std::stoi(rh) : resource->getHandlerType();
+        // http-get:*:image/jpeg:*
+        std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
+        if (!protocolInfo.empty()) {
+            mimeType = getMTFromProtocolInfo(protocolInfo);
         }
 
         auto h = MetadataHandler::createHandler(context, res_handler);
