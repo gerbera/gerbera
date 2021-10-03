@@ -333,7 +333,7 @@ int main(int argc, char** argv, char** envp)
             pidfile = opts["pidfile"].as<fs::path>();
 
             // x will make it fail if file exists
-            auto pidf = std::fopen(pidfile->c_str(), "wx");
+            auto pidf = std::fopen(pidfile->c_str(), apple ? "wx" : "wxe");
             if (!pidf) {
                 log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
                 log_error("running or the file is a leftover from an unclean shutdown.");

@@ -56,11 +56,7 @@ private:
 
 public:
     explicit FileIOCallback(const char* path)
-#ifdef __linux__
-        : mediaFile(std::fopen(path, "rbe"))
-#else
-        : mediaFile(std::fopen(path, "rb"))
-#endif
+        : mediaFile(std::fopen(path, apple ? "rb" : "rbe"))
     {
         if (!mediaFile) {
             throw_std_runtime_error("Could not fopen {}", path);

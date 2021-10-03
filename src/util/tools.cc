@@ -496,11 +496,7 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 
 std::string readTextFile(const fs::path& path)
 {
-#ifdef __linux__
-    auto f = std::fopen(path.c_str(), "rte");
-#else
-    auto f = std::fopen(path.c_str(), "rt");
-#endif
+    auto f = std::fopen(path.c_str(), apple ? "rt" : "rte");
     if (!f) {
         throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
     }
@@ -516,11 +512,7 @@ std::string readTextFile(const fs::path& path)
 
 void writeTextFile(const fs::path& path, std::string_view contents)
 {
-#ifdef __linux__
-    auto f = std::fopen(path.c_str(), "wte");
-#else
-    auto f = std::fopen(path.c_str(), "wt");
-#endif
+    auto f = std::fopen(path.c_str(), apple ? "wt" : "wte");
     if (!f) {
         throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
     }
@@ -942,11 +934,7 @@ bool isTheora(const fs::path& oggFilename)
 {
     char buffer[7];
 
-#ifdef __linux__
-    auto f = std::fopen(oggFilename.c_str(), "rbe");
-#else
-    auto f = std::fopen(oggFilename.c_str(), "rb");
-#endif
+    auto f = std::fopen(oggFilename.c_str(), apple ? "rb" : "rbe");
     if (!f) {
         throw_std_runtime_error("Error opening {}: {}", oggFilename.c_str(), std::strerror(errno));
     }
@@ -1061,11 +1049,7 @@ std::string getAVIFourCC(std::string_view aviFilename)
 {
 #define FCC_OFFSET 0xbc
 
-#ifdef __linux__
-    auto f = std::fopen(aviFilename.data(), "rbe");
-#else
-    auto f = std::fopen(aviFilename.data(), "rb");
-#endif
+    auto f = std::fopen(aviFilename.data(), apple ? "rb" : "rbe");
     if (!f)
         throw_std_runtime_error("Could not open file {}: {}", aviFilename, std::strerror(errno));
 

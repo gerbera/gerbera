@@ -56,11 +56,7 @@
 #define MAX_STRLEN 4096
 
 Inotify::Inotify()
-#ifdef __linux__
     : inotify_fd(inotify_init1(IN_CLOEXEC))
-#else
-    : inotify_fd(inotify_init())
-#endif
 {
     if (inotify_fd < 0)
         throw_std_runtime_error("Unable to initialize inotify");
@@ -84,11 +80,7 @@ Inotify::~Inotify()
 
 bool Inotify::supported()
 {
-#ifdef __linux__
     int testFd = inotify_init1(IN_CLOEXEC);
-#else
-    int testFd = inotify_init();
-#endif
     if (testFd < 0)
         return false;
 

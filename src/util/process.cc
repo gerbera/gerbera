@@ -50,19 +50,12 @@
 
 std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::string& prog, const std::string& param, const std::string& input)
 {
-    std::FILE* file;
-    int fd;
-
     /* creating input file */
     char tempIn[] = "mt_in_XXXXXX";
     char tempOut[] = "mt_out_XXXXXX";
 
     std::string inputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempIn);
-#ifdef __linux__
-    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
-#else
-    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-#endif
+    auto fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         log_debug("Failed to open input file {}: {}", inputFile, std::strerror(errno));
         throw_std_runtime_error("Failed to open input file {}: {}", inputFile, std::strerror(errno));
@@ -76,11 +69,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
 
     /* touching output file */
     std::string outputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempOut);
-#ifdef __linux__
     fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
-#else
-    fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-#endif
     if (fd == -1) {
         log_debug("Failed to open output file {}: {}", outputFile, std::strerror(errno));
         throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
@@ -97,11 +86,7 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     }
 
     /* reading output file */
-#ifdef __linux__
-    file = std::fopen(outputFile.c_str(), "re");
-#else
-    file = std::fopen(outputFile.c_str(), "r");
-#endif
+    auto file = std::fopen(outputFile.c_str(), apple ? "r" : "re");
     if (!file) {
         log_debug("Could not open output file {}: {}", outputFile, std::strerror(errno));
         throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
