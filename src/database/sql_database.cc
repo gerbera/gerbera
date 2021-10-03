@@ -514,7 +514,7 @@ std::string SQLDatabase::getSearchCapabilities()
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
     };
-    searchKeys.reserve(M_MAX + R_MAX);
+    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(R_MAX));
     for (auto&& [field, meta] : mt_keys) {
         searchKeys.emplace_back(meta);
     }

@@ -121,6 +121,15 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
             ClientMatchType::UserAgent,
             "[BD]J5500",
         },
+
+        // User-Agent: ?
+        {
+            "Dual CR 510",
+            ClientType::IRadio,
+            QUIRK_FLAG_IRADIO,
+            ClientMatchType::UserAgent,
+            "EC-IRADIO/1.0",
+        },
     };
 
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);

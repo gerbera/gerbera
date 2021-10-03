@@ -146,6 +146,8 @@ std::string_view ClientConfig::mapClientType(ClientType clientType)
         return "SamsungSeriesCDE";
     case ClientType::SamsungBDJ5500:
         return "SamsungBDJ5500";
+    case ClientType::IRadio:
+        return "EC-IRadio";
     case ClientType::StandardUPnP:
         return "StandardUPnP";
     }
@@ -188,6 +190,9 @@ ClientType ClientConfig::remapClientType(const std::string& clientType)
     if (clientType == "StandardUPnP") {
         return ClientType::StandardUPnP;
     }
+    if (clientType == "EC-IRadio") {
+        return ClientType::IRadio;
+    }
     if (clientType == "None") {
         return ClientType::Unknown;
     }
@@ -205,6 +210,9 @@ int ClientConfig::remapFlag(const std::string& flag)
     }
     if (flag == "SAMSUNG_BOOKMARK_MSEC") {
         return QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
+    }
+    if (flag == "IRADIO") {
+        return QUIRK_FLAG_IRADIO;
     }
 
     return stoiString(flag, 0, 0);
@@ -234,6 +242,10 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     if (flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) {
         myFlags.emplace_back("SAMSUNG_BOOKMARK_MSEC");
         flags &= ~QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
+    }
+    if (flags & QUIRK_FLAG_IRADIO) {
+        myFlags.emplace_back("IRADIO");
+        flags &= ~QUIRK_FLAG_IRADIO;
     }
 
     if (flags) {

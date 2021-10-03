@@ -22,7 +22,7 @@ The automatic detection supports the following devices and software:
 - SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG``
 - SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG``
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG``
-
+- EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
 
 Device Flags
 ~~~~~~~~~~~~
@@ -32,6 +32,7 @@ The device flags have the following meaning
 -  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
 -  ``SAMSUNG_BOOKMARK_SEC``: 0x02, restore last played position when the media is played again (only for Samsung). Not applicable for transcoded media
 -  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is recieved from the Samsung TV as msec
+-  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~
@@ -112,6 +113,11 @@ Also, the DSM-510 (probably also valid for other models) will only play avi file
 .. code-block:: xml
 
     <map from="avi" to="video/avi"/>
+
+Dual
+~~~~
+
+-  CR 510: set flag IRADIO by IP because userAgent is not sent reliably
 
 Freecom
 ~~~~~~~

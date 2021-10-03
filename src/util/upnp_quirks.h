@@ -37,6 +37,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_SAMSUNG 0x00000001
 #define QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC 0x00000002
 #define QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC 0x00000004
+#define QUIRK_FLAG_IRADIO 0x00000008
 
 // forward declaration
 class ActionRequest;
@@ -94,6 +95,21 @@ public:
      *
      */
     void getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const;
+
+    /** \brief block XML header in response for broken clients
+     *
+     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * \return void
+     *
+     */
+    bool blockXmlDeclaration() const;
+
+    /** \brief Check whether the supplied flags are set
+     *
+     * \param bitset of the flags to check
+     * \return bitset of the flags
+     *
+     */
     int checkFlags(int flags) const;
 
 private:
