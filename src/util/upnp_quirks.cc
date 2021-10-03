@@ -175,3 +175,8 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
     auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     request->setResponse(std::move(response));
 }
+
+bool Quirks::blockXmlDeclaration() const
+{
+    return (pClientInfo && (pClientInfo->flags & QUIRK_FLAG_IRADIO) == QUIRK_FLAG_IRADIO);
+}
