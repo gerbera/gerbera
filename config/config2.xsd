@@ -405,6 +405,7 @@
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
             <xs:attribute name="searchable-container-flag" type="boolean" default="no"/>
             <xs:attribute name="search-result-separator" type="xs:string" default=" - "/>
+            <xs:attribute name="search-filename" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 

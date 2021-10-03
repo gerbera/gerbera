@@ -253,7 +253,6 @@ static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap {
 static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::PartNumber },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::TrackNumber },
-    { MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::DcTitle },
     { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
     { UPNP_SEARCH_PATH, SearchCol::Location },
     { UPNP_SEARCH_REFID, SearchCol::RefId },
@@ -363,7 +362,11 @@ void SQLDatabase::init()
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
-    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchSortMap, searchColMap);
+    auto searchTagMap = searchSortMap;
+    if (config->getBoolOption(CFG_UPNP_SEARCH_FILENAME)) {
+        searchTagMap.emplace_back(MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::DcTitle);
+    }
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
     asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);

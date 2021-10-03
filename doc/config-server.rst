@@ -735,6 +735,16 @@ This section defines the properties which are send to UPnP clients as part of th
                 <upnp:artist>First Artist</upnp:artist>
                 <upnp:artist>Second Artist</upnp:artist>
 
+        ::
+
+            search-filename="yes"
+
+        * Optional
+
+        * Default: **no**
+
+        Older versions of gerbera have been searching in the file name instead of the title metadata. If set to yes this behaviour is back, even if the result of the search shows another title.
+
     **Child tags:**
 
     .. code-block:: xml
