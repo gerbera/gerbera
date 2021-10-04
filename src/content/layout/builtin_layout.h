@@ -48,7 +48,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<Database> database;
+    std::map<std::string, std::string> genreMap;
 
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
     static std::string esc(std::string str);
@@ -62,7 +62,6 @@ protected:
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
-    std::map<std::string, std::string> genreMap;
 };
 
 #endif // __BUILTIN_LAYOUT_H__
