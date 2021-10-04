@@ -186,3 +186,34 @@ TEST(ToolsTest, dictMergeTest)
     EXPECT_EQ(result["B"], "2");
     EXPECT_EQ(result["C"], "3");
 }
+
+TEST(ToolsTest, pathToMapTest)
+{
+    std::map<std::string, std::string> values = pathToMap("Key 1/Value 1/Key 2/Value 2/Key3//");
+    ASSERT_EQ(values.size(), 3);
+    EXPECT_EQ(values["Key 1"], "Value 1");
+    EXPECT_EQ(values["Key 2"], "Value 2");
+    EXPECT_EQ(values["Key3"], "");
+
+    values = pathToMap("Key 1/Value 1/Key 2/");
+    ASSERT_EQ(values.size(), 2);
+    EXPECT_EQ(values["Key 1"], "Value 1");
+    EXPECT_EQ(values["Key 2"], "");
+
+    values = pathToMap("Key 1/Value 1/Key 2");
+    ASSERT_EQ(values.size(), 2);
+    EXPECT_EQ(values["Key 1"], "Value 1");
+    EXPECT_EQ(values["Key 2"], "");
+
+    values = pathToMap("Key 1/");
+    ASSERT_EQ(values.size(), 1);
+    EXPECT_EQ(values["Key 1"], "");
+
+    values = pathToMap("/");
+    ASSERT_EQ(values.size(), 1);
+    EXPECT_EQ(values[""], "");
+
+    values = pathToMap("/meh");
+    ASSERT_EQ(values.size(), 1);
+    EXPECT_EQ(values[""], "meh");
+}

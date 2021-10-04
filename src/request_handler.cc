@@ -77,7 +77,7 @@ std::string RequestHandler::joinUrl(const std::vector<std::string>& components, 
 std::map<std::string, std::string> RequestHandler::parseParameters(std::string_view filename, std::string_view baseLink)
 {
     const auto parameters = filename.substr(baseLink.size());
-    return dictDecodeSimple(parameters);
+    return pathToMap(parameters);
 }
 
 std::shared_ptr<CdsObject> RequestHandler::getObjectById(const std::map<std::string, std::string>& params) const
