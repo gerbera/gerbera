@@ -456,33 +456,30 @@ std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscap
     return dict;
 }
 
-// this is somewhat tricky as we need an exact amount of pairs
-// object_id=720&res_id=0
-std::map<std::string, std::string> dictDecodeSimple(std::string_view url)
+std::map<std::string, std::string> pathToMap(std::string_view url)
 {
-    std::map<std::string, std::string> dict;
+    std::map<std::string, std::string> out;
     std::size_t pos;
     std::size_t lastPos = 0;
+    std::size_t size = url.size();
     do {
         pos = url.find('/', lastPos);
-        if (pos == std::string_view::npos || pos < lastPos + 1)
-            break;
+        if (pos == std::string_view::npos)
+            pos = size;
 
         std::string key = urlUnescape(url.substr(lastPos, pos - lastPos));
-        lastPos = pos + 1;
+        lastPos = pos == size ? size : pos + 1;
         pos = url.find('/', lastPos);
         if (pos == std::string::npos)
-            pos = url.length();
-        if (pos < lastPos + 1)
-            break;
+            pos = size;
 
         std::string value = urlUnescape(url.substr(lastPos, pos - lastPos));
         lastPos = pos + 1;
 
-        dict.emplace(key, value);
-    } while (lastPos < url.length());
+        out.emplace(key, value);
+    } while (lastPos < size);
 
-    return dict;
+    return out;
 }
 
 void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source)

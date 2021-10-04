@@ -142,7 +142,7 @@ std::string urlUnescape(std::string_view str);
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
 std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
-std::map<std::string, std::string> dictDecodeSimple(std::string_view url);
+std::map<std::string, std::string> pathToMap(std::string_view url);
 
 /// \brief Adds elements from source to result if they do not yet exist in result
 void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source);
