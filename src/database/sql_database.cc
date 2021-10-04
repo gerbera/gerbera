@@ -423,7 +423,7 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -443,7 +443,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
         std::vector<std::pair<std::string, std::string>> versionCmds;
-        auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
+        const auto myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& scriptNode : versionNode.children("script")) {
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
@@ -465,7 +465,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     this->addResourceColumnCmd = addResourceColumnCmd;
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
-        if (dbVersion == fmt::to_string(version)) {
+        if (dbVersion == version) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
             for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
                 bool actionResult = true;
@@ -475,13 +475,13 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
                     _exec(upgradeCmd);
             }
             _exec(fmt::format(updateVersionCommand, version + 1, version));
-            dbVersion = fmt::to_string(version + 1);
+            dbVersion = version + 1;
             log_info("Database upgrade to version {} successful.", dbVersion);
         }
         version++;
     }
 
-    if (version != DBVERSION || dbVersion != fmt::to_string(DBVERSION))
+    if (version != DBVERSION || dbVersion != DBVERSION)
         throw_std_runtime_error("The database seems to be from a newer version");
 
     prepareResourceTable(addResourceColumnCmd);
