@@ -502,6 +502,12 @@ protected:
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     CdsContainer();
+    CdsContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
+    {
+        this->title = title;
+        this->upnpClass = upnpClass;
+    }
+
     bool isContainer() const override { return true; }
 
     /// \brief Set the searchable flag.

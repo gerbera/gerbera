@@ -32,7 +32,6 @@
 #ifndef __STORAGE_H__
 #define __STORAGE_H__
 
-#include <deque>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -44,6 +43,7 @@ namespace fs = std::filesystem;
 // forward declaration
 class AutoscanDirectory;
 class AutoscanList;
+class CdsContainer;
 class CdsObject;
 class Config;
 class ConfigValue;
@@ -181,9 +181,7 @@ public:
     /// the object ID of the container that is last in the path. The
     /// updateID will hold the objectID of the container that was changed,
     /// in case new containers were created during the operation.
-    virtual void addContainerChain(std::string path, const std::string& lastClass, int flags, int lastRefID, int* containerID,
-        std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
-        = 0;
+    virtual bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) = 0;
 
     /// \brief Builds the container path. Fetches the path of the
     /// parent and adds the title

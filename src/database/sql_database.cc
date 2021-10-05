@@ -1307,42 +1307,37 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     return path;
 }
 
-void SQLDatabase::addContainerChain(std::string virtualPath, const std::string& lastClass, int flags, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata)
+bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID)
 {
-    log_debug("Adding container Chain for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), lastRefID, *containerID);
+    log_debug("Adding container for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), cont->getRefID(), *containerID);
+
+    if (parentContainerId == INVALID_OBJECT_ID) {
+        *containerID = INVALID_OBJECT_ID;
+        return false;
+    }
 
     reduceString(virtualPath, VIRTUAL_CONTAINER_SEPARATOR);
     if (virtualPath == std::string(1, VIRTUAL_CONTAINER_SEPARATOR)) {
         *containerID = CDS_ID_ROOT;
-        return;
+        return false;
     }
     std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, virtualPath);
 
-    beginTransaction("addContainerChain");
+    beginTransaction("addContainer");
     auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}location_hash{1} = {3} AND {0}location{1} = {4} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(stringHash(dbLocation)), quote(dbLocation)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
             if (containerID)
                 *containerID = row->col_int(0, INVALID_OBJECT_ID);
-            commit("addContainerChain");
-            return;
+            commit("addContainer");
+            return false;
         }
     }
-    commit("addContainerChain");
+    commit("addContainer");
 
-    int parentContainerID = 0;
-    std::string newpath, container, newClass;
-    stripAndUnescapeVirtualContainerFromPath(virtualPath, newpath, container);
-    auto classes = splitString(lastClass, '/');
-    if (!classes.empty()) {
-        newClass = classes.back();
-        classes.pop_back();
-    }
-    addContainerChain(newpath, classes.empty() ? "" : fmt::format("{}", fmt::join(classes, "/")), OBJECT_FLAG_RESTRICTED, INVALID_OBJECT_ID, &parentContainerID, updateID, std::vector<std::pair<std::string, std::string>>());
-
-    *containerID = createContainer(parentContainerID, container, virtualPath, flags, true, newClass, lastRefID, lastMetadata);
-    updateID.push_front(*containerID);
+    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), INVALID_OBJECT_ID, cont->getMetaData());
+    return true;
 }
 
 std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)

@@ -145,7 +145,7 @@ public:
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
-    void addContainerChain(std::string virtualPath, const std::string& lastClass, int flags, int lastRefID, int* containerID, std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata) override;
+    bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) override;
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 

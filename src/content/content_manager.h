@@ -230,16 +230,6 @@ public:
     void addObject(const std::shared_ptr<CdsObject>& obj, bool firstChild);
 
     /// \brief Adds a virtual container chain specified by path.
-    /// \param container path separated by '/'. Slashes in container
-    /// titles must be escaped.
-    /// \param lastClass upnp:class of the last container in the chain, if nullptr
-    /// then the default class will be taken
-    /// \param lastRefID reference id of the last container in the chain,
-    /// INVALID_OBJECT_ID indicates that the id will not be set.
-    /// \return ID of the last container in the chain.
-    std::pair<int, bool> addContainerChain(const std::string& chain, const std::string& lastClass = "",
-        int lastRefID = INVALID_OBJECT_ID, const std::shared_ptr<CdsObject>& origObj = nullptr);
-
     /// \return ID of the last container in the chain.
     std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain);
 
@@ -358,7 +348,7 @@ protected:
     void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
-    void assignFanArt(const std::vector<std::shared_ptr<CdsContainer>>& containerList, const std::shared_ptr<CdsObject>& origObj);
+    void assignFanArt(const std::shared_ptr<CdsContainer>& containerList, const std::shared_ptr<CdsObject>& origObj, int count);
 
     template <typename T>
     void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);

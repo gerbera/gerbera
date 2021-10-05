@@ -114,16 +114,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         return 0;
     duk_to_object(ctx, 0);
     //stack: js_cds_obj
-    const char* ts = duk_to_string(ctx, 1);
-    if (!ts)
-        ts = "/";
-    fs::path path = ts;
-    //stack: js_cds_obj path
-    std::string containerclass;
-    if (!duk_is_null_or_undefined(ctx, 2)) {
-        containerclass = duk_to_string(ctx, 2);
-    }
-    //stack: js_cds_obj path containerclass
+    const char* containerId = duk_to_string(ctx, 1);
+    if (!containerId)
+        containerId = "-1";
+    //stack: js_cds_obj containerId
 
     try {
         std::unique_ptr<StringConverter> p2i;
@@ -142,10 +136,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             duk_get_global_string(ctx, "orig");
         else
             duk_push_undefined(ctx);
-        //stack: js_cds_obj path containerclass js_orig_obj
+        //stack: js_cds_obj containerId js_orig_obj
 
         if (duk_is_undefined(ctx, -1)) {
-            log_debug("Could not retrieve orig/playlist object");
+            log_debug("Could not retrieve global 'orig'/'playlist' object");
             return 0;
         }
 
@@ -158,7 +152,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         int pcdId = INVALID_OBJECT_ID;
 
         duk_swap_top(ctx, 0);
-        //stack: js_orig_obj path containerclass js_cds_obj
+        //stack: js_orig_obj containerId js_cds_obj
         if (self->whoami() == S_PLAYLIST) {
             int otype = self->getIntProperty("objectType", -1);
             if (otype == -1) {
@@ -180,6 +174,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
                     pcdId = cm->addFile(dirEnt, asSetting, false);
                     if (pcdId == INVALID_OBJECT_ID) {
+                        log_error("Faild to add object {}", dirEnt.path().string());
                         return 0;
                     }
                     auto mainObj = self->getDatabase()->loadObject(pcdId);
@@ -196,16 +191,11 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        auto parentId = std::pair(stoiString(ts), false);
+        auto parentId = std::pair(stoiString(containerId), false);
 
         if (parentId.first <= 0) {
-            if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
-                path = p2i->convert(path);
-                parentId = cm->addContainerChain(path, containerclass, origObject->getID());
-            } else {
-                path = (self->whoami() == S_PLAYLIST) ? p2i->convert(path) : i2i->convert(path);
-                parentId = cm->addContainerChain(path, containerclass, INVALID_OBJECT_ID, origObject);
-            }
+            log_error("Invalid parent id passed to addCdsObject: {}", parentId.first);
+            return 0;
         }
 
         cdsObj->setParentID(parentId.first);
