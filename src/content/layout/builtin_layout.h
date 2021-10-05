@@ -38,6 +38,7 @@
 #include "layout.h"
 
 // forward declaration
+class CdsContainer;
 class CdsObject;
 
 class BuiltinLayout : public Layout {
@@ -49,9 +50,10 @@ public:
 protected:
     std::shared_ptr<Config> config;
     std::map<std::string, std::string> genreMap;
+    std::map<std::string, std::pair<int, bool>> chain;
+    std::map<std::string, std::shared_ptr<CdsContainer>> container;
 
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
-    static std::string esc(std::string str);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);

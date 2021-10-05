@@ -20,8 +20,7 @@ public:
     void shutdown() override { }
 
     void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
-    void addContainerChain(std::string path, const std::string& lastClass, int flags, int lastRefID, int* containerID,
-        std::deque<int>& updateID, const std::vector<std::pair<std::string, std::string>>& lastMetadata) override { }
+    bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) override { return true; }
     fs::path buildContainerPath(int parentID, const std::string& title) override { return {}; }
 
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
