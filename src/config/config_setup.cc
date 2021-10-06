@@ -530,17 +530,16 @@ bool ConfigBoolSetup::CheckMarkPlayedValue(std::string& value)
 /// This function will create an array like that: ["data", "otherdata"]
 bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
-    if (element) {
-        for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
-            const pugi::xml_node& child = it.node();
-            std::string attrValue = attrOption != CFG_MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
-            if (itemNotEmpty && attrValue.empty()) {
-                throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
-            }
-            if (!attrValue.empty())
-                result.push_back(std::move(attrValue));
+    for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
+        const pugi::xml_node& child = it.node();
+        std::string attrValue = attrOption != CFG_MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
+        if (itemNotEmpty && attrValue.empty()) {
+            throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
         }
+        if (!attrValue.empty())
+            result.push_back(std::move(attrValue));
     }
+
     return true;
 }
 
@@ -654,7 +653,7 @@ std::shared_ptr<ConfigOption> ConfigArraySetup::newOption(const std::vector<std:
 
 bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName)
 {
-    if (value && !value.empty()) {
+    if (!value.empty()) {
         for (auto&& it : value.select_nodes(nodeName)) {
             const pugi::xml_node& content = it.node();
             std::string markContent = content.text().as_string();
@@ -678,7 +677,7 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
 
 bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName)
 {
-    if (value && !value.empty()) {
+    if (!value.empty()) {
         // create the array from user settings
         for (auto&& it : value.select_nodes(nodeName)) {
             const pugi::xml_node& child = it.node();
@@ -712,25 +711,24 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
 /// key:value paris: "1":"2", "3":"4"
 bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
 {
-    if (optValue) {
-        const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
-        auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
-        auto valAttr = ConfigDefinition::removeAttribute(valOption);
+    const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
+    auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
+    auto valAttr = ConfigDefinition::removeAttribute(valOption);
 
-        for (auto&& it : dictNodes) {
-            const pugi::xml_node child = it.node();
-            std::string key = child.attribute(keyAttr.c_str()).as_string();
-            std::string value = child.attribute(valAttr.c_str()).as_string();
-            if (!key.empty() && !value.empty()) {
-                if (tolower) {
-                    toLowerInPlace(key);
-                }
-                result[key] = std::move(value);
-            } else if (itemNotEmpty) {
-                return false;
+    for (auto&& it : dictNodes) {
+        const pugi::xml_node child = it.node();
+        std::string key = child.attribute(keyAttr.c_str()).as_string();
+        std::string value = child.attribute(valAttr.c_str()).as_string();
+        if (!key.empty() && !value.empty()) {
+            if (tolower) {
+                toLowerInPlace(key);
             }
+            result[key] = std::move(value);
+        } else if (itemNotEmpty) {
+            return false;
         }
     }
+
     return true;
 }
 

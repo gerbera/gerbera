@@ -310,8 +310,7 @@ void ContentManager::shutdown()
         // update modification time for database
         for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoScanDir {}", i);
-            auto dir = autoscan_inotify->get(i);
-            if (dir) {
+            if (auto dir = autoscan_inotify->get(i)) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
                     auto t = to_seconds(dirEnt.last_write_time());

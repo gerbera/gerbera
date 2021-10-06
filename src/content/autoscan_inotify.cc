@@ -177,8 +177,7 @@ void AutoscanInotify::threadProc()
                     path /= name;
 
                 std::shared_ptr<AutoscanDirectory> adir;
-                auto watchAs = getAppropriateAutoscan(wdObj, path);
-                if (watchAs)
+                if (auto watchAs = getAppropriateAutoscan(wdObj, path))
                     adir = watchAs->getAutoscanDirectory();
 
                 // file is renamed
@@ -225,8 +224,7 @@ void AutoscanInotify::threadProc()
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
-                            auto watch = getStartPoint(wdObj);
-                            if (watch) {
+                            if (auto watch = getStartPoint(wdObj)) {
                                 if (adir->persistent()) {
                                     monitorNonexisting(path, watch->getAutoscanDirectory());
                                     content->handlePeristentAutoscanRemove(adir);
@@ -360,9 +358,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, const std::vector<std
         }
 
         fs::path path = buf.str();
-        bool pathExists = fs::is_directory(path);
-        //        log_debug("checking {}: {}", path.c_str(), pathExists);
-        if (pathExists) {
+        if (fs::is_directory(path)) {
             if (curWd != -1)
                 removeNonexistingMonitor(curWd, watches.at(curWd), pathAr);
             if (first) {
@@ -402,8 +398,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                 log_debug("found wd to remove because of move event: {} {}", removeWd, path.c_str());
 
                 inotify->removeWatch(removeWd);
-                auto watchToRemove = getStartPoint(wdToRemove);
-                if (watchToRemove) {
+                if (auto watchToRemove = getStartPoint(wdToRemove)) {
                     auto adir = watchToRemove->getAutoscanDirectory();
                     if (adir->persistent()) {
                         monitorNonexisting(path, adir);

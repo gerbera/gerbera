@@ -495,9 +495,7 @@ void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
 
     for (auto&& cfgValue : values) {
         try {
-            auto cs = ConfigDefinition::findConfigSetupByPath(cfgValue.key, true);
-
-            if (cs) {
+            if (auto cs = ConfigDefinition::findConfigSetupByPath(cfgValue.key, true)) {
                 if (cfgValue.item == cs->xpath) {
                     origValues[cfgValue.item] = cs->getCurrentValue();
                     cs->makeOption(cfgValue.value, self);
