@@ -4,5 +4,4 @@ using namespace ::testing;
 
 TEST(AutoscanTimedTest, millisecondsToHMSF)
 {
-
 }

@@ -163,7 +163,7 @@ void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, s
                 duk_push_string(ctx, array[i].c_str());
                 duk_put_prop_index(ctx, duk_array, i);
             }
-            duk_put_prop_string(ctx, -2 , key.c_str());
+            duk_put_prop_string(ctx, -2, key.c_str());
         }
         duk_put_prop_string(ctx, -2, "metaData");
     }

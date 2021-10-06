@@ -27,7 +27,8 @@ Gerbera - https://gerbera.io/
 class MySQLConfigFake : public Config {
 public:
     fs::path getConfigFilename() const override { return {}; }
-    std::string getOption(config_option_t option) const override {
+    std::string getOption(config_option_t option) const override
+    {
         if (option == CFG_SERVER_STORAGE_MYSQL_HOST) {
             return "hydra.home";
         }
@@ -43,9 +44,9 @@ public:
         if (option == CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
             return "mysql-upgrade.xml";
         }
-//        if (option == CFG_SERVER_STORAGE_MYSQL_DATABASE) {
-//            return "gerbera";
-//        }
+        //        if (option == CFG_SERVER_STORAGE_MYSQL_DATABASE) {
+        //            return "gerbera";
+        //        }
         return {};
     }
     void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override { }
@@ -56,7 +57,7 @@ public:
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
-    void updateConfigFromDatabase(std::shared_ptr<Database> database) override {}
+    void updateConfigFromDatabase(std::shared_ptr<Database> database) override { }
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }

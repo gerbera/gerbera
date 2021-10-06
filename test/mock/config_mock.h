@@ -19,29 +19,29 @@ public:
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override
     {
         switch (option) {
-            case CFG_UPNP_ALBUM_PROPERTIES:
-                return {
-                    { "dc:creator", "M_ALBUMARTIST" },
-                    { "upnp:artist", "M_ALBUMARTIST" },
-                    { "upnp:albumArtist", "M_ALBUMARTIST" },
-                    { "upnp:composer", "M_COMPOSER" },
-                    { "upnp:conductor", "M_CONDUCTOR" },
-                    { "upnp:orchestra", "M_ORCHESTRA" },
-                    { "upnp:date", "M_UPNP_DATE" },
-                    { "dc:date", "M_UPNP_DATE" },
-                    { "upnp:producer", "M_PRODUCER" },
-                    { "dc:publisher", "M_PUBLISHER" },
-                    { "upnp:genre", "M_GENRE" },
-                };
-            default:
-                return {};
+        case CFG_UPNP_ALBUM_PROPERTIES:
+            return {
+                { "dc:creator", "M_ALBUMARTIST" },
+                { "upnp:artist", "M_ALBUMARTIST" },
+                { "upnp:albumArtist", "M_ALBUMARTIST" },
+                { "upnp:composer", "M_COMPOSER" },
+                { "upnp:conductor", "M_CONDUCTOR" },
+                { "upnp:orchestra", "M_ORCHESTRA" },
+                { "upnp:date", "M_UPNP_DATE" },
+                { "dc:date", "M_UPNP_DATE" },
+                { "upnp:producer", "M_PRODUCER" },
+                { "dc:publisher", "M_PUBLISHER" },
+                { "upnp:genre", "M_GENRE" },
+            };
+        default:
+            return {};
         }
     }
     std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
-    void updateConfigFromDatabase(std::shared_ptr<Database> database) override {}
+    void updateConfigFromDatabase(std::shared_ptr<Database> database) override { }
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }

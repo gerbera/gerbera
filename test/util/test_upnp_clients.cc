@@ -40,7 +40,7 @@ public:
         struct sockaddr_in sin = {};
         sin.sin_family = AF_INET;
         sin.sin_addr.s_addr = inet_addr(ip);
-        memcpy(addr, &sin, sizeof (sin));
+        memcpy(addr, &sin, sizeof(sin));
     }
 
     Clients* subject;
