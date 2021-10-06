@@ -1098,7 +1098,7 @@ std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, b
     }
 
     beginTransaction("getChildCounts");
-    auto res = select(fmt::format("SELECT {0}, COUNT(*) FROM {1} WHERE {2} GROUP BY {0}",
+    auto res = select(fmt::format("SELECT {0}, COUNT(*) FROM {1} WHERE {2} GROUP BY {0} ORDER BY {0}",
         identifier("parent_id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
     commit("getChildCounts");
 
@@ -1106,7 +1106,7 @@ std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, b
     if (res) {
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
-            result.emplace(row->col_int(0, INVALID_OBJECT_ID), row->col_int(1, 0));
+            result.emplace_hint(result.end(), row->col_int(0, INVALID_OBJECT_ID), row->col_int(1, 0));
         }
     }
     return result;
@@ -1518,6 +1518,8 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
         return {};
 
     std::vector<std::pair<std::string, std::string>> metaData;
+    metaData.reserve(res->getNumRows());
+
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         metaData.emplace_back(getCol(row, MetadataCol::PropertyName), getCol(row, MetadataCol::PropertyValue));
