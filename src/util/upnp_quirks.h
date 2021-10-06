@@ -58,11 +58,11 @@ public:
     /** \brief Add Samsung specific bookmark information to the request's result.
      *
      * \param item const std::shared_ptr<CdsItem>& Item which will be played and stores the bookmark information.
-     * \param result pugi::xml_node* Answer content.
+     * \param result pugi::xml_node& Answer content.
      * \return void
      *
      */
-    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node* result) const;
+    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result) const;
 
     /** \brief Stored bookmark information into the database
      *

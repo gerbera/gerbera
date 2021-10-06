@@ -66,12 +66,12 @@ void Web::Autoscan::process()
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("1");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
             auto adir = content->getAutoscanDirectory(path);
-            autoscan2XML(adir, &autoscan);
+            autoscan2XML(adir, autoscan);
         } else {
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
             auto adir = database->getAutoscanDirectory(intParam("object_id"));
-            autoscan2XML(adir, &autoscan);
+            autoscan2XML(adir, autoscan);
         }
     } else if (action == "as_edit_save") {
         std::string scanModeStr = param("scan_mode");
@@ -136,19 +136,19 @@ void Web::Autoscan::process()
         throw_std_runtime_error("called with illegal action");
 }
 
-void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element)
+void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node& element)
 {
     if (!adir) {
-        element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
-        element->append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
-        element->append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
-        element->append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
-        element->append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
+        element.append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
+        element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
     } else {
-        element->append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
-        element->append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
-        element->append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
-        element->append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
-        element->append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
+        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()).data());
+        element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
+        element.append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
+        element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
+        element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
     }
 }

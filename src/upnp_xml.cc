@@ -147,7 +147,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (quirks)
-            quirks->restoreSamsungBookMarkedPosition(item, &result);
+            quirks->restoreSamsungBookMarkedPosition(item, result);
 
         auto metaGroups = obj->getMetaGroups();
 

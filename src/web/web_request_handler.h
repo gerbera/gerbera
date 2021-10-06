@@ -117,7 +117,7 @@ protected:
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param session the session from which the ui update ids should be taken
     /// \param updateIDsEl the xml element to add the elements to
-    static void addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node* updateIDsEl);
+    static void addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node& updateIDsEl);
 
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.
@@ -127,7 +127,7 @@ protected:
     /// \brief add the content manager task to the given xml element as xml elements
     /// \param task the task to add to the given xml element
     /// \param parent the xml element to add the elements to
-    static void appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node* parent);
+    static void appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node& parent);
 
     /// \brief check if accounts are enabled in the config
     /// \return true if accounts are enabled, false if not

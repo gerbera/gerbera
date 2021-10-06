@@ -145,7 +145,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
 
             if (checkRequestCalled) {
                 // add current task
-                appendTask(content->getCurrentTask(), &root);
+                appendTask(content->getCurrentTask(), root);
 
                 handleUpdateIDs();
             }
@@ -248,26 +248,26 @@ void WebRequestHandler::handleUpdateIDs()
         if (updates == "check") {
             updateIDs.append_attribute("pending") = session->hasUIUpdateIDs();
         } else if (updates == "get") {
-            addUpdateIDs(session, &updateIDs);
+            addUpdateIDs(session, updateIDs);
         }
     }
 }
 
-void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node* updateIDsEl)
+void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node& updateIDsEl)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (!updateIDs.empty()) {
         log_debug("UI: sending update ids: {}", updateIDs);
-        updateIDsEl->append_attribute("ids") = updateIDs.c_str();
-        updateIDsEl->append_attribute("updates") = true;
+        updateIDsEl.append_attribute("ids") = updateIDs.c_str();
+        updateIDsEl.append_attribute("updates") = true;
     }
 }
 
-void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node* parent)
+void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node& parent)
 {
     if (!task || !parent)
         return;
-    auto taskEl = parent->append_child("task");
+    auto taskEl = parent.append_child("task");
     taskEl.append_attribute("id") = task->getID();
     taskEl.append_attribute("cancellable") = task->isCancellable();
     taskEl.append_attribute("text") = task->getDescription().c_str();
