@@ -1584,9 +1584,13 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
 std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContainer)
 {
+    auto colId = identifier("id");
+    auto table = identifier(CDS_OBJECT_TABLE);
+    auto colParentId = identifier("parent_id");
+
     auto getSql = (withoutContainer) //
-        ? fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} = {3} AND {0}object_type{1} != {4}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID, OBJECT_TYPE_CONTAINER)
-        : fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} = {3}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, parentID);
+        ? fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} != {}", colId, table, colParentId, parentID, identifier("object_type"), OBJECT_TYPE_CONTAINER)
+        : fmt::format("SELECT {} FROM {} WHERE {} = {}", colId, table, colParentId, parentID);
     auto res = select(getSql);
     if (!res)
         throw_std_runtime_error("db error");
@@ -1613,7 +1617,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
         throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
     }
 
-    auto res = select(fmt::format("SELECT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}id{1} IN ({3})", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, fmt::join(list, ",")));
+    auto res = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {0} IN ({3})",
+        identifier("id"), identifier("object_type"), identifier(CDS_OBJECT_TABLE), fmt::join(list, ",")));
     if (!res)
         throw_std_runtime_error("sql error");
 
@@ -1675,7 +1680,8 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
 {
-    auto res = select(fmt::format("SELECT {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}id{1} = {3} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, objectID));
+    auto res = select(fmt::format("SELECT {}, {} FROM {} WHERE {} = {} LIMIT 1",
+        identifier("object_type"), identifier("ref_id"), identifier(CDS_OBJECT_TABLE), identifier("id"), objectID));
     if (!res)
         return nullptr;
 
@@ -1824,16 +1830,17 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
         return {};
 
-    constexpr auto tabAlias = "fol";
-    constexpr auto childAlias = "cld";
+    auto tabAlias = identifier("fol");
+    auto childAlias = identifier("cld");
+    auto colId = identifier("id");
     auto fields = std::vector {
-        fmt::format("{}.{}", identifier(tabAlias), identifier("id")),
-        fmt::format("COUNT({}.{})", identifier(childAlias), identifier("parent_id")),
-        fmt::format("{}.{}", identifier(tabAlias), identifier("parent_id")),
-        fmt::format("{}.{}", identifier(tabAlias), identifier("flags")),
+        fmt::format("{}.{}", tabAlias, colId),
+        fmt::format("COUNT({}.{})", childAlias, identifier("parent_id")),
+        fmt::format("{}.{}", tabAlias, identifier("parent_id")),
+        fmt::format("{}.{}", tabAlias, identifier("flags")),
     };
-    std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {0}{3}{1}.{0}id{1} = {0}{4}{1}.{0}parent_id{1} WHERE {0}{3}{1}.{0}object_type{1} = {6} AND {0}{3}{1}.{0}id{1} ",
-        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, CDS_OBJECT_TABLE, quote(OBJECT_TYPE_CONTAINER));
+    std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {3}.{0}id{1} = {4}.{0}parent_id{1} WHERE {3}.{0}object_type{1} = {6} AND {3}.{0}id{1}",
+        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, identifier(CDS_OBJECT_TABLE), OBJECT_TYPE_CONTAINER);
 
     std::vector<std::int32_t> del;
 
@@ -1850,7 +1857,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         again = false;
 
         if (!selUpnp.empty()) {
-            auto sql = fmt::format("{2} IN ({3}) GROUP BY {0}{4}{1}.{0}id{1}", table_quote_begin, table_quote_end, selectSql, fmt::join(selUpnp, ","), tabAlias);
+            auto sql = fmt::format("{} IN ({}) GROUP BY {}.{}", selectSql, fmt::join(selUpnp, ","), tabAlias, colId);
             log_debug("upnp-sql: {}", sql);
             std::shared_ptr<SQLResult> res = select(sql);
             selUpnp.clear();
@@ -1870,7 +1877,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         }
 
         if (!selUi.empty()) {
-            auto sql = fmt::format("{2} IN ({3}) GROUP BY {0}{4}{1}.{0}id{1}", table_quote_begin, table_quote_end, selectSql, fmt::join(selUi, ","), tabAlias);
+            auto sql = fmt::format("{} IN ({}) GROUP BY {}.{}", selectSql, fmt::join(selUi, ","), tabAlias, colId);
             log_debug("ui-sql: {}", sql);
             std::shared_ptr<SQLResult> res = select(sql);
             selUi.clear();
