@@ -83,7 +83,7 @@ static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
     return int(c[0]);
 }
 
-static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
+static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int& w, int& h)
 {
     int a = iohFgetc(ioh);
 
@@ -151,8 +151,8 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int* w, int
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            *w = get16m(data + 5);
-            *h = get16m(data + 3);
+            w = get16m(data + 5);
+            h = get16m(data + 3);
             return;
         }
     }
@@ -164,7 +164,7 @@ std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh)
 {
     int w, h;
     try {
-        getJpegResolution(ioh, &w, &h);
+        getJpegResolution(ioh, w, h);
     } catch (const std::runtime_error& e) {
         ioh->close();
         throw e;

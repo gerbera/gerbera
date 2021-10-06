@@ -52,7 +52,7 @@ void Web::Tasks::process()
         xml2JsonHints->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
         for (auto&& task : taskList) {
-            appendTask(task, &tasksEl);
+            appendTask(task, tasksEl);
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");
