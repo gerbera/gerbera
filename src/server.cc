@@ -525,6 +525,7 @@ int Server::registerVirtualDirCallbacks()
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
             reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
+            *requestCookie = reinterpret_cast<const void**>(reqHandler.release());
             return 0;
         } catch (const ServerShutdownException& se) {
             return -1;
@@ -542,12 +543,10 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir OpenCallback");
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
-            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
+            auto reqHandler = std::unique_ptr<RequestHandler>(static_cast<RequestHandler*>(const_cast<void*>(requestCookie)));
             std::string link = urlUnescape(filename);
             auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
-            auto ioPtr = UpnpWebFileHandle(ioHandler.release());
-            //log_debug("{} open({})", ioPtr, filename);
-            return ioPtr;
+            return ioHandler.release();
         } catch (const ServerShutdownException& se) {
             return nullptr;
         } catch (const SubtitlesNotFoundException& sex) {
