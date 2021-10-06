@@ -269,6 +269,12 @@ public:
         this->metaData = metaData;
     }
 
+    /// \brief Set entire metadata dictionary by moving
+    void setMetaData(std::vector<std::pair<std::string, std::string>>&& metaData)
+    {
+        this->metaData = std::move(metaData);
+    }
+
     /// \brief Add a single metadata value.
     void addMetaData(const metadata_fields_t key, const std::string& value)
     {
@@ -328,6 +334,12 @@ public:
     void setResources(const std::vector<std::shared_ptr<CdsResource>>& res)
     {
         resources = res;
+    }
+
+    /// \brief Set resources by move
+    void setResources(std::vector<std::shared_ptr<CdsResource>>&& res)
+    {
+        resources = std::move(res);
     }
 
     /// \brief Search resources for given handler id

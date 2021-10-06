@@ -1380,26 +1380,29 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty()) {
-        obj->setMetaData(metaData);
+        obj->setMetaData(std::move(metaData));
     } else if (obj->getRefID() != CDS_ID_ROOT) {
         metaData = retrieveMetaDataForObject(obj->getRefID());
         if (!metaData.empty())
-            obj->setMetaData(metaData);
+            obj->setMetaData(std::move(metaData));
     }
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::Auxdata), getCol(row, BrowseCol::RefAuxdata));
     std::map<std::string, std::string> aux = dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
+    bool resourceZeroOk = false;
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
-        obj->setResources(resources);
+        resourceZeroOk = true;
+        obj->setResources(std::move(resources));
     } else if (obj->getRefID() != CDS_ID_ROOT) {
         resources = retrieveResourcesForObject(obj->getRefID());
-        if (!resources.empty())
-            obj->setResources(resources);
+        if (!resources.empty()) {
+            resourceZeroOk = true;
+            obj->setResources(std::move(resources));
+        }
     }
-    auto resourceZeroOk = !resources.empty();
 
     obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
@@ -1475,18 +1478,20 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty())
-        obj->setMetaData(metaData);
+        obj->setMetaData(std::move(metaData));
 
+    bool resourceZeroOk = false;
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
-        obj->setResources(resources);
+        resourceZeroOk = true;
+        obj->setResources(std::move(resources));
     } else if (obj->getRefID() != CDS_ID_ROOT) {
         resources = retrieveResourcesForObject(obj->getRefID());
-        if (!resources.empty())
-            obj->setResources(resources);
+        if (!resources.empty()) {
+            resourceZeroOk = true;
+            obj->setResources(std::move(resources));
+        }
     }
-
-    auto resourceZeroOk = !resources.empty();
 
     if (obj->isItem()) {
         if (!resourceZeroOk)
