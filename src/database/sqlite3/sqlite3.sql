@@ -63,16 +63,15 @@ CREATE TABLE "grb_config_value" (
   "status" varchar(20) NOT NULL
 );
 CREATE TABLE "grb_cds_resource" (
-    "id" integer primary key,
     "item_id" integer NOT NULL,
     "res_id" integer NOT NULL,
     "handlerType" integer NOT NULL,
     "options" text default NULL,
     "parameters" text default NULL,
+    PRIMARY KEY ("item_id", "res_id"),
     CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
-CREATE INDEX grb_cds_resource_id ON grb_cds_resource(item_id,res_id);
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX mt_object_type ON mt_cds_object(object_type);

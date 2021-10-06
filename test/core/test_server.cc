@@ -18,7 +18,7 @@ public:
     {
     }
 
-    void TearDown() override {}
+    void TearDown() override { }
 
     static std::string exec(const char* cmd)
     {

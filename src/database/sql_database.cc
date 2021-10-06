@@ -112,16 +112,14 @@ enum class SearchCol {
 
 /// \brief meta column ids
 enum class MetadataCol {
-    Id = 0,
-    ItemId,
+    ItemId = 0,
     PropertyName,
     PropertyValue
 };
 
 /// \brief resource column ids
 enum class ResourceCol {
-    Id = 0,
-    ItemId,
+    ItemId = 0,
     ResId,
     HandlerType,
     Options,
@@ -201,7 +199,6 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
 static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap {
-    { MetadataCol::Id, { MTA_ALIAS, "id" } },
     { MetadataCol::ItemId, { MTA_ALIAS, "item_id" } },
     { MetadataCol::PropertyName, { MTA_ALIAS, "property_name" } },
     { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value" } },
@@ -266,7 +263,6 @@ static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
-    { "id", MetadataCol::Id },
     { UPNP_SEARCH_ID, MetadataCol::ItemId },
     { META_NAME, MetadataCol::PropertyName },
     { META_VALUE, MetadataCol::PropertyValue },
@@ -332,14 +328,12 @@ void SQLDatabase::init()
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
     std::vector<std::pair<std::string, int>> resourceTagMap {
-        { "id", to_underlying(ResourceCol::Id) },
         { UPNP_SEARCH_ID, to_underlying(ResourceCol::ItemId) },
         { "res@id", to_underlying(ResourceCol::ResId) },
     };
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, std::pair<std::string, std::string>> resourceColMap {
-        { to_underlying(ResourceCol::Id), { RES_ALIAS, "id" } },
         { to_underlying(ResourceCol::ItemId), { RES_ALIAS, "item_id" } },
         { to_underlying(ResourceCol::ResId), { RES_ALIAS, "res_id" } },
         { to_underlying(ResourceCol::HandlerType), { RES_ALIAS, "handlerType" } },
@@ -349,7 +343,7 @@ void SQLDatabase::init()
 
     /// \brief List of column names to be used in insert and update to ensure correct order of columns
     // only columns listed here are added to the insert and update statements
-    tableColumnOrder = std::map<std::string, std::vector<std::string>> {
+    tableColumnOrder = {
         { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "bookmark_pos", "last_modified", "last_updated" } },
         { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },
@@ -429,7 +423,7 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -449,7 +443,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
         std::vector<std::pair<std::string, std::string>> versionCmds;
-        auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
+        const auto myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& scriptNode : versionNode.children("script")) {
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
@@ -471,7 +465,7 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
     this->addResourceColumnCmd = addResourceColumnCmd;
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
-        if (dbVersion == fmt::to_string(version)) {
+        if (dbVersion == version) {
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
             for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
                 bool actionResult = true;
@@ -481,13 +475,13 @@ void SQLDatabase::upgradeDatabase(std::string&& dbVersion, const std::array<unsi
                     _exec(upgradeCmd);
             }
             _exec(fmt::format(updateVersionCommand, version + 1, version));
-            dbVersion = fmt::to_string(version + 1);
+            dbVersion = version + 1;
             log_info("Database upgrade to version {} successful.", dbVersion);
         }
         version++;
     }
 
-    if (version != DBVERSION || dbVersion != fmt::to_string(DBVERSION))
+    if (version != DBVERSION || dbVersion != DBVERSION)
         throw_std_runtime_error("The database seems to be from a newer version");
 
     prepareResourceTable(addResourceColumnCmd);
@@ -918,17 +912,31 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     commit("browse");
 
     std::vector<std::shared_ptr<CdsObject>> result;
+    std::vector<std::shared_ptr<CdsContainer>> containers;
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        result.push_back(createObjectFromRow(row));
+        auto obj = createObjectFromRow(row);
+        if (obj->isContainer()) {
+            containers.push_back(std::static_pointer_cast<CdsContainer>(obj));
+        }
+        result.push_back(std::move(obj));
     }
 
-    // update childCount fields
-    for (auto&& obj : result) {
-        if (obj->isContainer()) {
-            auto cont = std::static_pointer_cast<CdsContainer>(obj);
-            cont->setChildCount(getChildCount(cont->getID(), getContainers, getItems, hideFsRoot));
+    // update childCount fields of containers (query all containers in one batch)
+    if (!containers.empty()) {
+        std::vector<int> contIds;
+        contIds.reserve(containers.size());
+        std::transform(containers.begin(), containers.end(), std::back_inserter(contIds),
+            [](auto&& container) { return container->getID(); });
+
+        const auto child_counts = getChildCounts(contIds, getContainers, getItems, hideFsRoot);
+        for (auto&& cont : containers) {
+            auto it = child_counts.find(cont->getID());
+            if (it != child_counts.end())
+                cont->setChildCount(it->second);
+            else
+                cont->setChildCount(0);
         }
     }
 
@@ -1056,6 +1064,7 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
     if (contId == CDS_ID_ROOT && hideFsRoot) {
         where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
     }
+
     beginTransaction("getChildCount");
     auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
     commit("getChildCount");
@@ -1067,6 +1076,40 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
         }
     }
     return 0;
+}
+
+std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot)
+{
+    if (!containers && !items)
+        return {};
+
+    if (contId.empty())
+        return {};
+
+    auto where = std::vector {
+        fmt::format("{} IN ({})", identifier("parent_id"), fmt::join(contId, ","))
+    };
+    if (containers && !items)
+        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+    else if (items && !containers)
+        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+    if (hideFsRoot && std::find(contId.begin(), contId.end(), CDS_ID_ROOT) != contId.end()) {
+        where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
+    }
+
+    beginTransaction("getChildCounts");
+    auto res = select(fmt::format("SELECT {0}, COUNT(*) FROM {1} WHERE {2} GROUP BY {0}",
+        identifier("parent_id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+    commit("getChildCounts");
+
+    std::map<int, int> result;
+    if (res) {
+        std::unique_ptr<SQLRow> row;
+        while ((row = res->nextRow())) {
+            result.emplace(row->col_int(0, INVALID_OBJECT_ID), row->col_int(1, 0));
+        }
+    }
+    return result;
 }
 
 std::vector<std::string> SQLDatabase::getMimeTypes()
@@ -2342,8 +2385,8 @@ void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>&
 
 std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObject(int objectId)
 {
-    auto rsql = fmt::format("{3} FROM {0}{2}{1} WHERE {0}item_id{1} = {4} ORDER BY {0}res_id{1}",
-        table_quote_begin, table_quote_end, RESOURCE_TABLE, sql_resource_query, objectId);
+    auto rsql = fmt::format("{} FROM {} WHERE {} = {} ORDER BY {}",
+        sql_resource_query, identifier(RESOURCE_TABLE), identifier("item_id"), objectId, identifier("res_id"));
     log_debug("SQLDatabase::retrieveResourcesForObject {}", rsql);
     auto&& res = select(rsql);
 
@@ -2602,8 +2645,7 @@ bool SQLDatabase::doResourceMigration()
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
-        fmt::format("SELECT COUNT(*) FROM {}",
-            identifier(RESOURCE_TABLE)));
+        fmt::format("SELECT COUNT(*) FROM {}", identifier(RESOURCE_TABLE)));
     int resourceRowCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 

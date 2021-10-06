@@ -48,7 +48,7 @@ class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 14
+#define DBVERSION 15
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -121,6 +121,7 @@ public:
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
+    std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
 
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
 
@@ -213,7 +214,7 @@ protected:
     using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(std::string&& dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd);
+    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd);
     virtual void _exec(const std::string& query) = 0;
 
 private:

@@ -742,10 +742,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         duk_push_object(ctx);
         // stack: js meta_js
         if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = std::vector<std::string> { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()) };
+            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()) };
         }
         if (std::static_pointer_cast<CdsItem>(obj)->getPartNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = std::vector<std::string> { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()) };
+            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()) };
         }
         for (auto&& [key, array] : metaGroups) {
             auto dukArray = duk_push_array(ctx);

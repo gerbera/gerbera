@@ -79,4 +79,9 @@
     <version number="14" remark="drop redundant index">
         <script>DROP INDEX `grb_config_value_item` ON `grb_config_value`</script>
     </version>
+    <version number="15" remark="Replace primary key on grb_cds_resource">
+        <script>DROP INDEX `grb_cds_resource_id` ON `grb_cds_resource`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `id`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD PRIMARY KEY (`item_id`, `res_id`)</script>
+    </version>
 </upgrade>

@@ -181,4 +181,25 @@
     <version number="14" remark="drop redundant index">
         <script>DROP INDEX grb_config_value_item;</script>
     </version>
+    <version number="15" remark="Replace primary key on grb_cds_resource">
+        <script>
+        CREATE TABLE "grb_cds_resource_new" (
+            "item_id" integer NOT NULL,
+            "res_id" integer NOT NULL,
+            "handlerType" integer NOT NULL,
+            "options" text default NULL,
+            "parameters" text default NULL,
+            "size" varchar(255) default NULL, "duration" varchar(255) default NULL, "bitrate" varchar(255) default NULL, "sampleFrequency" varchar(255) default NULL, "nrAudioChannels" varchar(255) default NULL, "resolution" varchar(255) default NULL, "colorDepth" varchar(255) default NULL, "protocolInfo" varchar(255) default NULL, "resFile" varchar(255) default NULL, "type" varchar(255) default NULL, "fanArtObject" varchar(255) default NULL, "fanArtResource" varchar(255) default NULL, "bitsPerSample" varchar(255) default NULL, "dc:language" varchar(255) default NULL, "sec:acodec" varchar(255) default NULL, "sec:vcodec" varchar(255) default NULL,
+            PRIMARY KEY ("item_id", "res_id"),
+            CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO "grb_cds_resource_new" (
+            "item_id", "res_id", "handlerType", "options", "parameters", "size", "duration", "bitrate", "sampleFrequency", "nrAudioChannels", "resolution", "colorDepth", "protocolInfo", "resFile", "type", "fanArtObject", "fanArtResource", "bitsPerSample", "dc:language", "sec:acodec", "sec:vcodec"
+        ) SELECT
+            "item_id", "res_id", "handlerType", "options", "parameters", "size", "duration", "bitrate", "sampleFrequency", "nrAudioChannels", "resolution", "colorDepth", "protocolInfo", "resFile", "type", "fanArtObject", "fanArtResource", "bitsPerSample", "dc:language", "sec:acodec", "sec:vcodec"
+        FROM "grb_cds_resource";
+        DROP TABLE grb_cds_resource;
+        ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
+        </script>
+    </version>
 </upgrade>

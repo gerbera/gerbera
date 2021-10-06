@@ -49,7 +49,7 @@ Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated, index 0 is used for create script
-    hashies = { 3888119908, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 43189396, 2767540493, 2512852146 };
+    hashies = { 3035716215, 778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, 43189396, 2767540493, 2512852146, 1273710965 };
 }
 
 void Sqlite3Database::prepare()
@@ -142,7 +142,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(std::move(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
+        upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);

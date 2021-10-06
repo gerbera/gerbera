@@ -20,8 +20,8 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file test_database.cc
-#include <pugixml.hpp>
 #include <gtest/gtest.h>
+#include <pugixml.hpp>
 
 #include "../mock/config_mock.h"
 #include "cds_objects.h"
