@@ -87,7 +87,7 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     // obj.meta
     duk_idx_t meta_idx = duk_push_object(ctx);
     for (auto&& [key, array] : metaGroups) {
-        duk_push_string(ctx,  fmt::format("{}", fmt::join(array, "/")).c_str());
+        duk_push_string(ctx, fmt::format("{}", fmt::join(array, "/")).c_str());
         duk_put_prop_string(ctx, meta_idx, key.c_str());
     }
     duk_put_prop_string(ctx, orig_idx, "meta");
