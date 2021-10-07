@@ -377,23 +377,14 @@ The server offers three functions which can be called from
 within the import and/or the playlist script:
 
 
-.. js:function:: addCdsObject(object, containerChain, lastContainerClass)
+.. js:function:: addCdsObject(object, containerId)
 
     Adds the object as a virtual object to the container chain
 
     :param object object:
         A virtual object that is either a copy of or a reference to 'orig'
-    :param string containerChain:
-        - A string, defining where the object will be added in the database hierarchy. The containers in the chain
-        are separated by a slash '/', for example, a value of '/Audio/All Music' will add the object to the Audio,
-        All Music container in the server hierarchy. Make sure to properly escape the slash characters in container
-        names. You will find more information on container chain escaping later in this chapter.
-        - A string, containing the container id as optained from `addContainerTree`. In this case the third parameter is not used.
-    :param string lastContainerClass:
-        A string, defining the ``upnp:class`` of the container that appears last in the chain. This parameter can be
-        omitted, in this case the default value ``object.container`` will be taken. Setting specific upnp container classes
-        is useful to define the special meaning of a particular container; for example, the server will always sort
-        songs by disk number and track number if upnp class of a container is set to ``object.container.album.musicAlbum``.
+    :param string containerId:
+        A string, containing the container id as optained from ``addContainerTree``.
 
 
 .. js:function:: addContainerTree(arr)

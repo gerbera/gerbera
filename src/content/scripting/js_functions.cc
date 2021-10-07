@@ -129,6 +129,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         } else {
             i2i = StringConverter::i2i(config);
         }
+        duk_get_global_string(ctx, "object_script_path");
+        auto rp = duk_get_string(ctx, -1);
+        duk_pop(ctx);
+        std::string rootPath = rp ? rp : "";
 
         if (self->whoami() == S_PLAYLIST)
             duk_get_global_string(ctx, "playlist");
@@ -172,9 +176,9 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                     asSetting.rescanResource = false;
                     asSetting.mergeOptions(config, loc);
 
-                    pcdId = cm->addFile(dirEnt, asSetting, false);
+                    pcdId = cm->addFile(dirEnt, rootPath, asSetting, false);
                     if (pcdId == INVALID_OBJECT_ID) {
-                        log_error("Faild to add object {}", dirEnt.path().string());
+                        log_error("Failed to add object {}", dirEnt.path().string());
                         return 0;
                     }
                     auto mainObj = self->getDatabase()->loadObject(pcdId);

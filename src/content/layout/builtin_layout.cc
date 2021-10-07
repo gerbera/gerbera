@@ -96,25 +96,31 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
 
 #ifdef ONLINE_SERVICES
-    container["Online Services"] = std::make_shared<CdsContainer>("Online Services");
+    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED) || config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
+        container["Online Services"] = std::make_shared<CdsContainer>("Online Services");
+    }
 #ifdef SOPCAST
-    container["SopCast"] = std::make_shared<CdsContainer>("SopCast");
-    container["SopCast/All Channels"] = std::make_shared<CdsContainer>("All Channels");
-    container["SopCast/Groups"] = std::make_shared<CdsContainer>("Groups");
-    chain["/Online Services/SopCast/All Channels"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/All Channels"] });
-    chain["/Online Services/SopCast/Groups"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/Groups"] });
+    if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
+        container["SopCast"] = std::make_shared<CdsContainer>("SopCast");
+        container["SopCast/All Channels"] = std::make_shared<CdsContainer>("All Channels");
+        container["SopCast/Groups"] = std::make_shared<CdsContainer>("Groups");
+        chain["/Online Services/SopCast/All Channels"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/All Channels"] });
+        chain["/Online Services/SopCast/Groups"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/Groups"] });
+    }
 #endif
 
 #ifdef ATRAILERS
-    container["Apple"] = std::make_shared<CdsContainer>("Apple Trailers");
-    container["Apple/All Trailers"] = std::make_shared<CdsContainer>("All Trailers");
-    container["Apple/Genres"] = std::make_shared<CdsContainer>("Genres");
-    container["Apple/Release Date"] = std::make_shared<CdsContainer>("Release Date");
-    container["Apple/Post Date"] = std::make_shared<CdsContainer>("Post Date");
-    chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] });
-    chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] });
-    chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] });
-    chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] });
+    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
+        container["Apple"] = std::make_shared<CdsContainer>("Apple Trailers");
+        container["Apple/All Trailers"] = std::make_shared<CdsContainer>("All Trailers");
+        container["Apple/Genres"] = std::make_shared<CdsContainer>("Genres");
+        container["Apple/Release Date"] = std::make_shared<CdsContainer>("Release Date");
+        container["Apple/Post Date"] = std::make_shared<CdsContainer>("Post Date");
+        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] });
+        chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] });
+        chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] });
+        chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] });
+    }
 #endif
 #endif
 }

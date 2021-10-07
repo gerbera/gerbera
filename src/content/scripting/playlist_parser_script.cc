@@ -142,7 +142,7 @@ std::string PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task)
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptpath)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || (currentHandle) || (currentLine)) {
         throw_std_runtime_error("recursion not allowed");
@@ -173,15 +173,26 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     try {
         cdsObject2dukObject(obj);
         duk_put_global_string(ctx, "playlist");
+        duk_push_string(ctx, scriptpath.c_str());
+        duk_put_global_string(ctx, "object_script_path");
+        auto autoScan = content->getAutoscanDirectory(scriptpath);
+        if (autoScan && !scriptpath.empty()) {
+            duk_push_sprintf(ctx, "%d", autoScan->getScanID());
+            duk_put_global_string(ctx, "object_autoscan_id");
+        }
 
         execute();
 
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");
+        duk_del_prop_string(ctx, -1, "object_script_path");
+        duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
     } catch (const std::runtime_error& e) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");
+        duk_del_prop_string(ctx, -1, "object_script_path");
+        duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
 
         std::fclose(currentHandle);
