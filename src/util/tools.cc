@@ -647,15 +647,15 @@ bool checkResolution(std::string_view resolution, int* x, int* y)
         return false;
 
     if (!parts[0].empty() && !parts[1].empty()) {
-        int _x = std::stoi(parts[0]);
-        int _y = std::stoi(parts[1]);
+        int x2 = std::stoi(parts[0]);
+        int y2 = std::stoi(parts[1]);
 
-        if ((_x > 0) && (_y > 0)) {
+        if ((x2 > 0) && (y2 > 0)) {
             if (x)
-                *x = _x;
+                *x = x2;
 
             if (y)
-                *y = _y;
+                *y = y2;
 
             return true;
         }
