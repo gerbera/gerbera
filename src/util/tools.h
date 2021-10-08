@@ -342,7 +342,7 @@ std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>
 ///
 /// This code is based on offsets, so we will use it only if ffmpeg is not
 /// available.
-std::string getAVIFourCC(std::string_view avi_filename);
+std::string getAVIFourCC(std::string_view aviFilename);
 #endif
 
 /// \brief Compare sockaddr
