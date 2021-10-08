@@ -21,13 +21,13 @@ public:
         gerberaDir = createTempPath();
 
         fs::path grbWeb = gerberaDir / "web";
-        create_directory(grbWeb);
+        createDirectory(grbWeb);
 
         fs::path grbJs = gerberaDir / "js";
-        create_directory(grbJs);
+        createDirectory(grbJs);
 
         fs::path configDir = gerberaDir / ".config";
-        create_directory(configDir);
+        createDirectory(configDir);
 
         // Create mock files, allowing for .init()
         auto mockFiles = std::array {
@@ -45,7 +45,7 @@ public:
             file.close();
         }
 
-        config_file = configDir / "config.xml";
+        configFile = configDir / "config.xml";
         home = gerberaDir;
         prefix = gerberaDir;
         magic = "";
@@ -63,11 +63,11 @@ public:
     static fs::path createTempPath()
     {
         fs::path ss = fs::path(CMAKE_BINARY_DIR) / "test" / "config" / generateRandomId();
-        create_directory(ss);
+        createDirectory(ss);
         return ss;
     }
 
-    static void create_directory(const fs::path& dir)
+    static void createDirectory(const fs::path& dir)
     {
         if (mkdir(dir.c_str(), 0777) < 0) {
             throw_std_runtime_error("Failed to create test_config temporary directory for testing: {}", dir.c_str());
@@ -87,7 +87,7 @@ public:
     }
 
     fs::path gerberaDir;
-    fs::path config_file;
+    fs::path configFile;
     fs::path home;
     fs::path confdir;
     fs::path prefix;
@@ -97,7 +97,7 @@ public:
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
-    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
+    auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
@@ -118,10 +118,10 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
     expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
     expErrMsg << "For a list of options run: gerbera -h\n";
 
-    config_file = "";
+    configFile = "";
 
     try {
-        auto shared = std::make_shared<ConfigManager>(config_file, notExistsDir, confdir, prefix, magic, "", "", 0, false);
+        auto shared = std::make_shared<ConfigManager>(configFile, notExistsDir, confdir, prefix, magic, "", "", 0, false);
         shared->load(notExistsDir);
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
@@ -130,8 +130,8 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
-    config_file = "";
-    auto shared = std::make_shared<ConfigManager>(config_file, home, confdir, prefix, magic, "", "", 0, false);
+    configFile = "";
+    auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, magic, "", "", 0, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));

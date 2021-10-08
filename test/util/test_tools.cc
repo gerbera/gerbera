@@ -15,10 +15,10 @@ TEST(ToolsTest, millisecondsToHMSF)
 TEST(ToolsTest, readWriteBinaryFile)
 {
     std::string source = "This is a test, \0, binary";
-    auto test_file = fs::temp_directory_path() / "gerbera-binary-test";
-    EXPECT_FALSE(fs::exists(test_file)) << "Can't test existing file";
-    writeBinaryFile(test_file, reinterpret_cast<const std::byte*>(source.data()), source.size());
-    auto result = readBinaryFile(test_file);
+    auto testFile = fs::temp_directory_path() / "gerbera-binary-test";
+    EXPECT_FALSE(fs::exists(testFile)) << "Can't test existing file";
+    writeBinaryFile(testFile, reinterpret_cast<const std::byte*>(source.data()), source.size());
+    auto result = readBinaryFile(testFile);
     EXPECT_TRUE(result.has_value());
 
     std::vector<std::byte> expected(source.size());
@@ -26,25 +26,25 @@ TEST(ToolsTest, readWriteBinaryFile)
         [](char c) { return std::byte(c); });
 
     EXPECT_EQ(*result, expected);
-    fs::remove(test_file);
+    fs::remove(testFile);
 }
 
 TEST(ToolsTest, readBinaryReturnsEmptyIfFileMissing)
 {
-    fs::path test_file("/some/unexisting/file");
-    EXPECT_FALSE(fs::exists(test_file));
-    auto res = readBinaryFile(test_file);
+    fs::path testFile("/some/unexisting/file");
+    EXPECT_FALSE(fs::exists(testFile));
+    auto res = readBinaryFile(testFile);
     EXPECT_FALSE(res.has_value());
 }
 
 TEST(ToolsTest, writeFileThrowsIfCantOpenFile)
 {
-    fs::path test_file("/some/unexisting/file");
-    EXPECT_FALSE(fs::exists(test_file));
+    fs::path testFile("/some/unexisting/file");
+    EXPECT_FALSE(fs::exists(testFile));
 
     std::vector<std::byte> data { std::byte { 1 } };
 
-    EXPECT_THROW(writeBinaryFile(test_file, data.data(), data.size()), std::runtime_error);
+    EXPECT_THROW(writeBinaryFile(testFile, data.data(), data.size()), std::runtime_error);
 }
 
 TEST(ToolsTest, renderWebUriV4)
@@ -101,11 +101,11 @@ TEST(ToolsTest, splitStringTest)
     EXPECT_EQ(parts[2], "C");
 
     // Test splitString on last usecase where 'empty' is in use
-    auto resource_string = "0~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=3327x2039&size=732150~~|1~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=170x256~rct=EX_TH~";
-    auto resource_parts = splitString(resource_string, '|');
-    ASSERT_EQ(resource_parts.size(), 2);
-    auto parts0 = splitString(resource_parts[0], '~', true);
-    auto parts1 = splitString(resource_parts[1], '~', true);
+    auto resourceString = "0~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=3327x2039&size=732150~~|1~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=170x256~rct=EX_TH~";
+    auto resourceParts = splitString(resourceString, '|');
+    ASSERT_EQ(resourceParts.size(), 2);
+    auto parts0 = splitString(resourceParts[0], '~', true);
+    auto parts1 = splitString(resourceParts[1], '~', true);
     ASSERT_EQ(parts0.size(), 4);
     ASSERT_EQ(parts1.size(), 4);
 }

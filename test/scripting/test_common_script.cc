@@ -107,15 +107,15 @@ TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForBackSlash)
 
 TEST_F(CommonScriptTest, createContainerChain_concatenatesContainerChainWithSlashBasedOnArray)
 {
-    duk_idx_t arr_idx;
+    duk_idx_t arrIdx;
     duk_get_global_string(ctx, "createContainerChain");
-    arr_idx = duk_push_array(ctx);
+    arrIdx = duk_push_array(ctx);
     duk_push_string(ctx, "path");
-    duk_put_prop_index(ctx, arr_idx, 0);
+    duk_put_prop_index(ctx, arrIdx, 0);
     duk_push_string(ctx, "to");
-    duk_put_prop_index(ctx, arr_idx, 1);
+    duk_put_prop_index(ctx, arrIdx, 1);
     duk_push_string(ctx, "combine");
-    duk_put_prop_index(ctx, arr_idx, 2);
+    duk_put_prop_index(ctx, arrIdx, 2);
 
     duk_pcall(ctx, 1);
 

@@ -79,16 +79,16 @@ std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx
 
 bool DukTestHelper::isArrayNotation(const std::string& key)
 {
-    std::regex associative_array_reg("^.*\\['.*'\\]$");
-    return regex_match(key, associative_array_reg);
+    std::regex associativeArrayReg("^.*\\['.*'\\]$");
+    return regex_match(key, associativeArrayReg);
 }
 
 std::pair<std::string, std::string> DukTestHelper::extractObjectValues(duk_context* ctx, const std::string& key, duk_idx_t idx)
 {
-    std::regex associative_array_reg("^(.*)\\['(.*)'\\]$");
+    std::regex associativeArrayReg("^(.*)\\['(.*)'\\]$");
     std::cmatch pieces;
 
-    if (std::regex_match(key.c_str(), pieces, associative_array_reg)) {
+    if (std::regex_match(key.c_str(), pieces, associativeArrayReg)) {
         if (pieces.size() == 3) {
             std::string objName = pieces.str(1);
             std::string objProp = pieces.str(2);
@@ -158,10 +158,10 @@ void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, s
     {
         duk_push_object(ctx);
         for (auto&& [key, array] : metaGroups) {
-            auto duk_array = duk_push_array(ctx);
+            auto dukArray = duk_push_array(ctx);
             for (std::size_t i = 0; i < array.size(); i++) {
                 duk_push_string(ctx, array[i].c_str());
-                duk_put_prop_index(ctx, duk_array, i);
+                duk_put_prop_index(ctx, dukArray, i);
             }
             duk_put_prop_string(ctx, -2, key.c_str());
         }

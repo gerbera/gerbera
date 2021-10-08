@@ -130,7 +130,7 @@ static duk_function_list_entry js_global_functions[] = {
 };
 
 template <typename Map>
-bool map_compare(Map const& lhs, Map const& rhs)
+bool mapCompare(Map const& lhs, Map const& rhs)
 {
     return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
@@ -138,7 +138,7 @@ bool map_compare(Map const& lhs, Map const& rhs)
 MATCHER_P(IsIdenticalMap, control, "Map to be identical")
 {
     {
-        return (map_compare(arg, control));
+        return (mapCompare(arg, control));
     }
 }
 

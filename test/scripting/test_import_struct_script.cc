@@ -135,14 +135,14 @@ static duk_function_list_entry js_global_functions[] = {
 };
 
 template <typename Map>
-bool map_compare(Map const& lhs, Map const& rhs)
+bool mapCompare(Map const& lhs, Map const& rhs)
 {
     return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 MATCHER_P(IsIdenticalMap, control, "Map to be identical")
 {
     {
-        return (map_compare(arg, control));
+        return (mapCompare(arg, control));
     }
 }
 
@@ -163,7 +163,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     std::string desc = "Description";
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
-    int online_service = 0;
+    int onlineService = 0;
     int theora = 0;
     std::map<std::string, std::string> aux;
     std::map<std::string, std::string> res;
@@ -264,7 +264,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 
     addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "26" } });
 
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 

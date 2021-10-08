@@ -59,22 +59,22 @@ void ScriptTestFixture::loadCommon(duk_context* ctx)
 
 duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
     const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
-    const std::string& location, int online_service)
+    const std::string& location, int onlineService)
 {
     const std::string objectName = "orig";
-    duk_idx_t orig_idx = duk_push_object(ctx);
+    duk_idx_t origIdx = duk_push_object(ctx);
     duk_push_string(ctx, mimetype.c_str());
-    duk_put_prop_string(ctx, orig_idx, "mimetype");
+    duk_put_prop_string(ctx, origIdx, "mimetype");
     duk_push_string(ctx, id.c_str());
-    duk_put_prop_string(ctx, orig_idx, "id");
+    duk_put_prop_string(ctx, origIdx, "id");
     duk_push_string(ctx, title.c_str());
-    duk_put_prop_string(ctx, orig_idx, "title");
+    duk_put_prop_string(ctx, origIdx, "title");
     duk_push_string(ctx, location.c_str());
-    duk_put_prop_string(ctx, orig_idx, "location");
-    duk_push_int(ctx, online_service);
-    duk_put_prop_string(ctx, orig_idx, "onlineservice");
+    duk_put_prop_string(ctx, origIdx, "location");
+    duk_push_int(ctx, onlineService);
+    duk_put_prop_string(ctx, origIdx, "onlineservice");
     duk_push_int(ctx, theora);
-    duk_put_prop_string(ctx, orig_idx, "theora");
+    duk_put_prop_string(ctx, origIdx, "theora");
 
     std::map<std::string, std::vector<std::string>> metaGroups;
     for (auto&& [mkey, mvalue] : meta) {
@@ -85,43 +85,43 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     }
 
     // obj.meta
-    duk_idx_t meta_idx = duk_push_object(ctx);
+    duk_idx_t metaIdx = duk_push_object(ctx);
     for (auto&& [key, array] : metaGroups) {
         duk_push_string(ctx, fmt::format("{}", fmt::join(array, "/")).c_str());
-        duk_put_prop_string(ctx, meta_idx, key.c_str());
+        duk_put_prop_string(ctx, metaIdx, key.c_str());
     }
-    duk_put_prop_string(ctx, orig_idx, "meta");
+    duk_put_prop_string(ctx, origIdx, "meta");
 
-    meta_idx = duk_push_object(ctx);
+    metaIdx = duk_push_object(ctx);
     // obj.metaData
     for (auto&& [key, array] : metaGroups) {
-        auto duk_array = duk_push_array(ctx);
+        auto dukArray = duk_push_array(ctx);
         for (std::size_t i = 0; i < array.size(); i++) {
             duk_push_string(ctx, array[i].c_str());
-            duk_put_prop_index(ctx, duk_array, i);
+            duk_put_prop_index(ctx, dukArray, i);
         }
-        duk_put_prop_string(ctx, meta_idx, key.c_str());
+        duk_put_prop_string(ctx, metaIdx, key.c_str());
     }
-    duk_put_prop_string(ctx, orig_idx, "metaData");
+    duk_put_prop_string(ctx, origIdx, "metaData");
 
     // obj.res
     if (!res.empty()) {
-        duk_idx_t res_idx = duk_push_object(ctx);
+        duk_idx_t resIdx = duk_push_object(ctx);
         for (auto const& val : res) {
             duk_push_string(ctx, val.second.c_str());
-            duk_put_prop_string(ctx, res_idx, val.first.c_str());
+            duk_put_prop_string(ctx, resIdx, val.first.c_str());
         }
-        duk_put_prop_string(ctx, orig_idx, "res");
+        duk_put_prop_string(ctx, origIdx, "res");
     }
 
     // obj.aux
     if (!aux.empty()) {
-        duk_idx_t aux_idx = duk_push_object(ctx);
+        duk_idx_t auxIdx = duk_push_object(ctx);
         for (auto const& val : aux) {
             duk_push_string(ctx, val.second.c_str());
-            duk_put_prop_string(ctx, aux_idx, val.first.c_str());
+            duk_put_prop_string(ctx, auxIdx, val.first.c_str());
         }
-        duk_put_prop_string(ctx, orig_idx, "aux");
+        duk_put_prop_string(ctx, origIdx, "aux");
     }
     duk_put_global_string(ctx, objectName.c_str());
 
@@ -354,7 +354,7 @@ abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
 
 getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
 {
-    duk_idx_t arr_idx;
+    duk_idx_t arrIdx;
     std::string objScriptPath;
     std::string objLocation;
     std::string origObjLocation;
@@ -375,11 +375,11 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
         objLocation.erase(0, pos + delimiter.length());
     }
 
-    arr_idx = duk_push_array(ctx);
+    arrIdx = duk_push_array(ctx);
     for (size_t i = 0; i < dirs.size(); i++) {
         std::string dir = dirs.at(i);
         duk_push_string(ctx, dir.c_str());
-        duk_put_prop_index(ctx, arr_idx, static_cast<int>(i));
+        duk_put_prop_index(ctx, arrIdx, static_cast<int>(i));
     }
 
     getRootPathParams params;

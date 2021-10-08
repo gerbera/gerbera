@@ -43,8 +43,8 @@ public:
 TEST_F(UpnpXmlTest, RenderObjectContainer)
 {
     // arrange
-    pugi::xml_document didl_lite;
-    auto root = didl_lite.append_child("DIDL-Lite");
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
     auto obj = std::make_shared<CdsContainer>();
     obj->setID(1);
     obj->setParentID(2);
@@ -86,16 +86,16 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
 
     // assert
     std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
-    EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
+    didlLite.print(buf, "", 0);
+    std::string didlLiteXml = buf.str();
+    EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
 TEST_F(UpnpXmlTest, RenderObjectItem)
 {
     // arrange
-    pugi::xml_document didl_lite;
-    auto root = didl_lite.append_child("DIDL-Lite");
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
     auto obj = std::make_shared<CdsItem>();
     obj->setID(1);
     obj->setParentID(2);
@@ -127,16 +127,16 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
 
     // assert
     std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
-    EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
+    didlLite.print(buf, "", 0);
+    std::string didlLiteXml = buf.str();
+    EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
 TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
 {
     // arrange
-    pugi::xml_document didl_lite;
-    auto root = didl_lite.append_child("DIDL-Lite");
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
     auto obj = std::make_shared<CdsItem>();
     obj->setID(42);
     obj->setParentID(2);
@@ -195,9 +195,9 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
 
     // assert
     std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
-    EXPECT_STREQ(didl_lite_xml.c_str(), expectedXml.str().c_str());
+    didlLite.print(buf, "", 0);
+    std::string didlLiteXml = buf.str();
+    EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
 TEST_F(UpnpXmlTest, CreatesEventPropertySet)

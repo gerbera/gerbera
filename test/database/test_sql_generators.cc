@@ -55,22 +55,22 @@ public:
 
     int exec(const std::string& query, bool) override
     {
-        last_statement = query;
+        lastStatement = query;
         return 0;
     }
 
     void _exec(const std::string& query) override
     {
-        last_statement = query;
+        lastStatement = query;
     }
 
     std::shared_ptr<SQLResult> select(const std::string& query) override
     {
-        last_statement = query;
+        lastStatement = query;
         return {};
     }
 
-    std::string last_statement;
+    std::string lastStatement;
 };
 
 class DatabaseTest : public ::testing::Test {
@@ -103,20 +103,20 @@ TEST_F(DatabaseTest, UpdateTest)
         "Table",
         { ColumnUpdate(database->identifier("a"), "4"), ColumnUpdate(database->identifier("b"), "101") },
         "id", 1234);
-    EXPECT_EQ(database->last_statement, "UPDATE [Table] SET [a] = 4, [b] = 101 WHERE [id] = 1234");
+    EXPECT_EQ(database->lastStatement, "UPDATE [Table] SET [a] = 4, [b] = 101 WHERE [id] = 1234");
 }
 
 TEST_F(DatabaseTest, DeleteTest)
 {
     database->deleteAll("Table");
-    EXPECT_EQ(database->last_statement, "DELETE FROM [Table]");
+    EXPECT_EQ(database->lastStatement, "DELETE FROM [Table]");
 
     database->deleteRow("Table", "id", 123);
-    EXPECT_EQ(database->last_statement, "DELETE FROM [Table] WHERE [id] = 123");
+    EXPECT_EQ(database->lastStatement, "DELETE FROM [Table] WHERE [id] = 123");
 
     database->deleteRow("Table", "id", std::string("Text"));
-    EXPECT_EQ(database->last_statement, "DELETE FROM [Table] WHERE [id] = \"Text\"");
+    EXPECT_EQ(database->lastStatement, "DELETE FROM [Table] WHERE [id] = \"Text\"");
 
     database->deleteRows("Table", "id", { 1, 2, 3 });
-    EXPECT_EQ(database->last_statement, "DELETE FROM [Table] WHERE [id] IN (1,2,3)");
+    EXPECT_EQ(database->lastStatement, "DELETE FROM [Table] WHERE [id] IN (1,2,3)");
 }
