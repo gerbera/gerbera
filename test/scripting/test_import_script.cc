@@ -135,14 +135,14 @@ static duk_function_list_entry js_global_functions[] = {
 };
 
 template <typename Map>
-bool map_compare(Map const& lhs, Map const& rhs)
+bool mapCompare(Map const& lhs, Map const& rhs)
 {
     return lhs.size() == rhs.size() && std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 MATCHER_P(IsIdenticalMap, control, "Map to be identical")
 {
     {
-        return (map_compare(arg, control));
+        return (mapCompare(arg, control));
     }
 }
 
@@ -167,7 +167,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
     std::string channels = "2";
-    int online_service = 0;
+    int onlineService = 0;
     int theora = 0;
     std::map<std::string, std::string> aux;
 
@@ -241,7 +241,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -251,7 +251,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "video/mpeg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.mp4";
-    auto online_service = int(OS_None);
+    auto onlineService = int(OS_None);
     int theora = 0;
     std::map<std::string, std::string> aux;
     std::map<std::string, std::string> meta;
@@ -276,7 +276,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -288,7 +288,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     std::string genre = "Genre";
     std::string id = "2";
     std::string location = "/home/gerbera/video.mp4";
-    auto online_service = int(OS_ATrailers);
+    auto onlineService = int(OS_ATrailers);
     int theora = 0;
     std::map<std::string, std::string> res;
 
@@ -326,7 +326,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "83", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -337,7 +337,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     std::string date = "2018-01-01";
     std::string id = "2";
     std::string location = "/home/gerbera/image.jpg";
-    auto online_service = int(OS_ATrailers);
+    auto onlineService = int(OS_ATrailers);
     int theora = 0;
 
     std::map<std::string, std::string> meta {
@@ -373,7 +373,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -383,7 +383,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "application/ogg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.ogg";
-    auto online_service = int(OS_None);
+    auto onlineService = int(OS_None);
     int theora = 1;
     std::map<std::string, std::string> aux;
     std::map<std::string, std::string> meta;
@@ -408,7 +408,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -428,7 +428,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
     std::string channels = "2";
-    int online_service = 0;
+    int onlineService = 0;
     int theora = 0;
     std::map<std::string, std::string> aux;
 
@@ -502,7 +502,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, online_service);
+    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 

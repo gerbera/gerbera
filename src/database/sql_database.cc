@@ -930,10 +930,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         std::transform(containers.begin(), containers.end(), std::back_inserter(contIds),
             [](auto&& container) { return container->getID(); });
 
-        const auto child_counts = getChildCounts(contIds, getContainers, getItems, hideFsRoot);
+        const auto childCounts = getChildCounts(contIds, getContainers, getItems, hideFsRoot);
         for (auto&& cont : containers) {
-            auto it = child_counts.find(cont->getID());
-            if (it != child_counts.end())
+            auto it = childCounts.find(cont->getID());
+            if (it != childCounts.end())
                 cont->setChildCount(it->second);
             else
                 cont->setChildCount(0);
