@@ -69,9 +69,9 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int get16m(const void* Short)
+static int get16m(const void* shrt)
 {
-    return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
+    return (static_cast<uchar*>(const_cast<void*>(shrt))[0] << 8) | static_cast<uchar*>(const_cast<void*>(shrt))[1];
 }
 
 static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
