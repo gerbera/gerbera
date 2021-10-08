@@ -38,14 +38,19 @@
 #include <memory>
 
 class FileRequestHandler : public RequestHandler {
-protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
     explicit FileRequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
+
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
+private:
+    std::shared_ptr<CdsObject> obj;
+    std::unique_ptr<IOHandler> ioHandler;
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__
