@@ -9,7 +9,8 @@
 #include "../mock/config_mock.h"
 #include "../mock/database_mock.h"
 
-using namespace ::testing;
+using ::testing::Return;
+using ::testing::_;
 
 class UpnpXmlTest : public ::testing::Test {
 

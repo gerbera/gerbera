@@ -2,8 +2,6 @@
 
 #include "util/upnp_headers.h"
 
-using namespace ::testing;
-
 class HeadersHelperTest : public ::testing::Test {
 
 public:

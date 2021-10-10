@@ -12,8 +12,6 @@ namespace fs = std::filesystem;
 
 #include "mock/script_test_fixture.h"
 
-using namespace ::testing;
-
 class CommonScriptTest : public ::testing::Test {
 
 public:

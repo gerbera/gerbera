@@ -7,8 +7,6 @@
 #include "config/config_setup.h"
 #include "database/database.h"
 
-using namespace ::testing;
-
 class DatabaseMock : public Database {
 public:
     DatabaseMock(std::shared_ptr<Config> config)

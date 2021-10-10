@@ -25,8 +25,6 @@ Gerbera - https://gerbera.io/
 
 #include "database/sql_database.h"
 
-using namespace ::testing;
-
 class TestDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     using SQLDatabase::identifier;

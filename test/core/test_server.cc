@@ -7,7 +7,7 @@
 #include <memory>
 namespace fs = std::filesystem;
 
-using namespace ::testing;
+using ::testing::HasSubstr;
 
 class ServerTest : public ::testing::Test {
 public:

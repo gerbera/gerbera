@@ -6,7 +6,7 @@
 #include <fstream>
 #include <regex>
 
-using namespace ::testing;
+using ::testing::MatchesRegex;
 
 class ConfigGeneratorTest : public ::testing::Test {
 

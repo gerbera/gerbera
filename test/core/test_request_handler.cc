@@ -24,8 +24,6 @@
 
 #include <gtest/gtest.h>
 
-using namespace testing;
-
 class RequestHandlerTest : public ::testing::Test {
 
 public:

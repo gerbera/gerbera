@@ -2,8 +2,6 @@
 
 #include <gtest/gtest.h>
 
-using namespace ::testing;
-
 TEST(ToolsTest, millisecondsToHMSF)
 {
     EXPECT_EQ(millisecondsToHMSF(0), "0:00:00.000");

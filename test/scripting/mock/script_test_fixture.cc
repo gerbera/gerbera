@@ -20,8 +20,6 @@ namespace fs = std::filesystem;
 #include "duk_helper.h"
 #include "script_test_fixture.h"
 
-using namespace ::testing;
-
 void ScriptTestFixture::SetUp()
 {
     ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
