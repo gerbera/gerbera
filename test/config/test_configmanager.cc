@@ -74,7 +74,7 @@ public:
         }
     }
 
-    std::string createConfig()
+    std::string createConfig() const
     {
         ConfigGenerator configGenerator;
         return configGenerator.generate(home, confdir, prefix, magic);

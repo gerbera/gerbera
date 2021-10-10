@@ -43,7 +43,7 @@ struct getCdsObjectParams {
 // useful for mocking said functions with expectations.
 class ScriptTestFixture : public ::testing::Test {
     // Loads common.js if running test for another script
-    void loadCommon(duk_context* ctx);
+    void loadCommon(duk_context* ctx) const;
 
 public:
     // Builds up the Duktape context
@@ -56,7 +56,7 @@ public:
     // Creates a mock item(orig) global object in Duktape context
     static duk_ret_t dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
         const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
-        const std::string& location, int online_service);
+        const std::string& location, int onlineService);
 
     // Creates a mock playlist global object in Duktape context
     static duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
