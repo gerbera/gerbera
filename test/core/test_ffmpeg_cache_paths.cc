@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
-using namespace testing;
-
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+
+using ::testing::Return;
 
 TEST(Thumbnailer_Cache, BaseDirFromConfig)
 {

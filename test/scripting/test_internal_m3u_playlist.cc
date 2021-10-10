@@ -13,8 +13,6 @@
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
-using namespace ::testing;
-
 // Extends ScriptTestFixture to allow
 // for unique testing of the Internal URL M3U Playlist
 // processing

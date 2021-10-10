@@ -22,8 +22,6 @@ Gerbera - https://gerbera.io/
 /// \file main.cc.c
 #include <gmock/gmock.h>
 
-using namespace ::testing;
-
 int main(int argc, char** argv)
 {
     testing::InitGoogleMock(&argc, argv);

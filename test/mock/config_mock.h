@@ -6,8 +6,6 @@
 
 #include "config/config.h"
 
-using namespace ::testing;
-
 class ConfigMock : public Config {
 public:
     fs::path getConfigFilename() const override { return {}; }

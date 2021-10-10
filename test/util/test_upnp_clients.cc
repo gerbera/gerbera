@@ -6,8 +6,6 @@
 
 #include "../mock/config_mock.h"
 
-using namespace ::testing;
-
 class MyConfigMock final : public ConfigMock {
 public:
     MyConfigMock() { list = std::make_shared<ClientConfigList>(); }

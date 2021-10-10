@@ -15,8 +15,6 @@
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
-using namespace ::testing;
-
 class ImportStructuredScriptTest : public ScriptTestFixture {
 public:
     ImportStructuredScriptTest()

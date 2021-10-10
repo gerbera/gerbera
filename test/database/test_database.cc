@@ -34,8 +34,6 @@ Gerbera - https://gerbera.io/
 #include "mysql_config_fake.h"
 #endif
 
-using namespace ::testing;
-
 class TestSqliteDatabase : public Sqlite3Database {
     friend class Sqlite3DatabaseTest;
 };
