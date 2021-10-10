@@ -48,7 +48,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --help 2>&1";
     std::string output = exec(cmd.c_str());
 
-    ASSERT_THAT(output.c_str(), HasSubstr(expectedOutput.c_str()));
+    ASSERT_THAT(output.c_str(), HasSubstr(expectedOutput));
 }
 
 TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit)

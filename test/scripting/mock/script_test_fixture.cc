@@ -42,7 +42,7 @@ void ScriptTestFixture::TearDown()
     duk_destroy_heap(ctx);
 }
 
-void ScriptTestFixture::loadCommon(duk_context* ctx)
+void ScriptTestFixture::loadCommon(duk_context* ctx) const
 {
     if (scriptName != "common.js") {
         fs::path commonScript = fs::path(SCRIPTS_DIR) / "js" / "common.js";
