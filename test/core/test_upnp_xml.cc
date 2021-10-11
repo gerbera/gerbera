@@ -180,7 +180,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<upnp:album>Album</upnp:album>\n";
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
     expectedXml << "<res bitrate=\"16044\" duration=\"123456\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_OP=01;DLNA.ORG_CI=0\" size=\"4711\">http://server/content/media/object_id/42/res_id/0</res>\n";
-    expectedXml << "<sec:CaptionInfoEx sec:type=\"\" dc:language=\"\" protocolInfo=\"http-get:*:srt:*\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
+    expectedXml << "<sec:CaptionInfoEx sec:type=\"srt\" dc:language=\"\" protocolInfo=\"http-get:*:srt:*\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
     expectedXml << "<res protocolInfo=\"http-get:*:srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0\" resFile=\"/home/resource/subtitle.srt\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</res>\n";
     expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2/rct/aa</upnp:albumArtURI>\n";
     expectedXml << "</item>\n";

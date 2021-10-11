@@ -724,7 +724,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             auto subUrl = url;
             subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
             vs.append_child(pugi::node_pcdata).set_value((virtualURL + subUrl).c_str());
-            vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).c_str();
+            vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).empty() ? res->getParameter("type").c_str() : res->getAttribute(R_TYPE).c_str();
             vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
             vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
             isFirstSub = false;
