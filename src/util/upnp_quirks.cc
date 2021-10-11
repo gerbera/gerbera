@@ -58,6 +58,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::uni
 
     auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item);
     if (subAdded) {
+        log_debug("Call for Samsung CaptionInfo.sec: {}", url);
         headers->addHeader("CaptionInfo.sec", url);
     }
 }

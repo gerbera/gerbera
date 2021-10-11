@@ -293,6 +293,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
             resource->addAttribute(R_RESOURCE_FILE, path.string());
+            resource->addAttribute(R_TYPE, type);
             resource->addAttribute(R_LANGUAGE, path.stem().string()); // assume file name is related to some language
             resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
             resource->addParameter("type", type);
