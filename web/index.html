@@ -91,6 +91,15 @@
                     <span>Change settings for Gerbera</span>
                 </a>
             </div>
+            <div class="col-sm offset-sm-2">
+                <h4><i class="fa fa-info-circle"></i> Server Status</h4>
+                <table>
+                  <tr><td style="width: 150px">Total Media Files</td><td><div id="status-total"></div></td></tr>
+                  <tr><td>- Audio Files</td><td><div id="status-audio"></div></td></tr>
+                  <tr><td>- Video Files</td><td><div id="status-video"></div></td></tr>
+                  <tr><td>- Image Files</td><td><div id="status-image"></div></td></tr>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -313,7 +322,7 @@
                         <div class="col-md-6">
                             <input type="text" id="dirTweakLocation" name="location" class="form-control" disabled />
                             <input type="number" id="dirTweakId" name="id" class="form-control" hidden />
-                            <input type="number" id="dirTweakIndex" name="status" class="form-control" hidden />
+                            <input type="number" id="dirTweakIndex" name="index" class="form-control" hidden />
                             <input type="text" id="dirTweakStatus" name="status" class="form-control" hidden />
                         </div>
                     </div>

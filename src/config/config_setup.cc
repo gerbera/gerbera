@@ -101,15 +101,15 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (root.child(xpath)) {
         std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue);
+            throw_std_runtime_error("Invalid {}{} value '{}'", root.path(), xpath, optValue);
         }
         return optValue;
     }
 
     if (required)
-        throw_std_runtime_error("Error in config file: {}/{} not found", root.path(), xpath);
+        throw_std_runtime_error("Error in config file: {}{} not found", root.path(), xpath);
 
-    log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue);
+    log_debug("Config: option not found: '{}{}' using default value: '{}'", root.path(), xpath, defaultValue);
 
     useDefault = true;
     return defaultValue;

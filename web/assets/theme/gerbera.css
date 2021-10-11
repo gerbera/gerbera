@@ -609,6 +609,10 @@ body,
     text-decoration: none;
 }
 
-#home a > h4 {
+#home a > h4, #home h4 {
     margin-top: 2em;
+}
+
+#status-total, #status-audio, #status-video, #status-image {
+    text-align: end;
 }

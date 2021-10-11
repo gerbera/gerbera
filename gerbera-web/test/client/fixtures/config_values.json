@@ -1,6 +1,42 @@
 {
 	"values": [
 		{
+			"item": "/status/attribute::total",
+			"id": "171",
+			"status": "unchanged",
+			"source": "config.xml",
+			"origValue": "",
+			"defaultValue": "",
+			"value": "42"
+		},
+		{
+			"item": "/status/attribute::audio",
+			"id": "171",
+			"status": "unchanged",
+			"source": "config.xml",
+			"origValue": "",
+			"defaultValue": "",
+			"value": "17"
+		},
+		{
+			"item": "/status/attribute::video",
+			"id": "171",
+			"status": "unchanged",
+			"source": "config.xml",
+			"origValue": "",
+			"defaultValue": "",
+			"value": "8"
+		},
+		{
+			"item": "/status/attribute::image",
+			"id": "171",
+			"status": "unchanged",
+			"source": "config.xml",
+			"origValue": "",
+			"defaultValue": "",
+			"value": "15"
+		},
+		{
 			"item": "/server/port",
 			"id": "00",
 			"status": "unchanged",
