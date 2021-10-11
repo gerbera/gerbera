@@ -113,6 +113,7 @@ void Web::ConfigLoad::process()
     check_request();
     auto root = xmlDoc->document_element();
     auto values = root.append_child("values");
+    std::string action = param("action");
 
     // set handling of json properties
     xml2JsonHints->setArrayName(values, "item");
@@ -123,13 +124,6 @@ void Web::ConfigLoad::process()
     xml2JsonHints->setFieldType("origValue", "string");
 
     log_debug("Sending Config to web!");
-
-    // generate meta info for ui
-    auto meta = root.append_child("types");
-    xml2JsonHints->setArrayName(meta, "item");
-    for (auto&& cs : ConfigDefinition::getOptionList()) {
-        addTypeMeta(meta, cs);
-    }
 
     // write database status
     {
@@ -159,6 +153,16 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
         setValue(item, database->getTotalFiles(true, "image"));
+    }
+
+    if (action == "status")
+        return;
+
+    // generate meta info for ui
+    auto meta = root.append_child("types");
+    xml2JsonHints->setArrayName(meta, "item");
+    for (auto&& cs : ConfigDefinition::getOptionList()) {
+        addTypeMeta(meta, cs);
     }
 
     // write all values with simple type (string, int, bool)

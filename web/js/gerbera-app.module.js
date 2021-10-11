@@ -155,6 +155,12 @@ export class App {
         Menu.initialize(this.serverConfig);
       })
       .then(() => {
+        return this.getStatus(this.clientConfig);
+      })
+      .then((response) => {
+        return this.displayStatus(response)
+      })
+      .then(() => {
         if (localStorage.getItem('pageInfo')) {
           this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
           if (!('configMode' in this.pageInfo)) {
@@ -180,6 +186,37 @@ export class App {
         xhr.setRequestHeader('Cache-Control', 'no-cache, must-revalidate');
       }
     });
+    return Promise.resolve();
+  }
+
+  getStatus (clientConfig) {
+    return $.ajax({
+      url: clientConfig.api,
+      type: 'get',
+      async: false,
+      data: {
+        req_type: 'config_load',
+        sid: Auth.getSessionId(),
+        action: 'status'
+      }
+    });
+  }
+
+  getStatusValue(itemList, entry) {
+    const found = itemList.filter(i => i.item === '/status/attribute::' + entry);
+    if (found && found.length > 0) {
+      return found[0].value;
+    }
+    return "";
+  }
+
+  displayStatus (response) {
+    if (response.success) {
+      $('#status-total').html(this.getStatusValue(response.values.item, 'total'));
+      $('#status-audio').html(this.getStatusValue(response.values.item, 'audio'));
+      $('#status-video').html(this.getStatusValue(response.values.item, 'video'));
+      $('#status-image').html(this.getStatusValue(response.values.item, 'image'));
+    }
     return Promise.resolve();
   }
 

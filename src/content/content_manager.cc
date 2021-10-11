@@ -1592,12 +1592,12 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
 
 void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
 {
-    // building container path for the description
     auto self = shared_from_this();
     auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);
 
     adir->incTaskCount();
 
+    // building container path for the description
     if (descPath.empty())
         descPath = adir->getLocation();
 

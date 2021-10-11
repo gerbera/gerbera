@@ -61,8 +61,8 @@ describe('Gerbera UI App', () => {
 
       await GerberaApp.initialize();
 
-      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
+      expect(ajaxSpy.calls.first().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.first().args[0]['data']).toEqual({
         req_type: 'auth',
         sid: 'A_MOCK_SID',
         action: 'get_config'
