@@ -78,7 +78,7 @@ static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    log_debug("start");
+    log_debug("start: {}", filename);
 
     const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
@@ -111,7 +111,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // for transcoded resources res_id will always be negative
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    log_debug("fetching resource id {}", resId);
+    log_debug("Fetching resource id {}", resId);
+    bool triggerPlayHook = true;
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
@@ -138,6 +139,10 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         ioHandler->close();
 
         UpnpFileInfo_set_FileLength(info, size);
+
+        // Should have its own handler really
+        triggerPlayHook = false;
+
     } else if (!isSrt && !trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
         if (!tp)
@@ -204,17 +209,21 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         ioHandler = std::make_unique<FileIOHandler>(path);
     }
 
+    if (triggerPlayHook) {
+        content->triggerPlayHook(obj);
+    }
+
     assert(ioHandler != nullptr);
 
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
-    log_debug("end");
+    log_debug("end: {}", filename);
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
-    log_debug("start");
+    log_debug("start: {}", filename);
 
     // We explicitly do not support UPNP_WRITE due to security reasons.
     if (mode != UPNP_READ) {
@@ -222,8 +231,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     }
 
     ioHandler->open(mode);
-    content->triggerPlayHook(obj);
-
-    log_debug("end");
+    log_debug("end: {}", filename);
     return std::move(ioHandler);
 }
