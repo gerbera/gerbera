@@ -24,7 +24,7 @@
 
 TEST_F(RuntimeTest, CheckTestCodeLinksAgainstDependencies)
 {
-    auto runtime = new ScriptingRuntime();
+    auto runtime = std::make_unique<ScriptingRuntime>();
     auto ctx = runtime->createContext("testCtx");
     EXPECT_NE(ctx, nullptr);
 }
