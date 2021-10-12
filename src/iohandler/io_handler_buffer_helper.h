@@ -90,7 +90,6 @@ protected:
     // thread stuff..
     void startBufferThread();
     void stopBufferThread();
-    static void* staticThreadProc(void* arg);
     virtual void threadProc() = 0;
 
     std::unique_ptr<StdThreadRunner> threadRunner;

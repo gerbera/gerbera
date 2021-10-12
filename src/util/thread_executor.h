@@ -75,9 +75,6 @@ protected:
     /// \brief check if the thread should shutdown
     /// should be called by the threadProc in short intervals
     bool threadShutdownCheck() const { return threadShutdown; }
-
-private:
-    static void* staticThreadProc(void* arg);
 };
 
 #endif // __THREAD_EXECUTOR_H__

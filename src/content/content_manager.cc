@@ -104,7 +104,13 @@ void ContentManager::run()
 #ifdef HAVE_LASTFMLIB
     last_fm->run();
 #endif
-    threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>("ContentTaskThread", ContentManager::staticThreadProc, this, config);
+    threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>(
+        "ContentTaskThread", [](void* arg) -> void* {
+            auto inst = static_cast<ContentManager*>(arg);
+            inst->threadProc();
+            return nullptr;
+        },
+        this, config);
 
     // wait for ContentTaskThread to become ready
     threadRunner->waitForReady();
@@ -1384,13 +1390,6 @@ void ContentManager::threadProc()
     }
 
     database->threadCleanup();
-}
-
-void* ContentManager::staticThreadProc(void* arg)
-{
-    auto inst = static_cast<ContentManager*>(arg);
-    inst->threadProc();
-    return nullptr;
 }
 
 void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)

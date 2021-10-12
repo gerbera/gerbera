@@ -43,7 +43,6 @@ protected:
     std::deque<std::shared_ptr<GenericTask>> taskQueue;
     std::shared_ptr<GenericTask> currentTask;
 
-    static void* staticThreadProc(void* arg);
     void threadProc();
 };
 

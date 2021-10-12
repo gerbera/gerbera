@@ -193,7 +193,11 @@ protected:
         int ret = pthread_create(
             &thread,
             attr,
-            ThreadRunner::staticThreadProc,
+            [](void* arg) -> void* {
+                auto inst = static_cast<ThreadRunner<Condition, Mutex>*>(arg);
+                inst->targetProc(inst->target);
+                pthread_exit(nullptr);
+            },
             this);
 
         if (ret != 0) {
@@ -211,13 +215,6 @@ private:
     Condition cond;
     Mutex mutex;
     bool isReady {};
-
-    static void* staticThreadProc(void* arg)
-    {
-        auto inst = static_cast<ThreadRunner<Condition, Mutex>*>(arg);
-        inst->targetProc(inst->target);
-        pthread_exit(nullptr);
-    }
 };
 
 using StdThreadRunner = class ThreadRunner<std::condition_variable, std::mutex>;

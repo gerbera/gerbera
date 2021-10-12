@@ -364,8 +364,6 @@ protected:
 #endif
 
     bool layout_enabled {};
-
-    static void* staticThreadProc(void* arg);
     void threadProc();
 
     void addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority = false);

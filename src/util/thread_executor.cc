@@ -41,7 +41,11 @@ void ThreadExecutor::startThread()
     int ret = pthread_create(
         &thread,
         nullptr,
-        ThreadExecutor::staticThreadProc,
+        [](void* arg) -> void* {
+            auto inst = static_cast<ThreadExecutor*>(arg);
+            inst->threadProc();
+            pthread_exit(nullptr);
+        },
         this);
 
     if (ret != 0) {
@@ -67,11 +71,4 @@ bool ThreadExecutor::kill()
         thread = 0;
     }
     return true;
-}
-
-void* ThreadExecutor::staticThreadProc(void* arg)
-{
-    auto inst = static_cast<ThreadExecutor*>(arg);
-    inst->threadProc();
-    pthread_exit(nullptr);
 }
