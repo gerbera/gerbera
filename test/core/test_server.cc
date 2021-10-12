@@ -9,6 +9,9 @@ namespace fs = std::filesystem;
 
 using ::testing::HasSubstr;
 
+static constexpr auto gitBranch = std::string_view(GIT_BRANCH);
+static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);
+
 class ServerTest : public ::testing::Test {
 public:
     ServerTest() = default;
@@ -57,14 +60,14 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit)
     std::string output = exec(cmd.c_str());
 
     ASSERT_THAT(output, HasSubstr("Compile info\n-------------\nWITH_"));
-    if (strlen(GIT_BRANCH) > 0) {
+    if constexpr (!gitBranch.empty()) {
         ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
         ASSERT_THAT(output, HasSubstr("Git Branch: "));
     } else {
         ASSERT_THAT(output, Not(HasSubstr("Git info:\n-------------\n")));
         ASSERT_THAT(output, Not(HasSubstr("Git Branch: ")));
     }
-    if (strlen(GIT_COMMIT_HASH) > 0) {
+    if constexpr (!gitCommitHash.empty()) {
         ASSERT_THAT(output, HasSubstr("Git Commit: "));
     } else {
         ASSERT_THAT(output, Not(HasSubstr("Git Commit: ")));
