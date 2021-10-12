@@ -50,32 +50,45 @@
       <map from="application/ogg" to="object.item.audioItem.musicTrack" />
     </mimetype-upnpclass>
     <mimetype-contenttype>
-      <treat mimetype="audio/mpeg" as="mp3" />
       <treat mimetype="application/ogg" as="ogg" />
-      <treat mimetype="audio/ogg" as="ogg" />
-      <treat mimetype="audio/x-flac" as="flac" />
+      <treat mimetype="audio/L16" as="pcm" />
       <treat mimetype="audio/flac" as="flac" />
-      <treat mimetype="audio/x-ms-wma" as="wma" />
-      <treat mimetype="audio/x-wavpack" as="wv" />
-      <treat mimetype="image/jpeg" as="jpg" />
+      <treat mimetype="audio/mp4" as="mp4" />
+      <treat mimetype="audio/mpeg" as="mp3" />
+      <treat mimetype="audio/ogg" as="ogg" />
+      <treat mimetype="audio/x-dsd" as="dsd" />
+      <treat mimetype="audio/x-flac" as="flac" />
+      <treat mimetype="audio/x-matroska" as="mka" />
       <treat mimetype="audio/x-mpegurl" as="playlist" />
+      <treat mimetype="audio/x-ms-wma" as="wma" />
       <treat mimetype="audio/x-scpls" as="playlist" />
       <treat mimetype="audio/x-wav" as="pcm" />
-      <treat mimetype="audio/L16" as="pcm" />
-      <treat mimetype="video/x-msvideo" as="avi" />
+      <treat mimetype="audio/x-wavpack" as="wv" />
+      <treat mimetype="image/jpeg" as="jpg" />
+      <treat mimetype="image/png" as="png" />
+      <treat mimetype="video/mkv" as="mkv" />
       <treat mimetype="video/mp4" as="mp4" />
-      <treat mimetype="audio/mp4" as="mp4" />
+      <treat mimetype="video/mpeg" as="mpeg" />
       <treat mimetype="video/x-matroska" as="mkv" />
-      <treat mimetype="audio/x-matroska" as="mka" />
-      <treat mimetype="audio/x-dsd" as="dsd" />
+      <treat mimetype="video/x-mkv" as="mkv" />
+      <treat mimetype="video/x-ms-asf" as="asf" />
+      <treat mimetype="video/x-msvideo" as="avi" />
     </mimetype-contenttype>
     <contenttype-dlnaprofile>
+      <map from="asf" to="VC_ASF_AP_L2_WMA" />
       <map from="avi" to="AVI" />
+      <map from="dsd" to="DSF" />
+      <map from="flac" to="FLAC" />
+      <map from="jpg" to="JPEG_LRG" />
+      <map from="mka" to="MKV" />
       <map from="mkv" to="MKV" />
       <map from="mp3" to="MP3" />
       <map from="mp4" to="AVC_MP4_EU" />
       <map from="mpeg" to="MPEG_PS_PAL" />
+      <map from="ogg" to="OGG" />
       <map from="pcm" to="LPCM" />
+      <map from="png" to="PNG_LRG" />
+      <map from="wma" to="WMAFULL" />
     </contenttype-dlnaprofile>
   </mappings>
 </import>

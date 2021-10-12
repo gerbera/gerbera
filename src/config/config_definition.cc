@@ -190,42 +190,55 @@ static std::vector<std::string> defaultItemsPerPage {
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
 static std::map<std::string, std::string> mt_ct_defaults {
-    { "audio/mpeg", CONTENT_TYPE_MP3 },
     { "application/ogg", CONTENT_TYPE_OGG },
-    { "audio/ogg", CONTENT_TYPE_OGG },
-    { "audio/x-flac", CONTENT_TYPE_FLAC },
+    { "audio/L16", CONTENT_TYPE_PCM },
     { "audio/flac", CONTENT_TYPE_FLAC },
-    { "audio/x-ms-wma", CONTENT_TYPE_WMA },
-    { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
-    { "image/jpeg", CONTENT_TYPE_JPG },
+    { "audio/mp4", CONTENT_TYPE_MP4 },
+    { "audio/mpeg", CONTENT_TYPE_MP3 },
+    { "audio/ogg", CONTENT_TYPE_OGG },
+    { "audio/x-dsd", CONTENT_TYPE_DSD },
+    { "audio/x-flac", CONTENT_TYPE_FLAC },
+    { "audio/x-matroska", CONTENT_TYPE_MKA },
     { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
+    { "audio/x-ms-wma", CONTENT_TYPE_WMA },
     { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
     { "audio/x-wav", CONTENT_TYPE_PCM },
-    { "audio/L16", CONTENT_TYPE_PCM },
-    { "video/x-msvideo", CONTENT_TYPE_AVI },
+    { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
+    { "image/jpeg", CONTENT_TYPE_JPG },
+    { "image/png", CONTENT_TYPE_PNG },
+    { "video/mkv", CONTENT_TYPE_MKV },
     { "video/mp4", CONTENT_TYPE_MP4 },
-    { "audio/mp4", CONTENT_TYPE_MP4 },
+    { "video/mpeg", CONTENT_TYPE_MPEG },
     { "video/x-matroska", CONTENT_TYPE_MKV },
-    { "audio/x-matroska", CONTENT_TYPE_MKA },
-    { "audio/x-dsd", CONTENT_TYPE_DSD },
+    { "video/x-mkv", CONTENT_TYPE_MKV },
+    { "video/x-ms-asf", CONTENT_TYPE_ASF },
+    { "video/x-msvideo", CONTENT_TYPE_AVI },
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
 static std::map<std::string, std::string> ct_dlna_defaults {
-    { CONTENT_TYPE_MP4, "AVC_MP4_EU" },
-    { CONTENT_TYPE_MKV, "MKV" },
+    { CONTENT_TYPE_ASF, "VC_ASF_AP_L2_WMA" },
     { CONTENT_TYPE_AVI, "AVI" },
-    { CONTENT_TYPE_MPEG, "MPEG_PS_PAL" },
+    { CONTENT_TYPE_DSD, "DSF" },
+    { CONTENT_TYPE_FLAC, "FLAC" },
+    { CONTENT_TYPE_JPG, "JPEG_LRG" },
+    { CONTENT_TYPE_MKA, "MKV" },
+    { CONTENT_TYPE_MKV, "MKV" },
     { CONTENT_TYPE_MP3, "MP3" },
+    { CONTENT_TYPE_MP4, "AVC_MP4_EU" },
+    { CONTENT_TYPE_MPEG, "MPEG_PS_PAL" },
+    { CONTENT_TYPE_OGG, "OGG" },
     { CONTENT_TYPE_PCM, "LPCM" },
+    { CONTENT_TYPE_PNG, "PNG_LRG" },
+    { CONTENT_TYPE_WMA, "WMAFULL" },
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
 static std::map<std::string, std::string> mt_upnp_defaults {
-    { "audio/*", UPNP_CLASS_MUSIC_TRACK },
-    { "video/*", UPNP_CLASS_VIDEO_ITEM },
-    { "image/*", UPNP_CLASS_IMAGE_ITEM },
     { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+    { "audio/*", UPNP_CLASS_MUSIC_TRACK },
+    { "image/*", UPNP_CLASS_IMAGE_ITEM },
+    { "video/*", UPNP_CLASS_VIDEO_ITEM },
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
