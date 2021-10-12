@@ -73,7 +73,11 @@ void Sqlite3Database::init()
         throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath, std::strerror(errno)));
 
     taskQueueOpen = true;
-    threadRunner = std::make_unique<StdThreadRunner>("SQLiteThread", Sqlite3Database::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "SQLiteThread", [](void* arg) -> void* {
+            auto inst = static_cast<Sqlite3Database*>(arg);
+            inst->threadProc();
+            return nullptr; }, this, config);
 
     if (!threadRunner->isAlive()) {
         throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
@@ -255,75 +259,67 @@ int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
     }
 }
 
-void* Sqlite3Database::staticThreadProc(void* arg)
-{
-    log_debug("Sqlite3Database::staticThreadProc - running thread");
-    auto inst = static_cast<Sqlite3Database*>(arg);
-    try {
-        inst->threadProc();
-        log_debug("Sqlite3Database::staticThreadProc - exiting thread");
-    } catch (const std::runtime_error& e) {
-        log_error("Sqlite3Database::staticThreadProc - aborting thread");
-    }
-    return nullptr;
-}
-
 void Sqlite3Database::threadProc()
 {
-    sqlite3* db;
+    log_debug("Running thread");
+    try {
+        sqlite3* db;
 
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+        std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
-    int res = sqlite3_open(dbFilePath.c_str(), &db);
-    if (res != SQLITE_OK) {
-        startupError = fmt::format("Sqlite3Database.init: could not open '{}'", dbFilePath);
-        return;
-    }
+        int res = sqlite3_open(dbFilePath.c_str(), &db);
+        if (res != SQLITE_OK) {
+            startupError = fmt::format("Sqlite3Database.init: could not open '{}'", dbFilePath);
+            return;
+        }
 
-    StdThreadRunner::waitFor("Sqlite3Database", [this] { return threadRunner != nullptr; });
-    auto lock = threadRunner->uniqueLockS("threadProc");
-    // tell init() that we are ready
-    threadRunner->setReady();
+        StdThreadRunner::waitFor("Sqlite3Database", [this] { return threadRunner != nullptr; });
+        auto lock = threadRunner->uniqueLockS("threadProc");
+        // tell init() that we are ready
+        threadRunner->setReady();
 
-    while (!shutdownFlag) {
+        while (!shutdownFlag) {
+            while (!taskQueue.empty()) {
+                auto task = taskQueue.front();
+                taskQueue.pop();
+
+                lock.unlock();
+                try {
+                    task->run(&db, this);
+                    if (task->didContamination())
+                        dirty = true;
+                    else if (task->didDecontamination())
+                        dirty = false;
+                    task->sendSignal();
+                } catch (const std::runtime_error& e) {
+                    task->sendSignal(e.what());
+                }
+                lock.lock();
+            }
+
+            /* if nothing to do, sleep until awakened */
+            threadRunner->wait(lock);
+        }
+        log_debug("Exiting");
+
+        taskQueueOpen = false;
         while (!taskQueue.empty()) {
             auto task = taskQueue.front();
             taskQueue.pop();
+            task->sendSignal("Sorry, sqlite3 thread is shutting down");
+        }
 
-            lock.unlock();
-            try {
-                task->run(&db, this);
-                if (task->didContamination())
-                    dirty = true;
-                else if (task->didDecontamination())
-                    dirty = false;
-                task->sendSignal();
-            } catch (const std::runtime_error& e) {
-                task->sendSignal(e.what());
+        if (db) {
+            log_debug("closing database");
+            if (sqlite3_close(db) == SQLITE_OK) {
+                log_debug("Closed database");
+            } else {
+                log_error("Closing database failed");
             }
-            lock.lock();
+            db = nullptr;
         }
-
-        /* if nothing to do, sleep until awakened */
-        threadRunner->wait(lock);
-    }
-    log_debug("Sqlite3Database::threadProc - exiting");
-
-    taskQueueOpen = false;
-    while (!taskQueue.empty()) {
-        auto task = taskQueue.front();
-        taskQueue.pop();
-        task->sendSignal("Sorry, sqlite3 thread is shutting down");
-    }
-
-    if (db) {
-        log_debug("Sqlite3Database::staticThreadProc - closing database");
-        if (sqlite3_close(db) == SQLITE_OK) {
-            log_debug("Sqlite3Database::staticThreadProc - closed database");
-        } else {
-            log_error("Sqlite3Database::staticThreadProc - closing database failed");
-        }
-        db = nullptr;
+    } catch (const std::runtime_error& e) {
+        log_error("Aborting thread");
     }
 }
 

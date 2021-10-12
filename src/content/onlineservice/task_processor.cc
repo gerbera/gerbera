@@ -37,7 +37,13 @@
 
 void TaskProcessor::run()
 {
-    threadRunner = std::make_unique<StdThreadRunner>("TaskProcessorThread", TaskProcessor::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "TaskProcessorThread", [](void* arg) -> void* {
+            auto inst = static_cast<TaskProcessor*>(arg);
+            inst->threadProc();
+            return nullptr;
+        },
+        this, config);
 
     // wait for thread to become ready
     threadRunner->waitForReady();
@@ -52,13 +58,6 @@ void TaskProcessor::shutdown()
     shutdownFlag = true;
     threadRunner->notify();
     threadRunner->join();
-}
-
-void* TaskProcessor::staticThreadProc(void* arg)
-{
-    auto inst = static_cast<TaskProcessor*>(arg);
-    inst->threadProc();
-    return nullptr;
 }
 
 void TaskProcessor::threadProc()

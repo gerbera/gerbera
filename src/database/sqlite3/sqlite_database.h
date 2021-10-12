@@ -188,7 +188,6 @@ private:
     std::string getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
 
     std::unique_ptr<StdThreadRunner> threadRunner;
-    static void* staticThreadProc(void* arg);
     void threadProc();
 
     void addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty = false);

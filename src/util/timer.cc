@@ -41,22 +41,19 @@ Timer::Timer(std::shared_ptr<Config> config)
 void Timer::run()
 {
     log_debug("Starting Timer thread...");
-    threadRunner = std::make_unique<StdThreadRunner>("TimerThread", Timer::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "TimerThread", [](void* arg) -> void* {
+            auto inst = static_cast<Timer*>(arg);
+            inst->threadProc();
+            return nullptr;
+        },
+        this, config);
 
     // wait for TimerThread to become ready
     threadRunner->waitForReady();
 
     if (!threadRunner->isAlive())
         throw_std_runtime_error("Failed to start timer thread");
-}
-
-void* Timer::staticThreadProc(void* arg)
-{
-    log_debug("Started Timer thread.");
-    auto inst = static_cast<Timer*>(arg);
-    inst->threadProc();
-    log_debug("Exiting Timer thread...");
-    return nullptr;
 }
 
 void Timer::threadProc()

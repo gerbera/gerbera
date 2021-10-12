@@ -148,7 +148,6 @@ protected:
     std::chrono::milliseconds getNextNotifyTime();
 
 private:
-    static void* staticThreadProc(void* arg);
     void threadProc();
     std::shared_ptr<Config> config;
     std::unique_ptr<StdThreadRunner> threadRunner;

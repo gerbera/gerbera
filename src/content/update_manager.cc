@@ -55,7 +55,13 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
 
 void UpdateManager::run()
 {
-    threadRunner = std::make_unique<StdThreadRunner>("UpdateThread", UpdateManager::staticThreadProc, this, config);
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "UpdateThread", [](void* arg) -> void* {
+            auto inst = static_cast<UpdateManager*>(arg);
+            inst->threadProc();
+            return nullptr;
+        },
+        this, config);
     // wait for thread to become ready
     threadRunner->waitForReady();
 }
@@ -223,12 +229,4 @@ void UpdateManager::threadProc()
     }
 
     database->threadCleanup();
-}
-
-void* UpdateManager::staticThreadProc(void* arg)
-{
-    auto inst = static_cast<UpdateManager*>(arg);
-    inst->threadProc();
-
-    return nullptr;
 }

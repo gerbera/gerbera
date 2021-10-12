@@ -75,7 +75,6 @@ protected:
 
     int lastContainerChanged { INVALID_OBJECT_ID };
 
-    static void* staticThreadProc(void* arg);
     void threadProc();
 
     bool haveUpdates() const { return !objectIDHash.empty(); }
