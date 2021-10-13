@@ -49,13 +49,13 @@ sudo make install
 | libupnp       | 1.14.0        | XOR libnpupnp | [pupnp]                    |                        |          | install-pupnp.sh   |
 | libnpupnp     | 4.1.2         | XOR libupnp   | [npupnp]                   | WITH_NPUPNP            | Disabled |                    |
 | libuuid       |               | Depends on OS | Not required on \*BSD      |                        |          |                    |
-| [pugixml]     |               | Required      | XML file and data support  |                        |          | install-pugixml.sh |
+| [pugixml]     |               | Required      | XML file and data support  |                        |          |                    |
 | libiconv      |               | Required      | Charset conversion         |                        |          |                    |
 | sqlite3       | 3.7.0         | Required      | Database storage           |                        |          |                    |
 | zlib          |               | Required      | Data compression           |                        |          |                    |
 | [fmtlib]      | 7.1.3         | Required      | Fast string formatting     |                        |          | install-fmt.sh     |
 | [spdlog]      | 1.8.5         | Required      | Runtime logging            |                        |          | install-spdlog.sh  |
-| [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  | install-duktape.sh |
+| [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  |                    |
 | mysql         |               | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |                    |
 | curl          |               | Optional      | Enables web services       | WITH_CURL              | Enabled  |                    |
 | [taglib]      | 1.11.1        | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  | install-taglib.sh  |

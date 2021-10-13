@@ -25,7 +25,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libuuid             |               | Depends on OS | Not required on \*BSD      |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| pugixml             |               | Required      | XML file and data support  |                         |          | install-pugixml.sh |
+| pugixml             |               | Required      | XML file and data support  |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libiconv            |               | Required      | Charset conversion         |                         |          |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
@@ -37,7 +37,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | spdlog              | 1.8.1         | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| duktape             | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh |
+| duktape             | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | mysql               |               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
@@ -310,18 +310,14 @@ Build On FreeBSD
 (pkg manager is used here.)  Include mysql if you wish to use that instead of SQLite3.
 ::
 
-  pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg \
-  libexif pkgconf liblastfm gmake
+  pkg install wget git autoconf automake libtool cmake sudo curl wget pugixml upnp duktape-lib spdlog magic taglib ffmpeg ffmpegthumbnailer libexif libmatroska libiconv sqlite3
 
-
-2. Clone repository, build depdences in current in ports and then build gerbera.
+2. Clone repository, build dependencies in current in ports and then build gerbera.
 ::
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
   cd build
-  sh ../gerbera/scripts/install-pupnp.sh
-  sh ../gerbera/scripts/install-duktape.sh
   cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 \
     -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0
   make -j4
@@ -356,7 +352,7 @@ Simplest way of building:
 
   sudo docker build https://github.com/gerbera/gerbera.git
 
-After successfull build you should get something like
+After successful build you should get something like
 ::
 
   Successfully built a13ccc793373
