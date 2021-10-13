@@ -7,7 +7,7 @@ class HeadersHelperTest : public ::testing::Test {
 public:
     HeadersHelperTest()
     {
-        subject = new Headers();
+        subject = std::make_unique<Headers>();
 #if defined(USING_NPUPNP)
         info = new UpnpFileInfo;
 #else
@@ -20,13 +20,11 @@ public:
         delete info;
 #else
         UpnpFileInfo_delete(info);
-
 #endif
-        delete subject;
     }
 
     UpnpFileInfo* info;
-    Headers* subject;
+    std::unique_ptr<Headers> subject;
 };
 
 #if !defined(USING_NPUPNP)
