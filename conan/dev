@@ -12,6 +12,6 @@ gerbera:debug_logging=True
 gerbera:tests=True
 
 [env]
-CXXFLAGS=-Og -Werror -Wall
+gerbera:CXXFLAGS=-Og -Werror -Wall
 # Requires CMake >= 3.17
 CMAKE_EXPORT_COMPILE_COMMANDS=ON
