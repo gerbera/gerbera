@@ -8,7 +8,7 @@ set -ex
 wget https://github.com/taglib/taglib/archive/v1.12.tar.gz -O taglib-1.12.0.tar.gz
 tar -xzvf taglib-1.12.0.tar.gz
 
-rm -R taglib-build
+rm -Rf taglib-build
 mkdir taglib-build
 
 cd taglib-build
