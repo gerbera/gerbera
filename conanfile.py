@@ -47,6 +47,8 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "zlib/1.2.11",
         "pupnp/[>=1.14.0]",
+        "taglib/1.12",
+        "openssl/1.1.1k", # Needed to fix conflicts
     ]
 
     def configure(self):
@@ -106,16 +108,6 @@ class GerberaConan(ConanFile):
                     "pacman": "file",
                     "yum": "file-devel",
                     "freebsd": [],
-                }[pm]
-            )
-
-        if self.options.taglib:
-            installer.install(
-                {
-                    "apt": "libtag1-dev",
-                    "pacman": "taglib",
-                    "yum": "libtag-devel",
-                    "freebsd": "taglib",
                 }[pm]
             )
 
