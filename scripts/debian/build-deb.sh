@@ -56,6 +56,12 @@ function install-pupnp() {
   echo "::endgroup::"
 }
 
+function install-taglib() {
+  echo "::group::Installing taglib"
+  sudo bash ${ROOT_DIR}scripts/install-taglib.sh
+  echo "::endgroup::"
+}
+
 function upload_to_artifactory() {
 
   target_path="pool/main/g/gerbera/$deb_name"
@@ -124,7 +130,6 @@ if [[ ! -d build-deb ]]; then
       "${libmysqlclient}" \
       libpugixml-dev \
       libsqlite3-dev \
-      libtag1-dev \
       uuid-dev
   sudo apt-get clean
   echo "::endgroup::"
@@ -139,6 +144,7 @@ fi
 install-fmt
 install-spdlog
 install-pupnp
+install-taglib
 
 cd build-deb
 
