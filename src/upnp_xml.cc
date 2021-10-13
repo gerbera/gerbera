@@ -193,7 +193,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             result.append_attribute("childCount") = childCount;
 
         log_debug("container is class: {}", upnpClass.c_str());
-        auto meta = obj->getMetaData();
+        auto&& meta = obj->getMetaData();
         if (upnpClass == UPNP_CLASS_MUSIC_ALBUM) {
             addPropertyList(result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
         } else if (upnpClass == UPNP_CLASS_MUSIC_ARTIST) {
@@ -492,13 +492,13 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     // Order resources according to index defined by orderedHandler
     std::deque<std::shared_ptr<CdsResource>> orderedResources;
     auto&& resources = object->getResources();
-    for (auto&& oh : orderedHandler) {
-        std::copy_if(resources.begin(), resources.end(), std::back_inserter(orderedResources), [&](auto res) { return oh == res->getHandlerType(); });
+    for (int oh : orderedHandler) {
+        std::copy_if(resources.begin(), resources.end(), std::back_inserter(orderedResources), [oh](auto&& res) { return oh == res->getHandlerType(); });
     }
 
     // Append resources not listed in orderedHandler
     for (auto&& res : resources) {
-        auto ch = res->getHandlerType();
+        int ch = res->getHandlerType();
         if (std::find(orderedHandler.begin(), orderedHandler.end(), ch) == orderedHandler.end()) {
             orderedResources.push_back(res);
         }
@@ -546,7 +546,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 // check user fourcc settings
                 avi_fourcc_listmode_t fccMode = tp->getAVIFourCCListMode();
 
-                std::vector<std::string> fccList = tp->getAVIFourCCList();
+                const auto& fccList = tp->getAVIFourCCList();
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
                 if (fccMode != FCC_None) {
@@ -645,7 +645,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                   if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */
 
         auto resAttrs = res->getAttributes();
-        auto resParams = res->getParameters();
+        auto&& resParams = res->getParameters();
         std::string protocolInfo = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
