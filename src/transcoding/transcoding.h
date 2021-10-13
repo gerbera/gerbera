@@ -170,7 +170,7 @@ public:
         avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
-    std::vector<std::string> getAVIFourCCList() const;
+    const std::vector<std::string>& getAVIFourCCList() const;
     /// \brief Provides information on the mode of the list
     avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourcc_mode; }
 
@@ -220,7 +220,7 @@ public:
     void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
     std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType) const;
-    std::map<std::string, std::shared_ptr<TranscodingProfileMap>> getList() const { return list; }
+    const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() const { return list; }
     std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
     std::size_t size() const { return list.size(); }
     void setKey(const std::string& oldKey, const std::string& newKey)

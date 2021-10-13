@@ -1166,7 +1166,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     }
 
     // validate profiles
-    auto tpl = result->getList();
+    auto&& tpl = result->getList();
     for (auto&& [key, val] : mtMappings) {
         if (tpl.find(key) == tpl.end()) {
             log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val, key);

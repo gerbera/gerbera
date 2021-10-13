@@ -62,7 +62,7 @@ void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, 
     fourcc_mode = mode;
 }
 
-std::vector<std::string> TranscodingProfile::getAVIFourCCList() const
+const std::vector<std::string>& TranscodingProfile::getAVIFourCCList() const
 {
     return fourcc_list;
 }
