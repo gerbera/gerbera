@@ -18,4 +18,4 @@ target_compile_definitions(testconfig PRIVATE CMAKE_BINARY_DIR="${CMAKE_BINARY_D
 add_dependencies(testconfig gerbera)
 
 include(GoogleTest)
-gtest_discover_tests(testconfig)
+gtest_discover_tests(testconfig PROPERTIES TIMEOUT 600)

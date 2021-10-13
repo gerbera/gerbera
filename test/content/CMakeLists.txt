@@ -9,4 +9,4 @@ target_link_libraries(testcontent PRIVATE
 )
 
 include(GoogleTest)
-gtest_discover_tests(testcontent)
+gtest_discover_tests(testcontent PROPERTIES TIMEOUT 600)
