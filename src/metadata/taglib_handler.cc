@@ -32,20 +32,20 @@
 #ifdef HAVE_TAGLIB
 #include "taglib_handler.h" // API
 
-#include <taglib/aifffile.h>
-#include <taglib/apefile.h>
-#include <taglib/asffile.h>
-#include <taglib/attachedpictureframe.h>
-#include <taglib/flacfile.h>
-#include <taglib/id3v2tag.h>
-#include <taglib/mp4file.h>
-#include <taglib/mpegfile.h>
-#include <taglib/textidentificationframe.h>
-#include <taglib/tfilestream.h>
-#include <taglib/tiostream.h>
-#include <taglib/tpropertymap.h>
-#include <taglib/vorbisfile.h>
-#include <taglib/wavpackfile.h>
+#include <aifffile.h>
+#include <apefile.h>
+#include <asffile.h>
+#include <attachedpictureframe.h>
+#include <flacfile.h>
+#include <id3v2tag.h>
+#include <mp4file.h>
+#include <mpegfile.h>
+#include <textidentificationframe.h>
+#include <tfilestream.h>
+#include <tiostream.h>
+#include <tpropertymap.h>
+#include <vorbisfile.h>
+#include <wavpackfile.h>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
@@ -390,15 +390,15 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
         if (!attrListMap.contains("WM/Picture"))
-            throw_std_runtime_error("wma file has no picture information");
+            throw_std_runtime_error("WMA file has no picture information");
 
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
         if (attrList.isEmpty())
-            throw_std_runtime_error("wma list has no picture information");
+            throw_std_runtime_error("WMA list has no picture information");
 
         const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
         if (!wmpic.isValid())
-            throw_std_runtime_error("wma pic not valid");
+            throw_std_runtime_error("WMA pic not valid");
 
         const TagLib::ByteVector& data = wmpic.picture();
 
