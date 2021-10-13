@@ -143,7 +143,7 @@ describe('Gerbera Auth', () => {
       await Auth.authenticate();
 
       expect(GerberaApp.isLoggedIn()).toBeTruthy();
-      expect(ajaxSpy.calls.count()).toBe(2);
+      expect(ajaxSpy.calls.count()).toBe(3);
       expect(Tree.initialize).toHaveBeenCalled();
       expect(Items.initialize).toHaveBeenCalled();
       expect(Menu.initialize).toHaveBeenCalled();

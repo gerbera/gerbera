@@ -123,9 +123,14 @@ export class App {
 
   setLoggedIn(isLoggedIn){
     this.loggedIn = isLoggedIn;
+    if (this.loggedIn) {
+        this.getStatus(this.clientConfig).then((response) => { return this.displayStatus(response); });
+    }
   }
 
   initialize () {
+    $('#server-status').hide();
+
     this.pageInfo = {
       dbType: 'home',
       configMode: 'minimal',
@@ -153,12 +158,6 @@ export class App {
         this.loggedIn = loggedIn;
         this.displayLogin(loggedIn);
         Menu.initialize(this.serverConfig);
-      })
-      .then(() => {
-        return this.getStatus(this.clientConfig);
-      })
-      .then((response) => {
-        return this.displayStatus(response)
       })
       .then(() => {
         if (localStorage.getItem('pageInfo')) {
@@ -212,6 +211,7 @@ export class App {
 
   displayStatus (response) {
     if (response.success) {
+      $('#server-status').show();
       $('#status-total').html(this.getStatusValue(response.values.item, 'total'));
       $('#status-audio').html(this.getStatusValue(response.values.item, 'audio'));
       $('#status-video').html(this.getStatusValue(response.values.item, 'video'));
@@ -276,7 +276,9 @@ export class App {
       Clients.initialize();
       Config.initialize();
       Tweaks.initialize();
+      this.getStatus(this.clientConfig).then((response) => {return this.displayStatus(response); });
     } else {
+      $('#server-status').hide();
       $('.login-field').show();
       $('#login-form').submit(function (event) {
         Auth.authenticate(event);
