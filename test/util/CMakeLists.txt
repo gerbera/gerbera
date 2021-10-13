@@ -10,4 +10,4 @@ target_link_libraries(testutil PRIVATE
 )
 
 include(GoogleTest)
-gtest_discover_tests(testutil PROPERTIES TIMEOUT 600)
+gtest_discover_tests(testutil DISCOVERY_TIMEOUT 60)

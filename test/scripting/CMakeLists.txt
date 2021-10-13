@@ -23,5 +23,5 @@ target_link_libraries(testscripting PRIVATE
 target_compile_definitions(testscripting PRIVATE SCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
 
 include(GoogleTest)
-gtest_discover_tests(testscripting PROPERTIES TIMEOUT 600)
+gtest_discover_tests(testscripting DISCOVERY_TIMEOUT 60)
 
