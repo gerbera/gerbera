@@ -40,6 +40,9 @@
 #include <id3v2tag.h>
 #include <mp4file.h>
 #include <mpegfile.h>
+#include <oggflacfile.h>
+#include <opusfile.h>
+#include <speexfile.h>
 #include <textidentificationframe.h>
 #include <tfilestream.h>
 #include <tiostream.h>
@@ -390,15 +393,15 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
         const TagLib::ASF::AttributeListMap& attrListMap = f.tag()->attributeListMap();
         if (!attrListMap.contains("WM/Picture"))
-            throw_std_runtime_error("WMA file has no picture information");
+            throw_std_runtime_error("wma file has no picture information");
 
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
         if (attrList.isEmpty())
-            throw_std_runtime_error("WMA list has no picture information");
+            throw_std_runtime_error("wma list has no picture information");
 
         const TagLib::ASF::Picture& wmpic = attrList[0].toPicture();
         if (!wmpic.isValid())
-            throw_std_runtime_error("WMA pic not valid");
+            throw_std_runtime_error("wma pic not valid");
 
         const TagLib::ByteVector& data = wmpic.picture();
 
@@ -406,14 +409,14 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     }
     if (contentType == CONTENT_TYPE_OGG) {
         // stream album art from Ogg/Vorbis file
-        auto f = TagLib::Ogg::Vorbis::File(&roStream);
+        auto f = getOggFile(&roStream);
 
-        if (!f.isValid() || !f.tag())
-            throw_std_runtime_error("Could not open vorbis file: {}", item->getLocation().c_str());
+        if (!f || !f->isValid() || !f->tag())
+            throw_std_runtime_error("Could not open OGG file: {}", item->getLocation().c_str());
 
-        const TagLib::List<TagLib::FLAC::Picture*> picList = f.tag()->pictureList();
+        const TagLib::List<TagLib::FLAC::Picture*> picList = reinterpret_cast<TagLib::Ogg::XiphComment*>(f->tag())->pictureList();
         if (picList.isEmpty())
-            throw_std_runtime_error("vorbis file has no picture information");
+            throw_std_runtime_error("OGG file has no picture information");
 
         const TagLib::FLAC::Picture* pic = picList.front();
         const TagLib::ByteVector& data = pic->data();
@@ -528,27 +531,42 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
+std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream* ioStream) const
+{
+    if (TagLib::Ogg::Vorbis::File::isSupported(ioStream)) {
+        return std::make_unique<TagLib::Ogg::Vorbis::File>(ioStream);
+    } else if (TagLib::Ogg::Opus::File::isSupported(ioStream)) {
+        return std::make_unique<TagLib::Ogg::Opus::File>(ioStream);
+    } else if (TagLib::Ogg::Speex::File::isSupported(ioStream)) {
+        return std::make_unique<TagLib::Ogg::Speex::File>(ioStream);
+    } else if (TagLib::Ogg::FLAC::File::isSupported(ioStream)) {
+        return std::make_unique<TagLib::Ogg::FLAC::File>(ioStream);
+    }
+    log_warning("Could not match supported Taglib OGG File for {}", ioStream->name());
+    return nullptr;
+}
+
 void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto vorbis = TagLib::Ogg::Vorbis::File(roStream);
+    auto oggFile = getOggFile(roStream);
 
-    if (!vorbis.isValid()) {
+    if (!oggFile || !oggFile->isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid ogg file", item->getLocation().c_str());
         return;
     }
-    populateGenericTags(item, vorbis);
+    populateGenericTags(item, *oggFile);
 
-    if (!vorbis.tag())
+    if (!oggFile->tag())
         return;
 
     auto sc = StringConverter::i2i(config);
-    auto propertyMap = vorbis.properties();
+    auto propertyMap = oggFile->properties();
     populateAuxTags(item, propertyMap, sc);
 
     // Vorbis uses the FLAC binary picture structure...
     // https://wiki.xiph.org/VorbisComment#Cover_art
     // The unofficial COVERART field is not supported.
-    const TagLib::List<TagLib::FLAC::Picture*> picList = vorbis.tag()->pictureList();
+    const TagLib::List<TagLib::FLAC::Picture*> picList = reinterpret_cast<TagLib::Ogg::XiphComment*>(oggFile->tag())->pictureList();
     if (picList.isEmpty())
         return;
 
