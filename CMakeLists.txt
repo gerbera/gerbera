@@ -472,7 +472,7 @@ if(WITH_CURL)
 endif()
 
 if(WITH_TAGLIB)
-    find_package(Taglib REQUIRED)
+    find_package(Taglib 1.12 REQUIRED)
     target_link_libraries(libgerbera PUBLIC Taglib::Taglib)
     target_compile_definitions(libgerbera PUBLIC HAVE_TAGLIB)
 endif()

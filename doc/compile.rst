@@ -43,7 +43,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | curl                |               | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| taglib              | 1.11.1        | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh  |
+| taglib              | 1.12          | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh  |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
 | libmagic            |               | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                    |
 +---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+

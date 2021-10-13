@@ -58,7 +58,7 @@ sudo make install
 | [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  | install-duktape.sh |
 | mysql         |               | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |                    |
 | curl          |               | Optional      | Enables web services       | WITH_CURL              | Enabled  |                    |
-| [taglib]      | 1.11.1        | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  | install-taglib.sh  |
+| [taglib]      | 1.12          | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  | install-taglib.sh  |
 | libmagic      |               | Optional      | File type detection        | WITH_MAGIC             | Enabled  |                    |
 | libmatroska   |               | Optional      | MKV metadata               | WITH_MATROSKA          | Enabled  |                    |
 | ffmpeg/libav  |               | Optional      | File metadata              | WITH_AVCODEC           | Disabled |                    |
