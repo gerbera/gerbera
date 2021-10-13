@@ -37,9 +37,9 @@
 
 #include <string>
 
-#include <taglib/tbytevector.h>
-#include <taglib/tfile.h>
-#include <taglib/tiostream.h>
+#include <tbytevector.h>
+#include <tfile.h>
+#include <tiostream.h>
 
 #include "metadata_handler.h"
 #include "util/string_converter.h"
