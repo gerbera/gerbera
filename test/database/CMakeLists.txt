@@ -19,4 +19,4 @@ target_link_libraries(testdb PUBLIC
 )
 
 include(GoogleTest)
-gtest_discover_tests(testdb PROPERTIES TIMEOUT 600)
+gtest_discover_tests(testdb DISCOVERY_TIMEOUT 60)

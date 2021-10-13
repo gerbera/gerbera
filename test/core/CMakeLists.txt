@@ -25,4 +25,4 @@ target_compile_definitions(testcore PRIVATE GIT_BRANCH="${GIT_BRANCH}")
 target_compile_definitions(testcore PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 include(GoogleTest)
-gtest_discover_tests(testcore PROPERTIES TIMEOUT 600)
+gtest_discover_tests(testcore DISCOVERY_TIMEOUT 60)
