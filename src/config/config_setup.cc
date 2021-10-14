@@ -1293,7 +1293,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
-                    entry->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)] = optValue;
+                    entry->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributes()[MetadataHandler::getResAttrName(R_RESOLUTION)]);
                     return true;
                 }
