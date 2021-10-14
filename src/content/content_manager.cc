@@ -1268,7 +1268,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
          * this is a container
          */
         /*
-        cont->setMTime(to_time_t(dirEnt.last_write_time(ec)));
+        cont->setMTime(dirEnt.last_write_time(ec));
         cont->setLocation(path);
         auto f2i = StringConverter::f2i();
         obj->setTitle(f2i->convert(filename));

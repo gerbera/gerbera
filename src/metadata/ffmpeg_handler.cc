@@ -50,6 +50,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include <fmt/chrono.h>
+
 #include <sys/stat.h>
 
 extern "C" {
@@ -161,16 +163,15 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             field = M_CREATION_DATE;
             if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
-                struct tm tmWork;
+                std::tm tmWork;
                 char mDate[] = "YYYY-mm-dd";
                 if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
-                    time_t utcTime;
                     // convert creation_time to local time
-                    utcTime = timegm(&tmWork);
-                    if (utcTime == time_t(-1)) {
+                    auto utcTime = timegm(&tmWork);
+                    if (utcTime == -1) {
                         continue;
                     }
-                    localtime_r(&utcTime, &tmWork);
+                    tmWork = fmt::localtime(utcTime);
                 } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
                     continue;
                 }

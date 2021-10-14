@@ -190,7 +190,7 @@ std::shared_ptr<CdsObject> SopCastContentHandler::getObject(const std::string& g
 
     item->setClass(UPNP_CLASS_VIDEO_BROADCAST);
 
-    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())));
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(std::chrono::system_clock::now().time_since_epoch().count()));
     item->setFlag(OBJECT_FLAG_PROXY_URL);
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
 
