@@ -121,15 +121,17 @@ public:
     void setFirstResource(bool fr) { first_resource = fr; }
     bool firstResource() const { return first_resource; }
 
-    /// \brief Adds a resource attribute.
+    /// \brief Adds or overwrites a resource attribute.
     ///
     /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(const std::string& name, const std::string& value);
+    void setAttribute(const std::string& name, const std::string& value);
 
-    std::map<std::string, std::string> getAttributes() const;
+    const std::map<std::string, std::string>& getAttributes() const;
+
+    std::string getAttribute(const std::string& name) const;
 
     /// \brief Override for theora content.
     ///
