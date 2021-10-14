@@ -60,14 +60,13 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
 
         if (isCaseSensitive) {
             for (auto&& name : files) {
-                auto found = folder / expandName(name, obj);
+                auto contentFile = folder / expandName(name, obj);
                 std::error_code ec;
-                bool exists = isRegularFile(found, ec); // no error throwing, please
-                if (!exists)
+                if (!isRegularFile(contentFile, ec)) // no error throwing, please
                     continue;
 
-                log_debug("{}: found", found.c_str());
-                result.push_back(std::move(found));
+                log_debug("{}: found", contentFile.c_str());
+                result.push_back(std::move(contentFile));
             }
         } else {
             std::map<std::string, fs::path> fileNames;
@@ -88,7 +87,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
         }
         if (!patterns.empty()) {
             for (auto&& [dir, ext] : patterns) {
-                auto found = fs::path(expandName(dir, obj));
+                auto contentPath = fs::path(expandName(dir, obj));
                 auto extn = fs::path(expandName(ext, obj));
                 auto stem = isCaseSensitive ? extn.stem().string() : toLower(extn.stem().string());
                 if (extn.has_extension()) {
@@ -98,34 +97,34 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     stem.clear();
                 }
                 std::error_code ec;
-                if (found.is_relative()) {
-                    found = folder / found;
+                if (contentPath.is_relative()) {
+                    contentPath = fs::weakly_canonical(folder / contentPath);
                 }
-                if (!fs::is_directory(found)) {
-                    log_debug("{}: not a directory", found.string());
+                if (!fs::is_directory(contentPath)) {
+                    log_debug("{}: not a directory", contentPath.string());
                     continue;
                 }
-                for (auto&& p : fs::directory_iterator(found, ec)) {
-                    if (isRegularFile(p, ec) && ((isCaseSensitive && p.path().extension() == extn) || (!isCaseSensitive && toLower(p.path().extension().string()) == extn))) {
+                for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
+                    if (isRegularFile(contentFile, ec) && ((isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))) {
                         if (!stem.empty()) {
                             replaceAllString(stem, "*", ".*");
                             replaceAllString(stem, ".", "?");
                             std::regex re(fmt::format("^{}$", stem));
                             std::cmatch m;
-                            if (std::regex_match(p.path().stem().string().c_str(), m, re)) {
-                                log_debug("{}: found", p.path().string());
-                                result.push_back(p.path());
+                            if (std::regex_match(contentFile.path().stem().string().c_str(), m, re)) {
+                                log_debug("{}: found", contentFile.path().string());
+                                result.push_back(contentFile.path());
                             }
                         } else {
-                            log_debug("{}: found", p.path().string());
-                            result.push_back(p.path());
+                            log_debug("{}: found", contentFile.path().string());
+                            result.push_back(contentFile.path());
                         }
                     }
                 }
             }
         }
     }
-    if (result.empty())
+    if (result.empty()) // required to detect no match
         result.emplace_back();
     return result;
 }
