@@ -161,21 +161,21 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             field = M_CREATION_DATE;
             if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
-                struct tm tm_work;
-                char m_date[] = "YYYY-mm-dd";
-                if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tm_work)) {
-                    time_t utc_time;
+                struct tm tmWork;
+                char mDate[] = "YYYY-mm-dd";
+                if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
+                    time_t utcTime;
                     // convert creation_time to local time
-                    utc_time = timegm(&tm_work);
-                    if (utc_time == time_t(-1)) {
+                    utcTime = timegm(&tmWork);
+                    if (utcTime == time_t(-1)) {
                         continue;
                     }
-                    localtime_r(&utc_time, &tm_work);
-                } else if (!strptime(e->value, "%Y-%m-%d", &tm_work)) { // use creation_time as is
+                    localtime_r(&utcTime, &tmWork);
+                } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
                     continue;
                 }
-                strftime(m_date, sizeof(m_date), "%F", &tm_work);
-                item->addMetaData(field, m_date);
+                strftime(mDate, sizeof(mDate), "%F", &tmWork);
+                item->addMetaData(field, mDate);
             }
         }
     }
@@ -212,8 +212,8 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
         AVStream* st = pFormatCtx->streams[i];
 
         if ((st) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
-            auto codec_id = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_VIDEOCODEC, avcodec_get_name(codec_id));
+            auto codecId = as_codecpar(st)->codec_id;
+            resource->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
 
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
@@ -238,8 +238,8 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             }
         }
         if ((st) && (!audioset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
-            auto codec_id = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codec_id));
+            auto codecId = as_codecpar(st)->codec_id;
+            resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
             if (as_codecpar(st)->sample_rate > 0) {
                 samplefreq = as_codecpar(st)->sample_rate;
@@ -266,12 +266,12 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
             auto it = mappings.find(CONTENT_TYPE_JPG);
-            std::string thumb_mimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
+            std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
             auto ffres = std::make_shared<CdsResource>(CH_FFTH);
             ffres->addParameter(RESOURCE_HANDLER, fmt::to_string(CH_FFTH));
             ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
-            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumb_mimetype));
+            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
             y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
             x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
@@ -285,7 +285,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 }
 
 // Stub for suppressing ffmpeg error messages during matadata extraction
-static void FfmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
+static void ffmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
 {
     // do nothing
 }
@@ -301,7 +301,7 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     AVFormatContext* pFormatCtx = nullptr;
 
     // Suppress all log messages
-    av_log_set_callback(FfmpegNoOutputStub);
+    av_log_set_callback(ffmpegNoOutputStub);
 
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
@@ -350,16 +350,16 @@ fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)
     return path;
 }
 
-std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movie_filename) const
+std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movieFilename) const
 {
-    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movie_filename);
+    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
     return readBinaryFile(path);
 }
 
-void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movie_filename, const std::byte* data, std::size_t size) const
+void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const
 {
     try {
-        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movie_filename);
+        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
         fs::create_directories(path.parent_path());
         writeBinaryFile(path, data, size);
     } catch (const std::runtime_error& e) {
@@ -387,7 +387,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
         }
     }
 
-    auto thumb_lock = std::scoped_lock<std::mutex>(thumb_mutex);
+    auto thumbLock = std::scoped_lock<std::mutex>(thumb_mutex);
 
     auto th = ffmpegthumbnailer::VideoThumbnailer(config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE), false, true, config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY), false);
     std::vector<uint8_t> img;

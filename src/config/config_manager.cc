@@ -403,8 +403,8 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    auto ffmp_en = setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
-    if (ffmp_en) {
+    auto ffmpEn = setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
+    if (ffmpEn) {
         setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
         setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
         setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
