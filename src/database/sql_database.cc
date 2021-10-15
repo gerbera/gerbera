@@ -457,6 +457,9 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
         version++;
     }
 
+    if (version != DBVERSION)
+        throw_std_runtime_error("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}", upgradeFile.c_str(), DBVERSION, dbVersion);
+
     version = 1;
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
         { "metadata", &SQLDatabase::doMetadataMigration },
@@ -481,8 +484,8 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
         version++;
     }
 
-    if (version != DBVERSION || dbVersion != DBVERSION)
-        throw_std_runtime_error("The database seems to be from a newer version");
+    if (dbVersion != DBVERSION)
+        throw_std_runtime_error("The database seems to be from another Gerbera version. Expected {}, actual {}", DBVERSION, dbVersion);
 
     prepareResourceTable(addResourceColumnCmd);
 }
