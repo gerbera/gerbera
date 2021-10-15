@@ -1069,31 +1069,25 @@ std::string getAVIFourCC(std::string_view aviFilename)
     if (!f)
         throw_std_runtime_error("Could not open file {}: {}", aviFilename, std::strerror(errno));
 
-    auto buffer = new char[FCC_OFFSET + 6];
+    char buffer[FCC_OFFSET + 6];
 
     std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     std::fclose(f);
     if (rb != FCC_OFFSET + 4) {
-        delete[] buffer;
         throw_std_runtime_error("Could not read header of {}: {}", aviFilename, std::strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
 
     if (std::strncmp(buffer, "RIFF", 4) != 0) {
-        delete[] buffer;
         return {};
     }
 
     if (std::strncmp(buffer + 8, "AVI ", 4) != 0) {
-        delete[] buffer;
         return {};
     }
 
-    auto fourcc = std::string(buffer + FCC_OFFSET, 4);
-    delete[] buffer;
-
-    return fourcc;
+    return std::string(buffer + FCC_OFFSET, 4);
 }
 #endif
 
