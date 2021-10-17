@@ -164,7 +164,6 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
                 std::tm tmWork;
-                char mDate[] = "YYYY-mm-dd";
                 if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
                     // convert creation_time to local time
                     auto utcTime = timegm(&tmWork);
@@ -175,7 +174,8 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
                     continue;
                 }
-                strftime(mDate, sizeof(mDate), "%F", &tmWork);
+
+                auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                 item->addMetaData(field, mDate);
             }
         }
