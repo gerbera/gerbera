@@ -276,7 +276,7 @@ public:
     }
 
     /// \brief Add a single metadata value.
-    void addMetaData(const metadata_fields_t key, const std::string& value)
+    void addMetaData(const metadata_fields_t key, std::string&& value)
     {
         metaData.emplace_back(MetadataHandler::getMetaFieldName(key), value);
     }

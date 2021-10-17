@@ -1025,7 +1025,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::
 
     clonedItem->removeMetaData(M_DESCRIPTION);
     if (!description.empty()) {
-        clonedItem->addMetaData(M_DESCRIPTION, description);
+        clonedItem->addMetaData(M_DESCRIPTION, std::move(description));
     }
 
     log_debug("updateCdsObject: checking equality of item {}", item->getTitle());

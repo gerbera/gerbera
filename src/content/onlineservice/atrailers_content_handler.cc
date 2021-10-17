@@ -140,7 +140,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     for (auto&& [key, tag] : propertyMap) {
         temp = info.child(key.c_str()).text().as_string();
         if (!temp.empty()) {
-            item->addMetaData(tag, temp);
+            item->addMetaData(tag, std::move(temp));
         }
     }
 
@@ -158,7 +158,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
             temp = actor.text().as_string();
             if (!temp.empty()) {
-                item->addMetaData(M_ARTIST, temp);
+                item->addMetaData(M_ARTIST, std::move(temp));
             }
         }
     }
@@ -173,7 +173,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
             temp = gn.text().as_string();
             if (!temp.empty()) {
-                item->addMetaData(M_GENRE, temp);
+                item->addMetaData(M_GENRE, std::move(temp));
             }
         }
     }

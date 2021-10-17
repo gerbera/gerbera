@@ -157,7 +157,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 value.append("-01-01");
                 log_debug("Identified metadata 'date': {}", value.c_str());
 
-                item->addMetaData(field, value);
+                item->addMetaData(field, std::move(value));
             }
         } else if (std::strcmp(e->key, "creation_time") == 0) {
             field = M_CREATION_DATE;
@@ -176,7 +176,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 }
 
                 auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
-                item->addMetaData(field, mDate);
+                item->addMetaData(field, std::move(mDate));
             }
         }
     }

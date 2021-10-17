@@ -69,7 +69,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
             if (value.length() >= 11) {
                 value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
                 log_debug("date: {}", value);
-                item->addMetaData(M_DATE, value);
+                item->addMetaData(M_DATE, std::move(value));
             }
         }
 

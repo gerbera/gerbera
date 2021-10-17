@@ -292,7 +292,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
         albumDate = "Unknown";
     }
     obj->removeMetaData(M_UPNP_DATE);
-    obj->addMetaData(M_UPNP_DATE, albumDate);
+    obj->addMetaData(M_UPNP_DATE, std::move(albumDate));
 
     std::string genre = obj->getMetaData(M_GENRE);
     if (!genre.empty()) {
@@ -304,7 +304,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
     std::string description = obj->getMetaData(M_DESCRIPTION);
     if (description.empty()) {
-        obj->addMetaData(M_DESCRIPTION, desc);
+        obj->addMetaData(M_DESCRIPTION, std::move(desc));
     }
 
     std::string composer = obj->getMetaData(M_COMPOSER);

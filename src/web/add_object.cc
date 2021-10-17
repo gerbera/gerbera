@@ -60,7 +60,7 @@ std::shared_ptr<CdsObject> Web::AddObject::addItem(int parentID, const std::shar
 
     std::string tmp = param("description");
     if (!tmp.empty()) {
-        item->addMetaData(M_DESCRIPTION, tmp);
+        item->addMetaData(M_DESCRIPTION, std::move(tmp));
     }
 
     /// \todo is there a default setting? autoscan? import settings?
@@ -86,7 +86,7 @@ std::shared_ptr<CdsObject> Web::AddObject::addUrl(int parentID, const std::share
 
     std::string tmp = param("description");
     if (!tmp.empty()) {
-        item->addMetaData(M_DESCRIPTION, tmp);
+        item->addMetaData(M_DESCRIPTION, std::move(tmp));
     }
 
     /// \todo is there a default setting? autoscan? import settings?

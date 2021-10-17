@@ -611,7 +611,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (!val.empty()) {
             val = sc->convert(val);
             item->removeMetaData(M_DESCRIPTION);
-            item->addMetaData(M_DESCRIPTION, val);
+            item->addMetaData(M_DESCRIPTION, std::move(val));
         } else if (pcd && item->getMetaData(M_DESCRIPTION).empty()) {
             item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
         }
