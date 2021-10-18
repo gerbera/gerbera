@@ -1005,6 +1005,9 @@
         <xs:complexType>
             <xs:attribute name="command" type="xs:string" use="required"/>
             <xs:attribute name="arguments" type="xs:string" use="required"/>
+            <xs:sequence>
+                <xs:element ref="environ" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 
@@ -1019,6 +1022,13 @@
     <xs:element name="resolution" type="xs:string"/>
 
     <xs:element name="thumbnail" type="boolean"/>
+
+    <xs:element name="environ">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
     <!-- online-content -->
 

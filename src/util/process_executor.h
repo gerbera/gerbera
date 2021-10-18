@@ -32,6 +32,7 @@
 #ifndef __PROCESS_EXECUTOR_H__
 #define __PROCESS_EXECUTOR_H__
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -41,8 +42,7 @@
 
 class ProcessExecutor : public Executor {
 public:
-    ProcessExecutor(const std::string& command,
-        const std::vector<std::string>& arglist);
+    ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& environ);
     ~ProcessExecutor() override;
 
     ProcessExecutor(const ProcessExecutor&) = delete;

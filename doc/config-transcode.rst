@@ -277,6 +277,9 @@ This section defines the various transcoding profiles.
     .. code-block:: xml
 
         <agent command="ogg123" arguments="-d wav -f %out %in"/>
+        <agent command="vlc" arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit">
+            <environ name="LC_ALL" value="C"/>
+        </agent>
 
      * Required
 
@@ -308,6 +311,14 @@ This section defines the various transcoding profiles.
                 %out
 
             Those tokens get substituted by the input file name and the output FIFO name before execution.
+
+        ::
+
+            <environ name="..." value=".."/>
+
+        * Optional
+
+        Sets environment variable which may be required by the transcoding process.
 
     .. code-block:: xml
 

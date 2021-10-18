@@ -38,7 +38,7 @@
 #include "logger.h"
 #include "process.h"
 
-ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist)
+ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& environ)
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];
@@ -61,14 +61,18 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     case 0:
         sigset_t maskSet;
         pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
-        log_debug("Launching process: {}", command);
+        for (auto&& [eName, eValue] : environ) {
+            setenv(eName.c_str(), eValue.c_str(), 1);
+            log_debug("setenv: {}='{}'", eName, eValue);
+        }
+        log_debug("Launching process: {} {}", command, fmt::join(arglist, " "));
         execvp(command.c_str(), const_cast<char**>(argv));
         break;
     default:
         break;
     }
 
-    log_debug("Launched process {}, pid: {}", command, process_id);
+    log_debug("Launched process {} {}, pid: {}", command, fmt::join(arglist, " "), process_id);
 }
 
 bool ProcessExecutor::isAlive()
