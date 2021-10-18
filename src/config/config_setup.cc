@@ -1131,6 +1131,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
         prof->setCommand(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
         prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
+        {
+            auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON);
+            if (cs->hasXmlElement(child))
+                prof->setEnviron(cs->getXmlContent(cs->getXmlElement(child)));
+        }
 
         // set buffer options
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);

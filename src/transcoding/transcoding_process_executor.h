@@ -39,7 +39,7 @@ namespace fs = std::filesystem;
 
 class TranscodingProcessExecutor : public ProcessExecutor {
 public:
-    TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist);
+    TranscodingProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& environ);
     ~TranscodingProcessExecutor() override;
 
     TranscodingProcessExecutor(const TranscodingProcessExecutor&) = delete;

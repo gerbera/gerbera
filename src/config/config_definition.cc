@@ -972,6 +972,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS,
         "attribute::arguments", "config-transcode.html#profiles",
         true, "", true),
+    std::make_shared<ConfigDictionarySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON,
+        "agent", "config-transcode.html#profiles",
+        ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_KEY, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_NAME, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_VALUE,
+        false, false, false),
     std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES,
         "resolution", "config-transcode.html#profiles",
         false),
@@ -1153,6 +1157,12 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     // simpleOptions
 
+    std::make_shared<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_KEY,
+        "environ", ""),
+    std::make_shared<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_NAME,
+        "name", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_VALUE,
+        "value", ""),
     std::make_shared<ConfigSetup>(ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION,
         "option", ""),
     std::make_shared<ConfigSetup>(ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT,

@@ -116,6 +116,9 @@ public:
 
     /// \brief retrieves the argument string
     std::string getArguments() const { return args; }
+    void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
+
+    const std::map<std::string, std::string>& getEnviron() const { return environment; };
 
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
@@ -209,6 +212,7 @@ protected:
     int number_of_channels { SOURCE };
     int sample_frequency { SOURCE };
     std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> environment;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode { FCC_None };
     int clientFlags { 0 };

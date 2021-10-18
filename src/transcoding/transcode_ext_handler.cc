@@ -111,7 +111,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), location, fifoName, range, obj->getTitle());
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
-    auto mainProc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist);
+    auto mainProc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron());
     mainProc->removeFile(fifoName);
     if (isURL && (!profile->acceptURL())) {
         mainProc->removeFile(location);
@@ -177,7 +177,7 @@ bool TranscodeExternalHandler::startSopcastConnector(const std::shared_ptr<CdsOb
         int p1 = find_local_port(45000, 65500);
         int p2 = find_local_port(45000, 65500);
         sopArgs = populateCommandLine(fmt::format("{} {} {}", location.c_str(), p1, p2));
-        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sopArgs);
+        auto spsc = std::make_shared<ProcessExecutor>("sp-sc-auth", sopArgs, std::map<std::string, std::string>());
         procList.push_back(std::make_shared<ProcListItem>(std::move(spsc)));
         location = fmt::format("http://localhost:{}/tv.asf", p2);
 
