@@ -118,10 +118,10 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (!list.isEmpty()) {
             value.push_back(list[0].to8Bit(true));
         } else {
-            list = file.properties()["TPOS"];
-            if (list.isEmpty())
+            auto list2 = file.properties()["TPOS"];
+            if (list2.isEmpty())
                 return;
-            value.push_back(list[0].to8Bit(true));
+            value.push_back(list2[0].to8Bit(true));
         }
         item->setPartNumber(stoiString(value[0]));
         break;
