@@ -51,7 +51,7 @@ public:
 
     /// \brief run the sqlite3 task
     /// \param sl The instance of Sqlite3Database to do the queries with.
-    virtual void run(sqlite3** db, Sqlite3Database* sl) = 0;
+    virtual void run(sqlite3*& db, Sqlite3Database* sl) = 0;
 
     /// \brief returns true if the task is not completed
     /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
@@ -98,7 +98,7 @@ public:
         , hashie(hashie)
     {
     }
-    void run(sqlite3** db, Sqlite3Database* sl) override;
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
 
     std::string_view taskType() const override { return "InitTask"; }
 
@@ -116,7 +116,7 @@ public:
         : query(query.c_str())
     {
     }
-    void run(sqlite3** db, Sqlite3Database* sl) override;
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
     [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
     std::string_view taskType() const override { return "SelectTask"; }
@@ -134,7 +134,7 @@ public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
     SLExecTask(const std::string& query, bool getLastInsertId);
-    void run(sqlite3** db, Sqlite3Database* sl) override;
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
     int getLastInsertId() const { return lastInsertId; }
 
     std::string_view taskType() const override { return "ExecTask"; }
@@ -152,7 +152,7 @@ class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<Config> config, bool restore);
-    void run(sqlite3** db, Sqlite3Database* sl) override;
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
 
     std::string_view taskType() const override { return "BackupTask"; }
 
