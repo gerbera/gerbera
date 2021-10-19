@@ -152,30 +152,28 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo)
+const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
 {
     const ClientInfo* info = nullptr;
 
     // 1. by IP address
-    bool found = getInfoByAddr(addr, &info);
+    info = getInfoByAddr(addr);
 
-    if (!found) {
+    if (!info) {
         // 2. by User-Agent
-        found = getInfoByType(userAgent, ClientMatchType::UserAgent, &info);
+        info = getInfoByType(userAgent, ClientMatchType::UserAgent);
     }
 
     // update IP or User-Agent match in cache
-    if (found) {
+    if (info) {
         updateCache(addr, userAgent, info);
-    }
-
-    if (!found) {
+    } else {
         // 3. by cache
         // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
-        found = getInfoByCache(addr, &info);
+        info = getInfoByCache(addr);
     }
 
-    if (!found) {
+    if (!info) {
         // always return something, 'Unknown' if we do not know better
         assert(clientInfo[0].type == ClientType::Unknown);
         info = &clientInfo[0];
@@ -184,11 +182,11 @@ void Clients::getInfo(const struct sockaddr_storage* addr, const std::string& us
         updateCache(addr, userAgent, info);
     }
 
-    *ppInfo = info;
-    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, (*ppInfo)->name, ClientConfig::mapClientType((*ppInfo)->type));
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    return info;
 }
 
-bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
+const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP) {
@@ -218,32 +216,28 @@ bool Clients::getInfoByAddr(const struct sockaddr_storage* addr, const ClientInf
     });
 
     if (it != clientInfo.end()) {
-        *ppInfo = &(*it);
         auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
         log_debug("found client by IP (ip='{}')", ip);
-        return true;
+        return &(*it);
     }
 
-    *ppInfo = nullptr;
-    return false;
+    return nullptr;
 }
 
-bool Clients::getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo)
+const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchType type)
 {
     if (!match.empty()) {
         auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
         if (it != clientInfo.rend()) {
-            *ppInfo = &(*it);
             log_debug("found client by type (match='{}')", match);
-            return true;
+            return &(*it);
         }
     }
 
-    *ppInfo = nullptr;
-    return false;
+    return nullptr;
 }
 
-bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo)
+const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr)
 {
     AutoLock lock(mutex);
 
@@ -251,14 +245,12 @@ bool Clients::getInfoByCache(const struct sockaddr_storage* addr, const ClientIn
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
 
     if (it != cache.end()) {
-        *ppInfo = it->pInfo;
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
         log_debug("found client by cache (hostname='{}')", hostName);
-        return true;
+        return it->pInfo;
     }
 
-    *ppInfo = nullptr;
-    return false;
+    return nullptr;
 }
 
 void Clients::updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo)

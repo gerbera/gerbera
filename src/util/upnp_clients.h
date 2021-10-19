@@ -95,16 +95,16 @@ public:
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
-    void getInfo(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo** ppInfo);
+    const ClientInfo* getInfo(const struct sockaddr_storage* addr, const std::string& userAgent);
 
     void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
-    bool getInfoByAddr(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
-    bool getInfoByType(const std::string& match, ClientMatchType type, const ClientInfo** ppInfo);
+    const ClientInfo* getInfoByAddr(const struct sockaddr_storage* addr);
+    const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type);
 
-    bool getInfoByCache(const struct sockaddr_storage* addr, const ClientInfo** ppInfo);
+    const ClientInfo* getInfoByCache(const struct sockaddr_storage* addr);
     void updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo);
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
