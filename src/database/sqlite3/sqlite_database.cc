@@ -285,7 +285,7 @@ void Sqlite3Database::threadProc()
 
                 lock.unlock();
                 try {
-                    task->run(&db, this);
+                    task->run(db, this);
                     if (task->didContamination())
                         dirty = true;
                     else if (task->didDecontamination())
@@ -401,14 +401,14 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
+void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: init");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
-    sqlite3_close(*db);
+    sqlite3_close(db);
 
-    int res = sqlite3_open(dbFilePath.c_str(), db);
+    int res = sqlite3_open(dbFilePath.c_str(), &db);
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
@@ -422,7 +422,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 
         char* err = nullptr;
         int ret = sqlite3_exec(
-            *db,
+            db,
             sql.c_str(),
             nullptr,
             nullptr,
@@ -433,7 +433,7 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
             sqlite3_free(err);
         }
         if (ret != SQLITE_OK) {
-            throw DatabaseException("", sl->getError(sql, error, *db, ret));
+            throw DatabaseException("", sl->getError(sql, error, db, ret));
         }
         contamination = true;
     } else {
@@ -442,14 +442,14 @@ void SLInitTask::run(sqlite3** db, Sqlite3Database* sl)
 }
 
 /* SLSelectTask */
-void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
+void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: {}", query);
     pres = std::make_shared<Sqlite3Result>();
 
     char* err = nullptr;
     int ret = sqlite3_get_table(
-        *db,
+        db,
         query,
         &pres->table,
         &pres->nrow,
@@ -462,7 +462,7 @@ void SLSelectTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(query, error, *db, ret));
+        throw DatabaseException("", sl->getError(query, error, db, ret));
     }
 
     pres->row = pres->table;
@@ -477,12 +477,12 @@ SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId)
 {
 }
 
-void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
+void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: {}", query);
     char* err;
     int ret = sqlite3_exec(
-        *db,
+        db,
         query,
         nullptr,
         nullptr,
@@ -493,10 +493,10 @@ void SLExecTask::run(sqlite3** db, Sqlite3Database* sl)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->getError(query, error, *db, ret));
+        throw DatabaseException("", sl->getError(query, error, db, ret));
     }
     if (getLastInsertIdFlag)
-        lastInsertId = sqlite3_last_insert_rowid(*db);
+        lastInsertId = sqlite3_last_insert_rowid(db);
     contamination = true;
 }
 
@@ -507,7 +507,7 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 {
 }
 
-void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
+void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: backup");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -525,7 +525,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         }
     } else {
         log_info("trying to restore sqlite3 database from backup...");
-        sqlite3_close(*db);
+        sqlite3_close(db);
         try {
             fs::copy(
                 fmt::format(DB_BACKUP_FORMAT, dbFilePath),
@@ -534,7 +534,7 @@ void SLBackupTask::run(sqlite3** db, Sqlite3Database* sl)
         } catch (const std::runtime_error& e) {
             throw DatabaseException(fmt::format("Error while restoring sqlite3 backup: {}", e.what()), fmt::format("Error while restoring sqlite3 backup: {}", e.what()));
         }
-        int res = sqlite3_open(dbFilePath.c_str(), db);
+        int res = sqlite3_open(dbFilePath.c_str(), &db);
         if (res != SQLITE_OK) {
             throw DatabaseException("", "error while restoring sqlite3 backup: could not reopen sqlite3 database after restore");
         }
