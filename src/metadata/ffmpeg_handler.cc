@@ -188,7 +188,8 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     int audioch, samplefreq;
     bool audioset, videoset;
     auto resource = item->getResource(0);
-    auto resource2 = startswith(item->getMimeType(), "audio") && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART) ? item->getResource(1) : item->getResource(0);
+    bool isAudioFile = startswith(item->getMimeType(), "audio") && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
+    auto resource2 = isAudioFile ? item->getResource(1) : item->getResource(0);
 
     // duration
     if (pFormatCtx->duration > 0) {
@@ -214,7 +215,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 
         if ((st) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
             auto codecId = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
+            resource2->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
 
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
