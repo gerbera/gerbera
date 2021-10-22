@@ -54,8 +54,8 @@ std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::st
     int fd;
 
     /* creating input file */
-    char tempIn[] = "mt_in_XXXXXX";
-    char tempOut[] = "mt_out_XXXXXX";
+    std::string tempIn = "mt_in_XXXXXX";
+    std::string tempOut = "mt_out_XXXXXX";
 
     std::string inputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempIn);
 #ifdef __linux__
