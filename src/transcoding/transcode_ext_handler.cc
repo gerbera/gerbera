@@ -127,7 +127,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
 fs::path TranscodeExternalHandler::makeFifo()
 {
-    char fifoTemplate[] = "grb_transcode_XXXXXX";
+    std::string fifoTemplate = "grb_transcode_XXXXXX";
     fs::path fifoName = tempName(config->getOption(CFG_SERVER_TMPDIR), fifoTemplate);
     log_debug("creating fifo: {}", fifoName.c_str());
     int err = mkfifo(fifoName.c_str(), O_RDWR);
@@ -193,7 +193,7 @@ bool TranscodeExternalHandler::startSopcastConnector(const std::shared_ptr<CdsOb
 void TranscodeExternalHandler::openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
 {
     std::string url = location;
-    char fifoTemplate[] = "grb_curl_transcode_XXXXXX";
+    std::string fifoTemplate = "grb_curl_transcode_XXXXXX";
     location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifoTemplate);
     log_debug("creating reader fifo: {}", location.c_str());
     auto r = mkfifo(location.c_str(), O_RDWR);

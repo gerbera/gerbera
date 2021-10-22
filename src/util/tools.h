@@ -319,7 +319,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 ///
 /// The reason behind this is, that we need to open a pipe, while mkstemp will
 /// open a regular file.
-fs::path tempName(const fs::path& leadPath, char* tmpl);
+fs::path tempName(const fs::path& leadPath, const std::string& tmpl);
 
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(const fs::path& oggFilename);

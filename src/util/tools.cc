@@ -885,9 +885,8 @@ std::vector<std::string> populateCommandLine(const std::string& line,
  * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
  */
 // tempName is based on create_temp_file, see (C) above
-fs::path tempName(const fs::path& leadPath, char* tmpl)
+fs::path tempName(const fs::path& leadPath, const std::string& tmpl)
 {
-    char* xxxxxx;
     int count;
     static constexpr char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     static constexpr int nletters = sizeof(letters) - 1;
@@ -898,11 +897,12 @@ fs::path tempName(const fs::path& leadPath, char* tmpl)
     int ret;
 
     /* find the last occurrence of "XXXXXX" */
-    xxxxxx = strstr(tmpl, "XXXXXX");
-
-    if (!xxxxxx || std::strncmp(xxxxxx, "XXXXXX", 6) != 0) {
+    auto x = tmpl.rfind("XXXXXX");
+    if (x == std::string::npos) {
         return {};
     }
+
+    auto xxxxxx = tmpl.substr(x);
 
     /* Get some more or less random data.  */
     clock_gettime(CLOCK_REALTIME, &ts);
