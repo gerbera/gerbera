@@ -62,7 +62,14 @@ void trimStringInPlace(std::string& str);
 std::string trimString(std::string str);
 
 /// \brief returns true if str starts with check
-bool startswith(std::string_view str, std::string_view check);
+constexpr bool startswith(std::string_view str, std::string_view check)
+{
+#if __cpp_lib_starts_ends_with
+    return str.starts_with(check);
+#else
+    return str.rfind(check, 0) == 0;
+#endif
+}
 
 /// \brief returns lowercase of str
 std::string toLower(std::string str);
