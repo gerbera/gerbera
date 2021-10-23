@@ -40,7 +40,7 @@ Web::Tasks::Tasks(std::shared_ptr<ContentManager> content)
 
 void Web::Tasks::process()
 {
-    check_request();
+    checkRequest();
     std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("called with illegal action");

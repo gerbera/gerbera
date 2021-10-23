@@ -69,7 +69,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define VIRTUAL_CONTAINER_ESCAPE '\\'
 
 // MIME TYPES FOR WEB UI
-#define MIMETYPE_XML "text/xml"
 #define MIMETYPE_TEXT "text/plain"
 #define MIMETYPE_JSON "application/json" // RFC 4627
 // default mime types for items in the cds

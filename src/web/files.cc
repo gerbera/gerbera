@@ -42,7 +42,7 @@ Web::Files::Files(std::shared_ptr<ContentManager> content)
 
 void Web::Files::process()
 {
-    check_request();
+    checkRequest();
 
     std::string parentID = param("parent_id");
     std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);

@@ -42,7 +42,7 @@ Web::Action::Action(std::shared_ptr<ContentManager> content)
 void Web::Action::process()
 {
     log_debug("action: start");
-    check_request();
+    checkRequest();
 
     std::string action = param("action");
     if (action.empty())

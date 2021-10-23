@@ -85,7 +85,7 @@ protected:
     std::unique_ptr<Xml2Json::Hints> xml2JsonHints;
 
     /// \brief The current session, used for this request; will be filled by
-    /// check_request()
+    /// checkRequest()
     std::shared_ptr<Session> session;
 
     /// \brief Little support function to access stuff from the dictionary in
@@ -102,17 +102,7 @@ protected:
     /// Each request going to the ui must at least have a valid session id,
     /// and a driver parameter. Also, there can only by a primary or a
     /// a decondary driver.
-    void check_request(bool checkLogin = true);
-
-    /// \brief Helper function to create a generic XML document header.
-    /// \param xsl_link If not nullptr, also adds header information that is required for the XSL processor.
-    /// \return The header as a string... because our parser does not yet understand <? ?> stuff :)
-    static std::string renderXMLHeader();
-
-    /// \brief Prepares the output buffer and calls the process function.
-    /// \return IOHandler
-    /// \todo Genych, chto tut proishodit, ya tolkom che to ne wrubaus??
-    std::unique_ptr<IOHandler> open(enum UpnpOpenFileMode mode);
+    void checkRequest(bool checkLogin = true);
 
     /// \brief add the ui update ids from the given session as xml tags to the given root element
     /// \param session the session from which the ui update ids should be taken
@@ -121,7 +111,7 @@ protected:
 
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.
-    /// must only be called after check_request
+    /// must only be called after checkRequest
     void handleUpdateIDs();
 
     /// \brief add the content manager task to the given xml element as xml elements
