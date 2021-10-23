@@ -154,11 +154,8 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 
 const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
 {
-    const ClientInfo* info = nullptr;
-
     // 1. by IP address
-    info = getInfoByAddr(addr);
-
+    auto info = getInfoByAddr(addr);
     if (!info) {
         // 2. by User-Agent
         info = getInfoByType(userAgent, ClientMatchType::UserAgent);
