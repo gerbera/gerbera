@@ -49,7 +49,7 @@ Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<Co
 /// \brief: process config_save request
 void Web::ConfigSave::process()
 {
-    check_request();
+    checkRequest();
     auto root = xmlDoc->document_element();
     log_debug("configSave");
     std::string action = param("action");

@@ -50,7 +50,7 @@ Web::EditLoad::EditLoad(std::shared_ptr<ContentManager> content, std::shared_ptr
 /// \brief: process request 'edit_load' to list contents of a folder
 void Web::EditLoad::process()
 {
-    check_request();
+    checkRequest();
 
     std::string objID = param("object_id");
     int objectID;

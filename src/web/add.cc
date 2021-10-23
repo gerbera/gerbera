@@ -46,7 +46,7 @@ void Web::Add::process()
 {
     log_debug("add: start");
 
-    check_request();
+    checkRequest();
 
     std::string objID = param("object_id");
     auto path = fs::path((objID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(objID));

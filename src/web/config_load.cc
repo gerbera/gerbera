@@ -110,7 +110,7 @@ void Web::ConfigLoad::setValue(pugi::xml_node& item, const fs::path& value)
 /// \brief: process config_load request
 void Web::ConfigLoad::process()
 {
-    check_request();
+    checkRequest();
     auto root = xmlDoc->document_element();
     auto values = root.append_child("values");
     std::string action = param("action");

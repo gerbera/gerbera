@@ -46,7 +46,7 @@ void Web::Remove::process()
 {
     log_debug("remove: start");
 
-    check_request();
+    checkRequest();
 
     int objectID = intParam("object_id");
     bool all = intParam("all");

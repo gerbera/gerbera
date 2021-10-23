@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     web_request_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -61,7 +61,7 @@ bool WebRequestHandler::boolParam(const std::string& name)
     return !value.empty() && (value == "1" || value == "true");
 }
 
-void WebRequestHandler::check_request(bool checkLogin)
+void WebRequestHandler::checkRequest(bool checkLogin)
 {
     // we have a minimum set of parameters that are "must have"
 
@@ -80,11 +80,6 @@ void WebRequestHandler::check_request(bool checkLogin)
     if (checkLogin && !session->isLoggedIn())
         throw LoginException("not logged in");
     session->access();
-}
-
-std::string WebRequestHandler::renderXMLHeader()
-{
-    return fmt::format((R"(<?xml version="1.0" encoding="{}"?>{})"), DEFAULT_INTERNAL_CHARSET, "\n");
 }
 
 void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
@@ -106,9 +101,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
-    auto returnType = param("return_type");
-    auto mimetype = (returnType == "xml") ? MIMETYPE_XML : MIMETYPE_JSON;
-    std::string contentType = fmt::format("{}; charset={}", mimetype, DEFAULT_INTERNAL_CHARSET);
+    std::string contentType = "application/json; charset=UTF-8";
 
 #ifdef USING_NPUPNP
     info->content_type = std::move(contentType);
@@ -120,7 +113,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     headers.writeHeaders(info);
 }
 
-std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     xmlDoc = std::make_unique<pugi::xml_document>();
     auto decl = xmlDoc->prepend_child(pugi::node_declaration);
@@ -182,35 +175,10 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
         log_warning("Web Error: {} {}", errorCode, error);
     }
 
-    std::string returnType = param("return_type");
-    if (returnType == "xml") {
-#ifdef TOMBDEBUG
-        try {
-            // make sure we can generate JSON w/o exceptions
-            std::ostringstream buf;
-            xmlDoc->print(buf, "    ");
-            output = Xml2Json::getJson(root, *xml2JsonHints);
-            log_debug("JSON-----------------------{}", output);
-        } catch (const std::runtime_error& e) {
-            log_error("Exception: {}", e.what());
-        }
-#endif
-        std::ostringstream buf;
-        xmlDoc->print(buf, "  ");
-        output = buf.str();
-    } else {
-        try {
-#if 0
-            // debug helper
-            std::ostringstream buf;
-            xmlDoc->print(buf, "    ");
-            output = buf.str();
-            log_debug("XML-----------------------{}", output);
-#endif
-            output = Xml2Json::getJson(root, *xml2JsonHints);
-        } catch (const std::runtime_error& e) {
-            log_error("Exception: {}", e.what());
-        }
+    try {
+        output = Xml2Json::getJson(root, *xml2JsonHints);
+    } catch (const std::runtime_error& e) {
+        log_error("Web marshalling error: {}", e.what());
     }
 
     log_debug("output-----------------------{}", output);
@@ -218,23 +186,6 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(enum UpnpOpenFileMode mode)
     auto ioHandler = std::make_unique<MemIOHandler>(output);
     ioHandler->open(mode);
     return ioHandler;
-}
-
-std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
-{
-    this->filename = filename;
-    this->mode = mode;
-
-    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
-
-    auto decodedParams = dictDecode(parameters);
-    if (params.empty()) {
-        params = std::move(decodedParams);
-    } else {
-        dictMerge(params, decodedParams);
-    }
-
-    return open(mode);
 }
 
 void WebRequestHandler::handleUpdateIDs()
@@ -280,8 +231,9 @@ std::string_view WebRequestHandler::mapAutoscanType(int type)
         return "ui";
     case 2:
         return "persistent";
+    default:
+        return "none";
     }
-    return "none";
 }
 
 } // namespace Web

@@ -46,7 +46,7 @@ Web::Containers::Containers(std::shared_ptr<ContentManager> content, std::shared
 void Web::Containers::process()
 {
     log_debug(("containers.cc: containers::process()"));
-    check_request();
+    checkRequest();
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)

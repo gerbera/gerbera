@@ -42,7 +42,7 @@ Web::Autoscan::Autoscan(std::shared_ptr<ContentManager> content)
 
 void Web::Autoscan::process()
 {
-    check_request();
+    checkRequest();
 
     std::string action = param("action");
     if (action.empty())

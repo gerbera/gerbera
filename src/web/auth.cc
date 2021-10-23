@@ -132,21 +132,21 @@ void Web::Auth::process()
         }
         root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {
-        check_request();
+        checkRequest();
         std::string sid = param("sid");
         auto session = sessionManager->getSession(sid);
         if (!session)
             throw_std_runtime_error("illegal session id");
         sessionManager->removeSession(sid);
     } else if (action == "get_token") {
-        check_request(false);
+        checkRequest(false);
 
         // sending token
         std::string token = generateToken();
         session->put("token", token);
         root.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
     } else if (action == "login") {
-        check_request(false);
+        checkRequest(false);
 
         // authentication
         std::string username = param("username");

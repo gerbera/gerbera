@@ -37,5 +37,5 @@
 
 void Web::VoidType::process()
 {
-    check_request();
+    checkRequest();
 }
