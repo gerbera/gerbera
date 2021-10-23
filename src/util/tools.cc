@@ -259,7 +259,7 @@ std::string hexEncode(const void* data, std::size_t len)
 {
     auto buf = std::string(2 * len, '\0');
 
-    const unsigned char* chars = static_cast<const unsigned char*>(data);
+    auto chars = static_cast<const unsigned char*>(data);
     for (std::size_t i = 0; i < len; i++) {
         unsigned char c = chars[i];
         unsigned char hi = c >> 4;
