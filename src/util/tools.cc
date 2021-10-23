@@ -114,15 +114,6 @@ std::string trimString(std::string str)
     return str;
 }
 
-bool startswith(std::string_view str, std::string_view check)
-{
-#if __cpp_lib_starts_ends_with
-    return str.starts_with(check);
-#else
-    return str.rfind(check, 0) == 0;
-#endif
-}
-
 std::string& toLowerInPlace(std::string& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
