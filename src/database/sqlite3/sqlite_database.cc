@@ -401,7 +401,7 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
+void SLInitTask::run(sqlite3* db, Sqlite3Database* sl)
 {
     log_debug("Running: init");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -442,7 +442,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
 }
 
 /* SLSelectTask */
-void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl)
+void SLSelectTask::run(sqlite3* db, Sqlite3Database* sl)
 {
     log_debug("Running: {}", query);
     pres = std::make_shared<Sqlite3Result>();
@@ -477,7 +477,7 @@ SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId)
 {
 }
 
-void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl)
+void SLExecTask::run(sqlite3* db, Sqlite3Database* sl)
 {
     log_debug("Running: {}", query);
     char* err;
@@ -507,7 +507,7 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 {
 }
 
-void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
+void SLBackupTask::run(sqlite3* db, Sqlite3Database* sl)
 {
     log_debug("Running: backup");
     std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
