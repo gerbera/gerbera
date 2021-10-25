@@ -102,8 +102,8 @@ describe('Gerbera DirTweaks', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('fs');
       const data = {
         req_type: 'config_load',
-        sid: 'SESSION_ID'
       };
+      data[Auth.SID] = 'SESSION_ID';
 
       Tweaks.addDirTweak(event);
 

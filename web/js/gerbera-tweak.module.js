@@ -33,8 +33,8 @@ const addDirTweak = (event) => {
   if (item) {
     let requestData = {
       req_type: 'config_load',
-      sid: Auth.getSessionId(),
     };
+    requestData[Auth.SID] = Auth.getSessionId();
 
     $.ajax({
       url: GerberaApp.clientConfig.api,
@@ -62,13 +62,13 @@ const submitDirTweak = () => {
 
   const saveData = {
     req_type: 'config_save',
-    sid: Auth.getSessionId(),
     data: [],
     changedCount: 0,
     action: 'rescan',
     target: '',
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
   saveData.data.push({
     item: `/import/directories/tweak[${item.index}]`,
     id: item.id,
@@ -109,13 +109,13 @@ const deleteDirTweak = () => {
 
   const saveData = {
     req_type: 'config_save',
-    sid: Auth.getSessionId(),
     data: [],
     changedCount: 0,
     action: 'rescan',
     target: '',
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
   saveData.data.push({
     item: `/import/directories/tweak[${item.index}]`,
     id: item.id,

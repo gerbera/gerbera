@@ -56,15 +56,16 @@ const selectType = (type, parentId) => {
   currentType = type;
   const linkType = (currentType === 'db') ? 'containers' : 'directories';
 
+  var requestData = {
+    req_type: linkType,
+    parent_id: parentId,
+    select_it: 0
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: linkType,
-      sid: Auth.getSessionId(),
-      parent_id: parentId,
-      select_it: 0
-    }
+    data: requestData
   })
     .then((response) => loadTree(response))
     .then(() => checkForUpdates())
@@ -166,15 +167,16 @@ const initSelection = (currentItems) => {
 const fetchChildren = (gerberaData) => {
   currentType = GerberaApp.getType();
   const linkType = (currentType === 'db') ? 'containers' : 'directories';
+  var requestData = {
+    req_type: linkType,
+    parent_id: gerberaData.id,
+    select_it: 0
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: linkType,
-      sid: Auth.getSessionId(),
-      parent_id: gerberaData.id,
-      select_it: 0
-    }
+    data: requestData
   })
   .catch((err) => {
     console.log(err);

@@ -83,9 +83,9 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
-        sid: 'SESSION_ID',
         from_fs: true
       };
+      data[Auth.SID] = 'SESSION_ID';
 
       Autoscan.addAutoscan(event);
 
@@ -99,10 +99,10 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
-        sid: 'SESSION_ID',
         from_fs: false,
         updates: 'check'
       };
+      data[Auth.SID] = 'SESSION_ID';
 
       Autoscan.addAutoscan(event);
 
@@ -193,10 +193,7 @@ describe('Gerbera Autoscan', () => {
       Autoscan.loadNewAutoscan(autoscanResponse);
 
       Autoscan.submitAutoscan();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'autoscan',
         action: 'as_edit_save',
         object_id: '2f6d6',
@@ -205,7 +202,11 @@ describe('Gerbera Autoscan', () => {
         recursive: true,
         hidden: false,
         interval: '1800'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
   });
   describe('submitComplete()', () => {

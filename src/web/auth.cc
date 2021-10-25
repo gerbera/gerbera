@@ -115,7 +115,7 @@ void Web::Auth::process()
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...");
         std::shared_ptr<Session> session;
-        std::string sid = param("sid");
+        std::string sid = param(SID);
 
         if (sid.empty() || !(session = sessionManager->getSession(sid))) {
             session = sessionManager->createSession(timeout);
@@ -124,7 +124,7 @@ void Web::Auth::process()
             session->clearUpdateIDs();
             root.append_attribute("sid_was_valid") = true;
         }
-        root.append_attribute("sid") = session->getID().c_str();
+        root.append_attribute(SID) = session->getID().c_str();
 
         if (!session->isLoggedIn() && !accountsEnabled()) {
             session->logIn();
@@ -133,7 +133,7 @@ void Web::Auth::process()
         root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {
         checkRequest();
-        std::string sid = param("sid");
+        std::string sid = param(SID);
         auto session = sessionManager->getSession(sid);
         if (!session)
             throw_std_runtime_error("illegal session id");
@@ -151,7 +151,7 @@ void Web::Auth::process()
         // authentication
         std::string username = param("username");
         std::string encPassword = param("password");
-        std::string sid = param("sid");
+        std::string sid = param(SID);
 
         if (username.empty() || encPassword.empty())
             throw LoginException("Missing username or password");

@@ -1,5 +1,5 @@
 {
-	"sid": "SESSION_ID",
+	"GerberaSID": "SESSION_ID",
 	"req_type": "config_save",
 	"action": "rescan",
 	"changedCount": 11,

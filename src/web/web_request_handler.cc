@@ -70,7 +70,7 @@ void WebRequestHandler::checkRequest(bool checkLogin)
 
     checkRequestCalled = true;
 
-    std::string sid = param("sid");
+    std::string sid = param(SID);
     if (sid.empty())
         throw SessionException("no session id given");
 
@@ -110,6 +110,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #endif
     Headers headers;
     headers.addHeader("Cache-Control", "no-cache, must-revalidate");
+    headers.addHeader("SameSite", "Lax");
     headers.writeHeaders(info);
 }
 

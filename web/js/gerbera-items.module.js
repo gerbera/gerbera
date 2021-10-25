@@ -48,17 +48,18 @@ const treeItemSelected = function (data) {
 };
 
 const retrieveGerberaItems = (type, parentId, start, count) => {
+  var requestData = {
+    req_type: type,
+    parent_id: parentId,
+    start: start,
+    count: count,
+    updates: 'check'
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: type,
-      sid: Auth.getSessionId(),
-      parent_id: parentId,
-      start: start,
-      count: count,
-      updates: 'check'
-    }
+    data: requestData
   });
 };
 
@@ -151,15 +152,16 @@ const previousPage = function (event) {
 const editItem = (event) => {
   const item = event.data;
   if (item) {
+    var requestData = {
+      req_type: 'edit_load',
+      object_id: item.id,
+      updates: 'check'
+    };
+    requestData[Auth.SID] = Auth.getSessionId();
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
-      data: {
-        req_type: 'edit_load',
-        sid: Auth.getSessionId(),
-        object_id: item.id,
-        updates: 'check'
-      }
+      data: requestData
     })
       .then((response) => loadEditItem(response))
       .catch((err) => GerberaApp.error(err));
@@ -177,16 +179,17 @@ const deleteItemFromList = (event) => {
 
 const deleteGerberaItem = (item, includeAll) => {
   const deleteAll = includeAll ? 1 : 0;
+  var requestData = {
+    req_type: 'remove',
+    object_id: item.id,
+    all: deleteAll,
+    updates: 'check'
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: 'remove',
-      sid: Auth.getSessionId(),
-      object_id: item.id,
-      all: deleteAll,
-      updates: 'check'
-    }
+    data: requestData
   });
 };
 
@@ -211,14 +214,15 @@ const downloadItem = (event) => {
 const addFileItem = (event) => {
   const item = event.data;
   if (item) {
+    var requestData = {
+      req_type: 'add',
+      object_id: item.id
+    };
+    requestData[Auth.SID] = Auth.getSessionId();
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
-      data: {
-        req_type: 'add',
-        sid: Auth.getSessionId(),
-        object_id: item.id
-      }
+      data: requestData
     })
       .then((response) => addFileItemComplete(response))
       .catch((err) => GerberaApp.error(err));
@@ -247,9 +251,9 @@ const addObject = () => {
   const item = $('#editModal').editmodal('addObject');
   const addObjectData = {
     req_type: 'add_object',
-    sid: Auth.getSessionId(),
     updates: 'check'
   };
+  addObjectData[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, item, addObjectData);
 
   if (requestData.parent_id && requestData.parent_id >= 0) {
@@ -344,9 +348,9 @@ const saveItem = () => {
   const item = $('#editModal').editmodal('saveItem');
   const saveData = {
     req_type: 'edit_save',
-    sid: Auth.getSessionId(),
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, item, saveData);
 
   if (requestData.object_id && requestData.object_id > 0) {
