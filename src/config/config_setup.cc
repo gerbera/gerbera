@@ -1069,7 +1069,8 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         if (sub) {
             std::string param = sub.text().as_string();
             if (!param.empty()) {
-                if (checkResolution(param))
+                auto [x, y] = checkResolution(param);
+                if (x && y)
                     prof->setAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), param);
             }
         }
