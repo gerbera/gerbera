@@ -261,10 +261,9 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
         std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
-        int x;
-        int y;
+        auto [x, y] = checkResolution(videoresolution);
 
-        if (!videoresolution.empty() && checkResolution(videoresolution, &x, &y)) {
+        if (!videoresolution.empty() && x && y) {
             auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
             auto it = mappings.find(CONTENT_TYPE_JPG);

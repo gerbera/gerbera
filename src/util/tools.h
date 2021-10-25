@@ -209,7 +209,7 @@ int HMSFToMilliseconds(std::string_view time);
 std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-bool checkResolution(std::string_view resolution, int* x = nullptr, int* y = nullptr);
+std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolution);
 
 std::string escape(std::string string, char escapeChar, char toEscape);
 

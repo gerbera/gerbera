@@ -748,9 +748,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         if (contentType == CONTENT_TYPE_JPG) {
             std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
-            int x;
-            int y;
-            if ((res->getResId() > 0) && !resolution.empty() && checkResolution(resolution, &x, &y)) {
+            auto [x, y] = checkResolution(resolution);
+            if ((res->getResId() > 0) && !resolution.empty() && x && y) {
                 if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
                     extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
                 else if ((x <= 640) && (y <= 420))
