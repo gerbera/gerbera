@@ -61,13 +61,14 @@ describe('Gerbera Updates', function () {
       });
 
       await Updates.getUpdates();
+      var data = {
+        req_type: 'void',
+        updates: 'check'
+      };
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-        req_type: 'void',
-        sid: 'SESSION_ID',
-        updates: 'check'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 
     it('calls the server get for updates when forced', async () => {
@@ -80,13 +81,14 @@ describe('Gerbera Updates', function () {
 
       const force = true;
       await Updates.getUpdates(force);
+      var data = {
+        req_type: 'void',
+        updates: 'get'
+      };
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-        req_type: 'void',
-        sid: 'SESSION_ID',
-        updates: 'get'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 
     it('updates the current task when response from server', async () => {

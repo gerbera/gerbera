@@ -29,16 +29,19 @@ import {Trail} from './gerbera-trail.module.js';
 import {Autoscan} from './gerbera-autoscan.module.js';
 import {Updates} from './gerbera-updates.module.js';
 
+const SID = 'GerberaSID';
+
 const checkSID = () => {
+  var data = {
+    req_type: 'auth',
+    action: 'get_sid'
+  }
+  data[SID] = getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
+    data: data,
     async: false,
-    data: {
-      req_type: 'auth',
-      sid: getSessionId(),
-      action: 'get_sid'
-    }
   }).then((response) => {
     return loadSession(response);
   }).catch((err) => {
@@ -47,15 +50,16 @@ const checkSID = () => {
 };
 
 const logout = () => {
+  var data = {
+    req_type: 'auth',
+    action: 'logout'
+  };
+  data[SID] = getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
+    data: data,
     async: false,
-    data: {
-      req_type: 'auth',
-      sid: getSessionId(),
-      action: 'logout'
-    }
   }).then(() => {
     handleLogout();
   }).catch((err) => {
@@ -70,15 +74,16 @@ const authenticate = () => {
 
   if (username.length > 0 && password.length > 0) {
     $('#warning').hide();
+    var data = {
+      req_type: 'auth',
+      action: 'get_token'
+    }
+    data[SID] = getSessionId();
     promise =
       $.ajax({
         url: GerberaApp.clientConfig.api,
+        data: data,
         type: 'get',
-        data: {
-          req_type: 'auth',
-          sid: getSessionId(),
-          action: 'get_token'
-        }
       }).then((response) => {
         return submitLogin(response);
       }).catch((err) => {
@@ -97,16 +102,17 @@ const submitLogin = (response) => {
     let password = $('#password').val();
     const token = response.token;
     password = md5(token + password);
+    var data = {
+      req_type: 'auth',
+      action: 'login',
+      username: username,
+      password: password
+    }
+    data[SID] = getSessionId();
     return $.ajax({
       url: GerberaApp.clientConfig.api,
+      data: data,
       type: 'get',
-      data: {
-        req_type: 'auth',
-        sid: getSessionId(),
-        action: 'login',
-        username: username,
-        password: password
-      }
     }).then((response) => {
       checkLogin(response);
     }).catch((err) => {
@@ -135,22 +141,23 @@ const checkLogin = (response) => {
 };
 
 const getSessionId = () => {
-  return Cookies.get('SID');
+  return Cookies.get(SID);
 };
 
 const handleLogout = () => {
+  GerberaApp.setLoggedIn(false);
   const now = new Date();
   const expire = new Date();
-  GerberaApp.setLoggedIn(false);
   expire.setTime(now.getTime() - 3600000 * 24 * 360);
-  Cookies.set('SID', null, {expires: expire});
+  Cookies.set(SID, null, {expires: expire, SameSite: 'Lax'});
   GerberaApp.reload('/index.html');
 };
 
 const loadSession = (response) => {
   return new Promise((resolve) => {
-    if (!response.sid_was_valid && response.sid && response.sid !== null) {
-      Cookies.set('SID', response.sid);
+    if ((!response.sid_was_valid || !getSessionId()) && response[SID] && response[SID] !== null) {
+  console.log(response);
+      Cookies.set(SID, response[SID], {SameSite: 'Lax'});
     }
     // TODO: reject what?
     resolve(response.logged_in);
@@ -158,6 +165,7 @@ const loadSession = (response) => {
 };
 
 export const Auth = {
+  SID,
   authenticate,
   checkSID,
   getSessionId,

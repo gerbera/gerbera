@@ -76,7 +76,7 @@ describe('Login Suite', () => {
         expect(style).to.equal('display: none;');
       }
 
-      const sid = await loginPage.getCookie('SID');
+      const sid = await loginPage.getCookie('GerberaSID');
       expect(sid).to.be.null;
     });
 

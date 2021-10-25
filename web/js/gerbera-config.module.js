@@ -86,13 +86,14 @@ const retrieveGerberaConfig = () => {
 };
 
 const retrieveGerberaValues = (type) => {
+  var requestData = {
+    req_type: type
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: type,
-      sid: Auth.getSessionId()
-     }
+    data: requestData
   });
 };
 
@@ -151,11 +152,11 @@ const saveConfig = () => {
   if (changedKeys.length > 0 ) {
     const saveData = {
       req_type: 'config_save',
-      sid: Auth.getSessionId(),
       data: [],
       changedCount: changedKeys.length,
       updates: 'check'
     };
+    saveData[Auth.SID] = Auth.getSessionId();
     changedKeys.forEach((key) => {
       let i = current_config.changedItems[key];
       if (i.item && i.item !== '') {
@@ -190,12 +191,12 @@ const saveConfig = () => {
 const clearConfig = () => {
   const saveData = {
     req_type: 'config_save',
-    sid: Auth.getSessionId(),
     data: [],
     action: 'clear',
     changedCount: -1,
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
 
   try {
     $.ajax({
@@ -215,13 +216,13 @@ const clearConfig = () => {
 const reScanLibrary = () => {
   const saveData = {
     req_type: 'config_save',
-    sid: Auth.getSessionId(),
     data: [],
     action: 'rescan',
     target: '--all',
     changedCount: -1,
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
 
   try {
     $.ajax({

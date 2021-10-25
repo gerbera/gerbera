@@ -67,10 +67,9 @@ const showTask = (message, callback, type, icon) => {
 const getUpdates = (force) => {
   if (GerberaApp.isLoggedIn()) {
     let requestData = {
-      req_type: 'void',
-      sid: Auth.getSessionId()
+      req_type: 'void'
     };
-
+    requestData[Auth.SID] = Auth.getSessionId();
     let checkUpdates;
     if (GerberaApp.getType() !== 'db') {
       checkUpdates = {};

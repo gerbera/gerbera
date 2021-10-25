@@ -34,11 +34,11 @@ const addAutoscan = (event) => {
   if (item) {
     let requestData = {
       req_type: 'autoscan',
-      sid: Auth.getSessionId(),
       object_id: item.id,
       action: 'as_edit_load',
       from_fs: fromFs
     };
+    requestData[Auth.SID] = Auth.getSessionId();
 
     if (GerberaApp.getType() === 'db') {
       requestData = $.extend({}, requestData, {updates: 'check'});
@@ -69,10 +69,10 @@ const submitAutoscan = () => {
   const autoscanModal = $('#autoscanModal');
   const item = autoscanModal.autoscanmodal('saveItem');
   const request = {
-    sid: Auth.getSessionId(),
     req_type: 'autoscan',
     action: 'as_edit_save'
   };
+  request[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, request, item);
 
   if (item) {

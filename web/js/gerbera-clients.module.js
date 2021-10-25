@@ -44,13 +44,14 @@ const menuSelected = () => {
 };
 
 const retrieveGerberaItems = (type) => {
+  var requestData = {
+    req_type: type
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: type,
-      sid: Auth.getSessionId()
-     }
+    data: requestData
   });
 };
 

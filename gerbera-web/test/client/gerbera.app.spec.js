@@ -33,7 +33,7 @@ describe('Gerbera UI App', () => {
 
     beforeEach(() => {
       cookieSpy = spyOn(Cookies, 'get').and.callFake((name) => {
-        if (name === 'SID') return 'A_MOCK_SID';
+        if (name === Auth.SID) return 'A_MOCK_SID';
         return 'A_MOCK_COOKIE';
       });
     });
@@ -60,13 +60,14 @@ describe('Gerbera UI App', () => {
       });
 
       await GerberaApp.initialize();
+      var data = {
+        req_type: 'auth',
+        action: 'get_config'
+      };
+      data[Auth.SID] = 'A_MOCK_SID';
 
       expect(ajaxSpy.calls.first().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.first().args[0]['data']).toEqual({
-        req_type: 'auth',
-        sid: 'A_MOCK_SID',
-        action: 'get_config'
-      });
+      expect(ajaxSpy.calls.first().args[0]['data']).toEqual(data);
 
       expect(GerberaApp.serverConfig).toEqual(convertedConfig.config);
       expect(Auth.checkSID).toHaveBeenCalled();

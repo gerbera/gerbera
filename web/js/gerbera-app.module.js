@@ -189,15 +189,16 @@ export class App {
   }
 
   getStatus (clientConfig) {
+    var data = {
+      req_type: 'config_load',
+      action: 'status'
+    };
+    data[Auth.SID] = Auth.getSessionId();
     return $.ajax({
       url: clientConfig.api,
       type: 'get',
+      data: data,
       async: false,
-      data: {
-        req_type: 'config_load',
-        sid: Auth.getSessionId(),
-        action: 'status'
-      }
     });
   }
 
@@ -221,15 +222,16 @@ export class App {
   }
 
   getConfig (clientConfig) {
+    var data = {
+      req_type: 'auth',
+      action: 'get_config'
+    };
+    data[Auth.SID] = Auth.getSessionId();
     return $.ajax({
       url: clientConfig.api,
       type: 'get',
+      data: data,
       async: false,
-      data: {
-        req_type: 'auth',
-        sid: Auth.getSessionId(),
-        action: 'get_config'
-      }
     });
   }
 
