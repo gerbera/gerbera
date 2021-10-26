@@ -202,7 +202,7 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
                     return true;
                 }
             }
-	} else if (c.match.find('.') != std::string::npos) {
+        } else if (c.match.find('.') != std::string::npos) {
             // IPv4
             struct sockaddr_in clientAddr = {};
             clientAddr.sin_family = AF_INET;
