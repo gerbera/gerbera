@@ -39,7 +39,7 @@
     "jasmine-core": "^3.5.0",
     "jimp": "^0.16.1",
     "jquery": "^3.5.0",
-    "jquery-ui": "^1.12.1",
+    "jquery-ui": "^1.13.0",
     "js-cookie": "^2.2.1",
     "karma": "^5.0.1",
     "karma-babel-preprocessor": "^8.0.1",
