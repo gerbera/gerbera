@@ -103,12 +103,6 @@
 					"editable": false
 				},
 				{
-					"item": "/server/servedir",
-					"caption": "Serve Dir",
-					"type": "String",
-					"editable": false
-				},
-				{
 					"item": "/server/alive",
 					"caption": "Alive Interval",
 					"type": "Number",
@@ -1146,15 +1140,6 @@
 				"value": "/usr/local/share/gerbera/web"
 			},
 			{
-				"item": "/server/servedir",
-				"id": "17",
-				"aid": "17",
-				"status": "unchanged",
-				"origValue": "",
-				"source": "config.xml",
-				"value": "/etc/gerbera/"
-			},
-			{
 				"item": "/server/alive",
 				"id": "18",
 				"aid": "18",
@@ -1522,12 +1507,6 @@
 			{
 				"item": "/server/webroot",
 				"id": "16",
-				"type": "Path",
-				"value": ""
-			},
-			{
-				"item": "/server/servedir",
-				"id": "17",
 				"type": "Path",
 				"value": ""
 			},

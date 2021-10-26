@@ -163,8 +163,6 @@ add_library(libgerbera STATIC
         src/request_handler.cc
         src/request_handler.h
         src/server.cc
-        src/serve_request_handler.cc
-        src/serve_request_handler.h
         src/server.h
         src/database/mysql/mysql_database.cc
         src/database/mysql/mysql_database.h

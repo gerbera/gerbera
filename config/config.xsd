@@ -64,7 +64,6 @@
                 <xs:element ref="home"/>
                 <xs:element ref="webroot"/>
                 <xs:element ref="storage"/>
-                <xs:element ref="servedir" minOccurs="0"/>
                 <xs:element ref="ip" minOccurs="0"/>
                 <xs:element ref="interface" minOccurs="0"/>
                 <xs:element ref="modelName" minOccurs="0"/>
@@ -127,8 +126,6 @@
     <xs:element name="home" type="xs:string" default="~/.mediatomb"/>
 
     <xs:element name="webroot" type="xs:string"/>
-
-    <xs:element name="servedir" type="xs:string" default=""/>
 
     <xs:element name="alive" type="xs:positiveInteger" default="180"/>
 
