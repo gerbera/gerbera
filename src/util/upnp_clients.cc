@@ -193,15 +193,7 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
             return false;
         }
 
-        if (c.match.find('.') != std::string::npos) {
-            // IPv4
-            struct sockaddr_in clientAddr = {};
-            clientAddr.sin_family = AF_INET;
-            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
-            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
-                return true;
-            }
-        } else if (c.match.find(':') != std::string::npos) {
+        if (c.match.find(':') != std::string::npos) {
             // IPv6
             struct sockaddr_in6 clientAddr = {};
             clientAddr.sin6_family = AF_INET6;
@@ -210,8 +202,15 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
                     return true;
                 }
             }
+	} else if (c.match.find('.') != std::string::npos) {
+            // IPv4
+            struct sockaddr_in clientAddr = {};
+            clientAddr.sin_family = AF_INET;
+            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
+            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
+                return true;
+            }
         }
-
         return false;
     });
 
