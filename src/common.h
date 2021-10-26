@@ -57,7 +57,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define URL_UI_PARAM_SEPARATOR '?'
 #define SERVER_VIRTUAL_DIR "content"
 #define CONTENT_MEDIA_HANDLER "media"
-#define CONTENT_SERVE_HANDLER "serve"
 #define CONTENT_ONLINE_HANDLER "online"
 #define CONTENT_UI_HANDLER "interface"
 #define DEVICE_DESCRIPTION_PATH "description.xml"

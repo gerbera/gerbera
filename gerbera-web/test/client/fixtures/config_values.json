@@ -173,14 +173,6 @@
 			"value": "/usr/local/share/gerbera/web"
 		},
 		{
-			"item": "/server/servedir",
-			"id": "17",
-			"status": "unchanged",
-			"origValue": "",
-			"source": "config.xml",
-			"value": "/etc/gerbera/"
-		},
-		{
 			"item": "/server/alive",
 			"id": "18",
 			"status": "unchanged",

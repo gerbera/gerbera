@@ -119,11 +119,6 @@
 					"editable": false
 				},
 				{
-					"item": "/server/servedir",
-					"caption": "Serve Dir",
-					"editable": false
-				},
-				{
 					"item": "/server/alive",
 					"caption": "Alive Interval",
 					"editable": false

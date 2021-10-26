@@ -103,12 +103,6 @@
 					"editable": false
 				},
 				{
-					"item": "/server/servedir",
-					"caption": "Serve Dir",
-					"type": "String",
-					"editable": false
-				},
-				{
 					"item": "/server/alive",
 					"caption": "Alive Interval",
 					"type": "Number",

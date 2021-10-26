@@ -49,7 +49,6 @@
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "file_request_handler.h"
-#include "serve_request_handler.h"
 #include "util/mime.h"
 #include "util/upnp_clients.h"
 #include "web/pages.h"
@@ -498,14 +497,6 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
         return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
-    }
-
-    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_SERVE_HANDLER))) {
-        if (config->getOption(CFG_SERVER_SERVEDIR).empty()) {
-            throw_std_runtime_error("Serving directories is not enabled in configuration");
-        }
-
-        return std::make_unique<ServeRequestHandler>(content);
     }
 
 #if defined(HAVE_CURL)

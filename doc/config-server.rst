@@ -227,24 +227,6 @@ The gerbera.html bookmark file will also be generated in that directory.
 
 Root directory for the web server, this is the location where device description documents, UI html and js files, icons, etc. are stored.
 
-``serverdir``
-~~~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <servedir>/home/myuser/mystuff</servedir>
-
-* Optional
-* Default: **empty (disabled)**
-
-Files from this directory will be served as from a regular web server. They do not need to be added to the database,
-but they are also not served via UPnP browse requests. Directory listing is not supported, you have to specify full paths.
-
-**Example:**
-    The file something.jar is located in ``/home/myuser/mystuff/javasubdir/something.jar`` on your filesystem.
-    Your ip address is 192.168.0.23, the server is running on port 50500. Assuming the above configuration you
-    could download it by entering this link in your web browser: ``http://192.168.0.23:50500/content/serve/javasubdir/something.jar``
-
 ``alive``
 ~~~~~~~~~
 
