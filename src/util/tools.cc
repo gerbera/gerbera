@@ -473,13 +473,6 @@ std::map<std::string, std::string> pathToMap(std::string_view url)
     return out;
 }
 
-void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source)
-{
-    for (auto&& [key, value] : source) {
-        result.emplace(key, value);
-    }
-}
-
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
     return mimeTypes.empty() ? "" : fmt::format("http-get:*:{}:*", fmt::join(mimeTypes, ":*,http-get:*:"));
