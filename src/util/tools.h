@@ -151,9 +151,6 @@ std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
 std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
 std::map<std::string, std::string> pathToMap(std::string_view url);
 
-/// \brief Adds elements from source to result if they do not yet exist in result
-void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source);
-
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
 /// \return string containing the CSV list

@@ -92,7 +92,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {
-        dictMerge(params, decodedParams);
+        params.merge(decodedParams);
     }
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
