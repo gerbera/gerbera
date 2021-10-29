@@ -211,6 +211,9 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "SAMSUNG_BOOKMARK_MSEC") {
         return QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
     }
+    if (flag == "SAMSUNG_FEATURES") {
+        return QUIRK_FLAG_SAMSUNG_FEATURES;
+    }
     if (flag == "IRADIO") {
         return QUIRK_FLAG_IRADIO;
     }
@@ -242,6 +245,10 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     if (flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) {
         myFlags.emplace_back("SAMSUNG_BOOKMARK_MSEC");
         flags &= ~QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
+    }
+    if (flags & QUIRK_FLAG_SAMSUNG_FEATURES) {
+        myFlags.emplace_back("SAMSUNG_FEATURES");
+        flags &= ~QUIRK_FLAG_SAMSUNG_FEATURES;
     }
     if (flags & QUIRK_FLAG_IRADIO) {
         myFlags.emplace_back("IRADIO");

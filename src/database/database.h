@@ -194,6 +194,7 @@ public:
 
     virtual std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) = 0;
     virtual std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) = 0;
+    virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) = 0;
 
     virtual std::vector<std::string> getMimeTypes() = 0;
 

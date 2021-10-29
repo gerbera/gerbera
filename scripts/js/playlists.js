@@ -30,13 +30,14 @@ var playlist_title = playlist.title;
 var last_path = getLastPath(playlist.location);
 
 const chain = {
-    playlistRoot: { title: 'Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    playlistRoot: { title: 'Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
     allPlaylists: { title: 'All Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
     allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
     title: { title: playlist_title, objectType: OBJECT_TYPE_CONTAINER, mtime: playlist.mtime, upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER, metaData: [] },
     lastPath: { title: last_path, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
 };
+chain.playlistRoot.metaData[M_CONTENT_CLASS] = UPNP_CLASS_PLAYLIST_ITEM;
 
 var playlistChain = addContainerTree([chain.playlistRoot, chain.allPlaylists, chain.title]);
 

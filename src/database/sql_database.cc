@@ -803,7 +803,19 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     }
     commit("loadObjectByServiceID");
 
-    return nullptr;
+    return {};
+}
+
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass)
+{
+    auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
+        fmt::format("{}=\"{}\"", MetadataHandler::getMetaFieldName(M_CONTENT_CLASS), contentClass),
+        "", 0, 1, false);
+    int numMatches = 0;
+    log_debug("Running content class search for '{}'", contentClass);
+    auto result = this->search(srcParam, &numMatches);
+    log_debug("Content class search {} returned {}", contentClass, numMatches);
+    return result;
 }
 
 std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
@@ -900,7 +912,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER, orderByCode());
+            orderBy = fmt::format(" ORDER BY {} DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), orderByCode());
         }
         if (doLimit)
             limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());

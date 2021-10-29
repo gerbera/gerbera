@@ -31,8 +31,7 @@
 
 #include "action_request.h" // API
 
-#include <sstream>
-
+#include "upnp_xml.h"
 #include "util/tools.h"
 #include "util/upnp_quirks.h"
 
@@ -97,10 +96,8 @@ void ActionRequest::setErrorCode(int errCode)
 void ActionRequest::update()
 {
     if (response) {
-        std::ostringstream buf;
-        response->print(buf, "", 0);
-        std::string xml = buf.str();
-        log_debug("ActionRequest::update(): {}", xml);
+        std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
+        log_info("ActionRequest::update(): {}", xml);
 
 #if defined(USING_NPUPNP)
         UpnpActionRequest_set_xmlResponse(upnp_request, xml);

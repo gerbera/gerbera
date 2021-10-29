@@ -77,6 +77,8 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
+    auto&& quirks = request->getQuirks();
+    auto arr = quirks->getSamsungFeatureRoot(objID);
     int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
@@ -100,15 +102,14 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     param.setRequestedCount(stoiString(requestedCount));
     param.setSortCriteria(trimString(sortCriteria));
 
-    std::vector<std::shared_ptr<CdsObject>> arr;
     try {
-        arr = database->browse(param);
+        if (arr.empty())
+            arr = database->browse(param);
     } catch (const std::runtime_error& e) {
         log_error("No such object: {}", e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    auto&& quirks = request->getQuirks();
     pugi::xml_document didlLite;
     if (!quirks->blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
