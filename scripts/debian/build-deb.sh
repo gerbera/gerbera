@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-
 set -Eeuo pipefail
+
 ROOT_DIR=`dirname $0`/../../
 ROOT_DIR=`realpath ${ROOT_DIR}`/
 
@@ -62,6 +62,31 @@ function install-taglib() {
   echo "::endgroup::"
 }
 
+function install-ffmpegthumbnailer() {
+  echo "::group::Installing ffmpegthumbnailer"
+  sudo bash ${ROOT_DIR}scripts/install-ffmpegthumbnailer.sh
+  echo "::endgroup::"
+}
+
+function install-pugixml() {
+  echo "::group::Installing pugixml"
+  sudo bash ${ROOT_DIR}scripts/install-pugixml.sh
+  echo "::endgroup::"
+}
+
+function install-duktape() {
+  echo "::group::Installing duktape"
+  sudo bash ${ROOT_DIR}scripts/install-duktape.sh
+  echo "::endgroup::"
+}
+
+function install-matroska() {
+  echo "::group::Installing matroska"
+  sudo bash ${ROOT_DIR}scripts/install-ebml.sh
+  sudo bash ${ROOT_DIR}scripts/install-matroska.sh
+  echo "::endgroup::"
+}
+
 function upload_to_artifactory() {
 
   target_path="pool/main/g/gerbera/$deb_name"
@@ -86,15 +111,32 @@ fi
 
 echo "Running $0 ${my_sys}"
 
-libduktape="libduktape205"
-if [[ "$lsb_codename" == "bionic" ]]; then
-  libduktape="libduktape202"
-elif [ "$lsb_codename" == "buster" ]; then
-  libduktape="libduktape203"
-elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:testing" -o "${my_sys}" == "debian:unstable" ]; then
-  libduktape="libduktape206"
+if [[ "${my_sys}" == "HEAD" ]]; then
+  libduktape=""
+  libmatroska=""
+  libpugixml=""
+  ffmpegthumbnailer="libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
+  gtesttools="googletest google-mock googletest-tools libgtest-dev libgmock-dev"
+  BuildType="Debug"
+  DoTests="ON"
+else
+  libpugixml="libpugixml-dev"
+  libmatroska="libebml-dev libmatroska-dev"
+  libduktape="libduktape205"
+  ffmpegthumbnailer="libffmpegthumbnailer-dev"
+  gtesttools=""
+  BuildType="Release"
+  DoTests="OFF"
+  if [[ "$lsb_codename" == "bionic" ]]; then
+    libduktape="libduktape202"
+  elif [ "$lsb_codename" == "buster" ]; then
+    libduktape="libduktape203"
+  elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:testing" -o "${my_sys}" == "debian:unstable" ]; then
+    libduktape="libduktape206"
+  fi
+  libduktape="duktape-dev ${libduktape}"
+  echo "Selecting $libduktape for $lsb_distro $lsb_codename"
 fi
-echo "Selecting $libduktape for $lsb_distro $lsb_codename"
 
 libmysqlclient="libmysqlclient-dev"
 if [ "$lsb_distro" == "Debian" -o "$lsb_distro" == "Raspbian" ]; then
@@ -103,8 +145,6 @@ fi
 if [[ "$lsb_codename" == "hirsute" ]]; then
   libmysqlclient="libmysql++-dev"
 fi
-
-set -ex
 
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
@@ -118,19 +158,18 @@ if [[ ! -d build-deb ]]; then
       wget autoconf libtool pkg-config \
       cmake \
       bsdmainutils \
-      duktape-dev \
       libavformat-dev \
       libcurl4-openssl-dev \
-      "${libduktape}" \
-      libebml-dev \
+      ${libduktape} \
+      ${libmatroska} \
       libexif-dev \
-      libffmpegthumbnailer-dev \
+      ${ffmpegthumbnailer} \
       libmagic-dev \
-      libmatroska-dev \
       "${libmysqlclient}" \
-      libpugixml-dev \
+      "${libpugixml}" \
       libsqlite3-dev \
-      uuid-dev
+      uuid-dev \
+      ${gtesttools}
   sudo apt-get clean
   echo "::endgroup::"
 fi
@@ -141,9 +180,16 @@ if [[ "$lsb_codename" == "bionic" ]]; then
   sudo update-alternatives --set cpp /usr/bin/cpp-8
 fi
 
+if [[ "${my_sys}" == "HEAD" ]]; then
+  install-pugixml
+  install-duktape
+  install-matroska
+fi
+
 install-fmt
 install-spdlog
 install-pupnp
+install-ffmpegthumbnailer
 install-taglib
 
 cd build-deb
@@ -162,8 +208,8 @@ fi
 deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
-if [[ ! -f $deb_name ]]; then
-  cmake ${ROOT_DIR} \
+if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
+  cmake ${ROOT_DIR} -DWITH_TESTS=${DoTests} \
     -DWITH_MAGIC=ON \
     -DWITH_MYSQL=ON \
     -DWITH_CURL=ON \
@@ -176,18 +222,24 @@ if [[ ! -f $deb_name ]]; then
     -DWITH_SYSTEMD=ON \
     -DWITH_DEBUG=ON \
     -DSTATIC_LIBUPNP=ON \
-    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_BUILD_TYPE=${BuildType} \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
-  cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+  if [[ "${my_sys}" != "HEAD" ]]; then
+    cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+  fi
 else
   printf "Deb already built!\n"
 fi
 
-if [[ "${ART_API_KEY:-}" ]]; then
-  # Tags only for main repo
-  [[ $is_tag == 1 ]] && upload_to_artifactory debian
-  # Git builds go to git
-  upload_to_artifactory debian-git
+if [[ "${my_sys}" != "HEAD" ]]; then
+  if [[ "${ART_API_KEY:-}" ]]; then
+    # Tags only for main repo
+    [[ $is_tag == 1 ]] && upload_to_artifactory debian
+    # Git builds go to git
+    upload_to_artifactory debian-git
+  fi
+else
+  ctest --output-on-failure
 fi
