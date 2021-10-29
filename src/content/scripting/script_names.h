@@ -75,6 +75,7 @@ static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const c
     std::pair(M_COMPOSER, "M_COMPOSER"),
     std::pair(M_CONDUCTOR, "M_CONDUCTOR"),
     std::pair(M_ORCHESTRA, "M_ORCHESTRA"),
+    std::pair(M_CONTENT_CLASS, "M_CONTENT_CLASS"),
 };
 
 static constexpr auto ot_names = std::array {
@@ -92,6 +93,10 @@ static constexpr auto upnp_classes = std::array {
     std::pair(UPNP_CLASS_MUSIC_ORCHESTRA, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA"),
     std::pair(UPNP_CLASS_CONTAINER, "UPNP_CLASS_CONTAINER"),
     std::pair(UPNP_CLASS_ITEM, "UPNP_CLASS_ITEM"),
+    std::pair(UPNP_CLASS_AUDIO_ITEM, "UPNP_CLASS_AUDIO_ITEM"),
+    std::pair(UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_VIDEO_ITEM"),
+    std::pair(UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_IMAGE_ITEM"),
+    std::pair(UPNP_CLASS_PLAYLIST_ITEM, "UPNP_CLASS_PLAYLIST_ITEM"),
     std::pair(UPNP_CLASS_MUSIC_TRACK, "UPNP_CLASS_ITEM_MUSIC_TRACK"),
     std::pair(UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_CONTAINER_ITEM_VIDEO"),
     std::pair(UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE"),

@@ -80,7 +80,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung other TVs",
             ClientType::SamsungSeriesCDE,
-            QUIRK_FLAG_SAMSUNG,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
             "SEC_HHP_",
         },
@@ -99,7 +99,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung Series [Q] TVs",
             ClientType::SamsungSeriesQ,
-            QUIRK_FLAG_SAMSUNG,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
             "SEC_HHP_[TV] Samsung Q",
         },
@@ -108,7 +108,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung Blu-ray Player BD-D5100",
             ClientType::SamsungBDP,
-            QUIRK_FLAG_SAMSUNG,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
             "SEC_HHP_BD",
         },
@@ -117,7 +117,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung Blu-ray Player J5500",
             ClientType::SamsungBDJ5500,
-            QUIRK_FLAG_SAMSUNG,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
             "[BD]J5500",
         },

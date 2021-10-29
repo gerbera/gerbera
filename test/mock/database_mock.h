@@ -27,7 +27,8 @@ public:
     std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) override { return {}; }
 
     std::vector<std::string> getMimeTypes() override { return {}; }
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return nullptr; }
+    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override { return {}; }
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return {}; }
     int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
@@ -35,11 +36,11 @@ public:
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override { return {}; }
 
-    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return nullptr; }
+    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return {}; }
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override { return {}; }
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }
 
-    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return nullptr; }
+    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return {}; }
     std::vector<int> getServiceObjectIDs(char servicePrefix) override { return {}; }
 
     int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
@@ -55,10 +56,10 @@ public:
     void removeConfigValue(const std::string& item) override { }
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
 
-    std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return nullptr; }
+    std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
     void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
 
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return nullptr; }
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return {}; }
     void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
     void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
@@ -74,7 +75,7 @@ public:
     bool threadCleanupRequired() const override { return false; }
 
 protected:
-    std::shared_ptr<Database> getSelf() override { return nullptr; }
+    std::shared_ptr<Database> getSelf() override { return {}; }
 };
 
 #endif // __DATABASE_MOCK_H__

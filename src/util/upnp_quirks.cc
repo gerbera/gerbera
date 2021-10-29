@@ -30,6 +30,7 @@
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
+#include "database/database.h"
 #include "request_handler.h"
 #include "server.h"
 #include "util/tools.h"
@@ -80,11 +81,11 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     feature.append_attribute("name") = "samsung.com_BASICVIEW";
     feature.append_attribute("version") = "1";
     constexpr auto containers = std::array {
-        std::pair("object.item.audioItem", "0"), // A
-        std::pair("object.item.videoItem", "0"), // V
-        std::pair("object.item.imageItem", "0"), // I
-        std::pair("object.item.playlistItem", "0"), // P
-        //std::pair("object.item.textItem", "0"), // T
+        std::pair(UPNP_CLASS_AUDIO_ITEM, "A"),
+        std::pair(UPNP_CLASS_VIDEO_ITEM, "V"),
+        std::pair(UPNP_CLASS_IMAGE_ITEM, "I"),
+        std::pair(UPNP_CLASS_PLAYLIST_ITEM, "P"),
+        // std::pair("object.item.textItem", "T"),
     };
 
     for (auto&& [type, id] : containers) {
@@ -97,9 +98,29 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     request->setResponse(std::move(response));
 }
 
+std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId)
+{
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
+        return {};
+    log_debug("getSamsungFeatureRoot objId [{}]", objId);
+
+    const static auto containers = std::map<std::string, std::string> {
+        { "A", UPNP_CLASS_AUDIO_ITEM },
+        { "V", UPNP_CLASS_VIDEO_ITEM },
+        { "I", UPNP_CLASS_IMAGE_ITEM },
+        { "P", UPNP_CLASS_PLAYLIST_ITEM },
+        // { "T", "object.item.textItem" },
+    };
+    if (containers.find(objId) != containers.end()) {
+        return this->context->getDatabase()->findObjectByContentClass(containers.at(objId));
+    }
+
+    return {};
+}
+
 void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
@@ -120,7 +141,7 @@ void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& r
 
 void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");

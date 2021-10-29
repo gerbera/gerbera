@@ -36,8 +36,10 @@
 // UPnP default classes
 #define UPNP_CLASS_CONTAINER "object.container"
 #define UPNP_CLASS_ITEM "object.item"
+#define UPNP_CLASS_AUDIO_ITEM "object.item.audioItem"
 #define UPNP_CLASS_VIDEO_ITEM "object.item.videoItem"
 #define UPNP_CLASS_IMAGE_ITEM "object.item.imageItem"
+#define UPNP_CLASS_PLAYLIST_ITEM "object.item.playlistItem"
 #define UPNP_CLASS_MUSIC_ALBUM "object.container.album.musicAlbum"
 #define UPNP_CLASS_MUSIC_TRACK "object.item.audioItem.musicTrack"
 #define UPNP_CLASS_MUSIC_GENRE "object.container.genre.musicGenre"

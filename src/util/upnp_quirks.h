@@ -29,6 +29,7 @@
 #include <filesystem>
 #include <memory>
 #include <pugixml.hpp>
+#include <vector>
 namespace fs = std::filesystem;
 
 using QuirkFlags = std::uint32_t;
@@ -38,12 +39,14 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC 0x00000002
 #define QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC 0x00000004
 #define QUIRK_FLAG_IRADIO 0x00000008
+#define QUIRK_FLAG_SAMSUNG_FEATURES 0x00000010
 
 // forward declaration
 class ActionRequest;
 class ContentManager;
 class Context;
 class CdsItem;
+class CdsObject;
 class Headers;
 struct ClientInfo;
 
@@ -79,6 +82,7 @@ public:
      *
      */
     void getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const;
+    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId);
 
     /** \brief get Samsung ObjectID from Index
      *

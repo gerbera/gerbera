@@ -119,6 +119,8 @@ enum metadata_fields_t {
     M_CONDUCTOR,
     M_ORCHESTRA,
 
+    M_CONTENT_CLASS,
+
     M_MAX
 };
 
@@ -147,6 +149,7 @@ static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const ch
     std::pair(M_COMPOSER, "upnp:composer"),
     std::pair(M_CONDUCTOR, "upnp:conductor"),
     std::pair(M_ORCHESTRA, "upnp:orchestra"),
+    std::pair(M_CONTENT_CLASS, "upnp:contentClass"),
 };
 
 // res tag attributes

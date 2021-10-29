@@ -139,6 +139,7 @@ public:
 
     std::vector<std::string> getMimeTypes() override;
 
+    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override;
     //virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, bool wasRegularFile = false) override;
     int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override;
