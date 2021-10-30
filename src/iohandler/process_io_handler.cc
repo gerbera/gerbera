@@ -170,7 +170,7 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
 {
     fd_set readSet;
     struct timespec timeout;
-    ssize_t bytesRead = 0;
+    ssize_t bytesRead;
     std::size_t numBytes = 0;
     char* pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
@@ -262,7 +262,7 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
 {
     fd_set writeSet;
     struct timespec timeout;
-    ssize_t bytesWritten = 0;
+    ssize_t bytesWritten;
     std::size_t numBytes = 0;
     char* pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;

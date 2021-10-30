@@ -153,7 +153,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
 
     bool first = true;
 
-    int bufFree = 0;
+    int bufFree;
     do {
         if (ego->doSeek && !ego->empty && (ego->seekWhence == SEEK_SET || (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0))) {
             auto currentFillSize = int(ego->b - ego->a);

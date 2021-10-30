@@ -49,7 +49,7 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 
 std::pair<std::string_view, std::string_view> RequestHandler::splitUrl(std::string_view url, char separator)
 {
-    std::size_t splitPos = std::string_view::npos;
+    std::size_t splitPos;
     switch (separator) {
     case '/':
         splitPos = url.rfind('/');

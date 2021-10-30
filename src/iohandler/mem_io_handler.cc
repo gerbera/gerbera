@@ -65,7 +65,7 @@ void MemIOHandler::open(enum UpnpOpenFileMode mode)
 
 std::size_t MemIOHandler::read(char* buf, std::size_t length)
 {
-    std::size_t ret = 0;
+    std::size_t ret;
 
     // we indicate EOF by setting pos to -1
     if (pos == -1) {

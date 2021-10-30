@@ -231,7 +231,7 @@ std::string ScriptTestFixture::getLastPath(duk_context* ctx)
     std::string path = inputPath;
     std::string delimiter = "/";
 
-    size_t pos = 0;
+    size_t pos;
     std::string token;
     std::vector<std::string> pathElements;
     while ((pos = path.find(delimiter)) != std::string::npos) {
@@ -362,7 +362,7 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
     origObjLocation = duk_to_string(ctx, 1);
     objLocation = origObjLocation;
 
-    size_t pos = 0;
+    size_t pos;
     std::string token;
     std::string delimiter = "/";
     std::vector<std::string> dirs;

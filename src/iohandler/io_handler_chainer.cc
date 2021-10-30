@@ -53,7 +53,7 @@ IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::uni
 void IOHandlerChainer::threadProc()
 {
     try {
-        bool again = false;
+        bool again;
         do {
             try {
                 writeTo->open(UPNP_WRITE);

@@ -99,7 +99,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         throw_std_runtime_error("Could not determine memory for string conversion");
     }
 
-    char* output = {};
+    char* output;
     try {
         output = new char[length];
     } catch (const std::bad_alloc& ex) {
