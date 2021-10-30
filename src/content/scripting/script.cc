@@ -210,13 +210,8 @@ Script::Script(std::shared_ptr<ContentManager> content,
     duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
 #endif //ATRAILERS
 
-#ifdef SOPCAST
-    duk_push_int(ctx, int(OS_SopCast));
-    duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
-#else
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
-#endif //SOPCAST
 
 #else // ONLINE SERVICES
     duk_push_int(ctx, 0);

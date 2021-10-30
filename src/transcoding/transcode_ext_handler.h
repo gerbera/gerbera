@@ -56,9 +56,6 @@ private:
 #ifdef HAVE_CURL
     void openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList);
 #endif
-#ifdef SOPCAST
-    static bool startSopcastConnector(const std::shared_ptr<CdsObject>& obj, std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList);
-#endif
 };
 
 #endif // __TRANSCODE_EXTERNAL_HANDLER_H__

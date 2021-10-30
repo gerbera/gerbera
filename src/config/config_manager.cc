@@ -452,15 +452,6 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
     // read online content options
-#ifdef SOPCAST
-    int sopcastRefresh = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_REFRESH)->getIntOption();
-    int sopcastPurge = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER)->getIntOption();
-
-    if (sopcastRefresh >= sopcastPurge) {
-        if (sopcastPurge != 0)
-            throw_std_runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
-    }
-#endif
 
 #ifdef ATRAILERS
     int atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();

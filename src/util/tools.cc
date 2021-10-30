@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     tools.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -1104,60 +1104,3 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 
     return fmt::format("{}:{}", hoststr, portstr);
 }
-
-#ifdef SOPCAST
-/// \brief
-int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
-{
-    int fd;
-    int retryCount = 0;
-    in_port_t port;
-    struct sockaddr_in serverAddr;
-    struct hostent* server;
-
-    if (rangeMin > rangeMax) {
-        log_error("min port range > max port range!");
-        return -1;
-    }
-
-    std::mt19937 rng;
-    std::uniform_int_distribution<in_port_t> gen(rangeMin, rangeMax);
-
-    do {
-        port = gen(rng);
-
-        fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0) {
-            log_error("could not determine free port: error creating socket: {}", std::strerror(errno));
-            return -1;
-        }
-
-        server = gethostbyname("127.0.0.1");
-        if (!server) {
-            log_error("could not resolve localhost");
-            close(fd);
-            return -1;
-        }
-
-        serverAddr = {};
-        serverAddr.sin_family = AF_INET;
-        std::memcpy(&serverAddr.sin_addr.s_addr, server->h_addr, server->h_length);
-        serverAddr.sin_port = htons(port);
-
-        if (connect(fd, reinterpret_cast<struct sockaddr*>(&serverAddr),
-                sizeof(serverAddr))
-            == -1) {
-            close(fd);
-            return port;
-        }
-
-        close(fd);
-
-        retryCount++;
-    } while (retryCount < std::numeric_limits<in_port_t>::max());
-
-    log_error("Could not find free port on localhost");
-
-    return -1;
-}
-#endif
