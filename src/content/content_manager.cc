@@ -146,7 +146,7 @@ void ContentManager::run()
         database->updateAutoscanList(ScanMode::INotify, configInotifyList);
         autoscan_inotify = database->getAutoscanList(ScanMode::INotify);
     } else {
-        // make an empty list so we do not have to do extra checks on shutdown
+        // make an empty list so that we do not have to do extra checks on shutdown
         autoscan_inotify = std::make_shared<AutoscanList>(database);
     }
 
@@ -350,7 +350,7 @@ std::deque<std::shared_ptr<GenericTask>> ContentManager::getTasklist()
     auto t = getCurrentTask();
 
     // if there is no current task, then the queues are empty
-    // and we do not have to allocate the array
+    // therefore we do not have to allocate the array
     if (!t)
         return taskList;
 
@@ -795,7 +795,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     // abort loop if either:
-    // no valid directory returned, server is about to shutdown, the task is there and was invalidated
+    // no valid directory returned, server is about to shut down, the task is there and was invalidated
     if (task) {
         log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), subDir.path().c_str());
     }
