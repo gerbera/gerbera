@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: DoozyX/clang-format-lint-action@v0.11
+    - uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: './src'
         exclude: './contrib'
         extensions: 'h,cc'
-        clangFormatVersion: 11
+        clangFormatVersion: 13
