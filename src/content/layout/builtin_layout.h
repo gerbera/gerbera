@@ -59,9 +59,6 @@ protected:
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     std::string mapGenre(const std::string& genre);
-#ifdef SOPCAST
-    void addSopCast(const std::shared_ptr<CdsObject>& obj);
-#endif
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif

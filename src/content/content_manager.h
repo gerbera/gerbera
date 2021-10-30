@@ -202,7 +202,7 @@ public:
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
-    /// online service (like YouTube, SopCast, etc.)
+    /// online service (like AppleTrailers etc.)
     void fetchOnlineContent(service_type_t serviceType, bool lowPriority = true,
         bool cancellable = true,
         bool unscheduledRefresh = false);
