@@ -39,7 +39,7 @@ public:
     static std::map<std::string, std::string> readHeaders(UpnpFileInfo* fileInfo);
 
 private:
-    static std::string formatHeader(const std::pair<std::string, std::string>& header, bool crlf);
+    static std::string formatHeader(const std::pair<std::string, std::string>& header);
     static std::pair<std::string, std::string> parseHeader(const std::string& header);
     static std::string stripInvalid(const std::string& value);
 
