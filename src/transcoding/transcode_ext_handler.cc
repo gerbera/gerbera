@@ -118,20 +118,21 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 
 fs::path TranscodeExternalHandler::makeFifo()
 {
-    std::string fifoTemplate = "grb_transcode_XXXXXX";
-    fs::path fifoName = tempName(config->getOption(CFG_SERVER_TMPDIR), fifoTemplate);
-    log_debug("creating fifo: {}", fifoName.c_str());
-    int err = mkfifo(fifoName.c_str(), O_RDWR);
+    fs::path tmpDir = config->getOption(CFG_SERVER_TMPDIR);
+    auto fifoPath = tmpDir / fmt::format("grb-tr-{}", generateRandomId());
+
+    log_debug("Creating FIFO: {}", fifoPath.string());
+    int err = mkfifo(fifoPath.c_str(), O_RDWR);
     if (err != 0) {
-        log_error("Failed to create fifo for the transcoding process!: {}", std::strerror(errno));
-        throw_std_runtime_error("Could not create fifo");
+        log_error("Failed to create FIFO for the transcoding process!: {}", std::strerror(errno));
+        throw_std_runtime_error("Could not create FIFO");
     }
 
-    err = chmod(fifoName.c_str(), S_IWUSR | S_IRUSR);
+    err = chmod(fifoPath.c_str(), S_IWUSR | S_IRUSR);
     if (err != 0) {
         log_error("Failed to change location permissions: {}", std::strerror(errno));
     }
-    return fifoName;
+    return fifoPath;
 }
 
 void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile)
@@ -159,21 +160,10 @@ void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<Transcoding
 void TranscodeExternalHandler::openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
 {
     std::string url = location;
-    std::string fifoTemplate = "grb_curl_transcode_XXXXXX";
-    location = tempName(config->getOption(CFG_SERVER_TMPDIR), fifoTemplate);
     log_debug("creating reader fifo: {}", location.c_str());
-    auto r = mkfifo(location.c_str(), O_RDWR);
-    if (r != 0) {
-        log_error("Failed to create fifo {} for the remote content reading thread: {}", location, std::strerror(errno));
-        throw_std_runtime_error("Could not create reader fifo");
-    }
+    location = makeFifo();
 
     try {
-        auto ret = chmod(location.c_str(), S_IWUSR | S_IRUSR);
-        if (ret != 0) {
-            log_error("Failed to change location {} permissions: {}", location, std::strerror(errno));
-        }
-
         auto cIoh = std::make_unique<CurlIOHandler>(config, url, nullptr,
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));

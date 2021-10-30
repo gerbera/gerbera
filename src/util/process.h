@@ -40,8 +40,6 @@
 // forward declaration
 class Config;
 
-std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::string& prog, const std::string& param, const std::string& input);
-
 bool is_alive(pid_t pid, int* status = nullptr);
 
 bool kill_proc(pid_t killPid);

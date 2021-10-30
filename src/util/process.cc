@@ -31,100 +31,13 @@
 
 #include "process.h" // API
 
-#include <cerrno>
 #include <csignal>
-#include <cstdio>
-#include <cstring>
 #include <sstream>
 #include <thread>
 
-#include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
-#include "config/config_manager.h"
 #include "util/tools.h"
-
-#define BUF_SIZE 256
-
-std::string run_simple_process(const std::shared_ptr<Config>& cfg, const std::string& prog, const std::string& param, const std::string& input)
-{
-    std::FILE* file;
-    int fd;
-
-    /* creating input file */
-    std::string tempIn = "mt_in_XXXXXX";
-    std::string tempOut = "mt_out_XXXXXX";
-
-    std::string inputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempIn);
-#ifdef __linux__
-    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
-#else
-    fd = open(inputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-#endif
-    if (fd == -1) {
-        log_debug("Failed to open input file {}: {}", inputFile, std::strerror(errno));
-        throw_std_runtime_error("Failed to open input file {}: {}", inputFile, std::strerror(errno));
-    }
-    std::size_t ret = write(fd, input.c_str(), input.length());
-    close(fd);
-    if (ret < input.length()) {
-        log_debug("Failed to write to {}: {}", input, std::strerror(errno));
-        throw_std_runtime_error("Failed to write to {}: {}", input, std::strerror(errno));
-    }
-
-    /* touching output file */
-    std::string outputFile = tempName(cfg->getOption(CFG_SERVER_TMPDIR), tempOut);
-#ifdef __linux__
-    fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC, S_IRUSR | S_IWUSR);
-#else
-    fd = open(outputFile.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-#endif
-    if (fd == -1) {
-        log_debug("Failed to open output file {}: {}", outputFile, std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
-    }
-    close(fd);
-
-    /* executing script */
-    auto command = fmt::format("{} {} < {} > {}", prog, param, inputFile, outputFile);
-    log_debug("running {}", command);
-    int sysret = std::system(command.c_str());
-    if (sysret == -1) {
-        log_debug("Failed to execute: {}", command);
-        throw_std_runtime_error("Failed to execute: {}", command);
-    }
-
-    /* reading output file */
-#ifdef __linux__
-    file = std::fopen(outputFile.c_str(), "re");
-#else
-    file = std::fopen(outputFile.c_str(), "r");
-#endif
-    if (!file) {
-        log_debug("Could not open output file {}: {}", outputFile, std::strerror(errno));
-        throw_std_runtime_error("Failed to open output file {}: {}", outputFile, std::strerror(errno));
-    }
-
-    std::ostringstream output;
-    int bytesRead;
-    char buf[BUF_SIZE];
-    while (true) {
-        bytesRead = std::fread(buf, 1, BUF_SIZE, file);
-        if (bytesRead > 0)
-            output << std::string(buf, bytesRead);
-        else
-            break;
-    }
-    std::fclose(file);
-
-    /* removing input and output files */
-    unlink(inputFile.c_str());
-    unlink(outputFile.c_str());
-
-    return output.str();
-}
 
 bool is_alive(pid_t pid, int* status)
 {
