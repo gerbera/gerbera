@@ -40,4 +40,4 @@ protected:
     std::string deviceDescription;
 };
 
-#endif //GERBERA_DEVICE_DESCRIPTION_HANDLER_H
+#endif // GERBERA_DEVICE_DESCRIPTION_HANDLER_H

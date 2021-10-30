@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_clients.h - this file is part of Gerbera.
-    
+
     Copyright (C) 2020-2021 Gerbera Contributors
-    
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -57,8 +57,8 @@ enum class ClientType {
 enum class ClientMatchType {
     None,
     UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
-    //FriendlyName,
-    //ModelName,
+    // FriendlyName,
+    // ModelName,
     IP, // use client's network address
 };
 

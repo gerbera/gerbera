@@ -46,4 +46,4 @@ private:
     std::map<std::string, std::string> headers;
 };
 
-#endif //GERBERA_HEADERS_H
+#endif // GERBERA_HEADERS_H

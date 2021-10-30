@@ -198,7 +198,7 @@ public:
 
     virtual std::vector<std::string> getMimeTypes() = 0;
 
-    //virtual std::vector<std::shared_ptr<CdsObject>> selectObjects(const std::unique_ptr<SelectParam>& param) = 0;
+    // virtual std::vector<std::shared_ptr<CdsObject>> selectObjects(const std::unique_ptr<SelectParam>& param) = 0;
 
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database
