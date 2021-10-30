@@ -31,10 +31,8 @@
 
 #include "tools.h" // API
 
-#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 
 #include "iohandler/io_handler.h"
 

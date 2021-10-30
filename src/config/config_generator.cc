@@ -26,7 +26,6 @@
 #include "config_generator.h"
 
 #include <sstream>
-#include <string>
 
 #include "config/config_definition.h"
 #include "config/config_setup.h"

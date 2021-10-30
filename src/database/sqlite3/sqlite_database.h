@@ -212,7 +212,6 @@ private:
     friend class SLSelectTask;
     friend class SLExecTask;
     friend class SLInitTask;
-    friend class Sqlite3BackupTimerSubscriber;
 };
 
 /// \brief The Database class for using SQLite3 with transactions

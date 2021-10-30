@@ -35,7 +35,6 @@
 #include <sstream>
 
 #include "config/config_manager.h"
-#include "util/tools.h"
 
 std::string URL::download(const std::string& url, long* httpRetcode,
     CURL* curlHandle, bool onlyHeader,

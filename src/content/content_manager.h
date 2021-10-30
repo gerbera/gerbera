@@ -74,7 +74,6 @@ class ScriptingRuntime;
 // forward declarations
 class ContentManager;
 class LastFm;
-class Runtime;
 class Server;
 class TaskProcessor;
 

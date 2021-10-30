@@ -23,7 +23,6 @@ Gerbera - https://gerbera.io/
 #include <gtest/gtest.h>
 #include <pugixml.hpp>
 
-#include "../mock/config_mock.h"
 #include "cds_objects.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "sqlite_config_fake.h"

@@ -38,7 +38,6 @@
 #include "util/timer.h"
 #include "util/tools.h"
 
-#define UI_UPDATE_ID_HASH_SIZE 61
 #define MAX_UI_UPDATE_IDS 10
 
 namespace Web {

@@ -31,10 +31,8 @@
 
 #include "tools.h" // API
 
-#include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
-#include <climits>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -44,7 +42,6 @@
 #include <queue>
 #include <random>
 #include <sstream>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -54,7 +51,6 @@
 #endif
 
 #include <ifaddrs.h>
-#include <net/if.h>
 
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
@@ -67,13 +63,8 @@
 #include <sys/sockio.h>
 #endif
 
-#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "contrib/md5.h"
-#include "iohandler/file_io_handler.h"
-#include "metadata/metadata_handler.h"
-
-#define WHITE_SPACE " \t\r\n"
 
 static constexpr auto hexChars = "0123456789abcdef";
 

@@ -36,7 +36,6 @@
 
 #include "database/database.h"
 #include "server.h"
-#include "upnp_cds.h"
 #include "util/tools.h"
 
 static constexpr auto specInterval = std::chrono::seconds(2);

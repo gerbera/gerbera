@@ -35,7 +35,6 @@
 
 #include <fcntl.h>
 #include <sys/select.h>
-#include <sys/stat.h>
 
 #include "content/content_manager.h"
 #include "util/process.h"

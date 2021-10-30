@@ -32,9 +32,6 @@
 #ifdef HAVE_JS
 #include "js_functions.h" // API
 
-#include <typeinfo>
-
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"

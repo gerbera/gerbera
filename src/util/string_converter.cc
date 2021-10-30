@@ -31,7 +31,6 @@
 
 #include "string_converter.h" // API
 
-#include "config/config_manager.h"
 #include "config/directory_tweak.h"
 #include <cstdlib>
 

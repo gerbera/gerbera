@@ -31,9 +31,6 @@
 
 #include "transcode_ext_handler.h" // API
 
-#include <climits>
-#include <csignal>
-#include <cstdio>
 #include <cstring>
 
 #include <fcntl.h>
@@ -45,10 +42,8 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "iohandler/buffered_io_handler.h"
-#include "iohandler/file_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "iohandler/process_io_handler.h"
-#include "metadata/metadata_handler.h"
 #include "transcoding_process_executor.h"
 #include "util/process.h"
 #include "util/tools.h"
