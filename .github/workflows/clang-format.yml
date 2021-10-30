@@ -10,6 +10,6 @@ jobs:
     - uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: './src'
-        exclude: './contrib'
+        exclude: './src/contrib'
         extensions: 'h,cc'
         clangFormatVersion: 13
