@@ -137,7 +137,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         if (objectIDHash.size() >= MAX_OBJECT_IDS)
             signal = true;
 
-        // very simple caching, but it get's a lot of hits
+        // very simple caching, but it gets a lot of hits
         lastContainerChanged = objectID;
 
         // signalling if the flushPolicy changes, so the thread recalculates

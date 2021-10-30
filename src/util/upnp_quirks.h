@@ -54,7 +54,7 @@ class Quirks {
 public:
     Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent);
 
-    // Look for subtitle file and returns it's URL in CaptionInfo.sec response header.
+    // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Headers>& headers) const;
 

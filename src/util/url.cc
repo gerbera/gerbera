@@ -65,7 +65,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
         if (logEnabled)
             curl_easy_setopt(curlHandle, CURLOPT_VERBOSE, 1);
     }
-    // some web sites send unexpected stuff, seems they need a user agent
+    // some websites send unexpected stuff, seems they need a user agent
     // that they know...
     curl_easy_setopt(curlHandle, CURLOPT_USERAGENT,
         "Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.6) Gecko/20091216 Fedora/3.5.6-1.fc12 Firefox/3.5.6");

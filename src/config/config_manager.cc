@@ -227,7 +227,7 @@ void ConfigManager::load(const fs::path& userHome)
     // now go through the optional settings and fix them if anything is missing
     auto defIpp = setOption(root, CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)->getIntOption();
 
-    // now get the option list for the drop down menu
+    // now get the option list for the drop-down menu
     auto menuOpts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
     if (std::find(menuOpts.begin(), menuOpts.end(), fmt::to_string(defIpp)) == menuOpts.end())
         throw_std_runtime_error("Error in config file: at least one <option> "
