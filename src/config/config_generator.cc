@@ -163,7 +163,7 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
 
     auto docinfo = config->append_child(pugi::node_comment);
     docinfo.set_value(R"(
-     See http://gerbera.io or read the docs for more
+     See https://gerbera.io or read the docs for more
      information on creating and using config.xml configuration files.
     )");
 
