@@ -63,7 +63,6 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    std::string header;
     std::string mimeType;
 
     if (!trProfile.empty()) {
@@ -84,7 +83,6 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         try {
             auto st = URL::getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
-            header = "Accept-Ranges: bytes";
             log_debug("URL used for request: {}", st->getURL());
         } catch (const std::runtime_error& ex) {
             log_warning("{}", ex.what());
@@ -97,12 +95,6 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_LastModified(info, 0);
     UpnpFileInfo_set_IsDirectory(info, 0);
-
-    // FIX EXTRA HEADERS
-    //    if (!header.empty()) {
-    //        UpnpFileInfo_set_ExtraHeaders(info,
-    //            ixmlCloneDOMString(header.c_str()));
-    //    }
 
 #ifdef USING_NPUPNP
     info->content_type = std::move(mimeType);
