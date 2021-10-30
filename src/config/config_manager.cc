@@ -385,7 +385,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
     }
-#endif //HAVE_CURL
+#endif // HAVE_CURL
 
     // read import options
     args["trim"] = "false";

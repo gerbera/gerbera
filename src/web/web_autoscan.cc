@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     web_autoscan.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -87,7 +87,7 @@ void Web::Autoscan::process()
             // add or update
             bool recursive = boolParam("recursive");
             bool hidden = boolParam("hidden");
-            //bool persistent = boolParam("persistent");
+            // bool persistent = boolParam("persistent");
 
             ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
             int interval = intParam("interval", 0);
@@ -96,12 +96,12 @@ void Web::Autoscan::process()
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
-            //log_debug("adding autoscan: location={}, scan_mode={}, recursive={}, interval={}, hidden={}",
-            //    location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
-            //    recursive, interval, hidden);
+            // log_debug("adding autoscan: location={}, scan_mode={}, recursive={}, interval={}, hidden={}",
+            //     location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
+            //     recursive, interval, hidden);
 
             auto autoscan = std::make_shared<AutoscanDirectory>(
-                "", //location
+                "", // location
                 scanMode,
                 recursive,
                 false, // persistent
@@ -129,8 +129,8 @@ void Web::Autoscan::process()
             autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
             autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()).data());
             autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
-            //autoscanEl.append_child("scan_level").append_child(pugi::node_pcdata)
-            //    .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
+            // autoscanEl.append_child("scan_level").append_child(pugi::node_pcdata)
+            //     .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
         }
     } else
         throw_std_runtime_error("called with illegal action");

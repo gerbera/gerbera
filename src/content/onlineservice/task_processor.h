@@ -1,5 +1,5 @@
 /*MT*
-*/
+ */
 
 #ifndef __TASK_PROCESSOR_H__
 #define __TASK_PROCESSOR_H__

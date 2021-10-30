@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     autoscan_inotify.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -313,10 +313,10 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
     if (wd >= 0) {
         std::shared_ptr<Wd> wdObj;
         try {
-            //find
+            // find
             wdObj = watches.at(wd);
 
-            //alreadyThere
+            // alreadyThere
             int parentWdSet = wdObj->getParentWd();
             if (parentWdSet >= 0) {
                 if (parentWd != parentWdSet) {
@@ -567,7 +567,7 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
     } else {
         if (wdObj->getWdWatches()->size() == 1) {
             // should be done automatically, because removeWatch triggers an IGNORED event
-            //watches.remove(wd);
+            // watches.remove(wd);
 
             inotify->removeWatch(wd);
         } else {

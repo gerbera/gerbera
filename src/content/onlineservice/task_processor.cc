@@ -183,7 +183,7 @@ void TPFetchOnlineContentTask::run()
     }
 
     try {
-        //cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
+        // cm->_fetchOnlineContent(service, getParentID(), unscheduled_refresh);
         if (service->refreshServiceData(layout) && (isValid())) {
             log_debug("Scheduling another task for online service: {}", service->getServiceName());
 

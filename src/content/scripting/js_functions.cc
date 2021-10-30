@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     js_functions.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -38,7 +38,7 @@
 #include "script.h"
 #include "util/string_converter.h"
 
-//extern "C" {
+// extern "C" {
 
 duk_ret_t js_print(duk_context* ctx)
 {
@@ -110,11 +110,11 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     if (!duk_is_object(ctx, 0))
         return 0;
     duk_to_object(ctx, 0);
-    //stack: js_cds_obj
+    // stack: js_cds_obj
     const char* containerId = duk_to_string(ctx, 1);
     if (!containerId)
         containerId = "-1";
-    //stack: js_cds_obj containerId
+    // stack: js_cds_obj containerId
 
     try {
         std::unique_ptr<StringConverter> p2i;
@@ -137,7 +137,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             duk_get_global_string(ctx, "orig");
         else
             duk_push_undefined(ctx);
-        //stack: js_cds_obj containerId js_orig_obj
+        // stack: js_cds_obj containerId js_orig_obj
 
         if (duk_is_undefined(ctx, -1)) {
             log_debug("Could not retrieve global 'orig'/'playlist' object");
@@ -153,7 +153,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         int pcdId = INVALID_OBJECT_ID;
 
         duk_swap_top(ctx, 0);
-        //stack: js_orig_obj containerId js_cds_obj
+        // stack: js_orig_obj containerId js_cds_obj
         if (self->whoami() == S_PLAYLIST) {
             int otype = self->getIntProperty("objectType", -1);
             if (otype == -1) {
@@ -282,4 +282,4 @@ duk_ret_t js_j2i(duk_context* ctx)
 
 //} // extern "C"
 
-#endif //HAVE_JS
+#endif // HAVE_JS

@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     string_converter.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -122,8 +122,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         dirty = false;
     }
 
-    //log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
-    //       input_bytes, output_bytes));
+    // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
+    //        input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
     ret = iconv(cd, input_ptr, &input_bytes,
         output_ptr, &output_bytes);
@@ -171,9 +171,9 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         throw_std_runtime_error(err);
     }
 
-    //log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
-    //       input_bytes, output_bytes);
-    //log_debug("iconv: returned {}", ret);
+    // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
+    //        input_bytes, output_bytes);
+    // log_debug("iconv: returned {}", ret);
 
     retStr = std::string(output, outputCopy - output);
     delete[] output;

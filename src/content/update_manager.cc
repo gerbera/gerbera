@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     update_manager.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -99,7 +99,7 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
     bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
     for (int objectID : objectIDs) {
         if (objectID != lastContainerChanged) {
-            //log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
+            // log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
             objectIDHash.insert(objectID);
             if (split && objectIDHash.size() > MAX_OBJECT_IDS) {
                 while (objectIDHash.size() > MAX_OBJECT_IDS) {
@@ -222,7 +222,7 @@ void UpdateManager::threadProc()
                 lock.lock();
             }
         } else {
-            //nothing to do
+            // nothing to do
             threadRunner->wait(lock);
         }
     }

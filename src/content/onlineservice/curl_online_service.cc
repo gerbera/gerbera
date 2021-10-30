@@ -151,4 +151,4 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
     return false;
 }
 
-#endif //HAVE_CURL
+#endif // HAVE_CURL
