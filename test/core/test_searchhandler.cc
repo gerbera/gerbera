@@ -33,7 +33,7 @@ static decltype(auto) getAllTokens(const std::string& input)
     SearchLexer lexer { input };
     upVecUpST searchTokens = std::make_unique<std::vector<std::unique_ptr<SearchToken>>>();
     std::unique_ptr<SearchToken> searchToken = nullptr;
-    bool gotToken = false;
+    bool gotToken;
     do {
         searchToken = lexer.nextToken();
         gotToken = !!searchToken;
