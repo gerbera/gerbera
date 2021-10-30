@@ -24,7 +24,6 @@
 #include <iostream>
 #include <regex>
 
-#include "config/config_manager.h"
 #include "database/search_handler.h"
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;

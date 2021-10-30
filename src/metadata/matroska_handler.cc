@@ -32,18 +32,13 @@
 
 #include <ebml/EbmlHead.h>
 #include <ebml/EbmlStream.h>
-#include <ebml/EbmlSubHead.h>
 #include <ebml/IOCallback.h>
 
-#include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
-#include <matroska/KaxCluster.h>
 #include <matroska/KaxContexts.h>
-#include <matroska/KaxSeekHead.h>
 #include <matroska/KaxSegment.h>
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
 #include "util/string_converter.h"

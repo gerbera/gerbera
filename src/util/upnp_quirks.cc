@@ -25,13 +25,9 @@
 
 #include "upnp_quirks.h" // API
 
-#include <unistd.h>
-
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "request_handler.h"
 #include "server.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"

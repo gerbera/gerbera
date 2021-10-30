@@ -38,7 +38,6 @@
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
-#include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
 Web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)

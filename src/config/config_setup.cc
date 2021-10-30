@@ -24,12 +24,9 @@
 
 #include "config_setup.h" // API
 
-#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
-
-#include <sys/stat.h>
 
 #include "client_config.h"
 #include "config_definition.h"
@@ -480,7 +477,7 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 
 #ifdef HAVE_INOTIFY
     bool inotifySupported = Inotify::supported();
-    tempBool = (inotifySupported && value == "auto") ? true : tempBool;
+    tempBool = (inotifySupported && value == "auto") || tempBool;
 #endif
 
     if (value == YES) {

@@ -30,14 +30,11 @@
 #include "config/client_config.h"
 #include "config/config.h"
 #include "config/config_definition.h"
-#include "config/config_options.h"
 #include "config/config_setup.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
-#include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)

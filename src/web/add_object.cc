@@ -31,11 +31,9 @@
 
 #include "pages.h" // API
 
-#include <cstdio>
 #include <filesystem>
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"

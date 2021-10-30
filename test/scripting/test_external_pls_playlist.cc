@@ -6,7 +6,6 @@
 #include <memory>
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"

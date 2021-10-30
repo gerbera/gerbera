@@ -34,10 +34,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
-
-#include <sys/stat.h>
-#include <unistd.h>
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(new char[length])

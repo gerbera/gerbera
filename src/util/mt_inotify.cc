@@ -53,7 +53,6 @@
 #include "tools.h"
 
 #define MAX_EVENTS 4096
-#define MAX_STRLEN 4096
 
 Inotify::Inotify()
 #ifdef __linux__

@@ -32,29 +32,21 @@
 #include "config_manager.h" // API
 
 #include <array>
-#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sstream>
-#include <sys/stat.h>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
 #endif
 
-#ifdef HAVE_CURL
-#include <curl/curl.h>
-#endif
-
 #include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "content/autoscan.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <stack>
 
-#include "config/config_manager.h"
 #include "database/sql_database.h"
 #include "util/tools.h"
 

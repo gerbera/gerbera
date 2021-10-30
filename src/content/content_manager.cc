@@ -31,11 +31,9 @@
 
 #include "content_manager.h" // API
 
-#include <cerrno>
 #include <cstring>
 #include <regex>
 
-#include "config/config_manager.h"
 #include "config/directory_tweak.h"
 #include "database/database.h"
 #include "layout/builtin_layout.h"

@@ -31,7 +31,6 @@
 
 #include "pages.h" // API
 
-#include <cstdio>
 #include <fmt/chrono.h>
 
 #include "cds_objects.h"

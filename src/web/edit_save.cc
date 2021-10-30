@@ -31,8 +31,6 @@
 
 #include "pages.h" // API
 
-#include <cstdio>
-
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/tools.h"

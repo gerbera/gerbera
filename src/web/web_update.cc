@@ -31,7 +31,6 @@
 
 #include "pages.h" // API
 
-#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 
