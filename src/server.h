@@ -134,14 +134,6 @@ protected:
     /// is returned by the getVirtualURL() function.
     std::string virtualUrl;
 
-    /// \brief Device description document is created on the fly and
-    /// stored here.
-    ///
-    /// All necessary values for the device description document are
-    /// read from the configuration and the device desc doc is created
-    /// on the fly.
-    std::string device_description_document;
-
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.

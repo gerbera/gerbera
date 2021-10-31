@@ -210,12 +210,6 @@ std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolutio
 
 std::string escape(std::string string, char escapeChar, char toEscape);
 
-/// \brief Unescapes the given String.
-/// \param string the string to unescape
-/// \param escape the escape character (e.g. "\")
-/// \return the unescaped string
-std::string unescape(std::string string, char escape);
-
 /*
 /// \brief Unescape &amp; &quot; and similar XML sequences.
 ///

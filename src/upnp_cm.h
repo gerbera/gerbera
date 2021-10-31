@@ -81,8 +81,6 @@ public:
     explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
         UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
 
-    static void setStaticArgs(std::string serviceType, std::string serviceID);
-
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
     ///

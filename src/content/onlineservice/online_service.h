@@ -53,7 +53,6 @@ class Layout;
 enum service_type_t {
     OS_None = 0,
     OS_YouTube = 1,
-    OS_SopCast = 2,
 
     OS_ATrailers = 4,
     OS_Max
@@ -104,8 +103,6 @@ public:
     void decTaskCount() { taskCount--; }
 
     int getTaskCount() const { return taskCount; }
-
-    void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
     /// Parameter that can be used by timerNotify
     void setTimerParameter(const std::shared_ptr<Timer::Parameter>& param)

@@ -99,13 +99,9 @@ public:
         this->clientInfo->match = userAgent;
     }
 
-    /// \brief copies all properties to another object
-    void copyTo(const std::shared_ptr<ClientConfig>& copy) const;
-
     /* helpers for clientType stuff */
     static std::string_view mapClientType(ClientType clientType);
     static std::string_view mapMatchType(ClientMatchType matchType);
-    static ClientType remapClientType(const std::string& clientType);
     static int remapFlag(const std::string& flag);
     static int makeFlags(const std::string& optValue);
 
