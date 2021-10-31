@@ -135,7 +135,6 @@ public:
     void setOrigValue(const std::string& item, int value) override;
 
     static bool isDebugLogging() { return debug; }
-    fs::path getDataDir() const override { return dataDir; }
 
 protected:
     fs::path filename;

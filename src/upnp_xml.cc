@@ -385,17 +385,6 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase);
 }
 
-std::string UpnpXMLBuilder::getArtworkUrl(const std::shared_ptr<CdsItem>& item) const
-{
-    log_debug("Building Art url for {}", item->getID());
-
-    auto urlBase = getPathBase(item);
-    if (urlBase->addResID) {
-        return fmt::format("{}{}1/rct/aa", virtualURL, urlBase->pathBase);
-    }
-    return virtualURL + urlBase->pathBase;
-}
-
 std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont)
 {
     auto orderedResources = getOrderedResources(cont);

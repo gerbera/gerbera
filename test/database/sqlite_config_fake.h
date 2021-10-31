@@ -68,7 +68,6 @@ public:
     bool hasOrigValue(const std::string& item) const override { return false; }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const override { return nullptr; }
-    fs::path getDataDir() const override { return "/usr/local/share/gerbera"; }
 };
 
 #endif //GERBERA_SQLITE_CONFIG_FAKE_H

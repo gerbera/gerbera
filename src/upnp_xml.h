@@ -121,7 +121,6 @@ protected:
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const fs::path& location);
-    std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item) const;
     static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
     void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
 };

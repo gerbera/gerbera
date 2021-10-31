@@ -44,7 +44,6 @@ public:
     bool isValid() const { return valid; }
     bool isCancellable() const { return cancellable; }
     void invalidate() { valid = false; }
-    task_owner_t getOwner() const { return taskOwner; }
 };
 
 #endif //__GENERIC_TASK_H__

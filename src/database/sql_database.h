@@ -171,11 +171,9 @@ public:
 
     int ensurePathExistence(const fs::path& path, int* changedContainer) override;
 
-    std::string getFsRootName() override;
     static std::string getSortCapabilities();
     static std::string getSearchCapabilities();
 
-    void clearFlagInDB(int flag) override;
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
 
     int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
@@ -298,9 +296,6 @@ private:
     static bool remapBool(const std::string& field) { return field == "1"; }
     static bool remapBool(int field) { return field == 1; }
 
-    void setFsRootName(const std::string& rootName = "");
-
-    std::string fsRootName;
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
     using AutoLock = std::lock_guard<std::mutex>;

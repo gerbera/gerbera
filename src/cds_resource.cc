@@ -60,11 +60,6 @@ void CdsResource::addAttribute(resource_attributes_t res, std::string value)
     attributes[MetadataHandler::getResAttrName(res)] = std::move(value);
 }
 
-void CdsResource::removeAttribute(resource_attributes_t res)
-{
-    attributes.erase(MetadataHandler::getResAttrName(res));
-}
-
 void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
 {
     for (auto&& [key, val] : additional) {
@@ -129,20 +124,6 @@ bool CdsResource::equals(const std::shared_ptr<CdsResource>& other) const
 std::shared_ptr<CdsResource> CdsResource::clone()
 {
     return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
-}
-
-std::string CdsResource::encode() const
-{
-    // encode resources
-    std::ostringstream buf;
-    buf << handlerType;
-    buf << RESOURCE_PART_SEP;
-    buf << dictEncode(attributes);
-    buf << RESOURCE_PART_SEP;
-    buf << dictEncode(parameters);
-    buf << RESOURCE_PART_SEP;
-    buf << dictEncode(options);
-    return buf.str();
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)

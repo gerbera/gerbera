@@ -152,8 +152,6 @@ public:
 
     void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
-    bool isBusy() const { return working; }
-
     /// \brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask();
 

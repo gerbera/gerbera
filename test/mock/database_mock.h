@@ -68,9 +68,6 @@ public:
     std::vector<int> getPathIDs(int objectID) override { return {}; }
     int ensurePathExistence(const fs::path& path, int* changedContainer) override { return 0; }
 
-    void clearFlagInDB(int flag) override { }
-    std::string getFsRootName() override { return {}; }
-
     void threadCleanup() override { }
     bool threadCleanupRequired() const override { return false; }
 

@@ -735,7 +735,6 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         std::map<std::string, std::string> cdsObjectSql;
 
         cdsObjectSql["dc_title"] = quote(obj->getTitle());
-        setFsRootName(obj->getTitle());
         cdsObjectSql["upnp_class"] = quote(obj->getClass());
 
         data.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update);
@@ -2363,30 +2362,6 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
         objectID = row->col_int(0, INVALID_OBJECT_ID);
     }
     return pathIDs;
-}
-
-std::string SQLDatabase::getFsRootName()
-{
-    if (!fsRootName.empty())
-        return fsRootName;
-    setFsRootName();
-    return fsRootName;
-}
-
-void SQLDatabase::setFsRootName(const std::string& rootName)
-{
-    if (!rootName.empty()) {
-        fsRootName = rootName;
-    } else {
-        auto fsRootObj = loadObject(CDS_ID_FS_ROOT);
-        fsRootName = fsRootObj->getTitle();
-    }
-}
-
-void SQLDatabase::clearFlagInDB(int flag)
-{
-    auto sql = fmt::format("UPDATE {0} SET {1} = ({1} & ~{2}) WHERE {1} & {2}", identifier(CDS_OBJECT_TABLE), identifier("flags"), flag);
-    exec(sql);
 }
 
 void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const
