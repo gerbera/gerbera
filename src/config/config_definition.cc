@@ -623,7 +623,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR,
         "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#scripting",
         ""),
-#endif // JS
+#endif // HAVE_JS
 
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
         "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",

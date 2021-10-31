@@ -273,4 +273,4 @@ protected:
     std::shared_ptr<DynamicContentList> option;
 };
 
-#endif // __CONFIG_MANAGER_H__
+#endif // __CONFIG_OPTIONS_H__

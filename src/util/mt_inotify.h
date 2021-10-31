@@ -80,4 +80,4 @@ private:
 
 #endif
 
-#endif // __INOTIFY_H__
+#endif // __MT_INOTIFY_H__

@@ -152,4 +152,4 @@ protected:
 
 #endif //__ONLINE_SERVICE_H__
 
-#endif //ONLINE_SERVICE
+#endif //ONLINE_SERVICES
