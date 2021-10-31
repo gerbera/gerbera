@@ -113,7 +113,7 @@ std::vector<std::string> Script::getArrayProperty(const std::string& name) const
     if (!duk_is_object_coercible(ctx, -1))
         return {};
     duk_get_prop_string(ctx, -1, name.c_str());
-    if (duk_is_null_or_undefined(ctx, -1)) {
+    if (duk_is_null_or_undefined(ctx, -1) || !duk_is_array(ctx, -1)) {
         duk_pop(ctx);
         return {};
     }
