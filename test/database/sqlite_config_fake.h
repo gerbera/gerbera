@@ -71,4 +71,4 @@ public:
     fs::path getDataDir() const override { return "/usr/local/share/gerbera"; }
 };
 
-#endif //GERBERA_MYSQL_CONFIG_FAKE_H
+#endif //GERBERA_SQLITE_CONFIG_FAKE_H

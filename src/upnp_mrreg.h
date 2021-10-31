@@ -114,4 +114,4 @@ public:
     //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
 
-#endif // __UPNP_CM_H__
+#endif // __UPNP_MRREG_H__
