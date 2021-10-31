@@ -53,6 +53,6 @@ protected:
     std::unique_ptr<CurlContentHandler> getContentHandler() const override;
 };
 
-#endif //__ONLINE_SERVICE_H__
+#endif //__ATRAILERS_SERVICE_H__
 
 #endif //ATRAILERS
