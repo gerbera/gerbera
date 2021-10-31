@@ -477,7 +477,7 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 
 #ifdef HAVE_INOTIFY
     bool inotifySupported = Inotify::supported();
-    tempBool = (inotifySupported && value == "auto") || tempBool;
+    tempBool = (inotifySupported && value == "auto");
 #endif
 
     if (value == YES) {
