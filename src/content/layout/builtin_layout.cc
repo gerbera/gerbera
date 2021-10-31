@@ -53,6 +53,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     , genreMap(this->config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
     container["Video"] = std::make_shared<CdsContainer>("Video");
+    container["Video"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
     container["All Video"] = std::make_shared<CdsContainer>("All Video");
     chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] });
     container["Video/Year"] = std::make_shared<CdsContainer>("Year");
@@ -63,6 +64,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] });
 
     container["Photos"] = std::make_shared<CdsContainer>("Photos");
+    container["Photos"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
     container["All Photos"] = std::make_shared<CdsContainer>("All Photos");
     chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] });
     container["Photos/Year"] = std::make_shared<CdsContainer>("Year");
@@ -73,6 +75,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] });
 
     container["Audio"] = std::make_shared<CdsContainer>("Audio");
+    container["Audio"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
     container["All Audio"] = std::make_shared<CdsContainer>("All Audio");
     container["All Songs"] = std::make_shared<CdsContainer>("All Songs");
     chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] });
