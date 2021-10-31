@@ -32,7 +32,6 @@
 #include "action_request.h" // API
 
 #include "upnp_xml.h"
-#include "util/tools.h"
 #include "util/upnp_quirks.h"
 
 ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest* upnpRequest)
