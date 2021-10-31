@@ -32,29 +32,21 @@
 #include "config_manager.h" // API
 
 #include <array>
-#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
 #include <sstream>
-#include <sys/stat.h>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <clocale>
 #include <langinfo.h>
 #endif
 
-#ifdef HAVE_CURL
-#include <curl/curl.h>
-#endif
-
 #include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "content/autoscan.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -393,7 +385,7 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
         setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
     }
-#endif //HAVE_CURL
+#endif // HAVE_CURL
 
     // read import options
     args["trim"] = "false";
@@ -452,15 +444,6 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
     // read online content options
-#ifdef SOPCAST
-    int sopcastRefresh = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_REFRESH)->getIntOption();
-    int sopcastPurge = setOption(root, CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER)->getIntOption();
-
-    if (sopcastRefresh >= sopcastPurge) {
-        if (sopcastPurge != 0)
-            throw_std_runtime_error("Error in config file: SopCast purge-after value must be greater than refresh interval");
-    }
-#endif
 
 #ifdef ATRAILERS
     int atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();

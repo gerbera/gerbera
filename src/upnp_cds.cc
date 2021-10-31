@@ -66,7 +66,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 #endif
     std::string objID = reqRoot.child("ObjectID").text().as_string();
     std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
-    //std::string filter; // not yet supported
+    // std::string filter; // not yet supported
     std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
     std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();

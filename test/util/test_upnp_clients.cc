@@ -47,7 +47,7 @@ public:
 
 TEST_F(UpnpClientsTest, bubbleUPnPV3_4_4)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 
@@ -62,7 +62,7 @@ TEST_F(UpnpClientsTest, bubbleUPnPV3_4_4)
 
 TEST_F(UpnpClientsTest, foobar2000V1_6_2)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 
@@ -77,7 +77,7 @@ TEST_F(UpnpClientsTest, foobar2000V1_6_2)
 
 TEST_F(UpnpClientsTest, kodiV18_9)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 
@@ -92,7 +92,7 @@ TEST_F(UpnpClientsTest, kodiV18_9)
 
 TEST_F(UpnpClientsTest, samsungTVQ70)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 
@@ -107,7 +107,7 @@ TEST_F(UpnpClientsTest, samsungTVQ70)
 
 TEST_F(UpnpClientsTest, vlcV3_0_11_1)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 
@@ -132,7 +132,7 @@ TEST_F(UpnpClientsTest, windows10)
 
 TEST_F(UpnpClientsTest, multipleClientsOnSameIP)
 {
-    const ClientInfo* pInfo = nullptr;
+    const ClientInfo* pInfo;
     struct sockaddr_storage addr;
     fillAddr(&addr, "192.168.1.42");
 

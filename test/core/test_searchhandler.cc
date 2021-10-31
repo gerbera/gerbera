@@ -24,7 +24,6 @@
 #include <iostream>
 #include <regex>
 
-#include "config/config_manager.h"
 #include "database/search_handler.h"
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
@@ -33,7 +32,7 @@ static decltype(auto) getAllTokens(const std::string& input)
     SearchLexer lexer { input };
     upVecUpST searchTokens = std::make_unique<std::vector<std::unique_ptr<SearchToken>>>();
     std::unique_ptr<SearchToken> searchToken = nullptr;
-    bool gotToken = false;
+    bool gotToken;
     do {
         searchToken = lexer.nextToken();
         gotToken = !!searchToken;

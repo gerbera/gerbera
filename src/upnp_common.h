@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_common.h - this file is part of Gerbera.
-    
+
     Copyright (C) 2021 Gerbera Contributors
-    
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -110,8 +110,8 @@
 #define UPNP_DESC_SPEC_VERSION_MINOR "0"
 #define UPNP_DESC_PRODUCT_CAPS "smi,DCM10,getMediaInfo.sec,getCaptionInfo.sec"
 
-//services
-// connection manager
+// services
+//  connection manager
 #define UPNP_DESC_CM_SERVICE_TYPE "urn:schemas-upnp-org:service:ConnectionManager:1"
 #define UPNP_DESC_CM_SERVICE_ID "urn:upnp-org:serviceId:ConnectionManager"
 #define UPNP_DESC_CM_SCPD_URL "cm.xml"

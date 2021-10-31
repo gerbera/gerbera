@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     builtin_layout.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -41,15 +41,11 @@
 
 #include "content/onlineservice/online_service.h"
 
-#ifdef SOPCAST
-#include "content/onlineservice/sopcast_content_handler.h"
-#endif
-
 #ifdef ATRAILERS
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-#endif //ONLINE_SERVICES
+#endif // ONLINE_SERVICES
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     : Layout(std::move(content))
@@ -96,18 +92,9 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
 
 #ifdef ONLINE_SERVICES
-    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED) || config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
+    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         container["Online Services"] = std::make_shared<CdsContainer>("Online Services");
     }
-#ifdef SOPCAST
-    if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
-        container["SopCast"] = std::make_shared<CdsContainer>("SopCast");
-        container["SopCast/All Channels"] = std::make_shared<CdsContainer>("All Channels");
-        container["SopCast/Groups"] = std::make_shared<CdsContainer>("Groups");
-        chain["/Online Services/SopCast/All Channels"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/All Channels"] });
-        chain["/Online Services/SopCast/Groups"] = this->content->addContainerTree({ container["Online Services"], container["SopCast"], container["SopCast/Groups"] });
-    }
-#endif
 
 #ifdef ATRAILERS
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
@@ -384,31 +371,6 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     getDir(obj, rootpath, "Audio", "Audio/Directories");
 }
 
-#ifdef SOPCAST
-void BuiltinLayout::addSopCast(const std::shared_ptr<CdsObject>& obj)
-{
-    bool refSet = false;
-
-    if (obj->getID() != INVALID_OBJECT_ID) {
-        obj->setRefID(obj->getID());
-        refSet = true;
-    }
-
-    add(obj, chain["/Online Services/SopCast/All Channels"], refSet);
-    if (!refSet) {
-        obj->setRefID(obj->getID());
-        refSet = true;
-    }
-
-    auto temp = obj->getAuxData(SOPCAST_AUXDATA_GROUP);
-    if (!temp.empty()) {
-        auto id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Online Services"], container["SopCast"], container["Groups"],
-            std::make_shared<CdsContainer>(temp) });
-        add(obj, id, refSet);
-    }
-}
-#endif
-
 #ifdef ATRAILERS
 void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
@@ -476,11 +438,6 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
         auto service = service_type_t(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID)));
 
         switch (service) {
-#ifdef SOPCAST
-        case OS_SopCast:
-            addSopCast(clone);
-            break;
-#endif
 #ifdef ATRAILERS
         case OS_ATrailers:
             addATrailers(clone);

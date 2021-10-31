@@ -30,14 +30,11 @@
 #include "config/client_config.h"
 #include "config/config.h"
 #include "config/config_definition.h"
-#include "config/config_options.h"
 #include "config/config_setup.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
-#include "upnp_xml.h"
 #include "util/upnp_clients.h"
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)
@@ -76,8 +73,7 @@ void Web::ConfigSave::process()
             std::shared_ptr<ConfigSetup> cs;
             log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
-                config_option_t option = CFG_MAX;
-                option = config_option_t(std::stoi(param(key)));
+                auto option = config_option_t(std::stoi(param(key)));
                 cs = ConfigDefinition::findConfigSetup(option, true);
             } else if (!param(item).empty()) {
                 cs = ConfigDefinition::findConfigSetupByPath(param(item), true);

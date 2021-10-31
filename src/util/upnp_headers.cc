@@ -67,9 +67,9 @@ void Headers::addHeader(const std::string& key, const std::string& value)
     headers.emplace(cleanKey, cleanValue);
 }
 
-std::string Headers::formatHeader(const std::pair<std::string, std::string>& header, bool crlf)
+std::string Headers::formatHeader(const std::pair<std::string, std::string>& header)
 {
-    return fmt::format("{}: {}{}", header.first, header.second, (crlf) ? "\r\n" : "");
+    return fmt::format("{}: {}", header.first, header.second);
 }
 
 std::pair<std::string, std::string> Headers::parseHeader(const std::string& header)
@@ -95,7 +95,7 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
     for (auto&& iter : headers) {
         UpnpExtraHeaders* h = UpnpExtraHeaders_new();
-        UpnpExtraHeaders_set_resp(h, formatHeader(iter, false).c_str());
+        UpnpExtraHeaders_set_resp(h, formatHeader(iter).c_str());
         UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
     }
 #endif

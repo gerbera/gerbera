@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     curl_io_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -46,7 +46,7 @@ CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& 
     this->URL = url;
     this->external_curl_handle = (curlHandle);
     this->curl_handle = curlHandle;
-    //bytesCurl = 0;
+    // bytesCurl = 0;
     signalAfterEveryRead = true;
 
     // still todo:
@@ -80,8 +80,8 @@ void CurlIOHandler::threadProc()
     assert(curl_handle);
     assert(!URL.empty());
 
-    //char error_buffer[CURL_ERROR_SIZE] = {'\0'};
-    //curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+    // char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+    // curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
@@ -97,9 +97,9 @@ void CurlIOHandler::threadProc()
     if (logEnabled)
         curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
 
-    //curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
+    // curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
 
-    //proxy..
+    // proxy..
 
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, static_cast<void*>(this));
@@ -147,13 +147,13 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
     assert(wantWrite <= ego->bufSize);
     auto& threadRunner = ego->threadRunner;
 
-    //log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
+    // log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
 
     auto lock = threadRunner->uniqueLock();
 
     bool first = true;
 
-    int bufFree = 0;
+    int bufFree;
     do {
         if (ego->doSeek && !ego->empty && (ego->seekWhence == SEEK_SET || (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0))) {
             auto currentFillSize = int(ego->b - ego->a);
@@ -224,7 +224,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
 
     lock.lock();
 
-    //ego->bytesCurl += wantWrite;
+    // ego->bytesCurl += wantWrite;
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
         ego->b -= ego->bufSize;
@@ -246,4 +246,4 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
     return wantWrite;
 }
 
-#endif //HAVE_CURL
+#endif // HAVE_CURL

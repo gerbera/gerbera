@@ -155,7 +155,7 @@ void Server::run()
     std::ostringstream buf;
     desc->print(buf, "", 0);
     std::string deviceDescription = buf.str();
-    //log_debug("Device Description: {}", deviceDescription.c_str());
+    // log_debug("Device Description: {}", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...");
     ret = UpnpRegisterRootDevice2(
@@ -431,7 +431,7 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
         cmgr->processActionRequest(request);
     } else if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
-        //log_debug("routeActionRequest: request for content directory service");
+        // log_debug("routeActionRequest: request for content directory service");
         cds->processActionRequest(request);
     } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processActionRequest(request);
@@ -454,11 +454,11 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
     // we need to match the serviceID to one of our services
     if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
-        //log_debug("routeSubscriptionRequest: request for content directory service");
+        // log_debug("routeSubscriptionRequest: request for content directory service");
         cds->processSubscriptionRequest(request);
     } else if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
-        //log_debug("routeSubscriptionRequest: request for connection manager service");
+        // log_debug("routeSubscriptionRequest: request for connection manager service");
         cmgr->processSubscriptionRequest(request);
     } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processSubscriptionRequest(request);
@@ -553,7 +553,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback");
     ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("{} read({})", f, length);
+        // log_debug("{} read({})", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
@@ -565,7 +565,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback");
     ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("{} write({})", f, length);
+        // log_debug("{} write({})", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS)
@@ -573,7 +573,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir SeekCallback");
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("{} seek({}, {})", f, offset, whence);
+        // log_debug("{} seek({}, {})", f, offset, whence);
         try {
             auto handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
@@ -588,7 +588,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-        //log_debug("{} close()", f);
+        // log_debug("{} close()", f);
         int retClose = 0;
         auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
         try {

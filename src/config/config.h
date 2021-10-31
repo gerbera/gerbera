@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     config.h - this file is part of Gerbera.
-    
+
     Copyright (C) 2020-2021 Gerbera Contributors
-    
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -139,7 +139,7 @@ enum config_option_t {
     CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_GENREBOX,
     CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_TRACKBOX,
     CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR,
-#endif // JS
+#endif // HAVE_JS
     CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
     CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
 #ifdef HAVE_MAGIC
@@ -176,13 +176,7 @@ enum config_option_t {
 #ifdef HAVE_CURL
     CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
     CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
-#endif //HAVE_CURL
-#ifdef SOPCAST
-    CFG_ONLINE_CONTENT_SOPCAST_ENABLED,
-    CFG_ONLINE_CONTENT_SOPCAST_REFRESH,
-    CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START,
-    CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER,
-#endif
+#endif // HAVE_CURL
 #ifdef ATRAILERS
     CFG_ONLINE_CONTENT_ATRAILERS_ENABLED,
     CFG_ONLINE_CONTENT_ATRAILERS_REFRESH,
@@ -236,9 +230,6 @@ enum config_option_t {
     CFG_UPNP_TITLE_NAMESPACES,
     CFG_THREAD_SCOPE_SYSTEM,
     CFG_IMPORT_READABLE_NAMES,
-#ifdef SOPCAST
-    CFG_IMPORT_SOPCAST_MIMETYE_LIST,
-#endif
     CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED,
     CFG_SERVER_DYNAMIC_CONTENT_LIST,
     CFG_IMPORT_RESOURCES_ORDER,

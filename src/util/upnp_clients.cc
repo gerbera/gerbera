@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_clients.cc - this file is part of Gerbera.
-    
+
     Copyright (C) 2020-2021 Gerbera Contributors
-    
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -154,11 +154,8 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 
 const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
 {
-    const ClientInfo* info = nullptr;
-
     // 1. by IP address
-    info = getInfoByAddr(addr);
-
+    auto info = getInfoByAddr(addr);
     if (!info) {
         // 2. by User-Agent
         info = getInfoByType(userAgent, ClientMatchType::UserAgent);

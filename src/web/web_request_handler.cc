@@ -31,8 +31,6 @@
 
 #include "web_request_handler.h" // API
 
-#include <ctime>
-
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "iohandler/mem_io_handler.h"
@@ -92,7 +90,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {
-        dictMerge(params, decodedParams);
+        params.merge(decodedParams);
     }
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown

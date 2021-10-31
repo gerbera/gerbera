@@ -31,11 +31,9 @@
 
 #include "content_manager.h" // API
 
-#include <cerrno>
 #include <cstring>
 #include <regex>
 
-#include "config/config_manager.h"
 #include "config/directory_tweak.h"
 #include "database/database.h"
 #include "layout/builtin_layout.h"
@@ -54,10 +52,6 @@
 
 #ifdef HAVE_LASTFMLIB
 #include "onlineservice/lastfm_scrobbler.h"
-#endif
-
-#ifdef SOPCAST
-#include "onlineservice/sopcast_service.h"
 #endif
 
 #ifdef ATRAILERS
@@ -166,32 +160,6 @@ void ContentManager::run()
 
 #ifdef ONLINE_SERVICES
     online_services = std::make_unique<OnlineServiceList>();
-
-#ifdef SOPCAST
-    if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_ENABLED)) {
-        try {
-            auto sc = std::make_shared<SopCastService>(self);
-
-            auto i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_REFRESH));
-            sc->setRefreshInterval(i);
-
-            i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER));
-            sc->setItemPurgeInterval(i);
-
-            if (config->getBoolOption(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START))
-                i = CFG_DEFAULT_UPDATE_AT_START;
-
-            auto scParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_SopCast);
-            sc->setTimerParameter(scParam);
-            online_services->registerService(sc);
-            if (i > std::chrono::seconds::zero()) {
-                timer->addTimerSubscriber(this, i, sc->getTimerParameter(), true);
-            }
-        } catch (const std::runtime_error& ex) {
-            log_error("Could not setup SopCast: {}", ex.what());
-        }
-    }
-#endif // SOPCAST
 
 #ifdef ATRAILERS
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {

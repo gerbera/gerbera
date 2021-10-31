@@ -70,11 +70,6 @@
 #define DEFAULT_HIDE_PC_DIRECTORY NO
 #define DEFAULT_CLIENTS_EN_VALUE NO
 
-#ifdef SOPCAST
-#define DEFAULT_SOPCAST_ENABLED NO
-#define DEFAULT_SOPCAST_UPDATE_AT_START NO
-#endif
-
 #ifdef ATRAILERS
 #define DEFAULT_ATRAILERS_ENABLED NO
 #define DEFAULT_ATRAILERS_UPDATE_AT_START NO
@@ -96,7 +91,7 @@
 #define DEFAULT_MYSQL_USER "gerbera"
 #define DEFAULT_MYSQL_ENABLED NO
 
-#else //HAVE_MYSQL
+#else // HAVE_MYSQL
 #define DEFAULT_MYSQL_ENABLED NO
 #endif
 
@@ -273,16 +268,6 @@ static std::map<std::string, std::string> ext_mt_defaults {
     { "wv", "audio/x-wavpack" },
     { "wvx", "video/x-ms-wvx" },
 };
-
-#ifdef SOPCAST
-/// \brief default values for CFG_IMPORT_SOPCAST_MIMETYE_LIST
-static std::map<std::string, std::string> sc_mt_defaults {
-    { "wmv", "video/sopcast-x-ms-wmv" },
-    { "mp3", "audio/sopcast-mpeg" },
-    { "wma", "audio/sopcast-x-ms-wma" },
-    { "*", "application/sopcast-stream" }, // default value
-};
-#endif
 
 /// \brief default values for ATTR_TRANSCODING_MIMETYPE_PROF_MAP
 static std::map<std::string, std::string> tr_mt_defaults {
@@ -623,7 +608,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR,
         "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#scripting",
         ""),
-#endif // JS
+#endif // HAVE_JS
 
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
         "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
@@ -762,24 +747,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/extended-runtime-options/lastfm/password", "config-extended.html#lastfm",
         false, DEFAULT_LASTFM_PASSWORD, true),
 #endif
-#ifdef SOPCAST
-    std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_SOPCAST_ENABLED,
-        "/import/online-content/SopCast/attribute::enabled", "config-online.html#sopcast",
-        DEFAULT_SOPCAST_ENABLED),
-    std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_SOPCAST_REFRESH,
-        "/import/online-content/SopCast/attribute::refresh", "config-online.html#sopcast",
-        0),
-    std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_SOPCAST_UPDATE_AT_START,
-        "/import/online-content/SopCast/attribute::update-at-start", "config-online.html#sopcast",
-        DEFAULT_SOPCAST_UPDATE_AT_START),
-    std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_SOPCAST_PURGE_AFTER,
-        "/import/online-content/SopCast/attribute::purge-after", "config-online.html#sopcast",
-        0),
-    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_SOPCAST_MIMETYE_LIST,
-        "/import/online-content/SopCast/mimetype-mappings", "config-online.html#sopcast",
-        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, false, std::move(sc_mt_defaults)),
-#endif
 #ifdef ATRAILERS
     std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED,
         "/import/online-content/AppleTrailers/attribute::enabled", "config-online.html#appletrailers",
@@ -841,7 +808,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
         "/transcoding/attribute::fetch-buffer-fill-size", "config-transcode.html#transcoding",
         DEFAULT_CURL_INITIAL_FILL_SIZE, 0, ConfigIntSetup::CheckMinValue),
-#endif //HAVE_CURL
+#endif // HAVE_CURL
 #ifdef HAVE_LIBEXIF
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
         "/import/library-options/libexif/auxdata", "config-import.html#libexif",
@@ -1259,15 +1226,17 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
     { ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, { CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
-#ifdef SOPCAST
-                                              CFG_IMPORT_SOPCAST_MIMETYE_LIST
-#endif
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, {
+                                              CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
+                                              CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+                                              CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+                                              CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
                                           } },
-    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST, CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
-#ifdef SOPCAST
-                                            CFG_IMPORT_SOPCAST_MIMETYE_LIST
-#endif
+    { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, {
+                                            CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
+                                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+                                            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+                                            CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
                                         } },
 
     { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, //

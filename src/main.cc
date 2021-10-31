@@ -54,7 +54,6 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
-#include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
 #include <sys/stat.h>
@@ -493,8 +492,8 @@ int main(int argc, char** argv, char** envp)
             try {
                 if (server)
                     server->shutdown();
-                server = nullptr;
-                configManager = nullptr;
+                server.reset();
+                configManager.reset();
             } catch (const std::runtime_error& e) {
                 log_error("{}", e.what());
             }
@@ -541,8 +540,8 @@ int main(int argc, char** argv, char** envp)
                 log_info("Restarting Gerbera!");
                 try {
                     server->shutdown();
-                    server = nullptr;
-                    configManager = nullptr;
+                    server.reset();
+                    configManager.reset();
 
                     try {
                         configManager = std::make_shared<ConfigManager>(
@@ -583,8 +582,8 @@ int main(int argc, char** argv, char** envp)
         int ret = EXIT_SUCCESS;
         try {
             server->shutdown();
-            server = nullptr;
-            configManager = nullptr;
+            server.reset();
+            configManager.reset();
         } catch (const UpnpException& upnpE) {
             log_error("main: upnp error {}", upnpE.getErrorCode());
             ret = EXIT_FAILURE;

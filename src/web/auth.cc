@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     auth.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -104,8 +104,8 @@ void Web::Auth::process()
 
         auto actions = cfg.append_child("actions");
         xml2JsonHints->setArrayName(actions, "action");
-        //actions->appendTextChild("action", "fokel1");
-        //actions->appendTextChild("action", "fokel2");
+        // actions->appendTextChild("action", "fokel1");
+        // actions->appendTextChild("action", "fokel2");
 
         auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
         friendlyName.set_value(config->getOption(CFG_SERVER_NAME).c_str());
@@ -128,7 +128,7 @@ void Web::Auth::process()
 
         if (!session->isLoggedIn() && !accountsEnabled()) {
             session->logIn();
-            //throw SessionException("not logged in");
+            // throw SessionException("not logged in");
         }
         root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {

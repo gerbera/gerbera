@@ -165,26 +165,6 @@ TEST(ToolsTest, dictDecodeTest)
     EXPECT_EQ(values.size(), 0);
 }
 
-TEST(ToolsTest, dictMergeTest)
-{
-    std::map<std::string, std::string> result;
-    result.emplace("A", "1");
-    result.emplace("B", "2");
-
-    std::map<std::string, std::string> source;
-    source.emplace("A", "10");
-    source.emplace("C", "3");
-
-    EXPECT_EQ(result.size(), 2);
-
-    dictMerge(result, source);
-
-    EXPECT_EQ(result.size(), 3);
-    EXPECT_EQ(result["A"], "1");
-    EXPECT_EQ(result["B"], "2");
-    EXPECT_EQ(result["C"], "3");
-}
-
 TEST(ToolsTest, pathToMapTest)
 {
     std::map<std::string, std::string> values = pathToMap("Key 1/Value 1/Key 2/Value 2/Key3//");

@@ -100,4 +100,4 @@ protected:
 
 #endif //__CURL_ONLINE_SERVICE_H__
 
-#endif //HAVE_CURL
+#endif // HAVE_CURL

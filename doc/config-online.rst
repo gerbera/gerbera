@@ -16,9 +16,6 @@ Example of online content XML configuration
                 purge-after="[seconds]"
                 update-at-start="[yes,no]"
                 resolution="[640,720]"/>
-            <SopCast enabled="[yes,no]" refresh="[seconds]"
-                purge-after="[seconds]"
-                update-at-start="[yes,no]"/>
         </online-content>
     </import>
 
@@ -103,50 +100,6 @@ This tag defines the online content for `Apple Trailers <https://trailers.apple.
 
     Sets the Apple Trailers URL to retrieve the content, affecting the resolution size that is downloaded.
 
-``SopCast``
-~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <SopCast enabled="[yes,no]" refresh="<int>" purge-after="<int>" update-at-start="[yes,no]"/>
-
-* Optional
-
-This tag defines the online content for `SopCast <http://www.sopcast.com/>`_
-
-    **Attributes**
-
-    .. code-block:: xml
-
-        enabled=...
-
-    * Default: **no**
-
-    .. code-block:: xml
-
-        refresh=...
-
-    * Default: **43200**
-
-    The amount of time to wait before refreshing the online content
-
-    .. code-block:: xml
-
-        update-at-start=...
-
-    * Default: **no**
-
-    Upon starting Gerbera, the SopCast content will be refreshed.
-
-    .. code-block:: xml
-
-        purge-after=...
-
-    * Default: **0**
-
-    Sets the expiration time of downloaded content in seconds.
-
-
 ``mimetype-mappings``
 ----------------------
 ::
@@ -164,10 +117,10 @@ This section holds the file name extension to mime type mappings.
 
 ::
 
-    <map from="wmv" to="video/sopcast-x-ms-wmv"/>
-    <map from="mp3" to="audio/sopcast-mpeg"/>
-    <map from="wma" to="audio/sopcast-x-ms-wma"/>
-    <map from="*" to="application/sopcast-stream"/>
+    <map from="wmv" to="video/x-ms-wmv"/>
+    <map from="mp3" to="audio/mpeg"/>
+    <map from="wma" to="audio/x-ms-wma"/>
+    <map from="*" to="application/octet-stream"/>
 
 * Optional
 

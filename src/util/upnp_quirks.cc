@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_quirks.cc - this file is part of Gerbera.
-    
+
     Copyright (C) 2020-2021 Gerbera Contributors
-    
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -25,13 +25,9 @@
 
 #include "upnp_quirks.h" // API
 
-#include <unistd.h>
-
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "request_handler.h"
 #include "server.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"

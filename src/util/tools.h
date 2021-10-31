@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     tools.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -150,9 +150,6 @@ std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
 std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
 std::map<std::string, std::string> pathToMap(std::string_view url);
-
-/// \brief Adds elements from source to result if they do not yet exist in result
-void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
@@ -321,13 +318,6 @@ std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& range = "",
     const std::string& title = "");
 
-/// \brief this is the mkstemp routine from glibc, the only difference is that
-/// it does not return an fd but just the name that we could use.
-///
-/// The reason behind this is, that we need to open a pipe, while mkstemp will
-/// open a regular file.
-fs::path tempName(const fs::path& leadPath, const std::string& tmpl);
-
 /// \brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(const fs::path& oggFilename);
 
@@ -361,10 +351,5 @@ std::string getAVIFourCC(std::string_view aviFilename);
 std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
 std::string sockAddrGetNameInfo(const struct sockaddr* sa);
-
-#ifdef SOPCAST
-/// \brief Finds a free port between range_min and range_max on localhost.
-int find_local_port(in_port_t rangeMin, in_port_t rangeMax);
-#endif
 
 #endif // __TOOLS_H__

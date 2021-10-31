@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     tools.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,10 +31,8 @@
 
 #include "tools.h" // API
 
-#include <arpa/inet.h>
 #include <cctype>
 #include <cerrno>
-#include <climits>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -44,7 +42,6 @@
 #include <queue>
 #include <random>
 #include <sstream>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -54,7 +51,6 @@
 #endif
 
 #include <ifaddrs.h>
-#include <net/if.h>
 
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
@@ -67,13 +63,8 @@
 #include <sys/sockio.h>
 #endif
 
-#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "contrib/md5.h"
-#include "iohandler/file_io_handler.h"
-#include "metadata/metadata_handler.h"
-
-#define WHITE_SPACE " \t\r\n"
 
 static constexpr auto hexChars = "0123456789abcdef";
 
@@ -259,7 +250,7 @@ std::string hexEncode(const void* data, std::size_t len)
 {
     auto buf = std::string(2 * len, '\0');
 
-    const unsigned char* chars = static_cast<const unsigned char*>(data);
+    auto chars = static_cast<const unsigned char*>(data);
     for (std::size_t i = 0; i < len; i++) {
         unsigned char c = chars[i];
         unsigned char hi = c >> 4;
@@ -471,13 +462,6 @@ std::map<std::string, std::string> pathToMap(std::string_view url)
     } while (lastPos < size);
 
     return out;
-}
-
-void dictMerge(std::map<std::string, std::string>& result, const std::map<std::string, std::string>& source)
-{
-    for (auto&& [key, value] : source) {
-        result.emplace(key, value);
-    }
 }
 
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
@@ -834,87 +818,7 @@ std::vector<std::string> populateCommandLine(const std::string& line,
             std::string newParam = param.replace(titlePos, 6, title);
         }
     }
-
     return params;
-}
-
-// The tempName() function is borrowed from gfileutils.c from the glibc package
-
-/* gfileutils.c - File utility functions
- *
- *  Copyright 2000 Red Hat, Inc.
- *
- * GLib is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * GLib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with GLib; see the file COPYING.LIB.  If not,
- * write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- *   Boston, MA 02111-1307, USA.
- */
-/*
- * create_temp_file based on the mkstemp implementation from the GNU C library.
- * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
- */
-// tempName is based on create_temp_file, see (C) above
-fs::path tempName(const fs::path& leadPath, const std::string& tmpl)
-{
-    int count;
-    static constexpr char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static constexpr int nletters = sizeof(letters) - 1;
-    long value;
-    struct timespec ts;
-    static int counter = 0;
-    struct stat statbuf;
-    int ret;
-
-    /* find the last occurrence of "XXXXXX" */
-    auto x = tmpl.rfind("XXXXXX");
-    if (x == std::string::npos) {
-        return {};
-    }
-
-    auto xxxxxx = tmpl.substr(x);
-
-    /* Get some more or less random data.  */
-    clock_gettime(CLOCK_REALTIME, &ts);
-    value = (ts.tv_nsec ^ ts.tv_sec) + counter++;
-
-    for (count = 0; count < 100; value += 7777, ++count) {
-        long v = value;
-
-        /* Fill in the random bits.  */
-        xxxxxx[0] = letters[v % nletters];
-        v /= nletters;
-        xxxxxx[1] = letters[v % nletters];
-        v /= nletters;
-        xxxxxx[2] = letters[v % nletters];
-        v /= nletters;
-        xxxxxx[3] = letters[v % nletters];
-        v /= nletters;
-        xxxxxx[4] = letters[v % nletters];
-        v /= nletters;
-        xxxxxx[5] = letters[v % nletters];
-
-        fs::path check = leadPath / tmpl;
-        ret = stat(check.c_str(), &statbuf);
-        if (ret != 0) {
-            if ((errno == ENOENT) || (errno == ENOTDIR))
-                return check;
-
-            return {};
-        }
-    }
-
-    /* We got out of the loop because we ran out of combinations to try.  */
-    return {};
 }
 
 bool isTheora(const fs::path& oggFilename)
@@ -1111,60 +1015,3 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 
     return fmt::format("{}:{}", hoststr, portstr);
 }
-
-#ifdef SOPCAST
-/// \brief
-int find_local_port(in_port_t rangeMin, in_port_t rangeMax)
-{
-    int fd;
-    int retryCount = 0;
-    in_port_t port;
-    struct sockaddr_in serverAddr;
-    struct hostent* server;
-
-    if (rangeMin > rangeMax) {
-        log_error("min port range > max port range!");
-        return -1;
-    }
-
-    std::mt19937 rng;
-    std::uniform_int_distribution<in_port_t> gen(rangeMin, rangeMax);
-
-    do {
-        port = gen(rng);
-
-        fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0) {
-            log_error("could not determine free port: error creating socket: {}", std::strerror(errno));
-            return -1;
-        }
-
-        server = gethostbyname("127.0.0.1");
-        if (!server) {
-            log_error("could not resolve localhost");
-            close(fd);
-            return -1;
-        }
-
-        serverAddr = {};
-        serverAddr.sin_family = AF_INET;
-        std::memcpy(&serverAddr.sin_addr.s_addr, server->h_addr, server->h_length);
-        serverAddr.sin_port = htons(port);
-
-        if (connect(fd, reinterpret_cast<struct sockaddr*>(&serverAddr),
-                sizeof(serverAddr))
-            == -1) {
-            close(fd);
-            return port;
-        }
-
-        close(fd);
-
-        retryCount++;
-    } while (retryCount < std::numeric_limits<in_port_t>::max());
-
-    log_error("Could not find free port on localhost");
-
-    return -1;
-}
-#endif

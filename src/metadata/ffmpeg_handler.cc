@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     ffmpeg_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 /*
@@ -95,15 +95,14 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
     std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
     for (auto&& desiredTag : aux) {
         if (!desiredTag.empty()) {
-            AVDictionaryEntry* tag = nullptr;
-            tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
+            auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
                 log_debug("Added {}: {}", desiredTag.c_str(), tag->value);
                 item->setAuxData(desiredTag, sc->convert(tag->value));
             }
         }
     }
-} //addFfmpegAuxdataFields
+} // addFfmpegAuxdataFields
 
 void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
 {
@@ -282,15 +281,8 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             log_debug("Adding resource for video thumbnail");
         }
     }
-#endif // FFMPEGTHUMBNAILER
+#endif // HAVE_FFMPEGTHUMBNAILER
 }
-
-// Stub for suppressing ffmpeg error messages during matadata extraction
-static void ffmpegNoOutputStub(void* ptr, int level, const char* fmt, va_list vl)
-{
-    // do nothing
-}
-
 void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -302,7 +294,7 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     AVFormatContext* pFormatCtx = nullptr;
 
     // Suppress all log messages
-    av_log_set_callback(ffmpegNoOutputStub);
+    av_log_set_callback([](auto...) {});
 
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
@@ -334,10 +326,10 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 fs::path getThumbnailCacheBasePath(const Config& config)
 {
-    if (auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
-        !configuredDir.empty()) {
-        return fs::path(std::move(configuredDir));
-    }
+    auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    if (!configuredDir.empty())
+        return std::move(configuredDir);
+
     auto home = config.getOption(CFG_SERVER_HOME);
     return fs::path(std::move(home)) / "cache-dir";
 }

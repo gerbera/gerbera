@@ -24,12 +24,9 @@
 
 #include "config_setup.h" // API
 
-#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
-
-#include <sys/stat.h>
 
 #include "client_config.h"
 #include "config_definition.h"
@@ -480,7 +477,7 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 
 #ifdef HAVE_INOTIFY
     bool inotifySupported = Inotify::supported();
-    tempBool = (inotifySupported && value == "auto") ? true : tempBool;
+    tempBool = (inotifySupported && value == "auto") || tempBool;
 #endif
 
     if (value == YES) {
@@ -1243,8 +1240,8 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
                 if (optItem == index) {
                     log_error("Cannot change profile name in Transcoding Detail {} {}", index, val->begin()->first);
-                    //value->setKey(key, optValue);
-                    //log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
+                    // value->setKey(key, optValue);
+                    // log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return false;
                 }
                 i++;
