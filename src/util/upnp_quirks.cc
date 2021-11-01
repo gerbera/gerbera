@@ -94,7 +94,7 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     request->setResponse(std::move(response));
 }
 
-std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId)
+std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return {};

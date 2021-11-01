@@ -1869,7 +1869,7 @@ void ConfigDynamicContentSetup::makeOption(const pugi::xml_node& root, const std
     setOption(config);
 }
 
-bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
 {
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;

@@ -339,7 +339,7 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
     log_debug("ContentDirectoryService::processActionRequest: end");
 }
 
-void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const
 {
     log_debug("start");
 

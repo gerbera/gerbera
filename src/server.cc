@@ -258,7 +258,7 @@ std::string Server::getPresentationUrl() const
     return presentationURL;
 }
 
-void Server::writeBookmark(const std::string& addr)
+void Server::writeBookmark(const std::string& addr) const
 {
     const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
         ? httpRedirectTo(addr)
@@ -269,7 +269,7 @@ void Server::writeBookmark(const std::string& addr)
     writeTextFile(path, data);
 }
 
-void Server::emptyBookmark()
+void Server::emptyBookmark() const
 {
     const std::string_view data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
@@ -388,7 +388,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     return ret;
 }
 
-int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
+int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event) const
 {
     // check parameters
     if (!event) {
@@ -434,7 +434,7 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
         // log_debug("routeActionRequest: request for content directory service");
         cds->processActionRequest(request);
     } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
-        mrreg->processActionRequest(request);
+        MRRegistrarService::processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions

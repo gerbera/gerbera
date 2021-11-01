@@ -35,7 +35,7 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, std::string_view url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
 {
     if (url.empty())

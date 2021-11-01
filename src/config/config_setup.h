@@ -699,7 +699,7 @@ protected:
     /// \param element starting element of the nodeset.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result);
 
-    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigDynamicContentSetup(config_option_t option, const char* xpath, const char* help)

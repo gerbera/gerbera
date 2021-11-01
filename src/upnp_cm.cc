@@ -69,7 +69,7 @@ void ConnectionManagerService::doGetCurrentConnectionInfo(const std::unique_ptr<
     log_debug("doGetCurrentConnectionInfo: end");
 }
 
-void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request)
+void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request) const
 {
     log_debug("start");
 
@@ -106,7 +106,7 @@ void ConnectionManagerService::processActionRequest(const std::unique_ptr<Action
     log_debug("end");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = UpnpXMLBuilder::createEventPropertySet();
@@ -139,7 +139,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
 #endif
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
+void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv) const
 {
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();

@@ -66,7 +66,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
 }
 
 void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
-    config_option_t itemProps, config_option_t nsProp)
+    config_option_t itemProps, config_option_t nsProp) const
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {

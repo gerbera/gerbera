@@ -573,10 +573,12 @@ std::string getMTFromProtocolInfo(std::string_view protocol)
     return {};
 }
 
-std::string getProtocol(const std::string& protocolInfo)
+std::string getProtocol(std::string_view protocolInfo)
 {
     auto pos = protocolInfo.find(':');
-    return (pos == std::string::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
+    if (pos == std::string_view::npos || pos == 0)
+        return PROTOCOL;
+    return std::string(protocolInfo.substr(0, pos));
 }
 
 std::string millisecondsToHMSF(int milliseconds)

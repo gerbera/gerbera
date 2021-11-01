@@ -168,7 +168,7 @@ void Timer::notify()
     }
 }
 
-std::chrono::milliseconds Timer::getNextNotifyTime()
+std::chrono::milliseconds Timer::getNextNotifyTime() const
 {
     auto lock = threadRunner->lockGuard();
     auto nextTime = std::chrono::milliseconds::zero();

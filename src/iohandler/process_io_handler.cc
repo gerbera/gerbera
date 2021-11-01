@@ -51,7 +51,7 @@ ProcListItem::ProcListItem(std::shared_ptr<Executor>&& exec, bool abortOnDeath)
 {
 }
 
-std::shared_ptr<Executor> ProcListItem::getExecutor()
+std::shared_ptr<Executor> ProcListItem::getExecutor() const
 {
     return executor;
 }
@@ -77,7 +77,7 @@ void ProcessIOHandler::killAll() const
     }
 }
 
-void ProcessIOHandler::registerAll()
+void ProcessIOHandler::registerAll() const
 {
     if (mainProc)
         content->registerExecutor(mainProc);
@@ -89,7 +89,7 @@ void ProcessIOHandler::registerAll()
     }
 }
 
-void ProcessIOHandler::unregisterAll()
+void ProcessIOHandler::unregisterAll() const
 {
     if (mainProc)
         content->unregisterExecutor(mainProc);

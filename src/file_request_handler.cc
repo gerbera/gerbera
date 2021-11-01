@@ -54,7 +54,7 @@ FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, 
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& resId, std::string& mimeType, struct stat& statbuf, const std::string& rh)
+static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& resId, std::string& mimeType, struct stat& statbuf, std::string_view rh)
 {
     bool isSrt = false;
 

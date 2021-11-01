@@ -66,7 +66,7 @@ protected:
     /// \param request Incoming ActionRequest.
     ///
     /// GetProtocolInfo(string Source, string Sink)
-    void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request);
+    void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request) const;
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
@@ -93,13 +93,13 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request);
+    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
+    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) const;
 };
 
 #endif // __UPNP_CM_H__

@@ -216,12 +216,12 @@ protected:
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
     ///
-    int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
+    int handleUpnpClientEvent(Upnp_EventType eventType, const void* event) const;
 
     /// \brief Creates a html file that is a redirector to the current server i
     /// instance
-    void writeBookmark(const std::string& addr);
-    void emptyBookmark();
+    void writeBookmark(const std::string& addr) const;
+    void emptyBookmark() const;
 
     std::string getPresentationUrl() const;
     int startupInterface(const std::string& iface, in_port_t inPort);

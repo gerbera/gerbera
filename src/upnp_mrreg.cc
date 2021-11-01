@@ -103,7 +103,7 @@ void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionReques
     log_debug("end");
 }
 
-void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const
 {
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();

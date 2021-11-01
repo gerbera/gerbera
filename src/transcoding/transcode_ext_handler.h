@@ -51,7 +51,7 @@ public:
         std::string range) override;
 
 private:
-    std::filesystem::path makeFifo();
+    std::filesystem::path makeFifo() const;
     static void checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile);
 #ifdef HAVE_CURL
     void openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList);

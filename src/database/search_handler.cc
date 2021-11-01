@@ -115,7 +115,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
     return nullptr;
 }
 
-std::string SearchLexer::getQuotedValue(const std::string& input)
+std::string SearchLexer::getQuotedValue(std::string_view input)
 {
     std::string token;
     bool escaping = false;

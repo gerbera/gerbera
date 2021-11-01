@@ -37,7 +37,7 @@ namespace fs = std::filesystem;
 class ContentPathSetup {
 public:
     explicit ContentPathSetup(std::shared_ptr<Config> config, config_option_t fileListOption, config_option_t dirListOption);
-    std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "");
+    std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "") const;
 
 private:
     std::shared_ptr<Config> config;

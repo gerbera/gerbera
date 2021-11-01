@@ -389,9 +389,7 @@ void SLTask::waitForTask()
 {
     if (is_running()) { // we check before we lock first, because there is no need to lock then
         std::unique_lock<decltype(mutex)> lock(mutex);
-        if (is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal
-            cond.wait(lock); // waiting for the task to complete
-        }
+        cond.wait(lock, [this] { return is_running(); }); // waiting for the task to complete
     }
 
     if (!getError().empty()) {
@@ -510,13 +508,13 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: backup");
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     if (!restore) {
         try {
             fs::copy(
                 dbFilePath,
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
                 fs::copy_options::overwrite_existing);
             log_debug("sqlite3 backup successful");
             decontamination = true;
@@ -528,7 +526,7 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
         sqlite3_close(db);
         try {
             fs::copy(
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
                 dbFilePath,
                 fs::copy_options::overwrite_existing);
         } catch (const std::runtime_error& e) {

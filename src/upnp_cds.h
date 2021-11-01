@@ -138,7 +138,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request);
+    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param containerUpdateIDs_CSV Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)

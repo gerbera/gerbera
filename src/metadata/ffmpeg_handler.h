@@ -63,9 +63,9 @@ private:
     std::mutex thumb_mutex;
     std::map<std::string, std::string> specialPropertyMap;
 
-    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
-    void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const;
+    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     std::optional<std::vector<std::byte>> readThumbnailCacheFile(const fs::path& movieFilename) const;
     void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
 };

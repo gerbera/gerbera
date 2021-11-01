@@ -81,7 +81,7 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST);
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata");
@@ -101,7 +101,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
     }
 } // addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
@@ -179,7 +179,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 }
 
 // ffmpeg library calls
-void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
 {
     int audioch, samplefreq;
     bool audioset, videoset;
@@ -209,7 +209,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     for (std::size_t i = 0; i < pFormatCtx->nb_streams; i++) {
         AVStream* st = pFormatCtx->streams[i];
 
-        if ((st) && (!videoset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
+        if (st && !videoset && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
             auto codecId = as_codecpar(st)->codec_id;
             resource2->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
 
@@ -235,7 +235,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 videoset = true;
             }
         }
-        if ((st) && (!audioset) && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
+        if (st && !audioset && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate

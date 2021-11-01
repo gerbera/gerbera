@@ -44,7 +44,7 @@ class Config;
 
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
-    CurlIOHandler(std::shared_ptr<Config> config, const std::string& URL, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize);
+    CurlIOHandler(std::shared_ptr<Config> config, std::string_view URL, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize);
 
     void open(enum UpnpOpenFileMode mode) override;
     void close() override;

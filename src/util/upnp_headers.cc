@@ -101,7 +101,7 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 #endif
 }
 
-std::map<std::string, std::string> Headers::readHeaders(UpnpFileInfo* fileInfo)
+std::map<std::string, std::string> Headers::readHeaders(const UpnpFileInfo* fileInfo)
 {
 #if defined(USING_NPUPNP)
     return fileInfo->request_headers;

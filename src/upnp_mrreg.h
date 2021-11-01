@@ -98,7 +98,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok. Currently we do not support any updates.
-    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request);
+    void processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const;
 
     // subscriptions for this service are not supported
     // subscriptions for this service are not supported

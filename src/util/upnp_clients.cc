@@ -139,7 +139,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
-void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
+void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation) const
 {
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;

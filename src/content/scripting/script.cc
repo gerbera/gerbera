@@ -829,7 +829,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::string Script::convertToCharset(const std::string& str, charset_convert_t chr)
+std::string Script::convertToCharset(const std::string& str, charset_convert_t chr) const
 {
     switch (chr) {
     case P2I:
@@ -846,7 +846,7 @@ std::string Script::convertToCharset(const std::string& str, charset_convert_t c
     throw_std_runtime_error("Illegal charset given to convertToCharset(): {}", chr);
 }
 
-std::shared_ptr<CdsObject> Script::getProcessedObject()
+std::shared_ptr<CdsObject> Script::getProcessedObject() const
 {
     return processed;
 }

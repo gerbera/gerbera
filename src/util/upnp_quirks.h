@@ -82,7 +82,7 @@ public:
      *
      */
     void getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const;
-    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId);
+    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId) const;
 
     /** \brief get Samsung ObjectID from Index
      *

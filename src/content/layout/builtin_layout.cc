@@ -115,7 +115,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
 #endif
 }
 
-void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef)
+void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef) const
 {
     obj->setParentID(parentID.first);
     if (useRef)
@@ -419,7 +419,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 }
 #endif
 
-std::string BuiltinLayout::mapGenre(const std::string& genre)
+std::string BuiltinLayout::mapGenre(const std::string& genre) const
 {
     for (auto&& [from, to] : genreMap) {
         if (std::regex_match(genre, std::regex(from, std::regex::ECMAScript | std::regex::icase))) {
@@ -446,7 +446,6 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
             addATrailers(clone);
             break;
 #endif
-        case OS_Max:
         default:
             log_warning("No handler for service type");
             break;
