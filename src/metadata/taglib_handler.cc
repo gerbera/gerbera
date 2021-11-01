@@ -531,7 +531,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream* ioStream) const
+std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream* ioStream)
 {
     if (TagLib::Ogg::Vorbis::File::isSupported(ioStream)) {
         return std::make_unique<TagLib::Ogg::Vorbis::File>(ioStream);
