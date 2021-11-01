@@ -235,9 +235,15 @@ Root directory for the web server, this is the location where device description
     <alive>180</alive>
 
 * Optional
-* Default: **180**, `this is according to the UPnP specification.`
+* Default: **180**, (Results in alive messages every 60s, see below) `this is according to the UPnP specification.`
+* Min: 62 (A message sent every 1s, see below)
 
 Interval for broadcasting SSDP:alive messages
+
+An advertisement will be sent by LibUPnP every (this value/2)-30 seconds, and will have a cache-control max-age of this value.
+
+For example: A value of 62 will result in an SSDP advertisement being sent every second. (62 / 2 = 31) - 30 = 1.
+The default value of 180 results results in alive messages every 60s. (180 / 2 = 90) - 30 = 60.
 
 Note:
    If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes, 
