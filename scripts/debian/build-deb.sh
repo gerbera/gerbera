@@ -31,22 +31,13 @@ function install-cmake() {
 
 function install-fmt {
   echo "::group::Installing fmt"
-  #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
-    sudo bash ${ROOT_DIR}scripts/install-fmt.sh static
-  #else
-  #   sudo apt-get install libfmt-dev -y
-  #fi
+  sudo bash ${ROOT_DIR}scripts/install-fmt.sh static
   echo "::endgroup::"
 }
 
 function install-spdlog() {
   echo "::group::Installing spdlog"
-
-  #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
-    sudo bash ${ROOT_DIR}scripts/install-spdlog.sh static
-  #else
-  #  sudo apt-get install libspdlog-dev -y
-  #fi
+  sudo bash ${ROOT_DIR}scripts/install-spdlog.sh static
   echo "::endgroup::"
 }
 
@@ -121,7 +112,7 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libduktape=""
   libmatroska=""
   libpugixml=""
-  ffmpegthumbnailer="libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
+  ffmpegthumbnailer="ffmpeg libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
   BuildType="Debug"
   DoTests="ON"
 else
@@ -188,12 +179,12 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   install-pugixml
   install-duktape
   install-matroska
+  install-ffmpegthumbnailer
 fi
 
 install-fmt
 install-spdlog
 install-pupnp
-install-ffmpegthumbnailer
 install-taglib
 
 cd build-deb

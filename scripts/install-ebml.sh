@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="1.4.2"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${EBML-1.4.2}"
 UNAME=$(uname)
 
 if [ "$(id -u)" != 0 ]; then

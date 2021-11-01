@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="1.11.4"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${PUGIXML-1.11.4}"
 
 if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"

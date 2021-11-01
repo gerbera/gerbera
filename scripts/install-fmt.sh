@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="8.0.1"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${FMT-8.0.1}"
 
 if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"

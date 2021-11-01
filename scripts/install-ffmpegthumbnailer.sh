@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="2.2.2"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${FFMPEGTHUMBNAILER-2.2.2}"
 UNAME=$(uname)
 
 if [ "$(id -u)" != 0 ]; then

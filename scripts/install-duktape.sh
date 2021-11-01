@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="2.6.0"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${DUKTAPE-2.6.0}"
 UNAME=$(uname)
 
 if [ "$(id -u)" != 0 ]; then

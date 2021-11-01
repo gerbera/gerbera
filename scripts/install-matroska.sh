@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="1.6.3"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${MATROSKA-1.6.3}"
 
 if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"

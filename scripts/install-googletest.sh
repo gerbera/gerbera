@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-set -set -Eeuo pipefail
+set -Eeuo pipefail
 
-VERSION="1.11.0"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${GOOGLETEST-1.11.0}"
 
 if ! [ "$(id -u)" = 0 ]; then
     echo "Please run this script with superuser access!"

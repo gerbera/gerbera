@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VERSION="1.14.12"
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${PUPNP-1.14.12}"
 UNAME=$(uname)
 
 if [ "$(id -u)" != 0 ]; then
