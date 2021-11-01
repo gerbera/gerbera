@@ -50,10 +50,6 @@
 /// \todo the whole service class should be rewritten with the use of inheritance
 class MRRegistrarService {
 protected:
-    /// \brief UPnP standard defined service type
-    /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    static std::string serviceType;
-
     /// \brief ID of the service.
     static std::string serviceID;
 
@@ -114,4 +110,4 @@ public:
     //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
 
-#endif // __UPNP_CM_H__
+#endif // __UPNP_MRREG_H__

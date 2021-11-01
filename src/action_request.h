@@ -116,8 +116,6 @@ public:
     /// This function writes all changed values into the upnp_request structure, and
     /// must be called at the very end before giving *upnp_request back to the SDK.
     void update();
-
-    const std::unique_ptr<Quirks>& GetQuirks() const { return quirks; }
 };
 
 #endif // __ACTION_REQUEST_H__

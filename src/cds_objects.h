@@ -155,7 +155,6 @@ public:
 
     /// \brief Retrieve the objects parent ID.
     int getParentID() const { return parentID; }
-    std::shared_ptr<CdsObject> getParent() const { return parent; }
 
     /// \brief Set the restricted flag.
     void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
@@ -315,12 +314,6 @@ public:
         this->auxdata = auxdata;
     }
 
-    /// \brief Removes auxdata with the given key
-    void removeAuxData(const std::string& key)
-    {
-        auxdata.erase(key);
-    }
-
     /// \brief Get number of resource tags
     std::size_t getResourceCount() const { return resources.size(); }
 
@@ -472,8 +465,6 @@ public:
     /// \param URL full url to the item: http://somewhere.com/something.mpg
     void setURL(const std::string& URL) { this->location = URL; }
 
-    /// \brief Get the URL of the item.
-    std::string getURL() const { return location; }
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
     // void copyTo(std::shared_ptr<CdsObject> obj) override;

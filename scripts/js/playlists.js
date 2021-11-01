@@ -37,7 +37,7 @@ const chain = {
     title: { title: playlist_title, objectType: OBJECT_TYPE_CONTAINER, mtime: playlist.mtime, upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER, metaData: [] },
     lastPath: { title: last_path, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
 };
-chain.playlistRoot.metaData[M_CONTENT_CLASS] = UPNP_CLASS_PLAYLIST_ITEM;
+chain.playlistRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
 
 var playlistChain = addContainerTree([chain.playlistRoot, chain.allPlaylists, chain.title]);
 

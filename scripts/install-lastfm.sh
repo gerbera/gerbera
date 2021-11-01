@@ -12,7 +12,9 @@ cd "lastfmlib-${LASTFM_VERSION}"
 make -j$(nproc) && \
 make install
 
-. /etc/os-release
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
 if [ "$ID" != 'alpine' ]; then
   ldconfig
 fi

@@ -672,28 +672,6 @@ std::string escape(std::string string, char escapeChar, char toEscape)
     return buf.str();
 }
 
-std::string unescape(std::string string, char escape)
-{
-    std::ostringstream buf;
-    auto len = string.length();
-
-    auto last = std::string::npos;
-    do {
-        auto next = string.find(escape, last + 1);
-        if (next == std::string::npos)
-            next = len;
-        if (last == std::string::npos)
-            last = 0;
-        int cpLen = next - last;
-        if (cpLen > 0)
-            buf.write(&string[last], cpLen);
-        last = next;
-        last++;
-    } while (last < len);
-
-    return buf.str();
-}
-
 std::string fallbackString(const std::string& first, const std::string& fallback)
 {
     return first.empty() ? fallback : first;

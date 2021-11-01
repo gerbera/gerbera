@@ -372,7 +372,7 @@ function addAudio(obj) {
         composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
     };
 
-    chain.audio.metaData[M_CONTENT_CLASS] = UPNP_CLASS_AUDIO_ITEM;
+    chain.audio.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_AUDIO_ITEM ];
     chain.album.metaData[M_ARTIST] = artist;
     chain.album.metaData[M_ALBUMARTIST] = artist;
     chain.album.metaData[M_GENRE] = [ genre ];
@@ -564,7 +564,7 @@ function addAudioStructured(obj) {
         date: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
     };
 
-    chain.allArtists.metaData[M_CONTENT_CLASS] = UPNP_CLASS_AUDIO_ITEM;
+    chain.allArtists.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_AUDIO_ITEM ];
     chain.album.metaData[M_ARTIST] = [ album_artist ];
     chain.album.metaData[M_ALBUMARTIST] = [ album_artist ];
     chain.album.metaData[M_GENRE] = [ genre ];
@@ -686,7 +686,7 @@ function addVideo(obj) {
         month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
         date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
     };
-    chain.video.metaData[M_CONTENT_CLASS] = UPNP_CLASS_VIDEO_ITEM;
+    chain.video.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_VIDEO_ITEM ];
     var container = addContainerTree([chain.video, chain.allVideo]);
     addCdsObject(obj, container);
     if (obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
@@ -731,7 +731,7 @@ function addImage(obj) {
         month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
         date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
     };
-    chain.imageRoot.metaData[M_CONTENT_CLASS] = UPNP_CLASS_IMAGE_ITEM;
+    chain.imageRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_IMAGE_ITEM ];
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
     if (obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
         var date = obj.metaData[M_DATE][0];

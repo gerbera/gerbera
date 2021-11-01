@@ -349,9 +349,6 @@ public:
     /// \brief Returns the path of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 
-    /// \brief Returns the path of the directory holding gerbera data files (sql,web,js)
-    virtual fs::path getDataDir() const = 0;
-
     /// \brief add a config option
     /// \param option option type to add.
     /// \param option option to add.

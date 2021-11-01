@@ -77,17 +77,8 @@ public:
     {
     }
 
-    unsigned int getFlags() const { return flags; }
     unsigned int getFlag(unsigned int mask) const { return flags & mask; }
-    void setFlags(unsigned int flags) { this->flags = flags; }
     void setFlag(unsigned int mask) { flags |= mask; }
-    void changeFlag(unsigned int mask, bool value)
-    {
-        if (value)
-            setFlag(mask);
-        else
-            clearFlag(mask);
-    }
     void clearFlag(unsigned int mask) { flags &= !mask; }
 
     std::shared_ptr<CdsObject> getObject() const { return object; }
@@ -143,7 +134,6 @@ public:
         , searchableContainers(searchableContainers)
     {
     }
-    const std::string& getContainerId() const { return containerID; }
     const std::string& searchCriteria() const { return searchCrit; }
     bool getSearchableContainers() const { return searchableContainers; }
     int getStartingIndex() const { return startingIndex; }
@@ -302,18 +292,10 @@ public:
     /// \return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 
-    /// \brief clears the given flag in all objects in the DB
-    [[deprecated]] virtual void clearFlagInDB(int flag) = 0;
-
-    virtual std::string getFsRootName() = 0;
-
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() const = 0;
 
 protected:
-    /* helper for addContainerChain */
-    static void stripAndUnescapeVirtualContainerFromPath(std::string virtualPath, std::string& first, std::string& last);
-
     static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
     friend class Server;
 

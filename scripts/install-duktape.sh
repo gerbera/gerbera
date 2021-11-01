@@ -42,7 +42,9 @@ fi
 
 $makeCMD -f Makefile.sharedlibrary && $makeCMD -f Makefile.sharedlibrary install || exit 1
 
-. /etc/os-release
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
 if [ "$ID" != 'alpine' ]; then
     ldconfig
 fi

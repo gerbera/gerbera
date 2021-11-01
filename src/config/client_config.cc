@@ -167,39 +167,6 @@ std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
     throw_std_runtime_error("illegal matchType given to mapMatchType()");
 }
 
-ClientType ClientConfig::remapClientType(const std::string& clientType)
-{
-    if (clientType == "BubbleUPnP") {
-        return ClientType::BubbleUPnP;
-    }
-    if (clientType == "SamsungAllShare") {
-        return ClientType::SamsungAllShare;
-    }
-    if (clientType == "SamsungSeriesQ") {
-        return ClientType::SamsungSeriesQ;
-    }
-    if (clientType == "SamsungBDP") {
-        return ClientType::SamsungBDP;
-    }
-    if (clientType == "SamsungSeriesCDE") {
-        return ClientType::SamsungSeriesCDE;
-    }
-    if (clientType == "SamsungBDJ5500") {
-        return ClientType::SamsungBDJ5500;
-    }
-    if (clientType == "StandardUPnP") {
-        return ClientType::StandardUPnP;
-    }
-    if (clientType == "EC-IRadio") {
-        return ClientType::IRadio;
-    }
-    if (clientType == "None") {
-        return ClientType::Unknown;
-    }
-
-    throw_std_runtime_error("clientType {} invalid", clientType);
-}
-
 int ClientConfig::remapFlag(const std::string& flag)
 {
     if (flag == "SAMSUNG") {
@@ -260,13 +227,4 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     }
 
     return fmt::format("{}", fmt::join(myFlags, "|"));
-}
-
-void ClientConfig::copyTo(const std::shared_ptr<ClientConfig>& copy) const
-{
-    copy->clientInfo->name = clientInfo->name;
-    copy->clientInfo->type = clientInfo->type;
-    copy->clientInfo->flags = clientInfo->flags;
-    copy->clientInfo->matchType = clientInfo->matchType;
-    copy->clientInfo->match = clientInfo->match;
 }

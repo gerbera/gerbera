@@ -262,7 +262,7 @@ int main(int argc, char** argv, char** envp)
             }
 
             // set all uids, gids and add. groups
-// mac os x does this differently, setgid and setuid are basically doing the same
+// macOS does this differently, setgid and setuid are basically doing the same
 // as setresuid and setresgid on linux: setting all of real{u,g}id, effective{u,g}id and saved-set{u,g}id
 // Solaroid systems are likewise missing setresgid and setresuid
 #if defined(__APPLE__) || defined(SOLARIS) || defined(__CYGWIN__) || defined(__HAIKU__)
@@ -553,7 +553,7 @@ int main(int argc, char** argv, char** envp)
                         log_error("Error parsing config file '{}': {}", (*configFile), ce.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
-                        // so it is safe to exit
+                        // therefore it is safe to exit
                         std::exit(EXIT_FAILURE);
                     } catch (const std::runtime_error& e) {
                         log_error("Error reloading configuration: {}",

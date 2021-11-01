@@ -79,11 +79,6 @@ public:
     /// \param value attribute value
     void addAttribute(resource_attributes_t res, std::string value);
 
-    /// \brief Removes a resource attribute.
-    ///
-    /// \param name attribute name
-    void removeAttribute(resource_attributes_t res);
-
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<std::string, std::string>& additional);
 
@@ -119,8 +114,6 @@ public:
     bool equals(const std::shared_ptr<CdsResource>& other) const;
     std::shared_ptr<CdsResource> clone();
 
-    /// \brief urlencode into string
-    [[deprecated]] std::string encode() const;
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
 };
 

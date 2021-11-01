@@ -40,7 +40,9 @@ else
 fi
 make install
 
-. /etc/os-release
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+fi
 if [ "$ID" != 'alpine' ]; then
     ldconfig
 fi
