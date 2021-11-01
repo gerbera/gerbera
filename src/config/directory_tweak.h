@@ -77,7 +77,7 @@ protected:
     std::map<std::size_t, std::shared_ptr<DirectoryTweak>> indexMap;
 
     std::recursive_mutex mutex;
-    using AutoLock = std::lock_guard<std::recursive_mutex>;
+    using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DirectoryTweak>> list;
     void _add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index);

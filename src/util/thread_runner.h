@@ -77,7 +77,7 @@ public:
         thread = 0;
     }
 
-    using AutoLock = std::lock_guard<Mutex>;
+    using AutoLock = std::scoped_lock<Mutex>;
     using AutoLockU = std::unique_lock<Mutex>;
 
     /// \brief the exit status of the thread - needs to be overridden
@@ -110,7 +110,7 @@ public:
         cond.wait(lck, pred);
     }
     template <class Predicate>
-    void wait(std::lock_guard<Mutex>& lck, Predicate pred)
+    void wait(std::scoped_lock<Mutex>& lck, Predicate pred)
     {
         log_debug("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck, pred);
