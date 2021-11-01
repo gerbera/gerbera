@@ -39,8 +39,7 @@ make install
 
 if [ -f /etc/os-release ]; then
     . /etc/os-release
+    if [ "$ID" != 'alpine' ]; then
+        ldconfig
+    fi
 fi
-if [ "$ID" != 'alpine' ]; then
-    ldconfig
-fi
-

@@ -50,6 +50,12 @@ function install-spdlog() {
   echo "::endgroup::"
 }
 
+function install-googletest() {
+  echo "::group::Installing googletest"
+  sudo bash ${ROOT_DIR}scripts/install-googletest.sh
+  echo "::endgroup::"
+}
+
 function install-pupnp() {
   echo "::group::Installing libupnp"
   sudo bash ${ROOT_DIR}scripts/install-pupnp.sh
@@ -116,7 +122,6 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libmatroska=""
   libpugixml=""
   ffmpegthumbnailer="libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
-  gtesttools="googletest google-mock googletest-tools libgtest-dev libgmock-dev"
   BuildType="Debug"
   DoTests="ON"
 else
@@ -124,7 +129,6 @@ else
   libmatroska="libebml-dev libmatroska-dev"
   libduktape="libduktape205"
   ffmpegthumbnailer="libffmpegthumbnailer-dev"
-  gtesttools=""
   BuildType="Release"
   DoTests="OFF"
   if [[ "$lsb_codename" == "bionic" ]]; then
@@ -168,8 +172,7 @@ if [[ ! -d build-deb ]]; then
       "${libmysqlclient}" \
       "${libpugixml}" \
       libsqlite3-dev \
-      uuid-dev \
-      ${gtesttools}
+      uuid-dev
   sudo apt-get clean
   echo "::endgroup::"
 fi
@@ -181,6 +184,7 @@ if [[ "$lsb_codename" == "bionic" ]]; then
 fi
 
 if [[ "${my_sys}" == "HEAD" ]]; then
+  install-googletest
   install-pugixml
   install-duktape
   install-matroska
