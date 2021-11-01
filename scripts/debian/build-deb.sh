@@ -43,7 +43,7 @@ function install-spdlog() {
   echo "::group::Installing spdlog"
 
   #if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "buster" || "$lsb_codename" == "hirsute" ]]; then
-    sudo bash ${ROOT_DIR}scripts/install-spdlog.sh
+    sudo bash ${ROOT_DIR}scripts/install-spdlog.sh static
   #else
   #  sudo apt-get install libspdlog-dev -y
   #fi

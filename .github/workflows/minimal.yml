@@ -34,7 +34,7 @@ jobs:
       - name: Build
         run: |
           ./scripts/install-fmt.sh static
-          ./scripts/install-spdlog.sh
+          ./scripts/install-spdlog.sh static
           cmake -S . -B build \
             -DCMAKE_BUILD_TYPE=RelWithDebInfo \
             -DWITH_AVCODEC=NO \
