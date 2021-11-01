@@ -40,8 +40,6 @@
 #include "mt_inotify.h"
 
 #include <array>
-#include <cassert>
-#include <cerrno>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>

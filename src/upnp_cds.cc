@@ -32,7 +32,6 @@
 #include "upnp_cds.h" // API
 
 #include <sstream>
-#include <string>
 #include <vector>
 
 #include "config/config_manager.h"

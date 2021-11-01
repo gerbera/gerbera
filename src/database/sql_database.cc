@@ -32,10 +32,8 @@
 #include "sql_database.h" // API
 
 #include <algorithm>
-#include <climits>
 #include <filesystem>
 #include <fmt/chrono.h>
-#include <string>
 #include <vector>
 
 #include "cds_objects.h"

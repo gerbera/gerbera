@@ -32,7 +32,6 @@
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h" // API
 
-#include <cassert>
 #include <sstream>
 
 #include "content_manager.h"

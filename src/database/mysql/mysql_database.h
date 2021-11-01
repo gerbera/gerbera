@@ -38,7 +38,6 @@
 #include "database/sql_database.h"
 #include <mutex>
 #include <mysql.h>
-#include <string>
 #include <vector>
 
 /// \brief The Database class for using MySQL

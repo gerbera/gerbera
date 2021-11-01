@@ -33,7 +33,6 @@
 #define __PROCESS_H__
 
 #include <memory>
-#include <string>
 
 #include <unistd.h>
 

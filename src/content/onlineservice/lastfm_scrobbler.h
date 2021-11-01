@@ -35,7 +35,6 @@
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include <cstdlib>
 #include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
 

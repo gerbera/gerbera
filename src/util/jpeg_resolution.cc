@@ -31,9 +31,6 @@
 
 #include "tools.h" // API
 
-#include <cstdio>
-#include <cstdlib>
-
 #include "iohandler/io_handler.h"
 
 using uchar = unsigned char;
