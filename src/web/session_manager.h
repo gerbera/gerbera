@@ -99,7 +99,7 @@ protected:
     void containerChangedUI(const std::vector<int>& objectIDs);
 
     std::recursive_mutex rmutex;
-    using AutoLockR = std::lock_guard<decltype(rmutex)>;
+    using AutoLockR = std::scoped_lock<decltype(rmutex)>;
     std::map<std::string, std::string> dict;
 
     /// \brief True if the ui update id hash became to big and
@@ -128,7 +128,7 @@ protected:
     std::shared_ptr<Timer> timer;
 
     std::mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
+    using AutoLock = std::scoped_lock<decltype(mutex)>;
 
     /// \brief This array is holding available sessions.
     std::vector<std::shared_ptr<Session>> sessions;
