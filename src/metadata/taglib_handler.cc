@@ -535,13 +535,20 @@ std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream* ioStre
 {
     if (TagLib::Ogg::Vorbis::File::isSupported(ioStream)) {
         return std::make_unique<TagLib::Ogg::Vorbis::File>(ioStream);
-    } else if (TagLib::Ogg::Opus::File::isSupported(ioStream)) {
+    }
+
+    if (TagLib::Ogg::Opus::File::isSupported(ioStream)) {
         return std::make_unique<TagLib::Ogg::Opus::File>(ioStream);
-    } else if (TagLib::Ogg::Speex::File::isSupported(ioStream)) {
+    }
+
+    if (TagLib::Ogg::Speex::File::isSupported(ioStream)) {
         return std::make_unique<TagLib::Ogg::Speex::File>(ioStream);
-    } else if (TagLib::Ogg::FLAC::File::isSupported(ioStream)) {
+    }
+
+    if (TagLib::Ogg::FLAC::File::isSupported(ioStream)) {
         return std::make_unique<TagLib::Ogg::FLAC::File>(ioStream);
     }
+
     log_warning("Could not match supported Taglib OGG File for {}", ioStream->name());
     return nullptr;
 }
