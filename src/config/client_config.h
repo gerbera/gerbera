@@ -63,7 +63,7 @@ protected:
     std::map<std::size_t, std::shared_ptr<ClientConfig>> indexMap;
 
     std::recursive_mutex mutex;
-    using AutoLock = std::lock_guard<std::recursive_mutex>;
+    using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<ClientConfig>> list;
     void _add(const std::shared_ptr<ClientConfig>& client, std::size_t index);
