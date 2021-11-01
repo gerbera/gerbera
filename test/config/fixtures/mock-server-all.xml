@@ -17,7 +17,7 @@
         the value configured here. Ex: A value of 62 will result
         in an SSDP advertisement being sent every second.
     -->
-  <alive>1800</alive>
+  <alive>180</alive>
   <storage>
     <sqlite3 enabled="yes">
       <database-file>gerbera.db</database-file>

@@ -1514,7 +1514,7 @@
 				"item": "/server/alive",
 				"id": "18",
 				"type": "Number",
-				"value": "1800"
+				"value": "180"
 			},
 			{
 				"item": "/import/library-options/attribute::multi-value-separator",
