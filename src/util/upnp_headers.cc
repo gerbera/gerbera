@@ -32,7 +32,6 @@
 #include <ExtraHeaders.h>
 #endif
 #endif
-#include <string>
 
 #include "common.h"
 #include "util/tools.h"

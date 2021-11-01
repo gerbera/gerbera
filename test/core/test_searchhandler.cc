@@ -21,7 +21,6 @@
 */
 
 #include <gtest/gtest.h>
-#include <iostream>
 #include <regex>
 
 #include "database/search_handler.h"

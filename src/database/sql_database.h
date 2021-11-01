@@ -33,7 +33,6 @@
 #define __SQL_STORAGE_H__
 
 #include <array>
-#include <cstdlib>
 #include <mutex>
 #include <unordered_set>
 #include <utility>

@@ -31,8 +31,6 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <cerrno>
-
 #include "exceptions.h"
 #include "upnp_common.h"
 #include "util/logger.h"

@@ -29,7 +29,6 @@
 #include <filesystem>
 #include <map>
 #include <memory>
-#include <string>
 namespace fs = std::filesystem;
 
 #ifdef HAVE_MAGIC

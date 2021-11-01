@@ -31,7 +31,6 @@
 
 #include "content_manager.h" // API
 
-#include <cstring>
 #include <regex>
 
 #include "config/directory_tweak.h"

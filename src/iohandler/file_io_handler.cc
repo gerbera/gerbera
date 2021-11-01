@@ -31,8 +31,6 @@
 
 #include "file_io_handler.h" // API
 
-#include <cstdio>
-
 #include "cds_objects.h"
 
 FileIOHandler::FileIOHandler(fs::path filename)

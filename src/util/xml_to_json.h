@@ -38,7 +38,6 @@
 #include <memory>
 #include <sstream>
 #include <stack>
-#include <string>
 
 #include <pugixml.hpp>
 

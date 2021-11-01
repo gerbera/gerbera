@@ -42,12 +42,6 @@
 #ifdef HAVE_FFMPEG
 #include "ffmpeg_handler.h"
 
-// ffmpeg needs the following sources
-// INT64_C is not defined in ffmpeg/avformat.h but is needed
-// macro defines included via autoconfig.h
-#include <cstdint>
-#include <cstring>
-
 #include <fmt/chrono.h>
 
 #include <sys/stat.h>

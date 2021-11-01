@@ -31,8 +31,6 @@
 
 #include "buffered_io_handler.h" // API
 
-#include <cassert>
-
 #include "util/tools.h"
 
 class Config;

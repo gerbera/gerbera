@@ -33,7 +33,6 @@
 #define __TRANSCODE_HANDLER_H__
 
 #include <memory>
-#include <string>
 
 #include <upnp.h>
 

@@ -35,7 +35,6 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
-#include <cstdlib>
 #include <filesystem>
 #include <fmt/core.h>
 #include <mutex>

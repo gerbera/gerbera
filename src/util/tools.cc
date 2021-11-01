@@ -31,9 +31,6 @@
 
 #include "tools.h" // API
 
-#include <cctype>
-#include <cerrno>
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <netdb.h>

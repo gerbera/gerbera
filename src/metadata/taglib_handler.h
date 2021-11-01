@@ -35,8 +35,6 @@
 
 #ifdef HAVE_TAGLIB
 
-#include <string>
-
 #include <tbytevector.h>
 #include <tfile.h>
 #include <tiostream.h>
