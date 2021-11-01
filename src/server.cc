@@ -190,7 +190,7 @@ void Server::run()
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
-    log_debug("Sending UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
+    log_info("Will send UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(rootDeviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
