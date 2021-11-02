@@ -97,7 +97,7 @@ void ActionRequest::update()
 {
     if (response) {
         std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
-        log_info("ActionRequest::update(): {}", xml);
+        log_debug("ActionRequest::update(): {}", xml);
 
 #if defined(USING_NPUPNP)
         UpnpActionRequest_set_xmlResponse(upnp_request, xml);
