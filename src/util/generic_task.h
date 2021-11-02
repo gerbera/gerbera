@@ -10,7 +10,6 @@ enum task_type_t {
     Invalid,
     AddFile,
     RemoveObject,
-    LoadAccounting,
     RescanDirectory,
     FetchOnlineContent
 };

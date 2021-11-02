@@ -31,10 +31,8 @@
 
 #include "database.h" // API
 
-#include "config/config_manager.h"
 #include "database/mysql/mysql_database.h"
 #include "database/sqlite3/sqlite_database.h"
-#include "util/tools.h"
 
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {

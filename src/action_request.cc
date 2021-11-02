@@ -32,7 +32,6 @@
 #include "action_request.h" // API
 
 #include "upnp_xml.h"
-#include "util/tools.h"
 #include "util/upnp_quirks.h"
 
 ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest* upnpRequest)
@@ -97,7 +96,7 @@ void ActionRequest::update()
 {
     if (response) {
         std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
-        log_info("ActionRequest::update(): {}", xml);
+        log_debug("ActionRequest::update(): {}", xml);
 
 #if defined(USING_NPUPNP)
         UpnpActionRequest_set_xmlResponse(upnp_request, xml);

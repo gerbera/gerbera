@@ -33,11 +33,9 @@
 #include "mysql_database.h"
 
 #include <array>
-#include <cstdlib>
 
 #include <netinet/in.h>
 
-#include "config/config_manager.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
 

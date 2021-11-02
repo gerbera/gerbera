@@ -79,7 +79,6 @@ public:
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
     void load(const std::string& scriptPath);
-    void load(std::string scriptText, std::string scriptPath);
 
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);

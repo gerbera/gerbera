@@ -45,8 +45,6 @@
 // ffmpeg needs the following sources
 // INT64_C is not defined in ffmpeg/avformat.h but is needed
 // macro defines included via autoconfig.h
-#include <cerrno>
-#include <cinttypes>
 #include <cstdint>
 #include <cstring>
 
@@ -68,7 +66,6 @@ extern "C" {
 #endif
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

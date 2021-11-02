@@ -26,7 +26,6 @@
 #include <sstream>
 
 #include "iohandler/mem_io_handler.h"
-#include "util/tools.h"
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
     : RequestHandler(std::move(content))

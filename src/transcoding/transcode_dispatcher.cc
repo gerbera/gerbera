@@ -35,7 +35,6 @@
 #include "iohandler/io_handler.h"
 #include "transcode_ext_handler.h"
 #include "transcoding.h"
-#include "util/tools.h"
 
 TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ContentManager> content)
     : TranscodeHandler(std::move(content))

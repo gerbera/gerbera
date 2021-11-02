@@ -27,6 +27,8 @@
     $Id$
 */
 
+#ifdef HAVE_EXIV2
+
 /// \file exiv2_handler.h
 /// \brief Definition of the Exiv2Handler class.
 #ifndef __METADATA_EXIV2_H__
@@ -46,3 +48,4 @@ public:
 };
 
 #endif // __METADATA_EXIV2_H__
+#endif // HAVE_EXIV2
