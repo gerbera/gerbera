@@ -270,8 +270,8 @@ Script::Script(std::shared_ptr<ContentManager> content,
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto dukArray = duk_push_array(ctx);
-        for (std::size_t i = 0; i < array.size(); i++) {
-            auto entry = array[i];
+        for (duk_uarridx_t i = 0; i < array.size(); i++) {
+            auto&& entry = array[i];
             duk_push_string(ctx, entry.c_str());
             duk_put_prop_index(ctx, dukArray, i);
         }
@@ -744,7 +744,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         }
         for (auto&& [key, array] : metaGroups) {
             auto dukArray = duk_push_array(ctx);
-            for (std::size_t i = 0; i < array.size(); i++) {
+            for (duk_uarridx_t i = 0; i < array.size(); i++) {
                 duk_push_string(ctx, array[i].c_str());
                 duk_put_prop_index(ctx, dukArray, i);
             }
