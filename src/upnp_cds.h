@@ -39,7 +39,6 @@
 #include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
-#include <string>
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///

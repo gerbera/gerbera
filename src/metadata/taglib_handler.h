@@ -35,8 +35,6 @@
 
 #ifdef HAVE_TAGLIB
 
-#include <string>
-
 #include <tbytevector.h>
 #include <tfile.h>
 #include <tiostream.h>
@@ -67,7 +65,7 @@ private:
     void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
     void addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
 
-    std::unique_ptr<TagLib::File> getOggFile(TagLib::IOStream* ioStream) const;
+    static std::unique_ptr<TagLib::File> getOggFile(TagLib::IOStream* ioStream);
 
     void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
     void populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const;

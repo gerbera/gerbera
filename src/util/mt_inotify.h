@@ -35,7 +35,6 @@
 #ifdef HAVE_INOTIFY
 
 #include <filesystem>
-#include <string>
 #include <sys/inotify.h>
 namespace fs = std::filesystem;
 

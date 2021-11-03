@@ -26,7 +26,6 @@
 #define __SQL_FORMAT_H__
 
 #include <fmt/format.h>
-#include <string_view>
 
 struct SQLIdentifier {
     constexpr SQLIdentifier(std::string_view name, char quote_begin, char quote_end)

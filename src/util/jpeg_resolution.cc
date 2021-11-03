@@ -31,9 +31,6 @@
 
 #include "tools.h" // API
 
-#include <cstdio>
-#include <cstdlib>
-
 #include "iohandler/io_handler.h"
 
 using uchar = unsigned char;
@@ -81,7 +78,7 @@ static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
     return int(c[0]);
 }
 
-static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int& w, int& h)
+static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& ioh)
 {
     int a = iohFgetc(ioh);
 
@@ -149,25 +146,23 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int& w, int
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            w = get16m(data + 5);
-            h = get16m(data + 3);
-            return;
+            return { get16m(data + 5), get16m(data + 3) };
         }
     }
     throw_std_runtime_error("get_jpeg_resolution: resolution not found");
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh)
+std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh)
 {
-    int w, h;
+    auto wh = std::pair<int, int>();
     try {
-        getJpegResolution(ioh, w, h);
+        wh = getJpegResolution(ioh);
     } catch (const std::runtime_error& e) {
         ioh->close();
         throw e;
     }
     ioh->close();
 
-    return fmt::format("{}x{}", w, h);
+    return fmt::format("{}x{}", wh.first, wh.second);
 }

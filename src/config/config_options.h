@@ -34,7 +34,6 @@
 #define __CONFIG_OPTIONS_H__
 
 #include <map>
-#include <string>
 #include <vector>
 
 #include "transcoding/transcoding.h"

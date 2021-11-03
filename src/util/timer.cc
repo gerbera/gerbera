@@ -31,8 +31,6 @@
 
 #include "timer.h" // API
 
-#include <cassert>
-
 Timer::Timer(std::shared_ptr<Config> config)
     : config(std::move(config))
 {

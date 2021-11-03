@@ -34,7 +34,6 @@
 
 #include <map>
 #include <memory>
-#include <string>
 
 #include "common.h"
 #include "metadata/metadata_handler.h"

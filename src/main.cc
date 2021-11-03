@@ -35,7 +35,6 @@
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
 #include <csignal>
-#include <cstdlib>
 #include <filesystem>
 #include <fmt/core.h>
 #include <mutex>
@@ -505,7 +504,7 @@ int main(int argc, char** argv, char** envp)
         }
 
         if (opts.count("add-file") > 0) {
-            auto files = opts["add-file"].as<std::vector<std::string>>();
+            auto files = opts["add-file"].as<std::vector<fs::path>>();
             for (auto&& f : files) {
                 try {
                     std::error_code ec;
@@ -520,7 +519,7 @@ int main(int argc, char** argv, char** envp)
                         asSetting.mergeOptions(configManager, f);
                         server->getContent()->addFile(dirEnt, asSetting, true);
                     } else {
-                        log_error("Failed to read {}: {}", f, ec.message());
+                        log_error("Failed to read {}: {}", f.c_str(), ec.message());
                     }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());

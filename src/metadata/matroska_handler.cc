@@ -27,7 +27,6 @@
 #include "matroska_handler.h" // API
 
 #include <fmt/chrono.h>
-#include <iostream>
 #include <vector>
 
 #include <ebml/EbmlHead.h>

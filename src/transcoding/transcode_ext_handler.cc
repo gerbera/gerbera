@@ -31,8 +31,6 @@
 
 #include "transcode_ext_handler.h" // API
 
-#include <cstring>
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>

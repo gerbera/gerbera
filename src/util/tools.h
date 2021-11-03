@@ -35,7 +35,6 @@
 #include <filesystem>
 #include <map>
 #include <optional>
-#include <string>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -203,7 +202,7 @@ int HMSFToMilliseconds(std::string_view time);
 
 /// \brief Extracts resolution from a JPEG image
 /// \param ioh the IOHandler must be opened. The function will read data and close the handler.
-std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh);
+std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh);
 
 /// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
 std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolution);

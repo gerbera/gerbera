@@ -33,7 +33,6 @@
 
 #include "xml_to_json.h"
 
-#include <iostream>
 #include <regex>
 
 #include "util/tools.h"

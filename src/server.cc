@@ -33,7 +33,6 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
-#include <iostream>
 #endif
 
 #include <upnpconfig.h>

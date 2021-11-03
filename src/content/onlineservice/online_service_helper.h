@@ -36,7 +36,6 @@
 #define __ONLINE_SERVICE_HELPER_H__
 
 #include <memory>
-#include <string>
 
 // forward declaration
 class CdsItemExternalURL;

@@ -31,8 +31,6 @@
 
 #include "io_handler_buffer_helper.h" // API
 
-#include <cstdlib>
-
 #include "config/config_manager.h"
 
 IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize)

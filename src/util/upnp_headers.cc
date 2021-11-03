@@ -32,7 +32,6 @@
 #include <ExtraHeaders.h>
 #endif
 #endif
-#include <string>
 
 #include "common.h"
 #include "util/tools.h"
@@ -64,7 +63,7 @@ void Headers::addHeader(const std::string& key, const std::string& value)
     }
 
     log_debug("Adding header: '{}: {}'", cleanKey, cleanValue);
-    headers.emplace(cleanKey, cleanValue);
+    headers.try_emplace(cleanKey, cleanValue);
 }
 
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header)
