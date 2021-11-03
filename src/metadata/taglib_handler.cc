@@ -350,7 +350,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
         if (f.pictureList().isEmpty())
             throw_std_runtime_error("flac resource has no picture information");
 
-        TagLib::FLAC::Picture* pic = f.pictureList().front();
+        const TagLib::FLAC::Picture* pic = f.pictureList().front();
         const TagLib::ByteVector& data = pic->data();
 
         return std::make_unique<MemIOHandler>(data.data(), data.size());
@@ -741,7 +741,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
             return;
         }
 
-        auto& coverArt = coverArtList.front();
+        const auto& coverArt = coverArtList.front();
         auto artMimetype = getContentTypeFromByteVector(coverArt.data());
         if (!artMimetype.empty()) {
             addArtworkResource(item, artMimetype);

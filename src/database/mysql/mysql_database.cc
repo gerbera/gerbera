@@ -349,7 +349,7 @@ MysqlResult::~MysqlResult()
 {
     if (mysql_res) {
         if (!nullRead) {
-            while ((mysql_fetch_row(mysql_res)))
+            while (mysql_fetch_row(mysql_res))
                 ; // read out data
         }
         mysql_free_result(mysql_res);

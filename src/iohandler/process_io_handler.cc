@@ -45,8 +45,8 @@
 
 #define MAX_TIMEOUTS 2 // maximum allowe consecutive timeouts
 
-ProcListItem::ProcListItem(std::shared_ptr<Executor>&& exec, bool abortOnDeath)
-    : executor(std::move(exec))
+ProcListItem::ProcListItem(const std::shared_ptr<Executor>& exec, bool abortOnDeath)
+    : executor(exec)
     , abort(abortOnDeath)
 {
 }
@@ -132,7 +132,7 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
 
 void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if ((mainProc) && ((!mainProc->isAlive() || abort()))) {
+    if (mainProc && (!mainProc->isAlive() || abort())) {
         killAll();
         throw_std_runtime_error("process terminated early");
     }
@@ -184,10 +184,8 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
         timeout.tv_nsec = 0;
 
         ret = pselect(fd + 1, &readSet, nullptr, nullptr, &timeout, nullptr);
-        if (ret == -1) {
-            if (errno == EINTR)
-                continue;
-        }
+        if ((ret == -1) && (errno == EINTR))
+            continue;
 
         // timeout
         if (ret == 0) {
@@ -275,11 +273,8 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
         timeout.tv_nsec = 0;
 
         ret = pselect(fd + 1, nullptr, &writeSet, nullptr, &timeout, nullptr);
-        if (ret == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
-        }
+        if ((ret == -1) && (errno == EINTR))
+            continue;
 
         // timeout
         if (ret == 0) {
