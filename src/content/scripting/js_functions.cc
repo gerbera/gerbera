@@ -71,7 +71,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     std::vector<std::shared_ptr<CdsObject>> result;
     auto length = duk_get_length(ctx, -1);
 
-    for (duk_size_t i = 0; i < length; i++) {
+    for (duk_uarridx_t i = 0; i < length; i++) {
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx);
@@ -91,10 +91,10 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
 
     if (!result.empty()) {
         auto cm = self->getContent();
-        auto containerId = cm->addContainerTree(result);
-        if (containerId.first != INVALID_OBJECT_ID) {
+        auto [containerId, containerStatus] = cm->addContainerTree(result);
+        if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
-            std::string tmp = fmt::to_string(containerId.first);
+            auto tmp = fmt::to_string(containerId);
             duk_push_string(ctx, tmp.c_str());
             return 1;
         }
@@ -192,14 +192,14 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        auto parentId = std::pair(stoiString(containerId), false);
+        auto [parentId, parentStatus] = std::pair(stoiString(containerId), false);
 
-        if (parentId.first <= 0) {
-            log_error("Invalid parent id passed to addCdsObject: {}", parentId.first);
+        if (parentId <= 0) {
+            log_error("Invalid parent id passed to addCdsObject: {}", parentId);
             return 0;
         }
 
-        cdsObj->setParentID(parentId.first);
+        cdsObj->setParentID(parentId);
         if (!cdsObj->isExternalItem()) {
             /// \todo get hidden file setting from config manager?
             /// what about same stuff in content manager, why is it not used
@@ -222,10 +222,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cdsObj->setID(INVALID_OBJECT_ID);
-        cm->addObject(cdsObj, parentId.second);
+        cm->addObject(cdsObj, parentStatus);
 
         /* setting object ID as return value */
-        std::string tmp = fmt::to_string(parentId.first);
+        auto tmp = fmt::to_string(parentId);
         duk_push_string(ctx, tmp.c_str());
         return 1;
     } catch (const ServerShutdownException& se) {
