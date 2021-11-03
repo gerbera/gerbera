@@ -39,6 +39,13 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
+    : MetadataHandler(context)
+{
+    // silence exiv2 messages without debug
+    Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
+}
+
 void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
 {
     try {
