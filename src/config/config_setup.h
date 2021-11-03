@@ -425,7 +425,7 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(bool optValue);
 
-    std::string getCurrentValue() const override { return optionValue ? (optionValue->getBoolOption() ? "true" : "false") : ""; }
+    std::string getCurrentValue() const override { return optionValue ? fmt::to_string(optionValue->getBoolOption()) : ""; }
 
     static bool CheckSqlLiteRestoreValue(std::string& value);
 
