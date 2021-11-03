@@ -35,11 +35,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Web::Files::Files(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 void Web::Files::process()
 {
     checkRequest();

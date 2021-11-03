@@ -35,11 +35,6 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 
-Web::Autoscan::Autoscan(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 void Web::Autoscan::process()
 {
     checkRequest();

@@ -36,9 +36,9 @@
 #include "transcode_handler.h"
 
 class TranscodeDispatcher : public TranscodeHandler {
-public:
-    explicit TranscodeDispatcher(std::shared_ptr<ContentManager> content);
+    using TranscodeHandler::TranscodeHandler;
 
+public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,

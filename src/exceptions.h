@@ -46,11 +46,7 @@
 #define throw_std_runtime_error(...) throw std::runtime_error(fmt::format("[{}:{}] {} Error: {}", __FILE__, __LINE__, PRETTY_FUNCTION, fmt::format(__VA_ARGS__)))
 
 class ConfigParseException : public std::runtime_error {
-public:
-    explicit ConfigParseException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 class UpnpException : public std::runtime_error {
@@ -84,27 +80,15 @@ public:
 };
 
 class SubtitlesNotFoundException : public std::runtime_error {
-public:
-    explicit SubtitlesNotFoundException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 class ServerShutdownException : public std::runtime_error {
-public:
-    explicit ServerShutdownException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 class TryAgainException : public std::runtime_error {
-public:
-    explicit TryAgainException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 #endif // __EXCEPTIONS_H__

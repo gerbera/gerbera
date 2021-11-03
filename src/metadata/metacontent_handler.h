@@ -50,11 +50,7 @@ private:
 
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
-public:
-    explicit MetacontentHandler(const std::shared_ptr<Context>& context)
-        : MetadataHandler(context)
-    {
-    }
+    using MetadataHandler::MetadataHandler;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art

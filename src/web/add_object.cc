@@ -38,11 +38,6 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-Web::AddObject::AddObject(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 void Web::AddObject::addContainer(int parentID)
 {
     content->addContainer(parentID, param("title"), param("class"));

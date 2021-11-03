@@ -35,11 +35,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Web::Directories::Directories(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 using dirInfo = std::pair<fs::path, bool>;
 
 void Web::Directories::process()

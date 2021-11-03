@@ -47,6 +47,8 @@ class StringConverter;
 /// \brief This class is responsible for reading exif header metadata via the
 /// libexif library
 class LibExifHandler : public MetadataHandler {
+    using MetadataHandler::MetadataHandler;
+
 private:
     // image resolution in pixels
     // the problem is that I do not know when I encounter the
@@ -60,10 +62,6 @@ private:
         const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
 
 public:
-    explicit LibExifHandler(const std::shared_ptr<Context>& context)
-        : MetadataHandler(context)
-    {
-    }
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 };

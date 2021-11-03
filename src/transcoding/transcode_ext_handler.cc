@@ -50,11 +50,6 @@
 #include "iohandler/curl_io_handler.h"
 #endif
 
-TranscodeExternalHandler::TranscodeExternalHandler(std::shared_ptr<ContentManager> content)
-    : TranscodeHandler(std::move(content))
-{
-}
-
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_ptr<TranscodingProfile> profile,
     std::string location, std::shared_ptr<CdsObject> obj, std::string range)
 {
