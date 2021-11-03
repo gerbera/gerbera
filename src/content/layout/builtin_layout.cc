@@ -458,7 +458,7 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
             addVideo(clone, rootpath);
         else if (startswith(mimetype, "image"))
             addImage(clone, rootpath);
-        else if ((startswith(mimetype, "audio") && (contentType != CONTENT_TYPE_PLAYLIST)))
+        else if (startswith(mimetype, "audio") && (contentType != CONTENT_TYPE_PLAYLIST))
             addAudio(clone, rootpath);
         else if (contentType == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))

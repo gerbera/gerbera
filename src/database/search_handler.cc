@@ -54,7 +54,7 @@ static const std::unordered_map<std::string_view, TokenType> tokenTypes {
 
 std::unique_ptr<SearchToken> SearchLexer::nextToken()
 {
-    for (; currentPos < input.length();) {
+    while (currentPos < input.length()) {
         char ch = input[currentPos];
 
         switch (ch) {
@@ -119,7 +119,7 @@ std::string SearchLexer::getQuotedValue(const std::string& input)
 {
     std::string token;
     bool escaping = false;
-    for (; currentPos < input.length();) {
+    while (currentPos < input.length()) {
         auto ch = input[currentPos];
         if (ch == '"' && !escaping) {
             break;
@@ -139,7 +139,7 @@ std::string SearchLexer::getQuotedValue(const std::string& input)
 std::string SearchLexer::nextStringToken(const std::string& input)
 {
     auto startPos = currentPos;
-    for (; currentPos < input.length();) {
+    while (currentPos < input.length()) {
         auto ch = input[currentPos];
         if (std::isalnum(ch) || ch == ':' || ch == '@' || ch == '.' || ch == '_')
             currentPos++;

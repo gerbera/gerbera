@@ -158,7 +158,7 @@ static void getJpegResolution(const std::unique_ptr<IOHandler>& ioh, int& w, int
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(std::unique_ptr<IOHandler>&& ioh)
+std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh)
 {
     int w, h;
     try {

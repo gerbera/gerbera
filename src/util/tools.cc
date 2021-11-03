@@ -425,10 +425,10 @@ std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscap
         }
         const char* eqPos = std::strchr(data, '=');
         if (eqPos && eqPos < ampPos) {
-            std::string_view key(data, eqPos - data);
-            std::string_view value(eqPos + 1, ampPos - eqPos - 1);
+            auto key = std::string_view(data, eqPos - data);
+            auto value = std::string_view(eqPos + 1, ampPos - eqPos - 1);
             if (unEscape) {
-                dict.emplace(urlUnescape(key), urlUnescape(value));
+                dict.try_emplace(urlUnescape(key), urlUnescape(value));
             } else {
                 dict.emplace(key, value);
             }

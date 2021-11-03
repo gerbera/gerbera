@@ -44,7 +44,7 @@ CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& 
         throw_std_runtime_error("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE);
 
     this->URL = url;
-    this->external_curl_handle = (curlHandle);
+    this->external_curl_handle = curlHandle;
     this->curl_handle = curlHandle;
     // bytesCurl = 0;
     signalAfterEveryRead = true;

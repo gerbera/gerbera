@@ -223,25 +223,21 @@ void LibExifHandler::process_ifd(ExifContent* content, const std::shared_ptr<Cds
 
         // if there are any metadata tags that the user wants - add them
         for (auto&& [tag, key] : metatags) {
-            if (!tag.empty()) {
-                if (e->tag == getTagFromString(tag)) {
-                    auto value = trimString(exif_egv(e));
-                    if (!value.empty()) {
-                        item->addMetaData(key, sc->convert(value));
-                        log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
-                    }
+            if (!tag.empty() && e->tag == getTagFromString(tag)) {
+                auto value = trimString(exif_egv(e));
+                if (!value.empty()) {
+                    item->addMetaData(key, sc->convert(value));
+                    log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
                 }
             }
         }
         // if there are any auxilary tags that the user wants - add them
         for (auto&& aux : auxtags) {
-            if (!aux.empty()) {
-                if (e->tag == getTagFromString(aux)) {
-                    auto value = trimString(exif_egv(e));
-                    if (!value.empty()) {
-                        item->setAuxData(aux, sc->convert(value));
-                        // log_debug("Adding tag: {} with value {}", aux, value);
-                    }
+            if (!aux.empty() && e->tag == getTagFromString(aux)) {
+                auto value = trimString(exif_egv(e));
+                if (!value.empty()) {
+                    item->setAuxData(aux, sc->convert(value));
+                    // log_debug("Adding tag: {} with value {}", aux, value);
                 }
             }
         }
