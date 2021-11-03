@@ -35,11 +35,6 @@
 #include "database/database.h"
 #include "util/tools.h"
 
-Web::EditSave::EditSave(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 void Web::EditSave::process()
 {
     checkRequest();

@@ -70,15 +70,17 @@ public:
 
 /// \brief Browser directory tree
 class Directories : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Directories(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser file list
 class Files : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Files(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
@@ -94,15 +96,17 @@ public:
 
 /// \brief Browser add item
 class Add : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Add(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser remove item
 class Remove : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Remove(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
@@ -118,15 +122,17 @@ public:
 
 /// \brief Browser remove item
 class EditSave : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit EditSave(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief Browser add object.
 class AddObject : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit AddObject(std::shared_ptr<ContentManager> content);
     void process() override;
 
 protected:
@@ -137,8 +143,9 @@ protected:
 
 /// \brief autoscan add and remove
 class Autoscan : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Autoscan(std::shared_ptr<ContentManager> content);
     void process() override;
 
 protected:
@@ -147,25 +154,25 @@ protected:
 
 /// \brief nothing :)
 class VoidType : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit VoidType(std::shared_ptr<ContentManager> content)
-        : WebRequestHandler(std::move(content))
-    {
-    }
     void process() override;
 };
 
 /// \brief task list and task cancel
 class Tasks : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Tasks(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
 /// \brief UI action button
 class Action : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Action(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 
@@ -180,8 +187,9 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
 
 /// \brief Browse clients list
 class Clients : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    explicit Clients(std::shared_ptr<ContentManager> content);
     void process() override;
 };
 

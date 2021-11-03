@@ -33,11 +33,6 @@
 
 #include "content/content_manager.h"
 
-Web::Tasks::Tasks(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 void Web::Tasks::process()
 {
     checkRequest();

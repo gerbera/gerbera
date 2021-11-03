@@ -36,11 +36,6 @@
 #include "transcode_ext_handler.h"
 #include "transcoding.h"
 
-TranscodeDispatcher::TranscodeDispatcher(std::shared_ptr<ContentManager> content)
-    : TranscodeHandler(std::move(content))
-{
-}
-
 std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(std::shared_ptr<TranscodingProfile> profile,
     std::string location,
     std::shared_ptr<CdsObject> obj,

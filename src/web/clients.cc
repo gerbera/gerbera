@@ -34,11 +34,6 @@
 
 #include <fmt/chrono.h>
 
-Web::Clients::Clients(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
-{
-}
-
 static std::string secondsToString(const std::chrono::seconds& t)
 {
     return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));

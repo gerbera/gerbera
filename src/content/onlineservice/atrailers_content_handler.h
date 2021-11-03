@@ -48,12 +48,9 @@ class CdsObject;
 /// \brief this class is responsible for creating objects from the ATrailers
 /// metadata XML.
 class ATrailersContentHandler : public CurlContentHandler {
-public:
-    explicit ATrailersContentHandler(const std::shared_ptr<Context>& context)
-        : CurlContentHandler(context)
-    {
-    }
+    using CurlContentHandler::CurlContentHandler;
 
+public:
     /// \brief Sets the service XML from which we will extract the objects.
     /// \return false if service XML contained an error status.
     void setServiceContent(std::unique_ptr<pugi::xml_document> service) override;

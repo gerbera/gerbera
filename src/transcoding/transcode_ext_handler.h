@@ -42,9 +42,9 @@
 class ProcListItem;
 
 class TranscodeExternalHandler : public TranscodeHandler {
-public:
-    explicit TranscodeExternalHandler(std::shared_ptr<ContentManager> content);
+    using TranscodeHandler::TranscodeHandler;
 
+public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,

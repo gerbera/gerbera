@@ -45,19 +45,11 @@
 namespace Web {
 
 class SessionException : public std::runtime_error {
-public:
-    explicit SessionException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 class LoginException : public std::runtime_error {
-public:
-    explicit LoginException(const std::string& message)
-        : std::runtime_error(message)
-    {
-    }
+    using std::runtime_error::runtime_error;
 };
 
 class SessionManager;

@@ -40,11 +40,9 @@ class MemIOHandler;
 
 /// \brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MetadataHandler {
+    using MetadataHandler::MetadataHandler;
+
 public:
-    explicit MatroskaHandler(const std::shared_ptr<Context>& context)
-        : MetadataHandler(context)
-    {
-    }
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
