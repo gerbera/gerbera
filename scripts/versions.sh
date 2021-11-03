@@ -1,6 +1,8 @@
-if [ ${GERBERA_ENV-head} == "minimum" ]; then
+if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
+
     DUKTAPE="2.2.1"
     EBML="1.3.9"
+    EXIV2="v0.26"
     FFMPEGTHUMBNAILER="2.2.0"
     FMT="7.1.3"
     GOOGLETEST="1.10.0"
@@ -10,9 +12,12 @@ if [ ${GERBERA_ENV-head} == "minimum" ]; then
     PUPNP="1.14.0"
     SPDLOG="1.8.1"
     TAGLIB="1.12"
-elif [ ${GERBERA_ENV-head} == "default" ]; then
+
+elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
+
     DUKTAPE="2.5.0"
     EBML="1.3.9"
+    EXIV2="v0.26"
     FFMPEGTHUMBNAILER="2.2.0"
     FMT="7.1.3"
     GOOGLETEST="1.10.0"
@@ -22,9 +27,12 @@ elif [ ${GERBERA_ENV-head} == "default" ]; then
     PUPNP="1.14.6"
     SPDLOG="1.8.5"
     TAGLIB="1.12"
+
 else
+
     DUKTAPE="2.6.0"
     EBML="1.4.2"
+    EXIV2="v0.27.5"
     FFMPEGTHUMBNAILER="2.2.2"
     FMT="8.0.1"
     GOOGLETEST="1.11.0"
@@ -34,4 +42,6 @@ else
     PUPNP="1.14.12"
     SPDLOG="1.9.2"
     TAGLIB="1.12"
+
 fi
+

@@ -2,7 +2,7 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/workflow/status/gerbera/gerbera/CI%20validation?style=for-the-badge)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=v) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
+ [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/workflow/status/gerbera/gerbera/CI%20validation?style=for-the-badge)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=1.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -63,7 +63,7 @@ sudo make install
 | [libmatroska] |               | 1.6.3         | 1.6.3         | Optional      | MKV metadata               | Enabled  |
 | ffmpeg/libav  |               |               |               | Optional      | File metadata              | Disabled |
 | libexif       |               |               |               | Optional      | JPEG Exif metadata         | Enabled  |
-| libexiv2      |               |               |               | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [libexiv2]    |               | v0.26         | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]   | 0.4.0         | 0.4.0         | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |         | 2.2.0         | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
 | inotify       |               |               |               | Optional      | Efficient file monitoring  | Enabled  |
@@ -90,6 +90,7 @@ sudo make install
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
+[libexiv2]: https://github.com/Exiv2llibexiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska, requires https://github.com/Matroska-Org/libebml
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/index.html
 [pugixml]: https://github.com/zeux/pugixml

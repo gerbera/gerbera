@@ -77,6 +77,12 @@ function install-duktape() {
   echo "::endgroup::"
 }
 
+function install-libexiv2() {
+  echo "::group::Installing libexiv2"
+  sudo bash ${ROOT_DIR}scripts/install-libexiv2.sh static
+  echo "::endgroup::"
+}
+
 function install-matroska() {
   echo "::group::Installing matroska"
   sudo bash ${ROOT_DIR}scripts/install-ebml.sh
@@ -109,6 +115,7 @@ fi
 echo "Running $0 ${my_sys}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
+  libexiv2="libexpat1-dev"
   libduktape=""
   libmatroska=""
   libpugixml=""
@@ -116,6 +123,7 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   BuildType="Debug"
   DoTests="ON"
 else
+  libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
   libmatroska="libebml-dev libmatroska-dev"
   libduktape="libduktape205"
@@ -157,6 +165,7 @@ if [[ ! -d build-deb ]]; then
       libcurl4-openssl-dev \
       ${libduktape} \
       ${libmatroska} \
+      ${libexiv2} \
       libexif-dev \
       ${ffmpegthumbnailer} \
       libmagic-dev \
@@ -176,6 +185,7 @@ fi
 
 if [[ "${my_sys}" == "HEAD" ]]; then
   install-googletest
+  install-libexiv2
   install-pugixml
   install-duktape
   install-matroska
@@ -213,6 +223,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     -DWITH_AVCODEC=ON \
     -DWITH_FFMPEGTHUMBNAILER=ON \
     -DWITH_EXIF=ON \
+    -DWITH_EXIV2=ON \
     -DWITH_LASTFM=OFF \
     -DWITH_SYSTEMD=ON \
     -DWITH_DEBUG=ON \
