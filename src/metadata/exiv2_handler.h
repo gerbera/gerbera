@@ -36,12 +36,16 @@
 
 #include "metadata_handler.h"
 
+#include <exiv2/error.hpp>
+
 /// \brief This class is responsible for reading exif header metadata
 class Exiv2Handler : public MetadataHandler {
 public:
     explicit Exiv2Handler(const std::shared_ptr<Context>& context)
         : MetadataHandler(context)
     {
+        // silence exiv2 messages without debug
+        Exiv2::LogMsg::defaultHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
     }
     void fillMetadata(const std::shared_ptr<CdsObject>& item) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& item, int resNum) override;
