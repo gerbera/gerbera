@@ -164,8 +164,8 @@ int main(int argc, char** argv, char** envp)
         ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
         ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
         ("c,config", "Path to config file", cxxopts::value<fs::path>()) //
-        ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<fs::path>()) //
-        ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<fs::path>()) //
+        ("m,home", "Search this directory for a .config/gerbera folder containing a config file", cxxopts::value<fs::path>()) //
+        ("f,cfgdir", "Override name of config folder (.config/gerbera) in home folder.", cxxopts::value<fs::path>()) //
         ("l,logfile", "Set log location", cxxopts::value<fs::path>()) //
         ("compile-info", "Print compile info and exit") //
         ("v,version", "Print version info and exit") //
@@ -342,7 +342,8 @@ int main(int argc, char** argv, char** envp)
             // x will make it fail if file exists
             auto pidf = std::fopen(pidfile->c_str(), "wx");
             if (!pidf) {
-                log_error("Pidfile {} exists. It may be that gerbera is already", pidfile->c_str());
+                log_error("fopen {} failed: {}", pidfile->c_str(), std::strerror(errno));
+                log_error("Pidfile already exists or is not writable. It may be that gerbera is already");
                 log_error("running or the file is a leftover from an unclean shutdown.");
                 log_error("In that case, remove the file before starting gerbera.");
                 std::exit(EXIT_FAILURE);

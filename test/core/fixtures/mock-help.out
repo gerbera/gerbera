@@ -11,10 +11,10 @@ Usage:
   -p, --port arg       Port to bind with, must be >=49152
   -i, --ip arg         IP to bind with
   -c, --config arg     Path to config file
-  -m, --home arg       Search this directory for a .gerbera folder containing
-                       a config file
-  -f, --cfgdir arg     Override name of config folder (.config/gerbera) by
-                       default. -h must also be set.
+  -m, --home arg       Search this directory for a .config/gerbera folder
+                       containing a config file
+  -f, --cfgdir arg     Override name of config folder (.config/gerbera) in
+                       home folder.
   -l, --logfile arg    Set log location
       --compile-info   Print compile info and exit
   -v, --version        Print version info and exit
