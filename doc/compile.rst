@@ -13,68 +13,74 @@ Dependencies
 
 .. Note:: Remember to install associated development packages, because development headers are needed for compilation!
 
+.. Note:: For the required and recommended versions `<see>: https://github.com/gerbera/gerbera/blob/master/README.md_
+
 In order to compile Gerbera you will have to install the following packages:
 
 
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| Library             | Min Version   | Required?     | Note                       | Compile-time option     | Default  | Script             |
-+=====================+===============+===============+============================+=========================+==========+====================+
-| libupnp             | 1.14.0        | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh   |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libnpupnp           | 4.1.2         | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libuuid             |               | Depends on OS | Not required on \*BSD      |                         |          |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| pugixml             |               | Required      | XML file and data support  |                         |          | install-pugixml.sh |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libiconv            |               | Required      | Charset conversion         |                         |          |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| sqlite3             | 3.7.11        | Required      | Database storage           |                         |          |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| zlib                |               | Required      | Data compression           |                         |          |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| fmtlib              | 7.1.3         | Required      | Fast string formatting     |                         |          | install-fmt.sh     |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| spdlog              | 1.8.1         | Required      | Runtime logging            |                         |          | install-spdlog.sh  |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| duktape             | 2.1.0         | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| mysql               |               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| curl                |               | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| taglib              | 1.12          | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh  |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libmagic            |               | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libmatroska         |               | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| ffmpeg/libav        |               | Optional      | File metadata              | WITH\_AVCODEC           | Disabled |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libexif             |               | Optional      | JPEG Exif metadata         | WITH\_EXIF              | Enabled  |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| libexiv2            |               | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| lastfmlib           | 0.4.0         | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh  |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| ffmpegthumbnailer   |               | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
-| inotify             |               | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                    |
-+---------------------+---------------+---------------+----------------------------+-------------------------+----------+--------------------+
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| Library             | Required?     | Note                       | Compile-time option     | Default  | Script                       |
++=====================+===============+============================+=========================+==========+==============================+
+| libupnp             | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh             |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libnpupnp           | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libuuid             | Depends on OS | Not required on \*BSD      |                         |          |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| pugixml             | Required      | XML file and data support  |                         |          | install-pugixml.sh           |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libiconv            | Required      | Charset conversion         |                         |          |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| sqlite3             | Required      | Database storage           |                         |          |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| zlib                | Required      | Data compression           |                         |          |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| fmtlib              | Required      | Fast string formatting     |                         |          | install-fmt.sh               |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| spdlog              | Required      | Runtime logging            |                         |          | install-spdlog.sh            |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| duktape             | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| mysql               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| curl                | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| taglib              | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libmagic            | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libmatroska         | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
+| libebml             | Optional      | required for MKV           |                         | Enabled  | install-ebml.sh              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| ffmpeg/libav        | Optional      | File metadata              | WITH\_AVCODEC           | Disabled |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libexif             | Optional      | JPEG Exif metadata         | WITH\_EXIF              | Enabled  |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| libexiv2            | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| lastfmlib           | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| ffmpegthumbnailer   | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| inotify             | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 
 Referenced packages:
 
-  `<duktape>: http://duktape.org`_
-  `<ffmpegthumbnailer>: https://github.com/dirkvdb/ffmpegthumbnailer`_
-  `<fmtlib>: https://github.com/fmtlib/fmt`_
-  `<lastfmlib>: https://github.com/dirkvdb/lastfmlib`_
-  `<npupnp>: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html`_
-  `<pugixml>: https://github.com/zeux/pugixml`_
-  `<pupnp>: https://github.com/pupnp/pupnp`_
-  `<spdlog>: https://github.com/gabime/spdlog`_
-  `<taglib>: http://taglib.org/`_
+.. _<duktape>: http://duktape.org
+.. _<ffmpegthumbnailer>: https://github.com/dirkvdb/ffmpegthumbnailer
+.. _<fmtlib>: https://github.com/fmtlib/fmt
+.. _<lastfmlib>: https://github.com/dirkvdb/lastfmlib
+.. _<libmatroska>: https://github.com/Matroska-Org/libmatroska
+.. _<libebml>, Extensible Binary Markup Language: https://github.com/Matroska-Org/libebml
+.. _<npupnp>: https://www.lesbonscomptes.com/upmpdcli/index.html
+.. _<pugixml>: https://github.com/zeux/pugixml
+.. _<pupnp>: https://github.com/pupnp/pupnp
+.. _<spdlog>: https://github.com/gabime/spdlog
+.. _<taglib>: http://taglib.org/
 
-Scripts for installation of (build) dependencies from source can be found under `scripts`.
+Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version of the package.
+Make sure no other version of the development package is installed.
 
 
 .. index:: Quick Start Build

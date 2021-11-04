@@ -1,16 +1,47 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+VERSION="${TAGLIB-1.12}"
+
 if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
-set -ex
-#wget http://taglib.github.io/releases/taglib-1.12.0.tar.gz
-wget https://github.com/taglib/taglib/archive/v1.12.tar.gz -O taglib-1.12.0.tar.gz
-tar -xzvf taglib-1.12.0.tar.gz
 
-rm -Rf taglib-build
-mkdir taglib-build
+script_dir=`pwd -P`
+src_dir="${script_dir}/taglib-${VERSION}"
+tgz_file="${script_dir}/taglib-${VERSION}.tgz"
 
-cd taglib-build
-cmake ../taglib-1.12
-make -j$(nproc) && make install && ldconfig
+if [ ! -f "${tgz_file}" ]; then
+    wget https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz -O ${tgz_file}
+fi
+
+if [ -d "${src_dir}" ]; then
+    rm -r ${src_dir}
+fi
+mkdir "${src_dir}"
+tar -xzvf ${tgz_file} --strip-components=1 -C ${src_dir}
+cd ${src_dir}
+if [ -d build ]; then
+    rm -R build
+fi
+mkdir build
+cd build
+
+cmake ..
+
+if command -v nproc >/dev/null 2>&1; then
+    make "-j$(nproc)"
+else
+    make
+fi
+make install
+
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" != 'alpine' ]; then
+        ldconfig
+    fi
+fi

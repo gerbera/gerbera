@@ -57,3 +57,26 @@ jobs:
         # Remove build directories before creating a cache.
         run: |
           conan remove '*' --force --builds --system-reqs
+
+  head-check:
+    runs-on: ubuntu-latest
+    container:
+      image: "ubuntu:21.04"
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        TZ: Etc/UTC
+    steps:
+      - name: Install script pre-reqs
+        shell: bash
+        run: |
+          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+          apt-get update -y
+          apt-get install -y lsb-release sudo wget curl git
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # We need history/tags to generate version info
+
+      - name: Build and upload deb
+        run: |
+          bash scripts/debian/build-deb.sh HEAD

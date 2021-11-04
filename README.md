@@ -2,7 +2,7 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/workflow/status/gerbera/gerbera/CI%20validation?style=for-the-badge)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=v) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
+ [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/workflow/status/gerbera/gerbera/CI%20validation?style=for-the-badge)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=1.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -30,7 +30,7 @@ Head over to the docs page on [Installing Gerbera](https://docs.gerbera.io/en/st
 how to install Gerbera.
 
 ## Building
-Visit our docs for instructions to [Compile Gerbera](https://docs.gerbera.io/en/stable/compile.html).
+Visit our docs for instructions to [Compile Gerbera](https://docs.gerbera.io/en/stable/compile.html) or [Compile latest Gerbera](https://docs.gerbera.io/en/latest/compile.html).
 
 ### Quick start build instructions:
 ```
@@ -44,31 +44,30 @@ sudo make install
 
 ## Dependencies
 
-| Library       | Min Version   | Required?     | Note                       | Compile-time option    | Default  | Script             |
-|---------------|---------------|---------------|----------------------------|------------------------|----------|--------------------|
-| libupnp       | 1.14.0        | XOR libnpupnp | [pupnp]                    |                        |          | install-pupnp.sh   |
-| libnpupnp     | 4.1.2         | XOR libupnp   | [npupnp]                   | WITH_NPUPNP            | Disabled |                    |
-| libuuid       |               | Depends on OS | Not required on \*BSD      |                        |          |                    |
-| [pugixml]     |               | Required      | XML file and data support  |                        |          | install-pugixml.sh |
-| libiconv      |               | Required      | Charset conversion         |                        |          |                    |
-| sqlite3       | 3.7.0         | Required      | Database storage           |                        |          |                    |
-| zlib          |               | Required      | Data compression           |                        |          |                    |
-| [fmtlib]      | 7.1.3         | Required      | Fast string formatting     |                        |          | install-fmt.sh     |
-| [spdlog]      | 1.8.5         | Required      | Runtime logging            |                        |          | install-spdlog.sh  |
-| [duktape]     | 2.1.0         | Optional      | Scripting Support          | WITH_JS                | Enabled  | install-duktape.sh |
-| mysql         |               | Optional      | Alternate database storage | WITH_MYSQL             | Disabled |                    |
-| curl          |               | Optional      | Enables web services       | WITH_CURL              | Enabled  |                    |
-| [taglib]      | 1.12          | Optional      | Audio tag support          | WITH_TAGLIB            | Enabled  | install-taglib.sh  |
-| libmagic      |               | Optional      | File type detection        | WITH_MAGIC             | Enabled  |                    |
-| libmatroska   |               | Optional      | MKV metadata               | WITH_MATROSKA          | Enabled  |                    |
-| ffmpeg/libav  |               | Optional      | File metadata              | WITH_AVCODEC           | Disabled |                    |
-| libexif       |               | Optional      | JPEG Exif metadata         | WITH_EXIF              | Enabled  |                    |
-| libexiv2      |               | Optional      | Exif, IPTC, XMP metadata   | WITH_EXIV2             | Disabled |                    |
-| [lastfmlib]   | 0.4.0         | Optional      | Enables scrobbling         | WITH_LASTFM            | Disabled | install-lastfm.sh  |
-| [ffmpegthumbnailer] |         | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |                    |
-| inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY           | Enabled  |                    |
+| Library       | Min Version   | Recommended   | Latest tested | Required?     | Note                       | Default  |
+|---------------|---------------|---------------|---------------|---------------|----------------------------|----------|
+| libupnp       | 1.14.0        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
+| libnpupnp     | 4.1.2         | 4.1.5         | 4.1.5         | XOR libupnp   | [npupnp]                   | Disabled |
+| libuuid       |               |               |               | Depends on OS | Not required on \*BSD      |          |
+| [pugixml]     |               |               |               | Required      | XML file and data support  |          |
+| libiconv      |               |               |               | Required      | Charset conversion         |          |
+| sqlite3       | 3.7.0         | 3.35.5        | 3.36.0        | Required      | Database storage           |          |
+| zlib          |               |               |               | Required      | Data compression           |          |
+| [fmtlib]      | 7.1.3         | 7.1.3         | 8.0.1         | Required      | Fast string formatting     |          |
+| [spdlog]      | 1.8.1         | 1.8.5         | 1.9.2         | Required      | Runtime logging            |          |
+| [duktape]     | 2.1.0         | 2.5.0         | 2.6.0         | Optional      | Scripting Support          | Enabled  |
+| mysql         |               |               |               | Optional      | Alternate database storage | Disabled |
+| curl          |               |               |               | Optional      | Enables web services       | Enabled  |
+| [taglib]      | 1.12          | 1.12          | 1.12          | Optional      | Audio tag support          | Enabled  |
+| libmagic      |               |               |               | Optional      | File type detection        | Enabled  |
+| [libmatroska] |               | 1.6.3         | 1.6.3         | Optional      | MKV metadata               | Enabled  |
+| ffmpeg/libav  |               |               |               | Optional      | File metadata              | Disabled |
+| libexif       |               |               |               | Optional      | JPEG Exif metadata         | Enabled  |
+| [libexiv2]    |               | v0.26         | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [lastfmlib]   | 0.4.0         | 0.4.0         | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
+| [ffmpegthumbnailer] |         | 2.2.0         | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
+| inotify       |               |               |               | Optional      | Efficient file monitoring  | Enabled  |
 
-Scripts for installation of (build) dependencies from source can be found under `scripts`.
 
 ## Licence
 
@@ -91,7 +90,9 @@ Scripts for installation of (build) dependencies from source can be found under 
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
-[npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
+[libexiv2]: https://github.com/Exiv2llibexiv2
+[libmatroska]: https://github.com/Matroska-Org/libmatroska, requires https://github.com/Matroska-Org/libebml
+[npupnp]: https://www.lesbonscomptes.com/upmpdcli/index.html
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp
 [spdlog]: https://github.com/gabime/spdlog
