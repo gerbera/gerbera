@@ -5,7 +5,7 @@
 \\$2 \(la\\$1\(ra\\$3
 ..
 .if \n(.g .mso www.tmac
-.TH gerbera 1 2017-09-05 "" ""
+.TH gerbera 1 2021-11-04 "" ""
 .SH NAME
 gerbera \- UPnP MediaServer
 .SH SYNOPSIS
@@ -16,29 +16,37 @@ gerbera \- UPnP MediaServer
 .if (\nx>(\n(.l/2)) .nr x (\n(.l/5)
 'in \n(.iu+\nxu
 [
-\fB-i \fIIP address\fB
+\fB-i|--ip \fIIP address\fB
 \fR] [
-\fB-e \fIinterface\fB
+\fB-e|--interface \fIinterface\fB
 \fR] [
-\fB-p \fIport\fB
+\fB-p|--port \fIport\fB
 \fR] [
-\fB-c \fIconfig file\fB
+\fB-u|--user \fIusername\fB
 \fR] [
-\fB-m \fIhome dir\fB
+\fB-c|--config \fIconfig file\fB
 \fR] [
-\fB-f \fIconfig dir\fB
+\fB-m|--home \fIhome dir\fB
 \fR] [
-\fB-a \fIpath\fB
+\fB-f|--cfgdir \fIconfig dir\fB
 \fR] [
-\fB-l \fIlogfile\fB
+\fB-P|--pidfile \fIpid file\fB
 \fR] [
-\fB-D\fR
+\fB--add-file \fIfile\fB
+\fR]  [
+\fB-l|--logfile \fIlogfile\fB
+\fR] [
+\fB-d|-daemon\fR
+] [
+\fB-D|--debug\fR
 ] [
 \fB--compile-info\fR
 ] [
-\fB--version\fR
+\fB--create-config\fR
 ] [
-\fB-h\fR
+\fB-v|--version\fR
+] [
+\fB-h|--help\fR
 ]
 'in \n(.iu-\nxu
 .ad b
@@ -63,33 +71,36 @@ serving media and for UPnP requests, minimum allowed value is 49152. If this
 option is omitted a default port will be chosen, however, in this case it is
 possible that the port will change upon server restart.
 .TP 
+\*(T<\fB\-u\fR\*(T>, \*(T<\fB\-\-user\fR\*(T> 
+Drop privs to user on startup. Make sure all mediafiles are readable by this user.
+Also make sure that home directory is writable for this user.
+.TP 
 \*(T<\fB\-c\fR\*(T>, \*(T<\fB\-\-config\fR\*(T> 
-By default Gerbera will search for a file named "config.xml" in the ~/.config/gerbera directory. This option allows you to specify a config file by the
+By default Gerbera will search for a file named "config.xml" in the ~/.config/gerbera directory.
+This option allows you to specify a config file by the
 name and location of your choice. The file name must be absolute.
 .TP 
 \*(T<\fB\-m\fR\*(T>, \*(T<\fB\-\-home\fR\*(T> 
 Specify an alternative home directory. By default Gerbera will try to
 retrieve the users home directory from the environment, then it will look for a
-\&.gerbera directory in users home. If .gerbera was found we will try to find
-the default configuration file (config.xml), if not found we will create both,
-the .Gerbera directory and the default config file.
+.config/gerbera directory in users home. If .config/gerbera was found we will try to find
+the default configuration file (config.xml).
 
-This option is useful in two cases: when the home directory can not be
+This option is useful in two cases: when the home directory cannot be
 retrieved from the environment (in this case you could also use -c to point
-Gerbera to your configuration file or when you want to create a new
+Gerbera to your configuration file) or when you want to test a new
 configuration in a non standard location (for example, when setting up daemon
 mode). In the latter case you can combine this parameter with the parameter
-described in Section 5.6, "Config Directory"
+described in "Config Directory"
 .TP 
 \*(T<\fB\-f\fR\*(T>, \*(T<\fB\-\-cfgdir\fR\*(T> 
-The default configuration directory is combined out of the users home and the
-default that equals to .gerbera, this option allows you to override the
-default directory naming. This is useful when you want to setup the server in a
-nonstandard location, but want that the default configuration to be written by
-the server.
+The default configuration directory is combined by the users home and the
+default that equals to .config/gerbera, this option allows you to override the
+default directory naming. This is useful when you want to set up the server in a
+nonstandard location.
 .TP 
-\*(T<\fB\-a\fR\*(T>, \*(T<\fB\-\-add\fR\*(T> 
-Add the specified directory or file name to the database without UI
+\*(T<\fB\-\-add\-file\fR\*(T> 
+Add the specified file name to the database without UI
 interaction. The path must be absolute, if path is a directory then it will be
 added recursively. If path is a file, then only the given file will be
 imported.
@@ -101,8 +112,12 @@ file.
 \*(T<\fB\-D\fR\*(T>, \*(T<\fB\-\-debug\fR\*(T> 
 Enable debug log output.
 .TP 
+\*(T<\fB\-d\fR\*(T>, \*(T<\fB\-\-daemon\fR\*(T> 
+Daemonize after startup.
+.TP 
 \*(T<\fB\-\-compile\-info\fR\*(T> 
-Print the configuration summary (used libraried and enabled features) and exit.
+Print the core configuration (defaults for used libraries and enabled features) and exit.
+Copy the output to your config file.
 .TP 
 \*(T<\fB\-\-version\fR\*(T> 
 Print version information and exit.
