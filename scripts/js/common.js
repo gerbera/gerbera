@@ -377,11 +377,13 @@ function addAudio(obj) {
     chain.album.metaData[M_ALBUMARTIST] = artist;
     chain.album.metaData[M_GENRE] = [ genre ];
     chain.album.metaData[M_DATE] = obj.metaData[M_DATE];
+    chain.album.metaData[M_UPNP_DATE] = obj.metaData[M_UPNP_DATE];
     chain.album.metaData[M_ALBUM] = [ album ];
     chain.artist.metaData[M_ARTIST] = artist;
     chain.artist.metaData[M_ALBUMARTIST] = artist;
     chain.genre.metaData[M_GENRE] = [ genre ];
     chain.year.metaData[M_DATE] = [ date ];
+    chain.year.metaData[M_UPNP_DATE] = [ date ];
     chain.composer.metaData[M_COMPOSER] = [ composer ];
 
     var container = addContainerTree([chain.audio, chain.allAudio]);
@@ -569,6 +571,7 @@ function addAudioStructured(obj) {
     chain.album.metaData[M_ALBUMARTIST] = [ album_artist ];
     chain.album.metaData[M_GENRE] = [ genre ];
     chain.album.metaData[M_DATE] = obj.metaData[M_DATE];
+    chain.album.metaData[M_UPNP_DATE] = obj.metaData[M_UPNP_DATE];
     chain.album.metaData[M_ALBUM] = [ album ];
     chain.artist.metaData[M_ARTIST] = artist;
     chain.artist.metaData[M_ALBUMARTIST] = artist;
@@ -807,6 +810,7 @@ function addTrailer(obj) {
         if (reldate.length >= 7) {
             chain.date.title = reldate.slice(0, 7);
             chain.date.metaData[M_DATE] = [ reldate.slice(0, 7) ];
+            chain.date.metaData[M_UPNP_DATE] = [ reldate.slice(0, 7) ];
             addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.relDate, chain.date]));
         }
     }
@@ -820,6 +824,7 @@ function addTrailer(obj) {
     if (postdate && postdate.length >= 7) {
         chain.date.title = postdate.slice(0, 7);
         chain.date.metaData[M_DATE] = [ postdate.slice(0, 7) ];
+        chain.date.metaData[M_UPNP_DATE] = [ postdate.slice(0, 7) ];
         addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.postDate, chain.date]));
     }
 }

@@ -159,19 +159,19 @@ int main(int argc, char** argv, char** envp)
         ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
         ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u,user", "Drop privs to user", cxxopts::value<std::string>()) //
-        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<std::string>()) //
+        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>()) //
         ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
         ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
         ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
-        ("c,config", "Path to config file", cxxopts::value<std::string>()) //
-        ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<std::string>()) //
-        ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<std::string>()) //
-        ("l,logfile", "Set log location", cxxopts::value<std::string>()) //
+        ("c,config", "Path to config file", cxxopts::value<fs::path>()) //
+        ("m,home", "Search this directory for a .gerbera folder containing a config file", cxxopts::value<fs::path>()) //
+        ("f,cfgdir", "Override name of config folder (.config/gerbera) by default. -h must also be set.", cxxopts::value<fs::path>()) //
+        ("l,logfile", "Set log location", cxxopts::value<fs::path>()) //
         ("compile-info", "Print compile info and exit") //
         ("v,version", "Print version info and exit") //
         ("h,help", "Print this help and exit") //
         ("create-config", "Print a default config.xml file and exit") //
-        ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<std::string>>(), "FILE") //
+        ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
         ;
 
     try {
@@ -217,9 +217,12 @@ int main(int argc, char** argv, char** envp)
             spdlog::set_pattern("%Y-%m-%d %X %^%6l%$: %v");
         }
 
-        std::optional<std::string> logfile;
+        std::optional<fs::path> logfile;
         if (opts.count("logfile") > 0) {
-            auto fileLogger = spdlog::basic_logger_mt("basic_logger", opts["logfile"].as<std::string>());
+            if (!fs::directory_entry(logfile->parent_path()).exists()) {
+                log_warning("Log dir {} missing", logfile->parent_path().c_str());
+            }
+            auto fileLogger = spdlog::basic_logger_mt("basic_logger", *logfile);
             spdlog::set_default_logger(fileLogger);
             spdlog::flush_on(spdlog::level::trace);
         }
@@ -229,9 +232,12 @@ int main(int argc, char** argv, char** envp)
             logCopyright();
         }
 
-        std::optional<std::string> home;
+        std::optional<fs::path> home;
         if (opts.count("home") > 0) {
-            home = opts["home"].as<std::string>();
+            home = opts["home"].as<fs::path>();
+            if (!fs::directory_entry(*home).exists()) {
+                log_warning("Home dir {} missing", home->c_str());
+            }
         }
 
         // are we requested to drop privs?
@@ -329,6 +335,9 @@ int main(int argc, char** argv, char** envp)
         std::optional<fs::path> pidfile;
         if (opts.count("pidfile") > 0) {
             pidfile = opts["pidfile"].as<fs::path>();
+            if (!fs::directory_entry(pidfile->parent_path()).exists()) {
+                log_warning("pidfile parent dir {} missing", pidfile->parent_path().c_str());
+            }
 
             // x will make it fail if file exists
             auto pidf = std::fopen(pidfile->c_str(), "wx");
@@ -357,14 +366,17 @@ int main(int argc, char** argv, char** envp)
             std::fclose(pidf);
         }
 
-        std::optional<std::string> configFile;
+        std::optional<fs::path> configFile;
         if (opts.count("config") > 0) {
-            configFile = opts["config"].as<std::string>();
+            configFile = opts["config"].as<fs::path>();
         }
 
-        std::optional<std::string> confdir;
+        std::optional<fs::path> confdir;
         if (opts.count("cfgdir") > 0) {
-            confdir = opts["cfgdir"].as<std::string>();
+            confdir = opts["cfgdir"].as<fs::path>();
+            if (!fs::directory_entry(*confdir).exists()) {
+                log_warning("confdir {} missing", confdir->c_str());
+            }
         }
 
         if (!confdir.has_value()) {
@@ -451,7 +463,7 @@ int main(int argc, char** argv, char** envp)
             configManager->load(home.value_or(""));
             portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
-            log_error("Error parsing config file '{}': {}", (*configFile), ce.what());
+            log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
             std::exit(EXIT_FAILURE);
         } catch (const std::runtime_error& e) {
             log_error("{}", e.what());
@@ -549,7 +561,7 @@ int main(int argc, char** argv, char** envp)
                             ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
                             debug);
                     } catch (const ConfigParseException& ce) {
-                        log_error("Error parsing config file '{}': {}", (*configFile), ce.what());
+                        log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // therefore it is safe to exit
