@@ -281,7 +281,7 @@ This section defines the various transcoding profiles.
             <environ name="LC_ALL" value="C"/>
         </agent>
 
-     * Required
+    * Required
 
     Defines the transcoding agent and the parameters, in the example above we use ogg123 to convert ogg or flac to wav.
 

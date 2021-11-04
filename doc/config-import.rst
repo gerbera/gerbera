@@ -574,14 +574,11 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         ::
 
             <handler name="Fanart"/>
+            name="..."
 
-            ::
+        * Required
 
-                name="..."
-
-            * Required
-
-            Valid handler names are ``Default``, ``LibExif``, ``TagLib``, ``Transcode``, ``Fanart``, ``Exturl``, ``MP4``, ``FFmpegThumbnailer``, ``Flac``, ``Matroska``, ``Subtitle``, ``Resource``, ``ContainerArt``
+        Valid handler names are ``Default``, ``LibExif``, ``TagLib``, ``Transcode``, ``Fanart``, ``Exturl``, ``MP4``, ``FFmpegThumbnailer``, ``Flac``, ``Matroska``, ``Subtitle``, ``Resource``, ``ContainerArt``
 
     ::
 
