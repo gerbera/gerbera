@@ -87,7 +87,7 @@ protected:
     std::shared_ptr<Database> database;
 
     std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
+    using AutoLock = std::lock_guard<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<AutoscanDirectory>> list;
     int _add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index);

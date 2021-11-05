@@ -209,7 +209,7 @@ protected:
     std::array<unsigned int, DBVERSION> hashies;
 
     std::recursive_mutex sqlMutex;
-    using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
+    using SqlAutoLock = std::lock_guard<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
     void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd);
@@ -297,7 +297,7 @@ private:
 
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
-    using AutoLock = std::scoped_lock<std::mutex>;
+    using AutoLock = std::lock_guard<std::mutex>;
 };
 
 template <typename T>
