@@ -29,7 +29,7 @@
 
 void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     _add(cont, index);
 }
 
@@ -58,13 +58,13 @@ std::size_t DynamicContentList::getEditSize() const
 
 std::vector<std::shared_ptr<DynamicContent>> DynamicContentList::getArrayCopy()
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     return list;
 }
 
 std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edit)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     if (!edit) {
         if (id >= list.size())
             return nullptr;
@@ -79,7 +79,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edi
 
 std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     auto entry = std::find_if(list.begin(), list.end(), [=](auto&& c) { return c->getLocation() == location; });
     if (entry != list.end() && *entry) {
         return *entry;
@@ -89,7 +89,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location
 
 void DynamicContentList::remove(std::size_t id, bool edit)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     if (!edit) {
         if (id >= list.size()) {

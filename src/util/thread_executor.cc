@@ -60,7 +60,7 @@ bool ThreadExecutor::kill()
     if (!threadRunning)
         return true;
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = std::unique_lock(mutex);
     threadShutdown = true;
     cond.notify_one();
     lock.unlock();

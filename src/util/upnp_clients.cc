@@ -236,7 +236,7 @@ const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchTy
 
 const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
         { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
@@ -252,7 +252,7 @@ const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr)
 
 void Clients::updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     // house cleaning, remove old entries
     auto now = currentTime();

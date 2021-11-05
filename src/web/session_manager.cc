@@ -50,13 +50,13 @@ Session::Session(std::chrono::seconds timeout)
 
 void Session::put(const std::string& key, std::string value)
 {
-    AutoLockR lock(rmutex);
+    auto lock = std::scoped_lock(rmutex);
     dict[key] = std::move(value);
 }
 
 std::string Session::get(const std::string& key)
 {
-    AutoLockR lock(rmutex);
+    auto lock = std::scoped_lock(rmutex);
     return getValueOrDefault(dict, key);
 }
 
@@ -65,7 +65,7 @@ void Session::containerChangedUI(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return;
     if (!updateAll) {
-        AutoLockR lock(rmutex);
+        auto lock = std::scoped_lock(rmutex);
         if (!updateAll) {
             if (uiUpdateIDs.size() >= MAX_UI_UPDATE_IDS) {
                 updateAll = true;
@@ -82,7 +82,7 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
         return;
 
     auto arSize = objectIDs.size();
-    AutoLockR lock(rmutex);
+    auto lock = std::scoped_lock(rmutex);
 
     if (updateAll)
         return;
@@ -100,7 +100,7 @@ std::string Session::getUIUpdateIDs()
 {
     if (!hasUIUpdateIDs())
         return {};
-    AutoLockR lock(rmutex);
+    auto lock = std::scoped_lock(rmutex);
     if (updateAll) {
         updateAll = false;
         return "all";
@@ -117,14 +117,13 @@ bool Session::hasUIUpdateIDs() const
 {
     if (updateAll)
         return true;
-    // AutoLock lock(mutex); only accessing an int - shouldn't be necessary
     return !uiUpdateIDs.empty();
 }
 
 void Session::clearUpdateIDs()
 {
     log_debug("clearing UI updateIDs");
-    AutoLockR lock(rmutex);
+    auto lock = std::scoped_lock(rmutex);
     uiUpdateIDs.clear();
     updateAll = false;
 }
@@ -138,7 +137,7 @@ SessionManager::SessionManager(const std::shared_ptr<Config>& config, std::share
 std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds timeout)
 {
     auto newSession = std::make_shared<Session>(timeout);
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     int count = 0;
     std::string sessionID;
@@ -160,7 +159,7 @@ std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID
         return nullptr;
     }
 
-    auto lock = std::unique_lock<std::mutex>(mutex, std::defer_lock);
+    auto lock = std::unique_lock(mutex, std::defer_lock);
     if (doLock)
         lock.lock();
 
@@ -174,7 +173,7 @@ void SessionManager::removeSession(const std::string& sessionID)
         return;
     }
 
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto it = std::find_if(sessions.begin(), sessions.end(), [=](auto&& s) { return s->getID() == sessionID; });
     if (it != sessions.end()) {
@@ -192,7 +191,7 @@ void SessionManager::containerChangedUI(int objectID)
 {
     if (sessions.empty())
         return;
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     for (auto&& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectID);
@@ -203,7 +202,7 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
 {
     if (sessions.empty())
         return;
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     for (auto&& session : sessions) {
         if (session->isLoggedIn())
             session->containerChangedUI(objectIDs);
@@ -225,7 +224,7 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
 {
     log_debug("notified... {} web sessions.", sessions.size());
 
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto now = currentTimeMS();
 

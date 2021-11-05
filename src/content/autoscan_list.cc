@@ -29,7 +29,7 @@
 
 void AutoscanList::updateLMinDB()
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     for (std::size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
         auto ad = list[i];
@@ -39,7 +39,7 @@ void AutoscanList::updateLMinDB()
 
 int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     return _add(dir, index);
 }
 
@@ -64,7 +64,7 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_
 
 void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     for (auto&& dir : list->list) {
         _add(dir, std::numeric_limits<std::size_t>::max());
@@ -81,14 +81,14 @@ std::size_t AutoscanList::getEditSize() const
 
 std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     return list;
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
     if (!edit) {
         if (id >= list.size())
             return nullptr;
@@ -103,7 +103,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit)
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return objectID == item->getObjectID(); });
     return it != list.end() ? *it : nullptr;
@@ -111,7 +111,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return location == item->getLocation(); });
     return it != list.end() ? *it : nullptr;
@@ -119,7 +119,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
 
 void AutoscanList::remove(std::size_t id, bool edit)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     if (!edit) {
         if (id >= list.size()) {
@@ -150,7 +150,7 @@ void AutoscanList::remove(std::size_t id, bool edit)
 
 std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& parent, bool persistent)
 {
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     auto rmIdList = std::make_shared<AutoscanList>(database);
 
@@ -182,7 +182,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
 {
     if (!sub)
         return;
-    AutoLock lock(mutex);
+    auto lock = std::scoped_lock(mutex);
 
     for (auto&& i : list) {
         sub->timerNotify(i->getTimerParameter());
