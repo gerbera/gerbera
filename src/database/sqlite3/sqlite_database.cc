@@ -373,7 +373,7 @@ bool SLTask::is_running() const
 void SLTask::sendSignal()
 {
     if (is_running()) { // we check before we lock first, because there is no need to lock then
-        std::scoped_lock<decltype(mutex)> lock(mutex);
+        std::lock_guard<decltype(mutex)> lock(mutex);
         running = false;
         cond.notify_one();
     }
