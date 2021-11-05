@@ -173,7 +173,7 @@ Script::Script(std::shared_ptr<ContentManager> content,
 {
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
-    auto lock = std::scoped_lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     ctx = runtime->createContext(name);
     if (!ctx)
         throw_std_runtime_error("Scripting: could not initialize js context");
@@ -383,7 +383,7 @@ void Script::_load(const std::string& scriptPath)
 
 void Script::load(const std::string& scriptPath)
 {
-    auto lock = std::scoped_lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
@@ -401,7 +401,7 @@ void Script::_execute()
 
 void Script::execute()
 {
-    auto lock = std::scoped_lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     duk_get_prop_string(ctx, -1, "script");
     duk_remove(ctx, -2);

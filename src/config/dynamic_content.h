@@ -64,6 +64,7 @@ protected:
     std::map<std::size_t, std::shared_ptr<DynamicContent>> indexMap;
 
     std::recursive_mutex mutex;
+    using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DynamicContent>> list;
     void _add(const std::shared_ptr<DynamicContent>& cont, std::size_t index);

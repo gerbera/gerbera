@@ -110,7 +110,7 @@ PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> conte
     : Script(std::move(content), runtime, "playlist")
 {
     try {
-        auto lock = std::scoped_lock(runtime->getMutex());
+        ScriptingRuntime::AutoLock lock(runtime->getMutex());
         defineFunction("readln", jsReadln, 0);
         defineFunction("getCdsObject", jsGetCdsObject, 1);
 
@@ -167,7 +167,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw_std_runtime_error("Failed to open file: {}", obj->getLocation().c_str());
     }
 
-    auto lock = std::scoped_lock(runtime->getMutex());
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
         cdsObject2dukObject(obj);
         duk_put_global_string(ctx, "playlist");

@@ -197,7 +197,7 @@ void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     if (use_transaction) {
         log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
-        auto lock = std::scoped_lock(sqlMutex);
+        SqlAutoLock lock(sqlMutex);
         StdThreadRunner::waitFor(
             fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
@@ -388,7 +388,7 @@ void SLTask::sendSignal(std::string error)
 void SLTask::waitForTask()
 {
     if (is_running()) { // we check before we lock first, because there is no need to lock then
-        auto lock = std::unique_lock(mutex);
+        std::unique_lock<decltype(mutex)> lock(mutex);
         if (is_running()) { // we check it a second time after locking to ensure we didn't miss the pthread_cond_signal
             cond.wait(lock); // waiting for the task to complete
         }

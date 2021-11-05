@@ -60,7 +60,7 @@ AutoscanInotify::AutoscanInotify(std::shared_ptr<ContentManager> content)
 
 AutoscanInotify::~AutoscanInotify()
 {
-    auto lock = std::unique_lock(mutex);
+    std::unique_lock<std::mutex> lock(mutex);
     if (!shutdownFlag) {
         log_debug("start");
         shutdownFlag = true;
@@ -75,7 +75,7 @@ AutoscanInotify::~AutoscanInotify()
 
 void AutoscanInotify::run()
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
 
     if (shutdownFlag) {
         shutdownFlag = false;
@@ -90,7 +90,7 @@ void AutoscanInotify::threadProc()
     std::error_code ec;
     while (!shutdownFlag) {
         try {
-            auto lock = std::unique_lock(mutex);
+            std::unique_lock<std::mutex> lock(mutex);
 
             //  remove old dirs
             while (!unmonitorQueue.empty()) {
@@ -275,7 +275,7 @@ void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     assert(dir->getScanMode() == ScanMode::INotify);
     log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     monitorQueue.push(dir);
     inotify->stop();
 }
@@ -286,7 +286,7 @@ void AutoscanInotify::unmonitor(const std::shared_ptr<AutoscanDirectory>& dir)
     assert(!dir->persistent());
 
     log_debug("Requested to stop monitoring \"{}\"", dir->getLocation().c_str());
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     unmonitorQueue.push(dir);
     inotify->stop();
 }
