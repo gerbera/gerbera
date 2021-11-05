@@ -59,7 +59,7 @@ MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mim
 
 MySQLDatabase::~MySQLDatabase()
 {
-    SqlAutoLock lock(sqlMutex); // just to ensure, that we don't close while another thread
+    auto lock = std::scoped_lock(sqlMutex); // just to ensure, that we don't close while another thread
     // is executing a query
 
     if (mysql_connection) {
@@ -95,7 +95,7 @@ void MySQLDatabase::init()
     log_debug("start");
     SQLDatabase::init();
 
-    std::unique_lock<decltype(sqlMutex)> lock(sqlMutex);
+    auto lock = std::unique_lock(sqlMutex);
 
     if (!mysql_thread_safe()) {
         throw_std_runtime_error("mysql library is not thread safe");
@@ -223,7 +223,7 @@ void MySQLDatabaseWithTransactions::beginTransaction(std::string_view tName)
         "MySqlDatabase", [this] { return !inTransaction; }, 100);
     inTransaction = true;
     log_debug("START TRANSACTION {}", tName);
-    SqlAutoLock lock(sqlMutex);
+    auto lock = std::scoped_lock(sqlMutex);
     if (use_transaction)
         _exec("START TRANSACTION");
 }
@@ -241,7 +241,7 @@ void MySQLDatabaseWithTransactions::rollback(std::string_view tName)
 void MySQLDatabaseWithTransactions::commit(std::string_view tName)
 {
     log_debug("COMMIT {}", tName);
-    SqlAutoLock lock(sqlMutex);
+    auto lock = std::scoped_lock(sqlMutex);
     if (use_transaction && inTransaction && mysql_commit(&db)) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while commiting db: {}", myError));
@@ -257,7 +257,7 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
 #endif
 
     checkMysqlThreadInit();
-    SqlAutoLock lock(sqlMutex);
+    auto lock = std::scoped_lock(sqlMutex);
     bool myTransaction = false;
     if (!inTransaction) { // protect calls outside transactions
         inTransaction = true;
@@ -288,7 +288,7 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
     log_debug("{}", query);
 
     checkMysqlThreadInit();
-    SqlAutoLock lock(sqlMutex);
+    auto lock = std::scoped_lock(sqlMutex);
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
@@ -312,7 +312,7 @@ int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 #endif
 
     checkMysqlThreadInit();
-    SqlAutoLock lock(sqlMutex);
+    auto lock = std::scoped_lock(sqlMutex);
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);

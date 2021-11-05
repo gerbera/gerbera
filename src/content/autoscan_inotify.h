@@ -77,7 +77,6 @@ private:
     std::unique_ptr<Inotify> inotify;
 
     std::mutex mutex;
-    using AutoLock = std::scoped_lock<std::mutex>;
 
     std::queue<std::shared_ptr<AutoscanDirectory>> monitorQueue;
     std::queue<std::shared_ptr<AutoscanDirectory>> unmonitorQueue;

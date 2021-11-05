@@ -110,7 +110,6 @@ private:
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 
     std::mutex mutex;
-    using AutoLock = std::scoped_lock<std::mutex>;
     std::vector<ClientCacheEntry> cache;
 
     std::vector<ClientInfo> clientInfo;
