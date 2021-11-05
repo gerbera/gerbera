@@ -77,6 +77,9 @@ public:
         thread = 0;
     }
 
+    using AutoLock = std::scoped_lock<Mutex>;
+    using AutoLockU = std::unique_lock<Mutex>;
+
     /// \brief the exit status of the thread - needs to be overridden
     int getStatus() override { return 0; }
 
@@ -94,7 +97,7 @@ public:
     }
     void waitForReady()
     {
-        auto lck = std::unique_lock(mutex);
+        auto lck = AutoLockU(mutex);
         log_debug("ThreadRunner: Waiting for {} to become ready", threadName);
         cond.wait(lck, [this] { return isReady; });
         lck.unlock();
@@ -127,25 +130,25 @@ public:
         log_debug("ThreadRunner: Notifying all {}", threadName);
         cond.notify_all();
     }
-    auto lockGuard([[maybe_unused]] const std::string& loc = "")
+    AutoLock lockGuard([[maybe_unused]] const std::string& loc = "")
     {
         log_debug("ThreadRunner: Guard for {} - {}", threadName, loc);
-        return std::scoped_lock(mutex);
+        return AutoLock(mutex);
     }
-    auto uniqueLockS([[maybe_unused]] const std::string& loc = "")
+    AutoLockU uniqueLockS([[maybe_unused]] const std::string& loc = "")
     {
         log_debug("ThreadRunner: Lock {} - {}", threadName, loc);
-        return std::unique_lock(mutex);
+        return AutoLockU(mutex);
     }
-    auto uniqueLock()
+    AutoLockU uniqueLock()
     {
         log_debug("ThreadRunner: Lock {}", threadName);
-        return std::unique_lock(mutex);
+        return AutoLockU(mutex);
     }
-    auto uniqueLock(std::defer_lock_t tag)
+    AutoLockU uniqueLock(std::defer_lock_t tag)
     {
         log_debug("ThreadRunner: Lock with tag {}", threadName);
-        return std::unique_lock(mutex, tag);
+        return AutoLockU(mutex, tag);
     }
     template <class Predicate>
     static void waitFor(const std::string_view& threadName, Predicate pred, int max_count = 10)

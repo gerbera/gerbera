@@ -52,7 +52,7 @@ void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const 
 
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     _add(dir, index);
 }
 
@@ -81,13 +81,13 @@ std::size_t DirectoryConfigList::getEditSize() const
 
 std::vector<std::shared_ptr<DirectoryTweak>> DirectoryConfigList::getArrayCopy()
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     return list;
 }
 
 std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool edit)
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     if (!edit) {
         if (id >= list.size())
             return nullptr;
@@ -102,7 +102,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool ed
 
 std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location)
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
     auto&& myLocation = location.has_filename() ? location.parent_path() : location;
     for (auto testLoc = myLocation; testLoc.has_parent_path() && testLoc != "/"; testLoc = testLoc.parent_path()) {
         auto entry = std::find_if(list.begin(), list.end(), [&](auto&& d) { return (d->getLocation() == myLocation || d->getInherit()) && d->getLocation() == testLoc; });
@@ -115,7 +115,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& locatio
 
 void DirectoryConfigList::remove(std::size_t id, bool edit)
 {
-    auto lock = std::scoped_lock(mutex);
+    AutoLock lock(mutex);
 
     if (!edit) {
         if (id >= list.size()) {

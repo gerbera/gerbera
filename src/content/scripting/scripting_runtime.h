@@ -54,6 +54,7 @@ public:
     duk_context* createContext(const std::string& name);
     void destroyContext(const std::string& name);
 
+    using AutoLock = std::scoped_lock<std::recursive_mutex>;
     std::recursive_mutex& getMutex() { return mutex; }
 };
 
