@@ -53,12 +53,12 @@ protected:
     std::map<std::string, std::pair<int, bool>> chain;
     std::map<std::string, std::shared_ptr<CdsContainer>> container;
 
-    void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
+    void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true) const;
     void getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
     void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
-    std::string mapGenre(const std::string& genre);
+    std::string mapGenre(const std::string& genre) const;
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif

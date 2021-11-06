@@ -97,7 +97,7 @@ public:
     // always return something, 'Unknown' if we do not know better
     const ClientInfo* getInfo(const struct sockaddr_storage* addr, const std::string& userAgent);
 
-    void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
+    void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation) const;
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:

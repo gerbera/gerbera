@@ -30,7 +30,7 @@ public:
 
     void addTask(const std::shared_ptr<GenericTask>& task);
     std::deque<std::shared_ptr<GenericTask>> getTasklist();
-    std::shared_ptr<GenericTask> getCurrentTask();
+    std::shared_ptr<GenericTask> getCurrentTask() const;
     void invalidateTask(unsigned int taskID);
 
 protected:

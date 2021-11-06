@@ -862,7 +862,7 @@ std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOpti
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
 /// \param element starting element of the nodeset.
 /// \param scanmode add only directories with the specified scanmode to the array
-bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result)
+bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<AutoscanList>& result) const
 {
     if (!element)
         return true;

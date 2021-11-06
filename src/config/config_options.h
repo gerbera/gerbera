@@ -247,7 +247,7 @@ public:
         return option;
     }
 
-    void setKey(const std::string& oldKey, const std::string& newKey)
+    void setKey(const std::string& oldKey, const std::string& newKey) const
     {
         option->setKey(oldKey, newKey);
     }
