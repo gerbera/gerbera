@@ -31,29 +31,22 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
-ClientConfig::ClientConfig()
-    : clientInfo(std::make_unique<ClientInfo>())
-{
-}
-
 ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
 {
-    auto cInfo = ClientInfo();
-    cInfo.type = ClientType::Unknown;
+    clientInfo.type = ClientType::Unknown;
     if (!ip.empty()) {
-        cInfo.matchType = ClientMatchType::IP;
-        cInfo.match = ip;
+        clientInfo.matchType = ClientMatchType::IP;
+        clientInfo.match = ip;
     } else if (!userAgent.empty()) {
-        cInfo.matchType = ClientMatchType::UserAgent;
-        cInfo.match = userAgent;
+        clientInfo.matchType = ClientMatchType::UserAgent;
+        clientInfo.match = userAgent;
     } else {
-        cInfo.matchType = ClientMatchType::None;
+        clientInfo.matchType = ClientMatchType::None;
     }
-    cInfo.flags = flags;
+    clientInfo.flags = flags;
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
-    cInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
-    clientInfo = std::make_unique<ClientInfo>(std::move(cInfo));
+    clientInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
