@@ -145,7 +145,7 @@ libmysqlclient="libmysqlclient-dev"
 if [ "$lsb_distro" == "Debian" -o "$lsb_distro" == "Raspbian" ]; then
   libmysqlclient="libmariadb-dev-compat"
 fi
-if [[ "$lsb_codename" == "hirsute" ]]; then
+if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" ]]; then
   libmysqlclient="libmysql++-dev"
 fi
 
