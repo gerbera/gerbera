@@ -121,6 +121,7 @@ Below are the available scripting options:
         -  **builtin**: a default layout will be created by the server
         -  **js**: a user customizable javascript will be used (Gerbera must be compiled with js support)
         -  **disabled**: only PC-Directory structure will be created, i.e. no virtual layout
+
         ::
 
             audio-layout="Default|Structured"
@@ -568,9 +569,6 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     **Child tags:**
 
-    ``handler``
-    -----------
-
         ::
 
             <handler name="Fanart"/>
@@ -708,7 +706,7 @@ A sample configuration would be:
       </subtitle>
       <resource>
           <add-file name="cover.png"/>
-          <add-file name="%filename%.srt""/>
+          <add-file name="%filename%.srt"/>
       </resource>
   </resources>
 

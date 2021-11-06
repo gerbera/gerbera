@@ -6,7 +6,7 @@ Configure Client Quirks
 These settings define the additions to the automatic client type detection.
 
 ``clients``
-~~~~~~~~~~
+~~~~~~~~~~~
 
 .. code-block:: xml
 
@@ -60,7 +60,7 @@ This section defines the client behaviour for one client.
     
     This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client. 
     Run a network sniffer like wireshark or some UPnP utility to discover the signature. 
-    If ``ip`` is set ``userAgent``is ignored.
+    If ``ip`` is set ``userAgent`` is ignored.
 
     ::
     
