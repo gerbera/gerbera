@@ -152,7 +152,7 @@ public:
     void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
 
     /// \brief Returns the task that is currently being executed.
-    std::shared_ptr<GenericTask> getCurrentTask();
+    std::shared_ptr<GenericTask> getCurrentTask() const;
 
     /// \brief Returns the list of all enqueued tasks, including the current or nullptr if no tasks are present.
     std::deque<std::shared_ptr<GenericTask>> getTasklist();
@@ -185,7 +185,7 @@ public:
     int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
-    int ensurePathExistence(const fs::path& path);
+    int ensurePathExistence(const fs::path& path) const;
     void removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
@@ -243,7 +243,7 @@ public:
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;
 
     /// \brief Gets an AutoscanDirectory (by objectID) from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID);
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) const;
 
     /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location) const;
@@ -256,7 +256,7 @@ public:
 
     /// \brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
-    void setAutoscanDirectory(std::shared_ptr<AutoscanDirectory>&& dir);
+    void setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir);
 
     /// \brief handles the removal of a persistent autoscan directory
     void handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir);
@@ -340,11 +340,11 @@ protected:
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task);
-    bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const std::string& parentPath, bool all);
-    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
+    bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
+    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr) const;
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
-    void assignFanArt(const std::shared_ptr<CdsContainer>& containerList, const std::shared_ptr<CdsObject>& origObj, int count);
+    void assignFanArt(const std::shared_ptr<CdsContainer>& containerList, const std::shared_ptr<CdsObject>& origObj, int count) const;
 
     template <typename T>
     void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);

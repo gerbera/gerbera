@@ -330,7 +330,7 @@ void ContentManager::shutdown()
     log_debug("end");
 }
 
-std::shared_ptr<GenericTask> ContentManager::getCurrentTask()
+std::shared_ptr<GenericTask> ContentManager::getCurrentTask() const
 {
     auto lock = threadRunner->lockGuard("getCurrentTask");
 
@@ -461,7 +461,7 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
     return obj->getID();
 }
 
-bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const std::string& parentPath, bool all)
+bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all)
 {
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
@@ -482,10 +482,10 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
             addFile(dirEntry, asSetting, true, true, false);
-            log_debug("Forced rescan of {} for resource {}", parentPath, obj->getLocation().string());
+            log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), obj->getLocation().c_str());
             parentRemoved = true;
         } else {
-            log_error("Failed to read {}: {}", parentPath, ec.message());
+            log_error("Failed to read {}: {}", parentPath.c_str(), ec.message());
         }
     }
     return parentRemoved;
@@ -523,7 +523,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
     // loadAccounting();
 }
 
-int ContentManager::ensurePathExistence(const fs::path& path)
+int ContentManager::ensurePathExistence(const fs::path& path) const
 {
     int updateID;
     int containerID = database->ensurePathExistence(path, &updateID);
@@ -655,7 +655,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             continue;
         }
 
-        if ((shutdownFlag) || ((task) && !task->isValid()))
+        if (shutdownFlag || (task && !task->isValid()))
             break;
 
         // it is possible that someone hits remove while the container is being scanned
@@ -755,7 +755,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     finishScan(adir, location, parentContainer, lastModifiedNewMax, firstObject);
 
-    if ((shutdownFlag) || ((task) && !task->isValid())) {
+    if (shutdownFlag || (task && !task->isValid())) {
         return;
     }
     if (!list.empty()) {
@@ -839,7 +839,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         if (name[0] == '.' && !hidden) {
             continue;
         }
-        if ((shutdownFlag) || ((task) && !task->isValid()))
+        if (shutdownFlag || (task && !task->isValid()))
             break;
 
         if (config->getConfigFilename() == newPath)
@@ -851,7 +851,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
 
         try {
-            fs::path rootPath = (task) ? task->getRootPath() : "";
+            fs::path rootPath = task ? task->getRootPath() : "";
             // check database if parent, process existing
             auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
 
@@ -890,7 +890,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     finishScan(adir, subDir.path(), parentContainer, lastModifiedNewMax, firstObject);
 }
 
-void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject) const
 {
     if (adir) {
         adir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));
@@ -1115,7 +1115,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     return { result, isNew };
 }
 
-void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count)
+void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const
 {
     if (origObj && container && origObj->getMTime() > container->getMTime()) {
         container->setMTime(origObj->getMTime());
@@ -1588,7 +1588,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scan
     return nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID)
+std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID) const
 {
     return database->getAutoscanDirectory(objectID);
 }
@@ -1661,7 +1661,7 @@ void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<Auto
     database->updateAutoscanDirectory(adir);
 }
 
-void ContentManager::setAutoscanDirectory(std::shared_ptr<AutoscanDirectory>&& dir)
+void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     // We will have to change this for other scan modes
     auto original = autoscan_timed->getByObjectID(dir->getObjectID());
