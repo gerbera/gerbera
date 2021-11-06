@@ -230,10 +230,8 @@ void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
     auto now = currentTimeMS();
 
     for (auto it = sessions.begin(); it != sessions.end(); /*++it*/) {
-        auto&& session = *it;
-
-        if (getDeltaMillis(session->getLastAccessTime(), now) > session->getTimeout()) {
-            log_debug("session timeout: {} - diff: {}", session->getID(), getDeltaMillis(session->getLastAccessTime(), now).count());
+        if (getDeltaMillis((*it)->getLastAccessTime(), now) > (*it)->getTimeout()) {
+            log_debug("session timeout: {} - diff: {}", (*it)->getID(), getDeltaMillis((*it)->getLastAccessTime(), now).count());
             checkTimer();
             it = sessions.erase(it);
             continue;

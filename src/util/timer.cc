@@ -142,18 +142,16 @@ void Timer::notify()
 
     if (!subscribers.empty()) {
         for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
-            TimerSubscriberElement& element = *it;
-
             auto now = currentTimeMS();
-            auto wait = getDeltaMillis(now, element.getNextNotify());
+            auto wait = getDeltaMillis(now, it->getNextNotify());
 
             if (wait <= std::chrono::milliseconds::zero()) {
-                toNotify.push_back(element);
-                if (element.isOnce()) {
+                toNotify.push_back(*it);
+                if (it->isOnce()) {
                     it = subscribers.erase(it);
                     continue;
                 }
-                element.updateNextNotify();
+                it->updateNextNotify();
             }
             ++it;
         }
