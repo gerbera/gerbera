@@ -125,7 +125,7 @@
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING "*"
 
 /// \brief default values for CFG_IMPORT_SYSTEM_DIRECTORIES
-static std::vector<std::string> excludes_fullpath {
+static const std::vector<std::string> excludes_fullpath {
     "/bin",
     "/boot",
     "/dev",
@@ -144,7 +144,7 @@ static std::vector<std::string> excludes_fullpath {
 };
 
 /// \brief default values for CFG_IMPORT_RESOURCES_FANART_FILE_LIST
-static std::vector<std::string> defaultFanArtFile {
+static const std::vector<std::string> defaultFanArtFile {
     // "%title%.jpg",
     // "%filename%.jpg",
     // "folder.jpg",
@@ -155,7 +155,7 @@ static std::vector<std::string> defaultFanArtFile {
 };
 
 /// \brief default values for CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST
-static std::vector<std::string> defaultContainerArtFile {
+static const std::vector<std::string> defaultContainerArtFile {
     // "folder.jpg",
     // "poster.jpg",
     // "cover.jpg",
@@ -163,20 +163,20 @@ static std::vector<std::string> defaultContainerArtFile {
 };
 
 /// \brief default values for CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST
-static std::vector<std::string> defaultSubtitleFile {
+static const std::vector<std::string> defaultSubtitleFile {
     // "%title%.srt",
     // "%filename%.srt"
 };
 
 /// \brief default values for CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST
-static std::vector<std::string> defaultResourceFile {
+static const std::vector<std::string> defaultResourceFile {
     // "%filename%.srt",
     // "cover.jpg",
     // "%album%.jpg",
 };
 
 /// \brief default values for CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
-static std::vector<std::string> defaultItemsPerPage {
+static const std::vector<std::string> defaultItemsPerPage {
     "10",
     "25",
     "50",
@@ -184,7 +184,7 @@ static std::vector<std::string> defaultItemsPerPage {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
-static std::map<std::string, std::string> mt_ct_defaults {
+static const std::map<std::string, std::string> mt_ct_defaults {
     { "application/ogg", CONTENT_TYPE_OGG },
     { "audio/L16", CONTENT_TYPE_PCM },
     { "audio/flac", CONTENT_TYPE_FLAC },
@@ -211,7 +211,7 @@ static std::map<std::string, std::string> mt_ct_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
-static std::map<std::string, std::string> ct_dlna_defaults {
+static const std::map<std::string, std::string> ct_dlna_defaults {
     { CONTENT_TYPE_ASF, "VC_ASF_AP_L2_WMA" },
     { CONTENT_TYPE_AVI, "AVI" },
     { CONTENT_TYPE_DSD, "DSF" },
@@ -229,7 +229,7 @@ static std::map<std::string, std::string> ct_dlna_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
-static std::map<std::string, std::string> mt_upnp_defaults {
+static const std::map<std::string, std::string> mt_upnp_defaults {
     { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
     { "audio/*", UPNP_CLASS_MUSIC_TRACK },
     { "image/*", UPNP_CLASS_IMAGE_ITEM },
@@ -237,7 +237,7 @@ static std::map<std::string, std::string> mt_upnp_defaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
-static std::map<std::string, std::string> ext_mt_defaults {
+static const std::map<std::string, std::string> ext_mt_defaults {
     { "asf", "video/x-ms-asf" },
     { "asx", "video/x-ms-asf" },
     { "dff", "audio/x-dsd" },
@@ -270,20 +270,20 @@ static std::map<std::string, std::string> ext_mt_defaults {
 };
 
 /// \brief default values for ATTR_TRANSCODING_MIMETYPE_PROF_MAP
-static std::map<std::string, std::string> tr_mt_defaults {
+static const std::map<std::string, std::string> tr_mt_defaults {
     { "video/x-flv", "vlcmpeg" },
     { "application/ogg", "vlcmpeg" },
     { "audio/ogg", "ogg2mp3" },
 };
 
 /// \brief default values for CFG_UPNP_SEARCH_SEGMENTS
-static std::vector<std::string> upnp_search_segment_defaults {
+static const std::vector<std::string> upnp_search_segment_defaults {
     "M_ARTIST",
     "M_TITLE",
 };
 
 /// \brief default values for CFG_UPNP_ALBUM_PROPERTIES
-static std::map<std::string, std::string> upnp_album_prop_defaults {
+static const std::map<std::string, std::string> upnp_album_prop_defaults {
     { "dc:creator", "M_ALBUMARTIST" },
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
@@ -298,29 +298,29 @@ static std::map<std::string, std::string> upnp_album_prop_defaults {
 };
 
 /// \brief default values for CFG_UPNP_ARTIST_PROPERTIES
-static std::map<std::string, std::string> upnp_artist_prop_defaults {
+static const std::map<std::string, std::string> upnp_artist_prop_defaults {
     { "upnp:artist", "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
     { "upnp:genre", "M_GENRE" },
 };
 
 /// \brief default values for CFG_UPNP_GENRE_PROPERTIES
-static std::map<std::string, std::string> upnp_genre_prop_defaults {
+static const std::map<std::string, std::string> upnp_genre_prop_defaults {
     { "upnp:genre", "M_GENRE" },
 };
 
 /// \brief default values for CFG_UPNP_PLAYLIST_PROPERTIES
-static std::map<std::string, std::string> upnp_playlist_prop_defaults {
+static const std::map<std::string, std::string> upnp_playlist_prop_defaults {
     { "dc:date", "M_UPNP_DATE" },
 };
 
 /// \brief default values for CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
-static std::map<std::string, std::string> id3_specialPropertyMap {
+static const std::map<std::string, std::string> id3_specialPropertyMap {
     { "PERFORMER", "upnp:artist@role[Performer]" },
 };
 
 /// \brief default values for CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
-static std::map<std::string, std::string> ffmpeg_specialPropertyMap {
+static const std::map<std::string, std::string> ffmpeg_specialPropertyMap {
     { "performer", "upnp:artist@role[Performer]" },
 };
 
@@ -491,7 +491,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
         "/server/ui/items-per-page", "config-server.html#ui",
         ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, ConfigArraySetup::InitItemsPerPage, true,
-        std::move(defaultItemsPerPage)),
+        defaultItemsPerPage),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_SHOW_TOOLTIPS,
         "/server/ui/attribute::show-tooltips", "config-server.html#ui",
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE),
@@ -530,7 +530,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
         "/import/mappings/extension-mimetype", "config-import.html#extension-mimetype",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, true, std::move(ext_mt_defaults)),
+        false, false, true, ext_mt_defaults),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
         "/import/mappings/extension-mimetype/attribute::ignore-unknown", "config-import.html#extension-mimetype",
         DEFAULT_IGNORE_UNKNOWN_EXTENSIONS),
@@ -540,15 +540,15 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         "/import/mappings/mimetype-upnpclass", "config-import.html#mimetype-upnpclass",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, true, std::move(mt_upnp_defaults)),
+        false, false, true, mt_upnp_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
         "/import/mappings/mimetype-contenttype", "config-import.html#mimetype-contenttype",
         ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
-        false, false, true, std::move(mt_ct_defaults)),
+        false, false, true, mt_ct_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
         "/import/mappings/contenttype-dlnaprofile", "config-import.html#contenttype-dlnaprofile",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
-        false, false, true, std::move(ct_dlna_defaults)),
+        false, false, true, ct_dlna_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LAYOUT_MAPPING,
         "/import/layout", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
@@ -645,7 +645,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_FANART_FILE_LIST,
         "/import/resources/fanart", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
-        false, false, std::move(defaultFanArtFile)),
+        false, false, defaultFanArtFile),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_FANART_DIR_LIST,
         "/import/resources/fanart", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
@@ -653,7 +653,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
         "/import/resources/container", "config-import.html#container",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
-        false, false, std::move(defaultContainerArtFile)),
+        false, false, defaultContainerArtFile),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
         "/import/resources/container", "config-import.html#container",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
@@ -670,14 +670,14 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
-        false, false, std::move(defaultSubtitleFile)),
+        false, false, defaultSubtitleFile),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
         "/import/resources/resource", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
-        false, false, std::move(defaultResourceFile)),
+        false, false, defaultResourceFile),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST,
         "/import/resources/resource", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
@@ -689,7 +689,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, true, true,
-        std::move(excludes_fullpath)),
+        excludes_fullpath),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_VISIBLE_DIRECTORIES,
         "/import/visible-directories", "config-import.html#visible-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME),
@@ -840,7 +840,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST,
         "/import/library-options/id3/metadata", "config-import.html#id3",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
-        false, true, false, std::move(id3_specialPropertyMap)),
+        false, true, false, id3_specialPropertyMap),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_ID3_CHARSET,
         "/import/library-options/id3/attribute::charset", "config-import.html#charset",
         ""),
@@ -920,7 +920,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP,
         "/transcoding/mimetype-profile-mappings", "config-transcode.html#profiles",
         ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING,
-        false, false, false, std::move(tr_mt_defaults)),
+        false, false, false, tr_mt_defaults),
     std::make_shared<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE,
         "/transcoding/profiles/profile", "config-server.html#ui",
         ""),
@@ -1047,23 +1047,23 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_UPNP_SEARCH_ITEM_SEGMENTS,
         "/server/upnp/search-item-result", "config-server.html#upnpf",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
-        false, false, std::move(upnp_search_segment_defaults)),
+        false, false, upnp_search_segment_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ALBUM_PROPERTIES,
         "/server/upnp/album-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, std::move(upnp_album_prop_defaults)),
+        false, false, true, upnp_album_prop_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_ARTIST_PROPERTIES,
         "/server/upnp/artist-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, std::move(upnp_artist_prop_defaults)),
+        false, false, true, upnp_artist_prop_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_GENRE_PROPERTIES,
         "/server/upnp/genre-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, std::move(upnp_genre_prop_defaults)),
+        false, false, true, upnp_genre_prop_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_PLAYLIST_PROPERTIES,
         "/server/upnp/playlist-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
-        false, false, true, std::move(upnp_playlist_prop_defaults)),
+        false, false, true, upnp_playlist_prop_defaults),
     std::make_shared<ConfigDictionarySetup>(CFG_UPNP_TITLE_PROPERTIES,
         "/server/upnp/title-properties", "config-server.html#upnp",
         ATTR_UPNP_PROPERTIES_PROPERTY, ATTR_UPNP_PROPERTIES_UPNPTAG, ATTR_UPNP_PROPERTIES_METADATA,
