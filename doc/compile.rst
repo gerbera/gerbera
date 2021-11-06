@@ -13,8 +13,6 @@ Dependencies
 
 .. Note:: Remember to install associated development packages, because development headers are needed for compilation!
 
-.. Note:: For the required and recommended versions `<see>: https://github.com/gerbera/gerbera/blob/master/README.md_
-
 In order to compile Gerbera you will have to install the following packages:
 
 
@@ -440,3 +438,4 @@ Some topics require proper handling, so we explain the core steps here.
 
    Configuration Options         <dev-configuration>
    Database Schema               <dev-database>
+   Conan                         <dev-conan>

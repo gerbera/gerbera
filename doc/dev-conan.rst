@@ -1,4 +1,5 @@
 .. _gerbera-conan:
+.. index:: Developing with Conan
 
 Developing with Conan
 =====================
