@@ -32,21 +32,21 @@
 #include "process_io_handler.h" // API
 
 #include <csignal>
+#include <utility>
 
 #include <fcntl.h>
 #include <sys/select.h>
 
 #include "content/content_manager.h"
-#include "util/process.h"
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to
 // call our close() callback
 
-#define MAX_TIMEOUTS 2 // maximum allowe consecutive timeouts
+#define MAX_TIMEOUTS 2 // maximum allowed consecutive timeouts
 
-ProcListItem::ProcListItem(const std::shared_ptr<Executor>& exec, bool abortOnDeath)
-    : executor(exec)
+ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
+    : executor(std::move(exec))
     , abort(abortOnDeath)
 {
 }
@@ -109,24 +109,13 @@ ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
     : content(std::move(content))
     , procList(std::move(procList))
     , mainProc(std::move(mainProc))
-    , filename(std::move(filename))
+    , path(std::move(filename))
     , ignoreSeek(ignoreSeek)
 {
     if (this->mainProc && (!this->mainProc->isAlive() || abort())) {
         killAll();
         throw_std_runtime_error("process terminated early");
     }
-    /*
-    if (mkfifo(filename.c_str(), O_RDWR) == -1)
-    {
-        log_error("Failed to create fifo: {}", std::strerror(errno));
-        killAll();
-        if (main_proc)
-            main_proc->kill();
-
-        throw_std_runtime_error("Could not create reader fifo");
-    }
-*/
     registerAll();
 }
 
@@ -139,15 +128,15 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 
     if (mode == UPNP_READ)
 #ifdef __linux__
-        fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+        fd = ::open(path.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 #else
-        fd = ::open(filename.c_str(), O_RDONLY | O_NONBLOCK);
+        fd = ::open(path.c_str(), O_RDONLY | O_NONBLOCK);
 #endif
     else if (mode == UPNP_WRITE)
 #ifdef __linux__
-        fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK | O_CLOEXEC);
+        fd = ::open(path.c_str(), O_WRONLY | O_NONBLOCK | O_CLOEXEC);
 #else
-        fd = ::open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+        fd = ::open(path.c_str(), O_WRONLY | O_NONBLOCK);
 #endif
     else
         fd = -1;
@@ -160,8 +149,8 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         killAll();
         if (mainProc)
             mainProc->kill();
-        fs::remove(filename);
-        throw_std_runtime_error("open: failed to open: {}", filename.c_str());
+        fs::remove(path);
+        throw_std_runtime_error("open: failed to open: {}", path.c_str());
     }
 }
 
@@ -349,30 +338,27 @@ void ProcessIOHandler::seek(off_t offset, int whence)
 
 void ProcessIOHandler::close()
 {
-    bool ret;
+}
 
-    log_debug("terminating process, closing {}", this->filename.c_str());
+ProcessIOHandler::~ProcessIOHandler()
+{
+    log_debug("Destroying ProcessIOHandler: terminating process, closing {}", this->path.c_str());
     unregisterAll();
 
+    bool killed;
     if (mainProc) {
-        ret = mainProc->kill();
-    } else
-        ret = true;
+        killed = mainProc->kill();
+    } else {
+        killed = true;
+    }
 
     killAll();
 
     ::close(fd);
 
-    fs::remove(filename);
+    fs::remove(path);
 
-    if (!ret)
-        throw_std_runtime_error("failed to kill process");
-}
-
-ProcessIOHandler::~ProcessIOHandler()
-{
-    try {
-        close();
-    } catch (const std::runtime_error& ex) {
+    if (!killed) {
+        log_warning("~ProcessIOHandler: Failed to kill process");
     }
 }

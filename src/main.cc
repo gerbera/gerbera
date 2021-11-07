@@ -57,6 +57,7 @@
 #include <pwd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "common.h"
@@ -101,10 +102,21 @@ static void signalHandler(int signum)
         return;
     }
 
+    log_debug("Got a SIG: {}", signum);
+
+    if (signum == SIGCHLD) {
+        log_debug("Got a SIGCHLD!");
+        int saved_errno = errno;
+        while (waitpid((pid_t)(-1), nullptr, WNOHANG) > 0) { }
+        errno = saved_errno;
+        return;
+    }
+
     if (signum == SIGSEGV) {
         log_error("This should never happen {}:{}, killing Gerbera!", errno, std::strerror(errno));
         std::exit(EXIT_FAILURE);
     }
+
     if ((signum == SIGINT) || (signum == SIGTERM)) {
         _ctx.shutdownFlag++;
         if (_ctx.shutdownFlag == 1) {
@@ -128,7 +140,7 @@ static void installSignalHandler()
 
     struct sigaction action = {};
     action.sa_handler = signalHandler;
-    action.sa_flags = 0;
+    action.sa_flags = SA_NOCLDSTOP;
     sigfillset(&action.sa_mask);
     if (sigaction(SIGSEGV, &action, nullptr) < 0) {
         log_error("Could not register SIGSEGV handler!");
@@ -148,6 +160,10 @@ static void installSignalHandler()
 
     if (sigaction(SIGPIPE, &action, nullptr) < 0) {
         log_error("Could not register SIGPIPE handler!");
+    }
+
+    if (sigaction(SIGCHLD, &action, nullptr) < 0) {
+        log_error("Could not register SIGCHLD handler!");
     }
 }
 

@@ -36,13 +36,14 @@
 #include <string>
 #include <vector>
 
+#include <filesystem>
 #include <unistd.h>
 
 #include "executor.h"
 
-class ProcessExecutor : public Executor {
+class ProcessExecutor final : public Executor {
 public:
-    ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& environ);
+    ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<std::filesystem::path> tempPaths);
     ~ProcessExecutor() override;
 
     ProcessExecutor(const ProcessExecutor&) = delete;
@@ -53,8 +54,9 @@ public:
     int getStatus() override;
 
 protected:
-    pid_t process_id;
-    int exit_status {};
+    std::vector<std::filesystem::path> tempPaths;
+    pid_t pid;
+    int exitStatus {};
 };
 
 #endif // __PROCESS_EXECUTOR_H__

@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <util/process_executor.h>
 
 #include "cds_objects.h"
 #include "config/config_manager.h"
@@ -42,8 +43,6 @@
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "iohandler/process_io_handler.h"
-#include "transcoding_process_executor.h"
-#include "util/process.h"
 #include "util/tools.h"
 #include "web/session_manager.h"
 
@@ -100,18 +99,17 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
     std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), location, fifoName, range, obj->getTitle());
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
-    auto mainProc = std::make_shared<TranscodingProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron());
-    mainProc->removeFile(fifoName);
-    if (isURL && (!profile->acceptURL())) {
-        mainProc->removeFile(location);
+
+    auto tempFiles = std::vector<fs::path>({ fifoName });
+    if (isURL && !profile->acceptURL()) {
+        tempFiles.emplace_back(location);
     }
+    auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
 
     content->triggerPlayHook(obj);
 
-    auto uIoh = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifoName), std::move(mainProc), std::move(procList));
-    return std::make_unique<BufferedIOHandler>(
-        config, std::move(uIoh),
-        profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
+    auto processIoHandler = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifoName), std::move(mainProc), std::move(procList));
+    return std::make_unique<BufferedIOHandler>(config, std::move(processIoHandler), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
 }
 
 fs::path TranscodeExternalHandler::makeFifo()
