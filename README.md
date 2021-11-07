@@ -61,6 +61,7 @@ sudo make install
 | [taglib]      | 1.12          | 1.12          | 1.12          | Optional      | Audio tag support          | Enabled  |
 | libmagic      |               |               |               | Optional      | File type detection        | Enabled  |
 | [libmatroska] |               | 1.6.3         | 1.6.3         | Optional      | MKV metadata               | Enabled  |
+| [libebml]     |               | 1.4.2         | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav  |               |               |               | Optional      | File metadata              | Disabled |
 | libexif       |               |               |               | Optional      | JPEG Exif metadata         | Enabled  |
 | [libexiv2]    |               | v0.26         | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
@@ -90,8 +91,9 @@ sudo make install
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
+[libebml]: https://github.com/Matroska-Org/libebml
 [libexiv2]: https://github.com/Exiv2llibexiv2
-[libmatroska]: https://github.com/Matroska-Org/libmatroska, requires https://github.com/Matroska-Org/libebml
+[libmatroska]: https://github.com/Matroska-Org/libmatroska
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/index.html
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp
