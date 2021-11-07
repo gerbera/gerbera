@@ -62,7 +62,6 @@ ConfigManager::ConfigManager(fs::path filename,
     , ip(std::move(ip))
     , interface(std::move(interface))
     , port(port)
-    , xmlDoc(std::make_unique<pugi::xml_document>())
 {
     ConfigManager::debug = debug;
 
