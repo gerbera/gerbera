@@ -898,7 +898,11 @@ void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, 
         if (parent && lmt > std::chrono::seconds::zero()) {
             parent->setMTime(lmt);
             int changedContainer;
-            int count = firstObject ? std::distance(firstObject->getLocation().begin(), firstObject->getLocation().end()) - std::distance(location.begin(), location.end()) : 0;
+            int count = 0;
+            if (firstObject) {
+                auto objectLocation = firstObject->getLocation(); // ensure same object is used
+                count = std::distance(objectLocation.begin(), objectLocation.end()) - std::distance(location.begin(), location.end());
+            }
             database->updateObject(parent, &changedContainer);
             assignFanArt(parent, firstObject, count);
         }
