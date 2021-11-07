@@ -143,8 +143,7 @@ private:
     class Wd {
     public:
         Wd(fs::path path, int wd, int parentWd)
-            : wdWatches(std::make_unique<std::vector<std::shared_ptr<Watch>>>())
-            , path(std::move(path))
+            : path(std::move(path))
             , parentWd(parentWd)
             , wd(wd)
         {
@@ -158,7 +157,7 @@ private:
         void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(move(w)); }
 
     private:
-        std::unique_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches;
+        std::unique_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches { std::make_unique<std::vector<std::shared_ptr<Watch>>>() };
         fs::path path;
         int parentWd;
         int wd;

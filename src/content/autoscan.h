@@ -55,7 +55,7 @@ enum class ScanMode {
 /// \brief Provides information about one autoscan directory.
 class AutoscanDirectory {
 public:
-    AutoscanDirectory();
+    AutoscanDirectory() = default;
 
     /// \brief Creates a new AutoscanDirectory object.
     /// \param location autoscan path
@@ -160,7 +160,7 @@ protected:
     int databaseID { INVALID_OBJECT_ID };
     std::chrono::seconds last_mod_previous_scan {};
     std::chrono::seconds last_mod_current_scan {};
-    std::shared_ptr<Timer::Parameter> timer_parameter;
+    std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
 };

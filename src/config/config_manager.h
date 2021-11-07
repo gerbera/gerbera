@@ -146,7 +146,7 @@ protected:
     static bool debug;
     std::map<std::string, std::string> origValues;
 
-    std::unique_ptr<pugi::xml_document> xmlDoc;
+    std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
 
     std::vector<std::shared_ptr<ConfigOption>> options { CFG_MAX };
 

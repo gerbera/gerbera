@@ -34,11 +34,6 @@
 #include "content_manager.h"
 #include "database/database.h"
 
-AutoscanDirectory::AutoscanDirectory()
-    : timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
-{
-}
-
 AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
     int id, unsigned int interval, bool hidden)
     : location(std::move(location))
@@ -48,7 +43,6 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     , persistent_flag(persistent)
     , interval(interval)
     , scanID(id)
-    , timer_parameter(std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID))
 {
 }
 
