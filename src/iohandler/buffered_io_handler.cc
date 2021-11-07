@@ -76,7 +76,7 @@ void BufferedIOHandler::threadProc()
     auto lock = threadRunner->uniqueLock();
     do {
 #ifdef TOMBDEBUG
-        if (firstLog || getDeltaMillis(lastLog) > std::chrono::seconds(1)) {
+        if (firstLog || getDeltaMillis(lastLog) > std::chrono::milliseconds(100)) {
             if (firstLog)
                 firstLog = false;
             lastLog = currentTimeMS();

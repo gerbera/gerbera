@@ -32,13 +32,19 @@
 #include "process_executor.h" // API
 
 #include <csignal>
+#include <optional>
+#include <sys/wait.h>
+#include <thread>
 #include <unistd.h>
+#include <utility>
 
 #include "exceptions.h"
 #include "logger.h"
-#include "process.h"
 
-ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& environ)
+namespace fs = std::filesystem;
+
+ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<fs::path> tempPaths)
+    : tempPaths(std::move(tempPaths))
 {
 #define MAX_ARGS 255
     const char* argv[MAX_ARGS];
@@ -53,15 +59,15 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     }
     argv[++apos] = nullptr;
 
-    process_id = fork();
-    switch (process_id) {
+    pid = fork();
+    switch (pid) {
     case -1:
         throw_std_runtime_error("Failed to launch process {}", command);
 
     case 0:
         sigset_t maskSet;
         pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
-        for (auto&& [eName, eValue] : environ) {
+        for (auto&& [eName, eValue] : env) {
             setenv(eName.c_str(), eValue.c_str(), 1);
             log_debug("setenv: {}='{}'", eName, eValue);
         }
@@ -72,26 +78,70 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
         break;
     }
 
-    log_debug("Launched process {} {}, pid: {}", command, fmt::join(arglist, " "), process_id);
+    log_debug("Launched process {} {}, pid: {}", command, fmt::join(arglist, " "), pid);
 }
 
 bool ProcessExecutor::isAlive()
 {
-    return is_alive(process_id, &exit_status);
+    return (waitpid(pid, &exitStatus, WNOHANG) == 0);
 }
 
 bool ProcessExecutor::kill()
 {
-    return kill_proc(process_id);
+    if (!isAlive()) {
+        log_debug("He's dead, Jim: {}", pid);
+        return true;
+    }
+
+    log_debug("Sending SIGTERM to PID: {}", pid);
+    ::kill(pid, SIGTERM);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if (!isAlive())
+        return true;
+
+    log_debug("Sending SIGINT to PID: {}", pid);
+    ::kill(pid, SIGINT);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    if (!isAlive())
+        return true;
+
+    log_debug("Sending SIGKILL to PID: {}", pid);
+    ::kill(pid, SIGKILL);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    return !isAlive();
 }
 
 int ProcessExecutor::getStatus()
 {
-    is_alive(process_id, &exit_status);
-    return exit_status;
+    isAlive();
+    return exitStatus;
 }
 
 ProcessExecutor::~ProcessExecutor()
 {
     kill();
+    for (const auto& path : tempPaths) {
+        log_debug("Cleaning up: {}", path.string());
+        int retries = 3;
+        bool failed = false;
+        while (retries--) {
+            try {
+                if (failed) {
+                    log_debug("Sleeping before attempting to delete file again...");
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+                fs::remove(path);
+                break;
+            } catch (fs::filesystem_error& err) {
+                failed = true;
+                log_warning("Failed to remove: {}: {}", path.string(), err.what());
+            }
+        }
+        if (failed) {
+            log_warning("Failed to remove temp path: {}: giving up!", path.string());
+        }
+    }
 }

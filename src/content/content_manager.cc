@@ -39,7 +39,6 @@
 #include "metadata/metadata_handler.h"
 #include "update_manager.h"
 #include "util/mime.h"
-#include "util/process.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
 #include "util/tools.h"

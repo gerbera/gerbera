@@ -48,7 +48,7 @@ class ContentManager;
 
 class ProcListItem {
 public:
-    explicit ProcListItem(const std::shared_ptr<Executor>& exec, bool abortOnDeath = false);
+    explicit ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
     std::shared_ptr<Executor> getExecutor();
     bool abortOnDeath() const;
 
@@ -109,7 +109,7 @@ protected:
     std::shared_ptr<Executor> mainProc;
 
     /// \brief name of the file or fifo to read the data from
-    fs::path filename;
+    fs::path path;
 
     /// \brief file descriptor
     int fd {};

@@ -181,8 +181,6 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_handler.h
         src/transcoding/transcoding.cc
         src/transcoding/transcoding.h
-        src/transcoding/transcoding_process_executor.cc
-        src/transcoding/transcoding_process_executor.h
         src/upnp_cds.cc
         src/upnp_cds.h
         src/upnp_cm.cc
@@ -202,10 +200,8 @@ add_library(libgerbera STATIC
         src/util/mime.h
         src/util/mt_inotify.cc
         src/util/mt_inotify.h
-        src/util/process.cc
         src/util/process_executor.cc
         src/util/process_executor.h
-        src/util/process.h
         src/util/string_converter.cc
         src/util/string_converter.h
         src/util/thread_executor.cc
