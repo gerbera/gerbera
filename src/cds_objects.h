@@ -173,7 +173,7 @@ public:
     /// \brief Set the physical location of the media (usually an absolute path)
     void setLocation(const fs::path& location) { this->location = location; }
     /// \brief Retrieve media location.
-    fs::path getLocation() const { return location; }
+    const fs::path& getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
