@@ -66,7 +66,7 @@ void Web::ConfigLoad::addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<Co
 
 void Web::ConfigLoad::createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs)
 {
-    allItems[name] = &item;
+    allItems[name] = fmt::format("{}[{}]", item.path(), allItems.size() + 1);
     item.append_attribute("item") = name.c_str();
     item.append_attribute("id") = fmt::format("{:03d}", id).c_str();
     item.append_attribute("aid") = fmt::format("{:03d}", aid).c_str();
@@ -504,9 +504,9 @@ void Web::ConfigLoad::process()
     for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
-            auto item = exItem->second;
-            item->attribute("source") = "database";
-            item->attribute("status") = entry.status.c_str();
+            auto item = root.select_node(exItem->second.c_str()).node();
+            item.attribute("source") = "database";
+            item.attribute("status") = entry.status.c_str();
         } else {
             auto cs = ConfigDefinition::findConfigSetupByPath(entry.item, true);
             auto acs = ConfigDefinition::findConfigSetupByPath(entry.item, true, cs);
