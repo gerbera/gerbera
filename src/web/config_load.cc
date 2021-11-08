@@ -505,7 +505,7 @@ void Web::ConfigLoad::process()
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
             auto item = exItem->second;
-			setValue(item, entry.value);
+            setValue(item, entry.value);
             item.attribute("source") = "database";
             item.attribute("status") = entry.status.c_str();
         } else {
