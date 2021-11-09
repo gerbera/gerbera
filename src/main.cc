@@ -219,6 +219,7 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<fs::path> logfile;
         if (opts.count("logfile") > 0) {
+            logfile = opts["logfile"].as<fs::path>();
             if (!fs::directory_entry(logfile->parent_path()).exists()) {
                 log_warning("Log dir {} missing", logfile->parent_path().c_str());
             }
