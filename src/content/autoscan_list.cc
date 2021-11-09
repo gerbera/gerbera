@@ -155,6 +155,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
     auto rmIdList = std::make_shared<AutoscanList>(database);
 
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
+        // the following must be non const. Otherwise, crash happens when two entries are added.
         auto& dir = *it;
 
         if (startswith(dir->getLocation().string(), parent.string())) {
