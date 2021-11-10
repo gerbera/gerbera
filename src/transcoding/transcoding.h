@@ -117,7 +117,7 @@ public:
     std::string getArguments() const { return args; }
     void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
 
-    const std::map<std::string, std::string>& getEnviron() const { return environment; };
+    const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
