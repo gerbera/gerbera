@@ -168,7 +168,6 @@ void CdsItem::validate() const
 //---------
 
 CdsItemExternalURL::CdsItemExternalURL()
-    : CdsItem()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
