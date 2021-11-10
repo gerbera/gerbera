@@ -49,16 +49,12 @@ class ContentManager;
 class Server : public std::enable_shared_from_this<Server> {
 public:
     explicit Server(std::shared_ptr<Config> config);
-    virtual ~Server();
-
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
 
     /// \brief Initializes the server.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    virtual void init();
+    void init();
 
     /// \brief Cleanup routine to shutdown the server.
     ///

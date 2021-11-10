@@ -88,8 +88,6 @@ void Server::init()
     content = std::make_shared<ContentManager>(context, self, timer);
 }
 
-Server::~Server() { log_debug("Server destroyed"); }
-
 void Server::run()
 {
     log_debug("Starting...");

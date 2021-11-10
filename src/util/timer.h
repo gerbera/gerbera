@@ -71,18 +71,11 @@ public:
     class Subscriber {
     public:
         Subscriber() = default;
-        virtual ~Subscriber() { log_debug("Subscriber destroyed"); }
+        virtual ~Subscriber() = default;
         virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
-
-        Subscriber(const Subscriber&) = delete;
-        Subscriber& operator=(const Subscriber&) = delete;
     };
 
     explicit Timer(std::shared_ptr<Config> config);
-    virtual ~Timer() { log_debug("Timer destroyed"); }
-
-    Timer(const Timer&) = delete;
-    Timer& operator=(const Timer&) = delete;
 
     void run();
     void shutdown();

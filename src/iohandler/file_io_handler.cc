@@ -40,8 +40,7 @@ FileIOHandler::FileIOHandler(fs::path filename)
 
 FileIOHandler::~FileIOHandler()
 {
-    if (f)
-        close();
+    close();
 }
 
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
