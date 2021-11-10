@@ -800,7 +800,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
             log_debug("AutoDir {}", i);
             auto dir = autoscan_inotify->get(i);
-            if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
+            if (dir && (dir->getLocation() < subDir.path()) && fs::is_directory(dir->getLocation())) {
                 adir = std::move(dir);
             }
         }
@@ -810,7 +810,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         for (std::size_t i = 0; i < autoscan_timed->size(); i++) {
             log_debug("Timed AutoscanDir {}", i);
             auto dir = autoscan_timed->get(i);
-            if (dir && startswith(dir->getLocation().string(), subDir.path().string()) && fs::is_directory(dir->getLocation())) {
+            if (dir && (dir->getLocation() < subDir.path()) && fs::is_directory(dir->getLocation())) {
                 adir = std::move(dir);
             }
         }
@@ -1456,7 +1456,7 @@ void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, co
     if (t->getType() == AddFile) {
         auto addTask = std::static_pointer_cast<CMAddFileTask>(t);
         log_debug("comparing, task path: {}, remove path: {}", addTask->getPath().c_str(), path.c_str());
-        if (startswith(addTask->getPath().string(), path.string())) {
+        if (addTask->getPath() < path) {
             log_debug("Invalidating task with path {}", addTask->getPath().c_str());
             addTask->invalidate();
         }
