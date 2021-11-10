@@ -945,7 +945,7 @@ std::string getAVIFourCC(std::string_view aviFilename)
         return {};
     }
 
-    return std::string(buffer + FCC_OFFSET, 4);
+    return { buffer + FCC_OFFSET, 4 };
 }
 #endif
 
