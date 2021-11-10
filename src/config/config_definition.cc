@@ -852,7 +852,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST,
         "/import/library-options/ffmpeg/metadata", "config-import.html#ffmpeg",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
-        false, true, false, std::move(ffmpeg_specialPropertyMap)),
+        false, true, false, ffmpeg_specialPropertyMap),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET,
         "/import/library-options/ffmpeg/attribute::charset", "config-import.html#charset",
         ""),

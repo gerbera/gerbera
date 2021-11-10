@@ -104,7 +104,7 @@ void Web::Autoscan::process()
                 interval,
                 hidden);
             autoscan->setObjectID(objectID);
-            content->setAutoscanDirectory(std::move(autoscan));
+            content->setAutoscanDirectory(autoscan);
         }
     } else if (action == "list") {
         auto autoscanList = content->getAutoscanDirectories();
