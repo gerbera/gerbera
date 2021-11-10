@@ -84,11 +84,6 @@ ConfigManager::ConfigManager(fs::path filename,
     }
 }
 
-ConfigManager::~ConfigManager()
-{
-    log_debug("ConfigManager destroyed");
-}
-
 std::shared_ptr<Config> ConfigManager::getSelf()
 {
     return shared_from_this();

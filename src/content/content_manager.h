@@ -141,10 +141,6 @@ class ContentManager : public Timer::Subscriber, public std::enable_shared_from_
 public:
     ContentManager(const std::shared_ptr<Context>& context,
         const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer);
-    ~ContentManager() override;
-
-    ContentManager(const ContentManager&) = delete;
-    ContentManager& operator=(const ContentManager&) = delete;
 
     void run();
     void shutdown();

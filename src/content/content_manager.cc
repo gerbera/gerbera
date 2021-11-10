@@ -220,8 +220,6 @@ void ContentManager::run()
     }
 }
 
-ContentManager::~ContentManager() { log_debug("ContentManager destroyed"); }
-
 void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
 {
     auto lock = threadRunner->lockGuard("registerExecutor");
