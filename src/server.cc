@@ -120,14 +120,19 @@ void Server::run()
         throw_std_runtime_error("Invalid web server root directory {}", webRoot);
     }
 
-    auto ret = startupInterface(iface, in_port_t(config->getIntOption(CFG_SERVER_PORT)));
+    auto configPort = config->getIntOption(CFG_SERVER_PORT);
+    auto ret = startupInterface(iface, configPort);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("run: UpnpInit failed {} {}", iface, port));
+        throw UpnpException(ret, fmt::format("UpnpInit failed {} {}", iface, port));
+    }
+
+    if (configPort > 0 && port != configPort) {
+        throw UpnpException(ret, fmt::format("LibUPnP failed to bind to request port! Bound to {}, requested: {}", port, configPort));
     }
 
     ret = UpnpSetWebServerRootDir(webRoot.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("run: UpnpSetWebServerRootDir failed {}", webRoot));
+        throw UpnpException(ret, fmt::format("UpnpSetWebServerRootDir failed {}", webRoot));
     }
 
     log_debug("webroot: {}", webRoot);
