@@ -47,7 +47,7 @@ public:
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);
-    script_class_t whoami() override { return S_IMPORT; }
+    script_class_t whoami() override;
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__

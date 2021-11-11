@@ -375,4 +375,9 @@ MysqlRow::MysqlRow(MYSQL_ROW mysqlRow)
 {
 }
 
+char* MysqlRow::col_c_str(int index) const
+{
+    return mysql_row[index];
+}
+
 #endif // HAVE_MYSQL

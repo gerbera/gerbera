@@ -34,6 +34,11 @@
 #include "database/mysql/mysql_database.h"
 #include "database/sqlite3/sqlite_database.h"
 
+Database::Database(std::shared_ptr<Config> config)
+    : config(std::move(config))
+{
+}
+
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {
     auto database = [&]() -> std::shared_ptr<Database> {

@@ -142,10 +142,7 @@ public:
 
 class Database {
 public:
-    explicit Database(std::shared_ptr<Config> config)
-        : config(std::move(config))
-    {
-    }
+    explicit Database(std::shared_ptr<Config> config);
     virtual ~Database() = default;
     virtual void init() = 0;
 

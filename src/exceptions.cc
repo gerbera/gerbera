@@ -31,6 +31,17 @@
 
 #include "exceptions.h" // API
 
+DatabaseException::DatabaseException(std::string _userMessage, const std::string& message)
+    : std::runtime_error(message)
+    , userMessage(std::move(_userMessage))
+{
+}
+
+ObjectNotFoundException::ObjectNotFoundException(const std::string& message)
+    : DatabaseException(message, message)
+{
+}
+
 UpnpException::UpnpException(int errCode, const std::string& message)
     : std::runtime_error(message)
     , errCode(errCode)

@@ -256,13 +256,10 @@ private:
 /// \brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
 public:
-    explicit Sqlite3Row(char** row)
-        : row(row)
-    {
-    }
+    explicit Sqlite3Row(char** row);
 
 private:
-    char* col_c_str(int index) const override { return row[index]; }
+    char* col_c_str(int index) const override;
     char** row;
 };
 

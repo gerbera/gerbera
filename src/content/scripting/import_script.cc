@@ -49,6 +49,11 @@ ImportScript::ImportScript(std::shared_ptr<ContentManager> content,
     }
 }
 
+script_class_t ImportScript::whoami()
+{
+    return S_IMPORT;
+}
+
 void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath)
 {
     processed = obj;

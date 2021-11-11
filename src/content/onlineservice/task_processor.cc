@@ -35,6 +35,11 @@
 #include "content/content_manager.h"
 #include "content/layout/layout.h"
 
+TaskProcessor::TaskProcessor(std::shared_ptr<Config> config)
+    : config(std::move(config))
+{
+}
+
 void TaskProcessor::run()
 {
     threadRunner = std::make_unique<StdThreadRunner>(
