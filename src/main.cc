@@ -510,6 +510,9 @@ int main(int argc, char** argv, char** envp)
             } else if (ue.getErrorCode() == UPNP_E_SOCKET_ERROR) {
                 log_error("LibUPnP Socket error");
                 log_error("Please check if your network interface was configured for multicast!");
+            } else if (ue.getErrorCode() == UPNP_E_SUCCESS) {
+                /* This means we died, not libupnp explicitly, likely because they gave us the wrong port */
+                log_error(ue.what());
             } else {
 #ifdef UPNP_HAVE_TOOLS
                 log_error("Failed to start LibUPnP: {} error code: {}", UpnpGetErrorMessage(ue.getErrorCode()), ue.getErrorCode());
