@@ -118,7 +118,7 @@ public:
     explicit MysqlRow(MYSQL_ROW mysqlRow);
 
 private:
-    char* col_c_str(int index) const override { return mysql_row[index]; }
+    char* col_c_str(int index) const override;
 
     MYSQL_ROW mysql_row;
 };

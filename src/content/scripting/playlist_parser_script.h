@@ -49,7 +49,7 @@ public:
 
     std::string readln();
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptpath);
-    script_class_t whoami() override { return S_PLAYLIST; }
+    script_class_t whoami() override;
 
 private:
     std::FILE* currentHandle {};

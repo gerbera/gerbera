@@ -63,20 +63,13 @@ protected:
     std::string userMessage;
 
 public:
-    DatabaseException(std::string _userMessage, const std::string& message)
-        : std::runtime_error(message)
-        , userMessage(std::move(_userMessage))
-    {
-    }
+    DatabaseException(std::string _userMessage, const std::string& message);
     std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : what()); }
 };
 
 class ObjectNotFoundException : public DatabaseException {
 public:
-    explicit ObjectNotFoundException(const std::string& message)
-        : DatabaseException(message, message)
-    {
-    }
+    explicit ObjectNotFoundException(const std::string& message);
 };
 
 class SubtitlesNotFoundException : public std::runtime_error {

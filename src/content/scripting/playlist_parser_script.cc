@@ -40,6 +40,11 @@
 
 #define ONE_TEXTLINE_BYTES 1024
 
+script_class_t PlaylistParserScript::whoami()
+{
+    return S_PLAYLIST;
+}
+
 extern "C" {
 
 static duk_ret_t

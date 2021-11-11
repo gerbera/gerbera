@@ -542,6 +542,18 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
     }
 }
 
+/* Sqlite3Row */
+
+Sqlite3Row::Sqlite3Row(char** row)
+    : row(row)
+{
+}
+
+char* Sqlite3Row::col_c_str(int index) const
+{
+    return row[index];
+}
+
 /* Sqlite3Result */
 
 Sqlite3Result::~Sqlite3Result()
