@@ -44,7 +44,7 @@ void Web::Autoscan::process()
         throw_std_runtime_error("web:autoscan called with illegal action");
 
     bool fromFs = boolParam("from_fs");
-    std::string path;
+    fs::path path;
     std::string objID = param("object_id");
     if (fromFs) {
         if (objID == "0")
