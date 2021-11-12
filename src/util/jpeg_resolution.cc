@@ -35,11 +35,6 @@
 
 using uchar = unsigned char;
 
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
-
 #define M_SOF0 0xC0 // Start Of Frame N
 #define M_SOF1 0xC1 // N indicates which compression process
 #define M_SOF2 0xC2 // Only SOF0-SOF2 are now in common use

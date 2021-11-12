@@ -79,8 +79,6 @@ class IOHandler;
 #define CONTENT_TYPE_WAVPACK "wv"
 #define CONTENT_TYPE_WMA "wma"
 
-#define OGG_THEORA "t"
-
 #define RESOURCE_CONTENT_TYPE "rct"
 #define RESOURCE_HANDLER "rh"
 
