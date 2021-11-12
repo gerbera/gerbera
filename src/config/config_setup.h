@@ -390,12 +390,9 @@ public:
 };
 
 class ConfigBoolSetup : public ConfigSetup {
-public:
-    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help)
-        : ConfigSetup(option, xpath, help)
-    {
-    }
+    using ConfigSetup::ConfigSetup;
 
+public:
     ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr)
         : ConfigSetup(option, xpath, help, check, defaultValue)
     {
