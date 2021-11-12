@@ -32,7 +32,6 @@
 #include "process_executor.h" // API
 
 #include <csignal>
-#include <optional>
 #include <sys/wait.h>
 #include <thread>
 #include <unistd.h>
