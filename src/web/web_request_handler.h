@@ -88,8 +88,8 @@ protected:
     /// \return Value of the parameter with the given name or nullptr if not found.
     std::string param(const std::string& name) const { return getValueOrDefault(params, name); }
 
-    int intParam(const std::string& name, int invalid = 0);
-    bool boolParam(const std::string& name);
+    int intParam(const std::string& name, int invalid = 0) const;
+    bool boolParam(const std::string& name) const;
 
     /// \brief Checks if the incoming request is valid.
     ///

@@ -47,13 +47,13 @@ WebRequestHandler::WebRequestHandler(std::shared_ptr<ContentManager> content)
 {
 }
 
-int WebRequestHandler::intParam(const std::string& name, int invalid)
+int WebRequestHandler::intParam(const std::string& name, int invalid) const
 {
     std::string value = param(name);
     return !value.empty() ? std::stoi(value) : invalid;
 }
 
-bool WebRequestHandler::boolParam(const std::string& name)
+bool WebRequestHandler::boolParam(const std::string& name) const
 {
     std::string value = param(name);
     return !value.empty() && (value == "1" || value == "true");

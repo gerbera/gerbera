@@ -145,7 +145,7 @@ protected:
     std::atomic_bool shutdownFlag {};
 
     void notify();
-    std::chrono::milliseconds getNextNotifyTime();
+    std::chrono::milliseconds getNextNotifyTime() const;
 
 private:
     void threadProc();
