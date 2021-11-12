@@ -218,19 +218,21 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     const char* ifName = iface.empty() ? nullptr : iface.c_str();
 
     int ret = UPNP_E_INIT_FAILED;
-    for (std::size_t attempt = 0; ret != UPNP_E_SUCCESS; attempt++) {
+    for (std::size_t attempt = 0; attempt < 4; attempt++) {
         ret = UpnpInit2(ifName, inPort);
-        if (ret != UPNP_E_SUCCESS) {
-            if (attempt > 3) {
-                throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName, inPort));
-            }
+        if (ret == UPNP_E_SUCCESS)
+            break;
+
 #ifdef UPNP_HAVE_TOOLS
-            log_warning("UPnP Init {}:{} failed: {} ({}). Retrying in {} seconds...", ifName, inPort, UpnpGetErrorMessage(ret), ret, attempt + 1);
+        log_warning("UPnP Init {}:{} failed: {} ({}). Retrying in {} seconds...", ifName, inPort, UpnpGetErrorMessage(ret), ret, attempt + 1);
 #else
-            log_warning("UPnP Init {}:{} failed: ({}). Retrying in {} seconds...", ifName, inPort, ret, attempt + 1);
+        log_warning("UPnP Init {}:{} failed: ({}). Retrying in {} seconds...", ifName, inPort, ret, attempt + 1);
 #endif
-            std::this_thread::sleep_for(std::chrono::seconds(attempt + 1));
-        }
+        std::this_thread::sleep_for(std::chrono::seconds(attempt + 1));
+    }
+
+    if (ret != UPNP_E_SUCCESS) {
+        throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName, inPort));
     }
 
     port = UpnpGetServerPort();
