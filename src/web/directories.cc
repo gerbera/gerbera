@@ -92,7 +92,7 @@ void Web::Directories::process()
 
     auto f2i = StringConverter::f2i(config);
     for (auto&& [key, val] : filesMap) {
-        auto [file, has] = val;
+        auto&& [file, has] = val;
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
         ce.append_attribute("child_count") = has;

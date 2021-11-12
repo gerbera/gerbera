@@ -135,7 +135,7 @@ ProcessExecutor::~ProcessExecutor()
                 }
                 fs::remove(path);
                 break;
-            } catch (fs::filesystem_error& err) {
+            } catch (const fs::filesystem_error& err) {
                 failed = true;
                 log_warning("Failed to remove: {}: {}", path.string(), err.what());
             }
