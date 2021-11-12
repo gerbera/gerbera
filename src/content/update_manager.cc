@@ -43,7 +43,6 @@ static constexpr auto minSleep = std::chrono::milliseconds(1);
 
 #define MAX_OBJECT_IDS 1000
 #define MAX_OBJECT_IDS_OVERLOAD 30
-#define OBJECT_ID_HASH_CAPACITY 3109
 
 UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database, std::shared_ptr<Server> server)
     : config(std::move(config))
