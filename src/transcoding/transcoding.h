@@ -242,20 +242,4 @@ protected:
     std::map<std::string, std::shared_ptr<TranscodingProfileMap>> list;
 };
 
-class TranscodingProcess {
-public:
-    TranscodingProcess(pid_t pid, std::string fname)
-        : pid(pid)
-        , fname(std::move(fname))
-    {
-    }
-
-    pid_t getPID() const { return pid; }
-    std::string getFName() const { return fname; }
-
-protected:
-    pid_t pid;
-    std::string fname;
-};
-
 #endif //__TRANSCODING_H__
