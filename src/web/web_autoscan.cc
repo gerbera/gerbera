@@ -44,17 +44,17 @@ void Web::Autoscan::process()
         throw_std_runtime_error("web:autoscan called with illegal action");
 
     bool fromFs = boolParam("from_fs");
-    std::string path;
     std::string objID = param("object_id");
-    if (fromFs) {
-        if (objID == "0")
-            path = FS_ROOT_DIRECTORY;
-        else
-            path = hexDecodeString(objID);
-    }
+    auto path = [fromFs, &objID]() -> fs::path {
+        if (fromFs) {
+            if (objID == "0")
+                return FS_ROOT_DIRECTORY;
+            return hexDecodeString(objID);
+        }
+        return {};
+    }();
 
     auto root = xmlDoc->document_element();
-
     if (action == "as_edit_load") {
         auto autoscan = root.append_child("autoscan");
         if (fromFs) {
