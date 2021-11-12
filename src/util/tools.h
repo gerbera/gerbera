@@ -233,7 +233,7 @@ unsigned int stringHash(std::string_view str);
 template <typename C, C beginVal, C endVal>
 class EnumIterator {
 private:
-    using val_t = typename std::underlying_type<C>::type;
+    using val_t = std::underlying_type_t<C>;
     val_t val;
 
 public:
