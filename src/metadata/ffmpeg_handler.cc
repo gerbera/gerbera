@@ -101,16 +101,16 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
     metadata_fields_t field = M_MAX;
 
-    auto propertyMap = std::map<metadata_fields_t, std::string> {
-        { M_TITLE, "title" },
-        { M_ARTIST, "artist" },
-        { M_ALBUM, "album" },
-        { M_GENRE, "genre" },
-        { M_DESCRIPTION, "description" },
-        { M_TRACKNUMBER, "track" },
-        { M_PARTNUMBER, "discnumber" },
-        { M_ALBUMARTIST, "album_artist" },
-        { M_COMPOSER, "composer" },
+    constexpr auto propertyMap = std::array {
+        std::pair(M_TITLE, "title"),
+        std::pair(M_ARTIST, "artist"),
+        std::pair(M_ALBUM, "album"),
+        std::pair(M_GENRE, "genre"),
+        std::pair(M_DESCRIPTION, "description"),
+        std::pair(M_TRACKNUMBER, "track"),
+        std::pair(M_PARTNUMBER, "discnumber"),
+        std::pair(M_ALBUMARTIST, "album_artist"),
+        std::pair(M_COMPOSER, "composer"),
     };
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
         std::string value = e->value;
