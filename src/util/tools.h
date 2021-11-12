@@ -32,15 +32,14 @@
 #define __TOOLS_H__
 
 #include <chrono>
-#include <filesystem>
 #include <map>
 #include <optional>
 #include <vector>
-namespace fs = std::filesystem;
 
 #include <netinet/in.h>
 
 #include "common.h"
+#include "util/grb_fs.h"
 
 // forward declaration
 class Config;

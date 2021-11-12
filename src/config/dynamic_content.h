@@ -27,11 +27,11 @@
 #ifndef __DYNAMICCONTENT_H__
 #define __DYNAMICCONTENT_H__
 
-#include <filesystem>
 #include <map>
 #include <mutex>
 #include <vector>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 // forward declarations
 class Config;

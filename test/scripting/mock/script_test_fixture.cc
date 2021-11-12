@@ -1,16 +1,13 @@
 #ifdef HAVE_JS
 
 #include <duktape.h>
-#include <filesystem>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <memory>
-#include <utility>
-namespace fs = std::filesystem;
 
 #include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"
 #include "metadata/metadata_handler.h"
+#include "util/grb_fs.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

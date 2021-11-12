@@ -27,9 +27,7 @@
 #ifndef __METADATA_CONTENT_H__
 #define __METADATA_CONTENT_H__
 
-#include <filesystem>
 #include <map>
-namespace fs = std::filesystem;
 
 #include "config/config.h"
 #include "metadata_handler.h"

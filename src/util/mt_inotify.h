@@ -34,9 +34,9 @@
 
 #ifdef HAVE_INOTIFY
 
-#include <filesystem>
 #include <sys/inotify.h>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 /// \brief Inotify interface.
 class Inotify {

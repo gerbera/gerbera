@@ -33,8 +33,6 @@
 #define __METADATA_HANDLER_H__
 
 #include <array>
-#include <filesystem>
-namespace fs = std::filesystem;
 
 #include "common.h"
 #include "context.h"

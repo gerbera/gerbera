@@ -32,12 +32,11 @@
 #ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 
-#include <filesystem>
-#include <memory>
 #include <upnp.h>
 
 #include "common.h"
 #include "transcode_handler.h"
+#include "util/grb_fs.h"
 
 class ProcListItem;
 
@@ -51,7 +50,7 @@ public:
         std::string range) override;
 
 private:
-    std::filesystem::path makeFifo();
+    fs::path makeFifo();
     static void checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile);
 #ifdef HAVE_CURL
     void openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList);

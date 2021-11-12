@@ -26,12 +26,9 @@
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
-#include <filesystem>
 #include <pugixml.hpp>
 
 #include "config/config_manager.h"
-
-namespace fs = std::filesystem;
 
 class ConfigGenerator {
 public:

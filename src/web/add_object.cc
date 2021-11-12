@@ -31,8 +31,6 @@
 
 #include "pages.h" // API
 
-#include <filesystem>
-
 #include "cds_objects.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"

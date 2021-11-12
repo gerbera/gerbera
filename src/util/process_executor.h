@@ -33,17 +33,16 @@
 #define __PROCESS_EXECUTOR_H__
 
 #include <map>
-#include <string>
 #include <vector>
 
-#include <filesystem>
 #include <unistd.h>
 
-#include "executor.h"
+#include "util/executor.h"
+#include "util/grb_fs.h"
 
 class ProcessExecutor final : public Executor {
 public:
-    ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<std::filesystem::path> tempPaths);
+    ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<fs::path> tempPaths);
     ~ProcessExecutor() override;
 
     ProcessExecutor(const ProcessExecutor&) = delete;
@@ -54,7 +53,7 @@ public:
     int getStatus() override;
 
 protected:
-    std::vector<std::filesystem::path> tempPaths;
+    std::vector<fs::path> tempPaths;
     pid_t pid;
     int exitStatus {};
 };

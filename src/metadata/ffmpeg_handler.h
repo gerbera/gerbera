@@ -39,8 +39,6 @@
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
 
-#include <filesystem>
-namespace fs = std::filesystem;
 #include <optional>
 
 #include "iohandler/io_handler.h"

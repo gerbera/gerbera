@@ -32,11 +32,9 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <vector>
-namespace fs = std::filesystem;
 
 #include "cds_resource.h"
 #include "common.h"

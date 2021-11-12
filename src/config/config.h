@@ -24,11 +24,10 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-#include <filesystem>
 #include <map>
-#include <memory>
 #include <vector>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 // forward declarations
 class AutoscanDirectory;

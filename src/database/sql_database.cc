@@ -32,7 +32,6 @@
 #include "sql_database.h" // API
 
 #include <algorithm>
-#include <filesystem>
 #include <fmt/chrono.h>
 #include <vector>
 

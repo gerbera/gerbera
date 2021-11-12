@@ -26,7 +26,6 @@
 #ifndef __CONFIG_SETUP_H__
 #define __CONFIG_SETUP_H__
 
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <pugixml.hpp>

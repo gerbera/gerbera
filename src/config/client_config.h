@@ -27,7 +27,6 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
-#include <filesystem>
 #include <map>
 #include <mutex>
 #include <vector>

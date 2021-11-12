@@ -32,13 +32,10 @@
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
-#include <filesystem>
-#include <memory>
-namespace fs = std::filesystem;
-
 #include "common.h"
 #include "io_handler.h"
 #include "util/executor.h"
+#include "util/grb_fs.h"
 
 // forward declaration
 class ContentManager;
