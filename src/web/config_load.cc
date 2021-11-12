@@ -493,7 +493,7 @@ void Web::ConfigLoad::process()
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (std::size_t i = 0; i < array.size(); i++) {
-            auto entry = array[i];
+            auto&& entry = array[i];
             auto item = values.append_child("item");
             createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption, acs);
             setValue(item, entry);
