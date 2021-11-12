@@ -121,8 +121,6 @@ private:
     char* col_c_str(int index) const override { return mysql_row[index]; }
 
     MYSQL_ROW mysql_row;
-
-    friend std::unique_ptr<SQLRow> MysqlResult::nextRow();
 };
 
 #endif // __mysql_database_H__
