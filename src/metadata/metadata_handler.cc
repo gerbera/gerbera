@@ -31,8 +31,6 @@
 
 #include "metadata_handler.h" // API
 
-#include <filesystem>
-
 #include "cds_objects.h"
 #include "config/config_manager.h"
 #include "content/scripting/script_names.h"

@@ -27,11 +27,11 @@
 #ifndef __DIRECTORYTWEAK_H__
 #define __DIRECTORYTWEAK_H__
 
-#include <filesystem>
 #include <map>
 #include <mutex>
 #include <vector>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 // forward declaration
 class AutoscanDirectory;

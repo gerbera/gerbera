@@ -32,11 +32,8 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
-#include <filesystem>
-#include <memory>
-namespace fs = std::filesystem;
-
 #include "context.h"
+#include "util/grb_fs.h"
 
 // forward declaration
 class CdsObject;

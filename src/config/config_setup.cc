@@ -24,7 +24,6 @@
 
 #include "config_setup.h" // API
 
-#include <filesystem>
 #include <numeric>
 
 #include "client_config.h"

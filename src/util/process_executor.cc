@@ -40,8 +40,6 @@
 #include "exceptions.h"
 #include "logger.h"
 
-namespace fs = std::filesystem;
-
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<fs::path> tempPaths)
     : tempPaths(std::move(tempPaths))
 {

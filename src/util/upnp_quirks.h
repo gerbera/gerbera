@@ -26,11 +26,9 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include <filesystem>
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
-namespace fs = std::filesystem;
 
 using QuirkFlags = std::uint32_t;
 

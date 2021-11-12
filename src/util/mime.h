@@ -26,10 +26,9 @@
 #ifndef __MIME_H__
 #define __MIME_H__
 
-#include <filesystem>
 #include <map>
-#include <memory>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 #ifdef HAVE_MAGIC
 // for older versions of filemagic

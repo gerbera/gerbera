@@ -31,8 +31,6 @@
 
 #include "file_request_handler.h" // API
 
-#include <filesystem>
-
 #include <sys/stat.h>
 #include <unistd.h>
 

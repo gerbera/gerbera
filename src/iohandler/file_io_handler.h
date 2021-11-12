@@ -32,11 +32,9 @@
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
 
-#include <filesystem>
-namespace fs = std::filesystem;
-
 #include "common.h"
 #include "io_handler.h"
+#include "util/grb_fs.h"
 
 /// \brief Allows the web server to read from a file.
 class FileIOHandler : public IOHandler {

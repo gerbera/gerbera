@@ -33,12 +33,10 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <netinet/in.h>
 #include <pugixml.hpp>
-namespace fs = std::filesystem;
 
 #include "common.h"
 #include "config.h"

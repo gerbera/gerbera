@@ -1,10 +1,8 @@
 #ifdef HAVE_JS
 
 #include <duktape.h>
-#include <filesystem>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-namespace fs = std::filesystem;
 
 #include "util/tools.h"
 
