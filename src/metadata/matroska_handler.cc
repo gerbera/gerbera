@@ -201,7 +201,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             auto fDate = fmt::format("{:%Y-%m-%d}", fmt::gmtime(dateEl->GetEpochDate()));
             if (!fDate.empty()) {
                 log_debug("KaxDateUTC = {}", fDate);
-                item->addMetaData(M_DATE, sc->convert(fDate));
+                item->addMetaData(M_CREATION_DATE, sc->convert(fDate));
             }
         }
     }
