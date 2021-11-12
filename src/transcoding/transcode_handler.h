@@ -59,8 +59,6 @@ public:
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<ContentManager> content;
-
-    enum { UNKNOWN_CONTENT_LENGTH = -1 };
 };
 
 #endif // __TRANSCODE_HANDLER_H__
