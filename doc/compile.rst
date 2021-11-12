@@ -5,6 +5,8 @@ Compile Gerbera
 
 Gerbera uses the excellent `CMake <https://cmake.org/>`_ build system.
 
+When gerbera is already installed, running ``gerbera --compile-info`` will show the compilation options used.
+
 
 .. _gerbera-requirements:
 
