@@ -48,10 +48,10 @@ enum class ScanMode;
 #define ITEM_PATH_PREFIX -3
 
 using StringCheckFunction = bool (*)(std::string& value);
-using ArrayInitFunction = bool (*)(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name);
-using DictionaryInitFunction = bool (*)(const pugi::xml_node& value, std::map<std::string, std::string>& result);
-using IntCheckFunction = bool (*)(int value);
-using IntMinFunction = bool (*)(int value, int minValue);
+using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
+using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
+using IntCheckFunction = std::function<bool(int value)>;
+using IntMinFunction = std::function<bool(int value, int minValue)>;
 
 using ConfigOptionIterator = EnumIterator<config_option_t, config_option_t::CFG_MIN, config_option_t::CFG_MAX>;
 
