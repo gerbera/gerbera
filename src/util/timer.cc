@@ -45,7 +45,7 @@ void Timer::run()
             inst->threadProc();
             return nullptr;
         },
-        this, config);
+        this);
 
     // wait for TimerThread to become ready
     threadRunner->waitForReady();

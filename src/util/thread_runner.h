@@ -31,36 +31,31 @@
 #include <mutex>
 #include <thread>
 
-#include <pthread.h>
-
-#include "config/config.h"
 #include "thread_executor.h"
 
 using ThreadProc = void* (*)(void* target);
 
 template <class Condition, class Mutex>
-class ThreadRunner : public ThreadExecutor {
+class ThreadRunner final {
 public:
-    ThreadRunner(std::string name, ThreadProc targetProc, void* target, std::shared_ptr<Config> config)
-        : config(std::move(config))
-        , threadName(std::move(name))
-        , targetProc(targetProc)
-        , target(target)
+    ThreadRunner(std::string name, ThreadProc targetProc, void* target)
+        : name(std::move(name))
     {
-        log_debug("ThreadRunner: Creating {}", this->threadName);
+        log_debug("ThreadRunner: Creating {}", this->name);
+
         try {
-            ThreadRunner::startThread();
-        } catch (const std::runtime_error& ex) {
-            log_error("{}", ex.what());
+            thread = std::thread(targetProc, target);
+        } catch (const std::exception& err) {
+            log_error("Could not start thread {}: {}", name, err.what());
         }
+        isRunning = true;
     }
 
-    ~ThreadRunner() override
+    ~ThreadRunner()
     {
-        log_debug("ThreadRunner: Destroying {}", threadName);
-        if (attr) {
-            pthread_attr_destroy(attr);
-            delete attr;
+        log_debug("ThreadRunner: Destroying {}", name);
+        if (thread.joinable()) {
+            thread.join();
         }
     }
 
@@ -69,87 +64,100 @@ public:
 
     void join()
     {
-        log_debug("ThreadRunner: Waiting for join {}", threadName);
-        if (thread) {
-            pthread_join(thread, nullptr);
+        log_debug("ThreadRunner: Waiting for join {}", name);
+        if (thread.joinable()) {
+            thread.join();
         }
-        threadRunning = false;
-        thread = 0;
+        isRunning = false;
+        thread = {};
     }
 
     using AutoLock = std::lock_guard<Mutex>;
     using AutoLockU = std::unique_lock<Mutex>;
 
-    /// \brief the exit status of the thread - needs to be overridden
-    int getStatus() override { return 0; }
-
     void setReady()
     {
-        log_debug("ThreadRunner: Setting {} ready", threadName);
+        log_debug("ThreadRunner: Setting {} ready", name);
         isReady = true;
         cond.notify_one();
     }
 
+    bool isAlive()
+    {
+        return isRunning;
+    }
+
     void wait(std::unique_lock<Mutex>& lck)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_debug("ThreadRunner: Waiting for {}", name);
         cond.wait(lck);
     }
+
     void waitForReady()
     {
         auto lck = AutoLockU(mutex);
-        log_debug("ThreadRunner: Waiting for {} to become ready", threadName);
+        log_debug("ThreadRunner: Waiting for {} to become ready", name);
         cond.wait(lck, [this] { return isReady; });
         lck.unlock();
         isReady = false;
     }
+
     template <class Predicate>
     void wait(std::unique_lock<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_debug("ThreadRunner: Waiting for {}", name);
         cond.wait(lck, pred);
     }
+
     template <class Predicate>
     void wait(std::lock_guard<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_debug("ThreadRunner: Waiting for {}", name);
         cond.wait(lck, pred);
     }
+
     std::cv_status waitFor(std::unique_lock<Mutex>& lck, std::chrono::milliseconds ms)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_debug("ThreadRunner: Waiting for {}", name);
         return cond.wait_for(lck, std::chrono::milliseconds(ms));
     }
+
     void notify()
     {
-        log_debug("ThreadRunner: Notifying {}", threadName);
+        log_debug("ThreadRunner: Notifying {}", name);
         cond.notify_one();
     }
+
     void notifyAll()
     {
-        log_debug("ThreadRunner: Notifying all {}", threadName);
+        log_debug("ThreadRunner: Notifying all {}", name);
         cond.notify_all();
     }
+
     AutoLock lockGuard([[maybe_unused]] const std::string& loc = "")
     {
-        log_debug("ThreadRunner: Guard for {} - {}", threadName, loc);
+        log_debug("ThreadRunner: Guard for {} - {}", name, loc);
         return AutoLock(mutex);
     }
+
     AutoLockU uniqueLockS([[maybe_unused]] const std::string& loc = "")
     {
-        log_debug("ThreadRunner: Lock {} - {}", threadName, loc);
+        log_debug("ThreadRunner: Lock {} - {}", name, loc);
         return AutoLockU(mutex);
     }
+
     AutoLockU uniqueLock()
     {
-        log_debug("ThreadRunner: Lock {}", threadName);
+        log_debug("ThreadRunner: Lock {}", name);
         return AutoLockU(mutex);
     }
+
     AutoLockU uniqueLock(std::defer_lock_t tag)
     {
-        log_debug("ThreadRunner: Lock with tag {}", threadName);
+        log_debug("ThreadRunner: Lock with tag {}", name);
         return AutoLockU(mutex, tag);
     }
+
     template <class Predicate>
     static void waitFor(const std::string_view& threadName, Predicate pred, int max_count = 10)
     {
@@ -164,56 +172,14 @@ public:
         }
     }
 
-protected:
-    std::shared_ptr<Config> config;
-
-    /// \brief thread method is injected
-    void threadProc() override
-    {
-        targetProc(target);
-        log_debug("ThreadRunner: Terminating {}", threadName);
-    }
-
-    /// \brief start the thread
-    void startThread() override
-    {
-#if !defined(SOLARIS) && !defined(__HAIKU__)
-        // default scoping on Solaroid systems is in fact PTHREAD_SCOPE_SYSTEM
-        // plus, setting PTHREAD_EXPLICIT_SCHED requires elevated privileges
-        // while Haiku doesn't implement pthread_attr_setinheritsched yet
-        if (config->getBoolOption(CFG_THREAD_SCOPE_SYSTEM)) {
-            attr = new pthread_attr_t;
-            pthread_attr_init(attr);
-            // pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED);
-            pthread_attr_setinheritsched(attr, PTHREAD_EXPLICIT_SCHED);
-            pthread_attr_setscope(attr, PTHREAD_SCOPE_SYSTEM);
-        }
-#endif
-
-        int ret = pthread_create(
-            &thread,
-            attr,
-            [](void* arg) -> void* {
-                auto inst = static_cast<ThreadRunner<Condition, Mutex>*>(arg);
-                inst->targetProc(inst->target);
-                pthread_exit(nullptr);
-            },
-            this);
-
-        if (ret != 0) {
-            log_error("Could not start thread {}: {}", threadName, std::strerror(ret));
-        } else {
-            threadRunning = true;
-        }
-    }
-
 private:
-    pthread_attr_t* attr {};
-    std::string threadName;
-    ThreadProc targetProc;
-    void* target;
+    std::thread thread;
+    std::string name;
+
     Condition cond;
     Mutex mutex;
+
+    bool isRunning {};
     bool isReady {};
 };
 

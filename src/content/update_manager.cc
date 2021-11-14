@@ -59,7 +59,7 @@ void UpdateManager::run()
             inst->threadProc();
             return nullptr;
         },
-        this, config);
+        this);
     // wait for thread to become ready
     threadRunner->waitForReady();
 }

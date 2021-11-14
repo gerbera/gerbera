@@ -102,7 +102,7 @@ void ContentManager::run()
             inst->threadProc();
             return nullptr;
         },
-        this, config);
+        this);
 
     // wait for ContentTaskThread to become ready
     threadRunner->waitForReady();

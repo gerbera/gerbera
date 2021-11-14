@@ -179,7 +179,7 @@ void IOHandlerBufferHelper::startBufferThread()
             inst->threadProc();
             return nullptr;
         },
-        this, config);
+        this);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
