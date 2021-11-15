@@ -82,8 +82,7 @@ std::string Mime::fileToMimeType(const fs::path& path, const std::string& defval
 
 std::string Mime::bufferToMimeType(const void* buffer, std::size_t length)
 {
-    const char* mimeType = magic_buffer(magicCookie, buffer, length);
-    return mimeType;
+    return magic_buffer(magicCookie, buffer, length);
 }
 #endif
 
