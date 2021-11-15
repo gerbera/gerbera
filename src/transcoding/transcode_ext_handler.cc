@@ -77,10 +77,9 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_pt
 #endif
 
     std::vector<std::shared_ptr<ProcListItem>> procList;
-    bool isConnected = false;
 
     bool isURL = obj->isExternalItem();
-    if (!isConnected && isURL && (!profile->acceptURL())) {
+    if (isURL && !profile->acceptURL()) {
 #ifdef HAVE_CURL
         openCurlFifo(location, procList);
 #else
