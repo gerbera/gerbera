@@ -51,28 +51,6 @@ FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& co
 {
 }
 
-static bool checkFileAndSubtitle(fs::path& path, const std::shared_ptr<CdsObject>& obj, const std::size_t& resId, std::string& mimeType, struct stat& statbuf, const std::string& rh)
-{
-    bool isSrt = false;
-
-    if (!rh.empty()) {
-        auto resPath = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
-        mimeType = MIMETYPE_TEXT;
-        isSrt = !resPath.empty();
-        if (isSrt) {
-            path = resPath;
-        }
-    }
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        if (isSrt) {
-            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
-        }
-        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
-    }
-    return isSrt;
-}
-
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start: {}", filename);
@@ -99,9 +77,24 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     fs::path path = item ? item->getLocation() : "";
-    std::string mimeType;
+    std::string mimeType = !rh.empty() ? MIMETYPE_TEXT : "";
+    bool isSrt = false;
     struct stat statbuf;
-    bool isSrt = checkFileAndSubtitle(path, obj, resId, mimeType, statbuf, rh);
+
+    if (!rh.empty()) {
+        auto resPath = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
+        isSrt = !resPath.empty();
+        if (isSrt) {
+            path = resPath;
+        }
+    }
+    int ret = stat(path.c_str(), &statbuf);
+    if (ret != 0) {
+        if (isSrt) {
+            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
+        }
+        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
+    }
 
     UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
 
