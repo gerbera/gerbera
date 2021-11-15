@@ -47,7 +47,7 @@ public:
     std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
         std::string location,
         std::shared_ptr<CdsObject> obj,
-        std::string range) override;
+        const std::string& range) override;
 
 private:
     fs::path makeFifo();
