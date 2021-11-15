@@ -186,27 +186,22 @@ const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const st
 const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
-        if (c.matchType != ClientMatchType::IP) {
+        if (c.matchType != ClientMatchType::IP)
             return false;
-        }
 
         if (c.match.find(':') != std::string::npos) {
             // IPv6
             struct sockaddr_in6 clientAddr = {};
             clientAddr.sin6_family = AF_INET6;
-            if (inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) {
-                if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
-                    return true;
-                }
-            }
+            if ((inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0))
+                return true;
         } else if (c.match.find('.') != std::string::npos) {
             // IPv4
             struct sockaddr_in clientAddr = {};
             clientAddr.sin_family = AF_INET;
             clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
-            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0) {
+            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0)
                 return true;
-            }
         }
 
         return false;
