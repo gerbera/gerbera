@@ -31,6 +31,8 @@
 
 #include "tools.h" // API
 
+#include <cstddef>
+
 #include "iohandler/io_handler.h"
 
 using uchar = unsigned char;
@@ -59,14 +61,14 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int get16m(const void* shrt)
+static int get16m(std::byte* shrt)
 {
-    return (static_cast<uchar*>(const_cast<void*>(shrt))[0] << 8) | static_cast<uchar*>(const_cast<void*>(shrt))[1];
+    return std::to_integer<int>((shrt[0] << 8) | shrt[1]);
 }
 
 static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
 {
-    uchar c[1] = { 0 };
+    std::byte c[1] {};
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
     if (ret < 0)
         return ret;
@@ -85,7 +87,7 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         off_t skip;
         int marker = 0;
         int ll, lh, got;
-        uchar data[ITEM_BUF_SIZE];
+        std::byte data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
             marker = iohFgetc(ioh);
@@ -116,8 +118,8 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         }
 
         // Store first two pre-read bytes.
-        data[0] = uchar(lh);
-        data[1] = uchar(ll);
+        data[0] = std::byte(lh);
+        data[1] = std::byte(ll);
 
         got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
         if (got != itemlen - 2)
