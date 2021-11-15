@@ -40,7 +40,7 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManage
 
 void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    // We should be able to do the generation here, but libupnp doesnt support the request cookies yet
+    // We should be able to do the generation here, but libupnp doesn't support the request cookies yet
     UpnpFileInfo_set_FileLength(info, -1);
     UpnpFileInfo_set_ContentType(info, "application/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
