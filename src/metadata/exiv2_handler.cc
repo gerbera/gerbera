@@ -197,7 +197,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         } else {
             log_debug("No aux data requested");
         }
-    } catch (Exiv2::AnyError& ex) {
+    } catch (const Exiv2::AnyError& ex) {
         log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().c_str(), ex.what());
     }
 }
