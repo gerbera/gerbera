@@ -123,17 +123,14 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 continue; // iterate while loop
             }
         }
-        for (auto&& [fld, key] : propertyMap) {
-            if (key == e->key) {
-                // only use ffmpeg meta data if not found by other handler
-                if (item->getMetaData(fld).empty()) {
-                    log_debug("Identified default metadata '{}': {}", key, value);
-                    field = fld;
-                    item->addMetaData(field, sc->convert(trimString(value)));
-                    break; // leave for loop
-                }
-            }
+        auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
+            [&](auto&& p) { return p.second == e->key && item->getMetaData(p.first).empty(); });
+        if (pIt != propertyMap.end()) {
+            log_debug("Identified default metadata '{}': {}", pIt->second, value);
+            field = pIt->first;
+            item->addMetaData(field, sc->convert(trimString(value)));
         }
+
         if (field != M_MAX) {
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
