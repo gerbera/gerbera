@@ -63,7 +63,7 @@ protected:
     std::string userMessage;
 
 public:
-    DatabaseException(std::string _userMessage, const std::string& message);
+    DatabaseException(std::string userMessage, const std::string& message);
     std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : what()); }
 };
 
