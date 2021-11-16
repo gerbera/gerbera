@@ -202,13 +202,11 @@ void TPFetchOnlineContentTask::run()
         log_error("{}", ex.what());
     }
     service->decTaskCount();
-    if (service->getTaskCount() == 0) {
-        if ((service->getRefreshInterval() > std::chrono::seconds::zero()) && !unscheduled_refresh) {
-            timer->addTimerSubscriber(
-                content.get(),
-                service->getRefreshInterval(),
-                service->getTimerParameter(), true);
-        }
+    if ((service->getTaskCount() == 0) && (service->getRefreshInterval() > std::chrono::seconds::zero()) && !unscheduled_refresh) {
+        timer->addTimerSubscriber(
+            content.get(),
+            service->getRefreshInterval(),
+            service->getTimerParameter(), true);
     }
 }
 #endif // ONLINE_SERVICES
