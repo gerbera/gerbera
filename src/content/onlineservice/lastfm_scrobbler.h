@@ -45,7 +45,6 @@
 class LastFm {
 public:
     explicit LastFm(const std::shared_ptr<Context>& context);
-    ~LastFm();
 
     /// \brief Initializes the LastFm client.
     ///
