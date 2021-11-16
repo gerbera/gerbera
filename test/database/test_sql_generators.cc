@@ -30,7 +30,7 @@ public:
     using SQLDatabase::identifier;
 
     TestDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-        : SQLDatabase(config, mime)
+        : SQLDatabase(std::move(config), std::move(mime))
     {
         table_quote_begin = '[';
         table_quote_end = ']';
