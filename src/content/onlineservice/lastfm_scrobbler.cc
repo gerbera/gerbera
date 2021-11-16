@@ -41,12 +41,6 @@ LastFm::LastFm(const std::shared_ptr<Context>& context)
 {
 }
 
-LastFm::~LastFm()
-{
-    if (currentTrackId != -1 && scrobbler)
-        scrobbler->finishedPlaying();
-}
-
 void LastFm::run()
 {
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
