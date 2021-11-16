@@ -326,7 +326,7 @@ public:
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, IntCheckFunction check)
         : ConfigSetup(option, xpath, help)
-        , valueCheck(check)
+        , valueCheck(std::move(check))
 
     {
         this->defaultValue = fmt::to_string(0);
@@ -334,7 +334,7 @@ public:
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check)
         : ConfigSetup(option, xpath, help)
-        , valueCheck(check)
+        , valueCheck(std::move(check))
 
     {
         this->defaultValue = fmt::to_string(defaultValue);
@@ -342,7 +342,7 @@ public:
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, int minValue, IntMinFunction check)
         : ConfigSetup(option, xpath, help)
-        , minCheck(check)
+        , minCheck(std::move(check))
         , minValue(minValue)
     {
         this->defaultValue = fmt::to_string(defaultValue);
@@ -350,7 +350,7 @@ public:
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr)
         : ConfigSetup(option, xpath, help)
-        , valueCheck(check)
+        , valueCheck(std::move(check))
 
     {
         this->defaultValue = defaultValue;
@@ -463,7 +463,7 @@ public:
         ArrayInitFunction init = nullptr, bool notEmpty = false, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
-        , initArray(init)
+        , initArray(std::move(init))
         , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
     {
@@ -538,7 +538,7 @@ public:
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
-        , initDict(init)
+        , initDict(std::move(init))
         , defaultEntries(std::move(defaultEntries))
     {
     }
