@@ -287,7 +287,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
                 log_error("Malformed MKV file; KaxDuration cast failed!");
                 continue;
             }
-            auto fDuration = millisecondsToHMSF((double)(*static_cast<EbmlFloat*>(durationEl)));
+            auto fDuration = millisecondsToHMSF(double(*static_cast<EbmlFloat*>(durationEl)));
             log_debug("KaxDuration = {}", fDuration);
             if (item->getResourceCount() > 0) {
                 item->getResource(0)->addAttribute(R_DURATION, sc->convert(fDuration));
