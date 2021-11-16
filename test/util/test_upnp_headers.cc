@@ -6,13 +6,12 @@ class HeadersHelperTest : public ::testing::Test {
 
 public:
     HeadersHelperTest()
-    {
-        subject = std::make_unique<Headers>();
 #if defined(USING_NPUPNP)
-        info = new UpnpFileInfo;
+        : info(new UpnpFileInfo)
 #else
-        info = UpnpFileInfo_new();
+        : info(UpnpFileInfo_new())
 #endif
+    {
     }
     ~HeadersHelperTest() override
     {
@@ -24,7 +23,7 @@ public:
     }
 
     UpnpFileInfo* info;
-    std::unique_ptr<Headers> subject;
+    std::unique_ptr<Headers> subject { std::make_unique<Headers>() };
 };
 
 #if !defined(USING_NPUPNP)
