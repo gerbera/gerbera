@@ -558,7 +558,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         if (obj->isPureItem())
             throw_std_runtime_error("Tried to add pure item with PLAYLIST_REF flag set");
         if (obj->getRefID() <= 0)
-            throw_std_runtime_error("PLAYLIST_REF flag set but refId is <=0");
+            throw_std_runtime_error("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str());
         refObj = loadObject(obj->getRefID());
         if (!refObj)
             throw_std_runtime_error("PLAYLIST_REF flag set but refId doesn't point to an existing object");
@@ -1321,7 +1321,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
 
 bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID)
 {
-    log_debug("Adding container for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), cont->getRefID(), *containerID);
+    log_debug("Adding container for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), cont->getRefID(), containerID ? *containerID : -999);
 
     if (parentContainerId == INVALID_OBJECT_ID) {
         *containerID = INVALID_OBJECT_ID;
@@ -1336,19 +1336,21 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
-    auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {0}location_hash{1} = {3} AND {0}location{1} = {4} LIMIT 1", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, quote(stringHash(dbLocation)), quote(dbLocation)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1", identifier("id"), identifier(CDS_OBJECT_TABLE), identifier("location_hash"), quote(stringHash(dbLocation)), identifier("location"), quote(dbLocation)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            if (containerID)
+            if (containerID) {
                 *containerID = row->col_int(0, INVALID_OBJECT_ID);
+                log_debug("Found container for path: {}, lastRefId: {} -> containerId: {}", virtualPath.c_str(), cont->getRefID(), *containerID);
+            }
             commit("addContainer");
             return false;
         }
     }
     commit("addContainer");
 
-    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), INVALID_OBJECT_ID, cont->getMetaData());
+    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
     return true;
 }
 

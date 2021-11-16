@@ -411,8 +411,6 @@ void Script::execute()
 std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
     std::string val;
-    int b;
-    int i;
     std::unique_ptr<StringConverter> sc = (this->whoami() == S_PLAYLIST) ? StringConverter::p2i(config) : StringConverter::i2i(config);
 
     int objType = getIntProperty("objectType", -1);
@@ -426,20 +424,20 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     // CdsObject
     obj->setVirtual(true); // JS creates only virtual objects
 
-    i = getIntProperty("id", INVALID_OBJECT_ID);
-    if (i != INVALID_OBJECT_ID)
-        obj->setID(i);
-    i = getIntProperty("refID", INVALID_OBJECT_ID);
-    if (i != INVALID_OBJECT_ID)
-        obj->setRefID(i);
-    i = getIntProperty("parentID", INVALID_OBJECT_ID);
-    if (i != INVALID_OBJECT_ID) {
-        obj->setParentID(i);
+    int id = getIntProperty("id", INVALID_OBJECT_ID);
+    if (id != INVALID_OBJECT_ID)
+        obj->setID(id);
+    id = getIntProperty("refID", INVALID_OBJECT_ID);
+    if (id != INVALID_OBJECT_ID)
+        obj->setRefID(id);
+    id = getIntProperty("parentID", INVALID_OBJECT_ID);
+    if (id != INVALID_OBJECT_ID) {
+        obj->setParentID(id);
     }
 
-    i = getIntProperty("mtime", 0);
-    if (i > 0) {
-        obj->setMTime(std::chrono::seconds(i));
+    int mtime = getIntProperty("mtime", 0);
+    if (mtime > 0) {
+        obj->setMTime(std::chrono::seconds(mtime));
     }
 
     duk_get_prop_string(ctx, -1, "parent");
@@ -471,9 +469,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             obj->setClass(pcd->getClass());
     }
 
-    b = getBoolProperty("restricted");
-    if (b >= 0)
-        obj->setRestricted(b);
+    int restricted = getBoolProperty("restricted");
+    if (restricted >= 0)
+        obj->setRestricted(restricted);
 
     duk_get_prop_string(ctx, -1, "metaData");
     if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
@@ -513,9 +511,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setResources(pcd->getResources());
         obj->setAuxData(pcd->getAuxData());
     } else {
-        i = getIntProperty("flags", -1);
-        if (i >= 0)
-            obj->setFlags(i);
+        int flags = getIntProperty("flags", -1);
+        if (flags >= 0)
+            obj->setFlags(flags);
 
         duk_get_prop_string(ctx, -1, "res");
         if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
@@ -525,9 +523,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             int resCount = 0;
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
-                    i = getIntProperty(sym, -1);
-                    if (i >= 0) {
-                        obj->addResource(std::make_shared<CdsResource>(i));
+                    int resNr = getIntProperty(sym, -1);
+                    if (resNr >= 0) {
+                        obj->addResource(std::make_shared<CdsResource>(resNr));
                     }
                 }
             }
@@ -647,13 +645,17 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     // CdsDirectory
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        i = getIntProperty("updateID", -1);
-        if (i >= 0)
-            cont->setUpdateID(i);
 
-        b = getBoolProperty("searchable");
-        if (b >= 0)
-            cont->setSearchable(b);
+        if (this->whoami() == S_PLAYLIST && this->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) && cont->getRefID() > 0) {
+            cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+        }
+        id = getIntProperty("updateID", -1);
+        if (id >= 0)
+            cont->setUpdateID(id);
+
+        int searchable = getBoolProperty("searchable");
+        if (searchable >= 0)
+            cont->setSearchable(searchable);
     }
 
     return obj;
@@ -662,21 +664,20 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 {
     std::string val;
-    int i;
 
     duk_push_object(ctx);
 
     // CdsObject
     setIntProperty("objectType", obj->getObjectType());
 
-    i = obj->getID();
+    int id = obj->getID();
 
-    if (i != INVALID_OBJECT_ID)
-        setIntProperty("id", i);
+    if (id != INVALID_OBJECT_ID)
+        setIntProperty("id", id);
 
-    i = obj->getParentID();
-    if (i != INVALID_OBJECT_ID)
-        setIntProperty("parentID", i);
+    id = obj->getParentID();
+    if (id != INVALID_OBJECT_ID)
+        setIntProperty("parentID", id);
 
     val = obj->getTitle();
     if (!val.empty())
@@ -696,8 +697,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     setIntProperty("flags", obj->getFlags());
 
     // TODO: boolean type
-    i = obj->isRestricted();
-    setIntProperty("restricted", i);
+    int restricted = obj->isRestricted();
+    setIntProperty("restricted", restricted);
 
     if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
         setIntProperty("theora", 1);
@@ -821,11 +822,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         // TODO: boolean type, hide updateID
-        i = cont->getUpdateID();
-        setIntProperty("updateID", i);
+        setIntProperty("updateID", cont->getUpdateID());
 
-        i = cont->isSearchable();
-        setIntProperty("searchable", i);
+        int searchable = cont->isSearchable();
+        setIntProperty("searchable", searchable);
     }
 }
 
