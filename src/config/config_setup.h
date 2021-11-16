@@ -42,9 +42,9 @@ class DirectoryTweak;
 class DynamicContent;
 enum class ScanMode;
 
-#define ITEM_PATH_ROOT -1
-#define ITEM_PATH_NEW -2
-#define ITEM_PATH_PREFIX -3
+#define ITEM_PATH_ROOT (-1)
+#define ITEM_PATH_NEW (-2)
+#define ITEM_PATH_PREFIX (-3)
 
 using StringCheckFunction = std::function<bool(std::string& value)>;
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
