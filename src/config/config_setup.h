@@ -47,7 +47,7 @@ enum class ScanMode;
 #define ITEM_PATH_NEW -2
 #define ITEM_PATH_PREFIX -3
 
-using StringCheckFunction = bool (*)(std::string& value);
+using StringCheckFunction = std::function<bool(std::string& value)>;
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 using IntCheckFunction = std::function<bool(int value)>;
@@ -117,7 +117,7 @@ public:
     ConfigSetup(config_option_t option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
         : cpath(buildCpath(xpath))
         , required(required)
-        , rawCheck(check)
+        , rawCheck(std::move(check))
         , defaultValue(defaultValue)
         , help(help)
         , option(option)
@@ -183,7 +183,7 @@ public:
     }
 
     ConfigStringSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
-        : ConfigSetup(option, xpath, help, check, defaultValue, required)
+        : ConfigSetup(option, xpath, help, std::move(check), defaultValue, required)
         , notEmpty(notEmpty)
     {
     }
@@ -357,7 +357,7 @@ public:
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check)
-        : ConfigSetup(option, xpath, help, check, defaultValue)
+        : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
 
     {
     }
@@ -394,12 +394,12 @@ class ConfigBoolSetup : public ConfigSetup {
 
 public:
     ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr)
-        : ConfigSetup(option, xpath, help, check, defaultValue)
+        : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
     {
     }
 
     ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, bool defaultValue, StringCheckFunction check = nullptr)
-        : ConfigSetup(option, xpath, help, check)
+        : ConfigSetup(option, xpath, help, std::move(check))
     {
         this->defaultValue = defaultValue ? YES : NO;
     }

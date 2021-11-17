@@ -446,7 +446,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_SQLITE_SYNC, ConfigIntSetup::CheckSqlLiteSyncValue),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_RESTORE,
         "/server/storage/sqlite3/on-error", "config-server.html#storage",
-        DEFAULT_SQLITE_RESTORE, ConfigBoolSetup::CheckSqlLiteRestoreValue),
+        DEFAULT_SQLITE_RESTORE, StringCheckFunction(ConfigBoolSetup::CheckSqlLiteRestoreValue)),
 #ifdef SQLITE_BACKUP_ENABLED
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
@@ -726,7 +726,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_MARK_PLAYED_ITEMS_ENABLED),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND,
         "/server/extended-runtime-options/mark-played-items/string/attribute::mode", "config-extended.html#extended-runtime-options",
-        DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, ConfigBoolSetup::CheckMarkPlayedValue),
+        DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, StringCheckFunction(ConfigBoolSetup::CheckMarkPlayedValue)),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING,
         "/server/extended-runtime-options/mark-played-items/string", "config-extended.html#extended-runtime-options",
         false, DEFAULT_MARK_PLAYED_ITEMS_STRING, true),
@@ -769,7 +769,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_INOTIFY
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_AUTOSCAN_USE_INOTIFY,
         "/import/autoscan/attribute::use-inotify", "config-import.html#autoscan",
-        "auto", ConfigBoolSetup::CheckInotifyValue),
+        "auto", StringCheckFunction(ConfigBoolSetup::CheckInotifyValue)),
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
         "/import/autoscan", "config-import.html#autoscan",
         ScanMode::INotify),
