@@ -857,7 +857,7 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         // will be displayed in the correct order inside a playlist
         // container. It is similar to the id3 track number that is used
         // to sort the media in album containers.
-        exturl.playlistOrder = (order ? order : playlistOrder++);
+        exturl.playlistOrder = (order ? order : playlistOrder);
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
@@ -869,17 +869,16 @@ function addPlaylistItem(playlist_title, location, title, playlistChain, order, 
         var cds = getCdsObject(location);
         if (!cds) {
             print("Playlist " + playlist_title + " Skipping entry: " + location);
-            return playlistOrder;
+            return;
         }
 
         var item = copyObject(cds);
 
-        item.playlistOrder = (order ? order : playlistOrder++);
+        item.playlistOrder = (order ? order : playlistOrder);
         item.title = item.metaData[M_TITLE] ? item.metaData[M_TITLE][0] : cds.title;
 
         addCdsObject(item, playlistChain);
     }
-    return playlistOrder;
 }
 // doc-add-playlist-item-end
 
@@ -896,22 +895,23 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
 
     // Here is the do - while loop which will read the playlist line by line.
     do {
-        var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
+        var matches = line.match(/^#EXTINF:(-?\d+),\s*(\S.*)$/i);
+
         if (matches) {
             // duration = matches[1]; // currently unused
             title = matches[2];
-        }
-        else if (!line.match(/^(#|\s*$)/)) {
+        } else if (!line.match(/^(#|\s*$)/)) {
             // Call the helper function to add the item once you gathered the data:
-            playlistOrder = addPlaylistItem(playlist_title, line, title, playlistChain, 0, playlistOrder);
+            addPlaylistItem(playlist_title, line, title, playlistChain, 0, playlistOrder);
 
             // Also add to "Directories"
             if (playlistDirChain)
-                playlistOrder = addPlaylistItem(playlist_title, line, title, playlistDirChain, 0, playlistOrder);
+                addPlaylistItem(playlist_title, line, title, playlistDirChain, 0, playlistOrder);
 
             title = null;
+            playlistOrder++;
         }
-        
+
         line = readln();
     } while (line);
 }
@@ -941,15 +941,16 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 lastId = id;
             if (lastId !== id) {
                 if (file) {
-                    playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+                    addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
                     if (playlistDirChain)
-                        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+                        addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
                 }
 
                 title = null;
                 lastId = id;
             }
             file = thisFile;
+            playlistOrder++;
         } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
             const matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
             var thisTitle = matches[2];
@@ -958,15 +959,16 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 lastId = id;
             if (lastId !== id) {
                 if (file) {
-                    playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+                    addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
                     if (playlistDirChain)
-                        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+                        addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
                 }
 
                 file = null;
                 lastId = id;
             }
             title = thisTitle;
+            playlistOrder++;
         } else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i)) {
             // currently unused
         }
@@ -975,8 +977,8 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
     } while (line);
 
     if (file) {
-        playlistOrder = addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
+        addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
         if (playlistDirChain)
-            playlistOrder = addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+            addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
     }
 }

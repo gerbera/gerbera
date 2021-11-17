@@ -180,7 +180,7 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromM3U8PlaylistWithInternalUrl
     std::map<std::string, std::string> asPlaylistDirChain {
         { "objectType", "2" },
         { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
-        { "playlistOrder", "2" },
+        { "playlistOrder", "1" },
         { "title", "example\xE2\x9C\x85.mp3" },
     };
 

@@ -181,7 +181,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
         { "location", "http://46.105.171.217:8024" },
         { "mimetype", mimeTypeAudioMpeg },
         { "objectType", objtypeItemExternalUrl },
-        { "playlistOrder", "2" },
+        { "playlistOrder", "1" },
         { "protocol", "http-get" },
         { "description", "Song from Playlist Title" },
         { "upnpclass", UPNP_CLASS_MUSIC_TRACK },

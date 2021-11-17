@@ -222,6 +222,9 @@ const transformContainers = (response, createParent) => {
       autoScanType: item.autoscan_type,
       image: ('image' in item) ? item.image : null
     };
+    if (!GerberaApp.serverConfig.enableThumbnail) {
+      node.gerbera.image = null;
+    }
     if (createParent) {
       parent.nodes.push(node);
     } else {

@@ -207,8 +207,16 @@ const deleteComplete = (response) => {
 const downloadItem = (event) => {
   const item = event.data;
   event.preventDefault();
-  // TODO: content type
-  window.location.href = item.url;
+
+  var link = document.createElement("a");
+  link.download = item.text;
+  link.type = item.mtype;
+  link.href = item.url;
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
 };
 
 const addFileItem = (event) => {
@@ -304,11 +312,18 @@ const transformItems = (items) => {
       id: gItem.id,
       text: gItem.title,
       url: gItem.res,
-      image: ('image' in gItem) ? gItem.image : null
+      mtype: ('mtype' in gItem) ? gItem.mtype : null,
+      image: ('image' in gItem) ? gItem.image : null,
+      part: ('part' in gItem) ? gItem.part : null,
+      track: ('track' in gItem) ? gItem.track : null
     };
 
-    if (GerberaApp.serverConfig.enableThumbnail) {
-      item.img = '/content/media/object_id/' + gItem.id + '/res_id/1/rh/6/ext/file.jpg';
+    if (!GerberaApp.serverConfig.enableNumbering) {
+      item.part = null;
+      item.track = null;
+    }
+    if (!GerberaApp.serverConfig.enableThumbnail) {
+      item.image = null;
     }
     if (GerberaApp.serverConfig.enableVideo) {
       item.video = '/content/media/object_id/' + gItem.id + '/res_id/0/ext/file.mp4';

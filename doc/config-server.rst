@@ -352,6 +352,24 @@ Note:
 
     ::
 
+        show-numbering=...
+
+    * Optional
+    * Default: **yes**
+
+    Set track number to be shown in the web UI.
+
+    ::
+
+        show-thumbnail=...
+
+    * Optional
+    * Default: **yes**
+
+    This setting specifies if thumbnails or cover art should be shown in the web UI.
+
+    ::
+
         poll-interval=...
 
     * Optional
