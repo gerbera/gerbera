@@ -82,6 +82,9 @@ void Web::Auth::process()
     if (action == "get_config") {
         auto cfg = root.append_child("config");
         cfg.append_attribute("accounts") = accountsEnabled();
+        cfg.append_attribute("enableNumbering") = config->getBoolOption(CFG_SERVER_UI_ENABLE_NUMBERING);
+        cfg.append_attribute("enableThumbnail") = config->getBoolOption(CFG_SERVER_UI_ENABLE_THUMBNAIL);
+        cfg.append_attribute("enableVideo") = config->getBoolOption(CFG_SERVER_UI_ENABLE_VIDEO);
         cfg.append_attribute("show-tooltips") = config->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS);
         cfg.append_attribute("poll-when-idle") = config->getBoolOption(CFG_SERVER_UI_POLL_WHEN_IDLE);
         cfg.append_attribute("poll-interval") = config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL);

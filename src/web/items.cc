@@ -61,6 +61,8 @@ void Web::Items::process()
     auto items = root.append_child("items");
     xml2JsonHints->setArrayName(items, "item");
     xml2JsonHints->setFieldType("title", "string");
+    xml2JsonHints->setFieldType("part", "string");
+    xml2JsonHints->setFieldType("track", "string");
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(parentID);
@@ -130,6 +132,11 @@ void Web::Items::process()
         item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
 
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
+        if (objItem->getPartNumber() > 0 && c == UPNP_CLASS_MUSIC_ALBUM)
+            item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
+        if (objItem->getTrackNumber() > 0)
+            item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getTrackNumber()).c_str());
+        item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 

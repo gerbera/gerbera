@@ -42,24 +42,26 @@ $.widget('grb.dataitems', {
         row = $('<tr></tr>');
         content = $('<td></td>');
 
-        if (item.img) {
-          const img = $('<img src=""/>');
-          img.attr('src', item.img);
-          img.attr('style', 'height: 25px');
-          img.addClass('rounded float-left');
-          img.appendTo(content);
+        var itemText = item.text;
+        if (item.track) {
+          itemText = item.track + ' ' + itemText;
+        }
+        if (item.part) {
+          itemText = item.part + ' ' + itemText;
         }
 
         if (item.url) {
           text = $('<a></a>');
-          text.attr('href', item.url).text(item.text).appendTo(content);
+          text.attr('title', 'Open ' + item.text);
+          text.attr('type', item.mtype);
+          text.attr('href', item.url).text(itemText).appendTo(content);
         } else {
           text = $('<span></span>');
-          text.text(item.text).appendTo(content);
+          text.text(itemText).appendTo(content);
         }
-      if (item.image) {
-        text.prepend($('<img style="margin-right: 10px" width="36" src="' + item.image + '"/>'));
-      }
+        if (item.image) {
+          text.prepend($('<img class="rounded" style="margin-right: 10px" width="36" src="' + item.image + '"/>'));
+        }
         text.addClass('grb-item-url');
 
         let buttons;

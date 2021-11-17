@@ -244,17 +244,27 @@
 				},
 				{
 					"item": "/server/ui/attribute::poll-interval",
-					"caption": "poll-interval",
+					"caption": "Poll Interval",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/attribute::show-tooltips",
-					"caption": "show-tooltips",
+					"caption": "Show Tooltips",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/attribute::show-thumbnail",
+					"caption": "Show Thumbnail",
+					"editable": true
+				},
+				{
+					"item": "/server/ui/attribute::show-numbering",
+					"caption": "Show Track Numbering",
 					"editable": true
 				},
 				{
 					"item": "/server/ui/attribute::poll-when-idle",
-					"caption": "poll-when-idle",
+					"caption": "Poll When Idle",
 					"editable": true
 				},
 				{
