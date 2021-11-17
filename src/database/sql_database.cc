@@ -1310,8 +1310,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     if (!row)
         return {};
 
-    char prefix;
-    auto path = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title), &prefix);
+    auto [path, prefix] = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title));
     if (prefix != LOC_VIRT_PREFIX)
         throw_std_runtime_error("Tried to build a virtual container path with an non-virtual parentID");
 
@@ -1358,16 +1357,12 @@ std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
     return fmt::format("{}{}", prefix, path.string());
 }
 
-fs::path SQLDatabase::stripLocationPrefix(std::string_view dbLocation, char* prefix)
+std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLocation)
 {
-    if (dbLocation.empty()) {
-        if (prefix)
-            *prefix = LOC_ILLEGAL_PREFIX;
-        return {};
-    }
-    if (prefix)
-        *prefix = dbLocation.at(0);
-    return dbLocation.substr(1);
+    if (dbLocation.empty())
+        return { "", LOC_ILLEGAL_PREFIX };
+
+    return { dbLocation.substr(1), dbLocation.at(0) };
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
@@ -1419,8 +1414,8 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         cont->setUpdateID(std::stoi(getCol(row, BrowseCol::UpdateId)));
-        char locationPrefix;
-        cont->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location), &locationPrefix));
+        auto [location, locationPrefix] = stripLocationPrefix(getCol(row, BrowseCol::Location));
+        cont->setLocation(location);
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
 
@@ -1443,9 +1438,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         item->setMimeType(fallbackString(getCol(row, BrowseCol::MimeType), getCol(row, BrowseCol::RefMimeType)));
         if (obj->isPureItem()) {
             if (!obj->isVirtual())
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location)));
+                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location)).first);
             else
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::RefLocation)));
+                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::RefLocation)).first);
         } else // URLs
         {
             item->setLocation(fallbackString(getCol(row, BrowseCol::Location), getCol(row, BrowseCol::RefLocation)));
@@ -1508,7 +1503,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(getCol(row, SearchCol::MimeType));
         if (obj->isPureItem()) {
-            item->setLocation(stripLocationPrefix(getCol(row, SearchCol::Location)));
+            item->setLocation(stripLocationPrefix(getCol(row, SearchCol::Location)).first);
         } else { // URLs
             item->setLocation(getCol(row, SearchCol::Location));
         }
@@ -1669,7 +1664,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
-                auto location = stripLocationPrefix(row->col(2));
+                auto [location, prefix] = stripLocationPrefix(row->col(2));
                 auto values = std::vector {
                     ColumnUpdate(identifier("obj_id"), SQL_NULL),
                     ColumnUpdate(identifier("location"), quote(location.string())),
@@ -2114,8 +2109,8 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     if (objectID == INVALID_OBJECT_ID) {
         location = getCol(row, AutoscanColumn::Location);
     } else {
-        char prefix;
-        location = stripLocationPrefix(getCol(row, AutoscanColumn::ObjLocation), &prefix);
+        auto [l, prefix] = stripLocationPrefix(getCol(row, AutoscanColumn::ObjLocation));
+        location = l;
         if (prefix != LOC_DIR_PREFIX)
             return nullptr;
     }
@@ -2148,11 +2143,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
         throw_std_runtime_error("addAutoscanDirectory called with adir==nullptr");
     if (adir->getDatabaseID() >= 0)
         throw_std_runtime_error("tried to add autoscan directory with a database id set");
-    int objectID;
-    if (adir->getLocation() == FS_ROOT_DIRECTORY)
-        objectID = CDS_ID_FS_ROOT;
-    else
-        objectID = findObjectIDByPath(adir->getLocation());
+    int objectID = (adir->getLocation() == FS_ROOT_DIRECTORY) ? CDS_ID_FS_ROOT : findObjectIDByPath(adir->getLocation());
     if (!adir->persistent() && objectID < 0)
         throw_std_runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
 
