@@ -108,8 +108,7 @@ std::map<std::string, std::string> Headers::readHeaders(UpnpFileInfo* fileInfo)
     std::map<std::string, std::string> ret;
 
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    UpnpListIter pos;
-    for (pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
+    for (auto pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
         auto extra = reinterpret_cast<UpnpExtraHeaders*>(pos);
         std::string header = UpnpExtraHeaders_get_resp(extra);
         ret.insert(parseHeader(header));

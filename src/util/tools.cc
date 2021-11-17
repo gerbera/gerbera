@@ -282,15 +282,12 @@ std::string urlUnescape(std::string_view str)
                 break; // avoid buffer overrun
             char chi = data[i++];
             char clo = data[i++];
-            int hi, lo;
 
-            const char* pos;
-
-            pos = std::strchr(hexCharS2, chi);
-            hi = pos ? pos - hexCharS2 : 0;
+            auto pos = std::strchr(hexCharS2, chi);
+            int hi = pos ? pos - hexCharS2 : 0;
 
             pos = std::strchr(hexCharS2, clo);
-            lo = pos ? pos - hexCharS2 : 0;
+            int lo = pos ? pos - hexCharS2 : 0;
 
             int ascii = (hi << 4) | lo;
             buf << char(ascii);

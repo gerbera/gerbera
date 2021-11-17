@@ -113,8 +113,6 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     auto inputBytes = str.length();
     auto outputBytes = length;
 
-    int ret;
-
     // reset to initial state
     if (dirty) {
         iconv(cd, nullptr, nullptr, nullptr, nullptr);
@@ -124,10 +122,10 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
     //        input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
-    ret = iconv(cd, input_ptr, &input_bytes,
+    int ret = iconv(cd, input_ptr, &input_bytes,
         output_ptr, &output_bytes);
 #else
-    ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
+    int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
         outputPtr, &outputBytes);
 #endif
 
