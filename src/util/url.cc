@@ -40,7 +40,6 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     CURL* curlHandle, bool onlyHeader,
     bool verbose, bool redirect)
 {
-    CURLcode res;
     bool cleanup = false;
     char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
 
@@ -89,7 +88,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
         curl_easy_setopt(curlHandle, CURLOPT_MAXREDIRS, -1);
     }
 
-    res = curl_easy_perform(curlHandle);
+    auto res = curl_easy_perform(curlHandle);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
         if (cleanup)
@@ -115,7 +114,6 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle
 {
     long retcode;
     bool cleanup = false;
-    CURLcode res;
     curl_off_t cl;
     char* ct;
     char* cUrl;
@@ -135,7 +133,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle
         throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", url.c_str(), retcode);
     }
 
-    res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
+    auto res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
         if (cleanup)

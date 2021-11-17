@@ -83,10 +83,7 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
 
     for (;;) {
-        int itemlen;
-        off_t skip;
         int marker = 0;
-        int ll, lh, got;
         std::byte data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
@@ -103,15 +100,14 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
             throw_std_runtime_error("get_jpeg_resolution: too many padding bytes");
 
         // Read the length of the section.
-        lh = iohFgetc(ioh);
-        ll = iohFgetc(ioh);
+        int lh = iohFgetc(ioh);
+        int ll = iohFgetc(ioh);
 
-        itemlen = (lh << 8) | ll;
-
+        int itemlen = (lh << 8) | ll;
         if (itemlen < 2)
             throw_std_runtime_error("get_jpeg_resolution: invalid marker");
 
-        skip = 0;
+        off_t skip = 0;
         if (itemlen > ITEM_BUF_SIZE) {
             skip = itemlen - ITEM_BUF_SIZE;
             itemlen = ITEM_BUF_SIZE;
@@ -121,7 +117,7 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         data[0] = std::byte(lh);
         data[1] = std::byte(ll);
 
-        got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
+        int got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
         if (got != itemlen - 2)
             throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
 

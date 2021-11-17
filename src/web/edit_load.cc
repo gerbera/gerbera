@@ -52,11 +52,10 @@ void Web::EditLoad::process()
     checkRequest();
 
     std::string objID = param("object_id");
-    int objectID;
     if (objID.empty())
         throw_std_runtime_error("invalid object id");
 
-    objectID = std::stoi(objID);
+    auto objectID = std::stoi(objID);
     auto obj = database->loadObject(objectID);
 
     // set handling of json properties

@@ -122,8 +122,6 @@ struct inotify_event* Inotify::nextEvent()
     static int firstByte = 0;
     static ssize_t bytes;
 
-    int fdMax;
-
     // first_byte is index into event buffer
     if (firstByte != 0
         && firstByte <= int(bytes - sizeof(struct inotify_event))) {
@@ -163,7 +161,7 @@ struct inotify_event* Inotify::nextEvent()
 
     FD_SET(inotify_fd, &readFds);
 
-    fdMax = inotify_fd;
+    auto fdMax = inotify_fd;
 
     FD_SET(stop_fd_read, &readFds);
 
