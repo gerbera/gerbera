@@ -106,9 +106,9 @@ static void signalHandler(int signum)
 
     if (signum == SIGCHLD) {
         log_debug("Got a SIGCHLD!");
-        int saved_errno = errno;
+        int savedErrno = errno;
         while (waitpid(pid_t(-1), nullptr, WNOHANG) > 0) { }
-        errno = saved_errno;
+        errno = savedErrno;
         return;
     }
 
