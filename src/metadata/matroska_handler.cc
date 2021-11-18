@@ -199,6 +199,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
     auto estream = LIBEBML_NAMESPACE::EbmlStream(ebmlFile);
     LIBEBML_NAMESPACE::EbmlElement* ebmlHead = estream.FindNextID(EBML_INFO(LIBEBML_NAMESPACE::EbmlHead), ~0);
     ebmlHead->SkipData(estream, EBML_CONTEXT(ebmlHead));
+    delete ebmlHead;
     ebmlHead = estream.FindNextID(EBML_INFO(LIBMATROSKA_NAMESPACE::KaxSegment), ~0);
 
     EbmlElement* dummyEl;
@@ -236,12 +237,15 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
 
                 if (EbmlId(*level1) == seekIdValue) {
                     parseLevel1Element(item, ebmlFile, attStream, level1, pIoHandler);
-                    if (activeFlag == 0) // terminate search
-                        break;
                 }
+                delete level1;
             }
+            if (activeFlag == 0) // terminate search
+                break;
         }
     }
+
+    delete ebmlHead;
 }
 
 void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info)
