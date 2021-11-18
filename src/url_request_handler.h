@@ -36,9 +36,9 @@
 #include "request_handler.h"
 
 class URLRequestHandler : public RequestHandler {
-public:
-    explicit URLRequestHandler(std::shared_ptr<ContentManager> content);
+    using RequestHandler::RequestHandler;
 
+public:
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 };

@@ -44,11 +44,6 @@
 #include "content/onlineservice/online_service_helper.h"
 #endif
 
-URLRequestHandler::URLRequestHandler(std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(content))
-{
-}
-
 void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
