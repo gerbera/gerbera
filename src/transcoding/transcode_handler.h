@@ -37,6 +37,7 @@
 #include <upnp.h>
 
 #include "common.h"
+#include "util/grb_fs.h"
 
 // forward declaration
 class CdsObject;
@@ -51,7 +52,7 @@ public:
     virtual ~TranscodeHandler() = default;
 
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-        std::string location,
+        fs::path location,
         const std::shared_ptr<CdsObject>& obj,
         const std::string& range)
         = 0;

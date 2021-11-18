@@ -37,6 +37,7 @@
 
 #include "common.h"
 #include "context.h"
+#include "util/grb_fs.h"
 
 // forward declaration
 class CdsObject;
@@ -78,7 +79,7 @@ public:
 
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
-    void load(const std::string& scriptPath);
+    void load(const fs::path& scriptPath);
 
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
@@ -116,7 +117,7 @@ protected:
 private:
     std::string entrySeparator;
     std::string name;
-    void _load(const std::string& scriptPath);
+    void _load(const fs::path& scriptPath);
     void _execute();
     std::unique_ptr<StringConverter> _p2i;
     std::unique_ptr<StringConverter> _j2i;

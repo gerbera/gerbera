@@ -37,12 +37,12 @@
 #include "transcoding.h"
 
 std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-    std::string location,
+    fs::path location,
     const std::shared_ptr<CdsObject>& obj,
     const std::string& range)
 {
     if (!profile)
-        throw_std_runtime_error("Transcoding of file {} requested but no profile given ", location);
+        throw_std_runtime_error("Transcoding of file {} requested but no profile given ", location.c_str());
 
     if (profile->getType() == TR_External) {
         auto trExt = std::make_unique<TranscodeExternalHandler>(std::move(content));

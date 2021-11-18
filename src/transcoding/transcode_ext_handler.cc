@@ -51,11 +51,11 @@
 #endif
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-    std::string location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
+    fs::path location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
 {
-    log_debug("Start transcoding file: {}", location);
+    log_debug("Start transcoding file: {}", location.c_str());
     if (!profile)
-        throw_std_runtime_error("Transcoding of file {} requested but no profile given", location);
+        throw_std_runtime_error("Transcoding of file {} requested but no profile given", location.c_str());
 
 #if 0
     std::string mimeType = profile->getTargetMimeType();
@@ -147,7 +147,7 @@ void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<Transcoding
 }
 
 #ifdef HAVE_CURL
-void TranscodeExternalHandler::openCurlFifo(std::string& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
+void TranscodeExternalHandler::openCurlFifo(fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
 {
     std::string url = location;
     log_debug("creating reader fifo: {}", location.c_str());

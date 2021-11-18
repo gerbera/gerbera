@@ -424,9 +424,9 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
-    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-    log_debug("Loading initialisation SQL from: {}", sqlFilePath);
-    auto sql = GrbFile(sqlFilePath).readTextFile();
+    auto sqlFilePath = fs::path(config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE));
+    log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+    auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
 
     if (myHash == hashie) {
