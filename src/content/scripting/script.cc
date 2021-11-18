@@ -360,7 +360,7 @@ void Script::defineFunctions(const duk_function_list_entry* functions)
     duk_pop(ctx);
 }
 
-void Script::_load(const std::string& scriptPath)
+void Script::_load(const fs::path& scriptPath)
 {
     std::string scriptText = GrbFile(scriptPath).readTextFile();
 
@@ -377,11 +377,11 @@ void Script::_load(const std::string& scriptPath)
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
         log_error("Failed to load script: {}", duk_safe_to_string(ctx, -1));
-        throw_std_runtime_error("Scripting: failed to compile {}", scriptPath);
+        throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
     }
 }
 
-void Script::load(const std::string& scriptPath)
+void Script::load(const fs::path& scriptPath)
 {
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);

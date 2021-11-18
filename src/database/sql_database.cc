@@ -2043,7 +2043,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
         // the scanmode should match the given parameter
         assert(ad->getScanMode() == scanmode);
 
-        std::string location = ad->getLocation();
+        fs::path location = ad->getLocation();
         if (location.empty())
             throw_std_runtime_error("AutoscanDirectoy with illegal location given to SQLDatabase::updateAutoscanPersistentList");
 
