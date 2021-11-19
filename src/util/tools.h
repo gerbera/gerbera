@@ -39,7 +39,6 @@
 #include <netinet/in.h>
 
 #include "common.h"
-#include "util/grb_fs.h"
 
 // forward declaration
 class Config;
@@ -86,24 +85,6 @@ void reduceString(std::string& str, char ch);
 /// \brief  Used to replace parts of string with other value
 void replaceString(std::string& str, std::string_view from, std::string_view to);
 void replaceAllString(std::string& str, std::string_view from, std::string_view to);
-
-/// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
-bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
-bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept;
-
-/// \brief Returns file size of give file, if it does not exist it will throw an exception
-off_t getFileSize(const fs::directory_entry& dirEnt);
-
-/// \brief Checks if the given binary is executable by our process
-/// \param path absolute path of the binary
-/// \param err if not NULL err will contain the errno result of the check
-/// \return true if the given binary is executable by our process, otherwise false
-bool isExecutable(const fs::path& path, int* err = nullptr);
-
-/// \brief Checks if the given executable exists in $PATH
-/// \param exec filename of the executable that needs to be checked
-/// \return aboslute path to the given executable or nullptr of it was not found
-fs::path findInPath(const fs::path& exec);
 
 /// \brief Render browser friendly uri (handle IPv6)
 std::string renderWebUri(std::string_view ip, int port);
@@ -153,19 +134,6 @@ std::map<std::string, std::string> pathToMap(std::string_view url);
 /// \param array that needs to be converted
 /// \return string containing the CSV list
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
-
-/// \brief Reads the entire contents of a text file and returns it as a string.
-std::string readTextFile(const fs::path& path);
-
-/// \brief writes a string into a text file
-void writeTextFile(const fs::path& path, std::string_view contents);
-
-/// \brief Reads entire contents of a binary file into a buffer.
-/// \return an empty optional if file can't be open and throws if read fails.
-std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path);
-
-/// \brief Writes data into a file. Throws if file can't be open or if write fails.
-void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size);
 
 /// \brief Renders a string that can be used as the protocolInfo resource
 /// attribute: "http-get:*:mimetype:*"
@@ -309,14 +277,6 @@ std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& out = "",
     const std::string& range = "",
     const std::string& title = "");
-
-/// \brief Determines if the particular ogg file contains a video (theora)
-bool isTheora(const fs::path& oggFilename);
-
-/// \brief Gets an absolute filename as a parameter and returns the last parent
-///
-/// "/some/path/to/file.txt" -> "to"
-fs::path getLastPath(const fs::path& path);
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
 /// \return Caclulated position or -1 in case of an error.

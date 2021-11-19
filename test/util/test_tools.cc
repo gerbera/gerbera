@@ -1,3 +1,4 @@
+#include "util/grb_fs.h"
 #include "util/tools.h"
 
 #include <gtest/gtest.h>
