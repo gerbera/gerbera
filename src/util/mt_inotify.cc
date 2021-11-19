@@ -121,13 +121,12 @@ struct inotify_event* Inotify::nextEvent()
     static struct inotify_event* ret;
     static int firstByte = 0;
     static ssize_t bytes;
-
-    int fdMax;
+    static std::byte* eventStart = reinterpret_cast<std::byte*>(&event[0]);
 
     // first_byte is index into event buffer
     if (firstByte != 0
         && firstByte <= int(bytes - sizeof(struct inotify_event))) {
-        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(&event[0]) + firstByte);
+        ret = reinterpret_cast<struct inotify_event*>(eventStart + firstByte);
         firstByte += sizeof(struct inotify_event) + ret->len;
 
         // if the pointer to the next event exactly hits end of bytes read,
@@ -141,11 +140,11 @@ struct inotify_event* Inotify::nextEvent()
             // oh, and they BETTER NOT overlap.
             // Boy I hope this code works.
             // But I think this can never happen due to how inotify is written.
-            assert(long(reinterpret_cast<char*>(&event[0]) + sizeof(struct inotify_event) + event[0].len) <= long(ret));
+            assert(long(eventStart + sizeof(struct inotify_event) + event[0].len) <= long(ret));
 
             // how much of the event do we have?
-            bytes = reinterpret_cast<char*>(&event[0]) + bytes - reinterpret_cast<char*>(ret);
-            std::memcpy(&event[0], ret, bytes);
+            bytes = eventStart + bytes - reinterpret_cast<std::byte*>(ret);
+            std::memcpy(eventStart, ret, bytes);
             return nextEvent();
         }
         return ret;
@@ -163,15 +162,14 @@ struct inotify_event* Inotify::nextEvent()
 
     FD_SET(inotify_fd, &readFds);
 
-    fdMax = inotify_fd;
+    int fdMax = inotify_fd;
 
     FD_SET(stop_fd_read, &readFds);
 
     if (stop_fd_read > fdMax)
         fdMax = stop_fd_read;
 
-    rc = select(fdMax + 1, &readFds,
-        nullptr, nullptr, nullptr);
+    rc = select(fdMax + 1, &readFds, nullptr, nullptr, nullptr);
     if (rc < 0) {
         return nullptr;
     }
@@ -198,14 +196,12 @@ struct inotify_event* Inotify::nextEvent()
             return nullptr;
         }
 
-        thisBytes = read(inotify_fd, &event[0] + bytes,
-            sizeof(struct inotify_event) * MAX_EVENTS - bytes);
+        thisBytes = read(inotify_fd, eventStart + bytes, sizeof(struct inotify_event) * MAX_EVENTS - bytes);
         if (thisBytes < 0) {
             return nullptr;
         }
         if (thisBytes == 0) {
-            log_error("Inotify reported end-of-file.  Possibly too many "
-                      "events occurred at once.\n");
+            log_error("Inotify reported end-of-file.\n  Possibly too many events occurred at once.");
             return nullptr;
         }
         bytes += thisBytes;
