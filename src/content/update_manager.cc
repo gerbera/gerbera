@@ -31,7 +31,6 @@
 
 #include "update_manager.h" // API
 
-#include <chrono>
 #include <csignal>
 
 #include "database/database.h"
