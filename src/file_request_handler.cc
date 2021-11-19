@@ -90,7 +90,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // determining which resource to serve
     auto resIdIt = params.find(URL_RESOURCE_ID);
-    std::size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(resIdIt->second) : std::numeric_limits<std::size_t>::max();
+    int resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(resIdIt->second) : -1;
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
