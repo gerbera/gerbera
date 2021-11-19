@@ -125,10 +125,10 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
     if (!item)
         return nullptr;
 
-    std::unique_ptr<MemIOHandler> ioHandler;
+    MemIOHandler ioHandler;
     parseMKV(item, &ioHandler);
 
-    return ioHandler;
+    return std::make_unique<MemIOHandler>(std::move(ioHandler));
 }
 
 #define GRB_MATROSKA_TITLE 0x01
@@ -138,7 +138,7 @@ std::unique_ptr<IOHandler> MatroskaHandler::serveContent(const std::shared_ptr<C
 
 #define GRB_MATROSKA_INFO (GRB_MATROSKA_TITLE | GRB_MATROSKA_DATE | GRB_MATROSKA_DURATION)
 
-void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler)
+void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler* pIoHandler)
 {
     auto ebmlFile = FileIOCallback(item->getLocation().c_str());
     auto ebmlStream = EbmlStream(ebmlFile);
@@ -168,7 +168,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
     ebmlFile.close();
 }
 
-void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler)
+void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlElement* elL1, MemIOHandler* pIoHandler)
 {
     // Looking at just at EbmlId is not reliable since it can be a dummy element.
     if (!elL1->IsMaster())
@@ -193,7 +193,7 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, I
 }
 
 // This code is inspired by https://github.com/TypesettingTools/DirectASS/blob/master/DSlibass/MatroskaParser.cpp#L58+
-void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler)
+void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info, MemIOHandler* pIoHandler)
 {
     ebmlFile.setFilePointer(0);
     auto estream = LIBEBML_NAMESPACE::EbmlStream(ebmlFile);
@@ -299,7 +299,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
     }
 }
 
-void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler)
+void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* attachments, MemIOHandler* pIoHandler)
 {
     EbmlElement* dummyEl;
     int iUpperLevel = 0;
@@ -318,7 +318,7 @@ void MatroskaHandler::parseAttachments(const std::shared_ptr<CdsItem>& item, LIB
 
             if (pIoHandler) {
                 // serveContent
-                *pIoHandler = std::make_unique<MemIOHandler>(fileData.GetBuffer(), fileData.GetSize());
+                *pIoHandler = MemIOHandler(fileData.GetBuffer(), fileData.GetSize());
                 activeFlag &= ~GRB_MATROSKA_ARTWORK;
             } else {
                 // fillMetadata

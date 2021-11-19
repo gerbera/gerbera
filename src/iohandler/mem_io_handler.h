@@ -50,10 +50,11 @@ public:
     /// \param buffer all operations will be done on this buffer.
     MemIOHandler(const void* buffer, int length);
     explicit MemIOHandler(const std::string& str);
+    MemIOHandler() = default;
     ~MemIOHandler() override;
 
-    MemIOHandler(const MemIOHandler&) = delete;
-    MemIOHandler& operator=(const MemIOHandler&) = delete;
+    MemIOHandler(MemIOHandler&&) = default;
+    MemIOHandler& operator=(MemIOHandler&&) = default;
 
     ///
     void open(enum UpnpOpenFileMode mode) override;
