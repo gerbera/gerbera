@@ -31,8 +31,6 @@
 
 #include "pages.h" // API
 
-#include <chrono>
-
 #include "config/config_manager.h"
 #include "session_manager.h"
 #include "util/tools.h"
