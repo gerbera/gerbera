@@ -152,7 +152,7 @@ void MySQLDatabase::init()
         log_info("Database doesn't seem to exist. Creating database...");
         auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         log_debug("Loading initialisation SQL from: {}", sqlFilePath);
-        auto sql = readTextFile(sqlFilePath);
+        auto sql = GrbFile(sqlFilePath).readTextFile();
         auto&& myHash = stringHash(sql);
 
         if (myHash == hashies[0]) {

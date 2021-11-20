@@ -34,7 +34,7 @@
 #include "cds_objects.h"
 
 FileIOHandler::FileIOHandler(fs::path filename)
-    : filename(std::move(filename))
+    : file(std::move(filename))
 {
 }
 
@@ -46,17 +46,9 @@ FileIOHandler::~FileIOHandler()
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode == UPNP_READ) {
-#ifdef __linux__
-        f = std::fopen(filename.c_str(), "rbe");
-#else
-        f = std::fopen(filename.c_str(), "rb");
-#endif
+        f = file.open("rb");
     } else {
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
-    }
-
-    if (!f) {
-        throw_std_runtime_error("Failed to open: {}", filename.c_str());
     }
 }
 
@@ -93,8 +85,4 @@ off_t FileIOHandler::tell()
 
 void FileIOHandler::close()
 {
-    if (f && std::fclose(f) != 0) {
-        log_error("fclose failed");
-    }
-    f = nullptr;
 }

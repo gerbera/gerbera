@@ -693,41 +693,6 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::st
     return {};
 }
 
-#ifndef HAVE_FFMPEG
-std::string getAVIFourCC(std::string_view aviFilename)
-{
-#define FCC_OFFSET 0xbc
-
-#ifdef __linux__
-    auto f = std::fopen(aviFilename.data(), "rbe");
-#else
-    auto f = std::fopen(aviFilename.data(), "rb");
-#endif
-    if (!f)
-        throw_std_runtime_error("Could not open file {}: {}", aviFilename, std::strerror(errno));
-
-    char buffer[FCC_OFFSET + 6];
-
-    std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
-    std::fclose(f);
-    if (rb != FCC_OFFSET + 4) {
-        throw_std_runtime_error("Could not read header of {}: {}", aviFilename, std::strerror(errno));
-    }
-
-    buffer[FCC_OFFSET + 5] = '\0';
-
-    if (std::strncmp(buffer, "RIFF", 4) != 0) {
-        return {};
-    }
-
-    if (std::strncmp(buffer + 8, "AVI ", 4) != 0) {
-        return {};
-    }
-
-    return { buffer + FCC_OFFSET, 4 };
-}
-#endif
-
 std::string getHostName(const struct sockaddr* addr)
 {
     char hoststr[NI_MAXHOST];

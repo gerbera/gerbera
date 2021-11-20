@@ -103,47 +103,63 @@ fs::path findInPath(const fs::path& exec)
     return {};
 }
 
-std::string readTextFile(const fs::path& path)
+GrbFile::GrbFile(const fs::path& path)
+    : path(path)
 {
-#ifdef __linux__
-    auto f = std::fopen(path.c_str(), "rte");
-#else
-    auto f = std::fopen(path.c_str(), "rt");
-#endif
-    if (!f) {
-        throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
+}
+
+GrbFile::~GrbFile()
+{
+    if (fd && std::fclose(fd) != 0) {
+        log_error("fclose {} failed", path.c_str());
     }
+    fd = nullptr;
+}
+
+#ifdef __linux__
+#define GrbFileExtra "e"
+#else
+#define GrbFileExtra ""
+#endif
+
+std::FILE* GrbFile::open(const char* mode, bool fail)
+{
+    if (fd && std::fclose(fd) != 0) {
+        log_error("fclose {} failed", path.c_str());
+    }
+    fd = std::fopen(path.c_str(), fmt::format("{}{}", mode, GrbFileExtra).c_str());
+    if (!fd) {
+        if (fail)
+            throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
+        log_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
+    }
+    return fd;
+}
+
+std::string GrbFile::readTextFile()
+{
+    open("rt");
     std::ostringstream buf;
     char buffer[1024];
     std::size_t bytesRead;
-    while ((bytesRead = std::fread(buffer, 1, std::size(buffer), f)) > 0) {
+    while ((bytesRead = std::fread(buffer, 1, std::size(buffer), fd)) > 0) {
         buf << std::string(buffer, bytesRead);
     }
-    std::fclose(f);
     return buf.str();
 }
 
-void writeTextFile(const fs::path& path, std::string_view contents)
+void GrbFile::writeTextFile(std::string_view contents)
 {
-#ifdef __linux__
-    auto f = std::fopen(path.c_str(), "wte");
-#else
-    auto f = std::fopen(path.c_str(), "wt");
-#endif
-    if (!f) {
-        throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
-    }
+    open("wt");
 
-    std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), f);
+    std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), fd);
     if (bytesWritten < contents.length()) {
-        std::fclose(f);
 
         throw_std_runtime_error("Error writing to {}: {}", path.c_str(), std::strerror(errno));
     }
-    std::fclose(f);
 }
 
-std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
+std::optional<std::vector<std::byte>> GrbFile::readBinaryFile()
 {
     static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
 
@@ -173,7 +189,7 @@ std::optional<std::vector<std::byte>> readBinaryFile(const fs::path& path)
     return result;
 }
 
-void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t size)
+void GrbFile::writeBinaryFile(const std::byte* data, std::size_t size)
 {
     static_assert(sizeof(std::byte) == sizeof(std::ifstream::char_type));
 
@@ -190,42 +206,29 @@ void writeBinaryFile(const fs::path& path, const std::byte* data, std::size_t si
 bool isTheora(const fs::path& oggFilename)
 {
     char buffer[7];
-
-#ifdef __linux__
-    auto f = std::fopen(oggFilename.c_str(), "rbe");
-#else
-    auto f = std::fopen(oggFilename.c_str(), "rb");
-#endif
-    if (!f) {
-        throw_std_runtime_error("Error opening {}: {}", oggFilename.c_str(), std::strerror(errno));
-    }
+    GrbFile file(oggFilename);
+    auto f = file.open("rb");
 
     if (std::fread(buffer, 1, 4, f) != 4) {
-        std::fclose(f);
         throw_std_runtime_error("Error reading {}", oggFilename.c_str());
     }
 
     if (std::memcmp(buffer, "OggS", 4) != 0) {
-        std::fclose(f);
         return false;
     }
 
     if (std::fseek(f, 28, SEEK_SET) != 0) {
-        std::fclose(f);
         throw_std_runtime_error("Incomplete file {}", oggFilename.c_str());
     }
 
     if (std::fread(buffer, 1, 7, f) != 7) {
-        std::fclose(f);
         throw_std_runtime_error("Error reading {}", oggFilename.c_str());
     }
 
     if (std::memcmp(buffer, "\x80theora", 7) != 0) {
-        std::fclose(f);
         return false;
     }
 
-    std::fclose(f);
     return true;
 }
 
@@ -239,3 +242,32 @@ fs::path getLastPath(const fs::path& path)
 
     return {};
 }
+
+#ifndef HAVE_FFMPEG
+std::string getAVIFourCC(const fs::path& aviFilename)
+{
+#define FCC_OFFSET 0xbc
+    GrbFile file(aviFilename);
+    auto f = file.open("rb");
+
+    char buffer[FCC_OFFSET + 6];
+
+    std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
+    if (rb != FCC_OFFSET + 4) {
+        throw_std_runtime_error("Could not read header of {}: {}", aviFilename, std::strerror(errno));
+    }
+
+    buffer[FCC_OFFSET + 5] = '\0';
+
+    if (std::strncmp(buffer, "RIFF", 4) != 0) {
+        return {};
+    }
+
+    if (std::strncmp(buffer + 8, "AVI ", 4) != 0) {
+        return {};
+    }
+
+    return { buffer + FCC_OFFSET, 4 };
+}
+#endif
+

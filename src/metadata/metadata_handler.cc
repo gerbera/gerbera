@@ -117,7 +117,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     }
 #else
     if (contentType == CONTENT_TYPE_AVI) {
-        std::string fourcc = getAVIFourCC(dirEnt.path().string());
+        std::string fourcc = getAVIFourCC(dirEnt.path());
         if (!fourcc.empty()) {
             item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
                 fourcc);

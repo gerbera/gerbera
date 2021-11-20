@@ -154,23 +154,13 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     if (!obj->isPureItem()) {
         throw_std_runtime_error("only allowed for pure items");
     }
+    GrbFile file(obj->getLocation());
+    currentHandle = file.open("r");
 
     currentTask = std::move(task);
     currentObjectID = obj->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';
-
-#ifdef __linux__
-    currentHandle = std::fopen(obj->getLocation().c_str(), "re");
-#else
-    currentHandle = std::fopen(obj->getLocation().c_str(), "r");
-#endif
-    if (!currentHandle) {
-        currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nullptr;
-        delete[] currentLine;
-        throw_std_runtime_error("Failed to open file: {}", obj->getLocation().c_str());
-    }
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
@@ -198,7 +188,6 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
 
-        std::fclose(currentHandle);
         currentHandle = nullptr;
 
         delete[] currentLine;
@@ -210,7 +199,6 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         throw e;
     }
 
-    std::fclose(currentHandle);
     currentHandle = nullptr;
 
     delete[] currentLine;

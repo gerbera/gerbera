@@ -19,7 +19,7 @@ public:
         ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
         fs::path ss = fs::path(SCRIPTS_DIR) / "js" / "common.js";
-        std::string script = readTextFile(ss.c_str());
+        std::string script = GrbFile(ss).readTextFile();
         duk_push_string(ctx, ss.c_str());
         duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
         duk_call(ctx, 0);

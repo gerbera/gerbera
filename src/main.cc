@@ -356,7 +356,8 @@ int main(int argc, char** argv, char** envp)
             }
 
             // x will make it fail if file exists
-            auto pidf = std::fopen(pidfile->c_str(), "wx");
+            GrbFile pidFile(pidfile.value());
+            auto pidf = pidFile.open("wx", false);
             if (!pidf) {
                 log_error("fopen {} failed: {}", pidfile->c_str(), std::strerror(errno));
                 log_error("Pidfile already exists or is not writable. It may be that gerbera is already");
@@ -380,7 +381,6 @@ int main(int argc, char** argv, char** envp)
                 std::exit(EXIT_FAILURE);
             }
             log_debug("Wrote pidfile {}.", pidfile->c_str());
-            std::fclose(pidf);
         }
 
         std::optional<fs::path> configFile;

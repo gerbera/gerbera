@@ -286,14 +286,6 @@ std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const st
 std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
 std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view mimeType);
 
-#ifndef HAVE_FFMPEG
-/// \brief Fallback code to retrieve the used fourcc from an AVI file.
-///
-/// This code is based on offsets, so we will use it only if ffmpeg is not
-/// available.
-std::string getAVIFourCC(std::string_view aviFilename);
-#endif
-
 /// \brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
 #define SOCK_ADDR_IN_PTR(sa) reinterpret_cast<const struct sockaddr_in*>(sa)

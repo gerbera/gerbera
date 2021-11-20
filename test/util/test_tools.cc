@@ -16,8 +16,8 @@ TEST(ToolsTest, readWriteBinaryFile)
     std::string source = "This is a test, \0, binary";
     auto testFile = fs::temp_directory_path() / "gerbera-binary-test";
     EXPECT_FALSE(fs::exists(testFile)) << "Can't test existing file";
-    writeBinaryFile(testFile, reinterpret_cast<const std::byte*>(source.data()), source.size());
-    auto result = readBinaryFile(testFile);
+    GrbFile(testFile).writeBinaryFile(reinterpret_cast<const std::byte*>(source.data()), source.size());
+    auto result = GrbFile(testFile).readBinaryFile();
     EXPECT_TRUE(result.has_value());
 
     std::vector<std::byte> expected(source.size());
@@ -32,7 +32,7 @@ TEST(ToolsTest, readBinaryReturnsEmptyIfFileMissing)
 {
     fs::path testFile("/some/unexisting/file");
     EXPECT_FALSE(fs::exists(testFile));
-    auto res = readBinaryFile(testFile);
+    auto res = GrbFile(testFile).readBinaryFile();
     EXPECT_FALSE(res.has_value());
 }
 
@@ -43,7 +43,7 @@ TEST(ToolsTest, writeFileThrowsIfCantOpenFile)
 
     std::vector<std::byte> data { std::byte { 1 } };
 
-    EXPECT_THROW(writeBinaryFile(testFile, data.data(), data.size()), std::runtime_error);
+    EXPECT_THROW(GrbFile(testFile).writeBinaryFile(data.data(), data.size()), std::runtime_error);
 }
 
 TEST(ToolsTest, renderWebUriV4)

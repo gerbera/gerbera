@@ -414,7 +414,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
 
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
     log_debug("Loading initialisation SQL from: {}", sqlFilePath);
-    auto sql = readTextFile(sqlFilePath);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 
     if (myHash == hashie) {
