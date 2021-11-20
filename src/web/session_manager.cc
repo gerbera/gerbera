@@ -213,10 +213,10 @@ void SessionManager::containerChangedUI(const std::vector<int>& objectIDs)
 void SessionManager::checkTimer()
 {
     if (!sessions.empty() && !timerAdded) {
-        timer->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL);
+        timer->addTimerSubscriber(this, SESSION_TIMEOUT_CHECK_INTERVAL, nullptr);
         timerAdded = true;
     } else if (sessions.empty() && timerAdded) {
-        timer->removeTimerSubscriber(this);
+        timer->removeTimerSubscriber(this, nullptr);
         timerAdded = false;
     }
 }
