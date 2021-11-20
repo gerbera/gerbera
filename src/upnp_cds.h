@@ -55,7 +55,7 @@ private:
     int systemUpdateID {};
 
     /// \brief All strings in the XML will be cut at this length.
-    int stringLimit;
+    int stringLimit {};
 
     /// \brief UPnP standard defined action: Browse()
     /// \param request Incoming ActionRequest.
@@ -112,7 +112,7 @@ private:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    UpnpDevice_Handle deviceHandle;
+    UpnpDevice_Handle deviceHandle {};
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
     std::vector<std::string> titleSegments;
