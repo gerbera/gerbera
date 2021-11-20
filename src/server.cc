@@ -180,14 +180,14 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder.get(), rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder, rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder.get(), rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder, rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder.get(), rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder, rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
@@ -499,7 +499,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
-        return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder.get());
+        return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder);
     }
 
 #if defined(HAVE_CURL)

@@ -40,12 +40,12 @@
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
-    UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
     : stringLimit(stringLimit)
     , config(context->getConfig())
     , database(context->getDatabase())
     , deviceHandle(deviceHandle)
-    , xmlBuilder(xmlBuilder)
+    , xmlBuilder(std::move(xmlBuilder))
 {
     titleSegments = this->config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
     resultSeparator = this->config->getOption(CFG_UPNP_SEARCH_SEPARATOR);

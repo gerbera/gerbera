@@ -71,7 +71,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     UpnpDevice_Handle deviceHandle;
 
 public:
@@ -79,7 +79,7 @@ public:
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
