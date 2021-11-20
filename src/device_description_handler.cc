@@ -27,7 +27,7 @@
 
 #include "iohandler/mem_io_handler.h"
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, UpnpXMLBuilder* xmlBuilder)
+DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(std::move(content))
     , xmlBuilder(xmlBuilder)
 {

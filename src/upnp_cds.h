@@ -113,7 +113,7 @@ private:
     std::shared_ptr<Database> database;
 
     UpnpDevice_Handle deviceHandle;
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
     std::vector<std::string> titleSegments;
     std::string resultSeparator;
@@ -123,7 +123,7 @@ public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
     explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit);
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.

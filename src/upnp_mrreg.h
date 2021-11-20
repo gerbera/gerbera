@@ -77,14 +77,14 @@ protected:
 
     std::shared_ptr<Config> config;
 
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
     MRRegistrarService(const std::shared_ptr<Context>& context,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
