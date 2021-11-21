@@ -64,7 +64,6 @@ bool isTheora(const fs::path& oggFilename);
 std::string getAVIFourCC(const fs::path& aviFilename);
 #endif
 
-
 /// \brief Gets an absolute filename as a parameter and returns the last parent
 ///
 /// "/some/path/to/file.txt" -> "to"

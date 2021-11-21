@@ -254,7 +254,7 @@ std::string getAVIFourCC(const fs::path& aviFilename)
 
     std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     if (rb != FCC_OFFSET + 4) {
-        throw_std_runtime_error("Could not read header of {}: {}", aviFilename, std::strerror(errno));
+        throw_std_runtime_error("Could not read header of {}: {}", aviFilename.c_str(), std::strerror(errno));
     }
 
     buffer[FCC_OFFSET + 5] = '\0';
@@ -270,4 +270,3 @@ std::string getAVIFourCC(const fs::path& aviFilename)
     return { buffer + FCC_OFFSET, 4 };
 }
 #endif
-
