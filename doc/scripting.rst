@@ -268,13 +268,13 @@ object.
 
     **RO**
 
-    Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example - this 
-    can be a musical work, its performing artists and their instruments, the name of a personal video collection 
-    and the episode-ID of a TV show, a camera model that was used to make a photo, or the information if the photo 
+    Array holding the so called auxiliary data. Aux data is metadata that is not part of UPnP, for example - this
+    can be a musical work, its performing artists and their instruments, the name of a personal video collection
+    and the episode-ID of a TV show, a camera model that was used to make a photo, or the information if the photo
     was taken with or without flash.
 
 
-    Currently aux data can be gathered from **taglib, ffmpeg and libexif** (see the 
+    Currently aux data can be gathered from **taglib, ffmpeg and libexif** (see the
     `Import section <https://docs.gerbera.io/en/stable/config-import.html?#library-options>`_ in the main documentation for
     more details). So, this array will hold the tags that you specified in your config.xml, allowing
     you to create your virtual structure according to your liking.
@@ -283,7 +283,7 @@ object.
 
     **RO**
 
-    Array holding the resources. Resources represent the files attached to the media item. Got the the web UI to see the names of available 
+    Array holding the resources. Resources represent the files attached to the media item. Got the the web UI to see the names of available
     resources. The names of the first resource (number 0) are stored as they are. Further resources are prepended with `<number>-`.
 
     Currently resources can be gathered during import process (see the
