@@ -20,7 +20,7 @@ private:
     std::FILE* fd {};
 
 public:
-    GrbFile(fs::path path);
+    explicit GrbFile(fs::path path);
     ~GrbFile();
 
     std::FILE* open(const char* mode, bool fail = true);
@@ -40,7 +40,7 @@ bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
 bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept;
 
 /// \brief Returns file size of give file, if it does not exist it will throw an exception
-off_t getFileSize(const fs::directory_entry& dirEnt);
+std::uintmax_t getFileSize(const fs::directory_entry& dirEnt);
 
 /// \brief Checks if the given binary is executable by our process
 /// \param path absolute path of the binary

@@ -63,7 +63,7 @@ bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexc
 #endif
 }
 
-off_t getFileSize(const fs::directory_entry& dirEnt)
+std::uintmax_t getFileSize(const fs::directory_entry& dirEnt)
 {
     // unfortunately fs::file_size() is broken with old libstdc++ on 32bit systems (see #737)
 #if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
@@ -220,7 +220,7 @@ bool isTheora(const fs::path& oggFilename)
         return false;
     }
 
-    if (std::fseek(f, 28, SEEK_SET) != 0) {
+    if (fseeko(f, 28, SEEK_SET) != 0) {
         throw_std_runtime_error("Incomplete file {}", oggFilename.c_str());
     }
 
