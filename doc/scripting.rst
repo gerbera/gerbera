@@ -1181,3 +1181,21 @@ Enable transcoding and set the correct path to the transcoding script.
   </transcoding>
 
 Have fun!
+
+
+Best practices for testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Writing a custom import script can be tricky.
+Here are some hints:
+
+- Gerbera needs to be restarted to pick up changes to the import script.
+- During startup, Gerbera scans all directories defined in the `autoscan`
+  configuration - this takes time.
+  Limit autoscan to a directory containing only few files.
+- When autoscan is configured, the import script can be triggered by running
+  ``touch /path/to/file.ogg``.
+  The "Add" button in the web interface does not trigger the import script
+  if Gerbera already knows about the file.
+- Do not modify the provided ``common.js`` file.
+  Override its functions in a separate file and let Gerbera load it by
+  specifying it in ``custom-script`` in ``config.xml``.
