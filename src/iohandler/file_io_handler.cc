@@ -45,11 +45,10 @@ FileIOHandler::~FileIOHandler()
 
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if (mode == UPNP_READ) {
-        f = file.open("rb");
-    } else {
+    if (mode != UPNP_READ)
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
-    }
+
+    f = file.open("rb");
 }
 
 std::size_t FileIOHandler::read(char* buf, std::size_t length)

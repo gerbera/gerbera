@@ -65,12 +65,12 @@ void Sqlite3Database::init()
     dbInitDone = false;
     SQLDatabase::init();
 
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-    log_debug("SQLite path: {}", dbFilePath);
+    fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    log_debug("SQLite path: {}", dbFilePath.c_str());
 
     // check for db-file
     if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
-        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath, std::strerror(errno)));
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
     threadRunner = std::make_unique<StdThreadRunner>(
@@ -93,11 +93,11 @@ void Sqlite3Database::init()
         prepare();
     } catch (const std::runtime_error& e) {
         shutdown();
-        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath);
+        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath.c_str());
     }
 
     std::string dbVersion;
-    std::string dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath);
+    fs::path dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str());
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
@@ -510,13 +510,13 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: backup");
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     if (!restore) {
         try {
             fs::copy(
                 dbFilePath,
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
                 fs::copy_options::overwrite_existing);
             log_debug("sqlite3 backup successful");
             decontamination = true;
@@ -528,7 +528,7 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
         sqlite3_close(db);
         try {
             fs::copy(
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath),
+                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
                 dbFilePath,
                 fs::copy_options::overwrite_existing);
         } catch (const std::runtime_error& e) {

@@ -194,7 +194,9 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
 
     EbmlElement* dummyEl;
     int iUpperLevel = 0;
-    auto metaSeek = static_cast<LIBMATROSKA_NAMESPACE::KaxSeekHead*>(info);
+    auto metaSeek = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeekHead*>(info);
+    if (!metaSeek)
+        return;
 
     // master elements
     info->Read(ebmlStream, EBML_CONTEXT(metaSeek), iUpperLevel, dummyEl, true);
@@ -203,14 +205,17 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
     }
     for (auto&& seekEl : *metaSeek) {
         if (EbmlId(*seekEl) == LIBMATROSKA_NAMESPACE::KaxSeek::ClassInfos.GlobalId) {
-            auto seekPoint = static_cast<LIBMATROSKA_NAMESPACE::KaxSeek*>(seekEl);
+            auto seekPoint = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeek*>(seekEl);
+            if (!seekPoint)
+                break;
+
             LIBMATROSKA_NAMESPACE::KaxSeekID* seekId = nullptr;
             LIBMATROSKA_NAMESPACE::KaxSeekPosition* seekPos = nullptr;
             for (auto&& seekPtEl : *seekPoint) {
                 if (EbmlId(*seekPtEl) == LIBMATROSKA_NAMESPACE::KaxSeekID::ClassInfos.GlobalId) {
-                    seekId = static_cast<LIBMATROSKA_NAMESPACE::KaxSeekID*>(seekPtEl);
+                    seekId = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeekID*>(seekPtEl);
                 } else if (EbmlId(*seekPtEl) == LIBMATROSKA_NAMESPACE::KaxSeekPosition::ClassInfos.GlobalId) {
-                    seekPos = static_cast<LIBMATROSKA_NAMESPACE::KaxSeekPosition*>(seekPtEl);
+                    seekPos = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeekPosition*>(seekPtEl);
                 }
             }
 

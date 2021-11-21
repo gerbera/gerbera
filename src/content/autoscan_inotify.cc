@@ -196,20 +196,17 @@ void AutoscanInotify::threadProc()
                         recheckNonexistingMonitors(wd, wdObj);
                     }
 
-                    if (adir && adir->getRecursive()) {
-                        // dir created
-                        if (mask & IN_CREATE) {
-                            if (adir->getHidden() || name.at(0) != '.') {
-                                log_debug("Detected new dir, adding to inotify: {}", path.c_str());
-                                auto dirEnt = fs::directory_entry(path, ec);
-                                if (!ec) {
-                                    monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
-                                } else {
-                                    log_error("Failed to read {}: {}", path.c_str(), ec.message());
-                                }
+                    if (adir && adir->getRecursive() && (mask & IN_CREATE)) {
+                        if (adir->getHidden() || name.at(0) != '.') {
+                            log_debug("Detected new dir, adding to inotify: {}", path.c_str());
+                            auto dirEnt = fs::directory_entry(path, ec);
+                            if (!ec) {
+                                monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                             } else {
-                                log_debug("Detected new dir, irgnoring because it's hidden: {}", path.c_str());
+                                log_error("Failed to read {}: {}", path.c_str(), ec.message());
                             }
+                        } else {
+                            log_debug("Detected new dir, irgnoring because it's hidden: {}", path.c_str());
                         }
                     }
                 }
@@ -225,11 +222,9 @@ void AutoscanInotify::threadProc()
                             if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
                             auto watch = getStartPoint(wdObj);
-                            if (watch) {
-                                if (adir->persistent()) {
-                                    monitorNonexisting(path, watch->getAutoscanDirectory());
-                                    content->handlePeristentAutoscanRemove(adir);
-                                }
+                            if (watch && adir->persistent()) {
+                                monitorNonexisting(path, watch->getAutoscanDirectory());
+                                content->handlePeristentAutoscanRemove(adir);
                             }
                         }
 
@@ -579,10 +574,8 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
     for (auto&& watch : *wdWatches) {
         if (watch->getType() == WatchType::Autoscan) {
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
-            if (watchAs->getNonexistingPathArray().empty()) {
-                if (watchAs->getAutoscanDirectory()->getLocation() == adir->getLocation()) {
-                    return watchAs;
-                }
+            if (watchAs->getNonexistingPathArray().empty() && watchAs->getAutoscanDirectory()->getLocation() == adir->getLocation()) {
+                return watchAs;
             }
         }
     }

@@ -44,8 +44,6 @@
 
 #include <fmt/chrono.h>
 
-#include <sys/stat.h>
-
 extern "C" {
 
 #include <libavformat/avformat.h>

@@ -51,7 +51,7 @@ duk_ret_t js_print(duk_context* ctx)
 
 duk_ret_t js_copyObject(duk_context* ctx)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
     if (!duk_is_object(ctx, 0))
         return duk_error(ctx, DUK_ERR_TYPE_ERROR, "copyObject argument is not an object");
     auto cdsObj = self->dukObject2cdsObject(nullptr);
@@ -61,7 +61,7 @@ duk_ret_t js_copyObject(duk_context* ctx)
 
 duk_ret_t js_addContainerTree(duk_context* ctx)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
 
     if (!duk_is_array(ctx, 0)) {
         log_js("js_addContainerTree: No Array");
@@ -214,11 +214,9 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 cdsObj->setRefID(origObject->getID());
 
             cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-        } else if (cdsObj->isExternalItem()) {
-            if ((self->whoami() == S_PLAYLIST) && (self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS))) {
-                cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-                cdsObj->setRefID(origObject->getID());
-            }
+        } else if (cdsObj->isExternalItem() && (self->whoami() == S_PLAYLIST) && self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)) {
+            cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+            cdsObj->setRefID(origObject->getID());
         }
 
         cdsObj->setID(INVALID_OBJECT_ID);
@@ -239,7 +237,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
 static duk_ret_t convertCharsetGeneric(duk_context* ctx, charset_convert_t chr)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
     if (duk_get_top(ctx) != 1)
         return DUK_RET_SYNTAX_ERROR;
     if (!duk_is_string(ctx, 0))

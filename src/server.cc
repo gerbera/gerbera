@@ -40,7 +40,6 @@
 #include <upnptools.h>
 #endif
 
-#include <chrono>
 #include <thread>
 
 #include "config/config_manager.h"
