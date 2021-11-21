@@ -36,6 +36,7 @@
 
 #include "common.h"
 #include "context.h"
+#include "util/grb_fs.h"
 #include "util/tools.h"
 
 // forward declaration

@@ -22,7 +22,7 @@ void ScriptTestFixture::SetUp()
     loadCommon(ctx);
 
     fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
-    std::string scriptContent = readTextFile(scriptFile.c_str());
+    std::string scriptContent = GrbFile(scriptFile).readTextFile();
     duk_push_thread_stash(ctx, ctx);
     duk_push_string(ctx, scriptFile.c_str());
     duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
@@ -39,7 +39,7 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
 {
     if (scriptName != "common.js") {
         fs::path commonScript = fs::path(SCRIPTS_DIR) / "js" / "common.js";
-        std::string script = readTextFile(commonScript.c_str());
+        std::string script = GrbFile(commonScript).readTextFile();
         duk_push_string(ctx, commonScript.c_str());
         duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
 

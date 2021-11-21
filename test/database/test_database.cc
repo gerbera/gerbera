@@ -86,7 +86,7 @@ public:
 TEST_F(Sqlite3DatabaseTest, CheckInitScript)
 {
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-    auto sql = readTextFile(sqlFilePath);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 
     EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));
@@ -158,7 +158,7 @@ TEST_F(MysqlDatabaseTest, CheckUpgradeCommands)
 TEST_F(MysqlDatabaseTest, CheckInitScript)
 {
     auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
-    auto sql = readTextFile(sqlFilePath);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 
     EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));

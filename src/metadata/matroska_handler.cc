@@ -47,19 +47,14 @@
 // file managment
 class FileIOCallback : public IOCallback {
 private:
+    GrbFile file;
     std::FILE* mediaFile;
 
 public:
     explicit FileIOCallback(const char* path)
-#ifdef __linux__
-        : mediaFile(std::fopen(path, "rbe"))
-#else
-        : mediaFile(std::fopen(path, "rb"))
-#endif
+        : file(path)
     {
-        if (!mediaFile) {
-            throw_std_runtime_error("Could not fopen {}", path);
-        }
+        mediaFile = file.open("rb");
     }
 
     ~FileIOCallback() override
@@ -101,11 +96,6 @@ public:
 
     void close() override
     {
-        if (!mediaFile)
-            return;
-        if (std::fclose(mediaFile) != 0) {
-            log_error("fclose failed");
-        }
         mediaFile = nullptr;
     }
 };

@@ -40,7 +40,7 @@
 class FileIOHandler : public IOHandler {
 protected:
     /// \brief Name of the file.
-    fs::path filename;
+    GrbFile file;
 
     /// \brief Handle of the file.
     std::FILE* f {};

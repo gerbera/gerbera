@@ -362,7 +362,7 @@ void Script::defineFunctions(const duk_function_list_entry* functions)
 
 void Script::_load(const std::string& scriptPath)
 {
-    std::string scriptText = readTextFile(scriptPath);
+    std::string scriptText = GrbFile(scriptPath).readTextFile();
 
     if (scriptText.empty())
         throw_std_runtime_error("empty script");

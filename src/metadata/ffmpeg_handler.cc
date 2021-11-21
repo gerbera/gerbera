@@ -332,7 +332,7 @@ fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movieFilename) const
 {
     auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
-    return readBinaryFile(path);
+    return GrbFile(path).readBinaryFile();
 }
 
 void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const
@@ -340,7 +340,7 @@ void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const
     try {
         auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
         fs::create_directories(path.parent_path());
-        writeBinaryFile(path, data, size);
+        GrbFile(path).writeBinaryFile(data, size);
     } catch (const std::runtime_error& e) {
         log_error("Failed to write thumbnail cache: {}", e.what());
     }
