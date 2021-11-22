@@ -185,19 +185,20 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, I
 // This code is inspired by https://github.com/TypesettingTools/DirectASS/blob/master/DSlibass/MatroskaParser.cpp#L58+
 void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler)
 {
+    auto metaSeek = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeekHead*>(info);
+    if (!metaSeek)
+        return;
+
     ebmlFile.setFilePointer(0);
     auto estream = LIBEBML_NAMESPACE::EbmlStream(ebmlFile);
     LIBEBML_NAMESPACE::EbmlElement* ebmlHead = estream.FindNextID(EBML_INFO(LIBEBML_NAMESPACE::EbmlHead), ~0);
     ebmlHead->SkipData(estream, EBML_CONTEXT(ebmlHead));
     delete ebmlHead;
-    ebmlHead = estream.FindNextID(EBML_INFO(LIBMATROSKA_NAMESPACE::KaxSegment), ~0);
 
     EbmlElement* dummyEl;
     int iUpperLevel = 0;
-    auto metaSeek = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxSeekHead*>(info);
-    if (!metaSeek)
-        return;
 
+    ebmlHead = estream.FindNextID(EBML_INFO(LIBMATROSKA_NAMESPACE::KaxSegment), ~0);
     // master elements
     info->Read(ebmlStream, EBML_CONTEXT(metaSeek), iUpperLevel, dummyEl, true);
     if (!metaSeek->CheckMandatory()) {
@@ -227,7 +228,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
             if (seekIdValue == LIBMATROSKA_NAMESPACE::KaxAttachments::ClassInfos.GlobalId || seekIdValue == LIBMATROSKA_NAMESPACE::KaxInfo::ClassInfos.GlobalId) {
                 ebmlFile.setFilePointer(segmentPosition);
                 auto attStream = EbmlStream(ebmlFile);
-                int upperLvlElement;
+                int upperLvlElement = 0;
                 auto level1 = attStream.FindNextElement(EBML_CLASS_CONTEXT(LIBMATROSKA_NAMESPACE::KaxSegment), upperLvlElement, ~0, true, 1);
 
                 if (EbmlId(*level1) == seekIdValue) {
