@@ -36,7 +36,6 @@
 #include <numeric>
 #include <queue>
 #include <sstream>
-#include <sys/socket.h>
 
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
