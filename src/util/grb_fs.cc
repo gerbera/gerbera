@@ -11,7 +11,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #ifdef __HAIKU__
@@ -20,6 +19,10 @@
 
 #ifdef SOLARIS
 #include <fcntl.h>
+#endif
+
+#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
+#include <sys/stat.h>
 #endif
 
 #include "util/tools.h"
