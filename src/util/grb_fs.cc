@@ -225,11 +225,7 @@ bool isTheora(const fs::path& oggFilename)
         throw_std_runtime_error("Error reading {}", oggFilename.c_str());
     }
 
-    if (std::memcmp(buffer, "\x80theora", 7) != 0) {
-        return false;
-    }
-
-    return true;
+    return std::memcmp(buffer, "\x80theora", 7) == 0;
 }
 
 fs::path getLastPath(const fs::path& path)
