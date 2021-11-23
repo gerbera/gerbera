@@ -191,28 +191,27 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
     std::stack<std::shared_ptr<ASTNode>> nodeStack;
     std::stack<TokenType> operatorStack;
     std::shared_ptr<ASTNode> root;
-    std::shared_ptr<ASTNode> expressionNode;
     TokenType currentOperator = TokenType::INVALID;
     while (currentToken) {
         if (currentToken->getType() == TokenType::PROPERTY) {
-            expressionNode = parseRelationshipExpression();
+            auto expressionNode = parseRelationshipExpression();
             if (currentOperator == TokenType::AND) {
                 if (!nodeStack.top())
                     throw_std_runtime_error("Cannot construct ASTAndOperator without lhs");
                 if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTAndOperator without rhs");
-                std::shared_ptr<ASTNode> lhs(nodeStack.top());
+                auto lhs = std::move(nodeStack.top());
                 nodeStack.pop();
-                nodeStack.push(std::make_shared<ASTAndOperator>(sqlEmitter, lhs, expressionNode));
+                nodeStack.push(std::make_shared<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
                 operatorStack.pop();
             } else if (currentOperator == TokenType::OR) {
                 if (!nodeStack.top())
                     throw_std_runtime_error("Cannot construct ASTOrOperator without lhs");
                 if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTOrOperator without rhs");
-                std::shared_ptr<ASTNode> lhs(nodeStack.top());
+                auto lhs = std::move(nodeStack.top());
                 nodeStack.pop();
-                nodeStack.push(std::make_shared<ASTOrOperator>(sqlEmitter, lhs, expressionNode));
+                nodeStack.push(std::make_shared<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
                 operatorStack.pop();
             } else {
                 nodeStack.push(expressionNode);
@@ -230,18 +229,18 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
     }
 
     while (!nodeStack.empty()) {
-        root = nodeStack.top();
+        root = std::move(nodeStack.top());
         nodeStack.pop();
         if (!operatorStack.empty()) {
             currentOperator = operatorStack.top();
             operatorStack.pop();
             if (!nodeStack.empty()) {
-                std::shared_ptr<ASTNode> lhs = nodeStack.top();
+                auto lhs = std::move(nodeStack.top());
                 nodeStack.pop();
                 if (currentOperator == TokenType::AND)
-                    root = std::make_shared<ASTAndOperator>(sqlEmitter, lhs, root);
+                    root = std::make_shared<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(root));
                 else
-                    root = std::make_shared<ASTOrOperator>(sqlEmitter, lhs, root);
+                    root = std::make_shared<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(root));
             } else
                 throw_std_runtime_error("Cannot construct ASTOrOperator/ASTAndOperator without rhs");
         }
@@ -255,8 +254,6 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
         throw_std_runtime_error("Failed to parse search criteria - expecting a ')'");
 
     std::shared_ptr<ASTNode> currentNode;
-    std::shared_ptr<ASTNode> lhsNode;
-    std::shared_ptr<ASTNode> rhsNode;
     getNextToken();
     while (currentToken && currentToken->getType() != TokenType::RPAREN) {
         // just call parseSearchExpression() at this point?
@@ -265,18 +262,15 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
             getNextToken();
         } else if (currentToken->getType() == TokenType::AND || currentToken->getType() == TokenType::OR) {
             auto tokenType = currentToken->getType();
-            lhsNode = currentNode;
+            auto lhsNode = currentNode;
 
             getNextToken();
-            if (currentToken->getType() == TokenType::LPAREN)
-                rhsNode = parseParenthesis();
-            else
-                rhsNode = parseRelationshipExpression();
+            auto rhsNode = (currentToken->getType() == TokenType::LPAREN) ? parseParenthesis() : parseRelationshipExpression();
 
             if (tokenType == TokenType::AND)
-                currentNode = std::make_shared<ASTAndOperator>(sqlEmitter, lhsNode, rhsNode);
+                currentNode = std::make_shared<ASTAndOperator>(sqlEmitter, std::move(lhsNode), std::move(rhsNode));
             else if (tokenType == TokenType::OR)
-                currentNode = std::make_shared<ASTOrOperator>(sqlEmitter, lhsNode, rhsNode);
+                currentNode = std::make_shared<ASTOrOperator>(sqlEmitter, std::move(lhsNode), std::move(rhsNode));
             else
                 throw_std_runtime_error("Failed to parse search criteria - expected and/or");
 
@@ -289,7 +283,7 @@ std::shared_ptr<ASTNode> SearchParser::parseParenthesis()
     if (!currentNode)
         throw_std_runtime_error("Failed to parse search criteria - bad expression between parenthesis");
 
-    return std::make_shared<ASTParenthesis>(sqlEmitter, currentNode);
+    return std::make_shared<ASTParenthesis>(sqlEmitter, std::move(currentNode));
 }
 
 std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
@@ -304,21 +298,21 @@ std::shared_ptr<ASTNode> SearchParser::parseRelationshipExpression()
         auto operatr = std::make_shared<ASTCompareOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
-        return std::make_shared<ASTCompareExpression>(sqlEmitter, property, operatr, quotedString);
+        return std::make_shared<ASTCompareExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(quotedString));
     }
 
     if (currentToken->getType() == TokenType::STRINGOP) {
         auto operatr = std::make_shared<ASTStringOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
-        return std::make_shared<ASTStringExpression>(sqlEmitter, property, operatr, quotedString);
+        return std::make_shared<ASTStringExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(quotedString));
     }
 
     if (currentToken->getType() == TokenType::EXISTS) {
         auto operatr = std::make_shared<ASTExistsOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto booleanValue = std::make_shared<ASTBoolean>(sqlEmitter, currentToken->getValue());
-        return std::make_shared<ASTExistsExpression>(sqlEmitter, property, operatr, booleanValue);
+        return std::make_shared<ASTExistsExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(booleanValue));
     }
 
     throw_std_runtime_error("Failed to parse search criteria - expecting a comparison, exists, or string operator");
@@ -341,7 +335,7 @@ std::shared_ptr<ASTQuotedString> SearchParser::parseQuotedString()
         throw_std_runtime_error("Failed to parse search criteria - expecting a double-quote");
     auto closeQuote = std::make_shared<ASTDQuote>(sqlEmitter, currentToken->getValue());
 
-    return std::make_shared<ASTQuotedString>(sqlEmitter, openQuote, escapedString, closeQuote);
+    return std::make_shared<ASTQuotedString>(sqlEmitter, std::move(openQuote), std::move(escapedString), std::move(closeQuote));
 }
 
 std::string ASTNode::emitSQL() const
