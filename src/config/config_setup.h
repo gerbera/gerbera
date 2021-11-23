@@ -76,7 +76,7 @@ protected:
     std::string cpath;
     bool required = false;
     bool useDefault = false;
-    StringCheckFunction rawCheck;
+    StringCheckFunction rawCheck {};
     std::string defaultValue;
     const char* help;
 
@@ -282,7 +282,7 @@ public:
     static fs::path Home;
 
     ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false)
-        : ConfigSetup(option, xpath, help, nullptr, defaultValue)
+        : ConfigSetup(option, xpath, help, false, defaultValue)
         , isFile(isFile)
         , mustExist(mustExist)
         , notEmpty(notEmpty)

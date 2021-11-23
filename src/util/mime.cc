@@ -33,6 +33,7 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     , ignore_unknown_extensions(config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS))
     , extension_mimetype_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
     , mimetype_upnpclass_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST))
+    , ignoredExtensions(config->getArrayOption(CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS))
 {
     if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
         log_warning("Ignore unknown extensions set, but no mappings specified");
@@ -95,6 +96,9 @@ std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
     if (!extension_map_case_sensitive)
         extension = toLower(extension);
 
+    if (std::find(ignoredExtensions.begin(), ignoredExtensions.end(), extension) != ignoredExtensions.end()) {
+        return {};
+    }
     std::string mimeType = getValueOrDefault(extension_mimetype_map, extension, "");
     if (mimeType.empty() && !ignore_unknown_extensions) {
 #ifdef HAVE_MAGIC

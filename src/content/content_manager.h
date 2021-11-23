@@ -311,7 +311,7 @@ protected:
     std::shared_ptr<ScriptingRuntime> scripting_runtime;
     std::shared_ptr<LastFm> last_fm;
 
-    std::map<std::string, std::string> mimetype_contenttype_map;
+    std::map<std::string, std::string> mimetypeContenttypeMap;
 
     std::shared_ptr<AutoscanList> autoscan_timed;
 #ifdef HAVE_INOTIFY

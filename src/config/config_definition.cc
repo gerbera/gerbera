@@ -269,6 +269,12 @@ static const std::map<std::string, std::string> extMtDefaults {
     { "wvx", "video/x-ms-wvx" },
 };
 
+/// \brief default values for CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS
+static const std::vector<std::string> ignoreDefaults {
+    "part",
+    "tmp",
+};
+
 /// \brief default values for ATTR_TRANSCODING_MIMETYPE_PROF_MAP
 static const std::map<std::string, std::string> trMtDefaults {
     { "video/x-flv", "vlcmpeg" },
@@ -558,6 +564,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/mappings/contenttype-dlnaprofile", "config-import.html#contenttype-dlnaprofile",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
         false, false, true, ctDlnaDefaults),
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS,
+        "/import/mappings/ignore-extensions", "config-import.html#ignore-extensions",
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, ignoreDefaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LAYOUT_MAPPING,
         "/import/layout", "config-import.html#layout",
         ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
