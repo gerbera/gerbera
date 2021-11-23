@@ -488,8 +488,8 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     auto [prpUpper, prpLower] = getPropertyStatement(property);
 
     if ((operatr == ">" || operatr == ">=") && startswith(value, "@last")) {
-        auto dateVal = to_seconds(std::chrono::system_clock::now()).count() - (24 * 60 * 60 * stoiString(value.substr(5)));
-        return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal);
+        auto dateVal = to_seconds(std::chrono::system_clock::now() - std::chrono::hours(24 * stoiString(value.substr(5))));
+        return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count());
     }
 
     if (operatr != "=")
