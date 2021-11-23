@@ -28,6 +28,7 @@
 #include <stack>
 
 #include "database/sql_database.h"
+#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
 static const std::unordered_map<std::string_view, TokenType> tokenTypes {
@@ -555,7 +556,18 @@ std::string SortParser::parse()
         if (!sortSql.empty()) {
             sort.push_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
         } else {
-            log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
+            for (auto&& metaId : MetadataIterator()) {
+                auto&& metaName = MetadataHandler::getMetaFieldName(metaId);
+                if (metaName == seg) {
+                    sortSql = colMapper->quote(metaName);
+                }
+            }
+            if (!sortSql.empty()) {
+                log_warning("Cannot sort by meta data '{}'", sortSql);
+                // TODO: sort.push_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
+            } else {
+                log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
+            }
         }
     }
     return fmt::format("{}", fmt::join(sort, ", "));

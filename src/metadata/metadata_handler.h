@@ -190,6 +190,7 @@ static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, con
 };
 
 using ResourceAttributeIterator = EnumIterator<resource_attributes_t, resource_attributes_t::R_SIZE, resource_attributes_t::R_MAX>;
+using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;
 
 /// \brief This class is responsible for providing access to metadata information
 /// of various media.
