@@ -383,6 +383,7 @@ public:
     virtual std::string tableQuoted() const = 0;
     virtual std::string mapQuoted(const std::string& tag) const = 0;
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
+    virtual std::string quote(const std::string& tag) const = 0;
 };
 
 class DefaultSQLEmitter : public SQLEmitter {
@@ -477,6 +478,13 @@ public:
             if (colMap.at(it->second).first.empty()) // no column
                 return colMap.at(it->second).second;
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
+        }
+        return {};
+    }
+    std::string quote(const std::string& tag) const override
+    {
+        if (!tag.empty()) {
+            return fmt::format("{0}{1}{2}", table_quote_begin, tag, table_quote_end);
         }
         return {};
     }
