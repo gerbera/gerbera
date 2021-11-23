@@ -727,6 +727,36 @@ media type auto detection will fail and you will have to set the mime types manu
 It is also helpful if you want to override auto detected mime types or simply skip filemagic processing for known file types.
 
 
+``ignore-extensions``
+~~~~~~~~~~~~~~~~~~~~~
+::
+
+    <ignore-extensions>
+
+* Optional
+
+This section holds the file name extension to mime type mappings.
+
+**Child tags:**
+
+``add-file``
+------------
+
+::
+
+    <add-file name="part"/>
+
+* Optional
+
+Specifies a file name extension (everything after the last dot ".") to ignore.
+
+Note:
+    This improves the import speed, because files are ignored completely.
+
+Note:
+    The extension is case sensitive, if `case-sensitive` in the element `extension-mimetype` is set to `yes`
+
+
 ``extension-mimetype``
 ~~~~~~~~~~~~~~~~~~~~~~
 ::
@@ -771,11 +801,11 @@ This section holds the file name extension to mime type mappings.
 Specifies a mapping from a certain file name extension (everything after the last dot ".") to mime type.
 
 Note:
-    this improves the import speed, because invoking libmagic to discover the right mime type of a file is
+    This improves the import speed, because invoking libmagic to discover the right mime type of a file is
     omitted for files with extensions listed here.
 
 Note:
-    extension is case sensitive, this will probably need to be fixed.
+    The extension is case sensitive, if `case-sensitive` is set to `yes`.
 
 
 ``mimetype-upnpclass``
@@ -820,7 +850,7 @@ If the user remaps mp3 files to a different mimetype, we must know about it so w
 for metadata extraction.
 
 Note:
-  if this section is not present in your config file, the defaults will be filled in automatically.
+  If this section is not present in your config file, the defaults will be filled in automatically.
   However, if you add an empty tag, without defining the following ``<treat>`` tags, the server assumes that
   you want to have an empty list and no files will be process by the metadata handler.
 
@@ -837,7 +867,7 @@ Note:
 Tells the server what content the specified mimetype actually is.
 
 Note:
-    it makes no sense to define 'as' values that are not below, the server only needs to know the content
+    It makes no sense to define 'as' values that are not below, the server only needs to know the content
     type of the ones specified, otherwise it does not matter.
 
 The ``as`` attribute can have following values:

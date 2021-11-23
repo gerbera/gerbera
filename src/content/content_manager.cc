@@ -84,7 +84,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     task_processor = std::make_shared<TaskProcessor>(config);
 #endif
 
-    mimetype_contenttype_map = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
 void ContentManager::run()
@@ -407,7 +407,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
     if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
-            std::string contentType = getValueOrDefault(mimetype_contenttype_map, mimetype);
+            std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
             layout->processCdsObject(obj, rootPath, mimetype, contentType);
 
@@ -1198,7 +1198,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 
         std::string upnpClass = mime->mimeTypeToUpnpClass(mimetype);
         if (upnpClass.empty()) {
-            std::string contentType = getValueOrDefault(mimetype_contenttype_map, mimetype);
+            std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
             if (contentType == CONTENT_TYPE_OGG) {
                 upnpClass = isTheora(dirEnt.path())
                     ? UPNP_CLASS_VIDEO_ITEM

@@ -742,6 +742,19 @@
 					"editable": true
 				},
 				{
+					"item": "/import/mappings/ignore-extensions/add-file",
+					"caption": "Ignored Extensions",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/mappings/ignore-extensions/add-file/attribute::name",
+							"caption": "From",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/import/mappings/extension-mimetype/map",
 					"caption": "Extensions",
 					"type": "List",

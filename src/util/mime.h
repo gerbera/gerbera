@@ -62,6 +62,7 @@ private:
 
     std::map<std::string, std::string> extension_mimetype_map;
     std::map<std::string, std::string> mimetype_upnpclass_map;
+    std::vector<std::string> ignoredExtensions;
 
 #ifdef HAVE_MAGIC
     magic_t magicCookie;
