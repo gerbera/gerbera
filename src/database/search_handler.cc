@@ -218,7 +218,7 @@ std::shared_ptr<ASTNode> SearchParser::parseSearchExpression()
     }
 
     while (!nodeStack.empty()) {
-        root = nodeStack.top();
+        root = std::move(nodeStack.top());
         nodeStack.pop();
         if (!operatorStack.empty()) {
             currentOperator = operatorStack.top();
