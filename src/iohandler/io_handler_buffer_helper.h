@@ -52,10 +52,6 @@ public:
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize);
-    ~IOHandlerBufferHelper() noexcept override;
-
-    IOHandlerBufferHelper(const IOHandlerBufferHelper&) = delete;
-    IOHandlerBufferHelper& operator=(const IOHandlerBufferHelper&) = delete;
 
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;

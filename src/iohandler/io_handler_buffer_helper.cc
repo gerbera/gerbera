@@ -55,12 +55,6 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
     isOpen = true;
 }
 
-IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
-{
-    if (isOpen)
-        close();
-}
-
 std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
 {
     // check read on closed BufferedIOHandler
