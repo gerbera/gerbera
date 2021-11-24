@@ -109,7 +109,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                         if (!stem.empty()) {
                             replaceAllString(stem, "*", ".*");
                             replaceAllString(stem, ".", "?");
-                            std::regex re(fmt::format("^{}$", stem));
+                            auto re = std::regex(fmt::format("^{}$", stem));
                             std::cmatch m;
                             if (std::regex_match(contentFile.path().stem().string().c_str(), m, re)) {
                                 log_debug("{}: found", contentFile.path().string());
