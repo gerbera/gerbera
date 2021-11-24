@@ -48,10 +48,6 @@ protected:
 public:
     /// \brief Sets the filename to work with.
     explicit FileIOHandler(fs::path filename);
-    ~FileIOHandler() override;
-
-    FileIOHandler(const FileIOHandler&) = delete;
-    FileIOHandler& operator=(const FileIOHandler&) = delete;
 
     /// \brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;
