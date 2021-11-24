@@ -38,11 +38,6 @@ FileIOHandler::FileIOHandler(fs::path filename)
 {
 }
 
-FileIOHandler::~FileIOHandler()
-{
-    close();
-}
-
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (mode != UPNP_READ)
