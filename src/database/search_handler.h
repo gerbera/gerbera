@@ -152,11 +152,11 @@ protected:
 
 class ASTParenthesis : public ASTNode {
 public:
-    ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node);
+    ASTParenthesis(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> node);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTNode> bracketedNode;
+    std::unique_ptr<ASTNode> bracketedNode;
 };
 
 class ASTDQuote : public ASTNode {
@@ -179,14 +179,14 @@ protected:
 
 class ASTQuotedString : public ASTNode {
 public:
-    ASTQuotedString(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTDQuote> openQuote,
-        std::shared_ptr<ASTEscapedString> escapedString, std::shared_ptr<ASTDQuote> closeQuote);
+    ASTQuotedString(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTDQuote> openQuote,
+        std::unique_ptr<ASTEscapedString> escapedString, std::unique_ptr<ASTDQuote> closeQuote);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTDQuote> openQuote;
-    std::shared_ptr<ASTEscapedString> escapedString;
-    std::shared_ptr<ASTDQuote> closeQuote;
+    std::unique_ptr<ASTDQuote> openQuote;
+    std::unique_ptr<ASTEscapedString> escapedString;
+    std::unique_ptr<ASTDQuote> closeQuote;
 };
 
 /// \brief Represents a comparison operator such as =, >=, <
@@ -204,14 +204,14 @@ protected:
 /// \brief Represents an expression using a comparison operator
 class ASTCompareExpression : public ASTNode {
 public:
-    ASTCompareExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
-        std::shared_ptr<ASTCompareOperator> operatr, std::shared_ptr<ASTQuotedString> rhs);
+    ASTCompareExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
+        std::unique_ptr<ASTCompareOperator> operatr, std::unique_ptr<ASTQuotedString> rhs);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTProperty> lhs;
-    std::shared_ptr<ASTCompareOperator> operatr;
-    std::shared_ptr<ASTQuotedString> rhs;
+    std::unique_ptr<ASTProperty> lhs;
+    std::unique_ptr<ASTCompareOperator> operatr;
+    std::unique_ptr<ASTQuotedString> rhs;
 };
 
 /// \brief Represents an operator defined by a string such as contains, derivedFrom
@@ -229,14 +229,14 @@ protected:
 /// \brief Represents an expression using an operator defined by a string
 class ASTStringExpression : public ASTNode {
 public:
-    ASTStringExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
-        std::shared_ptr<ASTStringOperator> operatr, std::shared_ptr<ASTQuotedString> rhs);
+    ASTStringExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
+        std::unique_ptr<ASTStringOperator> operatr, std::unique_ptr<ASTQuotedString> rhs);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTProperty> lhs;
-    std::shared_ptr<ASTStringOperator> operatr;
-    std::shared_ptr<ASTQuotedString> rhs;
+    std::unique_ptr<ASTProperty> lhs;
+    std::unique_ptr<ASTStringOperator> operatr;
+    std::unique_ptr<ASTQuotedString> rhs;
 };
 
 class ASTExistsOperator : public ASTNode {
@@ -252,34 +252,34 @@ protected:
 /// \brief Represents an expression using the exists operator
 class ASTExistsExpression : public ASTNode {
 public:
-    ASTExistsExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
-        std::shared_ptr<ASTExistsOperator> operatr, std::shared_ptr<ASTBoolean> rhs);
+    ASTExistsExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
+        std::unique_ptr<ASTExistsOperator> operatr, std::unique_ptr<ASTBoolean> rhs);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTProperty> lhs;
-    std::shared_ptr<ASTExistsOperator> operatr;
-    std::shared_ptr<ASTBoolean> rhs;
+    std::unique_ptr<ASTProperty> lhs;
+    std::unique_ptr<ASTExistsOperator> operatr;
+    std::unique_ptr<ASTBoolean> rhs;
 };
 
 class ASTAndOperator : public ASTNode {
 public:
-    ASTAndOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs);
+    ASTAndOperator(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> lhs, std::unique_ptr<ASTNode> rhs);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTNode> lhs;
-    std::shared_ptr<ASTNode> rhs;
+    std::unique_ptr<ASTNode> lhs;
+    std::unique_ptr<ASTNode> rhs;
 };
 
 class ASTOrOperator : public ASTNode {
 public:
-    ASTOrOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs);
+    ASTOrOperator(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTNode> lhs, std::unique_ptr<ASTNode> rhs);
     std::string emit() const override;
 
 protected:
-    std::shared_ptr<ASTNode> lhs;
-    std::shared_ptr<ASTNode> rhs;
+    std::unique_ptr<ASTNode> lhs;
+    std::unique_ptr<ASTNode> rhs;
 };
 
 class SQLEmitter {
@@ -340,18 +340,18 @@ private:
 class SearchParser {
 public:
     SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria);
-    std::shared_ptr<ASTNode> parse();
+    std::unique_ptr<ASTNode> parse();
 
 protected:
     void getNextToken();
-    std::shared_ptr<ASTNode> parseSearchExpression();
-    std::shared_ptr<ASTNode> parseRelationshipExpression();
-    std::shared_ptr<ASTNode> parseParenthesis();
-    std::shared_ptr<ASTQuotedString> parseQuotedString();
+    std::unique_ptr<ASTNode> parseSearchExpression();
+    std::unique_ptr<ASTNode> parseRelationshipExpression();
+    std::unique_ptr<ASTNode> parseParenthesis();
+    std::unique_ptr<ASTQuotedString> parseQuotedString();
 
 private:
-    std::shared_ptr<SearchToken> currentToken;
-    std::shared_ptr<SearchLexer> lexer;
+    std::unique_ptr<SearchToken> currentToken;
+    std::unique_ptr<SearchLexer> lexer;
     const SQLEmitter& sqlEmitter;
 };
 
