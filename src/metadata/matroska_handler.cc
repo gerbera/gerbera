@@ -57,14 +57,6 @@ public:
         mediaFile = file.open("rb");
     }
 
-    ~FileIOCallback() override
-    {
-        close();
-    }
-
-    FileIOCallback(const FileIOCallback&) = delete;
-    FileIOCallback& operator=(const FileIOCallback&) = delete;
-
     uint32 read(void* buffer, std::size_t size) override
     {
         assert(mediaFile);
