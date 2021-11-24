@@ -380,8 +380,9 @@ class ColumnMapper {
 public:
     virtual ~ColumnMapper() = default;
     virtual bool hasEntry(const std::string& tag) const = 0;
+    virtual std::string getTableName() const = 0;
     virtual std::string tableQuoted() const = 0;
-    virtual std::string mapQuoted(const std::string& tag) const = 0;
+    virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
     virtual std::string quote(const std::string& tag) const = 0;
 };
@@ -455,6 +456,10 @@ public:
     {
         return std::any_of(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
     }
+    std::string getTableName() const override
+    {
+        return fmt::format("{}{}{}", table_quote_begin, tableName, table_quote_end);
+    }
     std::string mapQuoted(En tag) const
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
@@ -471,12 +476,12 @@ public:
         return fmt::format("{0}{1}{3} {0}{2}{3}", table_quote_begin, tableName, tableAlias, table_quote_end);
     }
 
-    std::string mapQuoted(const std::string& tag) const override
+    std::string mapQuoted(const std::string& tag, bool noAlias = false) const override
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
-            if (colMap.at(it->second).first.empty()) // no column
-                return colMap.at(it->second).second;
+            if (colMap.at(it->second).first.empty() || noAlias) // no column alias
+                return fmt::format("{}{}{}", table_quote_begin, colMap.at(it->second).second, table_quote_end);
             return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
         }
         return {};
@@ -510,15 +515,17 @@ private:
 
 class SortParser {
 public:
-    SortParser(std::shared_ptr<ColumnMapper> colMapper, std::string sortCriteria)
+    SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria)
         : colMapper(std::move(colMapper))
+        , metaMapper(std::move(metaMapper))
         , sortCrit(std::move(sortCriteria))
     {
     }
-    std::string parse();
+    std::string parse(std::string& addColumns, std::string& addJoin);
 
 private:
     std::shared_ptr<ColumnMapper> colMapper;
+    std::shared_ptr<ColumnMapper> metaMapper;
     std::string sortCrit;
 };
 #endif // __SEARCH_HANDLER_H__

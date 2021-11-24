@@ -373,7 +373,8 @@ void SQLDatabase::init()
         auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
             identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::RefId), identifier(browseColMap.at(BrowseCol::Id).second));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
-        this->sql_browse_query = fmt::format("SELECT {} FROM {} {} {} ", fmt::join(buf, ", "), browseColumnMapper->tableQuoted(), join1, join2);
+        this->sql_browse_columns = fmt::format("{}", fmt::join(buf, ", "));
+        this->sql_browse_query = fmt::format("{} {} {} ", browseColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for UPnP search
     {
@@ -498,6 +499,12 @@ std::string SQLDatabase::getSortCapabilities()
     for (auto&& [key, col] : browseSortMap) {
         if (std::find(sortKeys.begin(), sortKeys.end(), key) == sortKeys.end()) {
             sortKeys.push_back(key);
+        }
+    }
+    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(R_MAX));
+    for (auto&& [field, meta] : mt_keys) {
+        if (std::find(sortKeys.begin(), sortKeys.end(), meta) == sortKeys.end()) {
+            sortKeys.emplace_back(meta);
         }
     }
     return fmt::format("{}", fmt::join(sortKeys, ","));
@@ -769,7 +776,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     }
 
     beginTransaction("loadObject");
-    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::Id), objectID);
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::Id), objectID);
     auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
@@ -786,7 +793,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
 {
-    auto loadSql = fmt::format("{} WHERE {} = {}", sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::ServiceId), quote(serviceID));
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::ServiceId), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
     auto res = select(loadSql);
     if (res) {
@@ -867,6 +874,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     std::vector<std::string> where;
     std::string orderBy;
     std::string limit;
+    std::string addColumns;
+    std::string addJoin;
 
     if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         int count = param.getRequestedCount();
@@ -889,8 +898,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             if (param.getFlag(BROWSE_TRACK_SORT)) {
                 orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::PartNumber), browseColumnMapper->mapQuoted(BrowseCol::TrackNumber));
             } else {
-                SortParser sortParser(browseColumnMapper, param.getSortCriteria());
-                orderQb = sortParser.parse();
+                SortParser sortParser(browseColumnMapper, metaColumnMapper, param.getSortCriteria());
+                orderQb = sortParser.parse(addColumns, addJoin);
             }
             if (orderQb.empty()) {
                 orderQb = browseColumnMapper->mapQuoted(BrowseCol::DcTitle);
@@ -916,7 +925,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Id), parent->getID()));
         limit = " LIMIT 1";
     }
-    auto qb = fmt::format("{} WHERE {}{}{}", sql_browse_query, fmt::join(where, " AND "), orderBy, limit);
+    auto qb = fmt::format("SELECT {} {} FROM {} {} WHERE {}{}{}", sql_browse_columns, addColumns, sql_browse_query, addJoin, fmt::join(where, " AND "), orderBy, limit);
     log_debug("QUERY: {}", qb);
     beginTransaction("browse");
     std::shared_ptr<SQLResult> sqlResult = select(qb);
@@ -1020,10 +1029,12 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         *numMatches = countRow->col_int(0, 0);
     }
 
+    std::string addColumns;
+    std::string addJoin;
     // order by code..
     auto orderByCode = [&]() {
-        SortParser sortParser(searchColumnMapper, param.getSortCriteria());
-        auto orderQb = sortParser.parse();
+        SortParser sortParser(searchColumnMapper, metaColumnMapper, param.getSortCriteria());
+        auto orderQb = sortParser.parse(addColumns, addJoin);
         if (orderQb.empty()) {
             orderQb = searchColumnMapper->mapQuoted(SearchCol::Id);
         }
@@ -1039,7 +1050,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }
 
-    auto retrievalSQL = fmt::format("SELECT DISTINCT {} FROM {} WHERE {}{}{}", sql_search_columns, sql_search_query, searchSQL, orderBy, limit);
+    auto retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, sql_search_query, addJoin, searchSQL, orderBy, limit);
 
     log_debug("Search resolves to SQL [{}]", retrievalSQL);
     beginTransaction("search 2");
@@ -1157,7 +1168,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(dbLocation)),
         fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::RefId)),
     };
-    auto findSql = fmt::format("{} WHERE {} LIMIT 1", sql_browse_query, fmt::join(where, " AND "));
+    auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
 
     beginTransaction("findObjectByPath");
     auto res = select(findSql);
