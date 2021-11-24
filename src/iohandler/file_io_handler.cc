@@ -33,8 +33,8 @@
 
 #include "cds_objects.h"
 
-FileIOHandler::FileIOHandler(fs::path filename)
-    : file(std::move(filename))
+FileIOHandler::FileIOHandler(const fs::path& filename)
+    : file(filename)
 {
 }
 

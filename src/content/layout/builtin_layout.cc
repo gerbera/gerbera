@@ -141,7 +141,9 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
     dir = f2i->convert(dir);
 
     if (!dir.empty()) {
-        auto dirVect = std::vector<std::shared_ptr<CdsObject>> { container[c1], container[c2] };
+        std::vector<std::shared_ptr<CdsObject>> dirVect;
+        dirVect.push_back(container[c1]);
+        dirVect.push_back(container[c2]);
         for (auto&& segment : dir) {
             if (segment != "/" && !segment.empty())
                 dirVect.push_back(std::make_shared<CdsContainer>(segment.string()));
@@ -181,13 +183,21 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
         std::string chain;
         if ((y > 0) && (m > 0)) {
-            id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Video"], container["Video/Year"],
-                std::make_shared<CdsContainer>(year), std::make_shared<CdsContainer>(month) });
+            std::vector<std::shared_ptr<CdsObject>> ct;
+            ct.reserve(4);
+            ct.push_back(container["Video"]);
+            ct.push_back(container["Video/Year"]);
+            ct.push_back(std::make_shared<CdsContainer>(year));
+            ct.push_back(std::make_shared<CdsContainer>(month));
+            id = content->addContainerTree(ct);
             add(obj, id);
         }
 
-        id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Video"], container["Video/Date"],
-            std::make_shared<CdsContainer>(date) });
+        std::vector<std::shared_ptr<CdsObject>> ct;
+        ct.push_back(container["Video"]);
+        ct.push_back(container["Video/Date"]);
+        ct.push_back(std::make_shared<CdsContainer>(date));
+        id = content->addContainerTree(ct);
         add(obj, id);
     }
 
@@ -224,13 +234,20 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
         std::string chain;
         if ((y > 0) && (m > 0)) {
-            id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Photos"], container["Photos/Year"],
-                std::make_shared<CdsContainer>(year), std::make_shared<CdsContainer>(month) });
+            std::vector<std::shared_ptr<CdsObject>> ct;
+            ct.push_back(container["Photos"]);
+            ct.push_back(container["Photos/Year"]);
+            ct.push_back(std::make_shared<CdsContainer>(year));
+            ct.push_back(std::make_shared<CdsContainer>(month));
+            id = content->addContainerTree(ct);
             add(obj, id);
         }
 
-        id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Photos"], container["Photos/Date"],
-            std::make_shared<CdsContainer>(date) });
+        std::vector<std::shared_ptr<CdsObject>> ct;
+        ct.push_back(container["Photos"]);
+        ct.push_back(container["Photos/Date"]);
+        ct.push_back(std::make_shared<CdsContainer>(date));
+        id = content->addContainerTree(ct);
         add(obj, id);
     }
 
@@ -320,8 +337,12 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     }
 
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Artists"],
-        artistContainer, container["All Songs"] });
+    std::vector<std::shared_ptr<CdsObject>> arc;
+    arc.push_back(container["Audio"]);
+    arc.push_back(container["Artists"]);
+    arc.push_back(artistContainer);
+    arc.push_back(container["All Songs"]);
+    id = content->addContainerTree(arc);
     add(obj, id);
 
     std::string temp;
@@ -338,36 +359,56 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     albumContainer->setResources(obj->getResources());
     albumContainer->setRefID(obj->getID());
     artistContainer->setSearchable(true);
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Artists"],
-        artistContainer, albumContainer });
+
+    std::vector<std::shared_ptr<CdsObject>> alc;
+    alc.push_back(container["Audio"]);
+    alc.push_back(container["Artists"]);
+    alc.push_back(artistContainer);
+    arc.push_back(albumContainer);
+    id = content->addContainerTree(alc);
     add(obj, id);
 
     albumContainer->setSearchable(true);
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Albums"],
-        albumContainer });
+    std::vector<std::shared_ptr<CdsObject>> allc;
+    allc.push_back(container["Audio"]);
+    allc.push_back(container["Albums"]);
+    allc.push_back(std::move(albumContainer));
+    id = content->addContainerTree(allc);
     add(obj, id);
 
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Genres"],
-        std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE) });
+    std::vector<std::shared_ptr<CdsObject>> ct;
+    ct.push_back(container["Audio"]);
+    ct.push_back(container["Genres"]);
+    ct.push_back(std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE));
+    id = content->addContainerTree(ct);
     add(obj, id);
 
     auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
     composerContainer->setSearchable(true);
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Composers"],
-        composerContainer });
+    std::vector<std::shared_ptr<CdsObject>> cc;
+    cc.push_back(container["Audio"]);
+    cc.push_back(container["Composers"]);
+    cc.push_back(std::move(composerContainer));
+    id = content->addContainerTree(cc);
     add(obj, id);
 
     auto yearContainer = std::make_shared<CdsContainer>(date);
     yearContainer->setSearchable(true);
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Year"],
-        yearContainer });
+    std::vector<std::shared_ptr<CdsObject>> yt;
+    yt.push_back(container["Audio"]);
+    yt.push_back(container["Year"]);
+    yt.push_back(std::move(yearContainer));
     add(obj, id);
 
     obj->setTitle(fmt::format("{}{}", temp, title));
     add(obj, chain["/Audio/All - full name"]);
 
-    id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Artists"],
-        artistContainer, container["All - full name"] });
+    std::vector<std::shared_ptr<CdsObject>> all;
+    all.push_back(container["Audio"]);
+    all.push_back(container["Artists"]);
+    all.push_back(std::move(artistContainer));
+    all.push_back(container["All - full name"]);
+    id = content->addContainerTree(all);
     add(obj, id);
 
     obj->setTitle(title);
@@ -398,22 +439,34 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         if (genre.empty())
             continue;
 
-        auto id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Online Services"], container["Apple"], container["Genres"],
-            std::make_shared<CdsContainer>(genre) });
+        std::vector<std::shared_ptr<CdsObject>> ct;
+        ct.push_back(container["Online Services"]);
+        ct.push_back(container["Apple"]);
+        ct.push_back(container["Genres"]);
+        ct.push_back(std::make_shared<CdsContainer>(genre));
+        auto id = content->addContainerTree(ct);
         add(obj, id);
     }
 
     temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
     if (temp.length() >= 7) {
-        auto id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Online Services"], container["Apple"], container["Release Date"],
-            std::make_shared<CdsContainer>(temp.substr(0, 7)) });
+        std::vector<std::shared_ptr<CdsObject>> ct;
+        ct.push_back(container["Online Services"]);
+        ct.push_back(container["Apple"]);
+        ct.push_back(container["Release Date"]);
+        ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
+        auto id = content->addContainerTree(ct);
         add(obj, id);
     }
 
     temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
     if (temp.length() >= 7) {
-        auto id = content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Online Services"], container["Apple"], container["Post Date"],
-            std::make_shared<CdsContainer>(temp.substr(0, 7)) });
+        std::vector<std::shared_ptr<CdsObject>> ct;
+        ct.push_back(container["Online Services"]);
+        ct.push_back(container["Apple"]);
+        ct.push_back(container["Post Date"]);
+        ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
+        auto id = content->addContainerTree(ct);
         add(obj, id);
     }
 }
