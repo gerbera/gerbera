@@ -78,7 +78,7 @@ void MySQLDatabase::checkMysqlThreadInit() const
     if (!pthread_getspecific(mysql_init_key)) {
         if (mysql_thread_init())
             throw_std_runtime_error("error while calling mysql_thread_init()");
-        if (pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1)))
+        if (pthread_setspecific(mysql_init_key, &mysql_init_val))
             throw_std_runtime_error("error while calling pthread_setspecific()");
     }
 }
@@ -107,7 +107,7 @@ void MySQLDatabase::init()
         throw_std_runtime_error("could not create pthread_key");
     }
     mysql_server_init(0, nullptr, nullptr);
-    pthread_setspecific(mysql_init_key, reinterpret_cast<void*>(1));
+    pthread_setspecific(mysql_init_key, &mysql_init_val);
 
     MYSQL* resMysql = mysql_init(&db);
     if (!resMysql) {
