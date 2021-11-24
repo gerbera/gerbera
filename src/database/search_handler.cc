@@ -538,12 +538,15 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
     return fmt::format("{} OR {}", lhs, rhs);
 }
 
-std::string SortParser::parse()
+std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
 {
     if (sortCrit.empty()) {
         return {};
     }
     std::vector<std::string> sort;
+    std::vector<std::string> colBuf;
+    std::vector<std::string> joinBuf;
+    size_t cnt = 0;
     for (auto&& seg : splitString(sortCrit, ',')) {
         trimStringInPlace(seg);
         bool desc = (seg[0] == '-');
@@ -559,16 +562,31 @@ std::string SortParser::parse()
             for (auto&& metaId : MetadataIterator()) {
                 auto&& metaName = MetadataHandler::getMetaFieldName(metaId);
                 if (metaName == seg) {
-                    sortSql = colMapper->quote(metaName);
+                    sortSql = metaName;
                 }
             }
             if (!sortSql.empty()) {
-                log_warning("Cannot sort by meta data '{}'", sortSql);
-                // TODO: sort.push_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
+                log_debug("Sort by meta data '{}'", sortSql);
+                auto metaAlias = fmt::format("meta_prop{}", cnt);
+                colBuf.push_back(fmt::format("{}.{}", metaMapper->quote(metaAlias), metaMapper->mapQuoted(META_VALUE, true)));
+                joinBuf.push_back(fmt::format("INNER JOIN {0} {1} ON {2} = {1}.{3} AND {1}.{4} = '{5}'",
+                    metaMapper->getTableName(), metaMapper->quote(metaAlias),
+                    colMapper->mapQuoted(UPNP_SEARCH_ID),
+                    metaMapper->mapQuoted(UPNP_SEARCH_ID, true),
+                    metaMapper->mapQuoted(META_NAME, true),
+                    sortSql));
+
+                sort.push_back(fmt::format("{}.{} {}", metaMapper->quote(metaAlias), metaMapper->mapQuoted(META_VALUE, true), (desc ? "DESC" : "ASC")));
+                cnt++;
             } else {
                 log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
             }
         }
     }
+    if (!colBuf.empty()) {
+        colBuf.insert(colBuf.begin(), ""); // result starts with ,
+    }
+    addColumns = fmt::format("{}", fmt::join(colBuf, ", "));
+    addJoin = fmt::format("{}", fmt::join(joinBuf, ", "));
     return fmt::format("{}", fmt::join(sort, ", "));
 }

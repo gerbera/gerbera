@@ -118,8 +118,10 @@ const std::vector<std::pair<std::string, TestCol>> testSortMap = {
 {
     try {
         auto columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-        auto parser = SortParser(columnMapper, input);
-        auto output = parser.parse();
+        auto parser = SortParser(columnMapper, columnMapper, input);
+        std::string addColumns;
+        std::string addJoin;
+        auto output = parser.parse(addColumns, addJoin);
         if (output.empty())
             return ::testing::AssertionFailure() << "Failed to parse";
 

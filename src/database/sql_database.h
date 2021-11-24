@@ -216,6 +216,7 @@ protected:
     virtual void _exec(const std::string& query) = 0;
 
 private:
+    std::string sql_browse_columns;
     std::string sql_browse_query;
     std::string sql_search_columns;
     std::string sql_search_query;
