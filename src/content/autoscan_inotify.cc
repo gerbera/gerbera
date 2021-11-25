@@ -165,7 +165,7 @@ void AutoscanInotify::threadProc()
                 std::shared_ptr<Wd> wdObj;
                 try {
                     wdObj = watches.at(wd);
-                } catch (const std::out_of_range& ex) {
+                } catch (const std::out_of_range&) {
                     inotify->removeWatch(wd);
                     continue;
                 }
@@ -318,7 +318,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
                 }
             } else
                 wdObj->setParentWd(parentWd);
-        } catch (const std::out_of_range& ex) {
+        } catch (const std::out_of_range&) {
             // add new wstch
             wdObj = std::make_shared<Wd>(path, wd, parentWd);
             watches.emplace(wd, wdObj);
@@ -406,7 +406,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                     if (objectID != INVALID_OBJECT_ID)
                         content->removeObject(adir, objectID, false);
                 }
-            } catch (const std::out_of_range& ex) {
+            } catch (const std::out_of_range&) {
             } // Not found in map
         } else
             ++it;
@@ -511,7 +511,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 
             // should we check for already existing "nonexisting" watches?
             // ...
-        } catch (const std::out_of_range& ex) {
+        } catch (const std::out_of_range&) {
             wdObj = std::make_shared<Wd>(path, wd, parentWd);
             watches.emplace(wd, wdObj);
         }
@@ -617,7 +617,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
         std::shared_ptr<Wd> wdObj;
         try {
             wdObj = watches.at(checkWd);
-        } catch (const std::out_of_range& ex) {
+        } catch (const std::out_of_range&) {
             break;
         }
 
@@ -682,7 +682,7 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
     std::shared_ptr<Wd> wdObj;
     try {
         wdObj = watches.at(startPointWd);
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range&) {
         return;
     }
     if (!wdObj)
@@ -702,7 +702,7 @@ void AutoscanInotify::removeDescendants(int wd)
     std::shared_ptr<Wd> wdObj;
     try {
         wdObj = watches.at(wd);
-    } catch (const std::out_of_range& ex) {
+    } catch (const std::out_of_range&) {
         return;
     }
 

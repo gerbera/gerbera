@@ -42,11 +42,7 @@ ImportScript::ImportScript(std::shared_ptr<ContentManager> content,
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
-    try {
-        load(scriptPath);
-    } catch (const std::runtime_error& ex) {
-        throw ex;
-    }
+    load(scriptPath);
 }
 
 script_class_t ImportScript::whoami()
@@ -73,13 +69,13 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_del_prop_string(ctx, -1, "object_script_path");
         duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
-    } catch (const std::runtime_error& ex) {
+    } catch (const std::runtime_error&) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "orig");
         duk_del_prop_string(ctx, -1, "object_script_path");
         duk_del_prop_string(ctx, -1, "object_autoscan_id");
         processed = nullptr;
-        throw ex;
+        throw;
     }
 
     processed = nullptr;

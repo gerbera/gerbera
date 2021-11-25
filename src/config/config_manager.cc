@@ -247,7 +247,7 @@ void ConfigManager::load(const fs::path& userHome)
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
     try {
         auto conv = std::make_unique<StringConverter>(defaultCharSet, DEFAULT_INTERNAL_CHARSET);
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         defaultCharSet = DEFAULT_FALLBACK_CHARSET;
     }
     co->setDefaultValue(defaultCharSet);

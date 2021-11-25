@@ -100,7 +100,7 @@ protected:
     std::chrono::seconds utime {};
 
     /// \brief File size on disk (in bytes).
-    off_t sizeOnDisk {};
+    std::uintmax_t sizeOnDisk {};
 
     /// \brief virtual object flag
     bool virt {};
@@ -184,9 +184,9 @@ public:
     std::chrono::seconds getUTime() const { return utime; }
 
     /// \brief Set file size.
-    void setSizeOnDisk(off_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
+    void setSizeOnDisk(std::uintmax_t sizeOnDisk) { this->sizeOnDisk = sizeOnDisk; }
     /// \brief Retrieve the file size (in bytes).
-    off_t getSizeOnDisk() const { return sizeOnDisk; }
+    std::uintmax_t getSizeOnDisk() const { return sizeOnDisk; }
 
     /// \brief Set the virtual flag.
     void setVirtual(bool virt) { this->virt = virt; }
