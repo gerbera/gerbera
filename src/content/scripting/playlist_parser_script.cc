@@ -59,7 +59,7 @@ jsReadln(duk_context* ctx)
 
     try {
         line = self->readln();
-    } catch (const ServerShutdownException& se) {
+    } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
     } catch (const std::runtime_error& e) {
@@ -114,16 +114,12 @@ PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> conte
     const std::shared_ptr<ScriptingRuntime>& runtime)
     : Script(std::move(content), runtime, "playlist")
 {
-    try {
-        ScriptingRuntime::AutoLock lock(runtime->getMutex());
-        defineFunction("readln", jsReadln, 0);
-        defineFunction("getCdsObject", jsGetCdsObject, 1);
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
+    defineFunction("readln", jsReadln, 0);
+    defineFunction("getCdsObject", jsGetCdsObject, 1);
 
-        std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
-        load(scriptPath);
-    } catch (const std::runtime_error& ex) {
-        throw ex;
-    }
+    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    load(scriptPath);
 }
 
 std::string PlaylistParserScript::readln()
@@ -181,7 +177,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         duk_del_prop_string(ctx, -1, "object_script_path");
         duk_del_prop_string(ctx, -1, "object_autoscan_id");
         duk_pop(ctx);
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         duk_push_global_object(ctx);
         duk_del_prop_string(ctx, -1, "playlist");
         duk_del_prop_string(ctx, -1, "object_script_path");
@@ -196,7 +192,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         currentObjectID = INVALID_OBJECT_ID;
         currentTask = nullptr;
 
-        throw e;
+        throw;
     }
 
     currentHandle = nullptr;

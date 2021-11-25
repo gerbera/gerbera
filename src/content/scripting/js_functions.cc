@@ -226,7 +226,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         auto tmp = fmt::to_string(parentId);
         duk_push_string(ctx, tmp.c_str());
         return 1;
-    } catch (const ServerShutdownException& se) {
+    } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.\n");
     } catch (const std::runtime_error& e) {
@@ -249,7 +249,7 @@ static duk_ret_t convertCharsetGeneric(duk_context* ctx, charset_convert_t chr)
         std::string result = self->convertToCharset(ts, chr);
         duk_push_lstring(ctx, result.c_str(), result.length());
         return 1;
-    } catch (const ServerShutdownException& se) {
+    } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return DUK_RET_ERROR;
     } catch (const std::runtime_error& e) {

@@ -97,7 +97,7 @@ void TaskProcessor::threadProc()
         try {
             if (task->isValid())
                 task->run();
-        } catch (const ServerShutdownException& se) {
+        } catch (const ServerShutdownException&) {
             shutdownFlag = true;
         } catch (const std::runtime_error& e) {
             log_error("Exception caught: {}", e.what());

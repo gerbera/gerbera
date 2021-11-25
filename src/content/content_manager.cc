@@ -552,7 +552,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             }
             location = (containerID == CDS_ID_FS_ROOT) ? FS_ROOT_DIRECTORY : obj->getLocation();
             parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
-        } catch (const std::runtime_error& e) {
+        } catch (const std::runtime_error&) {
             if (adir->persistent()) {
                 containerID = INVALID_OBJECT_ID;
             } else {
@@ -1129,7 +1129,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
             if (fanartObjId > 0) {
                 database->loadObject(fanartObjId);
             }
-        } catch (const ObjectNotFoundException& e) {
+        } catch (const ObjectNotFoundException&) {
             container->removeResource((*fanart)->getHandlerType());
             fanart = resources.end();
         }
@@ -1345,7 +1345,7 @@ void ContentManager::threadProc()
         try {
             if (task->isValid())
                 task->run();
-        } catch (const ServerShutdownException& se) {
+        } catch (const ServerShutdownException&) {
             shutdownFlag = true;
         } catch (const std::runtime_error& e) {
             log_error("Exception caught: {}", e.what());
@@ -1512,7 +1512,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
         try {
             obj = database->loadObject(objectID);
             path = obj->getLocation();
-        } catch (const std::runtime_error& e) {
+        } catch (const std::runtime_error&) {
             log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
             return;
         }
