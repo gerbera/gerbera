@@ -355,6 +355,8 @@ protected:
     std::unique_ptr<PlaylistParserScript> playlist_parser_script;
 #endif
 
+    std::mutex layoutMutex;
+
     bool layout_enabled {};
     void threadProc();
 
