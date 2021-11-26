@@ -113,6 +113,7 @@ void ActionRequest::update()
             UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
+        ixmlDocument_free(result);
 #endif
     } else {
         // ok, here there can be two cases
