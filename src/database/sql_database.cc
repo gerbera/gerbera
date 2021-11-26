@@ -1308,7 +1308,7 @@ void SQLDatabase::deleteRows(std::string_view tableName, std::string_view key, c
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
 {
     if (parentID == CDS_ID_ROOT)
-        return fmt::format("{}{}", VIRTUAL_CONTAINER_SEPARATOR, title);
+        return title;
 
     beginTransaction("buildContainerPath");
     auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} = {3} LIMIT 1",
@@ -1325,7 +1325,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     if (prefix != LOC_VIRT_PREFIX)
         throw_std_runtime_error("Tried to build a virtual container path with an non-virtual parentID");
 
-    return path;
+    return path.relative_path();
 }
 
 bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID)
