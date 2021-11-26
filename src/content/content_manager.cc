@@ -409,6 +409,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
+            std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
             layout->processCdsObject(obj, rootPath, mimetype, contentType);
 
 #ifdef HAVE_JS
@@ -1298,6 +1299,7 @@ void ContentManager::destroyLayout()
 
 void ContentManager::reloadLayout()
 {
+    std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
     destroyLayout();
 #ifdef HAVE_JS
     destroyJS();
