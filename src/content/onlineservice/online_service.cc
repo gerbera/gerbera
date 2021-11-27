@@ -62,10 +62,10 @@ std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t serv
     return service_list.at(service);
 }
 
-OnlineService::OnlineService(std::shared_ptr<ContentManager> content)
+OnlineService::OnlineService(const std::shared_ptr<ContentManager>& content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
-    , content(std::move(content))
+    , content(content)
 {
 }
 

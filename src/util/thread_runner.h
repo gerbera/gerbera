@@ -41,8 +41,8 @@ using ThreadProc = void* (*)(void* target);
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
-    ThreadRunner(std::string name, ThreadProc targetProc, void* target, std::shared_ptr<Config> config)
-        : config(std::move(config))
+    ThreadRunner(std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
+        : config(config)
         , threadName(std::move(name))
         , targetProc(targetProc)
         , target(target)

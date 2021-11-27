@@ -96,7 +96,7 @@ public:
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
-    Script(std::shared_ptr<ContentManager> content,
+    Script(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name);
 
     void execute();

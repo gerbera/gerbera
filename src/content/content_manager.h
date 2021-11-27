@@ -145,7 +145,7 @@ public:
     void run();
     void shutdown();
 
-    void timerNotify(std::shared_ptr<Timer::Parameter> parameter) override;
+    void timerNotify(const std::shared_ptr<Timer::Parameter>& parameter) override;
 
     /// \brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask() const;
@@ -272,7 +272,7 @@ public:
     /// when we shutdown the server.
     ///
     /// \param exec the Executor object of the process
-    void registerExecutor(std::shared_ptr<Executor> exec);
+    void registerExecutor(const std::shared_ptr<Executor>& exec);
 
     /// \brief unregister process
     ///
@@ -343,7 +343,7 @@ protected:
     void assignFanArt(const std::shared_ptr<CdsContainer>& containerList, const std::shared_ptr<CdsObject>& origObj, int count) const;
 
     template <typename T>
-    void updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
+    void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
 
     std::shared_ptr<Layout> layout;
 

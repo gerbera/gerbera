@@ -37,8 +37,8 @@
 #include "server.h"
 #include "upnp_xml.h"
 
-Web::Items::Items(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
-    : WebRequestHandler(std::move(content))
+Web::Items::Items(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+    : WebRequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
 {
 }

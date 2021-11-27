@@ -342,7 +342,7 @@ enum config_option_t {
 class Config {
 public:
     virtual ~Config() = default;
-    virtual void updateConfigFromDatabase(std::shared_ptr<Database> database) = 0;
+    virtual void updateConfigFromDatabase(const std::shared_ptr<Database>& database) = 0;
     virtual std::string getOrigValue(const std::string& item) const = 0;
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;
@@ -355,7 +355,7 @@ public:
     /// \brief add a config option
     /// \param option option type to add.
     /// \param option option to add.
-    virtual void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) = 0;
+    virtual void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) = 0;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.

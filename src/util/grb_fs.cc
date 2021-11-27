@@ -106,8 +106,8 @@ fs::path findInPath(const fs::path& exec)
     return {};
 }
 
-GrbFile::GrbFile(const fs::path& path)
-    : path(path)
+GrbFile::GrbFile(fs::path path)
+    : path(std::move(path))
 {
 }
 

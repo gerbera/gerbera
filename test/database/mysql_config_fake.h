@@ -49,7 +49,7 @@ public:
         //        }
         return {};
     }
-    void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override { }
+    void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
     int getIntOption(config_option_t option) const override { return 0; }
     bool getBoolOption(config_option_t option) const override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
@@ -57,7 +57,7 @@ public:
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
-    void updateConfigFromDatabase(std::shared_ptr<Database> database) override { }
+    void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override { }
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }

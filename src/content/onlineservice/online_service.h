@@ -62,7 +62,7 @@ enum service_type_t {
 /// handles adding/refreshing content in the database.
 class OnlineService {
 public:
-    explicit OnlineService(std::shared_ptr<ContentManager> content);
+    explicit OnlineService(const std::shared_ptr<ContentManager>& content);
     virtual ~OnlineService() = default;
 
     /// \brief Retrieves user specified content from the service and adds

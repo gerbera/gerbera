@@ -47,8 +47,8 @@
 
 #endif // ONLINE_SERVICES
 
-BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
-    : Layout(std::move(content))
+BuiltinLayout::BuiltinLayout(const std::shared_ptr<ContentManager>& content)
+    : Layout(content)
     , config(this->content->getContext()->getConfig())
     , genreMap(this->config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {

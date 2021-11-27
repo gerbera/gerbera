@@ -47,8 +47,8 @@
 #define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
 #define MYSQL_ADD_RESOURCE_ATTR "ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL"
 
-MySQLDatabase::MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : SQLDatabase(std::move(config), std::move(mime))
+MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
+    : SQLDatabase(config, mime)
 {
     table_quote_begin = '`';
     table_quote_end = '`';
@@ -216,6 +216,12 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return res;
 }
 
+MySQLDatabaseWithTransactions::MySQLDatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
+    : SqlWithTransactions(config)
+    , MySQLDatabase(config, mime)
+{
+}
+
 void MySQLDatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     log_debug("START TRANSACTION {} {}", tName, inTransaction);
@@ -344,6 +350,11 @@ void MySQLDatabase::_exec(const std::string& query)
 }
 
 /* MysqlResult */
+
+MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
+    : mysql_res(mysql_res)
+{
+}
 
 MysqlResult::~MysqlResult()
 {

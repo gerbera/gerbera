@@ -310,8 +310,8 @@ static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 
-SQLDatabase::SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-    : Database(std::move(config))
+SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime)
+    : Database(config)
     , mime(std::move(mime))
 {
 }
@@ -2022,7 +2022,7 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
     }
 }
 
-void SQLDatabase::updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list)
+void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
 
@@ -2148,7 +2148,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     return dir;
 }
 
-void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
+void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
         throw_std_runtime_error("addAutoscanDirectory called with adir==nullptr");
@@ -2189,7 +2189,7 @@ void SQLDatabase::addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
     adir->setDatabaseID(insert(AUTOSCAN_TABLE, fields, values, true));
 }
 
-void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
+void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
         throw_std_runtime_error("updateAutoscanDirectory called with adir==nullptr");
@@ -2222,7 +2222,7 @@ void SQLDatabase::updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adi
     updateRow(AUTOSCAN_TABLE, fields, "id", adir->getDatabaseID());
 }
 
-void SQLDatabase::removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir)
+void SQLDatabase::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     _removeAutoscanDirectory(adir->getDatabaseID());
 }

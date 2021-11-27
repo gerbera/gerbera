@@ -37,8 +37,8 @@
 #include "metadata/metadata_handler.h"
 #include "util/upnp_clients.h"
 
-Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content)
+    : WebRequestHandler(content)
     , context(std::move(context))
 {
 }

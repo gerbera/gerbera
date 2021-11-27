@@ -43,7 +43,7 @@
 /// \brief The Database class for using MySQL
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    explicit MySQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime);
     ~MySQLDatabase() override;
 
     MySQLDatabase(const MySQLDatabase&) = delete;
@@ -81,11 +81,8 @@ private:
 /// \brief The Database class for using MySQL with transactions
 class MySQLDatabaseWithTransactions : public SqlWithTransactions, public MySQLDatabase {
 public:
-    MySQLDatabaseWithTransactions(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
-        : SqlWithTransactions(config)
-        , MySQLDatabase(std::move(config), std::move(mime))
-    {
-    }
+    MySQLDatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime);
+
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;
     void commit(std::string_view tName) override;
@@ -95,10 +92,7 @@ public:
 
 class MysqlResult : public SQLResult {
 public:
-    explicit MysqlResult(MYSQL_RES* mysql_res)
-        : mysql_res(mysql_res)
-    {
-    }
+    explicit MysqlResult(MYSQL_RES* mysql_res);
     ~MysqlResult() override;
 
     MysqlResult(const MysqlResult&) = delete;

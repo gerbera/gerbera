@@ -110,9 +110,9 @@ jsGetCdsObject(duk_context* ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(std::shared_ptr<ContentManager> content,
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(std::move(content), runtime, "playlist")
+    : Script(content, runtime, "playlist")
 {
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     defineFunction("readln", jsReadln, 0);
@@ -141,7 +141,7 @@ std::string PlaylistParserScript::readln()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptpath)
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptpath)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
         throw_std_runtime_error("recursion not allowed");
@@ -153,7 +153,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     GrbFile file(obj->getLocation());
     currentHandle = file.open("r");
 
-    currentTask = std::move(task);
+    currentTask = task;
     currentObjectID = obj->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';

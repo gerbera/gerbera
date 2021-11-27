@@ -27,8 +27,8 @@
 
 #include "iohandler/mem_io_handler.h"
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ContentManager> content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
-    : RequestHandler(std::move(content))
+DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
+    : RequestHandler(content)
     , xmlBuilder(xmlBuilder)
 {
     auto desc = xmlBuilder->renderDeviceDescription();

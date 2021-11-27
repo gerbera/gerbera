@@ -76,7 +76,7 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(resource_attributes_t res, std::string value);
+    void addAttribute(resource_attributes_t res, const std::string& value);
 
     /// \brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<std::string, std::string>& additional);

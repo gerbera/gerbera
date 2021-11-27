@@ -221,7 +221,7 @@ void SessionManager::checkTimer()
     }
 }
 
-void SessionManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
+void SessionManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parameter)
 {
     log_debug("notified... {} web sessions.", sessions.size());
 

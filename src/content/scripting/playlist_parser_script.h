@@ -44,11 +44,11 @@ class GenericTask;
 
 class PlaylistParserScript : public Script {
 public:
-    PlaylistParserScript(std::shared_ptr<ContentManager> content,
+    PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
     std::string readln();
-    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptpath);
+    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptpath);
     script_class_t whoami() override;
 
 private:

@@ -29,7 +29,7 @@ class TestDatabase : public SQLDatabase, public std::enable_shared_from_this<SQL
 public:
     using SQLDatabase::identifier;
 
-    TestDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime)
+    TestDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
         : SQLDatabase(config, mime)
     {
         table_quote_begin = '[';

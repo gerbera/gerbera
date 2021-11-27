@@ -45,8 +45,8 @@
 #include "util/upnp_quirks.h"
 #include "web/session_manager.h"
 
-FileRequestHandler::FileRequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
-    : RequestHandler(std::move(content))
+FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+    : RequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
 {
 }

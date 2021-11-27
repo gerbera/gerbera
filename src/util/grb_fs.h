@@ -20,7 +20,7 @@ private:
     std::FILE* fd {};
 
 public:
-    GrbFile(const fs::path& path);
+    GrbFile(fs::path path);
     ~GrbFile();
 
     std::FILE* open(const char* mode, bool fail = true);
