@@ -519,7 +519,7 @@ int Server::registerVirtualDirCallbacks()
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = urlUnescape(filename);
             reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
-            *requestCookie = reinterpret_cast<const void**>(reqHandler.release());
+            *requestCookie = reinterpret_cast<const void*>(reqHandler.release());
             return 0;
         } catch (const ServerShutdownException& se) {
             return -1;
