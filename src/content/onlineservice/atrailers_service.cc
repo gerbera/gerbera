@@ -37,8 +37,8 @@
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService(std::shared_ptr<ContentManager> content)
-    : CurlOnlineService(std::move(content), ATRAILERS_SERVICE)
+ATrailersService::ATrailersService(const std::shared_ptr<ContentManager>& content)
+    : CurlOnlineService(content, ATRAILERS_SERVICE)
 {
     if (config->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
         service_url = ATRAILERS_SERVICE_URL_640;

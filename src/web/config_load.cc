@@ -40,8 +40,8 @@
 #include "transcoding/transcoding.h"
 #include "util/upnp_clients.h"
 
-Web::ConfigLoad::ConfigLoad(std::shared_ptr<ContentManager> content)
-    : WebRequestHandler(std::move(content))
+Web::ConfigLoad::ConfigLoad(const std::shared_ptr<ContentManager>& content)
+    : WebRequestHandler(content)
 {
     try {
         if (this->database) {

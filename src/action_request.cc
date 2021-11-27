@@ -34,7 +34,7 @@
 #include "upnp_xml.h"
 #include "util/upnp_quirks.h"
 
-ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest* upnpRequest)
+ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnpRequest)
     : upnp_request(upnpRequest)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnpRequest))
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnpRequest))
@@ -42,7 +42,7 @@ ActionRequest::ActionRequest(std::shared_ptr<Context> context, UpnpActionRequest
 {
     auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnpRequest);
-    quirks = std::make_unique<Quirks>(std::move(context), ctrlPtIPAddr, userAgent);
+    quirks = std::make_unique<Quirks>(context, ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const

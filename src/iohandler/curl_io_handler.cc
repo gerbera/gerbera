@@ -35,8 +35,8 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(std::shared_ptr<Config> config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
-    : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
+CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
+    : IOHandlerBufferHelper(config, bufSize, initialFillSize)
 {
     if (url.empty())
         throw_std_runtime_error("URL has not been set correctly");

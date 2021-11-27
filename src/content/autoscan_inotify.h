@@ -51,7 +51,7 @@ class ContentManager;
 
 class AutoscanInotify {
 public:
-    explicit AutoscanInotify(std::shared_ptr<ContentManager> content);
+    explicit AutoscanInotify(const std::shared_ptr<ContentManager>& content);
     ~AutoscanInotify();
 
     AutoscanInotify(const AutoscanInotify&) = delete;
@@ -104,9 +104,9 @@ private:
 
     class WatchAutoscan : public Watch {
     public:
-        WatchAutoscan(bool startPoint, std::shared_ptr<AutoscanDirectory> adir)
+        WatchAutoscan(bool startPoint, const std::shared_ptr<AutoscanDirectory>& adir)
             : Watch(WatchType::Autoscan)
-            , adir(std::move(adir))
+            , adir(adir)
             , startPoint(startPoint)
         {
         }
@@ -154,7 +154,7 @@ private:
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
         const std::unique_ptr<std::vector<std::shared_ptr<Watch>>>& getWdWatches() const { return wdWatches; }
-        void addWatch(std::shared_ptr<Watch> w) { wdWatches->push_back(move(w)); }
+        void addWatch(const std::shared_ptr<Watch>& w) { wdWatches->push_back(w); }
 
     private:
         std::unique_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches { std::make_unique<std::vector<std::shared_ptr<Watch>>>() };

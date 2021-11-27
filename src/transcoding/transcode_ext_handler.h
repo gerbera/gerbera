@@ -44,9 +44,9 @@ class TranscodeExternalHandler : public TranscodeHandler {
     using TranscodeHandler::TranscodeHandler;
 
 public:
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<TranscodingProfile> profile,
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
         std::string location,
-        std::shared_ptr<CdsObject> obj,
+        const std::shared_ptr<CdsObject>& obj,
         const std::string& range) override;
 
 private:

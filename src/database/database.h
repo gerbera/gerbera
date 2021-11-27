@@ -69,9 +69,9 @@ protected:
     int totalMatches {};
 
 public:
-    BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
+    BrowseParam(const std::shared_ptr<CdsObject>& object, unsigned int flags)
         : flags(flags)
-        , object(std::move(object))
+        , object(object)
     {
     }
 
@@ -259,7 +259,7 @@ public:
 
     /* autoscan methods */
     virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
-    virtual void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) = 0;
+    virtual void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) = 0;
 
     /* config methods */
     virtual std::vector<ConfigValue> getConfigValues() = 0;
@@ -272,9 +272,9 @@ public:
     /// \return nullptr if the given id is no autoscan start point,
     /// or the matching AutoscanDirectory
     virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
-    virtual void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
-    virtual void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
-    virtual void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) = 0;
+    virtual void addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
+    virtual void updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
+    virtual void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
     virtual void checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
 
     virtual std::vector<int> getPathIDs(int objectID) = 0;

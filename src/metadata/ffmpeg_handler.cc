@@ -180,7 +180,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     if (pFormatCtx->duration > 0) {
         auto duration = millisecondsToHMSF(pFormatCtx->duration / (AV_TIME_BASE / 1000));
         log_debug("Added duration: {}", duration);
-        resource->addAttribute(R_DURATION, std::move(duration));
+        resource->addAttribute(R_DURATION, duration);
     }
 
     // bitrate
@@ -220,7 +220,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
-                resource2->addAttribute(R_RESOLUTION, std::move(resolution));
+                resource2->addAttribute(R_RESOLUTION, resolution);
                 videoset = true;
             }
         }

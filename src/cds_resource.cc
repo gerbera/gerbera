@@ -55,9 +55,9 @@ CdsResource::CdsResource(int handlerType,
 {
 }
 
-void CdsResource::addAttribute(resource_attributes_t res, std::string value)
+void CdsResource::addAttribute(resource_attributes_t res, const std::string& value)
 {
-    attributes[MetadataHandler::getResAttrName(res)] = std::move(value);
+    attributes[MetadataHandler::getResAttrName(res)] = value;
 }
 
 void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)

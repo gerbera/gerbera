@@ -220,10 +220,10 @@ void ContentManager::run()
     }
 }
 
-void ContentManager::registerExecutor(std::shared_ptr<Executor> exec)
+void ContentManager::registerExecutor(const std::shared_ptr<Executor>& exec)
 {
     auto lock = threadRunner->lockGuard("registerExecutor");
-    process_list.push_back(std::move(exec));
+    process_list.push_back(exec);
 }
 
 void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
@@ -242,7 +242,7 @@ void ContentManager::unregisterExecutor(const std::shared_ptr<Executor>& exec)
     process_list.erase(std::remove(process_list.begin(), process_list.end(), exec), process_list.end());
 }
 
-void ContentManager::timerNotify(std::shared_ptr<Timer::Parameter> parameter)
+void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parameter)
 {
     if (!parameter)
         return;
@@ -908,7 +908,7 @@ void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, 
 }
 
 template <typename T>
-void ContentManager::updateCdsObject(std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
+void ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -922,7 +922,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<T>& item, const std::map<st
 }
 
 template <>
-void ContentManager::updateCdsObject(std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
+void ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -951,7 +951,7 @@ void ContentManager::updateCdsObject(std::shared_ptr<CdsContainer>& item, const 
 }
 
 template <>
-void ContentManager::updateCdsObject(std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
+void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");

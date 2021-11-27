@@ -40,8 +40,8 @@
 #include "upnp_xml.h"
 #include "util/tools.h"
 
-Web::EditLoad::EditLoad(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
-    : WebRequestHandler(std::move(content))
+Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+    : WebRequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
 {
 }

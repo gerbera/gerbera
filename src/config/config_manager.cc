@@ -97,7 +97,7 @@ std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& roo
     return co->getValue();
 }
 
-void ConfigManager::addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue)
+void ConfigManager::addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue)
 {
     options.at(option) = optionValue;
 }
@@ -460,7 +460,7 @@ void ConfigManager::load(const fs::path& userHome)
     xmlDoc = nullptr;
 }
 
-void ConfigManager::updateConfigFromDatabase(std::shared_ptr<Database> database)
+void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& database)
 {
     auto values = database->getConfigValues();
     auto self = getSelf();

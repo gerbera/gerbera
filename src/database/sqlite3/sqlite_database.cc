@@ -41,8 +41,8 @@
 #define SQLITE3_UPDATE_VERSION "UPDATE \"mt_internal_setting\" SET \"value\"='{}' WHERE \"key\"='db_version' AND \"value\"='{}'"
 #define SQLITE3_ADD_RESOURCE_ATTR "ALTER TABLE \"grb_cds_resource\" ADD COLUMN \"{}\" varchar(255) default NULL"
 
-Sqlite3Database::Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
-    : SQLDatabase(std::move(config), std::move(mime))
+Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
+    : SQLDatabase(config, mime)
     , timer(std::move(timer))
 {
     table_quote_begin = '"';
@@ -191,6 +191,12 @@ std::string Sqlite3Database::getError(const std::string& query, const std::strin
 {
     sqliteStatus = (errorCode == SQLITE_BUSY || errorCode == SQLITE_LOCKED) ? SQLITE_LOCKED : SQLITE_OK;
     return fmt::format("SQLITE3: ({}, : {}) {}\nQuery: {}\nerror: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
+}
+
+Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
+    : SqlWithTransactions(config)
+    , Sqlite3Database(config, mime, timer)
+{
 }
 
 void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
@@ -401,6 +407,12 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
+SLInitTask::SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
+    : config(std::move(config))
+    , hashie(hashie)
+{
+}
+
 void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: init");
@@ -442,6 +454,11 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl)
 }
 
 /* SLSelectTask */
+SLSelectTask::SLSelectTask(const std::string& query)
+    : query(query.c_str())
+{
+}
+
 void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: {}", query);
@@ -578,7 +595,7 @@ std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 
 /* Sqlite3BackupTimerSubscriber */
 
-void Sqlite3Database::timerNotify(std::shared_ptr<Timer::Parameter> param)
+void Sqlite3Database::timerNotify(const std::shared_ptr<Timer::Parameter>& param)
 {
     auto btask = std::make_shared<SLBackupTask>(config, false);
     this->addTask(btask, true);

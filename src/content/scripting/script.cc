@@ -163,11 +163,11 @@ void Script::setIntProperty(const std::string& name, int value)
 
 /* **************** */
 
-Script::Script(std::shared_ptr<ContentManager> content,
+Script::Script(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
-    , content(std::move(content))
+    , content(content)
     , runtime(runtime)
     , name(name)
 {

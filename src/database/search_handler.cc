@@ -53,6 +53,11 @@ static const std::unordered_map<std::string_view, TokenType> tokenTypes {
     { "or", TokenType::OR }
 };
 
+SearchLexer::SearchLexer(std::string input)
+    : input(std::move(input))
+{
+}
+
 std::unique_ptr<SearchToken> SearchLexer::nextToken()
 {
     while (currentPos < input.length()) {
@@ -159,6 +164,12 @@ std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
         return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
     }
     return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
+}
+
+SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)
+    : lexer(std::make_unique<SearchLexer>(searchCriteria))
+    , sqlEmitter(sqlEmitter)
+{
 }
 
 void SearchParser::getNextToken()
@@ -338,9 +349,21 @@ std::string ASTNode::emitSQL() const
     return sqlEmitter.emitSQL(this);
 }
 
+ASTAsterisk::ASTAsterisk(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
+}
+
 std::string ASTAsterisk::emit() const
 {
     return sqlEmitter.emit(this);
+}
+
+ASTProperty::ASTProperty(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
 }
 
 std::string ASTProperty::emit() const
@@ -348,9 +371,21 @@ std::string ASTProperty::emit() const
     return value;
 }
 
+ASTBoolean::ASTBoolean(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
+}
+
 std::string ASTBoolean::emit() const
 {
     return value;
+}
+
+ASTParenthesis::ASTParenthesis(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> node)
+    : ASTNode(sqlEmitter)
+    , bracketedNode(std::move(node))
+{
 }
 
 std::string ASTParenthesis::emit() const
@@ -358,9 +393,21 @@ std::string ASTParenthesis::emit() const
     return sqlEmitter.emit(this, bracketedNode->emit());
 }
 
+ASTDQuote::ASTDQuote(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
+}
+
 std::string ASTDQuote::emit() const
 {
     return sqlEmitter.emit(this);
+}
+
+ASTEscapedString::ASTEscapedString(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
 }
 
 std::string ASTEscapedString::emit() const
@@ -368,9 +415,24 @@ std::string ASTEscapedString::emit() const
     return value;
 }
 
+ASTQuotedString::ASTQuotedString(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTDQuote> openQuote,
+    std::shared_ptr<ASTEscapedString> escapedString, std::shared_ptr<ASTDQuote> closeQuote)
+    : ASTNode(sqlEmitter)
+    , openQuote(std::move(openQuote))
+    , escapedString(std::move(escapedString))
+    , closeQuote(std::move(closeQuote))
+{
+}
+
 std::string ASTQuotedString::emit() const
 {
     return openQuote->emit() + escapedString->emit() + closeQuote->emit();
+}
+
+ASTCompareOperator::ASTCompareOperator(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
 }
 
 std::string ASTCompareOperator::emit() const
@@ -384,9 +446,24 @@ std::string ASTCompareOperator::emit(const std::string& property, const std::str
     return sqlEmitter.emit(this, property, value);
 }
 
+ASTCompareExpression::ASTCompareExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+    std::shared_ptr<ASTCompareOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
+    : ASTNode(sqlEmitter)
+    , lhs(std::move(lhs))
+    , operatr(std::move(operatr))
+    , rhs(std::move(rhs))
+{
+}
+
 std::string ASTCompareExpression::emit() const
 {
     return operatr->emit(lhs->emit(), rhs->emit());
+}
+
+ASTStringOperator::ASTStringOperator(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
 }
 
 std::string ASTStringOperator::emit() const
@@ -400,9 +477,24 @@ std::string ASTStringOperator::emit(const std::string& property, const std::stri
     return sqlEmitter.emit(this, property, value);
 }
 
+ASTStringExpression::ASTStringExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+    std::shared_ptr<ASTStringOperator> operatr, std::shared_ptr<ASTQuotedString> rhs)
+    : ASTNode(sqlEmitter)
+    , lhs(std::move(lhs))
+    , operatr(std::move(operatr))
+    , rhs(std::move(rhs))
+{
+}
+
 std::string ASTStringExpression::emit() const
 {
     return operatr->emit(lhs->emit(), rhs->emit());
+}
+
+ASTExistsOperator::ASTExistsOperator(const SQLEmitter& sqlEmitter, std::string value)
+    : ASTNode(sqlEmitter)
+    , value(std::move(value))
+{
 }
 
 std::string ASTExistsOperator::emit() const
@@ -416,19 +508,48 @@ std::string ASTExistsOperator::emit(const std::string& property, const std::stri
     return sqlEmitter.emit(this, property, value);
 }
 
+ASTExistsExpression::ASTExistsExpression(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTProperty> lhs,
+    std::shared_ptr<ASTExistsOperator> operatr, std::shared_ptr<ASTBoolean> rhs)
+    : ASTNode(sqlEmitter)
+    , lhs(std::move(lhs))
+    , operatr(std::move(operatr))
+    , rhs(std::move(rhs))
+{
+}
+
 std::string ASTExistsExpression::emit() const
 {
     return operatr->emit(lhs->emit(), rhs->emit());
 }
 
+ASTAndOperator::ASTAndOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs)
+    : ASTNode(sqlEmitter)
+    , lhs(std::move(lhs))
+    , rhs(std::move(rhs))
+{
+}
 std::string ASTAndOperator::emit() const
 {
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
+ASTOrOperator::ASTOrOperator(const SQLEmitter& sqlEmitter, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs)
+    : ASTNode(sqlEmitter)
+    , lhs(std::move(lhs))
+    , rhs(std::move(rhs))
+{
+}
+
 std::string ASTOrOperator::emit() const
 {
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
+}
+
+DefaultSQLEmitter::DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper)
+    : colMapper(std::move(colMapper))
+    , metaMapper(std::move(metaMapper))
+    , resMapper(std::move(resMapper))
+{
 }
 
 std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
@@ -536,6 +657,13 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
     const std::string& rhs) const
 {
     return fmt::format("{} OR {}", lhs, rhs);
+}
+
+SortParser::SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria)
+    : colMapper(std::move(colMapper))
+    , metaMapper(std::move(metaMapper))
+    , sortCrit(std::move(sortCriteria))
+{
 }
 
 std::string SortParser::parse(std::string& addColumns, std::string& addJoin)

@@ -50,8 +50,8 @@
 #include "iohandler/curl_io_handler.h"
 #endif
 
-std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(std::shared_ptr<TranscodingProfile> profile,
-    std::string location, std::shared_ptr<CdsObject> obj, const std::string& range)
+std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
+    std::string location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
 {
     log_debug("Start transcoding file: {}", location);
     if (!profile)

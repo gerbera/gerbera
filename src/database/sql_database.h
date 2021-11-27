@@ -150,12 +150,12 @@ public:
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanmode) override;
-    void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override;
+    void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override;
 
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override;
-    void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
-    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override;
+    void addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override;
+    void updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override;
+    void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override;
     void checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
     /* config methods */
@@ -185,7 +185,7 @@ public:
     void deleteRows(std::string_view tableName, std::string_view where_key, const std::vector<int>& where_values);
 
 protected:
-    explicit SQLDatabase(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime);
+    explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime);
     void init() override;
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)

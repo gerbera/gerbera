@@ -57,12 +57,12 @@ public:
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
-    void updateAutoscanList(ScanMode scanmode, std::shared_ptr<AutoscanList> list) override { }
+    void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }
 
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return {}; }
-    void addAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
-    void updateAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
-    void removeAutoscanDirectory(std::shared_ptr<AutoscanDirectory> adir) override { }
+    void addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override { }
+    void updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override { }
+    void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override { }
     void checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir) override { }
 
     std::vector<int> getPathIDs(int objectID) override { return {}; }

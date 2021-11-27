@@ -43,7 +43,7 @@ class ScriptingRuntime;
 
 class ImportScript : public Script {
 public:
-    ImportScript(std::shared_ptr<ContentManager> content,
+    ImportScript(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);

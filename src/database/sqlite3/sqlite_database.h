@@ -93,11 +93,7 @@ protected:
 class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
-    explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
-        : config(std::move(config))
-        , hashie(hashie)
-    {
-    }
+    explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie);
     void run(sqlite3*& db, Sqlite3Database* sl) override;
 
     std::string_view taskType() const override { return "InitTask"; }
@@ -112,10 +108,7 @@ class SLSelectTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
-    explicit SLSelectTask(const std::string& query)
-        : query(query.c_str())
-    {
-    }
+    explicit SLSelectTask(const std::string& query);
     void run(sqlite3*& db, Sqlite3Database* sl) override;
     [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
 
@@ -164,8 +157,8 @@ protected:
 /// \brief The Database class for using SQLite3
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    void timerNotify(std::shared_ptr<Timer::Parameter> param) override;
-    Sqlite3Database(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer);
+    void timerNotify(const std::shared_ptr<Timer::Parameter>& param) override;
+    Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer);
 
 protected:
     void _exec(const std::string& query) override;
@@ -217,11 +210,8 @@ private:
 /// \brief The Database class for using SQLite3 with transactions
 class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
 public:
-    Sqlite3DatabaseWithTransactions(std::shared_ptr<Config> config, std::shared_ptr<Mime> mime, std::shared_ptr<Timer> timer)
-        : SqlWithTransactions(config)
-        , Sqlite3Database(std::move(config), std::move(mime), std::move(timer))
-    {
-    }
+    Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
+
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;
     void commit(std::string_view tName) override;

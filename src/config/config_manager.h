@@ -67,12 +67,12 @@ public:
     fs::path getConfigFilename() const override { return filename; }
 
     void load(const fs::path& userHome);
-    void updateConfigFromDatabase(std::shared_ptr<Database> database) override;
+    void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override;
 
     /// \brief add a config option
     /// \param option option type to add.
     /// \param option option to add.
-    void addOption(config_option_t option, std::shared_ptr<ConfigOption> optionValue) override;
+    void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.

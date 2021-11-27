@@ -28,8 +28,8 @@
 #include "content/content_manager.h"
 #include "context.h"
 
-TranscodeHandler::TranscodeHandler(std::shared_ptr<ContentManager> content)
+TranscodeHandler::TranscodeHandler(const std::shared_ptr<ContentManager>& content)
     : config(content->getContext()->getConfig())
-    , content(std::move(content))
+    , content(content)
 {
 }

@@ -35,8 +35,8 @@
 
 class Config;
 
-BufferedIOHandler::BufferedIOHandler(std::shared_ptr<Config> config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize)
-    : IOHandlerBufferHelper(std::move(config), bufSize, initialFillSize)
+BufferedIOHandler::BufferedIOHandler(const std::shared_ptr<Config>& config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize)
+    : IOHandlerBufferHelper(config, bufSize, initialFillSize)
 {
     if (!underlyingHandler)
         throw_std_runtime_error("underlyingHandler must not be nullptr");

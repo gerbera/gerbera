@@ -200,8 +200,8 @@ private:
 
 class AutoscanListOption : public ConfigOption {
 public:
-    explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
-        : option(std::move(option))
+    explicit AutoscanListOption(const std::shared_ptr<AutoscanList>& option)
+        : option(option)
     {
     }
 
@@ -213,7 +213,7 @@ private:
 
 class ClientConfigListOption : public ConfigOption {
 public:
-    explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
+    explicit ClientConfigListOption(const std::shared_ptr<ClientConfigList>& option)
         : option(std::move(option))
     {
     }
@@ -225,8 +225,8 @@ private:
 
 class DirectoryTweakOption : public ConfigOption {
 public:
-    explicit DirectoryTweakOption(std::shared_ptr<DirectoryConfigList> option)
-        : option(std::move(option))
+    explicit DirectoryTweakOption(const std::shared_ptr<DirectoryConfigList>& option)
+        : option(option)
     {
     }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const override { return option; }
@@ -237,8 +237,8 @@ protected:
 
 class TranscodingProfileListOption : public ConfigOption {
 public:
-    explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
-        : option(std::move(option))
+    explicit TranscodingProfileListOption(const std::shared_ptr<TranscodingProfileList>& option)
+        : option(option)
     {
     }
 
@@ -258,8 +258,8 @@ protected:
 
 class DynamicContentListOption : public ConfigOption {
 public:
-    explicit DynamicContentListOption(std::shared_ptr<DynamicContentList> option)
-        : option(std::move(option))
+    explicit DynamicContentListOption(const std::shared_ptr<DynamicContentList>& option)
+        : option(option)
     {
     }
 
