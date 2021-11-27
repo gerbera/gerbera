@@ -2399,7 +2399,6 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
         return {};
 
     std::vector<std::shared_ptr<CdsResource>> resources;
-    resources.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(
