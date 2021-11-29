@@ -349,7 +349,7 @@ void SQLDatabase::init()
         auto attrName = MetadataHandler::getResAttrName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + resAttrId);
         resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + resAttrId, std::pair(RES_ALIAS, attrName));
-        tableColumnOrder[RESOURCE_TABLE].emplace_back(attrName);
+        tableColumnOrder[RESOURCE_TABLE].push_back(std::move(attrName));
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
@@ -445,7 +445,7 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
         if (version < DBVERSION && myHash == hashies.at(version)) {
             for (auto&& scriptNode : versionNode.children("script")) {
                 std::string migration = trimString(scriptNode.attribute("migration").as_string());
-                versionCmds.emplace_back(migration, trimString(scriptNode.text().as_string()));
+                versionCmds.emplace_back(std::move(migration), trimString(scriptNode.text().as_string()));
             }
         } else {
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
