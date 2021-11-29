@@ -212,7 +212,7 @@ void AutoscanInotify::threadProc()
                 }
 
                 // changed
-                if (adir && mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE)) {
+                if (adir && (mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE))) {
                     // not new
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
                         log_debug("deleting {}", path.c_str());
@@ -592,7 +592,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray().empty()) {
                 fs::path testLocation = watchAs->getAutoscanDirectory()->getLocation();
-                if (path < testLocation) {
+                if (testLocation <= path) {
                     if (!pathBestMatch.empty()) {
                         if (pathBestMatch.string().length() < testLocation.string().length()) {
                             pathBestMatch = testLocation;
