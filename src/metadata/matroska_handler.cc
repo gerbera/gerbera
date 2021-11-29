@@ -135,13 +135,13 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
         while ((elL1 = ebmlStream.FindNextElement(elL0->Generic().Context, iUpperLevel, ~0, true))) {
             parseLevel1Element(item, ebmlFile, ebmlStream, elL1, pIoHandler);
 
-            elL1->SkipData(ebmlStream, elL1->Generic().Context);
+            delete (elL1->SkipData(ebmlStream, elL1->Generic().Context));
             delete elL1;
             if (activeFlag == 0) // terminate search
                 break;
         } // while elementLevel1
 
-        elL0->SkipData(ebmlStream, LIBMATROSKA_NAMESPACE::KaxSegment_Context);
+        delete (elL0->SkipData(ebmlStream, LIBMATROSKA_NAMESPACE::KaxSegment_Context));
         delete elL0;
         if (activeFlag == 0) // terminate search
             break;
@@ -184,7 +184,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
     ebmlFile.setFilePointer(0);
     auto estream = LIBEBML_NAMESPACE::EbmlStream(ebmlFile);
     LIBEBML_NAMESPACE::EbmlElement* ebmlHead = estream.FindNextID(EBML_INFO(LIBEBML_NAMESPACE::EbmlHead), ~0);
-    ebmlHead->SkipData(estream, EBML_CONTEXT(ebmlHead));
+    delete (ebmlHead->SkipData(estream, EBML_CONTEXT(ebmlHead)));
     delete ebmlHead;
 
     EbmlElement* dummyEl;
