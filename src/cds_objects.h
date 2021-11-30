@@ -530,9 +530,10 @@ public:
     ///
     /// See description for CdsObject::equals() for details.
     bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() const override;
+    /*
+        /// \brief Checks if the minimum required parameters for the object have been set and are valid.
+        void validate() const override;
+    */
 };
 
 #endif // __CDS_OBJECTS_H__
