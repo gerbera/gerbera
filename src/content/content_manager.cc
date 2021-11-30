@@ -48,20 +48,12 @@
 #include "layout/js_layout.h"
 #endif
 
-#ifdef HAVE_LASTFMLIB
-#include "onlineservice/lastfm_scrobbler.h"
-#endif
-
 #ifdef ATRAILERS
 #include "onlineservice/atrailers_service.h"
 #endif
 
 #ifdef ONLINE_SERVICES
 #include "onlineservice/task_processor.h"
-#endif
-
-#ifdef HAVE_JS
-#include "scripting/scripting_runtime.h"
 #endif
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
@@ -72,12 +64,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , session_manager(context->getSessionManager())
     , context(context)
     , timer(std::move(timer))
-#ifdef HAVE_JS
-    , scripting_runtime(std::make_shared<ScriptingRuntime>())
-#endif
-#ifdef HAVE_LASTFMLIB
-    , last_fm(std::make_shared<LastFm>(context))
-#endif
 {
     update_manager = std::make_shared<UpdateManager>(config, database, server);
 #ifdef ONLINE_SERVICES

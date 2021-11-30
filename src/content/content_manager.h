@@ -50,6 +50,7 @@
 // vice versa
 class PlaylistParserScript;
 #include "scripting/playlist_parser_script.h"
+#include "scripting/scripting_runtime.h"
 #else
 class ScriptingRuntime;
 #endif // HAVE_JS
@@ -67,6 +68,10 @@ class ScriptingRuntime;
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service.h"
 #endif // ONLINE_SERVICES
+
+#ifdef HAVE_LASTFMLIB
+#include "onlineservice/lastfm_scrobbler.h"
+#endif
 
 #include "util/executor.h"
 
@@ -308,8 +313,12 @@ protected:
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<ScriptingRuntime> scripting_runtime;
-    std::shared_ptr<LastFm> last_fm;
+#ifdef HAVE_JS
+    std::shared_ptr<ScriptingRuntime> scripting_runtime { std::make_shared<ScriptingRuntime>() };
+#endif
+#ifdef HAVE_LASTFMLIB
+    std::shared_ptr<LastFm> last_fm { std::make_shared<LastFm>(context) };
+#endif
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
 
