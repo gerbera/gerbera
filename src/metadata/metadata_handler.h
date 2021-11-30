@@ -224,7 +224,7 @@ public:
     static std::string mapContentHandler2String(int ch);
     static int remapContentHandler(const std::string& contHandler);
 
-    static metadata_fields_t remapMetaDataField(const std::string& fieldName);
+    static metadata_fields_t remapMetaDataField(std::string_view fieldName);
 };
 
 #endif // __METADATA_HANDLER_H__

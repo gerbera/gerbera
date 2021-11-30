@@ -50,7 +50,7 @@ static constexpr auto res_names = std::array<std::pair<resource_attributes_t, co
     std::pair(R_VIDEOCODEC, "R_VIDEOCODEC"),
 };
 
-static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, const char*>, M_MAX> {
+static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, std::string_view>, M_MAX> {
     std::pair(M_TITLE, "M_TITLE"),
     std::pair(M_ARTIST, "M_ARTIST"),
     std::pair(M_ALBUM, "M_ALBUM"),

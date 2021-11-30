@@ -72,7 +72,7 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define MIMETYPE_DEFAULT "application/octet-stream"
 
 // default protocol
-#define PROTOCOL "http-get"
+static constexpr auto PROTOCOL = std::string_view("http-get");
 
 // device description defaults
 #define DESC_MANUFACTURER_URL "http://gerbera.io/"
