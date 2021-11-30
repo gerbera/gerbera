@@ -31,6 +31,7 @@
 
 #include "process_executor.h" // API
 
+#include <array>
 #include <csignal>
 #include <sys/wait.h>
 #include <thread>
@@ -44,7 +45,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
     : tempPaths(std::move(tempPaths))
 {
 #define MAX_ARGS 255
-    const char* argv[MAX_ARGS];
+    std::array<const char*, MAX_ARGS> argv;
 
     argv[0] = command.c_str();
     int apos = 0;
@@ -69,7 +70,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
             log_debug("setenv: {}='{}'", eName, eValue);
         }
         log_debug("Launching process: {} {}", command, fmt::join(arglist, " "));
-        execvp(command.c_str(), const_cast<char**>(argv));
+        execvp(command.c_str(), const_cast<char**>(argv.data()));
         break;
     default:
         break;
