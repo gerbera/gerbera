@@ -119,7 +119,7 @@ void TaskProcessor::addTask(const std::shared_ptr<GenericTask>& task)
     threadRunner->notify();
 }
 
-std::shared_ptr<GenericTask> TaskProcessor::getCurrentTask()
+std::shared_ptr<GenericTask> TaskProcessor::getCurrentTask() const
 {
     auto lock = threadRunner->lockGuard();
     return currentTask;

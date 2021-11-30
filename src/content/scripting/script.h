@@ -85,7 +85,7 @@ public:
 
     virtual script_class_t whoami() = 0;
 
-    std::shared_ptr<CdsObject> getProcessedObject();
+    std::shared_ptr<CdsObject> getProcessedObject() const;
 
     std::string convertToCharset(const std::string& str, charset_convert_t chr);
 
