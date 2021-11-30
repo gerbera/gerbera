@@ -712,7 +712,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         }
     }
     if (!colBuf.empty()) {
-        colBuf.insert(colBuf.begin(), ""); // result starts with ,
+        colBuf.emplace(colBuf.begin(), ""); // result starts with ,
     }
     addColumns = fmt::format("{}", fmt::join(colBuf, ", "));
     addJoin = fmt::format("{}", fmt::join(joinBuf, ", "));
