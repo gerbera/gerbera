@@ -150,7 +150,7 @@ void Web::ConfigSave::process()
     }
 
     // trigger rescan of database after update
-    std::string target = param("target");
+    fs::path target = param("target");
     if (action == "rescan" && !target.empty()) {
         if (target != "--all") {
             fs::path targetPath(target);
@@ -163,10 +163,10 @@ void Web::ConfigSave::process()
             if (objectID > 0 && autoscan) {
                 content->rescanDirectory(autoscan, objectID, target);
                 auto taskEl = root.append_child("task");
-                taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();
-                log_info("Rescanning directory {}", target);
+                taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target.c_str()).c_str();
+                log_info("Rescanning directory {}", target.c_str());
             } else {
-                log_error("No such autoscan or dir: {} ({})", target, objectID);
+                log_error("No such autoscan or dir: {} ({})", target.c_str(), objectID);
             }
         } else {
             auto autoScans = content->getAutoscanDirectories();
