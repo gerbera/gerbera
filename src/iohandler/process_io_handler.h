@@ -46,7 +46,7 @@ class ContentManager;
 class ProcListItem {
 public:
     explicit ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath = false);
-    std::shared_ptr<Executor> getExecutor();
+    std::shared_ptr<Executor> getExecutor() const;
     bool abortOnDeath() const;
 
 protected:

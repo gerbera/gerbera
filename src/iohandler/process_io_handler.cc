@@ -51,7 +51,7 @@ ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
 {
 }
 
-std::shared_ptr<Executor> ProcListItem::getExecutor()
+std::shared_ptr<Executor> ProcListItem::getExecutor() const
 {
     return executor;
 }
