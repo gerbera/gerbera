@@ -234,7 +234,7 @@ std::string MetadataHandler::mapContentHandler2String(int ch)
     return "Unknown";
 }
 
-metadata_fields_t MetadataHandler::remapMetaDataField(const std::string& fieldName)
+metadata_fields_t MetadataHandler::remapMetaDataField(std::string_view fieldName)
 {
     for (auto&& [f, s] : mt_names) {
         if (s == fieldName) {

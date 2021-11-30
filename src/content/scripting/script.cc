@@ -226,9 +226,9 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
 
     for (auto&& [field, sym] : mt_keys) {
         duk_push_string(ctx, sym);
-        for (auto&& [f, s] : mt_names) {
+        for (auto [f, s] : mt_names) {
             if (f == field) {
-                duk_put_global_string(ctx, s);
+                duk_put_global_string(ctx, s.data());
             }
         }
     }

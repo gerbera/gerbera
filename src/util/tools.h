@@ -151,7 +151,7 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 ///
 /// \param protocolInfoStr the String from renderProtocolInfo.
 /// \return Protocol (i.e. http-get).
-std::string getProtocol(const std::string& protocolInfo);
+std::string_view getProtocol(std::string_view protocolInfo);
 
 template <typename TP>
 std::chrono::seconds to_seconds(TP tp)
