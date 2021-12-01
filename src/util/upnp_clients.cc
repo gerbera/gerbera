@@ -80,7 +80,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung other TVs",
             ClientType::SamsungSeriesCDE,
-            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
             ClientMatchType::UserAgent,
             "SEC_HHP_",
         },
@@ -99,7 +99,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
         {
             "Samsung Series [Q] TVs",
             ClientType::SamsungSeriesQ,
-            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
             ClientMatchType::UserAgent,
             "SEC_HHP_[TV] Samsung Q",
         },

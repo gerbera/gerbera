@@ -64,6 +64,7 @@ protected:
     int startingIndex {};
     int requestedCount {};
     std::string sortCrit;
+    bool showDynamicContainers { true };
 
     // output parameters
     int totalMatches {};
@@ -101,6 +102,12 @@ public:
         this->sortCrit = sortCrit;
     }
 
+    void setDynamicContainers(bool showDynamicContainers)
+    {
+        this->showDynamicContainers = showDynamicContainers;
+    }
+
+    bool getDynamicContainers() const { return showDynamicContainers; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
     int getTotalMatches() const { return totalMatches; }

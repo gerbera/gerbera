@@ -18,8 +18,8 @@ The automatic detection supports the following devices and software:
 - StandardUPnP (all devices sending signature UPnP/1.0)
 - BubbleUPnP (running on smartphones)
 - SamsungAllShare (AllShare running on Windows)
-- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
-- SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
+- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``
+- SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``
 - SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
@@ -33,6 +33,7 @@ The device flags have the following meaning
 -  ``SAMSUNG_BOOKMARK_SEC``: 0x02, restore last played position when the media is played again (only for Samsung). Not applicable for transcoded media
 -  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is recieved from the Samsung TV as msec
 -  ``SAMSUNG_FEATURES``: 0x10, activate Samsung features protocol (support for additional request like X_GetFeatureList, X_GetObjectIDfromIndex, X_GetIndexfromRID)
+-  ``SAMSUNG_HIDE_DYNAMIC``: 0x20, some Samsung devices do not work with dynamic folders on top level, so this flag hides them for those devices
 -  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
 
 Manual Overrides
