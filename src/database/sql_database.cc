@@ -847,7 +847,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 {
     const auto parent = param.getObject();
 
-    if (dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
+    if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
@@ -960,7 +960,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         }
     }
 
-    if (config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (param.getDynamicContainers() && config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
             for (std::size_t count = 0; count < dynContent->size(); count++) {

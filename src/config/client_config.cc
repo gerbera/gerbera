@@ -181,6 +181,9 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "SAMSUNG_FEATURES") {
         return QUIRK_FLAG_SAMSUNG_FEATURES;
     }
+    if (flag == "SAMSUNG_HIDE_DYNAMIC") {
+        return QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC;
+    }
     if (flag == "IRADIO") {
         return QUIRK_FLAG_IRADIO;
     }
@@ -216,6 +219,10 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     if (flags & QUIRK_FLAG_SAMSUNG_FEATURES) {
         myFlags.emplace_back("SAMSUNG_FEATURES");
         flags &= ~QUIRK_FLAG_SAMSUNG_FEATURES;
+    }
+    if (flags & QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC) {
+        myFlags.emplace_back("SAMSUNG_HIDE_DYNAMIC");
+        flags &= ~QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC;
     }
     if (flags & QUIRK_FLAG_IRADIO) {
         myFlags.emplace_back("IRADIO");

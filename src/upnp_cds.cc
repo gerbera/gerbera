@@ -97,6 +97,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
 
     auto param = BrowseParam(parent, flag);
 
+    param.setDynamicContainers(!quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
     param.setStartingIndex(stoiString(startingIndex));
     param.setRequestedCount(stoiString(requestedCount));
     param.setSortCriteria(trimString(sortCriteria));
