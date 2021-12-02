@@ -101,8 +101,8 @@ public:
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
-    const ClientInfo* getInfoByAddr(const struct sockaddr_storage* addr);
-    const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type);
+    const ClientInfo* getInfoByAddr(const struct sockaddr_storage* addr) const;
+    const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
     const ClientInfo* getInfoByCache(const struct sockaddr_storage* addr);
     void updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo);
