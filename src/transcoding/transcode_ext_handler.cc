@@ -51,7 +51,7 @@
 #endif
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-    fs::path location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
+    const fs::path& location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
 {
     log_debug("Start transcoding file: {}", location.c_str());
     if (!profile)
@@ -77,11 +77,12 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 #endif
 
     std::vector<std::shared_ptr<ProcListItem>> procList;
+    fs::path fifoLocation;
 
     bool isURL = obj->isExternalItem();
     if (isURL && !profile->acceptURL()) {
 #ifdef HAVE_CURL
-        openCurlFifo(location, procList);
+        fifoLocation = openCurlFifo(location, procList);
 #else
         throw_std_runtime_error("Compiled without libcurl support, data proxying for profile {} is not available", profile->getName());
 #endif
@@ -90,14 +91,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     checkTranscoder(profile);
     fs::path fifoName = makeFifo();
 
-    std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), location, fifoName, range, obj->getTitle());
+    std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), fifoLocation, fifoName, range, obj->getTitle());
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
 
     std::vector<fs::path> tempFiles;
     tempFiles.push_back(fifoName);
     if (isURL && !profile->acceptURL()) {
-        tempFiles.push_back(std::move(location));
+        tempFiles.push_back(std::move(fifoLocation));
     }
     auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
 
@@ -148,22 +149,24 @@ void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<Transcoding
 }
 
 #ifdef HAVE_CURL
-void TranscodeExternalHandler::openCurlFifo(fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
+fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
 {
     std::string url = location;
     log_debug("creating reader fifo: {}", location.c_str());
-    location = makeFifo();
+    auto ret = makeFifo();
 
     try {
         auto cIoh = std::make_unique<CurlIOHandler>(config, url, nullptr,
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
-        auto pIoh = std::make_unique<ProcessIOHandler>(content, location, nullptr);
+        auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
         auto ch = std::make_shared<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
         procList.push_back(std::make_shared<ProcListItem>(std::move(ch)));
     } catch (const std::runtime_error& ex) {
-        unlink(location.c_str());
+        unlink(ret.c_str());
         throw ex;
     }
+
+    return ret;
 }
 #endif

@@ -45,7 +45,7 @@ class TranscodeExternalHandler : public TranscodeHandler {
 
 public:
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-        fs::path location,
+        const fs::path& location,
         const std::shared_ptr<CdsObject>& obj,
         const std::string& range) override;
 
@@ -53,7 +53,7 @@ private:
     fs::path makeFifo();
     static void checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile);
 #ifdef HAVE_CURL
-    void openCurlFifo(fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList);
+    fs::path openCurlFifo(const fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList);
 #endif
 };
 

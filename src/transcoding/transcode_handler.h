@@ -52,7 +52,7 @@ public:
     virtual ~TranscodeHandler() = default;
 
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-        fs::path location,
+        const fs::path& location,
         const std::shared_ptr<CdsObject>& obj,
         const std::string& range)
         = 0;

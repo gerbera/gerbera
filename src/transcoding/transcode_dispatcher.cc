@@ -37,7 +37,7 @@
 #include "transcoding.h"
 
 std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-    fs::path location,
+    const fs::path& location,
     const std::shared_ptr<CdsObject>& obj,
     const std::string& range)
 {
@@ -46,7 +46,7 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(const std::shared_p
 
     if (profile->getType() == TR_External) {
         auto trExt = std::make_unique<TranscodeExternalHandler>(std::move(content));
-        return trExt->serveContent(profile, std::move(location), obj, range);
+        return trExt->serveContent(profile, location, obj, range);
     }
 
     throw_std_runtime_error("Unknown transcoding type for profile {}", profile->getName());
