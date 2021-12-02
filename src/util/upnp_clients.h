@@ -105,7 +105,7 @@ private:
     const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
     const ClientInfo* getInfoByCache(const struct sockaddr_storage* addr);
-    void updateCache(const struct sockaddr_storage* addr, std::string userAgent, const ClientInfo* pInfo);
+    void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 
