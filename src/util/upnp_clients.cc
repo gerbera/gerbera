@@ -183,7 +183,7 @@ const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const st
     return info;
 }
 
-const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
+const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) const
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
@@ -216,7 +216,7 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr)
     return nullptr;
 }
 
-const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchType type)
+const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchType type) const
 {
     if (!match.empty()) {
         auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
