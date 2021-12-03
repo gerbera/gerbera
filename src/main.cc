@@ -493,10 +493,9 @@ int main(int argc, char** argv, char** envp)
 
         installSignalHandler();
 
-        std::shared_ptr<Server> server;
+        auto server = std::make_shared<Server>(configManager);
+
         try {
-            auto config = std::static_pointer_cast<Config>(configManager);
-            server = std::make_shared<Server>(config);
             server->init();
             server->run();
         } catch (const UpnpException& ue) {
@@ -593,8 +592,7 @@ int main(int argc, char** argv, char** envp)
                     }
 
                     ///  \todo fix this for SIGHUP
-                    auto config = std::static_pointer_cast<Config>(configManager);
-                    server = std::make_shared<Server>(config);
+                    server = std::make_shared<Server>(configManager);
                     server->init();
                     server->run();
 
