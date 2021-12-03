@@ -123,16 +123,17 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     for (auto&& obj : arr) {
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
-            std::string title = obj->getTitle();
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-            else
-                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-
-            obj->setTitle(title);
+        if (!config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) || !obj->getFlag(OBJECT_FLAG_PLAYED)) {
+            xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
+            continue;
         }
 
+        std::string title = obj->getTitle();
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+            title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+        else
+            title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+        obj->setTitle(title);
         xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
     }
 
@@ -197,28 +198,32 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     }
 
     for (auto&& cdsObject : results) {
-        if (cdsObject->isItem()) {
-            std::string title = cdsObject->getTitle();
-            if (!titleSegments.empty()) {
-                std::vector<std::string> values;
-                for (auto&& segment : titleSegments) {
-                    auto mtField = MetadataHandler::remapMetaDataField(segment);
-                    auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
-                    if (!value.empty())
-                        values.push_back(value);
-                }
-                if (!values.empty())
-                    title = fmt::format("{}", fmt::join(values, resultSeparator));
-            }
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
-                if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                    title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-                else
-                    title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-            }
-            cdsObject->setTitle(title);
+        if (!cdsObject->isItem()) {
+            xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
+            continue;
         }
 
+        std::string title = cdsObject->getTitle();
+        if (!titleSegments.empty()) {
+            std::vector<std::string> values;
+            for (auto&& segment : titleSegments) {
+                auto mtField = MetadataHandler::remapMetaDataField(segment);
+                auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
+                if (!value.empty())
+                    values.push_back(value);
+            }
+            if (!values.empty())
+                title = fmt::format("{}", fmt::join(values, resultSeparator));
+        }
+
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
+            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+            else
+                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+        }
+
+        cdsObject->setTitle(title);
         xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
     }
 

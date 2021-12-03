@@ -357,10 +357,10 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
     if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
         return nullptr;
 
-    const auto cacheEnabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
-
+    auto cacheEnabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
     if (cacheEnabled) {
-        if (auto data = readThumbnailCacheFile(item->getLocation())) {
+        auto data = readThumbnailCacheFile(item->getLocation());
+        if (data) {
             log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
             return std::make_unique<MemIOHandler>(data->data(), data->size());
         }
