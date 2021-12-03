@@ -594,7 +594,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
                 fs::path testLocation = watchAs->getAutoscanDirectory()->getLocation();
                 if (testLocation <= path) {
                     if (!pathBestMatch.empty()) {
-                        if (pathBestMatch.string().length() < testLocation.string().length()) {
+                        if (pathBestMatch < testLocation) {
                             pathBestMatch = testLocation;
                             bestMatch = watchAs;
                         }
