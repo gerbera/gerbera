@@ -389,28 +389,29 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
 {
     auto orderedResources = getOrderedResources(cont);
     for (auto&& res : orderedResources) {
-        if (res->isMetaResource(ID3_ALBUM_ART)) {
-            auto resFile = res->getAttribute(R_RESOURCE_FILE);
-            auto resObj = res->getAttribute(R_FANART_OBJ_ID);
-            if (!resFile.empty()) {
-                // found, FanArtHandler deals already with file
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
+        if (!res->isMetaResource(ID3_ALBUM_ART))
+            continue;
 
-                auto resParams = res->getParameters();
-                resParams[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
-                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
-                return { url, true };
-            }
+        auto resFile = res->getAttribute(R_RESOURCE_FILE);
+        auto resObj = res->getAttribute(R_FANART_OBJ_ID);
+        if (!resFile.empty()) {
+            // found, FanArtHandler deals already with file
+            std::map<std::string, std::string> dict;
+            dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
 
-            if (!resObj.empty()) {
-                std::map<std::string, std::string> dict;
-                dict[URL_OBJECT_ID] = resObj;
+            auto resParams = res->getParameters();
+            resParams[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
+            auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
+            return { url, true };
+        }
 
-                auto resParams = res->getParameters();
-                auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(resParams) });
-                return { url, true };
-            }
+        if (!resObj.empty()) {
+            std::map<std::string, std::string> dict;
+            dict[URL_OBJECT_ID] = resObj;
+
+            auto resParams = res->getParameters();
+            auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(resParams) });
+            return { url, true };
         }
     }
     return {};
