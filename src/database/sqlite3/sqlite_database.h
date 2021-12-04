@@ -110,7 +110,7 @@ public:
     /// \param query The SQL query string
     explicit SLSelectTask(const std::string& query);
     void run(sqlite3*& db, Sqlite3Database* sl) override;
-    [[nodiscard]] std::shared_ptr<SQLResult> getResult() const { return std::static_pointer_cast<SQLResult>(pres); }
+    [[nodiscard]] std::shared_ptr<Sqlite3Result> getResult() const { return pres; }
 
     std::string_view taskType() const override { return "SelectTask"; }
 
