@@ -52,7 +52,7 @@ if(SQLite3_INCLUDE_DIR)
     unset(_ver_line)
 endif()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(SQLite3
     REQUIRED_VARS SQLite3_INCLUDE_DIR SQLite3_LIBRARY
     VERSION_VAR SQLite3_VERSION)
