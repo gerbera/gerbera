@@ -100,7 +100,7 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
         return {};
     log_debug("getSamsungFeatureRoot objId [{}]", objId);
 
-    const static auto containers = std::map<std::string, std::string> {
+    static const auto containers = std::map<std::string, std::string> {
         { "A", UPNP_CLASS_AUDIO_ITEM },
         { "V", UPNP_CLASS_VIDEO_ITEM },
         { "I", UPNP_CLASS_IMAGE_ITEM },
