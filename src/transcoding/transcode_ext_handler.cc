@@ -94,9 +94,10 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
 
-    auto tempFiles = std::vector<fs::path>({ fifoName });
+    std::vector<fs::path> tempFiles;
+    tempFiles.push_back(fifoName);
     if (isURL && !profile->acceptURL()) {
-        tempFiles.emplace_back(location);
+        tempFiles.push_back(std::move(location));
     }
     auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
 
