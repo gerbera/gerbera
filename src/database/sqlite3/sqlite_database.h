@@ -30,8 +30,7 @@
 /// \file sqlite3_database.h
 ///\brief Definitions of the Sqlite3Database, Sqlite3Result, Sqlite3Row and SLTask classes.
 
-#ifndef __SQLITE3_STORAGE_H__
-#define __SQLITE3_STORAGE_H__
+#pragma once
 
 #include <queue>
 #include <sqlite3.h>
@@ -252,5 +251,3 @@ private:
     char* col_c_str(int index) const override;
     char** row;
 };
-
-#endif // __SQLITE3_STORAGE_H__

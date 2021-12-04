@@ -29,10 +29,9 @@
 
 /// \file transcode_dispatcher.h
 /// \brief Definition of the TranscodeRequest class.
-#ifndef __TRANSCODE_DISPATCHER_H__
-#define __TRANSCODE_DISPATCHER_H__
 
-#include "common.h"
+#pragma once
+
 #include "transcode_handler.h"
 
 class TranscodeDispatcher : public TranscodeHandler {
@@ -44,5 +43,3 @@ public:
         const std::shared_ptr<CdsObject>& obj,
         const std::string& range) override;
 };
-
-#endif // __TRANSCODE_DISPATCHER_H__

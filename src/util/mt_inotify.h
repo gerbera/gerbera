@@ -29,8 +29,7 @@
 
 /// \file mt_inotify.h
 
-#ifndef __MT_INOTIFY_H__
-#define __MT_INOTIFY_H__
+#pragma once
 
 #ifdef HAVE_INOTIFY
 
@@ -78,5 +77,3 @@ private:
 };
 
 #endif
-
-#endif // __MT_INOTIFY_H__

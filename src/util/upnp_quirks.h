@@ -23,8 +23,7 @@
 
 /// \file upnp_quirks.h
 
-#ifndef __UPNP_QUIRKS_H__
-#define __UPNP_QUIRKS_H__
+#pragma once
 
 #include <memory>
 #include <pugixml.hpp>
@@ -120,5 +119,3 @@ private:
     std::shared_ptr<ContentManager> content;
     const ClientInfo* pClientInfo;
 };
-
-#endif // __UPNP_QUIRKS_H__

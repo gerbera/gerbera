@@ -29,8 +29,8 @@
 
 /// \file cds_objects.h
 /// \brief Definition for the CdsObject, CdsItem and CdsContainer classes.
-#ifndef __CDS_OBJECTS_H__
-#define __CDS_OBJECTS_H__
+
+#pragma once
 
 #include <map>
 #include <memory>
@@ -535,5 +535,3 @@ public:
         void validate() const override;
     */
 };
-
-#endif // __CDS_OBJECTS_H__

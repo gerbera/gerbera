@@ -29,8 +29,7 @@
 
 /// \file runtime.h
 
-#ifndef __SCRIPTING_RUNTIME_H__
-#define __SCRIPTING_RUNTIME_H__
+#pragma once
 
 #include <duktape.h>
 #include <mutex>
@@ -57,5 +56,3 @@ public:
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
     std::recursive_mutex& getMutex() { return mutex; }
 };
-
-#endif // __SCRIPTING_RUNTIME_H__

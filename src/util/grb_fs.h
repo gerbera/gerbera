@@ -5,8 +5,7 @@
  * Copyright (C) 2021 Gerbera Contributors
  */
 
-#ifndef __GRB_FS_H__
-#define __GRB_FS_H__
+#pragma once
 
 #include <filesystem>
 #include <optional>
@@ -68,5 +67,3 @@ std::string getAVIFourCC(const fs::path& aviFilename);
 ///
 /// "/some/path/to/file.txt" -> "to"
 fs::path getLastPath(const fs::path& path);
-
-#endif // __GRB_FS_H__

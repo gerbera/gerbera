@@ -28,8 +28,8 @@
 */
 
 /// \file content_manager.h
-#ifndef __CONTENT_MANAGER_H__
-#define __CONTENT_MANAGER_H__
+
+#pragma once
 
 #include <deque>
 #include <map>
@@ -380,5 +380,3 @@ protected:
     friend void CMFetchOnlineContentTask::run();
 #endif
 };
-
-#endif // __CONTENT_MANAGER_H__

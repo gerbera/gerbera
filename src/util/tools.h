@@ -28,8 +28,8 @@
 */
 
 /// \file tools.h
-#ifndef __TOOLS_H__
-#define __TOOLS_H__
+
+#pragma once
 
 #include <chrono>
 #include <map>
@@ -295,5 +295,3 @@ std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>
 std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
 std::string sockAddrGetNameInfo(const struct sockaddr* sa);
-
-#endif // __TOOLS_H__

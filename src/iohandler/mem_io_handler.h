@@ -29,8 +29,8 @@
 
 /// \file mem_io_handler.h
 /// \brief definition of the MemIOHandler class.
-#ifndef __MEM_IO_HANDLER_H__
-#define __MEM_IO_HANDLER_H__
+
+#pragma once
 
 #include "common.h"
 #include "io_handler.h"
@@ -62,5 +62,3 @@ public:
     off_t tell() override;
     void close() override;
 };
-
-#endif // __MEM_IO_HANDLER_H__

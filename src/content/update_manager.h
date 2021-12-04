@@ -29,8 +29,7 @@
 
 /// \file update_manager.h
 
-#ifndef __UPDATE_MANAGER_H__
-#define __UPDATE_MANAGER_H__
+#pragma once
 
 #include <memory>
 #include <unordered_set>
@@ -79,5 +78,3 @@ protected:
 
     bool haveUpdates() const { return !objectIDHash.empty(); }
 };
-
-#endif // __UPDATE_MANAGER_H__

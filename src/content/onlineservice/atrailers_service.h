@@ -30,10 +30,9 @@
 /// \file atrailers_service.h
 /// \brief Definition of the ATrailersService class.
 
-#ifdef ATRAILERS
+#pragma once
 
-#ifndef __ATRAILERS_SERVICE_H__
-#define __ATRAILERS_SERVICE_H__
+#ifdef ATRAILERS
 
 #include "atrailers_content_handler.h"
 
@@ -52,7 +51,5 @@ public:
 protected:
     std::unique_ptr<CurlContentHandler> getContentHandler() const override;
 };
-
-#endif //__ATRAILERS_SERVICE_H__
 
 #endif // ATRAILERS

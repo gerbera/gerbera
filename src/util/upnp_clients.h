@@ -25,8 +25,7 @@
 /// \brief Definition of the Clients class.
 /// inspired by https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.h
 
-#ifndef __UPNP_CLIENTS_H__
-#define __UPNP_CLIENTS_H__
+#pragma once
 
 #include <chrono>
 #include <memory>
@@ -115,5 +114,3 @@ private:
 
     std::vector<ClientInfo> clientInfo;
 };
-
-#endif // __UPNP_CLIENTS_H__

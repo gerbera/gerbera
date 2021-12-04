@@ -35,9 +35,9 @@
 /// \brief Definition of the FfmpegHandler class - getting metadata via
 /// ffmpeg library calls.
 
+#pragma once
+
 #ifdef HAVE_FFMPEG
-#ifndef __FFMPEG_HANDLER_H__
-#define __FFMPEG_HANDLER_H__
 
 #include <optional>
 
@@ -71,5 +71,4 @@ private:
 fs::path getThumbnailCacheBasePath(const Config& config);
 fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
 
-#endif //__FFMPEG_HANDLER_H__
 #endif // HAVE_FFMPEG

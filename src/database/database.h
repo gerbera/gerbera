@@ -29,8 +29,7 @@
 
 /// \file database.h
 
-#ifndef __STORAGE_H__
-#define __STORAGE_H__
+#pragma once
 
 #include <map>
 #include <unordered_set>
@@ -305,5 +304,3 @@ protected:
 
     std::shared_ptr<Config> config;
 };
-
-#endif // __STORAGE_H__

@@ -29,8 +29,7 @@
 
 /// \file builtin_layout.h
 
-#ifndef __BUILTIN_LAYOUT_H__
-#define __BUILTIN_LAYOUT_H__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -63,5 +62,3 @@ protected:
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
 };
-
-#endif // __BUILTIN_LAYOUT_H__

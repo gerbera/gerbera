@@ -1,8 +1,7 @@
 /*MT*
  */
 
-#ifndef __TASK_PROCESSOR_H__
-#define __TASK_PROCESSOR_H__
+#pragma once
 
 #include <deque>
 #include <memory>
@@ -62,5 +61,3 @@ protected:
     std::shared_ptr<Layout> layout;
     bool unscheduled_refresh;
 };
-
-#endif //__TASK_PROCESSOR_H__

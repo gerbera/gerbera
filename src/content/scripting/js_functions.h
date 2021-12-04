@@ -30,8 +30,7 @@
 /// \file js_functions.h
 /// \brief These functions can be called from scripts.
 
-#ifndef __SCRIPTING_JS_FUNCTIONS_H__
-#define __SCRIPTING_JS_FUNCTIONS_H__
+#pragma once
 
 #include <duktape.h>
 
@@ -59,5 +58,3 @@ duk_ret_t js_p2i(duk_context* ctx);
 duk_ret_t js_j2i(duk_context* ctx);
 
 } // extern "C"
-
-#endif //__SCRIPTING_JS_FUNCTIONS_H__

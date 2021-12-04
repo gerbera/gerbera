@@ -24,8 +24,7 @@
 /// \file matroska_handler.h
 /// \brief Definition of the MatroskaHandler class.
 
-#ifndef __METADATA_MATROSKA_H__
-#define __METADATA_MATROSKA_H__
+#pragma once
 
 #ifdef HAVE_MATROSKA
 
@@ -57,7 +56,4 @@ private:
     std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData& data) const;
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
 };
-
-#endif
-
-#endif // __METADATA_MATROSKA_H__
+#endif // HAVE_MATROSKA

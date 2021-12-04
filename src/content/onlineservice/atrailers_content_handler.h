@@ -30,10 +30,9 @@
 /// \file atrailers_content_handler.h
 /// \brief Definitions of the ATrailersContentHandler class.
 
-#ifdef ATRAILERS
+#pragma once
 
-#ifndef __ATRAILERS_CONTENT_HANDLER_H__
-#define __ATRAILERS_CONTENT_HANDLER_H__
+#ifdef ATRAILERS
 
 #include "curl_online_service.h"
 
@@ -71,7 +70,5 @@ protected:
 
     std::string trailer_mimetype;
 };
-
-#endif //__ATRAILERS_CONTENT_HANDLER_H__
 
 #endif // ATRAILERS

@@ -23,8 +23,7 @@
 
 /// \file script_names.h
 
-#ifndef __SCRIPTING_SCRIPT_NAMES_H__
-#define __SCRIPTING_SCRIPT_NAMES_H__
+#pragma once
 
 #include <array>
 
@@ -102,5 +101,3 @@ static constexpr auto upnp_classes = std::array {
     std::pair(UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE"),
     std::pair(UPNP_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER"),
 };
-
-#endif

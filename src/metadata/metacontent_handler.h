@@ -24,8 +24,7 @@
 /// \file metacontent_handler.h
 /// \brief Definition of the Metacontent, FanArt and Subtitle classes.
 
-#ifndef __METADATA_CONTENT_H__
-#define __METADATA_CONTENT_H__
+#pragma once
 
 #include <map>
 
@@ -94,5 +93,3 @@ public:
 private:
     static std::unique_ptr<ContentPathSetup> setup;
 };
-
-#endif // __METADATA_CONTENT_H__

@@ -29,8 +29,8 @@
 
 /// \file libexif_handler.h
 /// \brief Definition of the LibExifHandler class.
-#ifndef __METADATA_LIBEXIF_H__
-#define __METADATA_LIBEXIF_H__
+
+#pragma once
 
 #ifdef HAVE_LIBEXIF
 
@@ -65,6 +65,4 @@ public:
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 };
-
 #endif
-#endif // __METADATA_LIBEXIF_H__

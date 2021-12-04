@@ -24,8 +24,7 @@
 /// \file directory_tweak.h
 ///\brief Definitions of the DirectoryTweak class.
 
-#ifndef __DIRECTORYTWEAK_H__
-#define __DIRECTORYTWEAK_H__
+#pragma once
 
 #include <map>
 #include <mutex>
@@ -149,5 +148,3 @@ protected:
     std::map<std::string, std::string> resourceFiles;
     std::map<std::string, bool> flags;
 };
-
-#endif

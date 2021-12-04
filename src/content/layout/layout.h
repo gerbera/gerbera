@@ -29,8 +29,7 @@
 
 /// \file layout.h
 
-#ifndef __LAYOUT_H__
-#define __LAYOUT_H__
+#pragma once
 
 #include "context.h"
 #include "util/grb_fs.h"
@@ -53,5 +52,3 @@ public:
 protected:
     std::shared_ptr<ContentManager> content;
 };
-
-#endif // __LAYOUT_H__

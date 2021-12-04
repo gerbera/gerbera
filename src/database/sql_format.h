@@ -22,8 +22,7 @@
 
 /// \file sql_format.h
 
-#ifndef __SQL_FORMAT_H__
-#define __SQL_FORMAT_H__
+#pragma once
 
 #include <fmt/format.h>
 
@@ -66,5 +65,3 @@ struct fmt::formatter<ColumnUpdate> : formatter<std::string_view> {
         return format_to(ctx.out(), "{} = {}", a.column, a.value);
     }
 };
-
-#endif

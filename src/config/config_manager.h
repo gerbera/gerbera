@@ -30,8 +30,7 @@
 /// \file config_manager.h
 ///\brief Definitions of the ConfigManager class.
 
-#ifndef __CONFIG_MANAGER_H__
-#define __CONFIG_MANAGER_H__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -148,5 +147,3 @@ protected:
 
     std::shared_ptr<Config> getSelf();
 };
-
-#endif // __CONFIG_MANAGER_H__

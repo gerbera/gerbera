@@ -29,8 +29,7 @@
 
 /// \file buffered_io_handler.h
 
-#ifndef __BUFFERED_IO_HANDLER_H__
-#define __BUFFERED_IO_HANDLER_H__
+#pragma once
 
 #include <memory>
 #include <upnp.h>
@@ -61,5 +60,3 @@ private:
 
     void threadProc() override;
 };
-
-#endif // __BUFFERED_IO_HANDLER_H__

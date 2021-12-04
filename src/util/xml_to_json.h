@@ -31,8 +31,7 @@
 
 /// \file xml_to_json.h
 
-#ifndef __UTIL_XML_TO_JSON_H__
-#define __UTIL_XML_TO_JSON_H__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -62,5 +61,3 @@ private:
     static std::string getValue(const std::string& name, const char* text, const Hints& hints);
     static bool isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName);
 };
-
-#endif // __UTIL_XML_TO_JSON_H__

@@ -23,13 +23,11 @@
 
 /// \file upnp_headers.h
 
-#ifndef GERBERA_HEADERS_H
-#define GERBERA_HEADERS_H
+#pragma once
 
 #include <map>
 #include <memory>
 #include <upnp.h>
-#include <vector>
 
 class Headers {
 public:
@@ -45,5 +43,3 @@ private:
 
     std::map<std::string, std::string> headers;
 };
-
-#endif // GERBERA_HEADERS_H

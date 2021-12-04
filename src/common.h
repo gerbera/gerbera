@@ -28,8 +28,8 @@
 */
 
 /// \file common.h
-#ifndef __COMMON_H__
-#define __COMMON_H__
+
+#pragma once
 
 #include "exceptions.h"
 #include "upnp_common.h"
@@ -136,5 +136,3 @@ static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 
 #define LINK_FILE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_MEDIA_HANDLER "/"
 #define LINK_URL_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/"
-
-#endif // __COMMON_H__

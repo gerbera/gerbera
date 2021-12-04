@@ -29,8 +29,7 @@
 
 /// \file io_handler_chainer.h
 
-#ifndef __IO_HANDLER_CHAINER_H__
-#define __IO_HANDLER_CHAINER_H__
+#pragma once
 
 #define IOHC_NORMAL_SHUTDOWN 1
 #define IOHC_FORCED_SHUTDOWN 2
@@ -74,5 +73,3 @@ private:
     std::unique_ptr<IOHandler> readFrom;
     std::unique_ptr<IOHandler> writeTo;
 };
-
-#endif // __IO_HANDLER_CHAINER_H__

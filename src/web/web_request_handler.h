@@ -29,8 +29,8 @@
 
 /// \file web_request_handler.h
 /// \brief Definition of the WebRequestHandler class.
-#ifndef __WEB_REQUEST_HANDLER_H__
-#define __WEB_REQUEST_HANDLER_H__
+
+#pragma once
 
 #include <pugixml.hpp>
 
@@ -144,5 +144,3 @@ public:
 };
 
 } // namespace Web
-
-#endif // __WEB_REQUEST_HANDLER_H__

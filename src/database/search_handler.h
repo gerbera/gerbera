@@ -25,8 +25,8 @@
 /// Implements functionality defined in standardizeddcps\MediaServer_4 and MediaRenderer_3\UPnP-av-ContentDirectory-v4-Service-20150630.pdf
 /// Document available in upnpresources.zip, download from here:
 /// https://openconnectivity.org/developer/specifications/upnp-resources/upnp
-#ifndef __SEARCH_HANDLER_H__
-#define __SEARCH_HANDLER_H__
+
+#pragma once
 
 #include <algorithm>
 #include <fmt/core.h>
@@ -439,4 +439,3 @@ private:
     std::shared_ptr<ColumnMapper> metaMapper;
     std::string sortCrit;
 };
-#endif // __SEARCH_HANDLER_H__

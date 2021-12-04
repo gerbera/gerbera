@@ -29,8 +29,8 @@
 
 /// \file file_io_handler.h
 /// \brief Definition of the FileIOHandler class.
-#ifndef __FILE_IO_HANDLER_H__
-#define __FILE_IO_HANDLER_H__
+
+#pragma once
 
 #include "common.h"
 #include "io_handler.h"
@@ -78,5 +78,3 @@ public:
     /// \brief Close a previously opened file.
     void close() override;
 };
-
-#endif // __FILE_IO_HANDLER_H__

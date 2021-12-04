@@ -29,10 +29,9 @@
 
 /// \file curl_io_handler.h
 
-#ifdef HAVE_CURL
+#pragma once
 
-#ifndef __CURL_IO_HANDLER_H__
-#define __CURL_IO_HANDLER_H__
+#ifdef HAVE_CURL
 
 #include <curl/curl.h>
 #include <upnp.h>
@@ -58,7 +57,4 @@ private:
     static std::size_t curlCallback(void* ptr, std::size_t size, std::size_t nmemb, void* data);
     void threadProc() override;
 };
-
-#endif // __CURL_IO_HANDLER_H__
-
 #endif // HAVE_CURL

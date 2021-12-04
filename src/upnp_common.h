@@ -22,8 +22,8 @@
 */
 
 /// \file upnp_common.h
-#ifndef __UPNP_COMMON_H__
-#define __UPNP_COMMON_H__
+
+#pragma once
 
 // ERROR CODES
 /// \brief UPnP specific error code.
@@ -148,5 +148,3 @@
 #define UPNP_XML_UPNP_NAMESPACE "urn:schemas-upnp-org:metadata-1-0/upnp/"
 #define UPNP_XML_SEC_NAMESPACE_ATTR "xmlns:sec"
 #define UPNP_XML_SEC_NAMESPACE "http://www.sec.co.kr/dlna"
-
-#endif // __UPNP_COMMON_H__

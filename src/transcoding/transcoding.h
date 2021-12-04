@@ -30,8 +30,7 @@
 /// \file transcoding.h
 /// \brief Definitions of the Transcoding classes.
 
-#ifndef __TRANSCODING_H__
-#define __TRANSCODING_H__
+#pragma once
 
 #include <map>
 #include <vector>
@@ -240,5 +239,3 @@ protected:
     // to the same output format but vary things like resolution, bitrate, etc.
     std::map<std::string, std::shared_ptr<TranscodingProfileMap>> list;
 };
-
-#endif //__TRANSCODING_H__

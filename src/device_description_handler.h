@@ -21,8 +21,7 @@
 
 /// \file device_description_handler.h
 
-#ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
-#define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
+#pragma once
 
 #include "request_handler.h"
 #include "upnp_xml.h"
@@ -39,5 +38,3 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     std::string deviceDescription;
 };
-
-#endif // GERBERA_DEVICE_DESCRIPTION_HANDLER_H

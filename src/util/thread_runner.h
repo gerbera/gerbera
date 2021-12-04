@@ -23,8 +23,7 @@
 
 /// \file thread_runner.h
 
-#ifndef __THREAD_RUNNER_H__
-#define __THREAD_RUNNER_H__
+#pragma once
 
 #include <chrono>
 #include <condition_variable>
@@ -218,5 +217,3 @@ private:
 };
 
 using StdThreadRunner = class ThreadRunner<std::condition_variable, std::mutex>;
-
-#endif // __THREAD_RUNNER_H__

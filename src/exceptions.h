@@ -29,8 +29,7 @@
 
 /// \file exceptions.h
 
-#ifndef __EXCEPTIONS_H__
-#define __EXCEPTIONS_H__
+#pragma once
 
 #include <stdexcept>
 #include <string>
@@ -83,5 +82,3 @@ class ServerShutdownException : public std::runtime_error {
 class TryAgainException : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
-
-#endif // __EXCEPTIONS_H__

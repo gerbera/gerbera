@@ -24,8 +24,7 @@
 /// \file client_config.h
 ///\brief Definitions of the ClientConfig classes.
 
-#ifndef __CLIENTCONFIG_H__
-#define __CLIENTCONFIG_H__
+#pragma once
 
 #include <map>
 #include <mutex>
@@ -114,5 +113,3 @@ protected:
     bool isOrig {};
     std::unique_ptr<ClientInfo> clientInfo;
 };
-
-#endif

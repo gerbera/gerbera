@@ -29,8 +29,8 @@
 
 /// \file server.h
 ///\brief Definitions of the server class.
-#ifndef __SERVER_H__
-#define __SERVER_H__
+
+#pragma once
 
 #include "action_request.h"
 #include "context.h"
@@ -222,5 +222,3 @@ protected:
     std::string getPresentationUrl() const;
     int startupInterface(const std::string& iface, in_port_t inPort);
 };
-
-#endif // __SERVER_H__

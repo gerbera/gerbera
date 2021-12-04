@@ -29,8 +29,7 @@
 
 /// \file js_layout.h
 
-#ifndef __JS_LAYOUT_H__
-#define __JS_LAYOUT_H__
+#pragma once
 
 #include <memory>
 
@@ -48,5 +47,3 @@ public:
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& contentType) override;
 };
-
-#endif // __JS_LAYOUT_H__

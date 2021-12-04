@@ -29,13 +29,12 @@
 
 /// \file upnp_cm.h
 /// \brief Definition of the ConnectionManagerService class.
-#ifndef __UPNP_CM_H__
-#define __UPNP_CM_H__
+
+#pragma once
 
 #include <memory>
 
 #include "action_request.h"
-#include "common.h"
 #include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
@@ -101,5 +100,3 @@ public:
     /// Sends out an update with protocol information to all subscribed devices
     void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
 };
-
-#endif // __UPNP_CM_H__

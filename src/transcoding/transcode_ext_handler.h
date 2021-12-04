@@ -29,12 +29,11 @@
 
 /// \file transcode_ext_handler.h
 /// \brief Definition of the TranscodeRequest class.
-#ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
-#define __TRANSCODE_EXTERNAL_HANDLER_H__
+
+#pragma once
 
 #include <upnp.h>
 
-#include "common.h"
 #include "transcode_handler.h"
 #include "util/grb_fs.h"
 
@@ -56,5 +55,3 @@ private:
     void openCurlFifo(fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList);
 #endif
 };
-
-#endif // __TRANSCODE_EXTERNAL_HANDLER_H__

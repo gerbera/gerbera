@@ -30,10 +30,9 @@
 /// \file online_service.h
 /// \brief Definition of the OnlineService class.
 
-#ifdef ONLINE_SERVICES
+#pragma once
 
-#ifndef __ONLINE_SERVICE_H__
-#define __ONLINE_SERVICE_H__
+#ifdef ONLINE_SERVICES
 
 #include <memory>
 #include <vector>
@@ -146,7 +145,4 @@ public:
 protected:
     std::vector<std::shared_ptr<OnlineService>> service_list { OS_Max };
 };
-
-#endif //__ONLINE_SERVICE_H__
-
 #endif // ONLINE_SERVICES

@@ -30,8 +30,7 @@
 /// \file autoscan.h
 ///\brief Definitions of the Autoscan classes.
 
-#ifndef __AUTOSCAN_H__
-#define __AUTOSCAN_H__
+#pragma once
 
 #include <mutex>
 
@@ -162,5 +161,3 @@ protected:
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
 };
-
-#endif

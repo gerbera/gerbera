@@ -24,8 +24,7 @@
 /// \file dynamic_content.h
 ///\brief Definitions of the DynamicContent class.
 
-#ifndef __DYNAMICCONTENT_H__
-#define __DYNAMICCONTENT_H__
+#pragma once
 
 #include <map>
 #include <mutex>
@@ -121,5 +120,3 @@ private:
 
     bool isOrig {};
 };
-
-#endif

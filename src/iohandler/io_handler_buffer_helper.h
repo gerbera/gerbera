@@ -29,8 +29,7 @@
 
 /// \file io_handler_buffer_helper.h
 
-#ifndef __IO_HANDLER_BUFFER_HELPER_H__
-#define __IO_HANDLER_BUFFER_HELPER_H__
+#pragma once
 
 #include <upnp.h>
 
@@ -95,5 +94,3 @@ protected:
     std::unique_ptr<StdThreadRunner> threadRunner;
     bool threadShutdown {};
 };
-
-#endif // __IO_HANDLER_BUFFER_HELPER_H__

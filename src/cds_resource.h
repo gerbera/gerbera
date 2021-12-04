@@ -29,8 +29,7 @@
 
 /// \file cds_resource.h
 
-#ifndef __CDS_RESOURCE_H__
-#define __CDS_RESOURCE_H__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -115,5 +114,3 @@ public:
 
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
 };
-
-#endif // __CDS_RESOURCE_H__

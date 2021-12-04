@@ -21,8 +21,7 @@
     $Id$
 */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
 
 #include <map>
 #include <vector>
@@ -397,5 +396,3 @@ public:
     /// \param option to retrieve
     virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const = 0;
 };
-
-#endif // __CONFIG_H__

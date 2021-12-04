@@ -29,8 +29,7 @@
 
 /// \file executor.h
 
-#ifndef __EXECUTOR_H__
-#define __EXECUTOR_H__
+#pragma once
 
 /// \brief wraps something executable e.g. a thread or a process
 class Executor {
@@ -50,5 +49,3 @@ public:
     /// \return the status, exit or return code. 0 for normal shutdown
     virtual int getStatus() = 0;
 };
-
-#endif // __EXECUTOR_H__

@@ -30,8 +30,7 @@
 /// \file taglib_handler.h
 /// \brief Definition of the TagHandler class.
 
-#ifndef __METADATA_TAGLIB_H__
-#define __METADATA_TAGLIB_H__
+#pragma once
 
 #ifdef HAVE_TAGLIB
 
@@ -81,7 +80,4 @@ private:
     void extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const;
 };
-
 #endif
-
-#endif // __METADATA_TAGLIB_H__

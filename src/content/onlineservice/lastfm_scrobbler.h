@@ -30,10 +30,9 @@
 /// \file lastfm_scrobbler.h
 /// \brief Last.fm scrobbler.
 
-#ifdef HAVE_LASTFMLIB
+#pragma once
 
-#ifndef __LASTFM_H__
-#define __LASTFM_H__
+#ifdef HAVE_LASTFMLIB
 
 #include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
@@ -72,7 +71,5 @@ private:
     std::unique_ptr<LastFmScrobbler> scrobbler;
     int currentTrackId { -1 };
 };
-
-#endif //__LASTFM_H__
 
 #endif // HAVE_LASTFMLIB

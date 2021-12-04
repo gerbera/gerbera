@@ -23,8 +23,7 @@
 
 /// \file config_generator.h
 
-#ifndef GERBERA_CONFIG_GENERATOR_H
-#define GERBERA_CONFIG_GENERATOR_H
+#pragma once
 
 #include <pugixml.hpp>
 
@@ -62,5 +61,3 @@ protected:
 
     static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
 };
-
-#endif // GERBERA_CONFIG_GENERATOR_H

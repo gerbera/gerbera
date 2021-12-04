@@ -29,8 +29,8 @@
 
 /// \file pages.h
 /// \brief Defines the various WebRequestHandler subclasses which process requests coming to the ui.
-#ifndef __WEB_PAGES_H__
-#define __WEB_PAGES_H__
+
+#pragma once
 
 #include "cds_objects.h"
 #include "common.h"
@@ -220,5 +220,3 @@ public:
 };
 
 } // namespace Web
-
-#endif // __WEB_PAGES_H__

@@ -30,8 +30,8 @@
 /// \file request_handler.h
 /// \brief Definition of the RequestHandler class.
 /// \todo genych, describe you this request handler...
-#ifndef __REQUEST_HANDLER_H__
-#define __REQUEST_HANDLER_H__
+
+#pragma once
 
 #include <map>
 #include <memory>
@@ -90,5 +90,3 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<Server> server;
 };
-
-#endif // __REQUEST_HANDLER_H__

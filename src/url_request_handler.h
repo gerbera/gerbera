@@ -29,10 +29,9 @@
 
 /// \file url_request_handler.h
 /// \brief Definition of the URLRequestHandler class.
-#ifndef __URL_REQUEST_HANDLER_H__
-#define __URL_REQUEST_HANDLER_H__
 
-#include "common.h"
+#pragma once
+
 #include "request_handler.h"
 
 class URLRequestHandler : public RequestHandler {
@@ -42,5 +41,3 @@ public:
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 };
-
-#endif // __URL_REQUEST_HANDLER_H__

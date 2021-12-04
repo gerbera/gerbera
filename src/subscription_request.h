@@ -30,12 +30,11 @@
 /// \file subscription_request.h
 /// \brief Definition of the SubscriptionRequest class.
 
-#ifndef __SUBSCRIPTION_REQUEST_H__
-#define __SUBSCRIPTION_REQUEST_H__
+#pragma once
+
+#include <string>
 
 #include <upnp.h>
-
-#include "common.h"
 
 /// \brief This class represents the Upnp_Subscription_Request type from the SDK.
 ///
@@ -76,5 +75,3 @@ public:
     /// \brief Returns the subscription ID.
     std::string getSubscriptionID() const;
 };
-
-#endif // __SUBSCRIPTION_REQUEST_H__

@@ -29,8 +29,7 @@
 
 /// \file timer.h
 
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#pragma once
 
 #include <algorithm>
 #include <atomic>
@@ -145,5 +144,3 @@ private:
     std::shared_ptr<Config> config;
     std::unique_ptr<StdThreadRunner> threadRunner;
 };
-
-#endif // __TIMER_H__

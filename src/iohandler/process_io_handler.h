@@ -29,8 +29,8 @@
 
 /// \file process_io_handler.h
 /// \brief Definition of the ProcessIOHandler class.
-#ifndef __PROCESS_IO_HANDLER_H__
-#define __PROCESS_IO_HANDLER_H__
+
+#pragma once
 
 #include "common.h"
 #include "io_handler.h"
@@ -119,5 +119,3 @@ protected:
     void registerAll();
     void unregisterAll();
 };
-
-#endif // __PROCESS_IO_HANDLER_H__

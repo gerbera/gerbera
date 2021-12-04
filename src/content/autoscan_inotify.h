@@ -28,8 +28,8 @@
 */
 
 /// \file autoscan_inotify.h
-#ifndef __AUTOSCAN_INOTIFY_H__
-#define __AUTOSCAN_INOTIFY_H__
+
+#pragma once
 
 #include <memory>
 #include <mutex>
@@ -191,5 +191,3 @@ private:
     /// \brief is set to true by shutdown() if the inotify thread should terminate
     bool shutdownFlag;
 };
-
-#endif // __AUTOSCAN_INOTIFY_H__

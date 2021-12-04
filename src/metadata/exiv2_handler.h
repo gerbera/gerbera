@@ -27,12 +27,12 @@
     $Id$
 */
 
+#pragma once
+
 #ifdef HAVE_EXIV2
 
 /// \file exiv2_handler.h
 /// \brief Definition of the Exiv2Handler class.
-#ifndef __METADATA_EXIV2_H__
-#define __METADATA_EXIV2_H__
 
 #include "metadata_handler.h"
 
@@ -43,6 +43,4 @@ public:
     void fillMetadata(const std::shared_ptr<CdsObject>& item) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& item, int resNum) override;
 };
-
-#endif // __METADATA_EXIV2_H__
 #endif // HAVE_EXIV2

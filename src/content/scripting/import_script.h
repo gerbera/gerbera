@@ -29,8 +29,7 @@
 
 /// \file import_script.h
 
-#ifndef __SCRIPTING_IMPORT_SCRIPT_H__
-#define __SCRIPTING_IMPORT_SCRIPT_H__
+#pragma once
 
 #include <memory>
 
@@ -49,5 +48,3 @@ public:
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath);
     script_class_t whoami() override;
 };
-
-#endif // __SCRIPTING_IMPORT_SCRIPT_H__

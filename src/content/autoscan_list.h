@@ -23,8 +23,7 @@
 
 /// \file autoscan_list.h
 
-#ifndef __AUTOSCAN_LIST_H__
-#define __AUTOSCAN_LIST_H__
+#pragma once
 
 #include "util/timer.h"
 
@@ -89,5 +88,3 @@ protected:
     std::vector<std::shared_ptr<AutoscanDirectory>> list;
     int _add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index);
 };
-
-#endif //__AUTOSCAN_LIST_H__

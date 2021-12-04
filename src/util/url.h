@@ -30,10 +30,9 @@
 /// \file url.h
 /// \brief Definition of the URLL class.
 
-#ifdef HAVE_CURL
+#pragma once
 
-#ifndef __URL_H__
-#define __URL_H__
+#ifdef HAVE_CURL
 
 #include <curl/curl.h>
 #include <memory>
@@ -93,7 +92,4 @@ protected:
     /// we download data from a remote site.
     static std::size_t dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data);
 };
-
-#endif //__URL_H__
-
 #endif // HAVE_CURL

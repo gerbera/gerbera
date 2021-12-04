@@ -29,8 +29,7 @@
 
 /// \file thread_executor.h
 
-#ifndef __THREAD_EXECUTOR_H__
-#define __THREAD_EXECUTOR_H__
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -76,5 +75,3 @@ protected:
     /// should be called by the threadProc in short intervals
     bool threadShutdownCheck() const { return threadShutdown; }
 };
-
-#endif // __THREAD_EXECUTOR_H__

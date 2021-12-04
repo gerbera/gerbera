@@ -30,8 +30,7 @@
 /// \file config_options.h
 ///\brief Definitions of the ConfigOption class.
 
-#ifndef __CONFIG_OPTIONS_H__
-#define __CONFIG_OPTIONS_H__
+#pragma once
 
 #include <map>
 #include <vector>
@@ -271,5 +270,3 @@ public:
 protected:
     std::shared_ptr<DynamicContentList> option;
 };
-
-#endif // __CONFIG_OPTIONS_H__

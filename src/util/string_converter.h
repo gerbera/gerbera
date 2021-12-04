@@ -29,8 +29,7 @@
 
 /// \file string_converter.h
 
-#ifndef __STRING_CONVERTER_H__
-#define __STRING_CONVERTER_H__
+#pragma once
 
 #include <iconv.h>
 #include <memory>
@@ -84,5 +83,3 @@ protected:
     std::string _convert(const std::string& str, bool validate,
         std::size_t* stoppedAt = nullptr);
 };
-
-#endif // __STRING_CONVERTER_H__

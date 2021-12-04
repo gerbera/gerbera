@@ -1,10 +1,9 @@
 /*MT*
  */
 
-#include "common.h"
+#pragma once
 
-#ifndef __GENERIC_TASK_H__
-#define __GENERIC_TASK_H__
+#include <string>
 
 enum task_type_t {
     Invalid,
@@ -44,5 +43,3 @@ public:
     bool isCancellable() const { return cancellable; }
     void invalidate() { valid = false; }
 };
-
-#endif //__GENERIC_TASK_H__

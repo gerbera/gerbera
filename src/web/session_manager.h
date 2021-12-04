@@ -29,8 +29,8 @@
 
 /// \file session_manager.h
 /// \brief Definitions of the Session and SessionManager classes.
-#ifndef __SESSION_MANAGER_H__
-#define __SESSION_MANAGER_H__
+
+#pragma once
 
 #include <memory>
 #include <unordered_set>
@@ -168,5 +168,3 @@ public:
 };
 
 } // namespace Web
-
-#endif //  __SESSION_MANAGER_H__

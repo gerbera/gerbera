@@ -30,8 +30,7 @@
 /// \file action_request.h
 /// \brief Definition of the ActionRequest class.
 
-#ifndef __ACTION_REQUEST_H__
-#define __ACTION_REQUEST_H__
+#pragma once
 
 #include <memory>
 #include <pugixml.hpp>
@@ -117,5 +116,3 @@ public:
     /// must be called at the very end before giving *upnp_request back to the SDK.
     void update();
 };
-
-#endif // __ACTION_REQUEST_H__

@@ -23,8 +23,7 @@
 /// \file config_setup.h
 ///\brief Definitions of the ConfigSetup classes.
 
-#ifndef __CONFIG_SETUP_H__
-#define __CONFIG_SETUP_H__
+#pragma once
 
 #include <map>
 #include <memory>
@@ -703,5 +702,3 @@ public:
 
     std::string getCurrentValue() const override { return {}; }
 };
-
-#endif // __CONFIG_SETUP_H__

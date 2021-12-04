@@ -29,8 +29,7 @@
 
 /// \file logger.h
 
-#ifndef __LOGGER_H__
-#define __LOGGER_H__
+#pragma once
 
 #include <spdlog/spdlog.h>
 
@@ -39,5 +38,3 @@
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
 #define log_js SPDLOG_INFO
-
-#endif // __LOGGER_H__

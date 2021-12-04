@@ -29,12 +29,12 @@
 
 /// \file io_handler.h
 /// \brief Definitoin for the IOHandler class.
-#ifndef __IO_HANDLER_H__
-#define __IO_HANDLER_H__
+
+#pragma once
 
 #include <upnp.h>
 
-#include "common.h"
+#include <cstddef>
 
 class IOHandler {
 public:
@@ -72,5 +72,3 @@ public:
     /// \brief Close/free previously opened/initialized data.
     virtual void close();
 };
-
-#endif // __IO_HANDLER_H__

@@ -29,10 +29,9 @@
 
 /// \file mysql_database.h
 
-#ifdef HAVE_MYSQL
+#pragma once
 
-#ifndef __mysql_database_H__
-#define __mysql_database_H__
+#ifdef HAVE_MYSQL
 
 #include "common.h"
 #include "database/sql_database.h"
@@ -117,7 +116,4 @@ private:
 
     MYSQL_ROW mysql_row;
 };
-
-#endif // __mysql_database_H__
-
 #endif // HAVE_MYSQL

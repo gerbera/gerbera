@@ -30,13 +30,11 @@
 /// \file upnp_mrreg.h
 /// \brief Definition of the ConnectionManagerService class.
 
-#ifndef __UPNP_MRREG_H__
-#define __UPNP_MRREG_H__
+#pragma once
 
 #include <memory>
 
 #include "action_request.h"
-#include "common.h"
 #include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
@@ -109,5 +107,3 @@ public:
     /// Sends out an update with protocol information to all subscribed devices
     //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
-
-#endif // __UPNP_MRREG_H__

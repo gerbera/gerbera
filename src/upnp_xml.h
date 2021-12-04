@@ -29,8 +29,8 @@
 
 /// \file upnp_xml.h
 /// \brief Provides various XML related functions, basically a toolkit.
-#ifndef __UPNP_XML_H__
-#define __UPNP_XML_H__
+
+#pragma once
 
 #include <deque>
 #include <memory>
@@ -38,7 +38,6 @@
 #include <vector>
 
 #include "cds_objects.h"
-#include "common.h"
 #include "config/config.h"
 #include "context.h"
 #include "util/upnp_quirks.h"
@@ -124,4 +123,3 @@ protected:
     static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
     void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
 };
-#endif // __UPNP_XML_H__

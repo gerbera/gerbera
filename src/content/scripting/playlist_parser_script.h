@@ -29,8 +29,7 @@
 
 /// \file playlist_parser_script.h
 
-#ifndef __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
-#define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
+#pragma once
 
 #include <memory>
 
@@ -57,5 +56,3 @@ private:
     char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
 };
-
-#endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

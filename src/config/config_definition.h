@@ -24,8 +24,7 @@
 /// \file config_definition.h
 ///\brief Definitions of class ConfigDefinition for default values and setup for configuration.
 
-#ifndef __CONFIG_DEFINITION_H__
-#define __CONFIG_DEFINITION_H__
+#pragma once
 
 #include "common.h"
 #include "config.h"
@@ -98,5 +97,3 @@ private:
     /// \brief option dependencies for automatic loading
     static const std::map<config_option_t, config_option_t> dependencyMap;
 };
-
-#endif // __CONFIG_DEFINITION_H__

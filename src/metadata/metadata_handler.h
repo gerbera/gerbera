@@ -29,8 +29,8 @@
 
 /// \file metadata_handler.h
 /// \brief Definition of the MetadataHandler class.
-#ifndef __METADATA_HANDLER_H__
-#define __METADATA_HANDLER_H__
+
+#pragma once
 
 #include <array>
 
@@ -226,5 +226,3 @@ public:
 
     static metadata_fields_t remapMetaDataField(std::string_view fieldName);
 };
-
-#endif // __METADATA_HANDLER_H__
