@@ -62,8 +62,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
         }
     }
 
-    std::string nodeName;
-    bool array = isArray(node, hints, &nodeName);
+    auto [array, nodeName] = isArray(node, hints);
 
     if (array) {
         if (!firstChild)
@@ -93,7 +92,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
                 buf << getAsString(child.name()) << ':';
             }
 
-            if (haveChildAttribute || haveChildElement || isArray(child, hints, nullptr)) {
+            if (haveChildAttribute || haveChildElement || isArray(child, hints).first) {
                 buf << '{';
                 handleElement(buf, child, hints);
                 buf << '}';
@@ -148,17 +147,13 @@ std::string Xml2Json::getValue(const std::string& name, const char* text, const 
     return getAsString(text);
 }
 
-bool Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints, std::string* arrayName)
+std::pair<bool, std::string> Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints)
 {
     auto&& hintsArray = hints.asArray;
     auto hint = hintsArray.find(node);
 
-    if (hint == hintsArray.end()) {
-        return false;
-    }
+    if (hint == hintsArray.end())
+        return {};
 
-    if (arrayName)
-        *arrayName = hint->second;
-
-    return true;
+    return { true, hint->second };
 }
