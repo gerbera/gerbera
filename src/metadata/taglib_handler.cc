@@ -252,21 +252,21 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     auto fs = TagLib::FileStream(item->getLocation().c_str(), true); // true = Read only
 
     if (contentType == CONTENT_TYPE_MP3) {
-        extractMP3(&fs, item);
+        extractMP3(fs, item);
     } else if (contentType == CONTENT_TYPE_FLAC) {
-        extractFLAC(&fs, item);
+        extractFLAC(fs, item);
     } else if (contentType == CONTENT_TYPE_MP4) {
-        extractMP4(&fs, item);
+        extractMP4(fs, item);
     } else if (contentType == CONTENT_TYPE_OGG) {
-        extractOgg(&fs, item);
+        extractOgg(fs, item);
     } else if (contentType == CONTENT_TYPE_APE) {
-        extractAPE(&fs, item);
+        extractAPE(fs, item);
     } else if (contentType == CONTENT_TYPE_WMA) {
-        extractASF(&fs, item);
+        extractASF(fs, item);
     } else if (contentType == CONTENT_TYPE_WAVPACK) {
-        extractWavPack(&fs, item);
+        extractWavPack(fs, item);
     } else if (contentType == CONTENT_TYPE_AIFF) {
-        extractAiff(&fs, item);
+        extractAiff(fs, item);
     } else {
         log_warning("TagLibHandler {}: Does not handle the {} content type", item->getLocation().c_str(), contentType.c_str());
     }
@@ -409,7 +409,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     }
     if (contentType == CONTENT_TYPE_OGG) {
         // stream album art from Ogg/Vorbis file
-        auto f = getOggFile(&roStream);
+        auto f = getOggFile(roStream);
 
         if (!f || !f->isValid() || !f->tag())
             throw_std_runtime_error("Could not open OGG file: {}", item->getLocation().c_str());
@@ -427,9 +427,9 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     throw_std_runtime_error("Unsupported content_type: {}", contentType.c_str());
 }
 
-void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto mp3 = TagLib::MPEG::File(roStream, TagLib::ID3v2::FrameFactory::instance());
+    auto mp3 = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
     if (!mp3.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid mp3 file", item->getLocation().c_str());
         return;
@@ -531,29 +531,29 @@ void TagLibHandler::extractMP3(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream* ioStream)
+std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream& ioStream)
 {
-    if (TagLib::Ogg::Vorbis::File::isSupported(ioStream)) {
-        return std::make_unique<TagLib::Ogg::Vorbis::File>(ioStream);
+    if (TagLib::Ogg::Vorbis::File::isSupported(&ioStream)) {
+        return std::make_unique<TagLib::Ogg::Vorbis::File>(&ioStream);
     }
 
-    if (TagLib::Ogg::Opus::File::isSupported(ioStream)) {
-        return std::make_unique<TagLib::Ogg::Opus::File>(ioStream);
+    if (TagLib::Ogg::Opus::File::isSupported(&ioStream)) {
+        return std::make_unique<TagLib::Ogg::Opus::File>(&ioStream);
     }
 
-    if (TagLib::Ogg::Speex::File::isSupported(ioStream)) {
-        return std::make_unique<TagLib::Ogg::Speex::File>(ioStream);
+    if (TagLib::Ogg::Speex::File::isSupported(&ioStream)) {
+        return std::make_unique<TagLib::Ogg::Speex::File>(&ioStream);
     }
 
-    if (TagLib::Ogg::FLAC::File::isSupported(ioStream)) {
-        return std::make_unique<TagLib::Ogg::FLAC::File>(ioStream);
+    if (TagLib::Ogg::FLAC::File::isSupported(&ioStream)) {
+        return std::make_unique<TagLib::Ogg::FLAC::File>(&ioStream);
     }
 
-    log_warning("Could not match supported Taglib OGG File for {}", ioStream->name());
+    log_warning("Could not match supported Taglib OGG File for {}", ioStream.name());
     return nullptr;
 }
 
-void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
     auto oggFile = getOggFile(roStream);
 
@@ -587,9 +587,9 @@ void TagLibHandler::extractOgg(TagLib::IOStream* roStream, const std::shared_ptr
     addArtworkResource(item, artMimetype);
 }
 
-void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto asf = TagLib::ASF::File(roStream);
+    auto asf = TagLib::ASF::File(&roStream);
 
     if (!asf.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid asf/wma file", item->getLocation().c_str());
@@ -626,9 +626,9 @@ void TagLibHandler::extractASF(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto flac = TagLib::FLAC::File(roStream, TagLib::ID3v2::FrameFactory::instance());
+    auto flac = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 
     if (!flac.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid flac file", item->getLocation().c_str());
@@ -661,9 +661,9 @@ void TagLibHandler::extractFLAC(TagLib::IOStream* roStream, const std::shared_pt
     addArtworkResource(item, artMimetype);
 }
 
-void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto ape = TagLib::APE::File(roStream);
+    auto ape = TagLib::APE::File(&roStream);
 
     if (!ape.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid APE file", item->getLocation().c_str());
@@ -683,9 +683,9 @@ void TagLibHandler::extractAPE(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto wavpack = TagLib::WavPack::File(roStream);
+    auto wavpack = TagLib::WavPack::File(&roStream);
 
     if (!wavpack.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid WavPack file", item->getLocation().c_str());
@@ -705,9 +705,9 @@ void TagLibHandler::extractWavPack(TagLib::IOStream* roStream, const std::shared
     }
 }
 
-void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto mp4 = TagLib::MP4::File(roStream);
+    auto mp4 = TagLib::MP4::File(&roStream);
 
     if (!mp4.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid mp4 file", item->getLocation().c_str());
@@ -752,9 +752,9 @@ void TagLibHandler::extractMP4(TagLib::IOStream* roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractAiff(TagLib::IOStream* roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractAiff(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
-    auto aiff = TagLib::RIFF::AIFF::File(roStream);
+    auto aiff = TagLib::RIFF::AIFF::File(&roStream);
 
     if (!aiff.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid AIFF file", item->getLocation().c_str());
