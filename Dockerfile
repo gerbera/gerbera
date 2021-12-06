@@ -4,23 +4,18 @@ RUN apk add --no-cache tini gcc g++ pkgconf make \
     util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev fmt-dev \
     file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev \
     libmatroska-dev libebml-dev taglib-dev pugixml-dev spdlog-dev \
-    duktape-dev git bash
+    duktape-dev git bash \
+    # to build libupnp
+    autoconf automake libtool file
+
+WORKDIR /gerbera_build
+
+COPY . .
 
 # Build libupnp
-WORKDIR /libupnp_build
-RUN wget -c https://github.com/pupnp/pupnp/archive/refs/tags/release-1.14.12.tar.gz -O - | tar -xz && \
-    cd pupnp-release-* && \
-    cmake -B build \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX=/usr \
-        -Dsamples=OFF \
-        -Dreuseaddr=ON \
-        -Dblocking_tcp_connections=OFF && \
-    cmake --build build --target install
+RUN scripts/install-pupnp.sh
 
 # Build Gerbera
-WORKDIR /gerbera_build
-COPY . .
 RUN mkdir build && \
     cd build && \
     cmake .. \
@@ -44,7 +39,7 @@ RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
     pugixml spdlog sqlite-libs duktape su-exec tzdata
 
 # Copy libupnp
-COPY --from=builder /usr/lib/libixml.so.* /usr/lib/libupnp.so.* /usr/lib/
+COPY --from=builder /usr/local/lib/libixml.so.* /usr/local/lib/libupnp.so.* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
