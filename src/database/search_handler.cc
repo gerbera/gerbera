@@ -709,6 +709,6 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         colBuf.emplace(colBuf.begin(), ""); // result starts with ,
     }
     addColumns = fmt::format("{}", fmt::join(colBuf, ", "));
-    addJoin = fmt::format("{}", fmt::join(joinBuf, ", "));
+    addJoin = fmt::format("{}", fmt::join(joinBuf, " "));
     return fmt::format("{}", fmt::join(sort, ", "));
 }
