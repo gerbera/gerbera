@@ -76,6 +76,8 @@ void CurlIOHandler::close()
 
 void CurlIOHandler::threadProc()
 {
+    StdThreadRunner::waitFor("CurlIOHandler", [this] { return threadRunner != nullptr; });
+
     CURLcode res;
     assert(curl_handle);
     assert(!URL.empty());

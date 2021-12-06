@@ -68,7 +68,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // determining which resource to serve
     auto resIdIt = params.find(URL_RESOURCE_ID);
-    std::size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? std::stoi(resIdIt->second) : std::numeric_limits<std::size_t>::max();
+    std::size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? stoiString(resIdIt->second) : std::numeric_limits<std::size_t>::max();
 
     if (!obj->isItem() && rh.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
@@ -109,7 +109,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // to trust the resource handler parameter
     if ((resId > 0 && resId < obj->getResourceCount()) || !rh.empty()) {
         auto resource = obj->getResource(resId);
-        int resHandler = (!rh.empty()) ? std::stoi(rh) : resource->getHandlerType();
+        int resHandler = (!rh.empty()) ? stoiString(rh) : resource->getHandlerType();
         // http-get:*:image/jpeg:*
         std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
         if (!protocolInfo.empty()) {
