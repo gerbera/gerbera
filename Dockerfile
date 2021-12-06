@@ -12,7 +12,7 @@ COPY . .
 RUN mkdir build && \
     cd build && \
     cmake .. \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_BUILD_TYPE=Release \
         -DWITH_MAGIC=YES \
         -DWITH_MYSQL=YES \
         -DWITH_CURL=YES \
