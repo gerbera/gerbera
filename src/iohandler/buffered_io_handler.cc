@@ -67,6 +67,7 @@ void BufferedIOHandler::threadProc()
 {
     int readBytes = 0;
     std::size_t maxWrite;
+    StdThreadRunner::waitFor("BufferedIOHandler", [this] { return threadRunner != nullptr; });
 
 #ifdef TOMBDEBUG
     std::chrono::milliseconds lastLog;
