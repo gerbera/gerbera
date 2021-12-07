@@ -31,7 +31,6 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_setup.h"
-#include "config/directory_tweak.h"
 #include "config/dynamic_content.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
