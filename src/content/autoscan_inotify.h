@@ -104,9 +104,9 @@ private:
 
     class WatchAutoscan : public Watch {
     public:
-        WatchAutoscan(bool startPoint, const std::shared_ptr<AutoscanDirectory>& adir)
+        WatchAutoscan(bool startPoint, std::shared_ptr<AutoscanDirectory> adir)
             : Watch(WatchType::Autoscan)
-            , adir(adir)
+            , adir(std::move(adir))
             , startPoint(startPoint)
         {
         }
