@@ -13,6 +13,7 @@ RUN mkdir build && \
     cd build && \
     cmake .. \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_FLAGS=-g1 \
         -DWITH_MAGIC=YES \
         -DWITH_MYSQL=YES \
         -DWITH_CURL=YES \
@@ -35,10 +36,8 @@ RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
 COPY --from=builder /gerbera_build/scripts/js /usr/local/share/gerbera/js
 COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
-COPY --from=builder /gerbera_build/src/database/*/*.sql /usr/local/share/gerbera/
-COPY --from=builder /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
-
-COPY scripts/docker/docker-entrypoint.sh /usr/local/bin
+COPY --from=builder /gerbera_build/src/database/*/*.sql /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
+COPY --from=builder /gerbera_build/scripts/docker/docker-entrypoint.sh /usr/local/bin
 
 RUN addgroup -S gerbera 2>/dev/null && \
     adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G gerbera -g gerbera gerbera 2>/dev/null && \
