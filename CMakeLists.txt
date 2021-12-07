@@ -418,14 +418,8 @@ endif()
 
 if(WITH_INOTIFY)
     find_package(Inotify REQUIRED)
-    if(Inotify_FOUND)
-        target_include_directories(libgerbera PUBLIC ${Inotify_INCLUDE_DIRS})
-        target_compile_definitions(libgerbera PUBLIC HAVE_INOTIFY)
-        # FreeBSD INotify shim!
-        if(Inotify_LIBRARIES)
-            target_link_libraries(libgerbera PUBLIC ${Inotify_LIBRARIES})
-        endif()
-    endif()
+    target_link_libraries(libgerbera PUBLIC Inotify::Inotify)
+    target_compile_definitions(libgerbera PUBLIC HAVE_INOTIFY)
 endif()
 
 if(WITH_JS)
