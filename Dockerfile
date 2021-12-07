@@ -5,17 +5,17 @@ RUN apk add --no-cache tini gcc g++ pkgconf make \
     file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev \
     libmatroska-dev libebml-dev taglib-dev pugixml-dev spdlog-dev \
     duktape-dev git bash \
-    # to build libupnp
+    # packages to build libupnp
     autoconf automake libtool file
 
-WORKDIR /gerbera_build
-
-COPY . .
-
 # Build libupnp
-RUN scripts/install-pupnp.sh
+WORKDIR /libupnp_build
+COPY scripts/install-pupnp.sh scripts/versions.sh ./
+RUN ./install-pupnp.sh
 
 # Build Gerbera
+WORKDIR /gerbera_build
+COPY . .
 RUN mkdir build && \
     cd build && \
     cmake .. \
