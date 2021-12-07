@@ -452,7 +452,7 @@ std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolutio
     return {};
 }
 
-std::string escape(std::string string, char escapeChar, char toEscape)
+std::string escape(std::string_view string, char escapeChar, char toEscape)
 {
     std::ostringstream buf;
     auto len = string.length();

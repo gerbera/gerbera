@@ -67,7 +67,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
     if (array) {
         if (!firstChild)
             buf << ',';
-        buf << getAsString(nodeName.c_str()) << ':';
+        buf << getAsString(nodeName) << ':';
         buf << '[';
         firstChild = true;
     }
@@ -106,7 +106,7 @@ void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node
         buf << ']';
 }
 
-std::string Xml2Json::getAsString(const char* str)
+std::string Xml2Json::getAsString(std::string_view str)
 {
     auto escaped = escape(str, '\\', '"');
 
@@ -147,7 +147,7 @@ std::string Xml2Json::getValue(const std::string& name, const char* text, const 
     return getAsString(text);
 }
 
-std::pair<bool, std::string> Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints)
+std::pair<bool, std::string_view> Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints)
 {
     auto&& hintsArray = hints.asArray;
     auto hint = hintsArray.find(node);

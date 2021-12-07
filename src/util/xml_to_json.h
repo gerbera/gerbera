@@ -45,8 +45,8 @@ class Xml2Json {
 public:
     class Hints {
     public:
-        void setArrayName(const pugi::xml_node& node, const std::string& name) { asArray[node] = name; }
-        void setFieldType(const std::string& node, const std::string& type) { asType[node] = type; }
+        void setArrayName(const pugi::xml_node& node, std::string_view name) { asArray.insert_or_assign(node, name); }
+        void setFieldType(const std::string& node, std::string_view type) { asType.insert_or_assign(node, type); }
 
     private:
         std::map<pugi::xml_node, std::string> asArray;
@@ -58,9 +58,9 @@ public:
 
 private:
     static void handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints& hints);
-    static std::string getAsString(const char* str);
+    static std::string getAsString(std::string_view str);
     static std::string getValue(const std::string& name, const char* text, const Hints& hints);
-    static std::pair<bool, std::string> isArray(const pugi::xml_node& node, const Hints& hints);
+    static std::pair<bool, std::string_view> isArray(const pugi::xml_node& node, const Hints& hints);
 };
 
 #endif // __UTIL_XML_TO_JSON_H__
