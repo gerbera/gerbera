@@ -37,14 +37,9 @@
 
 static constexpr auto loginTimeout = std::chrono::seconds(10);
 
-static std::chrono::seconds getTime()
-{
-    return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
-}
-
 static std::string generateToken()
 {
-    auto expiration = getTime() + loginTimeout;
+    auto expiration = currentTime() + loginTimeout;
     std::string salt = generateRandomId();
     return fmt::format("{}_{}", expiration.count(), salt);
 }
@@ -55,7 +50,7 @@ static bool checkToken(const std::string& token, const std::string& password, co
     if (parts.size() != 2)
         return false;
     auto expiration = std::chrono::seconds(std::stol(parts[0]));
-    if (expiration < getTime())
+    if (expiration < currentTime())
         return false;
     std::string checksum = hexStringMd5(token + password);
     return (checksum == encPassword);
