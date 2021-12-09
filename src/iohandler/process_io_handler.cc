@@ -157,7 +157,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
 {
     fd_set readSet;
-    struct timespec timeout;
+    struct timespec timeout = { FIFO_READ_TIMEOUT, 0 };
     ssize_t bytesRead;
     std::size_t numBytes = 0;
     char* pBuffer = buf;
@@ -168,9 +168,6 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
     while (true) {
         FD_ZERO(&readSet);
         FD_SET(fd, &readSet);
-
-        timeout.tv_sec = FIFO_READ_TIMEOUT;
-        timeout.tv_nsec = 0;
 
         ret = pselect(fd + 1, &readSet, nullptr, nullptr, &timeout, nullptr);
         if ((ret == -1) && (errno == EINTR))
@@ -247,7 +244,7 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
 std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
 {
     fd_set writeSet;
-    struct timespec timeout;
+    struct timespec timeout = { FIFO_WRITE_TIMEOUT, 0 };
     ssize_t bytesWritten;
     std::size_t numBytes = 0;
     char* pBuffer = buf;
@@ -257,9 +254,6 @@ std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
     while (true) {
         FD_ZERO(&writeSet);
         FD_SET(fd, &writeSet);
-
-        timeout.tv_sec = FIFO_WRITE_TIMEOUT;
-        timeout.tv_nsec = 0;
 
         ret = pselect(fd + 1, nullptr, &writeSet, nullptr, &timeout, nullptr);
         if ((ret == -1) && (errno == EINTR))
