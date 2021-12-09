@@ -54,7 +54,7 @@ class LoginException : public std::runtime_error {
 
 class SessionManager;
 
-static constexpr char SID[] = "GerberaSID";
+static constexpr auto SID = "GerberaSID";
 
 /// \brief This class is responsible for processing requests that come to the user interface.
 class WebRequestHandler : public RequestHandler {
