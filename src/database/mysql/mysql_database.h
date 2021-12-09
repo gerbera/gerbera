@@ -92,7 +92,7 @@ public:
 
 class MysqlResult : public SQLResult {
 public:
-    explicit MysqlResult(MYSQL_RES* mysql_res);
+    explicit MysqlResult(MYSQL_RES* mysqlRes);
     ~MysqlResult() override;
 
     MysqlResult(const MysqlResult&) = delete;
@@ -101,8 +101,8 @@ public:
 private:
     int nullRead {};
     std::unique_ptr<SQLRow> nextRow() override;
-    unsigned long long getNumRows() const override { return mysql_num_rows(mysql_res); }
-    MYSQL_RES* mysql_res;
+    unsigned long long getNumRows() const override { return mysql_num_rows(mysqlRes); }
+    MYSQL_RES* mysqlRes;
 
     friend class MysqlRow;
     friend class MySQLDatabase;
@@ -115,7 +115,7 @@ public:
 private:
     char* col_c_str(int index) const override;
 
-    MYSQL_ROW mysql_row;
+    MYSQL_ROW mysqlRow;
 };
 
 #endif // __mysql_database_H__
