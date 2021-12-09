@@ -351,44 +351,44 @@ void MySQLDatabase::_exec(const std::string& query)
 
 /* MysqlResult */
 
-MysqlResult::MysqlResult(MYSQL_RES* mysql_res)
-    : mysql_res(mysql_res)
+MysqlResult::MysqlResult(MYSQL_RES* mysqlRes)
+    : mysqlRes(mysqlRes)
 {
 }
 
 MysqlResult::~MysqlResult()
 {
-    if (mysql_res) {
+    if (mysqlRes) {
         if (!nullRead) {
-            while (mysql_fetch_row(mysql_res))
+            while (mysql_fetch_row(mysqlRes))
                 ; // read out data
         }
-        mysql_free_result(mysql_res);
-        mysql_res = nullptr;
+        mysql_free_result(mysqlRes);
+        mysqlRes = nullptr;
     }
 }
 
 std::unique_ptr<SQLRow> MysqlResult::nextRow()
 {
-    if (auto mysqlRow = mysql_fetch_row(mysql_res); mysqlRow) {
-        return std::make_unique<MysqlRow>(mysqlRow);
+    if (auto m = mysql_fetch_row(mysqlRes)) {
+        return std::make_unique<MysqlRow>(m);
     }
     nullRead = true;
-    mysql_free_result(mysql_res);
-    mysql_res = nullptr;
+    mysql_free_result(mysqlRes);
+    mysqlRes = nullptr;
     return nullptr;
 }
 
 /* MysqlRow */
 
 MysqlRow::MysqlRow(MYSQL_ROW mysqlRow)
-    : mysql_row(mysqlRow)
+    : mysqlRow(mysqlRow)
 {
 }
 
 char* MysqlRow::col_c_str(int index) const
 {
-    return mysql_row[index];
+    return mysqlRow[index];
 }
 
 #endif // HAVE_MYSQL
