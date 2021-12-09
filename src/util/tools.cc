@@ -150,7 +150,9 @@ void replaceAllString(std::string& str, std::string_view from, std::string_view 
 
 std::string renderWebUri(std::string_view ip, int port)
 {
-    return fmt::format((ip.find(':') != std::string::npos) ? "[{}]:{}" : "{}:{}", ip, port);
+    if (ip.find(':') != std::string_view::npos)
+        return fmt::format("[{}]:{}", ip, port);
+    return fmt::format("{}:{}", ip, port);
 }
 
 std::string httpRedirectTo(std::string_view addr, std::string_view page)

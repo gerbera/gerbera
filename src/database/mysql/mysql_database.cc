@@ -44,8 +44,8 @@
 //#define MYSQL_EXEC_DEBUG
 
 #define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
-#define MYSQL_UPDATE_VERSION "UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'"
-#define MYSQL_ADD_RESOURCE_ATTR "ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL"
+static constexpr auto MYSQL_UPDATE_VERSION = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
+static constexpr auto MYSQL_ADD_RESOURCE_ATTR = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
 
 MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
     : SQLDatabase(config, mime)

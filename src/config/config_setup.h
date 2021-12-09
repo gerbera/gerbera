@@ -89,7 +89,9 @@ protected:
     static std::string buildCpath(const char* xpath)
     {
         auto cPath = std::string_view(xpath);
-        return fmt::format(!cPath.empty() && cPath.front() != '/' ? "/{}/{}" : "/{}{}", ROOT_NAME, cPath);
+        if (!cPath.empty() && cPath.front() != '/')
+            return fmt::format("/{}/{}", ROOT_NAME, cPath);
+        return fmt::format("/{}{}", ROOT_NAME, cPath);
     }
 
 public:
