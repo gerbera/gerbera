@@ -421,7 +421,7 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -2620,7 +2620,7 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
     }
 }
 
-void SQLDatabase::prepareResourceTable(const std::string& addColumnCmd)
+void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
 {
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;

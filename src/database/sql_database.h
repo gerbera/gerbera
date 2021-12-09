@@ -193,7 +193,7 @@ protected:
     void migrateMetadata(int objectId, const std::string& metadataStr);
 
     /// \brief Add a column to resource table for each defined resource attribute
-    void prepareResourceTable(const std::string& addColumnCmd);
+    void prepareResourceTable(std::string_view addColumnCmd);
 
     /// \brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
@@ -212,7 +212,7 @@ protected:
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, const std::string& updateVersionCommand, const std::string& addResourceColumnCmd);
+    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
     virtual void _exec(const std::string& query) = 0;
 
 private:
