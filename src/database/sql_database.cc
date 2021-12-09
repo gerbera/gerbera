@@ -621,7 +621,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     } else {
         cdsObjectSql.emplace("last_modified", SQL_NULL);
     }
-    cdsObjectSql.emplace("last_updated", quote(to_seconds(std::chrono::system_clock::now()).count()));
+    cdsObjectSql.emplace("last_updated", quote(currentTime().count()));
 
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());

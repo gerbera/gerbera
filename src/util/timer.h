@@ -112,7 +112,7 @@ protected:
         }
         void updateNextNotify()
         {
-            auto start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+            auto start = currentTimeMS();
             nextNotify = start + notifyInterval;
         }
         std::chrono::milliseconds getNextNotify() const { return nextNotify; }

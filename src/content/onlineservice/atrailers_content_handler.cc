@@ -189,7 +189,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     }
     */
 
-    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(std::chrono::system_clock::now().time_since_epoch().count()));
+    item->setAuxData(ONLINE_SERVICE_LAST_UPDATE, fmt::to_string(currentTime().count()));
 
     item->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     try {

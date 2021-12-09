@@ -1426,7 +1426,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
     if (service->getItemPurgeInterval() > std::chrono::seconds::zero()) {
         auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
 
-        auto current = std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch();
+        auto current = currentTime();
         std::chrono::seconds last = {};
         std::string temp;
 
