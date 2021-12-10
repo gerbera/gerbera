@@ -337,6 +337,8 @@ void Server::shutdown()
     timer->shutdown();
     timer = nullptr;
 
+    context = nullptr;
+
     mime = nullptr;
     clients = nullptr;
 }

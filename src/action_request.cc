@@ -108,6 +108,8 @@ void ActionRequest::update()
         if (err != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML");
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
+            if (result)
+                ixmlDocument_free(result);
         } else {
             log_debug("ActionRequest::update(): converted to iXML, code {}", errCode);
             UpnpActionRequest_set_ActionResult(upnp_request, result);
