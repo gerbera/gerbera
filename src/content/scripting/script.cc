@@ -610,6 +610,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
         if (this->whoami() == S_PLAYLIST) {
             item->setTrackNumber(getIntProperty("playlistOrder", 0));
+            item->setPartNumber(0);
         }
 
         // location must not be touched by character conversion!

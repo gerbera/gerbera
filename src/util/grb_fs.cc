@@ -9,20 +9,14 @@
 
 #include "grb_fs.h" // API
 
+#include <fcntl.h>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
-#endif
-
-#ifdef SOLARIS
-#include <fcntl.h>
-#endif
-
-#if defined(__GLIBCXX__) && (__GLIBCXX__ <= 20190406)
-#include <sys/stat.h>
 #endif
 
 #include "util/tools.h"
@@ -154,10 +148,13 @@ std::string GrbFile::readTextFile()
 void GrbFile::writeTextFile(std::string_view contents)
 {
     open("wt");
+    auto err = chmod(path.c_str(), S_IWUSR | S_IRUSR);
+    if (err != 0) {
+        log_error("Failed to change location {} permissions: {}", path.c_str(), std::strerror(errno));
+    }
 
     std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), fd);
     if (bytesWritten < contents.length()) {
-
         throw_std_runtime_error("Error writing to {}: {}", path.c_str(), std::strerror(errno));
     }
 }
