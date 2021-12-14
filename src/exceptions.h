@@ -35,15 +35,7 @@
 #include <stdexcept>
 #include <string>
 
-#ifdef __PRETTY_FUNCTION__
-// GCC + llvm
-#define PRETTY_FUNCTION __PRETTY_FUNCTION__
-#else
-// C99
-#define PRETTY_FUNCTION __func__
-#endif
-
-#define throw_std_runtime_error(...) throw std::runtime_error(fmt::format("[{}:{}] {} Error: {}", __FILE__, __LINE__, PRETTY_FUNCTION, fmt::format(__VA_ARGS__)))
+#define throw_std_runtime_error(...) throw std::runtime_error(fmt::format("[{}:{}] {} Error: {}", __FILE__, __LINE__, __PRETTY_FUNCTION__, fmt::format(__VA_ARGS__)))
 
 class ConfigParseException : public std::runtime_error {
     using std::runtime_error::runtime_error;
