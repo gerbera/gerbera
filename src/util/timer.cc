@@ -40,10 +40,9 @@ void Timer::run()
 {
     log_debug("Starting Timer thread...");
     threadRunner = std::make_unique<StdThreadRunner>(
-        "TimerThread", [](void* arg) -> void* {
+        "TimerThread", [](void* arg) {
             auto inst = static_cast<Timer*>(arg);
             inst->threadProc();
-            return nullptr;
         },
         this, config);
 
