@@ -36,7 +36,7 @@
 #include "config/config.h"
 #include "thread_executor.h"
 
-using ThreadProc = void* (*)(void* target);
+using ThreadProc = std::function<void(void* target)>;
 
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
@@ -44,7 +44,7 @@ public:
     ThreadRunner(std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
         : config(config)
         , threadName(std::move(name))
-        , targetProc(targetProc)
+        , targetProc(std::move(targetProc))
         , target(target)
     {
         log_debug("ThreadRunner: Creating {}", this->threadName);

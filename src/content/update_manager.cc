@@ -53,10 +53,9 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
 void UpdateManager::run()
 {
     threadRunner = std::make_unique<StdThreadRunner>(
-        "UpdateThread", [](void* arg) -> void* {
+        "UpdateThread", [](void* arg) {
             auto inst = static_cast<UpdateManager*>(arg);
             inst->threadProc();
-            return nullptr;
         },
         this, config);
     // wait for thread to become ready

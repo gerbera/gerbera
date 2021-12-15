@@ -43,10 +43,9 @@ TaskProcessor::TaskProcessor(std::shared_ptr<Config> config)
 void TaskProcessor::run()
 {
     threadRunner = std::make_unique<StdThreadRunner>(
-        "TaskProcessorThread", [](void* arg) -> void* {
+        "TaskProcessorThread", [](void* arg) {
             auto inst = static_cast<TaskProcessor*>(arg);
             inst->threadProc();
-            return nullptr;
         },
         this, config);
 

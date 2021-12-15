@@ -174,10 +174,9 @@ void IOHandlerBufferHelper::close()
 void IOHandlerBufferHelper::startBufferThread()
 {
     threadRunner = std::make_unique<StdThreadRunner>(
-        "BufferHelperThread", [](void* arg) -> void* {
+        "BufferHelperThread", [](void* arg) {
             auto inst = static_cast<IOHandlerBufferHelper*>(arg);
             inst->threadProc();
-            return nullptr;
         },
         this, config);
 }
