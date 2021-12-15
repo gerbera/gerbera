@@ -38,7 +38,7 @@ StringConverter::StringConverter(const std::string& from, const std::string& to)
 {
     if (!cd) {
         cd = {};
-        throw_std_runtime_error("iconv: {}", std::strerror(errno));
+        throw_fmt_system_error("iconv");
     }
 }
 

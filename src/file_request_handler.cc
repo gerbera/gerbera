@@ -93,7 +93,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (isResourceFile) {
             throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
         }
-        throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
+        throw_fmt_system_error("Failed to open {}", path.c_str());
     }
 
     // If we get to here we can read the thing

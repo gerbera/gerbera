@@ -117,8 +117,7 @@ fs::path TranscodeExternalHandler::makeFifo()
     log_debug("Creating FIFO: {}", fifoPath.string());
     int err = mkfifo(fifoPath.c_str(), O_RDWR);
     if (err != 0) {
-        log_error("Failed to create FIFO for the transcoding process!: {}", std::strerror(errno));
-        throw_std_runtime_error("Could not create FIFO");
+        throw_fmt_system_error("Failed to create FIFO for the transcoding process!");
     }
 
     err = chmod(fifoPath.c_str(), S_IWUSR | S_IRUSR);
