@@ -139,7 +139,7 @@ std::string GrbNet::getNameInfo(bool withPort) const
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
     int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     if (ret != 0) {
-        throw_std_runtime_error("could not determine getnameinfo: {}", std::strerror(errno));
+        throw_fmt_system_error("could not determine getnameinfo");
     }
 
     return withPort ? fmt::format("{}:{}", hoststr, portstr) : hoststr;

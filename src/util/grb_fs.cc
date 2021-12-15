@@ -77,7 +77,7 @@ std::uintmax_t getFileSize(const fs::directory_entry& dirEnt)
     struct stat statbuf;
     int ret = stat(dirEnt.path().c_str(), &statbuf);
     if (ret != 0) {
-        throw_std_runtime_error("{}: {}", std::strerror(errno), dirEnt.path().c_str());
+        throw_fmt_system_error("Could not stat file {}", dirEnt.path().c_str());
     }
 
     return statbuf.st_size;
@@ -140,7 +140,7 @@ std::FILE* GrbFile::open(const char* mode, bool fail)
     fd = std::fopen(path.c_str(), fmt::format("{}{}", mode, GrbFileExtra).c_str());
     if (!fd) {
         if (fail)
-            throw_std_runtime_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
+            throw_fmt_system_error("Could not open {}", path.c_str());
         log_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
     }
     return fd;
@@ -165,7 +165,7 @@ void GrbFile::writeTextFile(std::string_view contents)
 
     std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), fd);
     if (bytesWritten < contents.length()) {
-        throw_std_runtime_error("Error writing to {}: {}", path.c_str(), std::strerror(errno));
+        throw_std_runtime_error("Error writing to {}", path.c_str());
     }
 }
 
@@ -291,7 +291,7 @@ std::string getAVIFourCC(const fs::path& aviFilename)
 
     std::size_t rb = std::fread(buffer, 1, FCC_OFFSET + 4, f);
     if (rb != FCC_OFFSET + 4) {
-        throw_std_runtime_error("Could not read header of {}: {}", aviFilename.c_str(), std::strerror(errno));
+        throw_std_runtime_error("Could not read header of {}", aviFilename.c_str());
     }
 
     buffer[FCC_OFFSET + 5] = '\0';

@@ -60,14 +60,14 @@ Inotify::Inotify()
 #endif
 {
     if (inotify_fd < 0)
-        throw_std_runtime_error("Unable to initialize inotify");
+        throw_fmt_system_error("Unable to initialize inotify");
 
 #ifdef __linux__
     if (pipe2(stop_fds_pipe, IN_CLOEXEC) < 0)
 #else
     if (pipe(stop_fds_pipe) < 0)
 #endif
-        throw_std_runtime_error("Unable to create pipe");
+        throw_fmt_system_error("Unable to create pipe");
 
     stop_fd_read = stop_fds_pipe[0];
     stop_fd_write = stop_fds_pipe[1];
@@ -98,12 +98,12 @@ int Inotify::addWatch(const fs::path& path, int events) const
     int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
     if (wd < 0 && errno != ENOENT) {
         if (errno == ENOSPC)
-            throw_std_runtime_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
+            throw_fmt_system_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
         if (errno == EACCES) {
             log_warning("Cannot add inotify watch for {}: {}", path.c_str(), std::strerror(errno));
             return -1;
         }
-        throw_std_runtime_error(std::strerror(errno));
+        throw_fmt_system_error("");
     }
     return wd;
 }
