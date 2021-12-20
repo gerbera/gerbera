@@ -118,11 +118,11 @@ TEST(ToolsTest, trimStringTest)
 
 TEST(ToolsTest, startswithTest)
 {
-    EXPECT_EQ(startswith("AB", "AB"), true);
-    EXPECT_EQ(startswith("ABCD", "AB"), true);
-    EXPECT_EQ(startswith("AB", "ABC"), false);
-    EXPECT_EQ(startswith("ABC", "BC"), false);
-    EXPECT_EQ(startswith("ABAB", "AB"), true);
+    ASSERT_TRUE(startswith("AB", "AB"));
+    ASSERT_TRUE(startswith("ABCD", "AB"));
+    ASSERT_FALSE(startswith("AB", "ABC"));
+    ASSERT_FALSE(startswith("ABC", "BC"));
+    ASSERT_TRUE(startswith("ABAB", "AB"));
 }
 
 TEST(ToolsTest, toLowerTest)
