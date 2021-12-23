@@ -47,11 +47,11 @@ public:
 
     [[maybe_unused]] void addList(const std::shared_ptr<AutoscanList>& list);
 
-    std::shared_ptr<AutoscanDirectory> get(std::size_t id, bool edit = false);
+    std::shared_ptr<AutoscanDirectory> get(std::size_t id, bool edit = false) const;
 
-    std::shared_ptr<AutoscanDirectory> get(const fs::path& location);
+    std::shared_ptr<AutoscanDirectory> get(const fs::path& location) const;
 
-    std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID);
+    std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID) const;
 
     std::size_t getEditSize() const;
 
@@ -75,7 +75,7 @@ public:
     void updateLMinDB();
 
     /// \brief returns a copy of the autoscan list in the form of an array
-    std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy();
+    std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy() const;
 
 protected:
     std::size_t origSize {};
@@ -83,7 +83,7 @@ protected:
 
     std::shared_ptr<Database> database;
 
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<AutoscanDirectory>> list;

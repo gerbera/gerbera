@@ -63,7 +63,7 @@ protected:
     bool threadRunning {};
 
     std::condition_variable cond;
-    std::mutex mutex;
+    mutable std::mutex mutex;
     pthread_t thread {};
 
     /// \brief abstract thread method, which needs to be overridden

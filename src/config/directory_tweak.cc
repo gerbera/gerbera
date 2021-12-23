@@ -79,13 +79,13 @@ std::size_t DirectoryConfigList::getEditSize() const
     return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
-std::vector<std::shared_ptr<DirectoryTweak>> DirectoryConfigList::getArrayCopy()
+std::vector<std::shared_ptr<DirectoryTweak>> DirectoryConfigList::getArrayCopy() const
 {
     AutoLock lock(mutex);
     return list;
 }
 
-std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool edit)
+std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool edit) const
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -95,12 +95,12 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool ed
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
-        return indexMap[id];
+        return indexMap.at(id);
     }
     return nullptr;
 }
 
-std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location)
+std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location) const
 {
     AutoLock lock(mutex);
     auto&& myLocation = location.has_filename() ? location.parent_path() : location;

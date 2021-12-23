@@ -45,7 +45,7 @@ public:
     /// \return scanID of the newly added ClientConfig
     void add(const std::shared_ptr<ClientConfig>& client, std::size_t index = std::numeric_limits<std::size_t>::max());
 
-    std::shared_ptr<ClientConfig> get(std::size_t id, bool edit = false);
+    std::shared_ptr<ClientConfig> get(std::size_t id, bool edit = false) const;
 
     std::size_t getEditSize() const;
 
@@ -55,13 +55,13 @@ public:
     void remove(std::size_t id, bool edit = false);
 
     /// \brief returns a copy of the client config list in the form of an array
-    std::vector<std::shared_ptr<ClientConfig>> getArrayCopy();
+    std::vector<std::shared_ptr<ClientConfig>> getArrayCopy() const;
 
 protected:
     std::size_t origSize {};
     std::map<std::size_t, std::shared_ptr<ClientConfig>> indexMap;
 
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<ClientConfig>> list;
