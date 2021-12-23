@@ -283,8 +283,6 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
 std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
-std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
-std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view mimeType);
 
 /// \brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c

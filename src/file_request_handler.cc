@@ -167,7 +167,14 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         auto resource = item->getResource(0);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+        std::string dlnaContentHeader = [&] {
+            std::string contentParameter = getDLNAprofileString(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+            return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
+                UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
+                UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
+                UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
+        }();
+
         if (!dlnaContentHeader.empty()) {
             headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
@@ -176,7 +183,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (mimeType.empty() && item)
         mimeType = item->getMimeType();
 
-    std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
+    std::string dlnaTransferHeader = [&mimeType] {
+        if (startswith(mimeType, "image"))
+            return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
+
+        if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+            return UPNP_DLNA_TRANSFER_MODE_STREAMING;
+
+        return "";
+    }();
+
     if (!dlnaTransferHeader.empty()) {
         headers->addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }

@@ -669,28 +669,6 @@ std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const st
     return profile.empty() ? "" : fmt::format("{}={};", UPNP_DLNA_PROFILE, profile);
 }
 
-std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
-{
-    std::string contentParameter = getDLNAprofileString(config, contentType, vCodec, aCodec);
-    return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
-        UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
-        UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
-        UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
-}
-
-std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::string_view mimeType)
-{
-    if (startswith(mimeType, "image")) {
-        return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
-    }
-
-    if (startswith(mimeType, "audio") || startswith(mimeType, "video")) {
-        return UPNP_DLNA_TRANSFER_MODE_STREAMING;
-    }
-
-    return {};
-}
-
 std::string getHostName(const struct sockaddr* addr)
 {
     char hoststr[NI_MAXHOST];
