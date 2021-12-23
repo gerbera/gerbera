@@ -741,26 +741,25 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             }
         }
 
-        std::string extend;
-        std::string dlnaProfile = res->getParameter("dlnaProfile");
-
-        if (contentType == CONTENT_TYPE_JPG) {
-            std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
-            auto [x, y] = checkResolution(resolution);
-            if ((res->getResId() > 0) && !resolution.empty() && x && y) {
-                if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
-                else if ((x <= 640) && (y <= 420))
-                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_SM);
-                else if ((x <= 1024) && (y <= 768))
-                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_MED);
-                else if ((x <= 4096) && (y <= 4096))
-                    extend = fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_LRG);
+        std::string extend = [&] {
+            std::string dlnaProfile = res->getParameter("dlnaProfile");
+            if (contentType == CONTENT_TYPE_JPG) {
+                std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
+                auto [x, y] = checkResolution(resolution);
+                if ((res->getResId() > 0) && !resolution.empty() && x && y) {
+                    if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
+                        return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
+                    if ((x <= 640) && (y <= 420))
+                        return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_SM);
+                    if ((x <= 1024) && (y <= 768))
+                        return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_MED);
+                    if ((x <= 4096) && (y <= 4096))
+                        return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_LRG);
+                }
             }
-        } else {
             /* handle audio/video content */
-            extend = dlnaProfile.empty() ? getDLNAprofileString(config, contentType, res->getAttribute(R_VIDEOCODEC), res->getAttribute(R_AUDIOCODEC)) : fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
-        }
+            return dlnaProfile.empty() ? getDLNAprofileString(config, contentType, res->getAttribute(R_VIDEOCODEC), res->getAttribute(R_AUDIOCODEC)) : fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
+        }();
 
         // we do not support seeking at all, so 00
         // and the media is converted, so set CI to 1
