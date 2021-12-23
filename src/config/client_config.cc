@@ -81,13 +81,13 @@ std::size_t ClientConfigList::getEditSize() const
     return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
-std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy()
+std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy() const
 {
     AutoLock lock(mutex);
     return list;
 }
 
-std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit)
+std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit) const
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -97,7 +97,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit)
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
-        return indexMap[id];
+        return indexMap.at(id);
     }
     return nullptr;
 }

@@ -84,14 +84,14 @@ std::size_t AutoscanList::getEditSize() const
     return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
-std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy()
+std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy() const
 {
     AutoLock lock(mutex);
 
     return list;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit) const
 {
     AutoLock lock(mutex);
     if (!edit) {
@@ -101,12 +101,12 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit)
         return list[id];
     }
     if (indexMap.find(id) != indexMap.end()) {
-        return indexMap[id];
+        return indexMap.at(id);
     }
     return nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
+std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID) const
 {
     AutoLock lock(mutex);
 
@@ -114,7 +114,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID)
     return it != list.end() ? *it : nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location)
+std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location) const
 {
     AutoLock lock(mutex);
 

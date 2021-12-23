@@ -45,9 +45,9 @@ public:
     /// \return index of the newly added DynamicContent
     void add(const std::shared_ptr<DynamicContent>& cont, std::size_t index = std::numeric_limits<std::size_t>::max());
 
-    std::shared_ptr<DynamicContent> get(std::size_t id, bool edit = false);
+    std::shared_ptr<DynamicContent> get(std::size_t id, bool edit = false) const;
 
-    std::shared_ptr<DynamicContent> get(const fs::path& location);
+    std::shared_ptr<DynamicContent> get(const fs::path& location) const;
 
     std::size_t getEditSize() const;
 
@@ -57,13 +57,13 @@ public:
     void remove(std::size_t id, bool edit = false);
 
     /// \brief returns a copy of the directory config list in the form of an array
-    std::vector<std::shared_ptr<DynamicContent>> getArrayCopy();
+    std::vector<std::shared_ptr<DynamicContent>> getArrayCopy() const;
 
 protected:
     std::size_t origSize {};
     std::map<std::size_t, std::shared_ptr<DynamicContent>> indexMap;
 
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<DynamicContent>> list;

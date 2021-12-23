@@ -213,7 +213,7 @@ private:
     ThreadProc targetProc;
     void* target;
     Condition cond;
-    Mutex mutex;
+    mutable Mutex mutex;
     bool isReady {};
 };
 

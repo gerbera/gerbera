@@ -54,7 +54,7 @@ void Session::put(const std::string& key, std::string value)
     dict[key] = std::move(value);
 }
 
-std::string Session::get(const std::string& key)
+std::string Session::get(const std::string& key) const
 {
     AutoLockR lock(rmutex);
     return getValueOrDefault(dict, key);

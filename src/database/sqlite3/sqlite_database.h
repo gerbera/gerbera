@@ -84,7 +84,7 @@ protected:
     bool decontamination {};
 
     std::condition_variable cond;
-    std::mutex mutex;
+    mutable std::mutex mutex;
 
     std::string error;
 };

@@ -229,7 +229,7 @@ const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchTy
     return nullptr;
 }
 
-const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr)
+const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) const
 {
     AutoLock lock(mutex);
 

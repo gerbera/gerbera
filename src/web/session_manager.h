@@ -60,7 +60,7 @@ public:
     explicit Session(std::chrono::seconds timeout);
 
     void put(const std::string& key, std::string value);
-    std::string get(const std::string& key);
+    std::string get(const std::string& key) const;
 
     /// \brief Returns the time of last access to the session.
     /// \return std::chrono::seconds
@@ -98,7 +98,7 @@ protected:
 
     void containerChangedUI(const std::vector<int>& objectIDs);
 
-    std::recursive_mutex rmutex;
+    mutable std::recursive_mutex rmutex;
     using AutoLockR = std::scoped_lock<decltype(rmutex)>;
     std::map<std::string, std::string> dict;
 
@@ -127,7 +127,7 @@ class SessionManager : public Timer::Subscriber {
 protected:
     std::shared_ptr<Timer> timer;
 
-    std::mutex mutex;
+    mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<decltype(mutex)>;
 
     /// \brief This array is holding available sessions.

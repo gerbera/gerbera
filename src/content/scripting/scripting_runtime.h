@@ -41,7 +41,7 @@
 class ScriptingRuntime {
 protected:
     duk_context* ctx;
-    std::recursive_mutex mutex;
+    mutable std::recursive_mutex mutex;
 
 public:
     ScriptingRuntime();
@@ -55,7 +55,7 @@ public:
     void destroyContext(const std::string& name);
 
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
-    std::recursive_mutex& getMutex() { return mutex; }
+    std::recursive_mutex& getMutex() const { return mutex; }
 };
 
 #endif // __SCRIPTING_RUNTIME_H__
