@@ -409,8 +409,10 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
-            std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
-            layout->processCdsObject(obj, rootPath, mimetype, contentType);
+            { // only lock mutex while processing item layout
+                std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
+                layout->processCdsObject(obj, rootPath, mimetype, contentType);
+            }
 
 #ifdef HAVE_JS
             try {
