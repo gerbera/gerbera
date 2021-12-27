@@ -77,12 +77,12 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 #endif
 
     std::vector<std::shared_ptr<ProcListItem>> procList;
-    fs::path fifoLocation;
+    fs::path inLocation = location;
 
     bool isURL = obj->isExternalItem();
     if (isURL && !profile->acceptURL()) {
 #ifdef HAVE_CURL
-        fifoLocation = openCurlFifo(location, procList);
+        inLocation = openCurlFifo(location, procList);
 #else
         throw_std_runtime_error("Compiled without libcurl support, data proxying for profile {} is not available", profile->getName());
 #endif
@@ -91,14 +91,14 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     checkTranscoder(profile);
     fs::path fifoName = makeFifo();
 
-    std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), fifoLocation, fifoName, range, obj->getTitle());
+    std::vector<std::string> arglist = populateCommandLine(profile->getArguments(), inLocation, fifoName, range, obj->getTitle());
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
 
     std::vector<fs::path> tempFiles;
     tempFiles.push_back(fifoName);
     if (isURL && !profile->acceptURL()) {
-        tempFiles.push_back(std::move(fifoLocation));
+        tempFiles.push_back(std::move(inLocation));
     }
     auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
 
