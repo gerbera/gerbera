@@ -25,7 +25,6 @@
 #include "search_handler.h" // API
 
 #include <algorithm>
-#include <stack>
 
 #include "database/sql_database.h"
 #include "metadata/metadata_handler.h"
@@ -188,55 +187,55 @@ std::unique_ptr<ASTNode> SearchParser::parse()
 
 std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
 {
-    std::stack<std::unique_ptr<ASTNode>> nodeStack;
-    std::stack<TokenType> operatorStack;
+    std::vector<std::unique_ptr<ASTNode>> nodeStack;
+    std::vector<TokenType> operatorStack;
     std::unique_ptr<ASTNode> root;
     TokenType currentOperator = TokenType::INVALID;
     while (currentToken) {
         if (currentToken->getType() == TokenType::PROPERTY) {
             auto expressionNode = parseRelationshipExpression();
             if (currentOperator == TokenType::AND) {
-                if (!nodeStack.top())
+                if (!nodeStack.back())
                     throw_std_runtime_error("Cannot construct ASTAndOperator without lhs");
                 if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTAndOperator without rhs");
-                auto lhs = std::move(nodeStack.top());
-                nodeStack.pop();
-                nodeStack.push(std::make_unique<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
-                operatorStack.pop();
+                auto lhs = std::move(nodeStack.back());
+                nodeStack.pop_back();
+                nodeStack.push_back(std::make_unique<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
+                operatorStack.pop_back();
             } else if (currentOperator == TokenType::OR) {
-                if (!nodeStack.top())
+                if (!nodeStack.back())
                     throw_std_runtime_error("Cannot construct ASTOrOperator without lhs");
                 if (!expressionNode)
                     throw_std_runtime_error("Cannot construct ASTOrOperator without rhs");
-                auto lhs = std::move(nodeStack.top());
-                nodeStack.pop();
-                nodeStack.push(std::make_unique<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
-                operatorStack.pop();
+                auto lhs = std::move(nodeStack.back());
+                nodeStack.pop_back();
+                nodeStack.push_back(std::make_unique<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
+                operatorStack.pop_back();
             } else {
-                nodeStack.push(std::move(expressionNode));
+                nodeStack.push_back(std::move(expressionNode));
             }
             currentOperator = TokenType::INVALID;
             getNextToken();
         } else if (currentToken->getType() == TokenType::LPAREN) {
-            nodeStack.push(parseParenthesis());
+            nodeStack.push_back(parseParenthesis());
             getNextToken();
         } else if (currentToken->getType() == TokenType::AND || currentToken->getType() == TokenType::OR) {
             currentOperator = currentToken->getType();
-            operatorStack.push(currentOperator);
+            operatorStack.push_back(currentOperator);
             getNextToken();
         }
     }
 
     while (!nodeStack.empty()) {
-        root = std::move(nodeStack.top());
-        nodeStack.pop();
+        root = std::move(nodeStack.back());
+        nodeStack.pop_back();
         if (!operatorStack.empty()) {
-            currentOperator = operatorStack.top();
-            operatorStack.pop();
+            currentOperator = operatorStack.back();
+            operatorStack.pop_back();
             if (!nodeStack.empty()) {
-                auto lhs = std::move(nodeStack.top());
-                nodeStack.pop();
+                auto lhs = std::move(nodeStack.back());
+                nodeStack.pop_back();
                 if (currentOperator == TokenType::AND)
                     root = std::make_unique<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(root));
                 else
