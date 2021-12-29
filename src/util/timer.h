@@ -34,7 +34,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <deque>
 #include <memory>
 
 #include "common.h"
@@ -134,7 +133,7 @@ protected:
     };
 
     std::mutex waitMutex;
-    std::deque<TimerSubscriberElement> subscribers;
+    std::vector<TimerSubscriberElement> subscribers;
     std::atomic_bool shutdownFlag {};
 
     void notify();
