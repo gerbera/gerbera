@@ -1071,7 +1071,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     }
     std::string tree;
     int result = CDS_ID_ROOT;
-    std::deque<int> createdIds;
+    std::vector<int> createdIds;
     bool isNew = false;
     int count = 0;
     for (auto&& item : chain) {
