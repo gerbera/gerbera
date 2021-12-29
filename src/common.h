@@ -120,12 +120,6 @@ static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 #define INVALID_OBJECT_ID_2 (-666)
 #define CHECK_SOCKET (-666)
 
-// database
-#define LOC_DIR_PREFIX 'D'
-#define LOC_FILE_PREFIX 'F'
-#define LOC_VIRT_PREFIX 'V'
-#define LOC_ILLEGAL_PREFIX 'X'
-
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://mediatomb.cc/config/"
 
