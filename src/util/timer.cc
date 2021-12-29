@@ -74,7 +74,7 @@ void Timer::addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds
         }
     }
 
-    subscribers.push_back(element);
+    subscribers.push_back(std::move(element));
     threadRunner->notify();
 }
 
@@ -140,19 +140,18 @@ void Timer::notify()
     std::deque<TimerSubscriberElement> toNotify;
 
     if (!subscribers.empty()) {
-        for (auto it = subscribers.begin(); it != subscribers.end(); /*++it*/) {
+        for (auto&& subscriber : subscribers) {
             auto now = currentTimeMS();
-            auto wait = getDeltaMillis(now, it->getNextNotify());
+            auto wait = getDeltaMillis(now, subscriber.getNextNotify());
 
             if (wait <= std::chrono::milliseconds::zero()) {
-                toNotify.push_back(*it);
-                if (it->isOnce()) {
-                    it = subscribers.erase(it);
+                toNotify.push_back(std::move(subscriber));
+                if (toNotify.back().isOnce()) {
+                    toNotify.pop_back();
                     continue;
                 }
-                it->updateNextNotify();
+                toNotify.back().updateNextNotify();
             }
-            ++it;
         }
     }
 
