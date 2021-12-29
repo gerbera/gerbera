@@ -81,12 +81,12 @@ void TranscodingProfileList::add(const std::string& sourceMimeType, const std::s
     auto inner = [this, &sourceMimeType] {
         auto it = list.find(sourceMimeType);
         if (it != list.end())
-            return it->second;
+            return std::move(it->second);
         return std::make_shared<TranscodingProfileMap>();
     }();
 
     inner->emplace(prof->getName(), prof);
-    list[sourceMimeType] = inner;
+    list[sourceMimeType] = std::move(inner);
 }
 
 std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::string& sourceMimeType) const
