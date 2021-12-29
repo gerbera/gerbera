@@ -76,7 +76,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     }
 #endif
 
-    std::vector<std::shared_ptr<ProcListItem>> procList;
+    std::vector<std::unique_ptr<ProcListItem>> procList;
     fs::path inLocation = location;
 
     bool isURL = obj->isExternalItem();
@@ -149,7 +149,7 @@ void TranscodeExternalHandler::checkTranscoder(const std::shared_ptr<Transcoding
 }
 
 #ifdef HAVE_CURL
-fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::vector<std::shared_ptr<ProcListItem>>& procList)
+fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::vector<std::unique_ptr<ProcListItem>>& procList)
 {
     std::string url = location;
     log_debug("creating reader fifo: {}", location.c_str());
@@ -160,8 +160,8 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
         auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
-        auto ch = std::make_shared<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
-        procList.push_back(std::make_shared<ProcListItem>(std::move(ch)));
+        auto ch = std::make_unique<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
+        procList.push_back(std::make_unique<ProcListItem>(std::move(ch)));
     } catch (const std::runtime_error& ex) {
         unlink(ret.c_str());
         throw ex;
