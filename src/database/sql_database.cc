@@ -61,6 +61,12 @@
 #define MTA_ALIAS "m"
 #define RES_ALIAS "re"
 
+// database
+#define LOC_DIR_PREFIX 'D'
+#define LOC_FILE_PREFIX 'F'
+#define LOC_VIRT_PREFIX 'V'
+#define LOC_ILLEGAL_PREFIX 'X'
+
 /// \brief browse column ids
 /// enum for createObjectFromRow's mode parameter
 enum class BrowseCol {
