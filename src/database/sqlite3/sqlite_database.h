@@ -33,7 +33,6 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
-#include <queue>
 #include <sqlite3.h>
 #include <unistd.h>
 
@@ -191,7 +190,7 @@ private:
     bool shutdownFlag {};
 
     /// \brief the tasks to be done by the sqlite3 thread
-    std::queue<std::shared_ptr<SLTask>> taskQueue;
+    std::vector<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen {};
 
     void threadCleanup() override { }

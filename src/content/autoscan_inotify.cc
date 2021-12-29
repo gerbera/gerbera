@@ -94,8 +94,8 @@ void AutoscanInotify::threadProc()
 
             //  remove old dirs
             while (!unmonitorQueue.empty()) {
-                auto adir = unmonitorQueue.front();
-                unmonitorQueue.pop();
+                auto adir = std::move(unmonitorQueue.back());
+                unmonitorQueue.pop_back();
 
                 lock.unlock();
 
@@ -120,8 +120,8 @@ void AutoscanInotify::threadProc()
 
             // monitor new dir
             while (!monitorQueue.empty()) {
-                auto adir = monitorQueue.front();
-                monitorQueue.pop();
+                auto adir = std::move(monitorQueue.front());
+                monitorQueue.pop_back();
 
                 lock.unlock();
 
@@ -271,7 +271,7 @@ void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir)
     assert(dir->getScanMode() == ScanMode::INotify);
     log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
-    monitorQueue.push(dir);
+    monitorQueue.push_back(dir);
     inotify->stop();
 }
 
@@ -282,7 +282,7 @@ void AutoscanInotify::unmonitor(const std::shared_ptr<AutoscanDirectory>& dir)
 
     log_debug("Requested to stop monitoring \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
-    unmonitorQueue.push(dir);
+    unmonitorQueue.push_back(dir);
     inotify->stop();
 }
 

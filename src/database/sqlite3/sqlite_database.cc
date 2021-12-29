@@ -285,8 +285,8 @@ void Sqlite3Database::threadProc()
 
         while (!shutdownFlag) {
             while (!taskQueue.empty()) {
-                auto task = taskQueue.front();
-                taskQueue.pop();
+                auto task = std::move(taskQueue.back());
+                taskQueue.pop_back();
 
                 lock.unlock();
                 try {
@@ -309,8 +309,8 @@ void Sqlite3Database::threadProc()
 
         taskQueueOpen = false;
         while (!taskQueue.empty()) {
-            auto task = taskQueue.front();
-            taskQueue.pop();
+            auto task = std::move(taskQueue.back());
+            taskQueue.pop_back();
             task->sendSignal("Sorry, sqlite3 thread is shutting down");
         }
 
@@ -340,7 +340,7 @@ void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDi
         throw_std_runtime_error("sqlite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
-        taskQueue.push(task);
+        taskQueue.push_back(task);
         threadRunner->notify();
     }
 }

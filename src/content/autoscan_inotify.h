@@ -33,7 +33,6 @@
 
 #include <memory>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -79,8 +78,8 @@ private:
     mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<std::mutex>;
 
-    std::queue<std::shared_ptr<AutoscanDirectory>> monitorQueue;
-    std::queue<std::shared_ptr<AutoscanDirectory>> unmonitorQueue;
+    std::vector<std::shared_ptr<AutoscanDirectory>> monitorQueue;
+    std::vector<std::shared_ptr<AutoscanDirectory>> unmonitorQueue;
 
     // event mask with events to watch for (set by constructor);
     int events;

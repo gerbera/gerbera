@@ -34,7 +34,6 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <numeric>
-#include <queue>
 #include <sstream>
 #include <sys/socket.h>
 
