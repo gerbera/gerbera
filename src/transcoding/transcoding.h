@@ -229,9 +229,9 @@ public:
     std::size_t size() const { return list.size(); }
     void setKey(const std::string& oldKey, const std::string& newKey)
     {
-        auto oldValue = list[oldKey];
+        auto oldValue = std::move(list.at(oldKey));
         list.erase(oldKey);
-        list[newKey] = oldValue;
+        list[newKey] = std::move(oldValue);
     }
 
 protected:
