@@ -1053,9 +1053,9 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
         session_manager->containerChangedUI(obj->getParentID());
 }
 
-void ContentManager::addContainer(int parentID, std::string title, const std::string& upnpClass)
+void ContentManager::addContainer(int parentID, const std::string& title, const std::string& upnpClass)
 {
-    fs::path cPath = database->buildContainerPath(parentID, escape(std::move(title), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
+    fs::path cPath = database->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
     std::vector<std::shared_ptr<CdsObject>> cVec;
     for (auto&& segment : cPath) {
         cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
