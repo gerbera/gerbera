@@ -78,8 +78,8 @@ const std::vector<std::string>& TranscodingProfile::getAVIFourCCList() const
 
 void TranscodingProfileList::add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof)
 {
-    auto it = list.find(sourceMimeType);
-    auto inner = [this, it] {
+    auto inner = [this, &sourceMimeType] {
+        auto it = list.find(sourceMimeType);
         if (it != list.end())
             return it->second;
         return std::make_shared<TranscodingProfileMap>();
