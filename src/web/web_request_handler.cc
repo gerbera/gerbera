@@ -114,6 +114,15 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
+    this->filename = filename;
+    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
+    auto decodedParams = dictDecode(parameters);
+    if (params.empty()) {
+        params = std::move(decodedParams);
+    } else {
+        params.merge(decodedParams);
+    }
+
     xmlDoc = std::make_unique<pugi::xml_document>();
     auto decl = xmlDoc->prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";

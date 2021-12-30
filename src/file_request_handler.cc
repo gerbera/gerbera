@@ -55,90 +55,91 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start: {}", filename);
 
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
-    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
-    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    auto quirks = std::make_unique<Quirks>(context, ctrlPtIPAddr, userAgent);
-
-    auto headers = std::make_unique<Headers>();
+    auto quirks = getQuirks(info);
 
     auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
-    obj = getObjectById(params);
-    std::string rh = getValueOrDefault(params, RESOURCE_HANDLER);
+    auto obj = loadObject(params);
 
-    // determining which resource to serve
-    auto resIdIt = params.find(URL_RESOURCE_ID);
-    std::size_t resId = (resIdIt != params.end() && resIdIt->second != URL_VALUE_TRANSCODE_NO_RES_ID) ? stoiString(resIdIt->second) : std::numeric_limits<std::size_t>::max();
+    auto [resourceHandler, resourceId] = parseResourceInfo(params);
 
-    if (!obj->isItem() && rh.empty()) {
+    // If its not an Item and there is no handler, we cant service this request.
+    if (!obj->isItem() && resourceHandler.empty()) {
         throw_std_runtime_error("Requested object {} is not an item", filename);
     }
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
-    fs::path path = item ? item->getLocation() : "";
-    std::string mimeType = !rh.empty() ? MIMETYPE_TEXT : "";
-    bool isSrt = false;
-    struct stat statbuf;
+    // Why text?
+    std::string mimeType = !resourceHandler.empty() ? MIMETYPE_TEXT : "";
 
-    if (!rh.empty()) {
-        auto resPath = obj->getResource(resId)->getAttribute(R_RESOURCE_FILE);
-        isSrt = !resPath.empty();
-        if (isSrt) {
+    fs::path path;
+    bool isResourceFile = false;
+    if (!resourceHandler.empty()) {
+        auto resPath = obj->getResource(resourceId)->getAttribute(R_RESOURCE_FILE);
+        isResourceFile = !resPath.empty();
+        if (isResourceFile) {
             path = resPath;
         }
+    } else {
+        path = item->getLocation();
     }
+
+    // Check the path (if its real) is accessible
+    struct stat statbuf {
+    };
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
-        if (isSrt) {
+        if (isResourceFile) {
             throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
         }
         throw_std_runtime_error("Failed to open {}: {}", path.c_str(), std::strerror(errno));
     }
 
-    UpnpFileInfo_set_IsReadable(info, access(path.c_str(), R_OK) == 0);
+    // If we get to here we can read the thing
+    UpnpFileInfo_set_IsReadable(info, true);
+    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+    UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
     // for transcoded resources res_id will always be negative
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    log_debug("Fetching resource id {}", resId);
-    bool triggerPlayHook = true;
+    auto headers = std::make_unique<Headers>();
 
     // some resources are created dynamically and not saved in the database,
     // so we can not load such a resource for a particular item, we will have
     // to trust the resource handler parameter
-    if ((resId > 0 && resId < obj->getResourceCount()) || !rh.empty()) {
-        auto resource = obj->getResource(resId);
-        int resHandler = (!rh.empty()) ? stoiString(rh) : resource->getHandlerType();
-        // http-get:*:image/jpeg:*
+    if (!resourceHandler.empty()) {
+        if (resourceId == CH_DEFAULT || resourceId >= obj->getResourceCount()) {
+            throw_std_runtime_error("Requested resource not found");
+        }
+
+        auto resource = obj->getResource(resourceId);
+        auto metadataHandler = getResourceMetadataHandler(obj, resourceHandler, resource);
+
         std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
         if (!protocolInfo.empty()) {
             mimeType = getMTFromProtocolInfo(protocolInfo);
         }
-
-        auto h = MetadataHandler::createHandler(context, resHandler);
         if (mimeType.empty())
-            mimeType = h->getMimeType();
+            mimeType = metadataHandler->getMimeType();
 
-        ioHandler = h->serveContent(obj, resId);
+        // Why doesnt serveContent take an actual Resource object....
+        auto ioHandler = metadataHandler->serveContent(obj, resourceId);
 
-        // get size
+        // Get size
         ioHandler->open(UPNP_READ);
         ioHandler->seek(0L, SEEK_END);
         off_t size = ioHandler->tell();
         ioHandler->close();
-
         UpnpFileInfo_set_FileLength(info, size);
 
-        // Should have its own handler really
-        triggerPlayHook = false;
+    } else if (!isResourceFile && !trProfile.empty()) {
 
-    } else if (!isSrt && !trProfile.empty()) {
-        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
-        if (!tp)
+        auto transcodingProfile = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
+        if (!transcodingProfile)
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 
-        mimeType = tp->getTargetMimeType();
+        mimeType = transcodingProfile->getTargetMimeType();
 
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
@@ -155,11 +156,6 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #else
         UpnpFileInfo_set_FileLength(info, -1);
 #endif
-        std::string range = getValueOrDefault(params, "range");
-
-        auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
-        ioHandler = transcodeDispatcher->serveContent(tp, path, item, range);
-
     } else if (item) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
 
@@ -181,11 +177,6 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         headers->addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
-    // log_debug("sizeof off_t {}, statbuf.st_size {}", sizeof(off_t), sizeof(statbuf.st_size));
-    // log_debug("getInfo: file_length: " OFF_T_SPRINTF "", statbuf.st_size);
-
-    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
-    UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 #ifdef USING_NPUPNP
     info->content_type = std::move(mimeType);
 #else
@@ -194,21 +185,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     headers->writeHeaders(info);
 
-    // Anything else just needs the FileIOHandler
-    if (!ioHandler) {
-        ioHandler = std::make_unique<FileIOHandler>(path);
-    }
-
-    if (triggerPlayHook) {
-        content->triggerPlayHook(obj);
-    }
-
-    assert(ioHandler != nullptr);
-
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("end: {}", filename);
+}
+
+std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::string& resourceHandler, const std::shared_ptr<CdsResource>& resource) const
+{
+    int resHandler = (!resourceHandler.empty()) ? stoiString(resourceHandler) : resource->getHandlerType();
+    return MetadataHandler::createHandler(context, resHandler);
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
@@ -220,7 +206,62 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         throw_std_runtime_error("UPNP_WRITE unsupported");
     }
 
-    ioHandler->open(mode);
-    log_debug("end: {}", filename);
-    return std::move(ioHandler);
+    auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
+    auto obj = loadObject(params);
+    auto [resourceHandler, resourceId] = parseResourceInfo(params);
+
+    // Serve metadata resources
+    if (!resourceHandler.empty()) {
+        auto resource = obj->getResource(resourceId);
+        auto metadataHandler = getResourceMetadataHandler(obj, resourceHandler, resource);
+        return metadataHandler->serveContent(obj, resourceId);
+    }
+
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    auto path = item->getLocation();
+
+    content->triggerPlayHook(obj);
+
+    // Transcoding
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (!trProfile.empty()) {
+        auto transcodingProfile = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
+        if (!transcodingProfile)
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
+
+        std::string range = getValueOrDefault(params, "range");
+
+        auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
+        return transcodeDispatcher->serveContent(transcodingProfile, path, item, range);
+    }
+
+    // Boring old file
+    return std::make_unique<FileIOHandler>(path);
+}
+
+std::pair<std::string, std::size_t> FileRequestHandler::parseResourceInfo(std::map<std::string, std::string>& params) const
+{
+    auto resourceHandler = getValueOrDefault(params, RESOURCE_HANDLER);
+
+    std::size_t resourceId = 0;
+    try {
+        auto resIdParam = params.at(URL_RESOURCE_ID);
+        if (resIdParam != URL_VALUE_TRANSCODE_NO_RES_ID) {
+            resourceId = stoiString(resIdParam);
+        }
+    } catch (const std::out_of_range&) {
+    }
+
+    log_debug("Resource Handler: '{}'", resourceHandler);
+    log_debug("Resource ID: {}", resourceId);
+
+    return std::make_pair<std::string, std::size_t>(std::move(resourceHandler), std::move(resourceId));
+}
+
+std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
+{
+    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
+    return std::make_unique<Quirks>(context, ctrlPtIPAddr, std::move(userAgent));
 }

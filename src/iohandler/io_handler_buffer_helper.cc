@@ -68,6 +68,9 @@ std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
     // length must be positive
     assert(length > 0);
 
+    // Lovely hack to ensure constuction of the child is complete before we try to do anything
+    StdThreadRunner::waitFor(
+        "IOHandlerBufferHelper", [this] { return threadRunner != nullptr; }, 100);
     auto lock = threadRunner->uniqueLock();
 
     while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {

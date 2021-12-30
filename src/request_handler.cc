@@ -80,13 +80,13 @@ std::map<std::string, std::string> RequestHandler::parseParameters(std::string_v
     return pathToMap(parameters);
 }
 
-std::shared_ptr<CdsObject> RequestHandler::getObjectById(const std::map<std::string, std::string>& params) const
+std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string, std::string>& params) const
 {
     auto it = params.find("object_id");
     if (it == params.end()) {
-        throw_std_runtime_error("getObjectById: object_id not found");
+        throw_std_runtime_error("loadObject: object_id not found");
     }
 
-    int objectID = std::stoi(it->second);
+    int objectID = stoiString(it->second);
     return database->loadObject(objectID);
 }
