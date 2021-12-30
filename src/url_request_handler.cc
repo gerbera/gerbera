@@ -49,7 +49,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("start");
 
     auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
-    auto obj = getObjectById(params);
+    auto obj = loadObject(params);
     if (!obj->isExternalItem()) {
         throw_std_runtime_error("getInfo: object is not an external url item");
     }
@@ -111,7 +111,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
         throw_std_runtime_error("UPNP_WRITE unsupported");
 
     auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
-    auto obj = getObjectById(params);
+    auto obj = loadObject(params);
     if (!obj->isExternalItem()) {
         throw_std_runtime_error("object is not an external url item");
     }
