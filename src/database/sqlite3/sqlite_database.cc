@@ -38,8 +38,8 @@
 #define DB_BACKUP_FORMAT "{}.backup"
 
 #define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
-static constexpr auto SQLITE3_UPDATE_VERSION = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
-static constexpr auto SQLITE3_ADD_RESOURCE_ATTR = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
+static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
+static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
 
 Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(config, mime)
@@ -145,7 +145,7 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, SQLITE3_UPDATE_VERSION, SQLITE3_ADD_RESOURCE_ATTR);
+        upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, sqlite3UpdateVersion, sqlite3AddResourceAttr);
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);

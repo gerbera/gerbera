@@ -44,8 +44,8 @@
 //#define MYSQL_EXEC_DEBUG
 
 #define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
-static constexpr auto MYSQL_UPDATE_VERSION = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
-static constexpr auto MYSQL_ADD_RESOURCE_ATTR = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
+static constexpr auto mysqlUpdateVersion = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
+static constexpr auto mysqlAddResourceAttr = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
 
 MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
     : SQLDatabase(config, mime)
@@ -181,7 +181,7 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, MYSQL_UPDATE_VERSION, MYSQL_ADD_RESOURCE_ATTR);
+    upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
     lock.unlock();
 
