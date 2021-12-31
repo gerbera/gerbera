@@ -42,7 +42,7 @@ ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpAction
 {
     auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest);
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnpRequest);
-    quirks = std::make_unique<Quirks>(context, ctrlPtIPAddr, userAgent);
+    quirks = std::make_unique<Quirks>(context, *ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const

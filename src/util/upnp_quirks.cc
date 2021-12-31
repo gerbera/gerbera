@@ -33,7 +33,7 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
 
-Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent)
+Quirks::Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage& addr, const std::string& userAgent)
     : context(std::move(context))
     , content(this->context->getServer()->getContent())
 {

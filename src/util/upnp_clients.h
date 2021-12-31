@@ -73,7 +73,7 @@ struct ClientInfo {
 };
 
 struct ClientCacheEntry {
-    ClientCacheEntry(const struct sockaddr_storage& addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+    ClientCacheEntry(const sockaddr_storage& addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const ClientInfo* pInfo)
         : addr(addr)
         , userAgent(std::move(userAgent))
         , last(last)
@@ -95,17 +95,17 @@ public:
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
-    const ClientInfo* getInfo(const struct sockaddr_storage* addr, const std::string& userAgent);
+    const ClientInfo* getInfo(const sockaddr_storage& addr, const std::string& userAgent);
 
-    void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
+    void addClientByDiscovery(const sockaddr_storage& addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
-    const ClientInfo* getInfoByAddr(const struct sockaddr_storage* addr) const;
+    const ClientInfo* getInfoByAddr(const sockaddr_storage& addr) const;
     const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
-    const ClientInfo* getInfoByCache(const struct sockaddr_storage* addr) const;
-    void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
+    const ClientInfo* getInfoByCache(const sockaddr_storage& addr) const;
+    void updateCache(const sockaddr_storage& addr, const std::string& userAgent, const ClientInfo* pInfo);
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 

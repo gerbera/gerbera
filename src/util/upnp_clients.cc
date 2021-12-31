@@ -139,7 +139,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
-void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
+void Clients::addClientByDiscovery(const sockaddr_storage& addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
@@ -152,7 +152,7 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
+const ClientInfo* Clients::getInfo(const sockaddr_storage& addr, const std::string& userAgent)
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -179,11 +179,11 @@ const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const st
         updateCache(addr, userAgent, info);
     }
 
-    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
     return info;
 }
 
-const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) const
+const ClientInfo* Clients::getInfoByAddr(const sockaddr_storage& addr) const
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
@@ -191,16 +191,16 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) co
 
         if (c.match.find(':') != std::string::npos) {
             // IPv6
-            struct sockaddr_in6 clientAddr = {};
+            sockaddr_in6 clientAddr = {};
             clientAddr.sin6_family = AF_INET6;
-            if ((inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0))
+            if ((inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&addr)) == 0))
                 return true;
         } else if (c.match.find('.') != std::string::npos) {
             // IPv4
-            struct sockaddr_in clientAddr = {};
+            sockaddr_in clientAddr = {};
             clientAddr.sin_family = AF_INET;
             clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
-            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0)
+            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&addr)) == 0)
                 return true;
         }
 
@@ -208,7 +208,7 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) co
     });
 
     if (it != clientInfo.end()) {
-        auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
+        auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(&addr));
         log_debug("found client by IP (ip='{}')", ip);
         return &(*it);
     }
@@ -229,12 +229,12 @@ const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchTy
     return nullptr;
 }
 
-const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) const
+const ClientInfo* Clients::getInfoByCache(const sockaddr_storage& addr) const
 {
     AutoLock lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(&addr)) == 0; });
 
     if (it != cache.end()) {
         auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
@@ -245,7 +245,7 @@ const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) c
     return nullptr;
 }
 
-void Clients::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
+void Clients::updateCache(const sockaddr_storage& addr, const std::string& userAgent, const ClientInfo* pInfo)
 {
     AutoLock lock(mutex);
 
@@ -256,7 +256,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(&addr)) == 0; });
 
     if (it != cache.end()) {
         it->last = now;
@@ -268,7 +268,7 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         }
     } else {
         // add new client
-        cache.emplace_back(*addr, userAgent, now, now, pInfo);
+        cache.emplace_back(addr, userAgent, now, now, pInfo);
     }
 }
 

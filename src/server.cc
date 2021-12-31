@@ -409,7 +409,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
         const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(dEvent);
         const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
-        clients->addClientByDiscovery(destAddr, userAgent, location);
+        clients->addClientByDiscovery(*destAddr, userAgent, location);
         break;
     }
     default:
