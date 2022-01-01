@@ -255,7 +255,6 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
             auto ffres = std::make_shared<CdsResource>(CH_FFTH);
-            ffres->addParameter(RESOURCE_HANDLER, fmt::to_string(CH_FFTH));
             ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
             ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 

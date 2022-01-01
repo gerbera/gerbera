@@ -79,7 +79,6 @@ class IOHandler;
 #define CONTENT_TYPE_WMA "wma"
 
 #define RESOURCE_CONTENT_TYPE "rct"
-#define RESOURCE_HANDLER "rh"
 
 #define ID3_ALBUM_ART "aa"
 #define VIDEO_SUB "vs"
