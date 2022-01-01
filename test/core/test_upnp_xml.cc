@@ -78,7 +78,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<upnp:conductor>Conductor</upnp:conductor>\n";
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
-    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0/rct/aa/rh/11</upnp:albumArtURI>\n";
+    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0/rct/aa</upnp:albumArtURI>\n";
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
 

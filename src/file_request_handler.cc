@@ -53,35 +53,36 @@ FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& co
 
 void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    log_debug("start: {}", filename);
+    log_debug("Start: {}", filename);
 
     auto quirks = getQuirks(info);
 
     auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
 
-    auto [resourceHandler, resourceId] = parseResourceInfo(params);
+    auto resourceId = parseResourceInfo(params);
 
-    // If its not an Item and there is no handler, we cant service this request.
-    if (!obj->isItem() && resourceHandler.empty()) {
-        throw_std_runtime_error("Requested object {} is not an item", filename);
+    if (!obj->isItem()) {
+        throw_std_runtime_error("Requested item {} is not an item", filename);
     }
-
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
-    // Why text?
-    std::string mimeType = !resourceHandler.empty() ? MIMETYPE_TEXT : "";
+    if (resourceId >= obj->getResourceCount()) {
+        throw_std_runtime_error("Requested resource {} does not exist", resourceId);
+    }
+    auto resource = obj->getResource(resourceId);
 
-    fs::path path;
+    std::string mimeType = item->getMimeType();
+    fs::path path = item->getLocation();
+
+    // Check if the resource is actually another external file, and if it exists
     bool isResourceFile = false;
-    if (!resourceHandler.empty()) {
-        auto resPath = obj->getResource(resourceId)->getAttribute(R_RESOURCE_FILE);
-        isResourceFile = !resPath.empty();
-        if (isResourceFile) {
-            path = resPath;
-        }
-    } else {
-        path = item->getLocation();
+
+    auto resPath = resource->getAttribute(R_RESOURCE_FILE);
+    isResourceFile = !resPath.empty() && resPath != obj->getLocation();
+    if (isResourceFile) {
+        log_debug("Resource is file: {}", path.string());
+        path = resPath;
     }
 
     // Check the path (if its real) is accessible
@@ -105,16 +106,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto headers = std::make_unique<Headers>();
 
-    // some resources are created dynamically and not saved in the database,
-    // so we can not load such a resource for a particular item, we will have
-    // to trust the resource handler parameter
-    if (!resourceHandler.empty()) {
-        if (resourceId == CH_DEFAULT || resourceId >= obj->getResourceCount()) {
-            throw_std_runtime_error("Requested resource not found");
-        }
-
-        auto resource = obj->getResource(resourceId);
-        auto metadataHandler = getResourceMetadataHandler(obj, resourceHandler, resource);
+    if (resource->getHandlerType() != CH_DEFAULT) {
+        auto metadataHandler = getResourceMetadataHandler(obj, resource);
 
         std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
         if (!protocolInfo.empty()) {
@@ -141,6 +134,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = transcodingProfile->getTargetMimeType();
 
+        // TODO: this WAV specific logic should be more generic
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             std::string freq = obj->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
@@ -158,19 +152,19 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #endif
     } else if (item) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
-
         quirks->addCaptionInfo(item, headers);
-
-        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        auto resource = item->getResource(0);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
-        if (!dlnaContentHeader.empty()) {
-            headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
-        }
+        resource = item->getResource(resourceId);
     }
 
     if (mimeType.empty() && item)
         mimeType = item->getMimeType();
+
+    // Generate DNLA Headers
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+    if (!dlnaContentHeader.empty()) {
+        headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
+    }
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (!dlnaTransferHeader.empty()) {
@@ -191,9 +185,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("end: {}", filename);
 }
 
-std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::string& resourceHandler, const std::shared_ptr<CdsResource>& resource) const
+std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const
 {
-    int resHandler = (!resourceHandler.empty()) ? stoiString(resourceHandler) : resource->getHandlerType();
+    int resHandler = resource->getHandlerType();
     return MetadataHandler::createHandler(context, resHandler);
 }
 
@@ -208,12 +202,12 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
     auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
-    auto [resourceHandler, resourceId] = parseResourceInfo(params);
+    auto resourceId = parseResourceInfo(params);
 
     // Serve metadata resources
-    if (!resourceHandler.empty()) {
+    if (obj->getResource(resourceId)->getHandlerType() != CH_DEFAULT) {
         auto resource = obj->getResource(resourceId);
-        auto metadataHandler = getResourceMetadataHandler(obj, resourceHandler, resource);
+        auto metadataHandler = getResourceMetadataHandler(obj, resource);
         return metadataHandler->serveContent(obj, resourceId);
     }
 
@@ -239,10 +233,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::pair<std::string, std::size_t> FileRequestHandler::parseResourceInfo(std::map<std::string, std::string>& params) const
+std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::string>& params) const
 {
-    auto resourceHandler = getValueOrDefault(params, RESOURCE_HANDLER);
-
     std::size_t resourceId = 0;
     try {
         auto resIdParam = params.at(URL_RESOURCE_ID);
@@ -252,10 +244,9 @@ std::pair<std::string, std::size_t> FileRequestHandler::parseResourceInfo(std::m
     } catch (const std::out_of_range&) {
     }
 
-    log_debug("Resource Handler: '{}'", resourceHandler);
     log_debug("Resource ID: {}", resourceId);
 
-    return std::make_pair<std::string, std::size_t>(std::move(resourceHandler), std::move(resourceId));
+    return resourceId;
 }
 
 std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const

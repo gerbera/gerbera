@@ -50,8 +50,8 @@ protected:
 
 private:
     std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
-    std::pair<std::string, std::size_t> parseResourceInfo(std::map<std::string, std::string>& params) const;
-    std::unique_ptr<MetadataHandler> getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::string& resourceHandler, const std::shared_ptr<CdsResource>& resource) const;
+    std::size_t parseResourceInfo(std::map<std::string, std::string>& params) const;
+    std::unique_ptr<MetadataHandler> getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const;
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__

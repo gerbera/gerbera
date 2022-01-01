@@ -400,7 +400,6 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
             dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
 
             auto resParams = res->getParameters();
-            resParams[RESOURCE_HANDLER] = fmt::to_string(res->getHandlerType());
             auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
             return { url, true };
         }
