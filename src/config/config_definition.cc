@@ -207,6 +207,7 @@ static const std::map<std::string, std::string> mtCtDefaults {
     { "video/x-matroska", CONTENT_TYPE_MKV },
     { "video/x-mkv", CONTENT_TYPE_MKV },
     { "video/x-ms-asf", CONTENT_TYPE_ASF },
+    { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
     { "video/x-msvideo", CONTENT_TYPE_AVI },
 };
 
@@ -239,7 +240,7 @@ static const std::map<std::string, std::string> mtUpnpDefaults {
 /// \brief default values for CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
 static const std::map<std::string, std::string> extMtDefaults {
     { "asf", "video/x-ms-asf" },
-    { "asx", "video/x-ms-asf" },
+    { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
     { "dff", "audio/x-dsd" },
     { "dsf", "audio/x-dsd" },
     { "flv", "video/x-flv" },

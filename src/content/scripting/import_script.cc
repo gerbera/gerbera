@@ -35,10 +35,11 @@
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "js_functions.h"
+#include "util/string_converter.h"
 
 ImportScript::ImportScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(content, runtime, "import")
+    : Script(content, runtime, "import", "orig", StringConverter::i2i(content->getContext()->getConfig()))
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
 
@@ -50,30 +51,13 @@ script_class_t ImportScript::whoami()
     return S_IMPORT;
 }
 
-void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptpath)
+void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath)
 {
     processed = obj;
     try {
-        cdsObject2dukObject(obj);
-        duk_put_global_string(ctx, "orig");
-        duk_push_string(ctx, scriptpath.c_str());
-        duk_put_global_string(ctx, "object_script_path");
-        auto autoScan = content->getAutoscanDirectory(scriptpath);
-        if (autoScan && !scriptpath.empty()) {
-            duk_push_sprintf(ctx, "%d", autoScan->getScanID());
-            duk_put_global_string(ctx, "object_autoscan_id");
-        }
-        execute();
-        duk_push_global_object(ctx);
-        duk_del_prop_string(ctx, -1, "orig");
-        duk_del_prop_string(ctx, -1, "object_script_path");
-        duk_del_prop_string(ctx, -1, "object_autoscan_id");
-        duk_pop(ctx);
+        execute(obj, scriptPath);
     } catch (const std::runtime_error&) {
-        duk_push_global_object(ctx);
-        duk_del_prop_string(ctx, -1, "orig");
-        duk_del_prop_string(ctx, -1, "object_script_path");
-        duk_del_prop_string(ctx, -1, "object_autoscan_id");
+        cleanup();
         processed = nullptr;
         throw;
     }

@@ -106,6 +106,7 @@ protected:
     const std::string presentationURL;
     std::string entrySeparator;
     bool multiValue;
+    std::map<std::string, std::string> ctMappings;
 
     /// \brief Holds a part of path and bool which says if we need to append the resource
     struct PathBase {

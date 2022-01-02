@@ -37,6 +37,7 @@
 #include "database/database.h"
 #include "js_functions.h"
 #include "scripting_runtime.h"
+#include "util/string_converter.h"
 
 #define ONE_TEXTLINE_BYTES 1024
 
@@ -47,18 +48,35 @@ script_class_t PlaylistParserScript::whoami()
 
 extern "C" {
 
-static duk_ret_t
-jsReadln(duk_context* ctx)
+static duk_ret_t jsReadXml(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
     if (!self) {
         return 0;
     }
 
-    std::string line;
+    if (!duk_is_number(ctx, 0))
+        return 0;
+
+    int direction = duk_to_int(ctx, 0);
+    duk_pop(ctx);
 
     try {
-        line = self->readln();
+        auto node = self->readXml(direction);
+        if (!node) {
+            log_debug("No matching node {} found.", direction);
+            return 0;
+        }
+        duk_push_object(ctx);
+        for (auto&& attrib : node.attributes()) {
+            duk_push_string(ctx, attrib.value());
+            duk_put_prop_string(ctx, -2, toLower(attrib.name()).c_str());
+        }
+
+        duk_push_string(ctx, node.text().as_string());
+        duk_put_prop_string(ctx, -2, "VALUE");
+        duk_push_string(ctx, toLower(node.name()).c_str());
+        duk_put_prop_string(ctx, -2, "NAME");
     } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
@@ -67,12 +85,31 @@ jsReadln(duk_context* ctx)
         return 0;
     }
 
-    duk_push_string(ctx, line.c_str());
     return 1;
 }
 
-static duk_ret_t
-jsGetCdsObject(duk_context* ctx)
+static duk_ret_t jsReadln(duk_context* ctx)
+{
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    if (!self) {
+        return 0;
+    }
+
+    try {
+        auto line = self->readLine();
+        duk_push_string(ctx, line.c_str());
+    } catch (const ServerShutdownException&) {
+        log_warning("Aborting script execution due to server shutdown.");
+        return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
+    } catch (const std::runtime_error& e) {
+        log_error("DUK exception: {}", e.what());
+        return 0;
+    }
+
+    return 1;
+}
+
+static duk_ret_t jsGetCdsObject(duk_context* ctx)
 {
     auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
     if (!self) {
@@ -112,21 +149,49 @@ jsGetCdsObject(duk_context* ctx)
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(content, runtime, "playlist")
+    : Script(content, runtime, "playlist", "playlist", StringConverter::p2i(content->getContext()->getConfig()))
 {
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     defineFunction("readln", jsReadln, 0);
+    defineFunction("readXml", jsReadXml, 1);
     defineFunction("getCdsObject", jsGetCdsObject, 1);
 
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     load(scriptPath);
 }
 
-std::string PlaylistParserScript::readln()
+static pugi::xml_node nullNode;
+pugi::xml_node& PlaylistParserScript::readXml(int direction)
 {
-    std::string ret;
+    if (!root)
+        throw_std_runtime_error("readXml not yet setup for use");
+
+    if (currentTask && !currentTask->isValid())
+        return root;
+
+    if (direction > 0 && root.first_child()) {
+        root = root.first_child();
+        return root;
+    }
+    if (direction < -1 && root.root()) {
+        root = xmlDoc->document_element();
+        return root;
+    }
+    if (direction < 0 && root.parent()) {
+        root = root.parent();
+        return root;
+    }
+    if (root.next_sibling()) {
+        root = root.next_sibling();
+        return root;
+    }
+    return nullNode;
+}
+
+std::string PlaylistParserScript::readLine()
+{
     if (!currentHandle)
-        throw_std_runtime_error("Readline not yet setup for use");
+        throw_std_runtime_error("readLine not yet setup for use");
 
     if (currentTask && !currentTask->isValid())
         return {};
@@ -135,53 +200,45 @@ std::string PlaylistParserScript::readln()
         if (!fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle))
             return {};
 
-        ret = trimString(currentLine);
+        auto ret = trimString(currentLine);
         if (!ret.empty())
             return ret;
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptpath)
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptPath)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
-        throw_std_runtime_error("recursion not allowed");
+        throw_std_runtime_error("Recursion in playlists not allowed");
     }
 
     if (!obj->isPureItem()) {
-        throw_std_runtime_error("only allowed for pure items");
+        throw_std_runtime_error("Calling processPlaylistObject only allowed for pure items");
     }
-    GrbFile file(obj->getLocation());
-    currentHandle = file.open("r");
+    auto item = std::static_pointer_cast<CdsItem>(obj);
+
+    log_debug("Checking playlist {} ...", obj->getLocation().string());
+    if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
+        GrbFile file(item->getLocation());
+        currentHandle = file.open("r");
+    } else {
+        pugi::xml_parse_result result = xmlDoc->load_file(item->getLocation().c_str());
+        if (result.status != pugi::xml_parse_status::status_ok) {
+            throw ConfigParseException(result.description());
+        }
+        root = xmlDoc->document_element();
+    }
 
     currentTask = task;
-    currentObjectID = obj->getID();
+    currentObjectID = item->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        cdsObject2dukObject(obj);
-        duk_put_global_string(ctx, "playlist");
-        duk_push_string(ctx, scriptpath.c_str());
-        duk_put_global_string(ctx, "object_script_path");
-        auto autoScan = content->getAutoscanDirectory(scriptpath);
-        if (autoScan && !scriptpath.empty()) {
-            duk_push_sprintf(ctx, "%d", autoScan->getScanID());
-            duk_put_global_string(ctx, "object_autoscan_id");
-        }
-
-        execute();
-
-        duk_push_global_object(ctx);
-        duk_del_prop_string(ctx, -1, "playlist");
-        duk_del_prop_string(ctx, -1, "object_script_path");
-        duk_del_prop_string(ctx, -1, "object_autoscan_id");
-        duk_pop(ctx);
+        execute(obj, scriptPath);
     } catch (const std::runtime_error&) {
-        duk_push_global_object(ctx);
-        duk_del_prop_string(ctx, -1, "playlist");
-        duk_del_prop_string(ctx, -1, "object_script_path");
-        duk_del_prop_string(ctx, -1, "object_autoscan_id");
+        cleanup();
         duk_pop(ctx);
 
         currentHandle = nullptr;
@@ -199,6 +256,8 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     delete[] currentLine;
     currentLine = nullptr;
+    xmlDoc->reset();
+    root = nullNode;
 
     currentObjectID = INVALID_OBJECT_ID;
     currentTask = nullptr;

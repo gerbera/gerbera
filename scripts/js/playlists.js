@@ -52,4 +52,6 @@ if (type === '') {
     readM3uPlaylist(playlist_title, playlistChain, playlistDirChain);
 } else if (type === 'pls') {
     readPlsPlaylist(playlist_title, playlistChain, playlistDirChain);
+} else if (type === 'asx') {
+    readAsxPlaylist(playlist_title, playlistChain, playlistDirChain);
 }

@@ -33,6 +33,7 @@
 #define __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__
 
 #include <memory>
+#include <pugixml.hpp>
 
 #include "common.h"
 #include "script.h"
@@ -47,8 +48,9 @@ public:
     PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
-    std::string readln();
-    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptpath);
+    std::string readLine();
+    pugi::xml_node& readXml(int direction);
+    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptPath);
     script_class_t whoami() override;
 
 private:
@@ -56,6 +58,8 @@ private:
     int currentObjectID { INVALID_OBJECT_ID };
     char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
+    std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
+    pugi::xml_node root;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

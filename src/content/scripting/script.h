@@ -98,9 +98,11 @@ public:
 
 protected:
     Script(const std::shared_ptr<ContentManager>& content,
-        const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name);
+        const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
+        const std::string& objName, std::unique_ptr<StringConverter>);
 
-    void execute();
+    void execute(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath);
+    void cleanup();
     int gc_counter {};
 
     // object that is currently being processed by the script (set in import
@@ -117,8 +119,10 @@ protected:
 private:
     std::string entrySeparator;
     std::string name;
+    std::string objectName;
     void _load(const fs::path& scriptPath);
     void _execute();
+    std::unique_ptr<StringConverter> sc;
     std::unique_ptr<StringConverter> _p2i;
     std::unique_ptr<StringConverter> _j2i;
     std::unique_ptr<StringConverter> _f2i;
