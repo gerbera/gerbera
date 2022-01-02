@@ -20,9 +20,6 @@ public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
-    // Used to iterate through `readln` content
-    static int readLineCnt;
-
     InternalUrlM3U8PlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -36,7 +33,6 @@ public:
 };
 
 std::unique_ptr<CommonScriptMock> InternalUrlM3U8PlaylistTest::commonScriptMock;
-int InternalUrlM3U8PlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
@@ -78,16 +74,11 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    std::vector<std::string> lines {
-        "\xEF\xBB\xBF#EXTM3U",
-        "#EXTINF:123, Example Artist, Thumbs Up Inc. \xF0\x9F\x91\x8D",
-        "/home/gerbera/example\xE2\x9C\x85.mp3",
-        "-EOF-" // used to stop processing :/
-    };
-
-    std::string line = lines.at(InternalUrlM3U8PlaylistTest::readLineCnt);
+    std::string line = InternalUrlM3U8PlaylistTest::lines.at(InternalUrlM3U8PlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
+    if (InternalUrlM3U8PlaylistTest::readLineCnt == 0)
+        line = fmt::format("{}{}", "\0xFEFF", line);
     InternalUrlM3U8PlaylistTest::readLineCnt++;
     return InternalUrlM3U8PlaylistTest::commonScriptMock->readln(line);
 }
@@ -168,8 +159,9 @@ TEST_F(InternalUrlM3U8PlaylistTest, CreatesDukContextWithPlaylistScript)
     EXPECT_NE(ctx, nullptr);
 }
 
-TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromM3U8PlaylistWithInternalUrlPlaylistAndDirChains)
+TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlaylistAndDirChains)
 {
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-internal.m3u8");
     std::map<std::string, std::string> asPlaylistChain {
         { "objectType", "2" },
         { "location", "/home/gerbera/example\xE2\x9C\x85.mp3" },
@@ -192,13 +184,13 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromM3U8PlaylistWithInternalUrl
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u8"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("\xEF\xBB\xBF#EXTM3U"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:123, Example Artist, Thumbs Up Inc. \xF0\x9F\x91\x8D"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("/home/gerbera/example\xE2\x9C\x85.mp3"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:123, Example Artist, Thumbs Up Inc. ðŸ‘"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("/home/gerbera/exampleâœ….mp3"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example\xE2\x9C\x85.mp3"))).WillRepeatedly(Return(1));
+    EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/exampleâœ….mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);

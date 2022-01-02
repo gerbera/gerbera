@@ -78,6 +78,8 @@ class IOHandler;
 #define CONTENT_TYPE_WAVPACK "wv"
 #define CONTENT_TYPE_WMA "wma"
 
+#define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
+
 #define RESOURCE_CONTENT_TYPE "rct"
 #define RESOURCE_HANDLER "rh"
 
@@ -188,6 +190,7 @@ static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, con
     std::pair(R_VIDEOCODEC, "sec:vcodec"),
     std::pair(R_TYPE, "type"),
 };
+static constexpr auto privateAttributes = std::array { R_RESOURCE_FILE, R_FANART_OBJ_ID, R_FANART_RES_ID, R_BITS_PER_SAMPLE, R_TYPE };
 
 using ResourceAttributeIterator = EnumIterator<resource_attributes_t, resource_attributes_t::R_SIZE, resource_attributes_t::R_MAX>;
 using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;

@@ -164,12 +164,15 @@ void Script::setIntProperty(const std::string& name, int value)
 /* **************** */
 
 Script::Script(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name)
+    const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
+    const std::string& objName, std::unique_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)
     , runtime(runtime)
     , name(name)
+    , objectName(objName)
+    , sc(std::move(sc))
 {
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
@@ -399,19 +402,44 @@ void Script::_execute()
     duk_pop(ctx);
 }
 
-void Script::execute()
+#define OBJECT_SCRIPT_PATH "object_script_path"
+#define OBJECT_AUTOSCAN_ID "object_autoscan_id"
+
+void Script::cleanup()
 {
+    duk_push_global_object(ctx);
+    duk_del_prop_string(ctx, -1, objectName.c_str());
+    duk_del_prop_string(ctx, -1, OBJECT_SCRIPT_PATH);
+    duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
+}
+
+void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath)
+{
+    cdsObject2dukObject(obj);
+    duk_put_global_string(ctx, objectName.c_str());
+
+    duk_push_string(ctx, scriptPath.c_str());
+    duk_put_global_string(ctx, OBJECT_SCRIPT_PATH);
+
+    auto autoScan = content->getAutoscanDirectory(scriptPath);
+    if (autoScan && !scriptPath.empty()) {
+        duk_push_sprintf(ctx, "%d", autoScan->getScanID());
+        duk_put_global_string(ctx, OBJECT_AUTOSCAN_ID);
+    }
+
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
     duk_get_prop_string(ctx, -1, "script");
     duk_remove(ctx, -2);
+
     _execute();
+    cleanup();
+    duk_pop(ctx);
 }
 
 std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
     std::string val;
-    std::unique_ptr<StringConverter> sc = (this->whoami() == S_PLAYLIST) ? StringConverter::p2i(config) : StringConverter::i2i(config);
 
     int objType = getIntProperty("objectType", -1);
     if (objType == -1) {
@@ -639,6 +667,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
 
                 item->addResource(resource);
+            } else {
+                auto resource = item->getResource(CH_DEFAULT);
+                resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
             }
         }
     }

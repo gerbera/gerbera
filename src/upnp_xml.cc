@@ -54,6 +54,7 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     }
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     multiValue = config->getBoolOption(CFG_UPNP_MULTI_VALUES_ENABLED);
+    ctMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
@@ -339,8 +340,11 @@ void UpnpXMLBuilder::renderResource(const std::string& url, const std::map<std::
     auto res = parent.append_child("res");
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
-    for (auto&& [key, val] : attributes) {
-        res.append_attribute(key.c_str()) = val.c_str();
+    for (auto&& attCfg : attributes) {
+        auto attrFound = std::find_if(privateAttributes.begin(), privateAttributes.end(),
+            [=](auto&& att) { return attCfg.first == MetadataHandler::getResAttrName(att); });
+        if (attrFound == privateAttributes.end())
+            res.append_attribute(attCfg.first.c_str()) = attCfg.second.c_str();
     }
 }
 
@@ -421,6 +425,8 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
 {
     auto resParams = res->getParameters();
     auto urlBase = getPathBase(item);
+    if (item->isExternalItem() && res->getHandlerType() == CH_DEFAULT)
+        return item->getLocation();
     std::string url;
     if (urlBase->addResID) {
         url = fmt::format("{}{}{}{}", virtualURL, urlBase->pathBase, res->getResId(), _URL_PARAM_SEPARATOR);
@@ -502,7 +508,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
     bool isExtThumbnail = false; // this sucks
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
@@ -527,7 +532,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // check for client profile prop and filter if no match
             if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0)
                 continue;
-            std::string ct = getValueOrDefault(mappings, item->getMimeType());
+            std::string ct = getValueOrDefault(ctMappings, item->getMimeType());
             if (ct == CONTENT_TYPE_OGG) {
                 if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
                     continue;
@@ -645,7 +650,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
 
         assert(!mimeType.empty());
-        std::string contentType = getValueOrDefault(mappings, mimeType);
+        std::string contentType = getValueOrDefault(ctMappings, mimeType);
         std::string url;
 
         /// \todo who will sync mimetype that is part of the protocol info and
@@ -713,11 +718,15 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             auto vs = parent.append_child("sec:CaptionInfoEx");
             auto subUrl = url;
             subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
+            vs.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
             vs.append_child(pugi::node_pcdata).set_value((virtualURL + subUrl).c_str());
             vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).empty() ? res->getParameter("type").c_str() : res->getAttribute(R_TYPE).c_str();
-            vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
-            vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
             isFirstSub = false;
+            if (quirks && quirks->checkFlags(QUIRK_FLAG_SAMSUNG) > 0)
+                continue;
+            if (!res->getAttribute(R_LANGUAGE).empty())
+                vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
+            vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
         }
 
         if (!isExtThumbnail) {

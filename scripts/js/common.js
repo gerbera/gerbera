@@ -48,6 +48,8 @@ function getPlaylistType(mimetype) {
         return 'm3u';
     if (mimetype == 'audio/x-scpls')
         return 'pls';
+    if (mimetype == 'video/x-ms-asf' || mimetype === 'video/x-ms-asx')
+        return 'asx';
     return '';
 }
 
@@ -831,60 +833,72 @@ function addTrailer(obj) {
 // doc-add-trailer-end
 
 // doc-add-playlist-item-begin
-function addPlaylistItem(playlist_title, location, title, playlistChain, order, playlistOrder) {
+function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
     // Determine if the item that we got is an URL or a local file.
 
-    if (location.match(/^.*:\/\//)) {
+    if (entry.location.match(/^.*:\/\//)) {
         var exturl = {};
 
         // Setting the mimetype is crucial and tricky... if you get it
         // wrong your renderer may show the item as unsupported and refuse
         // to play it. Unfortunately most playlist formats do not provide
         // any mimetype information.
-        exturl.mimetype = 'audio/mpeg';
+        exturl.mimetype = entry.mimetype ? entry.mimetype : 'audio/mpeg';
 
         // Make sure to correctly set the object type, then populate the
         // remaining fields.
         exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-        exturl.location = location;
-        exturl.title = (title ? title : location);
-        exturl.protocol = 'http-get';
-        exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
-        exturl.description = "Song from " + playlist_title;
+        exturl.location = entry.location;
+        exturl.title = (entry.title ? entry.title : entry.location);
+        exturl.protocol = entry.protocol ? entry.ptotocol :'http-get';
+        exturl.upnpclass = exturl.mimetype.startsWith('video') ? UPNP_CLASS_VIDEO_ITEM : UPNP_CLASS_ITEM_MUSIC_TRACK;
+        exturl.description = entry.description ? entry.description : ("Entry from " + playlist_title);
 
         // This is a special field which ensures that your playlist files
         // will be displayed in the correct order inside a playlist
         // container. It is similar to the id3 track number that is used
         // to sort the media in album containers.
-        exturl.playlistOrder = (order ? order : playlistOrder);
+        exturl.playlistOrder = (entry.order ? entry.order : playlistOrder);
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
         addCdsObject(exturl, playlistChain);
     } else {
-        if (location.substr(0,1) !== '/') {
-            location = playlistLocation + location;
+        if (entry.location.substr(0,1) !== '/') {
+            entry.location = playlistLocation + entry.location;
         }
-        var cds = getCdsObject(location);
+
+        var cds = getCdsObject(entry.location);
         if (!cds) {
-            print("Playlist " + playlist_title + " Skipping entry: " + location);
-            return;
+            print("Playlist " + playlist_title + " Skipping entry: " + entry.location);
+            return false;
         }
 
         var item = copyObject(cds);
 
-        item.playlistOrder = (order ? order : playlistOrder);
+        item.playlistOrder = (entry.order ? entry.order : playlistOrder);
         item.title = item.metaData[M_TITLE] ? item.metaData[M_TITLE][0] : cds.title;
+        item.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
+        item.description = entry.description ? entry.description : null;
+        // print("Playlist " + item.title + " Adding entry: " + item.playlistOrder + " " + item.location);
 
         addCdsObject(item, playlistChain);
     }
+    return true;
 }
 // doc-add-playlist-item-end
 
 // doc-playlist-m3u-parse-begin
 function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
-    var title = null;
+    var entry = {
+        title: null,
+        location: null,
+        order: 0,
+        mimetype: null,
+        description: null,
+        protocol: null,
+    };
     var line = readln();
     var playlistOrder = 1;
 
@@ -899,17 +913,25 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
 
         if (matches) {
             // duration = matches[1]; // currently unused
-            title = matches[2];
+            entry.title = matches[2];
+            matches = line.match(/^#EXTINF:(-?\d+),\s*(\S.*),\s*(\S.*)$/i);
+            if (matches) {
+                entry.title = matches[2];
+                entry.mimetype = matches[3];
+            }
         } else if (!line.match(/^(#|\s*$)/)) {
+            entry.location = line;
             // Call the helper function to add the item once you gathered the data:
-            addPlaylistItem(playlist_title, line, title, playlistChain, 0, playlistOrder);
+            var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
 
             // Also add to "Directories"
-            if (playlistDirChain)
-                addPlaylistItem(playlist_title, line, title, playlistDirChain, 0, playlistOrder);
+            if (playlistDirChain && state)
+                state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
 
-            title = null;
-            playlistOrder++;
+            entry.title = null;
+            entry.mimetype = null;
+            if (state)
+                playlistOrder++;
         }
 
         line = readln();
@@ -917,11 +939,85 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
 }
 // doc-playlist-m3u-parse-end
 
+function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
+    var entry = {
+        title: null,
+        location: null,
+        order: 0,
+        mimetype: null,
+        description: null,
+        protocol: null,
+    };
+    var base = null;
+    var node = readXml(-2);
+    var playlistOrder = 1;
+    var level = 0;
+    
+    while (node || level > 0) {
+        if (!node && level > 0) {
+            node = readXml(-1); // read parent
+            node = readXml(0); // read next
+            level--;
+            if (entry.location) {
+                if (base)
+                    entry.location = base + '/' + entry.location;
+                var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                if (playlistDirChain && state)
+                    state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                if (state)
+                    playlistOrder++;
+            }
+            entry.title = null;
+            entry.location = null;
+            entry.mimetype = null;
+            entry.protocol = null;
+            entry.description = null;
+        } else if (node.NAME === "asx") {
+            node = readXml(1); // read children
+            level++;
+        } else if (node.NAME === "entry") {
+            node = readXml(1); // read children
+            level++;
+        } else if (node.NAME === "ref" && node.href) {
+            entry.location = node.href;
+            node = readXml(0); // read nect
+        } else if (node.NAME === "base" && node.href && level < 2) {
+            base = node.href;
+            node = readXml(0); // read nect
+        } else if (node.NAME == "title") {
+            entry.title = node.VALUE;
+            node = readXml(0); // read nect
+        } else if (node.NAME == "abstract") {
+            entry.description = node.VALUE;
+            node = readXml(0); // read nect
+            // currently unused
+        } else if (node.NAME == "param" && node.name === "mimetype") {
+            entry.mimetype = node.value;
+            node = readXml(0); // read nect
+        } else if (node.NAME == "param" && node.name === "protocol") {
+            entry.protocol = node.value;
+            node = readXml(0); // read nect
+        } else {
+            node = readXml(0); // read nect
+        }
+    }
+
+    if (entry.location) {
+        var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+        if (playlistDirChain && state)
+            addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+    }
+}
+
 function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
-    var title = null;
-    var file = null;
-    var lastId = -1;
-    var id = -1;
+    var entry = {
+        title: null,
+        location: null,
+        order: -1,
+        mimetype: null,
+        description: null,
+        protocol: null,
+    };
     var line = readln();
     var playlistOrder = 1;
     
@@ -935,50 +1031,74 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
             // var plsVersion =  RegExp.$1;
         } else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i)) {
             const matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
-            var thisFile = matches[2];
-            id = parseInt(matches[1], 10);
-            if (lastId === -1)
-                lastId = id;
-            if (lastId !== id) {
-                if (file) {
-                    addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
-                    if (playlistDirChain)
-                        addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+            const thisFile = matches[2];
+            const id = parseInt(matches[1], 10);
+            if (entry.order === -1)
+                entry.order = id;
+            if (entry.order !== id) {
+                if (entry.location) {
+                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    if (playlistDirChain && state)
+                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                    if (state)
+                        playlistOrder++;
                 }
 
-                title = null;
-                lastId = id;
+                entry.title = null;
+                entry.mimetype = null;
+                entry.order = id;
             }
-            file = thisFile;
-            playlistOrder++;
+            entry.location = thisFile;
         } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
             const matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
-            var thisTitle = matches[2];
-            id = parseInt(matches[1], 10);
-            if (lastId === -1)
-                lastId = id;
-            if (lastId !== id) {
-                if (file) {
-                    addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
-                    if (playlistDirChain)
-                        addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+            const thisTitle = matches[2];
+            const id = parseInt(matches[1], 10);
+            if (entry.order === -1)
+                entry.order = id;
+            if (entry.order !== id) {
+                if (entry.location) {
+                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    if (playlistDirChain && state)
+                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                    if (state)
+                        playlistOrder++;
                 }
 
-                file = null;
-                lastId = id;
+                entry.location = null;
+                entry.mimetype = null;
+                entry.order = id;
             }
-            title = thisTitle;
-            playlistOrder++;
+            entry.title = thisTitle;
+        } else if (line.match(/^MimeType\s*(\d+)\s*=\s*(\S.+)$/i)) {
+            const matches = line.match(/^MimeType\s*(\d+)\s*=\s*(\S.+)$/i);
+            const thisMime = matches[2];
+            const id = parseInt(matches[1], 10);
+            if (entry.order === -1)
+                entry.order = id;
+            if (entry.order !== id) {
+                if (entry.location) {
+                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    if (playlistDirChain && state)
+                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                    if (state)
+                        playlistOrder++;
+                }
+
+                entry.location = null;
+                entry.title = null;
+                entry.order = id;
+            }
+            entry.mimetype = thisMime;
         } else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i)) {
             // currently unused
         }
 
         line = readln();
-    } while (line);
+    } while (line !== undefined);
 
-    if (file) {
-        addPlaylistItem(playlist_title, file, title, playlistChain, lastId, playlistOrder);
-        if (playlistDirChain)
-            addPlaylistItem(playlist_title, file, title, playlistDirChain, lastId, playlistOrder);
+    if (entry.location) {
+        var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+        if (playlistDirChain && state)
+            addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
     }
 }

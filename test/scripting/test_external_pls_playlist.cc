@@ -20,9 +20,6 @@ public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
-    // Used to iterate through `readln` content
-    static int readLineCnt;
-
     ExternalUrlPLSPlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -36,7 +33,6 @@ public:
 };
 
 std::unique_ptr<CommonScriptMock> ExternalUrlPLSPlaylistTest::commonScriptMock;
-int ExternalUrlPLSPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
@@ -78,19 +74,7 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    std::vector<std::string> lines = {
-        "[playlist]",
-        "\n",
-        "File1=http://46.105.171.217:8024",
-        "Title1=Song from Playlist Title",
-        "Length1=-1",
-        "\n",
-        "NumberOfEntries=1",
-        "Version=2",
-        "-EOF-" // used to stop processing
-    };
-
-    std::string line = lines.at(ExternalUrlPLSPlaylistTest::readLineCnt);
+    std::string line = ExternalUrlPLSPlaylistTest::lines.at(ExternalUrlPLSPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     ExternalUrlPLSPlaylistTest::readLineCnt++;
@@ -159,19 +143,20 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     executeScript(ctx);
 }
 
-TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPlaylistAndDirChains)
+TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlaylistAndDirChains)
 {
-    const std::string mimeTypeAudioMpeg = "audio/mpeg";
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-external.pls");
+    const std::string mimeType = "audio/mpeg";
     const std::string objtypeItemExternalUrl = "8";
 
     std::map<std::string, std::string> asPlaylistChain {
         { "title", "Song from Playlist Title" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", mimeTypeAudioMpeg },
+        { "mimetype", mimeType },
         { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "1" },
         { "protocol", "http-get" },
-        { "description", "Song from Playlist Title" },
+        { "description", "Entry from Playlist Title" },
         { "upnpclass", UPNP_CLASS_MUSIC_TRACK },
     };
 
@@ -182,9 +167,50 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("\n"))).Times(2).WillRepeatedly(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq(""))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("File1=http://46.105.171.217:8024"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Title1=Song from Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("Length1=-1"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
+
+    addGlobalFunctions(ctx, js_global_functions);
+    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
+
+    executeScript(ctx);
+}
+
+TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistAndDirChains)
+{
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-external-video.pls");
+    const std::string mimeType = "video/mp4";
+    const std::string objtypeItemExternalUrl = "8";
+
+    std::map<std::string, std::string> asPlaylistChain {
+        { "title", "Video from Playlist Title" },
+        { "location", "http://46.105.171.217:8024" },
+        { "mimetype", mimeType },
+        { "objectType", objtypeItemExternalUrl },
+        { "playlistOrder", "1" },
+        { "protocol", "http-get" },
+        { "description", "Entry from Playlist Title" },
+        { "upnpclass", UPNP_CLASS_VIDEO_ITEM },
+    };
+
+    // Expecting the common script calls..and will proxy through the mock objects for verification.
+    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq(""))).Times(2).WillRepeatedly(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("File1=http://46.105.171.217:8024"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("Title1=Video from Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("MimeType1=video/mp4"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Length1=-1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));

@@ -479,7 +479,7 @@ $.widget('grb.config', {
           switch(item.type){
             case 'Boolean': {
               input.attr('type', 'checkbox');
-              input.attr('checked', itemValue.value === "true" || itemValue.value === "on");
+              input.attr('checked', itemValue.value === "true" || itemValue.value === "on" || itemValue.value === "yes");
             }
             break;
             case 'Enum':

@@ -20,9 +20,6 @@ public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
-    // Used to iterate through `readln` content
-    static int readLineCnt;
-
     InternalUrlM3UPlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -36,7 +33,6 @@ public:
 };
 
 std::unique_ptr<CommonScriptMock> InternalUrlM3UPlaylistTest::commonScriptMock;
-int InternalUrlM3UPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
@@ -78,14 +74,7 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    std::vector<std::string> lines {
-        "#EXTM3U",
-        "#EXTINF:123, Example Artist, Example Title",
-        "/home/gerbera/example.mp3",
-        "-EOF-" // used to stop processing :/
-    };
-
-    std::string line = lines.at(InternalUrlM3UPlaylistTest::readLineCnt);
+    std::string line = InternalUrlM3UPlaylistTest::lines.at(InternalUrlM3UPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     InternalUrlM3UPlaylistTest::readLineCnt++;
@@ -168,8 +157,9 @@ TEST_F(InternalUrlM3UPlaylistTest, CreatesDukContextWithPlaylistScript)
     EXPECT_NE(ctx, nullptr);
 }
 
-TEST_F(InternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPlaylistAndDirChains)
+TEST_F(InternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlaylistAndDirChains)
 {
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-internal.m3u");
     std::map<std::string, std::string> asPlaylistChain {
         { "objectType", "2" },
         { "location", "/home/gerbera/example.mp3" },

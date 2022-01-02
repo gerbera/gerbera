@@ -58,6 +58,9 @@ public:
         const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
         const std::string& location, int onlineService);
 
+    // Load playlist file from fixtures
+    static void mockPlaylistFile(const std::string& mockFile);
+
     // Creates a mock playlist global object in Duktape context
     static duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
 
@@ -124,6 +127,10 @@ public:
     std::string scriptName;
     // Select audio layout to test
     std::string audioLayout;
+
+    // Used to iterate through `readln` content
+    static int readLineCnt;
+    static std::vector<std::string> lines;
 
     // The Duktape Context
     duk_context* ctx;

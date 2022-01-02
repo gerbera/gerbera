@@ -19,9 +19,6 @@ public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
-    // Used to iterate through `readln` content
-    static int readLineCnt;
-
     ExternalUrlM3UPlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -35,7 +32,6 @@ public:
 };
 
 std::unique_ptr<CommonScriptMock> ExternalUrlM3UPlaylistTest::commonScriptMock;
-int ExternalUrlM3UPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
@@ -77,14 +73,7 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    std::vector<std::string> lines {
-        "#EXTM3U",
-        "#EXTINF:-1,(#1 - 177/750) : Ibiza Global Radio :",
-        "http://46.105.171.217:8024",
-        "-EOF-" // used to stop processing
-    };
-
-    std::string line = lines.at(ExternalUrlM3UPlaylistTest::readLineCnt);
+    std::string line = ExternalUrlM3UPlaylistTest::lines.at(ExternalUrlM3UPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     ExternalUrlM3UPlaylistTest::readLineCnt++;
@@ -160,30 +149,31 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     executeScript(ctx);
 }
 
-TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPlaylistAndDirChains)
+TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlaylistAndDirChains)
 {
-    const std::string mimeTypeAudioMpeg = "audio/mpeg";
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-external.m3u");
+    const std::string mimeType = "audio/mpeg";
     const std::string objtypeItemExternalUrl = "8";
 
     std::map<std::string, std::string> asPlaylistChain {
         { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", mimeTypeAudioMpeg },
+        { "mimetype", mimeType },
         { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "1" },
         { "protocol", "http-get" },
-        { "description", "Song from Playlist Title" },
+        { "description", "Entry from Playlist Title" },
         { "upnpclass", UPNP_CLASS_MUSIC_TRACK },
     };
 
     std::map<std::string, std::string> asPlaylistDirChain {
         { "title", "(#1 - 177/750) : Ibiza Global Radio :" },
         { "location", "http://46.105.171.217:8024" },
-        { "mimetype", mimeTypeAudioMpeg },
+        { "mimetype", mimeType },
         { "objectType", objtypeItemExternalUrl },
         { "playlistOrder", "1" },
         { "protocol", "http-get" },
-        { "description", "Song from Playlist Title" },
+        { "description", "Entry from Playlist Title" },
         { "upnpclass", UPNP_CLASS_MUSIC_TRACK },
     };
 
@@ -195,6 +185,53 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromM3UPlaylistWithExternalUrlPl
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:-1,(#1 - 177/750) : Ibiza Global Radio :"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("http://46.105.171.217:8024"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
+
+    addGlobalFunctions(ctx, js_global_functions);
+    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.m3u", "audio/x-mpegurl");
+
+    executeScript(ctx);
+}
+
+TEST_F(ExternalUrlM3UPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistAndDirChains)
+{
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-external-video.m3u");
+    const std::string mimeType = "video/mp4";
+    const std::string objtypeItemExternalUrl = "8";
+
+    std::map<std::string, std::string> asPlaylistChain {
+        { "title", "(#1 - 177/750) : Ibiza Tourism Video :" },
+        { "location", "http://46.105.171.217:8024" },
+        { "mimetype", mimeType },
+        { "objectType", objtypeItemExternalUrl },
+        { "playlistOrder", "1" },
+        { "protocol", "http-get" },
+        { "description", "Entry from Playlist Title" },
+        { "upnpclass", UPNP_CLASS_VIDEO_ITEM },
+    };
+
+    std::map<std::string, std::string> asPlaylistDirChain {
+        { "title", "(#1 - 177/750) : Ibiza Tourism Video :" },
+        { "location", "http://46.105.171.217:8024" },
+        { "mimetype", mimeType },
+        { "objectType", objtypeItemExternalUrl },
+        { "playlistOrder", "1" },
+        { "protocol", "http-get" },
+        { "description", "Entry from Playlist Title" },
+        { "upnpclass", UPNP_CLASS_VIDEO_ITEM },
+    };
+
+    // Expecting the common script calls..and will proxy through the mock objects for verification.
+    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-mpegurl"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.m3u"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:-1,(#1 - 177/750) : Ibiza Tourism Video :,video/mp4"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("http://46.105.171.217:8024"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));

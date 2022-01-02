@@ -1,7 +1,7 @@
 <mappings>
   <extension-mimetype ignore-unknown="no">
     <map from="asf" to="video/x-ms-asf" />
-    <map from="asx" to="video/x-ms-asf" />
+    <map from="asx" to="video/x-ms-asx" />
     <map from="dff" to="audio/x-dsd" />
     <map from="dsf" to="audio/x-dsd" />
     <map from="flv" to="video/x-flv" />
@@ -63,6 +63,7 @@
     <treat mimetype="video/x-matroska" as="mkv" />
     <treat mimetype="video/x-mkv" as="mkv" />
     <treat mimetype="video/x-ms-asf" as="asf" />
+    <treat mimetype="video/x-ms-asx" as="playlist" />
     <treat mimetype="video/x-msvideo" as="avi" />
   </mimetype-contenttype>
   <contenttype-dlnaprofile>

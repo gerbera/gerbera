@@ -1,6 +1,7 @@
 #ifdef HAVE_JS
 
 #include <duktape.h>
+#include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -122,6 +123,17 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     duk_push_string(ctx, "object/script/path");
     duk_put_global_string(ctx, "object_script_path");
     return 0;
+}
+
+int ScriptTestFixture::readLineCnt = 0;
+std::vector<std::string> ScriptTestFixture::lines;
+void ScriptTestFixture::mockPlaylistFile(const std::string& mockFile)
+{
+    std::ifstream t(mockFile);
+    std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+    lines = splitString(str, '\n', true);
+    lines.push_back("-EOF-"); // used to stop processing
+    readLineCnt = 0;
 }
 
 duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype)
@@ -247,6 +259,8 @@ std::string ScriptTestFixture::getPlaylistType(duk_context* ctx)
         type = "m3u";
     } else if (playlistMimeType == "audio/x-scpls") {
         type = "pls";
+    } else if (playlistMimeType == MIME_TYPE_ASX_PLAYLIST) {
+        type = "asx";
     } else {
         type = "";
     }

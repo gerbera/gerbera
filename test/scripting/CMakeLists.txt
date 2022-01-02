@@ -8,6 +8,7 @@ add_executable(testscripting
     test_common_script.cc
     test_external_m3u_playlist.cc
     test_external_pls_playlist.cc
+    test_external_asx_playlist.cc
     test_import_script.cc
     test_import_struct_script.cc
     test_internal_m3u_playlist.cc
@@ -19,6 +20,11 @@ add_executable(testscripting
 target_link_libraries(testscripting PRIVATE
     libgerbera
     GTest::GTest
+)
+add_custom_command(TARGET testscripting POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
+    DEPENDS fixtures/*
+    COMMENT "Copying Playlist Fixtures"
 )
 target_compile_definitions(testscripting PRIVATE SCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
 

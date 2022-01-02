@@ -20,9 +20,6 @@ public:
     // As Duktape requires static methods, so must the mock expectations be
     static std::unique_ptr<CommonScriptMock> commonScriptMock;
 
-    // Used to iterate through `readln` content
-    static int readLineCnt;
-
     InternalUrlPLSPlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -36,7 +33,6 @@ public:
 };
 
 std::unique_ptr<CommonScriptMock> InternalUrlPLSPlaylistTest::commonScriptMock;
-int InternalUrlPLSPlaylistTest::readLineCnt = 0;
 
 static duk_ret_t getPlaylistType(duk_context* ctx)
 {
@@ -78,19 +74,7 @@ static duk_ret_t getLastPath(duk_context* ctx)
 // Uses the `CommonScriptMock` to track expectations
 static duk_ret_t readln(duk_context* ctx)
 {
-    std::vector<std::string> lines {
-        "[playlist]",
-        "\n",
-        "File1=/home/gerbera/example.mp3",
-        "Title1=Song from Playlist Title",
-        "Length1=120",
-        "\n",
-        "NumberOfEntries=1",
-        "Version=2",
-        "-EOF-" // used to stop processing
-    };
-
-    std::string line = lines.at(InternalUrlPLSPlaylistTest::readLineCnt);
+    std::string line = InternalUrlPLSPlaylistTest::lines.at(InternalUrlPLSPlaylistTest::readLineCnt);
 
     duk_push_string(ctx, line.c_str());
     InternalUrlPLSPlaylistTest::readLineCnt++;
@@ -178,8 +162,9 @@ TEST_F(InternalUrlPLSPlaylistTest, CreatesDukContextWithPlaylistScript)
     EXPECT_NE(ctx, nullptr);
 }
 
-TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPlaylistAndDirChains)
+TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlaylistAndDirChains)
 {
+    ScriptTestFixture::mockPlaylistFile("fixtures/example-internal.pls");
     std::map<std::string, std::string> asPlaylistChain {
         { "objectType", "2" },
         { "location", "/home/gerbera/example.mp3" },
@@ -196,7 +181,7 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromM3UPlaylistWithInternalUrlPl
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readln(Eq("\n"))).Times(2).WillRepeatedly(Return(1));
+    EXPECT_CALL(*commonScriptMock, readln(Eq(""))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("File1=/home/gerbera/example.mp3"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Title1=Song from Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Length1=120"))).WillOnce(Return(1));
