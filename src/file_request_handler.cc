@@ -62,18 +62,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto resourceId = parseResourceInfo(params);
 
-    if (!obj->isItem()) {
-        throw_std_runtime_error("Requested item {} is not an item", filename);
+    if (!obj->isItem() && obj->getResourceCount() == 0) {
+        throw_std_runtime_error("Requested object {} is not an item and has no resources", filename);
     }
-    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
 
     if (resourceId >= obj->getResourceCount()) {
         throw_std_runtime_error("Requested resource {} does not exist", resourceId);
     }
     auto resource = obj->getResource(resourceId);
 
-    std::string mimeType = item->getMimeType();
-    fs::path path = item->getLocation();
+    fs::path path = obj->getLocation();
 
     // Check if the resource is actually another external file, and if it exists
     bool isResourceFile = false;
@@ -105,6 +103,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
     auto headers = std::make_unique<Headers>();
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    std::string mimeType = item ? item->getMimeType() : "";
 
     if (resource->getHandlerType() != CH_DEFAULT) {
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
@@ -161,7 +161,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     // Generate DNLA Headers
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, item->getMimeType()), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+    std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, mimeType), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
     if (!dlnaContentHeader.empty()) {
         headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
     }
@@ -211,8 +211,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         return metadataHandler->serveContent(obj, resourceId);
     }
 
-    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    auto path = item->getLocation();
+    auto path = obj->getLocation();
 
     content->triggerPlayHook(obj);
 
@@ -225,6 +224,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
         std::string range = getValueOrDefault(params, "range");
 
+        auto item = std::dynamic_pointer_cast<CdsItem>(obj);
         auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
         return transcodeDispatcher->serveContent(transcodingProfile, path, item, range);
     }
