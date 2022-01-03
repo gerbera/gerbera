@@ -197,6 +197,19 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
+    UpnpSetHostValidateCallback(
+        [](auto host, auto cookie) -> int {
+            auto virtualURL = static_cast<Server*>(cookie)->getVirtualUrl();
+            if (!virtualURL.empty() && virtualURL.find(host) != std::string::npos) {
+                return UPNP_E_SUCCESS;
+            }
+            log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL: '{}'. "
+                        "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
+                host, static_cast<Server*>(cookie)->config->getOption(CFG_VIRTUAL_URL));
+            return UPNP_E_BAD_HTTPMSG;
+        },
+        this);
+
     std::string url = config->getOption(CFG_VIRTUAL_URL);
     if (url.empty()) {
         url = renderWebUri(ip, port);
