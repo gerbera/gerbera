@@ -224,9 +224,8 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
         std::string range = getValueOrDefault(params, "range");
 
-        auto item = std::dynamic_pointer_cast<CdsItem>(obj);
         auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
-        return transcodeDispatcher->serveContent(transcodingProfile, path, item, range);
+        return transcodeDispatcher->serveContent(transcodingProfile, path, obj, range);
     }
 
     // Boring old file

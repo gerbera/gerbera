@@ -4,7 +4,7 @@ Gerbera - https://gerbera.io/
 
     mysql_config_fake.h - this file is part of Gerbera.
 
-    Copyright (C) 2020-2021 Gerbera Contributors
+    Copyright (C) 2020-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

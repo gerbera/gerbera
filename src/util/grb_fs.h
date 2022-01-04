@@ -2,7 +2,7 @@
 /*
  * std::filesystem and fs namespace header
  *
- * Copyright (C) 2021 Gerbera Contributors
+ * Copyright (C) 2021-2022 Gerbera Contributors
  */
 
 #ifndef __GRB_FS_H__
