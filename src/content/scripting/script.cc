@@ -165,13 +165,13 @@ void Script::setIntProperty(const std::string& name, int value)
 
 Script::Script(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
-    const std::string& objName, std::unique_ptr<StringConverter> sc)
+    std::string objName, std::unique_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)
     , runtime(runtime)
     , name(name)
-    , objectName(objName)
+    , objectName(std::move(objName))
     , sc(std::move(sc))
 {
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
