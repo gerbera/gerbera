@@ -45,7 +45,11 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(const std::shared_p
         throw_std_runtime_error("Transcoding of file {} requested but no profile given ", location.c_str());
 
     if (profile->getType() == TR_External) {
-        auto trExt = std::make_unique<TranscodeExternalHandler>(std::move(content));
+#if defined(_LIBCPP_VERSION) && _LIBCPP_VERSION < 11000
+        auto trExt = std::shared_ptr<TranscodeExternalHandler>(content, reinterpret_cast<TranscodeExternalHandler*>(content.get()));
+#else
+        auto trExt = std::reinterpret_pointer_cast<TranscodeExternalHandler>(content);
+#endif
         return trExt->serveContent(profile, location, obj, range);
     }
 
