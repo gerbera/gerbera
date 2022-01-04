@@ -3,7 +3,7 @@
 
   sql_format.h - this file is part of Gerbera.
 
-  Copyright (C) 2021 Gerbera Contributors
+  Copyright (C) 2021-2022 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2

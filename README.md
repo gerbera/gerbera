@@ -49,7 +49,7 @@ sudo make install
 | libupnp       | 1.14.0        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp     | 4.1.2         | 4.1.5         | 4.1.5         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid       |               |               |               | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]     |               |               |               | Required      | XML file and data support  |          |
+| [pugixml]     |               | 1.10          | 1.11.4        | Required      | XML file and data support  |          |
 | libiconv      |               |               |               | Required      | Charset conversion         |          |
 | sqlite3       | 3.7.0         | 3.35.5        | 3.36.0        | Required      | Database storage           |          |
 | zlib          |               |               |               | Required      | Data compression           |          |
@@ -83,7 +83,7 @@ sudo make install
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2021
+    Copyright (C) 2016-2022
         Gerbera Contributors
 
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
