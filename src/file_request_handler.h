@@ -50,7 +50,7 @@ protected:
 
 private:
     std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
-    std::size_t parseResourceInfo(std::map<std::string, std::string>& params) const;
+    static std::size_t parseResourceInfo(std::map<std::string, std::string>& params);
     std::unique_ptr<MetadataHandler> getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const;
 };
 

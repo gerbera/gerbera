@@ -232,7 +232,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::string>& params) const
+std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::string>& params)
 {
     std::size_t resourceId = 0;
     try {
