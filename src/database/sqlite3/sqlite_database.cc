@@ -285,7 +285,7 @@ void Sqlite3Database::threadProc()
 
         while (!shutdownFlag) {
             while (!taskQueue.empty()) {
-                auto task = taskQueue.front();
+                auto task = std::move(taskQueue.front());
                 taskQueue.pop();
 
                 lock.unlock();
@@ -309,7 +309,7 @@ void Sqlite3Database::threadProc()
 
         taskQueueOpen = false;
         while (!taskQueue.empty()) {
-            auto task = taskQueue.front();
+            auto task = std::move(taskQueue.front());
             taskQueue.pop();
             task->sendSignal("Sorry, sqlite3 thread is shutting down");
         }

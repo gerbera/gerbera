@@ -79,7 +79,7 @@ void TaskProcessor::threadProc()
 
         task = nullptr;
         if (!taskQueue.empty()) {
-            task = taskQueue.front();
+            task = std::move(taskQueue.front());
             taskQueue.pop_front();
         }
 
@@ -108,13 +108,13 @@ void TaskProcessor::threadProc()
     }
 }
 
-void TaskProcessor::addTask(const std::shared_ptr<GenericTask>& task)
+void TaskProcessor::addTask(std::shared_ptr<GenericTask> task)
 {
     auto lock = threadRunner->lockGuard();
 
     task->setID(taskID++);
 
-    taskQueue.push_back(task);
+    taskQueue.push_back(std::move(task));
     threadRunner->notify();
 }
 

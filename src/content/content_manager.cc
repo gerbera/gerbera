@@ -386,7 +386,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<CMAddFileTask> task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -417,7 +417,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
 #ifdef HAVE_JS
             try {
                 if (playlist_parser_script && contentType == CONTENT_TYPE_PLAYLIST)
-                    playlist_parser_script->processPlaylistObject(obj, task, rootPath);
+                    playlist_parser_script->processPlaylistObject(obj, std::move(task), rootPath);
             } catch (const std::runtime_error& e) {
                 log_error("{}", e.what());
             }
@@ -1323,10 +1323,10 @@ void ContentManager::threadProc()
 
         task = nullptr;
         if (!taskQueue1.empty()) {
-            task = taskQueue1.front();
+            task = std::move(taskQueue1.front());
             taskQueue1.pop_front();
         } else if (!taskQueue2.empty()) {
-            task = taskQueue2.front();
+            task = std::move(taskQueue2.front());
             taskQueue2.pop_front();
         }
 
@@ -1338,13 +1338,13 @@ void ContentManager::threadProc()
             continue;
         }
 
-        currentTask = task;
+        currentTask = std::move(task);
         lock.unlock();
 
         // log_debug("content manager Async START {}", task->getDescription());
         try {
-            if (task->isValid())
-                task->run();
+            if (currentTask->isValid())
+                currentTask->run();
         } catch (const ServerShutdownException&) {
             shutdownFlag = true;
         } catch (const std::runtime_error& e) {
@@ -1360,16 +1360,16 @@ void ContentManager::threadProc()
     database->threadCleanup();
 }
 
-void ContentManager::addTask(const std::shared_ptr<GenericTask>& task, bool lowPriority)
+void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority)
 {
     auto lock = threadRunner->lockGuard("addTask");
 
     task->setID(taskID++);
 
     if (!lowPriority)
-        taskQueue1.push_back(task);
+        taskQueue1.push_back(std::move(task));
     else
-        taskQueue2.push_back(task);
+        taskQueue2.push_back(std::move(task));
     threadRunner->notify();
 }
 
@@ -1394,7 +1394,7 @@ int ContentManager::addFileInternal(
         auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
         task->setDescription(fmt::format("Importing: {}", dirEnt.path().string()));
         task->setParentID(parentTaskID);
-        addTask(task, lowPriority);
+        addTask(std::move(task), lowPriority);
         return INVALID_OBJECT_ID;
     }
     return _addFile(dirEnt, rootpath, asSetting);
@@ -1416,7 +1416,7 @@ void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPrio
     task->setDescription(fmt::format("Updating content from {}", service->getServiceName()));
     task->setParentID(parentTaskID);
     service->incTaskCount();
-    addTask(task, lowPriority);
+    addTask(std::move(task), lowPriority);
 }
 
 void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineService>& service)
@@ -1546,7 +1546,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
             }
         }
 
-        addTask(task);
+        addTask(std::move(task));
     } else {
         _removeObject(adir, objectID, rescanResource, all);
     }
@@ -1564,7 +1564,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
         descPath = adir->getLocation();
 
     task->setDescription(fmt::format("Scan: {}", descPath.string()));
-    addTask(task, true); // adding with low priority
+    addTask(std::move(task), true); // adding with low priority
 }
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, ScanMode scanMode) const

@@ -206,7 +206,7 @@ std::string PlaylistParserScript::readLine()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptPath)
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptPath)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
         throw_std_runtime_error("Recursion in playlists not allowed");
@@ -229,7 +229,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         root = xmlDoc->document_element();
     }
 
-    currentTask = task;
+    currentTask = std::move(task);
     currentObjectID = item->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';
