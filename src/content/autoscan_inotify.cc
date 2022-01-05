@@ -94,7 +94,7 @@ void AutoscanInotify::threadProc()
 
             //  remove old dirs
             while (!unmonitorQueue.empty()) {
-                auto adir = unmonitorQueue.front();
+                auto adir = std::move(unmonitorQueue.front());
                 unmonitorQueue.pop();
 
                 lock.unlock();
@@ -120,7 +120,7 @@ void AutoscanInotify::threadProc()
 
             // monitor new dir
             while (!monitorQueue.empty()) {
-                auto adir = monitorQueue.front();
+                auto adir = std::move(monitorQueue.front());
                 monitorQueue.pop();
 
                 lock.unlock();

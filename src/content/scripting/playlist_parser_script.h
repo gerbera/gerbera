@@ -50,7 +50,7 @@ public:
 
     std::string readLine();
     pugi::xml_node& readXml(int direction);
-    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<GenericTask>& task, const std::string& scriptPath);
+    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptPath);
     script_class_t whoami() override;
 
 private:
