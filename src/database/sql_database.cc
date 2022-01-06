@@ -688,6 +688,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
 
     cdsObjectSql.emplace("parent_id", quote(obj->getParentID()));
 
+    std::vector<AddUpdateTable> returnVal;
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
@@ -699,10 +700,9 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
             identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
         if (res && res->getNumRows() > 0)
-            return {};
+            return returnVal;
     }
 
-    std::vector<AddUpdateTable> returnVal;
     returnVal.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op);
 
     if (!hasReference || obj->getMetaData() != refObj->getMetaData()) {
@@ -805,9 +805,8 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow(row);
             commit("loadObjectByServiceID");
-            return result;
+            return createObjectFromRow(row);
         }
     }
     commit("loadObjectByServiceID");
@@ -1108,11 +1107,12 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
 
 std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot)
 {
+    std::map<int, int> result;
     if (!containers && !items)
-        return {};
+        return result;
 
     if (contId.empty())
-        return {};
+        return result;
 
     auto where = std::vector {
         fmt::format("{} IN ({})", identifier("parent_id"), fmt::join(contId, ","))
@@ -1130,7 +1130,6 @@ std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, b
         identifier("parent_id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
     commit("getChildCounts");
 
-    std::map<int, int> result;
     if (res) {
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
@@ -1620,10 +1619,10 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     if (!res)
         throw_std_runtime_error("db error");
 
-    if (res->getNumRows() == 0)
-        return {};
-
     std::unordered_set<int> ret;
+    if (res->getNumRows() == 0)
+        return ret;
+
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         ret.insert(row->col_int(0, INVALID_OBJECT_ID));
@@ -1852,8 +1851,9 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(ChangedContainers maybeEmpty)
 {
     log_debug("start upnp: {}; ui: {}", fmt::to_string(fmt::join(maybeEmpty.upnp, ",")), fmt::to_string(fmt::join(maybeEmpty.ui, ",")));
+    auto changedContainers = std::make_unique<ChangedContainers>();
     if (maybeEmpty.upnp.empty() && maybeEmpty.ui.empty())
-        return {};
+        return changedContainers;
 
     auto tabAlias = identifier("fol");
     auto childAlias = identifier("cld");
@@ -1870,8 +1870,6 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     std::vector<std::int32_t> del;
 
     std::unique_ptr<SQLRow> row;
-
-    ChangedContainers changedContainers;
 
     auto selUi = std::vector(maybeEmpty.ui);
     auto selUpnp = std::vector(maybeEmpty.upnp);
@@ -1891,7 +1889,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
-                    changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    changedContainers->upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 else if (row->col(1) == "0") {
                     del.push_back(row->col_int(0, INVALID_OBJECT_ID));
                     selUi.push_back(row->col_int(2, INVALID_OBJECT_ID));
@@ -1911,8 +1909,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
-                    changedContainers.ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
-                    changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    changedContainers->ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
+                    changedContainers->upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
                 } else if (row->col(1) == "0") {
                     del.push_back(row->col_int(0, INVALID_OBJECT_ID));
                     selUi.push_back(row->col_int(2, INVALID_OBJECT_ID));
@@ -1933,8 +1931,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             throw_std_runtime_error("there seems to be an infinite loop...");
     } while (again);
 
-    auto& changedUi = changedContainers.ui;
-    auto& changedUpnp = changedContainers.upnp;
+    auto& changedUi = changedContainers->ui;
+    auto& changedUpnp = changedContainers->upnp;
     if (!selUi.empty()) {
         std::copy(selUi.begin(), selUi.end(), std::back_inserter(changedUi));
         std::copy(selUi.begin(), selUi.end(), std::back_inserter(changedUpnp));
@@ -1947,7 +1945,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
-    return std::make_unique<ChangedContainers>(std::move(changedContainers));
+    return changedContainers;
 }
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)
@@ -1972,11 +1970,11 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
         identifier("item_value"),
         identifier("status"),
     };
+    std::vector<ConfigValue> result;
     auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CONFIG_VALUE_TABLE)));
     if (!res)
-        return {};
+        return result;
 
-    std::vector<ConfigValue> result;
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
@@ -2352,12 +2350,12 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
 std::vector<int> SQLDatabase::getPathIDs(int objectID)
 {
+    std::vector<int> pathIDs;
     if (objectID == INVALID_OBJECT_ID)
-        return {};
+        return pathIDs;
 
     auto sel = fmt::format("SELECT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} = ", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
 
-    std::vector<int> pathIDs;
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
         auto res = select(fmt::format("{} {} LIMIT 1", sel, objectID));
