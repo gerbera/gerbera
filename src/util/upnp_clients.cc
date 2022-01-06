@@ -274,25 +274,24 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
 
 std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
 {
+    auto xml = std::make_unique<pugi::xml_document>();
 #if defined(USING_NPUPNP)
     std::string description, ct;
     int errCode = UpnpDownloadUrlItem(location, description, ct);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return {};
+        return xml;
     }
-    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(description.c_str());
 #else
     IXML_Document* descDoc = nullptr;
     int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
     if (errCode != UPNP_E_SUCCESS) {
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        return {};
+        return xml;
     }
 
     DOMString cxml = ixmlPrintDocument(descDoc);
-    auto xml = std::make_unique<pugi::xml_document>();
     auto ret = xml->load_string(cxml);
 
     ixmlFreeDOMString(cxml);
@@ -301,7 +300,6 @@ std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::stri
 
     if (ret.status != pugi::xml_parse_status::status_ok) {
         log_debug("Unable to parse xml client description from {}", location);
-        return {};
     }
 
     return xml;
