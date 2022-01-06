@@ -234,14 +234,12 @@ public:
     std::string getMetaData(const metadata_fields_t key) const
     {
         auto field = MetadataHandler::getMetaFieldName(key);
-        auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
-        return it != metaData.end() ? it->second : std::string();
+        return getValueOrDefault(metaData, field);
     }
     /// \brief Query single metadata value.
     std::string getMetaData(const std::string& field) const
     {
-        auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
-        return it != metaData.end() ? it->second : std::string();
+        return getValueOrDefault(metaData, field);
     }
     std::map<std::string, std::vector<std::string>> getMetaGroups() const
     {

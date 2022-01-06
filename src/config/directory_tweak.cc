@@ -94,10 +94,7 @@ std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(std::size_t id, bool ed
 
         return list[id];
     }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
+    return getValueOrDefault(indexMap, id, std::shared_ptr<DirectoryTweak>());
 }
 
 std::shared_ptr<DirectoryTweak> DirectoryConfigList::get(const fs::path& location) const

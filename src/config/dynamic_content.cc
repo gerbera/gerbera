@@ -71,10 +71,7 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edi
 
         return list[id];
     }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
+    return getValueOrDefault(indexMap, id, std::shared_ptr<DynamicContent>());
 }
 
 std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location) const

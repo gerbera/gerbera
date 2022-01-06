@@ -227,11 +227,7 @@ int MetadataHandler::remapContentHandler(const std::string& contHandler)
 
 std::string MetadataHandler::mapContentHandler2String(int ch)
 {
-    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
-    if (chEntry != chKeys.end()) {
-        return chEntry->second;
-    }
-    return "Unknown";
+    return getValueOrDefault(chKeys, ch, std::string("Unknown"));
 }
 
 metadata_fields_t MetadataHandler::remapMetaDataField(std::string_view fieldName)

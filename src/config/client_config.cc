@@ -96,10 +96,7 @@ std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit) c
 
         return list[id];
     }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
+    return getValueOrDefault(indexMap, id, std::shared_ptr<ClientConfig>());
 }
 
 void ClientConfigList::remove(std::size_t id, bool edit)

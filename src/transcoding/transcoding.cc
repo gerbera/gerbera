@@ -58,11 +58,7 @@ const std::map<std::string, std::string>& TranscodingProfile::getAttributes() co
 
 std::string TranscodingProfile::getAttribute(const std::string& name) const
 {
-    auto it = attributes.find(name);
-    if (it != attributes.end()) {
-        return it->second;
-    }
-    return {};
+    return getValueOrDefault(attributes, name, std::string());
 }
 
 void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, avi_fourcc_listmode_t mode)
@@ -78,23 +74,14 @@ const std::vector<std::string>& TranscodingProfile::getAVIFourCCList() const
 
 void TranscodingProfileList::add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof)
 {
-    auto inner = [this, &sourceMimeType] {
-        auto it = list.find(sourceMimeType);
-        if (it != list.end())
-            return std::move(it->second);
-        return std::make_shared<TranscodingProfileMap>();
-    }();
-
+    auto inner = getValueOrDefault(list, sourceMimeType, std::make_shared<TranscodingProfileMap>());
     inner->emplace(prof->getName(), prof);
     list[sourceMimeType] = std::move(inner);
 }
 
 std::shared_ptr<TranscodingProfileMap> TranscodingProfileList::get(const std::string& sourceMimeType) const
 {
-    auto it = list.find(sourceMimeType);
-    if (it != list.end())
-        return it->second;
-    return nullptr;
+    return getValueOrDefault(list, sourceMimeType, std::shared_ptr<TranscodingProfileMap>());
 }
 
 std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll) const

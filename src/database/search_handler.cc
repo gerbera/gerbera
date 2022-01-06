@@ -159,11 +159,8 @@ std::string SearchLexer::nextStringToken(const std::string& input)
 
 std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
 {
-    auto itr = tokenTypes.find(toLower(tokenStr));
-    if (itr != tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
-    }
-    return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
+    auto token = getValueOrDefault(tokenTypes, toLower(tokenStr), TokenType::PROPERTY);
+    return std::make_unique<SearchToken>(token, std::move(tokenStr));
 }
 
 SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)

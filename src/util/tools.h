@@ -234,19 +234,22 @@ public:
 };
 
 /// \brief Get value of map, iff not key is not in map return defval
-template <typename K, typename V>
-V getValueOrDefault(const std::vector<std::pair<K, V>>& m, const K& key, const V& defval)
+template <typename K, typename V, typename C>
+V getValueOrDefault(const C& m, const K& key, const V& defval)
 {
+    if constexpr (std::is_same_v<C, std::map<K, V>>) {
+        auto it = m.find(key);
+        if (it == m.end())
+            return defval;
+        return it->second;
+    }
+
     auto it = std::find_if(m.begin(), m.end(), [&](auto&& v) { return v.first == key; });
-    return (it == m.end()) ? defval : it->second;
+    if (it == m.end())
+        return defval;
+    return it->second;
 }
 
-template <typename K, typename V>
-V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
-{
-    auto it = m.find(key);
-    return (it == m.end()) ? defval : it->second;
-}
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 

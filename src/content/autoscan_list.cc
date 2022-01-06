@@ -100,10 +100,7 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit) 
 
         return list[id];
     }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
+    return getValueOrDefault(indexMap, id, std::shared_ptr<AutoscanDirectory>());
 }
 
 std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID) const
