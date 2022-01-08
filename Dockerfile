@@ -1,12 +1,34 @@
-FROM alpine:3.14 AS builder
+FROM alpine:3.15 AS builder
 
-RUN apk add --no-cache tini gcc g++ pkgconf make \
-    util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev fmt-dev \
-    file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev \
-    libmatroska-dev libebml-dev taglib-dev pugixml-dev spdlog-dev \
-    duktape-dev git bash \
+RUN apk add --no-cache  \
+    bash \
+    cmake zlib-dev \
+    curl-dev \
+    duktape-dev \
+    ffmpeg-dev \
+    ffmpegthumbnailer-dev \
+    file-dev \
+    fmt-dev \
+    g++ \
+    gcc \
+    git \
+    libebml-dev \
+    libexif-dev \
+    libmatroska-dev \
+    make \
+    mariadb-connector-c-dev \
+    pkgconf \
+    pugixml-dev \
+    spdlog-dev \
+    sqlite-dev \
+    taglib-dev \
+    tini \
+    util-linux-dev \
     # packages to build libupnp
-    autoconf automake libtool file
+    autoconf \
+    automake \
+    libtool \
+    file
 
 # Build libupnp
 WORKDIR /libupnp_build
@@ -16,9 +38,7 @@ RUN ./install-pupnp.sh
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
-RUN mkdir build && \
-    cd build && \
-    cmake .. \
+RUN cmake -S . -B build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_CXX_FLAGS=-g1 \
         -DWITH_MAGIC=YES \
@@ -31,13 +51,32 @@ RUN mkdir build && \
         -DWITH_EXIF=YES \
         -DWITH_LASTFM=NO \
         -DWITH_SYSTEMD=NO \
-        -DWITH_DEBUG=YES && \
-    make -j$(nproc)
+        -DWITH_DEBUG=YES \
+    && \
+    cmake --build build -v -j$(nproc)
 
-FROM alpine:3.14
-RUN apk add --no-cache tini util-linux sqlite mariadb-connector-c zlib fmt \
-    file libexif curl ffmpeg-libs ffmpegthumbnailer libmatroska libebml taglib \
-    pugixml spdlog sqlite-libs duktape su-exec tzdata
+FROM alpine:3.15
+RUN apk add --no-cache \
+    curl \
+    duktape \
+    ffmpeg-libs \
+    ffmpegthumbnailer \
+    file \
+    fmt \
+    libebml \
+    libexif \
+    libmatroska \
+    mariadb-connector-c \
+    pugixml \
+    spdlog \
+    sqlite \
+    sqlite-libs \
+    su-exec \
+    taglib \
+    tini \
+    tzdata \
+    util-linux \
+    zlib
 
 # Copy libupnp
 COPY --from=builder /usr/local/lib/libixml.so.* /usr/local/lib/libupnp.so.* /usr/lib/
