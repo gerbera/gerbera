@@ -9,7 +9,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     LASTFM="0.4.0"
     MATROSKA="1.5.2"
     PUGIXML="1.10"
-    PUPNP="1.14.0"
+    PUPNP="1.14.6"
     SPDLOG="1.8.1"
     TAGLIB="1.12"
 
