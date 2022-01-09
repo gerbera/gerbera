@@ -199,6 +199,15 @@ void Server::run()
 
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
+            auto hostStr = std::string(host);
+            auto ip = std::string(UpnpGetServerIpAddress());
+            auto ip6 = std::string(UpnpGetServerIp6Address());
+            auto ip6gla = std::string(UpnpGetServerUlaGuaIp6Address());
+
+            if (hostStr.find(ip) != std::string::npos || hostStr.find(ip6) != std::string::npos || hostStr.find(ip6gla) != std::string::npos) {
+                return UPNP_E_SUCCESS;
+            }
+
             auto virtualURL = static_cast<Server*>(cookie)->getVirtualUrl();
             if (!virtualURL.empty() && virtualURL.find(host) != std::string::npos) {
                 return UPNP_E_SUCCESS;
