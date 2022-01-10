@@ -154,17 +154,17 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
         quirks->addCaptionInfo(item, headers);
         resource = item->getResource(resourceId);
+
+        // Generate DNLA Headers
+        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, mimeType), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+        if (!dlnaContentHeader.empty()) {
+            headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
+        }
     }
 
     if (mimeType.empty() && item)
         mimeType = item->getMimeType();
-
-    // Generate DNLA Headers
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, mimeType), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
-    if (!dlnaContentHeader.empty()) {
-        headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
-    }
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (!dlnaTransferHeader.empty()) {
