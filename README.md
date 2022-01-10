@@ -46,8 +46,8 @@ sudo make install
 
 | Library       | Min Version   | Recommended   | Latest tested | Required?     | Note                       | Default  |
 |---------------|---------------|---------------|---------------|---------------|----------------------------|----------|
-| libupnp       | 1.14.0        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp     | 4.1.2         | 4.1.5         | 4.1.5         | XOR libupnp   | [npupnp]                   | Disabled |
+| libupnp       | 1.14.6        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
+| libnpupnp     | 4.1.2         | 4.1.5         | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid       |               |               |               | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]     |               | 1.10          | 1.11.4        | Required      | XML file and data support  |          |
 | libiconv      |               |               |               | Required      | Charset conversion         |          |
@@ -94,7 +94,7 @@ sudo make install
 [libebml]: https://github.com/Matroska-Org/libebml
 [libexiv2]: https://github.com/Exiv2llibexiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska
-[npupnp]: https://www.lesbonscomptes.com/upmpdcli/index.html
+[npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp
 [spdlog]: https://github.com/gabime/spdlog

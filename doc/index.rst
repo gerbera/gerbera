@@ -86,7 +86,7 @@ Contributions
 - Initial version of the MediaTomb start up script was contributed by Iain Lea <iain at bricbrac dot de>
 - TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail dot com>
 - ffmpeg metadata handler was contributed by Ingo Preiml <ipreiml at edu dot uni-klu dot ac dot at>
-- ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb at ebixio dot com
+- ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb at ebixio dot com>
 - Photo layout by year/month was contributed by Aleix Conchillo Flaqué <aleix at member dot fsf dot org>
 - lastfmlib patch was contributed by Dirk Vanden Boer <dirk dot vdb at gmail dot com>
 - NetBSD patches were contributed by Jared D. McNeill <jmcneill at NetBSD dot org>
@@ -99,6 +99,7 @@ Contributions
    Run Gerbera                <run>
    Gerbera Daemon             <daemon>
    Gerbera UI                 <ui>
+   Supported File Types       <supported-types>
    Supported Devices          <supported-devices>
    Transcoding                <transcoding>
    Scripting                  <scripting>

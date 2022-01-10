@@ -73,7 +73,7 @@ Referenced packages:
 .. _<lastfmlib>: https://github.com/dirkvdb/lastfmlib
 .. _<libmatroska>: https://github.com/Matroska-Org/libmatroska
 .. _<libebml>, Extensible Binary Markup Language: https://github.com/Matroska-Org/libebml
-.. _<npupnp>: https://www.lesbonscomptes.com/upmpdcli/index.html
+.. _<npupnp>: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 .. _<pugixml>: https://github.com/zeux/pugixml
 .. _<pupnp>: https://github.com/pupnp/pupnp
 .. _<spdlog>: https://github.com/gabime/spdlog
