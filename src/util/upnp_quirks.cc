@@ -198,3 +198,8 @@ bool Quirks::blockXmlDeclaration() const
 {
     return (pClientInfo && (pClientInfo->flags & QUIRK_FLAG_IRADIO) == QUIRK_FLAG_IRADIO);
 }
+
+int Quirks::getCaptionInfoCount() const
+{
+    return pClientInfo ? pClientInfo->captionInfoCount : -1;
+}

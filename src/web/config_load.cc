@@ -195,6 +195,10 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, cs);
         setValue(item, client->getUserAgent());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ATTR_CLIENTS_UPNP_CAPTION_COUNT, cs);
+        setValue(item, client->getCaptionInfoCount());
     }
     if (clientConfig->size() == 0) {
         auto item = values.append_child("item");

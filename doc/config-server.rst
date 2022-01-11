@@ -751,6 +751,16 @@ This section defines the properties which are send to UPnP clients as part of th
 
         Older versions of gerbera have been searching in the file name instead of the title metadata. If set to yes this behaviour is back, even if the result of the search shows another title.
 
+        ::
+
+            caption-info-count="0"
+
+        * Optional
+
+        * Default: **1**
+
+        Number of ``sec::CaptionInfoEx`` entries to write to UPnP result. Default can be overwritten by clients setting.
+
     **Child tags:**
 
     .. code-block:: xml

@@ -115,6 +115,13 @@ public:
      */
     int checkFlags(int flags) const;
 
+    /** \brief Get number of allow CaptionInfoEx entries
+     *
+     * \return number for client
+     *
+     */
+    int getCaptionInfoCount() const;
+
 private:
     std::shared_ptr<Context> context;
     std::shared_ptr<ContentManager> content;

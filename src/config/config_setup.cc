@@ -1470,8 +1470,9 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
         auto flags = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
         auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
+        auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
 
-        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), ip, userAgent);
+        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), ip, userAgent, captionInfoCount);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -1525,6 +1526,14 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
             return true;
         }
+    }
+    index = getItemPath(i, ATTR_CLIENTS_UPNP_CAPTION_COUNT);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getCaptionInfoCount());
+        entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
+        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
+        return true;
     }
     return false;
 }

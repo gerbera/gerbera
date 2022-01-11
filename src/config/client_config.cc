@@ -36,7 +36,7 @@ ClientConfig::ClientConfig()
 {
 }
 
-ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent)
+ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view userAgent, int captionInfoCount)
 {
     auto cInfo = ClientInfo();
     cInfo.type = ClientType::Unknown;
@@ -50,6 +50,7 @@ ClientConfig::ClientConfig(int flags, std::string_view ip, std::string_view user
         cInfo.matchType = ClientMatchType::None;
     }
     cInfo.flags = flags;
+    cInfo.captionInfoCount = captionInfoCount;
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
     cInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
