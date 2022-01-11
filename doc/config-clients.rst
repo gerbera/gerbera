@@ -72,3 +72,13 @@ This section defines the client behaviour for one client.
     Containing the flags you want to set. Must be given in the following format ``SAMSUNG|0x100``, where the text either contains 
     one of the known flags or an integer number if the flags has no name.
     For valid flags see :doc:`Supported Devices </supported-devices>`.
+
+    ::
+
+        caption-info-count="0"
+
+    * Optional
+
+    * Default: set by option server/upnp/caption-info-count
+
+    Number of ``sec::CaptionInfoEx`` entries to write to UPnP result.

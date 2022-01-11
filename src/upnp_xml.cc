@@ -466,17 +466,17 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& v
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
 {
-    auto ext = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file" });
+    auto urlExt = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file." });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
-        return fmt::format("{}.{}", ext, contentType);
+        return fmt::format("{}{}", urlExt, contentType);
     }
 
     if (!location.empty() && location.has_extension()) {
         // make sure that the filename does not contain the separator character
         std::string filename = urlEscape(location.filename().stem().string());
         std::string extension = location.filename().extension();
-        return fmt::format("{}.{}{}", ext, filename, extension);
+        return fmt::format("{}{}{}", urlExt, filename != "file" ? filename : "", extension);
     }
 
     return {};
@@ -528,7 +528,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     auto urlBase = getPathBase(item);
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
-    bool isExtThumbnail = false; // this sucks
+    bool isExtThumbnail = false;
 
     // this will be used to count only the "real" resources, omitting the
     // transcoded ones
@@ -654,12 +654,8 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             urlBaseTr = getPathBase(item, true);
     }
 
-    bool isFirstSub = true;
+    std::vector<std::map<std::string, std::string>> captionInfoEx;
     for (auto&& res : orderedResources) {
-        /// \todo what if the resource has a different mimetype than the item??
-        /*        std::string mimeType = item->getMimeType();
-                  if (mimeType.empty()) mimeType = DEFAULT_MIMETYPE; */
-
         auto resAttrs = res->getAttributes();
         auto&& resParams = res->getParameters();
         std::string protocolInfo = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
@@ -735,19 +731,24 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
                 continue;
             }
         }
-        if (isFirstSub && res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
-            auto vs = parent.append_child("sec:CaptionInfoEx");
+        std::string dlnaFlags;
+        if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;
+        else if (startswith(mimeType, "image"))
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_IMAGE;
+
+        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
+            auto captionInfo = std::map<std::string, std::string>();
             auto subUrl = url;
             subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
-            vs.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
-            vs.append_child(pugi::node_pcdata).set_value((virtualURL + subUrl).c_str());
-            vs.append_attribute("sec:type") = res->getAttribute(R_TYPE).empty() ? res->getParameter("type").c_str() : res->getAttribute(R_TYPE).c_str();
-            isFirstSub = false;
-            if (quirks && quirks->checkFlags(QUIRK_FLAG_SAMSUNG) > 0)
-                continue;
+            captionInfo[""] = virtualURL + subUrl;
+            captionInfo["sec:type"] = res->getAttribute(R_TYPE).empty() ? res->getParameter("type") : res->getAttribute(R_TYPE);
             if (!res->getAttribute(R_LANGUAGE).empty())
-                vs.append_attribute(MetadataHandler::getResAttrName(R_LANGUAGE).c_str()) = res->getAttribute(R_LANGUAGE).c_str();
-            vs.append_attribute(MetadataHandler::getResAttrName(R_PROTOCOLINFO).c_str()) = protocolInfo.c_str();
+                captionInfo[MetadataHandler::getResAttrName(R_LANGUAGE)] = res->getAttribute(R_LANGUAGE);
+            captionInfo[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_SUB;
+
+            captionInfoEx.push_back(std::move(captionInfo));
         }
 
         if (!isExtThumbnail) {
@@ -769,12 +770,11 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // and the media is converted, so set CI to 1
         if (!isExtThumbnail && transcoded) {
             extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
-
-            if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-                extend.append(";" UPNP_DLNA_FLAGS "=" UPNP_DLNA_ORG_FLAGS_AV);
         } else {
             extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
         }
+        if (!dlnaFlags.empty())
+            extend.append(fmt::format(";{}={}", UPNP_DLNA_FLAGS, dlnaFlags));
 
         protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
         resAttrs[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
@@ -788,5 +788,21 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
             renderResource(url, resAttrs, parent);
+    }
+    if (!captionInfoEx.empty()) {
+        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
+        for (auto&& captionInfo : captionInfoEx) {
+            count--;
+            if (count < 0)
+                break;
+            auto vs = parent.append_child("sec:CaptionInfoEx");
+            for (auto&& [key, val] : captionInfo) {
+                if (key.empty()) {
+                    vs.append_child(pugi::node_pcdata).set_value(val.c_str());
+                } else {
+                    vs.append_attribute(key.c_str()) = val.c_str();
+                }
+            }
+        }
     }
 }

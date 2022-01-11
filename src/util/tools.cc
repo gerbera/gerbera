@@ -684,8 +684,12 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::st
         return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
     }
 
-    if (startswith(mimeType, "audio") || startswith(mimeType, "video")) {
+    if (startswith(mimeType, "audio") || startswith(mimeType, "video") || mimeType == "application/ogg") {
         return UPNP_DLNA_TRANSFER_MODE_STREAMING;
+    }
+
+    if (startswith(mimeType, "text") || startswith(mimeType, "srt") || startswith(mimeType, "plain")) {
+        return UPNP_DLNA_TRANSFER_MODE_BACKGROUND;
     }
 
     return {};

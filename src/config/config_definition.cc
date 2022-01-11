@@ -1062,8 +1062,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/upnp/attribute::search-result-separator", "config-server.html#upnp",
         " - "),
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_SEARCH_FILENAME,
-        "/server/upnp/attribute:search-filename", "config-server.html#upnp",
+        "/server/upnp/attribute::search-filename", "config-server.html#upnp",
         NO),
+    std::make_shared<ConfigIntSetup>(CFG_UPNP_CAPTION_COUNT,
+        "/server/upnp/attribute::caption-info-count", "config-server.html#upnp",
+        1, 0, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigArraySetup>(CFG_UPNP_SEARCH_ITEM_SEGMENTS,
         "/server/upnp/search-item-result", "config-server.html#upnpf",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
@@ -1138,6 +1141,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT,
         "attribute::sort", "config-server.html#sort",
         ""),
+    std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT,
+        "attribute::caption-info-count", "config-clients.html#caption-info-count",
+        1, 0, ConfigIntSetup::CheckMinValue),
 
     // simpleOptions
 

@@ -1306,6 +1306,11 @@
 							"item": "/clients/client/attribute::flags",
 							"caption": "Flags",
 							"editable": true
+						},
+						{
+							"item": "/clients/client/attribute::caption-info-count",
+							"caption": "CaptionInfo count",
+							"editable": true
 						}
 					]
 				}
@@ -1320,6 +1325,16 @@
 				{
 					"item": "/server/upnp/attribute::multi-value",
 					"caption": "Enable Multi Value",
+					"editable": true
+				},
+				{
+					"item": "/server/upnp/attribute::searchable-container-flag",
+					"caption": "Enable Searchable Container",
+					"editable": true
+				},
+				{
+					"item": "/server/upnp/attribute::caption-info-count",
+					"caption": "CaptionInfo count",
 					"editable": true
 				},
 				{
