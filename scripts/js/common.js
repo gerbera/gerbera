@@ -851,7 +851,7 @@ function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
 
         exturl.location = entry.location;
         exturl.title = (entry.title ? entry.title : entry.location);
-        exturl.protocol = entry.protocol ? entry.ptotocol :'http-get';
+        exturl.protocol = entry.protocol ? entry.protocol : 'http-get';
         exturl.upnpclass = exturl.mimetype.startsWith('video') ? UPNP_CLASS_VIDEO_ITEM : UPNP_CLASS_ITEM_MUSIC_TRACK;
         exturl.description = entry.description ? entry.description : ("Entry from " + playlist_title);
 

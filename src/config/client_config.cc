@@ -188,6 +188,9 @@ int ClientConfig::remapFlag(const std::string& flag)
     if (flag == "IRADIO") {
         return QUIRK_FLAG_IRADIO;
     }
+    if (flag == "PV_SUBTITLES") {
+        return QUIRK_FLAG_PV_SUBTITLES;
+    }
 
     return stoiString(flag, 0, 0);
 }
@@ -228,6 +231,10 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     if (flags & QUIRK_FLAG_IRADIO) {
         myFlags.emplace_back("IRADIO");
         flags &= ~QUIRK_FLAG_IRADIO;
+    }
+    if (flags & QUIRK_FLAG_PV_SUBTITLES) {
+        myFlags.emplace_back("PV_SUBTITLES");
+        flags &= ~QUIRK_FLAG_PV_SUBTITLES;
     }
 
     if (flags) {

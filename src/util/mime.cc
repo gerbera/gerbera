@@ -113,13 +113,5 @@ std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
 
 std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
 {
-    auto it = mimetype_upnpclass_map.find(mimeType);
-    if (it != mimetype_upnpclass_map.end())
-        return it->second;
-
-    // try to match foo
-    std::vector<std::string> parts = splitString(mimeType, '/');
-    if (parts.size() != 2)
-        return {};
-    return getValueOrDefault(mimetype_upnpclass_map, parts[0] + "/*");
+    return getPropertyMapValue(mimetype_upnpclass_map, mimeType);
 }

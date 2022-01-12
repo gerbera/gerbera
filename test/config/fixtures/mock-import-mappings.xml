@@ -66,6 +66,15 @@
     <treat mimetype="video/x-ms-asx" as="playlist" />
     <treat mimetype="video/x-msvideo" as="avi" />
   </mimetype-contenttype>
+  <mimetype-dlnatransfermode>
+    <map from="application/ogg" to="Streaming" />
+    <map from="application/x-srt" to="Background" />
+    <map from="audio/*" to="Streaming" />
+    <map from="image/*" to="Interactive" />
+    <map from="srt" to="Background" />
+    <map from="text/*" to="Background" />
+    <map from="video/*" to="Streaming" />
+  </mimetype-dlnatransfermode>
   <contenttype-dlnaprofile>
     <map from="asf" to="VC_ASF_AP_L2_WMA" />
     <map from="avi" to="AVI" />

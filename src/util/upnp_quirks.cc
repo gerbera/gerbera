@@ -57,6 +57,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::uni
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", url);
         headers->addHeader("CaptionInfo.sec", url);
+        headers->addHeader("getCaptionInfo.sec", url);
     }
 }
 

@@ -183,6 +183,8 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    if (quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES))
+        didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
 
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers);
@@ -395,8 +397,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     std::string xml = buf.str();
 
 #if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CDS_SERVICE_ID, xml);
+    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, xml);
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -405,9 +406,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle,
-        config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CDS_SERVICE_ID, event);
+    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 #endif

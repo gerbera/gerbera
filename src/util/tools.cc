@@ -108,6 +108,12 @@ std::string toLower(std::string str)
     return str;
 }
 
+std::string toUpper(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    return str;
+}
+
 int stoiString(const std::string& str, int def, int base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
@@ -519,6 +525,19 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
+std::string getPropertyMapValue(const std::map<std::string, std::string>& propMap, const std::string& search)
+{
+    auto it = propMap.find(search);
+    if (it != propMap.end())
+        return it->second;
+
+    // try to match foo
+    std::vector<std::string> parts = splitString(search, '/');
+    if (parts.size() != 2)
+        return {};
+    return getValueOrDefault(propMap, parts[0] + "/*");
+}
+
 std::chrono::seconds currentTime()
 {
     return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -678,21 +697,10 @@ std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const st
         UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
 }
 
-std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::string_view mimeType)
+std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, const std::string& mimeType)
 {
-    if (startswith(mimeType, "image")) {
-        return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
-    }
-
-    if (startswith(mimeType, "audio") || startswith(mimeType, "video") || mimeType == "application/ogg") {
-        return UPNP_DLNA_TRANSFER_MODE_STREAMING;
-    }
-
-    if (startswith(mimeType, "text") || startswith(mimeType, "srt") || startswith(mimeType, "plain")) {
-        return UPNP_DLNA_TRANSFER_MODE_BACKGROUND;
-    }
-
-    return {};
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
+    return getPropertyMapValue(mappings, mimeType);
 }
 
 std::string getHostName(const struct sockaddr* addr)
