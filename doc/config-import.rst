@@ -835,8 +835,39 @@ Specifies a mapping from a certain mime type to upnp:class in the Content Direct
 entered explicitly "audio/mpeg" or using a wildcard after the slash ``audio/\*``. The values of **from** and **to**
 attributes are case sensitive.
 
+
+``mimetype-dlnatransfermode``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    <mimetype-dlnatransfermode>
+
+* Optional
+
+This section holds the mime type to dlna transfer mode mappings. It is added to the http-header ``transferMode.dlna.org``` of the file request.
+
+
+**Child tags:**
+
+``map``
+-------
+
+::
+
+     <map from="audio/*" to="Streaming"/>
+     <map from="video/*" to="Streaming"/>
+     <map from="image/*" to="Interative"/>
+     <map from="text/*" to="Background"/>
+
+* Optional
+
+Specifies a mapping from a certain mime type to transfer mode. The mime type can either be
+entered explicitly "audio/mpeg" or using a wildcard after the slash ``audio/\*``. The values of **from** and **to**
+attributes are case sensitive.
+
 ``mimetype-contenttype``
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 

@@ -39,6 +39,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_IRADIO 0x00000008
 #define QUIRK_FLAG_SAMSUNG_FEATURES 0x00000010
 #define QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC 0x00000020
+#define QUIRK_FLAG_PV_SUBTITLES 0x00000040
 
 // forward declaration
 class ActionRequest;

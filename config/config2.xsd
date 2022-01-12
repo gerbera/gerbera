@@ -718,6 +718,7 @@
                 <xs:element ref="extension-mimetype" minOccurs="0"/>
                 <xs:element ref="mimetype-contenttype" minOccurs="0"/>
                 <xs:element ref="mimetype-upnpclass" minOccurs="0"/>
+                <xs:element ref="mimetype-dlnatransfermode" minOccurs="0"/>
                 <xs:element ref="contenttype-dlnaprofile" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
@@ -758,6 +759,14 @@
     </xs:element>
 
     <xs:element name="mimetype-upnpclass">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mimetype-dlnatransfermode">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>

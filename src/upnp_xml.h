@@ -119,6 +119,7 @@ protected:
         bool addResID;
     };
     std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object);
+    std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
     static std::string renderExtension(const std::string& contentType, const fs::path& location);

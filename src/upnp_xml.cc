@@ -476,7 +476,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         // make sure that the filename does not contain the separator character
         std::string filename = urlEscape(location.filename().stem().string());
         std::string extension = location.filename().extension();
-        return fmt::format("{}{}{}", urlExt, filename != "file" ? filename : "", extension);
+        return fmt::format("{}{}{}", urlExt, filename, extension);
     }
 
     return {};
@@ -484,7 +484,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 
 std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType)
 {
-    std::string dlnaProfile = res->getParameter("dlnaProfile");
+    std::string dlnaProfile = res->getOption("dlnaProfile");
     if (contentType == CONTENT_TYPE_JPG) {
         auto resAttrs = res->getAttributes();
         std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
@@ -523,26 +523,15 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     return orderedResources;
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
+std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL)
 {
-    auto urlBase = getPathBase(item);
-    bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
-
-    bool isExtThumbnail = false;
-
-    // this will be used to count only the "real" resources, omitting the
-    // transcoded ones
     bool hideOriginalResource = false;
     int originalResource = -1;
-
-    std::unique_ptr<PathBase> urlBaseTr;
 
     // once proxying is a feature that can be turned off or on in
     // config manager we should use that setting
     //
     // TODO: allow transcoding for URLs
-    auto orderedResources = getOrderedResources(item);
-
     // now get the profile
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto tpMt = tlist->get(item->getMimeType());
@@ -638,10 +627,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             tRes->mergeAttributes(tp->getAttributes());
 
             if (!tp->dlnaProfile().empty())
-                tRes->addParameter("dlnaProfile", tp->dlnaProfile());
+                tRes->addOption("dlnaProfile", tp->dlnaProfile());
 
             if (tp->hideOriginalResource())
                 hideOriginalResource = true;
+
+            auto urlBase = (skipURL) ? getPathBase(item, true) : getPathBase(item);
+            tRes->addOption("urlBase", fmt::format("{}{}", urlBase->pathBase, URL_VALUE_TRANSCODE_NO_RES_ID));
 
             if (tp->firstResource()) {
                 orderedResources.push_front(std::move(tRes));
@@ -649,12 +641,88 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             } else
                 orderedResources.push_back(std::move(tRes));
         }
-
-        if (skipURL)
-            urlBaseTr = getPathBase(item, true);
     }
 
+    return { hideOriginalResource, originalResource };
+}
+
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
+{
+    auto urlBase = getPathBase(item);
+    bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
+
+    auto orderedResources = getOrderedResources(item);
+
     std::vector<std::map<std::string, std::string>> captionInfoEx;
+    for (auto&& res : orderedResources) {
+        auto resAttrs = res->getAttributes();
+        auto&& resParams = res->getParameters();
+        std::string protocolInfo = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
+        std::string url;
+
+        if (urlBase->addResID) {
+            url = fmt::format("{}{}", urlBase->pathBase, res->getResId());
+        } else
+            url = urlBase->pathBase;
+
+        if (!resParams.empty()) {
+            url.append(_URL_PARAM_SEPARATOR);
+            url.append(dictEncodeSimple(resParams));
+        }
+
+        int handlerType = res->getHandlerType();
+        if (res->getResId() > 0 && handlerType == CH_EXTURL && (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL || res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART)) {
+            url = res->getOption(RESOURCE_OPTION_URL);
+            if (url.empty())
+                throw_std_runtime_error("missing thumbnail URL");
+        }
+
+        // resource is used to point to album art
+        // only add upnp:AlbumArtURI if we have an AA, skip the resource
+        if (res->isMetaResource(ID3_ALBUM_ART) //
+            || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+            || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
+        ) {
+            auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
+            aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
+
+            /// \todo clean this up, make sure to check the mimetype and
+            /// provide the profile correctly
+            aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
+            aa.append_attribute("dlna:profileID") = "JPEG_TN";
+        }
+        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
+            auto captionInfo = std::map<std::string, std::string>();
+            auto subUrl = url;
+            subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
+            captionInfo[""] = virtualURL + subUrl;
+            captionInfo["sec:type"] = res->getAttribute(R_TYPE).empty() ? res->getParameter("type") : res->getAttribute(R_TYPE);
+            if (!res->getAttribute(R_LANGUAGE).empty())
+                captionInfo[MetadataHandler::getResAttrName(R_LANGUAGE)] = res->getAttribute(R_LANGUAGE);
+            captionInfo[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
+            captionInfoEx.push_back(std::move(captionInfo));
+        }
+    }
+    if (!captionInfoEx.empty()) {
+        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
+        for (auto&& captionInfo : captionInfoEx) {
+            count--;
+            if (count < 0)
+                break;
+            auto vs = parent.append_child("sec:CaptionInfoEx");
+            for (auto&& [key, val] : captionInfo) {
+                if (key.empty()) {
+                    vs.append_child(pugi::node_pcdata).set_value(val.c_str());
+                } else {
+                    vs.append_attribute(key.c_str()) = val.c_str();
+                }
+            }
+        }
+    }
+
+    auto [hideOriginalResource, originalResource] = insertTempTranscodingResource(item, quirks, orderedResources, skipURL);
+
+    bool isExtThumbnail = false;
     for (auto&& res : orderedResources) {
         auto resAttrs = res->getAttributes();
         auto&& resParams = res->getParameters();
@@ -691,12 +759,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             } else
                 url = urlBase->pathBase;
         } else {
-            if (!skipURL)
-                url = urlBase->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
-            else {
-                assert(urlBaseTr);
-                url = urlBaseTr->pathBase + URL_VALUE_TRANSCODE_NO_RES_ID;
-            }
+            url = res->getOption("urlBase");
         }
         if (!resParams.empty()) {
             url.append(_URL_PARAM_SEPARATOR);
@@ -706,7 +769,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // ok this really sucks, I guess another rewrite of the resource manager
         // is necessary
         int handlerType = res->getHandlerType();
-        if ((res->getResId() > 0) && (handlerType == CH_EXTURL) && ((res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART))) {
+        if (res->getResId() > 0 && handlerType == CH_EXTURL && (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL || res->getOption(RESOURCE_CONTENT_TYPE) == ID3_ALBUM_ART)) {
             url = res->getOption(RESOURCE_OPTION_URL);
             if (url.empty())
                 throw_std_runtime_error("missing thumbnail URL");
@@ -716,39 +779,14 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         // resource is used to point to album art
         // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if (res->isMetaResource(ID3_ALBUM_ART) //
-            || (res->getHandlerType() == CH_LIBEXIF && res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
-            || (res->getHandlerType() == CH_FFTH && res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL) //
-        ) {
-            auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).c_str());
-            aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
-
-            /// \todo clean this up, make sure to check the mimetype and
-            /// provide the profile correctly
-            aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
-            aa.append_attribute("dlna:profileID") = "JPEG_TN";
-            if (res->isMetaResource(ID3_ALBUM_ART)) {
-                continue;
-            }
+        if (res->isMetaResource(ID3_ALBUM_ART)) {
+            continue;
         }
-        std::string dlnaFlags;
-        if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;
-        else if (startswith(mimeType, "image"))
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_IMAGE;
 
-        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
-            auto captionInfo = std::map<std::string, std::string>();
-            auto subUrl = url;
-            subUrl.append(renderExtension("", res->getAttribute(R_RESOURCE_FILE)));
-            captionInfo[""] = virtualURL + subUrl;
-            captionInfo["sec:type"] = res->getAttribute(R_TYPE).empty() ? res->getParameter("type") : res->getAttribute(R_TYPE);
-            if (!res->getAttribute(R_LANGUAGE).empty())
-                captionInfo[MetadataHandler::getResAttrName(R_LANGUAGE)] = res->getAttribute(R_LANGUAGE);
-            captionInfo[MetadataHandler::getResAttrName(R_PROTOCOLINFO)] = protocolInfo;
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_SUB;
-
-            captionInfoEx.push_back(std::move(captionInfo));
+        if (handlerType == CH_DEFAULT && captionInfoEx.size() > 0 && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
+            auto captionInfo = captionInfoEx[0];
+            resAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]).c_str();
+            resAttrs["pv:subtitleFileUri"] = captionInfo[""].c_str();
         }
 
         if (!isExtThumbnail) {
@@ -773,6 +811,14 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         } else {
             extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
         }
+        std::string dlnaFlags;
+        if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;
+        else if (startswith(mimeType, "image"))
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_IMAGE;
+        if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
+            dlnaFlags = UPNP_DLNA_ORG_FLAGS_SUB;
+        }
         if (!dlnaFlags.empty())
             extend.append(fmt::format(";{}={}", UPNP_DLNA_FLAGS, dlnaFlags));
 
@@ -788,21 +834,5 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
             renderResource(url, resAttrs, parent);
-    }
-    if (!captionInfoEx.empty()) {
-        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
-        for (auto&& captionInfo : captionInfoEx) {
-            count--;
-            if (count < 0)
-                break;
-            auto vs = parent.append_child("sec:CaptionInfoEx");
-            for (auto&& [key, val] : captionInfo) {
-                if (key.empty()) {
-                    vs.append_child(pugi::node_pcdata).set_value(val.c_str());
-                } else {
-                    vs.append_attribute(key.c_str()) = val.c_str();
-                }
-            }
-        }
     }
 }

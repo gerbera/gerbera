@@ -68,6 +68,9 @@ constexpr bool startswith(std::string_view str, std::string_view check)
 #endif
 }
 
+/// \brief returns uppercase of str
+std::string toUpper(std::string str);
+
 /// \brief returns lowercase of str
 std::string toLower(std::string str);
 
@@ -250,6 +253,8 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 
+std::string getPropertyMapValue(const std::map<std::string, std::string>& propMap, const std::string& search);
+
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();
 
@@ -284,7 +289,7 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
 std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
 std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
-std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, std::string_view mimeType);
+std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, const std::string& mimeType);
 
 /// \brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c

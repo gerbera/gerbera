@@ -46,7 +46,8 @@ ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, config_option
 
 std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder) const
 {
-    auto tweak = allTweaks->get(obj->getLocation());
+    auto objLocation = obj->getLocation();
+    auto tweak = allTweaks->get(objLocation);
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
@@ -54,7 +55,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
 
     if (!files.empty()) {
         if (folder.empty()) {
-            folder = (obj->isContainer()) ? obj->getLocation() : obj->getLocation().parent_path();
+            folder = (obj->isContainer()) ? objLocation : objLocation.parent_path();
         }
         log_debug("Folder name: {}", folder.c_str());
 
@@ -62,7 +63,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             for (auto&& name : files) {
                 auto contentFile = folder / expandName(name, obj);
                 std::error_code ec;
-                if (!isRegularFile(contentFile, ec)) // no error throwing, please
+                if (!isRegularFile(contentFile, ec) || contentFile == objLocation) // no error throwing, please
                     continue;
 
                 log_debug("{}: found", contentFile.c_str());
@@ -72,7 +73,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             std::map<std::string, fs::path> fileNames;
             std::error_code ec;
             for (auto&& p : fs::directory_iterator(folder, ec))
-                if (isRegularFile(p, ec))
+                if (isRegularFile(p, ec) && p.path() != objLocation)
                     fileNames[toLower(p.path().filename().string())] = p;
 
             for (auto&& name : files) {
@@ -105,7 +106,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
                 }
                 for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
-                    if (isRegularFile(contentFile, ec) && ((isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))) {
+                    if (isRegularFile(contentFile, ec) && ((isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn)) && contentFile.path() != objLocation) {
                         if (!stem.empty()) {
                             replaceAllString(stem, "*", ".*");
                             replaceAllString(stem, ".", "?");
@@ -274,6 +275,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
 void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_SUBTITLE);
+    auto objFilename = obj->getLocation().filename().string() + ".";
 
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(CH_SUBTITLE);
@@ -293,7 +295,12 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
             resource->addAttribute(R_RESOURCE_FILE, path.string());
             resource->addAttribute(R_TYPE, type);
-            resource->addAttribute(R_LANGUAGE, path.stem().string()); // assume file name is related to some language
+            auto lang = path.stem().string();
+            if (startswith(lang, objFilename)) {
+                replaceAllString(lang, objFilename, ""); // remove starting part with filename
+            }
+            if (!lang.empty())
+                resource->addAttribute(R_LANGUAGE, lang); // assume file name is related to some language
             resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
             resource->addParameter("type", type);
             obj->addResource(resource);

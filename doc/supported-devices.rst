@@ -35,6 +35,7 @@ The device flags have the following meaning
 -  ``SAMSUNG_FEATURES``: 0x10, activate Samsung features protocol (support for additional request like X_GetFeatureList, X_GetObjectIDfromIndex, X_GetIndexfromRID)
 -  ``SAMSUNG_HIDE_DYNAMIC``: 0x20, some Samsung devices do not work with dynamic folders on top level, so this flag hides them for those devices
 -  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
+-  ``PV_SUBTITLES``: 0x40, add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri`` to video files if subtitles exist
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~

@@ -237,6 +237,17 @@ static const std::map<std::string, std::string> mtUpnpDefaults {
     { "video/*", UPNP_CLASS_VIDEO_ITEM },
 };
 
+/// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
+static const std::map<std::string, std::string> mtTransferDefaults {
+    { "application/ogg", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+    { "audio/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+    { "image/*", UPNP_DLNA_TRANSFER_MODE_INTERACTIVE },
+    { "video/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+    { "text/*", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+    { "application/x-srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+    { "srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+};
+
 /// \brief default values for CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
 static const std::map<std::string, std::string> extMtDefaults {
     { "asf", "video/x-ms-asf" },
@@ -557,6 +568,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/mappings/mimetype-upnpclass", "config-import.html#mimetype-upnpclass",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
         false, false, true, mtUpnpDefaults),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
+        "/import/mappings/mimetype-dlnatransfermode", "config-import.html#mimetype-dlnatransfermode",
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, true, mtTransferDefaults),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
         "/import/mappings/mimetype-contenttype", "config-import.html#mimetype-contenttype",
         ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
@@ -1256,12 +1271,14 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
                                               CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
                                               CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
                                               CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+                                              CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                               CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
                                           } },
     { ATTR_IMPORT_MAPPINGS_MIMETYPE_TO, {
                                             CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
                                             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
                                             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
+                                            CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                             CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
                                         } },
 

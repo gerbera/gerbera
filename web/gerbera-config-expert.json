@@ -1094,6 +1094,24 @@
 					]
 				},
 				{
+					"item": "/import/mappings/mimetype-dlnatransfermode/map",
+					"caption": "transferMode.dlna.org",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/mappings/mimetype-dlnatransfermode/map/attribute::from",
+							"caption": "From",
+							"editable": true
+						},
+						{
+							"item": "/import/mappings/mimetype-dlnatransfermode/map/attribute::to",
+							"caption": "To",
+							"editable": true
+						}
+					]
+				},
+				{
 					"item": "/import/mappings/contenttype-dlnaprofile/map",
 					"caption": "DLNA Profiles",
 					"type": "List",

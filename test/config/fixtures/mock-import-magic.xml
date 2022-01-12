@@ -45,6 +45,15 @@
       <map from="image/*" to="object.item.imageItem" />
       <map from="application/ogg" to="object.item.audioItem.musicTrack" />
     </mimetype-upnpclass>
+    <mimetype-dlnatransfermode>
+      <map from="application/ogg" to="Streaming" />
+      <map from="application/x-srt" to="Background" />
+      <map from="audio/*" to="Streaming" />
+      <map from="image/*" to="Interactive" />
+      <map from="srt" to="Background" />
+      <map from="text/*" to="Background" />
+      <map from="video/*" to="Streaming" />
+    </mimetype-dlnatransfermode>
     <mimetype-contenttype>
       <treat mimetype="application/ogg" as="ogg" />
       <treat mimetype="audio/L16" as="pcm" />
