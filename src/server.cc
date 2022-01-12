@@ -227,7 +227,7 @@ void Server::run()
         url = fmt::format("http://{}", url);
     }
     writeBookmark(url);
-    log_info("The Web UI can be reached by following this link: {}/", url);
+    log_info("The Web UI can be reached by following this link: {}", url);
 }
 
 int Server::startupInterface(const std::string& iface, in_port_t inPort)
