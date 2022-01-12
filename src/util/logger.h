@@ -32,12 +32,27 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include <fmt/format.h>
 #include <spdlog/spdlog.h>
+#include <type_traits>
 
 #define log_debug SPDLOG_DEBUG
 #define log_info SPDLOG_INFO
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
 #define log_js SPDLOG_INFO
+
+#if FMT_VERSION >= 80100
+template <typename T>
+struct fmt::formatter<T, std::enable_if_t<std::is_enum_v<T>, char>>
+    : formatter<std::underlying_type_t<T>> {
+    template <typename FormatContext>
+    auto format(const T& value, FormatContext& ctx) -> decltype(ctx.out())
+    {
+        return fmt::formatter<std::underlying_type_t<T>>::format(
+            static_cast<std::underlying_type_t<T>>(value), ctx);
+    }
+};
+#endif
 
 #endif // __LOGGER_H__
