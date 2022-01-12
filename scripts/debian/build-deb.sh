@@ -21,7 +21,7 @@ function install-cmake() {
   echo "::group::Installing CMake"
   if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "focal" ]]; then
     sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
-    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+    curl https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
     sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
     sudo apt-get update -y
   fi
@@ -100,7 +100,14 @@ function upload_to_artifactory() {
   curl -H "X-JFrog-Art-Api:$ART_API_KEY" -XPUT  -T "$deb_name" -uian@gerbera.io:"${ART_API_KEY}" "$bintray_url"
 }
 
+# Fix time issues
+ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Pre reqs
 export DEBIAN_FRONTEND=noninteractive
+apt-get update -y
+apt-get install -y lsb-release sudo wget curl git ca-certificates
+
 lsb_codename=$(lsb_release -c --short)
 lsb_distro=$(lsb_release -i --short)
 lsb_rel=$(lsb_release -r --short)
