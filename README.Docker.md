@@ -25,6 +25,10 @@ The default docker bridge network setup does not support multicast. The easiest 
 Connecting Gerbera to your network via the "macvlan" driver should work, but remember you will not be
 able to access the container from the docker host with this method by default.
 
+# Transcoding Tools
+Transcoding tools are made available in a separate image with the `-transcoding` suffix.
+e.g. `gerbera/gerbera:1.9.2-transcoding`. Includes tools such as ffmpeg and vlc.
+
 # Examples
 ## Serve some files via a volume
 ```console

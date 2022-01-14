@@ -55,7 +55,7 @@ RUN cmake -S . -B build \
     && \
     cmake --build build -v -j$(nproc)
 
-FROM alpine:3.15
+FROM alpine:3.15 AS gerbera
 RUN apk add --no-cache \
     curl \
     duktape \
@@ -98,3 +98,11 @@ EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
+
+FROM gerbera AS with_transcoding
+RUN apk add --no-cache \
+    ffmpeg \
+    libheif-tools \
+    vlc
+
+FROM gerbera AS default
