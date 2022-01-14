@@ -21,13 +21,25 @@ jobs:
 
       - name: Docker meta
         id: docker_meta
-        uses: crazy-max/ghaction-docker-meta@v1
+        uses: crazy-max/ghaction-docker-meta@v3
         with:
           images: gerbera/gerbera
-          tag-sha: true
-          tag-semver: |
-            {{version}}
-            {{major}}.{{minor}}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Docker meta (transcoding)
+        id: docker_meta_transcoding
+        uses: crazy-max/ghaction-docker-meta@v3
+        with:
+          images: gerbera/gerbera
+          flavor: |
+            suffix=-transcoding
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -53,6 +65,19 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Build and push (transcoding)
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}
+          tags: ${{ steps.docker_meta_transcoding.outputs.tags }}
+          labels: ${{ steps.docker_meta_transcoding.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: with_transcoding
 
       - name: Docker Hub Description
         if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
