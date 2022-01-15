@@ -11,16 +11,18 @@ import fileItems from './fixtures/items-for-files';
 import editItemResponse from './fixtures/object_id-39479';
 import editDisabled from './fixtures/edit_load_disabled';
 import itemMock from './fixtures/item';
-import activeItemMock from './fixtures/active-item';
 import externalUrl from './fixtures/external-url';
-import internalUrl from './fixtures/internal-url';
 import containerMock from './fixtures/container';
 import treeDataJson from './fixtures/tree-data';
 
 describe('Gerbera Items', () => {
+  let lsSpy;
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
   });
   afterEach((done) => {
     $("body").on('transitionend', function(event){
@@ -104,7 +106,7 @@ describe('Gerbera Items', () => {
     it('does not load items if response is failure', () => {
       itemsResponse.success = false;
       Items.loadItems(itemsResponse);
-      expect($('#items').find('tr').length).toEqual(0);
+      expect($('#datagrid').find('tr').length).toEqual(0);
       itemsResponse.success = true;
     });
 
@@ -362,16 +364,17 @@ describe('Gerbera Items', () => {
       editModal.editmodal('loadItem', itemData);
 
       Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'edit_save',
         object_id: '39479',
         title: 'Test.mp4',
-        description: 'A description',
+        description: 'A%20description',
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       editModal.remove();
     });
 
@@ -383,15 +386,16 @@ describe('Gerbera Items', () => {
       editModal.editmodal('loadItem', itemData);
 
       Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'edit_save',
         object_id: '1471',
-        title: 'container title',
+        title: 'container%20title',
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       editModal.remove();
     });
 
@@ -403,66 +407,20 @@ describe('Gerbera Items', () => {
       editModal.editmodal('loadItem', itemData);
 
       Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'edit_save',
         object_id: '1469',
         title: 'title',
-        location: 'http://localhost',
+        location: 'http%3A%2F%2Flocalhost',
         description: 'description',
+        'mime-type': 'video%2Fts',
         protocol: 'http-get',
         updates: 'check'
-      });
-      editModal.remove();
-    });
-
-    it('calls the server with the `internal_url` details', () => {
-      const itemData = {
-        item: internalUrl
       };
-
-      editModal.editmodal('loadItem', itemData);
-
-      Items.saveItem();
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'edit_save',
-        object_id: '1470',
-        title: 'title',
-        location: './test',
-        description: 'description',
-        protocol: 'http-get',
-        updates: 'check'
-      });
-      editModal.remove();
-    });
-
-    it('calls the server with the `active_item` details', () => {
-      const itemData = {
-        item: activeItemMock
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      Items.saveItem();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'edit_save',
-        object_id: '1306',
-        title: 'Test Active Item',
-        location: '/home/test.txt',
-        description: 'test',
-        'mime-type': 'text/plain',
-        action: '/home/echoText.sh',
-        state: 'test-state',
-        updates: 'check'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       editModal.remove();
     });
   });
@@ -611,10 +569,7 @@ describe('Gerbera Items', () => {
       editModal.editmodal('addNewItem', {type: 'item', item: item});
 
       await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'add_object',
         parent_id: '9999',
         obj_type: 'item',
@@ -623,7 +578,11 @@ describe('Gerbera Items', () => {
         title: '',
         description: '',
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
 
     it('allows creation of object under root parent = 0 (database)', async () => {
@@ -633,44 +592,43 @@ describe('Gerbera Items', () => {
       editModal.editmodal('addNewItem', {type: 'container', item: parentId});
 
       await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'add_object',
         parent_id: '0',
         obj_type: 'container',
         class: 'object.container',
         title: '',
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
 
     it('calls the server with the `container` details', async () => {
       editModal.editmodal('addNewItem', {type: 'container', item: item});
 
       await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'add_object',
         parent_id: '9999',
         obj_type: 'container',
         class: 'object.container',
         title: '',
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
 
     it('calls the server with the `external_url` details', async () => {
       editModal.editmodal('addNewItem', {type: 'external_url', item: item});
 
       await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'add_object',
         parent_id: '9999',
         obj_type: 'external_url',
@@ -678,55 +636,18 @@ describe('Gerbera Items', () => {
         title: '',
         location: '',
         description: '',
+        'mime-type': '',
         protocol: 'http-get',
         updates: 'check'
-      });
-    });
-
-    it('calls the server with the `internal_url` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      await Items.addObject();
+      };
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'add_object',
-        parent_id: '9999',
-        obj_type: 'internal_url',
-        class: 'object.item',
-        title: '',
-        location: '',
-        description: '',
-        protocol: '',
-        updates: 'check'
-      });
-    });
-
-    it('calls the server with the `active_item` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
-
-      await Items.addObject();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
-        req_type: 'add_object',
-        parent_id: '9999',
-        obj_type: 'active_item',
-        class: 'object.item.activeItem',
-        title: '',
-        location: '',
-        description: '',
-        'mime-type': '',
-        action: '',
-        state: '',
-        updates: 'check'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
 
     it('when successful adds a GERBERA.Updates UI timer to check for updates later', async () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
+      editModal.editmodal('addNewItem', {type: 'item', item: item});
       GerberaApp.currentTreeItem = {};
       await Items.addObject();
 
@@ -750,15 +671,16 @@ describe('Gerbera Items', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
 
       await Items.retrieveGerberaItems('db', 0, 0, 25);
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
+      var data = {
         req_type: 'db',
-        sid: 'SESSION_ID',
         parent_id: 0,
         start: 0,
         count: 25,
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
   });
   describe('retrieveItemsForPage()', () => {
@@ -791,15 +713,16 @@ describe('Gerbera Items', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
 
       await Items.retrieveItemsForPage(event);
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
+      var data = {
         req_type: 'items',
-        sid: 'SESSION_ID',
         parent_id: 1235,
         start: 0,
         count: 25,
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       expect(GerberaApp.currentPage()).toBe(1);
     });
 
@@ -816,16 +739,16 @@ describe('Gerbera Items', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
 
       await Items.retrieveItemsForPage(event);
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
+      var data = {
         req_type: 'items',
-        sid: 'SESSION_ID',
         parent_id: 1235,
         start: 100,
         count: 25,
         updates: 'check'
-      });
-
+      };
+      data[Auth.SID] = 'SESSION_ID';
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       expect(GerberaApp.currentPage()).toBe(5);
     });
   });
@@ -857,16 +780,17 @@ describe('Gerbera Items', () => {
       Items.setPage(1);
 
       await Items.nextPage(event);
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
+      var data = {
         req_type: 'items',
-        sid: 'SESSION_ID',
         parent_id: 1235,
         start: 25,
         count: 50,
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       expect(GerberaApp.currentPage()).toBe(2);
     });
   });
@@ -898,15 +822,16 @@ describe('Gerbera Items', () => {
       Items.setPage(2);
 
       await Items.previousPage(event);
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
+      var data = {
         req_type: 'items',
-        sid: 'SESSION_ID',
         parent_id: 1235,
         start: 0,
         count: 50,
         updates: 'check'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
       expect(GerberaApp.currentPage()).toBe(1);
     });
   });

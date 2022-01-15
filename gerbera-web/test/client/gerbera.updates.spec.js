@@ -16,9 +16,13 @@ import updateIds from './fixtures/update_ids';
 describe('Gerbera Updates', function () {
   'use strict';
 
+  let lsSpy;
   beforeEach(function () {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
     Updates.initialize();
   });
 
@@ -57,13 +61,14 @@ describe('Gerbera Updates', function () {
       });
 
       await Updates.getUpdates();
+      var data = {
+        req_type: 'void',
+        updates: 'check'
+      };
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-        req_type: 'void',
-        sid: 'SESSION_ID',
-        updates: 'check'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 
     it('calls the server get for updates when forced', async () => {
@@ -76,13 +81,14 @@ describe('Gerbera Updates', function () {
 
       const force = true;
       await Updates.getUpdates(force);
+      var data = {
+        req_type: 'void',
+        updates: 'get'
+      };
+      data[Auth.SID] = 'SESSION_ID';
 
       expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
-        req_type: 'void',
-        sid: 'SESSION_ID',
-        updates: 'get'
-      });
+      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 
     it('updates the current task when response from server', async () => {
@@ -152,7 +158,7 @@ describe('Gerbera Updates', function () {
 
       const promisedResponse = await Updates.updateTask(updatesWithTaskId);
 
-      expect($('#grb-toast-msg').text()).toEqual('Performing full scan: /Movies');
+      expect($('#grb-toast-msg').text()).toEqual('Scan: /Movies');
       expect(promisedResponse).toEqual(updatesWithTaskId);
     });
 

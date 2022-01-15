@@ -1,0 +1,87 @@
+<upgrade>
+    <version number="2">
+        <script>ALTER TABLE `mt_cds_object` CHANGE `location` `location` BLOB NULL DEFAULT NULL</script>
+        <script>ALTER TABLE `mt_cds_object` CHANGE `metadata` `metadata` BLOB NULL DEFAULT NULL</script>
+        <script>ALTER TABLE `mt_cds_object` CHANGE `auxdata` `auxdata` BLOB NULL DEFAULT NULL</script>
+        <script>ALTER TABLE `mt_cds_object` CHANGE `resources` `resources` BLOB NULL DEFAULT NULL</script>
+        <script>ALTER TABLE `mt_autoscan` CHANGE `location` `location` BLOB NULL DEFAULT NULL</script>
+    </version>
+    <version number="3">
+        <script>ALTER TABLE "ALTER TABLE `mt_autoscan` CHANGE `scan_mode` `scan_mode` ENUM( 'timed', 'inotify' ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL</script>
+        <script>ALTER TABLE `mt_autoscan` DROP INDEX `mt_autoscan_obj_id`, ADD UNIQUE `mt_autoscan_obj_id` ( `obj_id` )</script>
+        <script>ALTER TABLE `mt_autoscan` ADD `path_ids` BLOB AFTER `location`</script>
+    </version>
+    <version number="4">
+        <script>ALTER TABLE `mt_cds_object` ADD `service_id` varchar(255) default NULL</script>
+        <script>ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)</script>
+    </version>
+    <version number="5" remark="move to metadata">
+        <script>
+        CREATE TABLE `mt_metadata` (
+            `id` int(11) NOT NULL auto_increment,
+            `item_id` int(11) NOT NULL,
+            `property_name` varchar(255) NOT NULL,
+            `property_value` text NOT NULL,
+            PRIMARY KEY `id` (`id`),
+            KEY `metadata_item_id` (`item_id`),
+            CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=MyISAM CHARSET=utf8
+        </script>
+    </version>
+    <version number="6" remark="add config value table">
+        <script>
+        CREATE TABLE `grb_config_value` (
+            `item` varchar(255) primary key,
+            `key` varchar(255) NOT NULL,
+            `item_value` varchar(255) NOT NULL,
+            `status` varchar(20) NOT NULL)
+            ENGINE=MyISAM CHARSET=utf8
+        </script>
+        <script>CREATE INDEX grb_config_value_item ON grb_config_value(item)</script>
+    </version>
+    <version number="7">
+        <script>DROP TABLE mt_cds_active_item</script>
+    </version>
+    <version number="8" remark="part_number">
+        <script>ALTER TABLE `mt_cds_object` ADD `part_number` int(11) default NULL AFTER `flags`</script>
+        <script>ALTER TABLE `mt_cds_object` DROP KEY `cds_object_track_number`</script>
+        <script>ALTER TABLE `mt_cds_object` ADD KEY `cds_object_track_number` (`part_number`,`track_number`)</script>
+    </version>
+    <version number="9" remark="bookmark_pos">
+        <script>ALTER TABLE `mt_cds_object` ADD `bookmark_pos` int(11) unsigned NOT NULL default '0' AFTER `service_id`</script>
+    </version>
+    <version number="10" remark="last_modified">
+        <script>ALTER TABLE `mt_cds_object` ADD `last_modified` bigint(20) unsigned default NULL AFTER `bookmark_pos`</script>
+    </version>
+    <version number="11" remark="last_updated">
+        <script>ALTER TABLE `mt_cds_object` ADD `last_updated` bigint(20) unsigned default '0' AFTER `last_modified`</script>
+        <script>UPDATE `mt_cds_object` SET `last_updated`=`last_modified`</script>
+    </version>
+    <version number="12" remark="drop metadata column">
+        <script migration="metadata">ALTER TABLE `mt_cds_object` DROP COLUMN `metadata`</script>
+    </version>
+    <version number="13" remark="add resource table">
+        <script>
+        CREATE TABLE `grb_cds_resource` (
+            `id` int(11) primary key auto_increment,
+            `item_id` int(11) NOT NULL,
+            `res_id` int(11) NOT NULL,
+            `handlerType` int(11) NOT NULL,
+            `options` text default NULL,
+            `parameters` text default NULL,
+            CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=MyISAM CHARSET=utf8
+        </script>
+        <script>INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '')</script>
+        <script>CREATE INDEX `grb_cds_resource_id` ON `grb_cds_resource`(`item_id`,`res_id`)</script>
+        <script migration="resources">ALTER TABLE `mt_cds_object` DROP COLUMN `resources`</script>
+    </version>
+    <version number="14" remark="drop redundant index">
+        <script>DROP INDEX `grb_config_value_item` ON `grb_config_value`</script>
+    </version>
+    <version number="15" remark="Replace primary key on grb_cds_resource">
+        <script>DROP INDEX `grb_cds_resource_id` ON `grb_cds_resource`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `id`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD PRIMARY KEY (`item_id`, `res_id`)</script>
+    </version>
+</upgrade>

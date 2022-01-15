@@ -2,20 +2,16 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://travis-ci.com/gerbera/gerbera.svg?branch=master)](https://travis-ci.com/gerbera/gerbera) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/gerbera/gerbera)](https://hub.docker.com/r/gerbera/gerbera) [![Documentation Status](https://readthedocs.org/projects/gerbera/badge/?version=latest)](http://docs.gerbera.io/en/latest/?badge=latest) [![IRC](https://img.shields.io/badge/IRC-on%20freenode-orange.svg)](https://webchat.freenode.net/?channels=#gerbera) 
+ [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/workflow/status/gerbera/gerbera/CI%20validation?style=for-the-badge)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=1.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
 **Pull requests are very welcome and reporting issues is encouraged.**
 
-Gerbera was originally based on [MediaTomb](http://web.archive.org/web/20170911172945/http://mediatomb.cc/)
-
 ## Documentation
-
-View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io).
+View our documentation online at [https://docs.gerbera.io](https://docs.gerbera.io).
 
 ## Features
-
 * Browse and playback your media via your network on all kinds of devices.
 * Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
 * Metadata extraction from MP3, OGG, AAC, M4A, FLAC, JPG (and many more!) files.
@@ -30,104 +26,49 @@ View our documentation online at [http://docs.gerbera.io](http://docs.gerbera.io
 * Runs on x86, ARM, MIPS, and more!
 
 ## Installing
-
-Head over to the docs page on [Installing Gerbera](http://docs.gerbera.io/en/latest/install.html).
+Head over to the docs page on [Installing Gerbera](https://docs.gerbera.io/en/stable/install.html) for instructions on
+how to install Gerbera.
 
 ## Building
-
-Gerbera uses [CMake].
+Visit our docs for instructions to [Compile Gerbera](https://docs.gerbera.io/en/stable/compile.html) or [Compile latest Gerbera](https://docs.gerbera.io/en/latest/compile.html).
 
 ### Quick start build instructions:
-
-```
-# Assuming Ubuntu base
-git clone https://github.com/gerbera/gerbera.git
-mkdir build
-cd build
-cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
--DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
-make -j4
-sudo make install
-```
-Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
 ```
 git clone https://github.com/gerbera/gerbera.git
 mkdir build
 cd build
-cmake ../gerbera
-make edit_cache
-# Enable some of the WITH... options
+cmake ../gerbera -DWITH_DEBUG=YES
 make -j4
 sudo make install
 ```
-
-### Install prerequisites.
-
-#### On Ubuntu 16.04
-```
-apt-get install uuid-dev libsqlite3-dev libmysqlclient-dev \
-libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev
-# If building with LibAV/FFmpeg (-DWITH_AVCODEC=1)
-apt-get install libavutil-dev libavcodec-dev libavformat-dev libavdevice-dev \
-libavfilter-dev libavresample-dev libswscale-dev libswresample-dev libpostproc-dev
-```
-
-The following packages are too old in 16.04 and must be installed from source:
-`taglib` (1.11.x), and `libupnp` (1.8.x).
-
-`libupnp` must be configured/built with `--enable-ipv6`. See
-`scripts/install-pupnp18.sh` for details.
-
-#### On FreeBSD
-
-_The following has bee tested on FreeBSD 11.0 using a clean jail environment._ 
-
-1. Install the required prerequisites as root using either ports or packages. This can be done via Package manager or ports. (pkg manager is used here.)  Include mysql if you wish to use that instead of SQLite3.
-```
-pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg libexif pkgconf liblastfm gmake
-````
-
-2. Clone repository, build dependencies in current in ports and then build gerbera.
-````
-git clone https://github.com/gerbera/gerbera.git 
-mkdir build
-cd build
-sh ../gerbera/scripts/install-pupnp18.sh
-sh ../gerbera/scripts/install-duktape.sh
-cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0
-make -j4
-sudo make install
-````
-
-#### On macOS
-
-The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerbera Media Server on macOS.
-
-[https://github.com/gerbera/homebrew-gerbera](https://github.com/gerbera/homebrew-gerbera)
 
 ## Dependencies
 
-| Lib          	| Version 	| Required? 	| Note                 	     | Compile-time option | Default  |
-|--------------	|---------	|-----------	|--------------------------- | --------------------| -------- |
-| libupnp      	| >=1.8.6  	| Required  	| [pupnp]                    |                     |          |
-| libuuid      	|         	| Depends on OS | On \*BSD native libuuid is used, others require e2fsprogs-libuuid | | |
-| pugixml     	|         	| Required  	| [pugixml]         	     |                     |          |
-| libiconv     	|         	| Required  	|                      	     |                     |          |
-| sqlite3      	|         	| Required  	| Database storage     	     |                     |          |
-| zlib          |        	| Required  	|                            |                     |          |
-| fmtlib        |        	| Required  	|                            |                     |          |
-| spdlog        |        	| Required  	|                            |                     |          |
-| duktape      	| 2.1.0   	| Optional  	| Scripting Support    	     | WITH_JS             | Enabled  |
-| mysql        	|         	| Optional  	| Alternate database storage | WITH_MYSQL          | Disabled |
-| curl         	|         	| Optional  	| Enables web services 	     | WITH_CURL           | Enabled  |
-| [taglib]      | 1.11.1  	| Optional  	| Audio tag support          | WITH_TAGLIB         | Enabled  |
-| libmagic     	|         	| Optional  	| File type detection  	     | WITH_MAGIC          | Enabled  |
-| ffmpeg/libav 	|         	| Optional  	| File metadata              | WITH_AVCODEC        | Disabled |
-| libexif      	|         	| Optional  	| JPEG Exif metadata         | WITH_EXIF           | Enabled  |
-| libexiv2    	|         	| Optional  	| Exif, IPTC, XMP metadata   | WITH_EXIV2          | Disabled |
-| lastfmlib    	| 0.4.0   	| Optional  	| Enables scrobbling   	     | WITH_LASTFM         | Disabled |
-| ffmpegthumbnailer |           | Optional      | Generate video thumbnails  | WITH_FFMPEGTHUMBNAILER | Disabled |
-| inotify       |               | Optional      | Efficient file monitoring  | WITH_INOTIFY      | Enabled |
+| Library       | Min Version   | Recommended   | Latest tested | Required?     | Note                       | Default  |
+|---------------|---------------|---------------|---------------|---------------|----------------------------|----------|
+| libupnp       | 1.14.6        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
+| libnpupnp     | 4.1.2         | 4.1.5         | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
+| libuuid       |               |               |               | Depends on OS | Not required on \*BSD      |          |
+| [pugixml]     |               | 1.10          | 1.11.4        | Required      | XML file and data support  |          |
+| libiconv      |               |               |               | Required      | Charset conversion         |          |
+| sqlite3       | 3.7.0         | 3.35.5        | 3.36.0        | Required      | Database storage           |          |
+| zlib          |               |               |               | Required      | Data compression           |          |
+| [fmtlib]      | 7.1.3         | 7.1.3         | 8.0.1         | Required      | Fast string formatting     |          |
+| [spdlog]      | 1.8.1         | 1.8.5         | 1.9.2         | Required      | Runtime logging            |          |
+| [duktape]     | 2.1.0         | 2.5.0         | 2.6.0         | Optional      | Scripting Support          | Enabled  |
+| mysql         |               |               |               | Optional      | Alternate database storage | Disabled |
+| curl          |               |               |               | Optional      | Enables web services       | Enabled  |
+| [taglib]      | 1.12          | 1.12          | 1.12          | Optional      | Audio tag support          | Enabled  |
+| libmagic      |               |               |               | Optional      | File type detection        | Enabled  |
+| [libmatroska] |               | 1.6.3         | 1.6.3         | Optional      | MKV metadata               | Enabled  |
+| [libebml]     |               | 1.4.2         | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
+| ffmpeg/libav  |               |               |               | Optional      | File metadata              | Disabled |
+| libexif       |               |               |               | Optional      | JPEG Exif metadata         | Enabled  |
+| [libexiv2]    |               | v0.26         | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [lastfmlib]   | 0.4.0         | 0.4.0         | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
+| [ffmpegthumbnailer] |         | 2.2.0         | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
+| inotify       |               |               |               | Optional      | Efficient file monitoring  | Enabled  |
+
 
 ## Licence
 
@@ -142,15 +83,19 @@ The Gerbera Team maintains a Homebrew Tap to allow for easy installation of Gerb
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2020
+    Copyright (C) 2016-2022
         Gerbera Contributors
 
-[1]: https://sourceforge.net/p/mediatomb/discussion/440751/thread/258c3cf7/?limit=250
-[pupnp]: https://github.com/mrjimenez/pupnp.git
-[pugixml]: https://github.com/zeux/pugixml
-[taglib]: http://taglib.org/
-[CMake]: https://cmake.org/
-[Ubuntu PPA]: https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates
-[v00d00 overlay]: https://github.com/v00d00/overlay
-[duktape]: http://duktape.org
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
+[duktape]: http://duktape.org
+[ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
+[fmtlib]: https://github.com/fmtlib/fmt
+[lastfmlib]: https://github.com/dirkvdb/lastfmlib
+[libebml]: https://github.com/Matroska-Org/libebml
+[libexiv2]: https://github.com/Exiv2llibexiv2
+[libmatroska]: https://github.com/Matroska-Org/libmatroska
+[npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
+[pugixml]: https://github.com/zeux/pugixml
+[pupnp]: https://github.com/pupnp/pupnp
+[spdlog]: https://github.com/gabime/spdlog
+[taglib]: http://taglib.org/

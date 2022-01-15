@@ -1,0 +1,256 @@
+/*MT*
+
+    MediaTomb - http://www.mediatomb.cc/
+
+    sqlite3_database.h - this file is part of MediaTomb.
+
+    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
+                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+
+    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
+                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
+                            Leonhard Wimmer <leo@mediatomb.cc>
+
+    MediaTomb is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    MediaTomb is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    version 2 along with MediaTomb; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+
+    $Id$
+*/
+
+/// \file sqlite3_database.h
+///\brief Definitions of the Sqlite3Database, Sqlite3Result, Sqlite3Row and SLTask classes.
+
+#ifndef __SQLITE3_STORAGE_H__
+#define __SQLITE3_STORAGE_H__
+
+#include <queue>
+#include <sqlite3.h>
+#include <unistd.h>
+
+#include "database/sql_database.h"
+#include "util/thread_runner.h"
+#include "util/timer.h"
+
+class Sqlite3Database;
+class Sqlite3Result;
+
+/// \brief A virtual class that represents a task to be done by the sqlite3 thread.
+class SLTask {
+public:
+    virtual ~SLTask() = default;
+
+    /// \brief run the sqlite3 task
+    /// \param sl The instance of Sqlite3Database to do the queries with.
+    virtual void run(sqlite3*& db, Sqlite3Database* sl) = 0;
+
+    /// \brief returns true if the task is not completed
+    /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
+    bool is_running() const;
+
+    /// \brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
+    void sendSignal();
+
+    void sendSignal(std::string error);
+
+    void waitForTask();
+
+    bool didContamination() const { return contamination; }
+    bool didDecontamination() const { return decontamination; }
+
+    std::string getError() const { return error; }
+
+    virtual std::string_view taskType() const = 0;
+
+protected:
+    /// \brief true as long as the task is not finished
+    ///
+    /// The value is set by the constructor to true and then to false be sendSignal()
+    bool running { true };
+
+    /// \brief true if this task has changed the db (in comparison to the backup)
+    bool contamination {};
+
+    /// \brief true if this task has backuped the db
+    bool decontamination {};
+
+    std::condition_variable cond;
+    mutable std::mutex mutex;
+
+    std::string error;
+};
+
+/// \brief A task for the sqlite3 thread to inititally create the database.
+class SLInitTask : public SLTask {
+public:
+    /// \brief Constructor for the sqlite3 init task
+    explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie);
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
+
+    std::string_view taskType() const override { return "InitTask"; }
+
+protected:
+    std::shared_ptr<Config> config;
+    unsigned int hashie;
+};
+
+/// \brief A task for the sqlite3 thread to do a SQL select.
+class SLSelectTask : public SLTask {
+public:
+    /// \brief Constructor for the sqlite3 select task
+    /// \param query The SQL query string
+    explicit SLSelectTask(const std::string& query);
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
+    [[nodiscard]] std::shared_ptr<Sqlite3Result> getResult() const { return pres; }
+
+    std::string_view taskType() const override { return "SelectTask"; }
+
+protected:
+    /// \brief The SQL query string
+    const char* query;
+    /// \brief The Sqlite3Result
+    std::shared_ptr<Sqlite3Result> pres;
+};
+
+/// \brief A task for the sqlite3 thread to do a SQL exec.
+class SLExecTask : public SLTask {
+public:
+    /// \brief Constructor for the sqlite3 exec task
+    /// \param query The SQL query string
+    SLExecTask(const std::string& query, bool getLastInsertId);
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
+    int getLastInsertId() const { return lastInsertId; }
+
+    std::string_view taskType() const override { return "ExecTask"; }
+
+protected:
+    /// \brief The SQL query string
+    const char* query;
+
+    int lastInsertId {};
+    bool getLastInsertIdFlag;
+};
+
+/// \brief A task for the sqlite3 thread to do a SQL exec.
+class SLBackupTask : public SLTask {
+public:
+    /// \brief Constructor for the sqlite3 backup task
+    SLBackupTask(std::shared_ptr<Config> config, bool restore);
+    void run(sqlite3*& db, Sqlite3Database* sl) override;
+
+    std::string_view taskType() const override { return "BackupTask"; }
+
+protected:
+    std::shared_ptr<Config> config;
+    bool restore;
+};
+
+/// \brief The Database class for using SQLite3
+class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
+public:
+    void timerNotify(const std::shared_ptr<Timer::Parameter>& param) override;
+    Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer);
+
+protected:
+    void _exec(const std::string& query) override;
+
+private:
+    void prepare();
+    void init() override;
+    void shutdownDriver() override;
+    std::shared_ptr<Database> getSelf() override;
+
+    std::string quote(const std::string& value) const override;
+
+    std::shared_ptr<SQLResult> select(const std::string& query) override;
+    int exec(const std::string& query, bool getLastInsertId = false) override;
+
+    void storeInternalSetting(const std::string& key, const std::string& value) override;
+
+    std::string startupError;
+
+    std::string getError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
+
+    std::unique_ptr<StdThreadRunner> threadRunner;
+    void threadProc();
+
+    void addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty = false);
+
+    std::shared_ptr<Timer> timer;
+
+    /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
+    bool shutdownFlag {};
+
+    /// \brief the tasks to be done by the sqlite3 thread
+    std::queue<std::shared_ptr<SLTask>> taskQueue;
+    bool taskQueueOpen {};
+
+    void threadCleanup() override { }
+    bool threadCleanupRequired() const override { return false; }
+
+    bool dirty {};
+    bool dbInitDone {};
+    bool hasBackupTimer {};
+    int sqliteStatus {};
+
+    friend class SLSelectTask;
+    friend class SLExecTask;
+    friend class SLInitTask;
+};
+
+/// \brief The Database class for using SQLite3 with transactions
+class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
+public:
+    Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
+
+    void beginTransaction(std::string_view tName) override;
+    void rollback(std::string_view tName) override;
+    void commit(std::string_view tName) override;
+};
+
+/// \brief Represents a result of a sqlite3 select
+class Sqlite3Result : public SQLResult {
+public:
+    Sqlite3Result() = default;
+    ~Sqlite3Result() override;
+
+    Sqlite3Result(const Sqlite3Result&) = delete;
+    Sqlite3Result& operator=(const Sqlite3Result&) = delete;
+
+private:
+    std::unique_ptr<SQLRow> nextRow() override;
+    [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }
+
+    char** table { nullptr };
+    char** row;
+
+    int cur_row;
+
+    int nrow;
+    int ncolumn;
+
+    friend class SLSelectTask;
+    friend class Sqlite3Row;
+    friend class Sqlite3Database;
+};
+
+/// \brief Represents a row of a result of a sqlite3 select
+class Sqlite3Row : public SQLRow {
+public:
+    explicit Sqlite3Row(char** row);
+
+private:
+    char* col_c_str(int index) const override;
+    char** row;
+};
+
+#endif // __SQLITE3_STORAGE_H__

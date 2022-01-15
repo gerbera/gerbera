@@ -5,7 +5,7 @@ import treeDataDiffJson from './fixtures/tree-data-diff';
 describe('The jQuery Tree', () => {
   'use strict';
 
-  let treeData, tree;
+  let treeData, tree, lsSpy;
   const treeConfig = {
     titleClass: 'folder-title',
     closedIcon: 'folder-closed',
@@ -13,6 +13,9 @@ describe('The jQuery Tree', () => {
   };
 
   beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     treeData = treeDataJson;
@@ -79,20 +82,6 @@ describe('The jQuery Tree', () => {
     $(icons.get(0)).click();
 
     expect(onExpand.calls.count()).toBe(1);
-  });
-
-  it('appends badges to the item', () => {
-    tree.tree({
-      data: treeData,
-      config: {
-        titleClass: 'folder-title',
-        closedIcon: 'folder-closed'
-      }
-    });
-
-    const items = $('#tree').find('li');
-    const firstBadges = $(items.get(0)).find('span.badge');
-    expect(firstBadges.length).toBe(3);
   });
 
   it('binds autoscan edit to the autoscan badge', () => {

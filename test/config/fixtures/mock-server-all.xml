@@ -1,0 +1,54 @@
+<server>
+  <ui enabled="yes" show-tooltips="yes">
+    <accounts enabled="no" session-timeout="30">
+      <account user="gerbera" password="gerbera" />
+    </accounts>
+  </ui>
+  <name>Gerbera</name>
+  <udn/>
+  <home>/tmp/.config/gerbera</home>
+  <webroot>/usr/local/share/gerbera/web</webroot>
+  <!--
+        How frequently (in seconds) to send ssdp:alive advertisements.
+        Minimum alive value accepted is: 62
+
+        The advertisement will be sent every (A/2)-30 seconds,
+        and will have a cache-control max-age of A where A is
+        the value configured here. Ex: A value of 62 will result
+        in an SSDP advertisement being sent every second.
+    -->
+  <alive>180</alive>
+  <storage>
+    <sqlite3 enabled="yes">
+      <database-file>gerbera.db</database-file>
+    </sqlite3>
+    <mysql enabled="no">
+      <host>localhost</host>
+      <username>gerbera</username>
+      <database>gerbera</database>
+    </mysql>
+  </storage>
+  <containers enabled="yes">
+    <container location="/LastAdded" title="Recently Added" sort="-last_updated">
+      <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+    </container>
+    <container location="/LastModified" title="Recently Modified" sort="-last_modified">
+      <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
+    </container>
+  </containers>
+  <extended-runtime-options>
+    <ffmpegthumbnailer enabled="no">
+      <thumbnail-size>128</thumbnail-size>
+      <seek-percentage>5</seek-percentage>
+      <filmstrip-overlay>yes</filmstrip-overlay>
+      <workaround-bugs>no</workaround-bugs>
+      <image-quality>8</image-quality>
+    </ffmpegthumbnailer>
+    <mark-played-items enabled="no" suppress-cds-updates="yes">
+      <string mode="prepend">*</string>
+      <mark>
+        <content>video</content>
+      </mark>
+    </mark-played-items>
+  </extended-runtime-options>
+</server>

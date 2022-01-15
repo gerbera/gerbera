@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     transcoding.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -33,35 +33,39 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include <filesystem>
 #include <map>
-#include <memory>
-#include <string>
 #include <vector>
-namespace fs = std::filesystem;
+
+#include "util/grb_fs.h"
 
 #define SOURCE (-1)
 #define OFF 0
 
-typedef enum {
+enum transcoding_type_t {
     TR_None,
     TR_External,
     TR_Remote
-} transcoding_type_t;
+};
 
-typedef enum {
+enum avi_fourcc_listmode_t {
     FCC_None,
     FCC_Process,
     FCC_Ignore
-} avi_fourcc_listmode_t;
+};
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile {
 public:
-    TranscodingProfile(transcoding_type_t tr_type, std::string name);
+    TranscodingProfile(transcoding_type_t trType, std::string name);
+
+    int getClientFlags() const { return clientFlags; }
+    void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
 
     /// \brief returns the transcoding type.
     transcoding_type_t getType() const { return tr_type; }
+
+    /// \brief set type of the transcoding profile
+    void setType(transcoding_type_t type) { this->tr_type = type; }
 
     /// \brief set name of the transcoding profile
     void setName(const std::string& name) { this->name = name; }
@@ -80,7 +84,7 @@ public:
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(fs::path command) { this->command = command; }
+    void setCommand(const fs::path& command) { this->command = command; }
 
     /// \brief gets the transcoders program name
     fs::path getCommand() const { return command; }
@@ -91,11 +95,11 @@ public:
     /// \param ifs the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
-    void setBufferOptions(size_t bs, size_t cs, size_t ifs);
+    void setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs);
 
-    size_t getBufferSize() const { return buffer_size; }
-    size_t getBufferChunkSize() const { return chunk_size; }
-    size_t getBufferInitialFillSize() const { return initial_fill_size; }
+    std::size_t getBufferSize() const { return buffer_size; }
+    std::size_t getBufferChunkSize() const { return chunk_size; }
+    std::size_t getBufferInitialFillSize() const { return initial_fill_size; }
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
@@ -110,20 +114,25 @@ public:
 
     /// \brief retrieves the argument string
     std::string getArguments() const { return args; }
+    void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
+
+    const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
     /// \brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { first_resource = fr; }
     bool firstResource() const { return first_resource; }
 
-    /// \brief Adds a resource attribute.
+    /// \brief Adds or overwrites a resource attribute.
     ///
     /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(const std::string& name, std::string value);
+    void setAttribute(const std::string& name, const std::string& value);
 
-    std::map<std::string, std::string> getAttributes() const;
+    const std::map<std::string, std::string>& getAttributes() const;
+
+    std::string getAttribute(const std::string& name) const;
 
     /// \brief Override for theora content.
     ///
@@ -138,6 +147,9 @@ public:
     /// or if we should proxy the data.
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() const { return accept_url; }
+
+    void setDlnaProfile(const std::string& dlna) { dlnaProf = dlna; }
+    std::string dlnaProfile() const { return dlnaProf; }
 
     /// \brief Specifies if the output of the profile is a thumbnail,
     /// this will add appropriate DLNA tags to the XML.
@@ -157,17 +169,17 @@ public:
     ///
     /// \param list List of FourCC entries.
     /// \param mode Specifies if the FourCCs in the list are accepted or ignored
-    void setAVIFourCCList(std::vector<std::string> list,
+    void setAVIFourCCList(const std::vector<std::string>& list,
         avi_fourcc_listmode_t mode = FCC_Ignore);
 
     /// \brief Retrieves the FourCC list
-    std::vector<std::string> getAVIFourCCList() const;
+    const std::vector<std::string>& getAVIFourCCList() const;
     /// \brief Provides information on the mode of the list
     avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourcc_mode; }
 
     /// \brief Send out the data in chunked encoding
-    void setChunked(bool chunked) { force_chunked = chunked; }
-    bool getChunked() const { return force_chunked; }
+    void setEnabled(bool new_enabled) { enabled = new_enabled; }
+    bool getEnabled() const { return enabled; }
 
     /// \brief Sample frequency handling
     void setSampleFreq(int freq) { sample_frequency = freq; }
@@ -177,62 +189,56 @@ public:
     void setNumChannels(int chans) { number_of_channels = chans; }
     int getNumChannels() const { return number_of_channels; }
 
+    static std::string mapFourCcMode(avi_fourcc_listmode_t mode);
+
 protected:
     std::string name;
     std::string tm;
     fs::path command;
     std::string args;
-    bool first_resource;
-    bool theora;
-    bool accept_url;
-    bool hide_orig_res;
-    bool thumbnail;
-    bool force_chunked;
-    size_t buffer_size;
-    size_t chunk_size;
-    size_t initial_fill_size;
+    bool enabled { true };
+    bool first_resource {};
+    bool theora {};
+    bool accept_url { true };
+    bool hide_orig_res {};
+    bool thumbnail {};
+    bool force_chunked { true };
+    std::size_t buffer_size {};
+    std::size_t chunk_size {};
+    std::size_t initial_fill_size {};
     transcoding_type_t tr_type;
-    int number_of_channels;
-    int sample_frequency;
+    int number_of_channels { SOURCE };
+    int sample_frequency { SOURCE };
     std::map<std::string, std::string> attributes;
+    std::map<std::string, std::string> environment;
     std::vector<std::string> fourcc_list;
-    avi_fourcc_listmode_t fourcc_mode;
-    TranscodingProfile();
+    avi_fourcc_listmode_t fourcc_mode { FCC_None };
+    int clientFlags { 0 };
+    std::string dlnaProf;
 };
 
 /// \brief this class allows access to available transcoding profiles.
-typedef std::map<std::string, std::shared_ptr<TranscodingProfile>> TranscodingProfileMap;
+using TranscodingProfileMap = std::map<std::string, std::shared_ptr<TranscodingProfile>>;
 class TranscodingProfileList {
 public:
-    TranscodingProfileList();
     void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
 
-    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType);
-    std::shared_ptr<TranscodingProfileMap> get(int index);
-    std::shared_ptr<TranscodingProfile> getByName(const std::string& name);
-    inline int size() const { return list.size(); }
+    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType) const;
+    const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() const { return list; }
+    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
+    std::size_t size() const { return list.size(); }
+    void setKey(const std::string& oldKey, const std::string& newKey)
+    {
+        auto oldValue = std::move(list.at(oldKey));
+        list.erase(oldKey);
+        list[newKey] = std::move(oldValue);
+    }
 
 protected:
     // outer dictionary is keyed by the source mimetype, inner dictionary by
     // profile name; this whole construction is necessary to allow to transcode
     // to the same output format but vary things like resolution, bitrate, etc.
     std::map<std::string, std::shared_ptr<TranscodingProfileMap>> list;
-};
-
-class TranscodingProcess {
-public:
-    TranscodingProcess(pid_t pid, const std::string& fname)
-    {
-        this->pid = pid;
-        this->fname = fname;
-    }
-
-    pid_t getPID() const { return pid; }
-    std::string getFName() const { return fname; }
-
-protected:
-    pid_t pid;
-    std::string fname;
 };
 
 #endif //__TRANSCODING_H__

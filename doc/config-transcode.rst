@@ -58,7 +58,7 @@ This tag defines the transcoding section.
 
 .. code-block:: xml
 
-    <mimetype-profile-mappings>
+    <mimetype-profile-mappings allow-unused="no">
 
 The mime type to profile mappings define which mime type is handled by which profile.
 
@@ -67,6 +67,12 @@ The same mime type can also map to several profiles, in this case multiple resou
 allowing the player to decide which one to take.
 
 The mappings under mimetype-profile are defined in the following manner:
+
+    ::
+
+        allow-unused=...
+
+    Suppress errors when loading profiles. Default **no**: Unused mappings are not allowed in config.
 
 ``transcode``
 -------------
@@ -99,9 +105,15 @@ profile which is defined below.
 
 .. code-block:: xml
 
-    <profiles>
+    <profiles allow-unused="no">
 
 This section defines the various transcoding profiles.
+
+    ::
+
+        allow-unused=...
+
+    Suppress errors when loading profiles. Default **no**: Unused profiles are not allowed in config.
 
     .. code-block:: xml
 
@@ -129,6 +141,14 @@ This section defines the various transcoding profiles.
 
         ::
 
+            client-flags=...
+
+        * Optional
+
+        If the flags match the ones defined in clients, the profile is selected for that client. Choose an unused flag, e.g. "0x100", to avoid collisions with other features.
+
+        ::
+
             type=...
 
         * Required
@@ -142,6 +162,14 @@ This section defines the various transcoding profiles.
     * Required
 
     Defines the mime type of the transcoding result (i.e. of the transcoded stream). In the above example we transcode to PCM.
+
+    .. code-block:: xml
+
+        <dlna-profile>AVC_MKV_HP_HD_AC3</dlna-profile>
+
+    * Optional
+
+    Defines the DLNA profile string of the transcoding result (i.e. of the transcoded stream). If empty, it is determined from the mime type.
 
     .. code-block:: xml
 
@@ -249,8 +277,11 @@ This section defines the various transcoding profiles.
     .. code-block:: xml
 
         <agent command="ogg123" arguments="-d wav -f %out %in"/>
+        <agent command="vlc" arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit">
+            <environ name="LC_ALL" value="C"/>
+        </agent>
 
-     * Required
+    * Required
 
     Defines the transcoding agent and the parameters, in the example above we use ogg123 to convert ogg or flac to wav.
 
@@ -280,6 +311,14 @@ This section defines the various transcoding profiles.
                 %out
 
             Those tokens get substituted by the input file name and the output FIFO name before execution.
+
+        ::
+
+            <environ name="..." value=".."/>
+
+        * Optional
+
+        Sets environment variable which may be required by the transcoding process.
 
     .. code-block:: xml
 
@@ -329,16 +368,6 @@ This section defines the various transcoding profiles.
     Allows you to tell the resolution of the transcoded media to your player. This may be helpful if you want
     to generate thumbnails for your photos, or if your player has the ability to pick video streams in a
     particular resolution. Of course the setting should match the real resolution of the transcoded media.
-
-    .. code-block:: xml
-
-        <use-chunked-encoding>yes</use-chunked-encoding>
-
-    * Optional
-    * Default: **yes**
-
-    Specifies that the content should be sent out using chunked HTTP encoding, this is the default setting for
-    transcoded streams, because the content length of the data is not known.
 
     .. code-block:: xml
 

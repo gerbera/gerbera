@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     tools.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,25 +31,18 @@
 
 #include "tools.h" // API
 
-#include <arpa/inet.h>
-#include <cctype>
-#include <cerrno>
-#include <climits>
-#include <cstdlib>
-#include <filesystem>
-#include <iterator>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <numeric>
 #include <queue>
 #include <sstream>
-#include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <utility>
+
+#ifdef __HAIKU__
+#define _DEFAULT_SOURCE
+#endif
 
 #include <ifaddrs.h>
-#include <net/if.h>
 
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
@@ -58,233 +51,150 @@
 #endif
 
 #ifdef SOLARIS
-#include <fcntl.h>
 #include <sys/sockio.h>
 #endif
 
-#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "contrib/md5.h"
-#include "iohandler/file_io_handler.h"
-#include "metadata/metadata_handler.h"
 
-#define WHITE_SPACE " \t\r\n"
+static constexpr auto hexChars = "0123456789abcdef";
 
-static const char* HEX_CHARS = "0123456789abcdef";
-
-std::vector<std::string> split_string(const std::string& str, char sep, bool empty)
+std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
 {
     std::vector<std::string> ret;
-    const char* data = str.c_str();
-    const char* end = data + str.length();
-    while (data < end) {
-        const char* pos = strchr(data, sep);
-        if (pos == nullptr) {
-            std::string part = data;
-            ret.push_back(part);
-            data = end;
-        } else if (pos == data) {
-            data++;
-            if ((data < end) && empty)
-                ret.emplace_back("");
+
+    std::size_t pos = 0;
+    while (pos < str.size()) {
+        if (str[pos] == sep) {
+            if (pos > 0 || empty)
+                ret.emplace_back(str.substr(0, pos));
+            str = str.substr(pos + 1);
+            pos = 0;
         } else {
-            std::string part(data, pos - data);
-            ret.push_back(part);
-            data = pos + 1;
+            ++pos;
         }
     }
+
+    if (pos > 0 || empty)
+        ret.emplace_back(str);
+
     return ret;
-}
-
-void leftTrimStringInPlace(std::string& str)
-{
-    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
-        return !std::isspace(ch);
-    }));
-}
-
-void rightTrimStringInPlace(std::string& str)
-{
-    str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
-        return !std::isspace(ch);
-    }).base(),
-        str.end());
 }
 
 void trimStringInPlace(std::string& str)
 {
-    leftTrimStringInPlace(str);
-    rightTrimStringInPlace(str);
+    str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));
+    str.erase(std::find_if_not(str.rbegin(), str.rend(), ::isspace).base(), str.end());
 }
 
-std::string trim_string(std::string str)
+std::string trimString(std::string str)
 {
     if (str.empty())
         return str;
 
-    leftTrimStringInPlace(str);
-    rightTrimStringInPlace(str);
+    trimStringInPlace(str);
     return str;
 }
 
-bool startswith(const std::string& str, const std::string& check)
-{
-    return str.rfind(check, 0) == 0;
-}
-
-std::string tolower_string(std::string str)
+std::string& toLowerInPlace(std::string& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
-int stoi_string(const std::string& str, int def)
+std::string toLower(std::string str)
 {
-    if (str.empty())
-        return def;
-
-    return std::stoi(str);
-}
-
-std::string reduce_string(std::string str, char ch)
-{
-    std::string::iterator new_end = std::unique(
-        str.begin(), str.end(),
-        [&](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
-
-    str.erase(new_end, str.end());
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     return str;
 }
 
-time_t getLastWriteTime(const fs::path& path)
+int stoiString(const std::string& str, int def, int base)
 {
-    // in future with C+20 we can replace this function too:
-    // auto ftime = fs::last_write_time(p);
-    // time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
+        return def;
 
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
+    return std::stoi(str, nullptr, base);
+}
+
+unsigned long stoulString(const std::string& str, int def, int base)
+{
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
+        return def;
+
+    return std::stoul(str, nullptr, base);
+}
+
+void reduceString(std::string& str, char ch)
+{
+    auto newEnd = std::unique(str.begin(), str.end(),
+        [=](char lhs, char rhs) { return (lhs == rhs) && (lhs == ch); });
+
+    str.erase(newEnd, str.end());
+}
+
+void replaceString(std::string& str, std::string_view from, std::string_view to)
+{
+    auto startPos = str.find(from);
+    if (startPos != std::string::npos)
+        str.replace(startPos, from.length(), to);
+}
+
+void replaceAllString(std::string& str, std::string_view from, std::string_view to)
+{
+    auto startPos = str.find(from);
+    while (startPos != std::string::npos) {
+        str.replace(startPos, from.length(), to);
+        startPos = str.find(from, startPos + to.length());
     }
-
-    return statbuf.st_mtime;
 }
 
-bool isRegularFile(const fs::path& path)
+std::string renderWebUri(std::string_view ip, int port)
 {
-    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
-    }
-
-    return S_ISREG(statbuf.st_mode);
+    if (ip.find(':') != std::string_view::npos)
+        return fmt::format("[{}]:{}", ip, port);
+    return fmt::format("{}:{}", ip, port);
 }
 
-bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
+std::string httpRedirectTo(std::string_view addr, std::string_view page)
 {
-    // unfortunately fs::is_regular_file(path, ec) does not to work for files >2GB on ARM 32bit systems (see #737)
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        ec = std::make_error_code(static_cast<std::errc>(errno));
-        return false;
-    }
-
-    ec.clear();
-    return S_ISREG(statbuf.st_mode);
+    return fmt::format(R"(<html><head><meta http-equiv="Refresh" content="0;URL={}/{}"></head><body bgcolor="#dddddd"></body></html>)", addr, page);
 }
 
-off_t getFileSize(const fs::path& path)
+std::string hexEncode(const void* data, std::size_t len)
 {
-    // unfortunately fs::file_size(path) does not to work for files >2GB on ARM 32bit systems (see #737)
-    struct stat statbuf;
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        throw_std_runtime_error(mt_strerror(errno) + ": " + path.string());
-    }
+    auto buf = std::string(2 * len, '\0');
 
-    return statbuf.st_size;
-}
-
-bool is_executable(const fs::path& path, int* err)
-{
-    int ret = access(path.c_str(), R_OK | X_OK);
-    if (err != nullptr)
-        *err = errno;
-
-    return ret == 0;
-}
-
-fs::path find_in_path(const fs::path& exec)
-{
-    std::string PATH = getenv("PATH");
-    if (PATH.empty())
-        return "";
-
-    std::error_code ec;
-    auto pathAr = split_string(PATH, ':');
-    for (auto& path : pathAr) {
-        fs::path check = fs::path(path) / exec;
-        if (isRegularFile(check, ec))
-            return check;
-    }
-
-    return "";
-}
-
-std::string http_redirect_to(const std::string& ip, const std::string& port, const std::string& page)
-{
-    return R"(<html><head><meta http-equiv="Refresh" content="0;URL=http://)" + ip + ":" + port + "/" + page + R"("></head><body bgcolor="#dddddd"></body></html>)";
-}
-
-std::string hex_encode(const void* data, int len)
-{
-    const unsigned char* chars;
-    int i;
-    unsigned char hi, lo;
-
-    std::ostringstream buf;
-
-    chars = static_cast<unsigned char*>(const_cast<void*>(data));
-    for (i = 0; i < len; i++) {
+    auto chars = static_cast<const unsigned char*>(data);
+    for (std::size_t i = 0; i < len; i++) {
         unsigned char c = chars[i];
-        hi = c >> 4;
-        lo = c & 0xF;
-        buf << HEX_CHARS[hi] << HEX_CHARS[lo];
+        unsigned char hi = c >> 4;
+        unsigned char lo = c & 0xF;
+        buf[2 * i + 0] = hexChars[hi];
+        buf[2 * i + 1] = hexChars[lo];
     }
-    return buf.str();
+
+    return buf;
 }
 
-std::string hex_decode_string(const std::string& encoded)
+std::string hexDecodeString(std::string_view encoded)
 {
-    auto ptr = const_cast<char*>(encoded.c_str());
-    int len = encoded.length();
+    const char* ptr = encoded.data();
+    std::size_t len = encoded.length();
 
-    std::ostringstream buf;
-    for (int i = 0; i < len; i += 2) {
-        const char* chi = strchr(const_cast<char*>(HEX_CHARS), ptr[i]);
-        const char* clo = strchr(const_cast<char*>(HEX_CHARS), ptr[i + 1]);
-        int hi, lo;
+    auto buf = std::string(len / 2, '\0');
+    for (std::size_t i = 0; i < len; i += 2) {
+        auto chi = std::strchr(hexChars, ptr[i]);
+        auto clo = std::strchr(hexChars, ptr[i + 1]);
+        std::size_t hi = chi ? chi - hexChars : 0;
+        std::size_t lo = clo ? clo - hexChars : 0;
 
-        if (chi)
-            hi = chi - HEX_CHARS;
-        else
-            hi = 0;
-
-        if (clo)
-            lo = clo - HEX_CHARS;
-        else
-            lo = 0;
         auto ch = static_cast<char>(hi << 4 | lo);
-        buf << ch;
+        buf[i / 2] = ch;
     }
-    return buf.str();
+    return buf;
 }
 
-std::string hex_md5(const void* data, int length)
+std::string hexMd5(const void* data, std::size_t length)
 {
     char md5buf[16];
 
@@ -293,91 +203,96 @@ std::string hex_md5(const void* data, int length)
     md5_append(&ctx, static_cast<unsigned char*>(const_cast<void*>(data)), length);
     md5_finish(&ctx, reinterpret_cast<unsigned char*>(md5buf));
 
-    return hex_encode(md5buf, 16);
+    return hexEncode(md5buf, 16);
 }
-std::string hex_string_md5(const std::string& str)
+
+std::string hexStringMd5(std::string_view str)
 {
-    return hex_md5(str.c_str(), str.length());
+    return hexMd5(str.data(), str.length());
 }
-std::string generate_random_id()
+
+std::string generateRandomId()
 {
 #ifdef BSD_NATIVE_UUID
-    char* uuid_str;
-    uint32_t status;
+    char* uuidStr;
+    std::uint32_t status;
 #else
-    char uuid_str[37];
+    char uuidStr[37];
 #endif
     uuid_t uuid;
 
 #ifdef BSD_NATIVE_UUID
     uuid_create(&uuid, &status);
-    uuid_to_string(&uuid, &uuid_str, &status);
+    uuid_to_string(&uuid, &uuidStr, &status);
 #else
     uuid_generate(uuid);
-    uuid_unparse(uuid, uuid_str);
+    uuid_unparse(uuid, uuidStr);
 #endif
 
-    log_debug("Generated: {}", uuid_str);
-    std::string uuid_String = std::string(uuid_str);
+    log_debug("Generated: {}", uuidStr);
+    auto uuidString = std::string(uuidStr);
 #ifdef BSD_NATIVE_UUID
-    free(uuid_str);
+    free(uuidStr);
 #endif
 
-    return uuid_String;
+    return uuidString;
 }
 
-static const char* HEX_CHARS2 = "0123456789ABCDEF";
+static constexpr auto hexCharS2 = "0123456789ABCDEF";
 
-std::string url_escape(const std::string& str)
+std::string urlEscape(std::string_view str)
 {
-    const char* data = str.c_str();
-    int len = str.length();
     std::ostringstream buf;
-    for (int i = 0; i < len; i++) {
-        auto c = static_cast<unsigned char>(data[i]);
+    for (std::size_t i = 0; i < str.length();) {
+        auto c = str[i];
+        int cplen = 1;
+        if ((c & 0xf8) == 0xf0)
+            cplen = 4;
+        else if ((c & 0xf0) == 0xe0)
+            cplen = 3;
+        else if ((c & 0xe0) == 0xc0)
+            cplen = 2;
+        if ((i + cplen) > str.length())
+            cplen = 1;
+
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
-            buf << static_cast<char>(c);
+            buf << char(c);
         } else {
             int hi = c >> 4;
             int lo = c & 15;
-            buf << '%' << HEX_CHARS2[hi] << HEX_CHARS2[lo];
+            if (cplen > 1)
+                buf << str.substr(i, cplen);
+            else
+                buf << '%' << hexCharS2[hi] << hexCharS2[lo];
         }
+        i += cplen;
     }
     return buf.str();
 }
 
-std::string urlUnescape(const std::string& str)
+std::string urlUnescape(std::string_view str)
 {
-    auto data = const_cast<char*>(str.c_str());
+    auto data = str.data();
     int len = str.length();
     std::ostringstream buf;
 
     int i = 0;
     while (i < len) {
-        char c = data[i++];
+        const char c = data[i++];
         if (c == '%') {
             if (i + 2 > len)
                 break; // avoid buffer overrun
             char chi = data[i++];
             char clo = data[i++];
-            int hi, lo;
 
-            const char* pos;
+            auto pos = std::strchr(hexCharS2, chi);
+            int hi = pos ? pos - hexCharS2 : 0;
 
-            pos = strchr(const_cast<char*>(HEX_CHARS2), chi);
-            if (!pos)
-                hi = 0;
-            else
-                hi = pos - HEX_CHARS2;
-
-            pos = strchr(const_cast<char*>(HEX_CHARS2), clo);
-            if (!pos)
-                lo = 0;
-            else
-                lo = pos - HEX_CHARS2;
+            pos = std::strchr(hexCharS2, clo);
+            int lo = pos ? pos - hexCharS2 : 0;
 
             int ascii = (hi << 4) | lo;
-            buf << static_cast<char>(ascii);
+            buf << char(ascii);
         } else if (c == '+') {
             buf << ' ';
         } else {
@@ -387,203 +302,125 @@ std::string urlUnescape(const std::string& str)
     return buf.str();
 }
 
-static std::string dict_encode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
+static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
 {
     std::ostringstream buf;
-    for (auto it = dict.begin(); it != dict.end(); it++) {
+    for (auto it = dict.begin(); it != dict.end(); ++it) {
         if (it != dict.begin())
             buf << sep1;
-        buf << url_escape(it->first) << sep2
-            << url_escape(it->second);
+        buf << urlEscape(it->first) << sep2
+            << urlEscape(it->second);
     }
     return buf.str();
 }
 
-std::string dict_encode(const std::map<std::string, std::string>& dict)
+std::string dictEncode(const std::map<std::string, std::string>& dict)
 {
-    return dict_encode(dict, '&', '=');
+    return dictEncode(dict, '&', '=');
 }
 
-std::string dict_encode_simple(const std::map<std::string, std::string>& dict)
+std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
 {
-    return dict_encode(dict, '/', '/');
+    return dictEncode(dict, '/', '/');
 }
 
-void dict_decode(const std::string& url, std::map<std::string, std::string>* dict)
+std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape)
 {
-    const char* data = url.c_str();
+    std::map<std::string, std::string> dict;
+    const char* data = url.data();
     const char* dataEnd = data + url.length();
     while (data < dataEnd) {
-        const char* ampPos = strchr(data, '&');
+        const char* ampPos = std::strchr(data, '&');
         if (!ampPos) {
             ampPos = dataEnd;
         }
-        const char* eqPos = strchr(data, '=');
+        const char* eqPos = std::strchr(data, '=');
         if (eqPos && eqPos < ampPos) {
-            std::string key(data, eqPos - data);
-            std::string value(eqPos + 1, ampPos - eqPos - 1);
-            key = urlUnescape(key);
-            value = urlUnescape(value);
-
-            dict->insert(std::pair(key, value));
+            auto key = std::string_view(data, eqPos - data);
+            auto value = std::string_view(eqPos + 1, ampPos - eqPos - 1);
+            if (unEscape) {
+                dict.try_emplace(urlUnescape(key), urlUnescape(value));
+            } else {
+                dict.emplace(key, value);
+            }
         }
         data = ampPos + 1;
     }
+    return dict;
 }
 
-// this is somewhat tricky as we need an exact amount of pairs
-// object_id=720&res_id=0
-void dict_decode_simple(const std::string& url, std::map<std::string, std::string>* dict)
+std::map<std::string, std::string> pathToMap(std::string_view url)
 {
-    std::string encoded;
-    size_t pos;
-    size_t last_pos = 0;
+    std::map<std::string, std::string> out;
+    std::size_t pos;
+    std::size_t lastPos = 0;
+    std::size_t size = url.size();
     do {
-        pos = url.find('/', last_pos);
-        if (pos == std::string::npos || pos < last_pos + 1)
-            break;
+        pos = url.find('/', lastPos);
+        if (pos == std::string_view::npos)
+            pos = size;
 
-        std::string key = urlUnescape(url.substr(last_pos, pos - last_pos));
-        last_pos = pos + 1;
-        pos = url.find('/', last_pos);
+        std::string key = urlUnescape(url.substr(lastPos, pos - lastPos));
+        lastPos = pos == size ? size : pos + 1;
+        pos = url.find('/', lastPos);
         if (pos == std::string::npos)
-            pos = url.length();
-        if (pos < last_pos + 1)
-            break;
+            pos = size;
 
-        std::string value = urlUnescape(url.substr(last_pos, pos - last_pos));
-        last_pos = pos + 1;
+        std::string value = urlUnescape(url.substr(lastPos, pos - lastPos));
+        lastPos = pos + 1;
 
-        dict->insert(std::pair(key, value));
-    } while (last_pos < url.length());
+        out.emplace(key, value);
+    } while (lastPos < size);
+
+    return out;
 }
 
-std::string mime_types_to_CSV(std::vector<std::string> mimeTypes)
+std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
-    std::ostringstream buf;
-    for (size_t i = 0; i < mimeTypes.size(); i++) {
-        if (i > 0)
-            buf << ",";
-        std::string mimeType = mimeTypes[i];
-        buf << "http-get:*:" << mimeType << ":*";
-    }
-
-    return buf.str();
+    return mimeTypes.empty() ? "" : fmt::format("http-get:*:{}:*", fmt::join(mimeTypes, ":*,http-get:*:"));
 }
 
-std::string mt_strerror(int mt_errno)
-{
-#ifdef DONT_USE_YET_HAVE_STRERROR_R
-    char* buffer = (char*)malloc(512);
-    char* err_str;
-#ifdef STRERROR_R_CHAR_P
-    err_str = strerror_r(errno, buffer, 512);
-    if (err_str == NULL)
-        err_str = buffer;
-#else
-    int ret = strerror_r(errno, buffer, 512);
-    if (ret < 0)
-        return "cannot get error string: error while calling XSI-compliant strerror_r";
-    err_str = buffer;
-#endif
-    std::string errStr(err_str);
-    free(buffer);
-    return errStr;
-#else
-    return strerror(errno);
-#endif
-}
-
-std::string readTextFile(const fs::path& path)
-{
-    FILE* f = fopen(path.c_str(), "rt");
-    if (!f) {
-        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
-    }
-    std::ostringstream buf;
-    char buffer[1024];
-    size_t bytesRead;
-    while ((bytesRead = fread(buffer, 1, sizeof(buffer), f)) > 0) {
-        buf << std::string(buffer, bytesRead);
-    }
-    fclose(f);
-    return buf.str();
-}
-
-void writeTextFile(const fs::path& path, const std::string& contents)
-{
-    size_t bytesWritten;
-    FILE* f = fopen(path.c_str(), "wt");
-    if (!f) {
-        throw_std_runtime_error("could not open " + path.string() + " : " + mt_strerror(errno));
-    }
-
-    bytesWritten = fwrite(contents.c_str(), 1, contents.length(), f);
-    if (bytesWritten < contents.length()) {
-        fclose(f);
-        if (bytesWritten >= 0)
-            throw_std_runtime_error("incomplete write to " + path.string() + " : ");
-
-        throw_std_runtime_error("error writing to " + path.string() + " : " + mt_strerror(errno));
-    }
-    fclose(f);
-}
-
-std::string renderProtocolInfo(const std::string& mimetype, const std::string& protocol, const std::string& extend)
+std::string renderProtocolInfo(std::string_view mimetype, std::string_view protocol, std::string_view extend)
 {
     if (!mimetype.empty() && !protocol.empty()) {
         if (!extend.empty())
-            return protocol + ":*:" + mimetype + ":" + extend;
-        return protocol + ":*:" + mimetype + ":*";
+            return fmt::format("{}:*:{}:{}", protocol, mimetype, extend);
+        return fmt::format("{}:*:{}:*", protocol, mimetype);
     }
 
     return "http-get:*:*:*";
 }
 
-std::string getMTFromProtocolInfo(const std::string& protocol)
+std::string getMTFromProtocolInfo(std::string_view protocol)
 {
-    std::vector<std::string> parts = split_string(protocol, ':');
+    std::vector<std::string> parts = splitString(protocol, ':');
     if (parts.size() > 2)
         return parts[2];
 
-    return "";
+    return {};
 }
 
-std::string getProtocol(const std::string& protocolInfo)
+std::string_view getProtocol(std::string_view protocolInfo)
 {
-    std::string protocol;
-    size_t pos = protocolInfo.find(':');
-    if (pos == std::string::npos || pos == 0)
-        protocol = "http-get";
-    else
-        protocol = protocolInfo.substr(0, pos);
-
-    return protocol;
+    auto pos = protocolInfo.find(':');
+    return (pos == std::string_view::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
-std::string secondsToHMS(int seconds)
+std::string millisecondsToHMSF(int milliseconds)
 {
-    int h, m, s;
+    auto ms = milliseconds % 1000;
+    milliseconds /= 1000;
 
-    s = seconds % 60;
-    seconds /= 60;
+    auto s = milliseconds % 60;
+    milliseconds /= 60;
 
-    m = seconds % 60;
-    h = seconds / 60;
+    auto m = milliseconds % 60;
+    auto h = milliseconds / 60;
 
-    // XXX:XX:XX
-    // This fails if h goes over 999
-    if (h > 999)
-        h = 999;
-
-    char buf[10];
-    snprintf(buf, sizeof(buf), "%02d:%02d:%02d", h, m, s);
-    std::string res = buf;
-
-    return res;
+    return fmt::format("{:01}:{:02}:{:02}.{:03}", h, m, s, ms);
 }
 
-int HMSToSeconds(const std::string& time)
+int HMSFToMilliseconds(std::string_view time)
 {
     if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
@@ -593,128 +430,61 @@ int HMSToSeconds(const std::string& time)
     int hours = 0;
     int minutes = 0;
     int seconds = 0;
-    sscanf(time.c_str(), "%d:%d:%d", &hours, &minutes, &seconds);
+    int ms = 0;
+    sscanf(time.data(), "%d:%d:%d.%d", &hours, &minutes, &seconds, &ms);
 
-    return (hours * 3600) + (minutes * 60) + seconds;
+    return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 }
 
-#ifdef HAVE_MAGIC
-std::string getMIMETypeFromFile(const fs::path& file)
+std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolution)
 {
-    return getMIME(file, nullptr, -1);
-}
-
-std::string getMIMETypeFromBuffer(const void* buffer, size_t length)
-{
-    return getMIME("", buffer, length);
-}
-
-std::string getMIME(const fs::path& filepath, const void* buffer, size_t length)
-{
-    /* MAGIC_MIME_TYPE tells magic to return ONLY the mimetype */
-    magic_t magic_cookie = magic_open(MAGIC_MIME_TYPE);
-
-    if (magic_cookie == nullptr) {
-        log_warning("Failed to initialize libmagic");
-        return "";
-    }
-
-    if (magic_load(magic_cookie, nullptr) != 0) {
-        log_warning("Failed to load magic database: {}", magic_error(magic_cookie));
-        magic_close(magic_cookie);
-        return "";
-    }
-
-    const char* mime;
-    if (filepath.empty()) {
-        mime = magic_buffer(magic_cookie, buffer, length);
-    } else {
-        mime = magic_file(magic_cookie, filepath.c_str());
-    }
-
-    std::string out = mime;
-    magic_close(magic_cookie);
-    return out;
-}
-#endif
-
-void set_jpeg_resolution_resource(const std::shared_ptr<CdsItem>& item, int res_num)
-{
-    try {
-        std::unique_ptr<IOHandler> fio_h = std::make_unique<FileIOHandler>(item->getLocation());
-        fio_h->open(UPNP_READ);
-        std::string resolution = get_jpeg_resolution(fio_h);
-
-        if (res_num >= item->getResourceCount())
-            throw_std_runtime_error("Invalid resource index");
-
-        item->getResource(res_num)->addAttribute(MetadataHandler::getResAttrName(R_RESOLUTION), resolution);
-    } catch (const std::runtime_error& e) {
-        log_error("Exception! {}", e.what());
-    }
-}
-
-bool check_resolution(const std::string& resolution, int* x, int* y)
-{
-    if (x != nullptr)
-        *x = 0;
-
-    if (y != nullptr)
-        *y = 0;
-
-    std::vector<std::string> parts = split_string(resolution, 'x');
+    std::vector<std::string> parts = splitString(resolution, 'x');
     if (parts.size() != 2)
-        return false;
+        return {};
 
     if (!parts[0].empty() && !parts[1].empty()) {
-        int _x = std::stoi(parts[0]);
-        int _y = std::stoi(parts[1]);
+        unsigned int x = std::stoul(parts[0]);
+        unsigned int y = std::stoul(parts[1]);
 
-        if ((_x > 0) && (_y > 0)) {
-            if (x != nullptr)
-                *x = _x;
-
-            if (y != nullptr)
-                *y = _y;
-
-            return true;
+        if ((x != std::numeric_limits<unsigned int>::max()) && (y != std::numeric_limits<unsigned int>::max())) {
+            return { x, y };
         }
     }
 
-    return false;
+    return {};
 }
 
-std::string escape(std::string string, char escape_char, char to_escape)
+std::string escape(std::string_view string, char escapeChar, char toEscape)
 {
     std::ostringstream buf;
-    size_t len = string.length();
+    auto len = string.length();
 
-    bool possible_more_esc = true;
-    bool possible_more_char = true;
+    bool possibleMoreEsc = true;
+    bool possibleMoreChar = true;
 
-    size_t last = 0;
+    std::size_t last = 0;
     do {
-        size_t next_esc = std::string::npos;
-        if (possible_more_esc) {
-            next_esc = string.find(escape_char, last);
-            if (next_esc == std::string::npos)
-                possible_more_esc = false;
+        auto nextEsc = std::string::npos;
+        if (possibleMoreEsc) {
+            nextEsc = string.find(escapeChar, last);
+            if (nextEsc == std::string::npos)
+                possibleMoreEsc = false;
         }
 
-        size_t next = std::string::npos;
-        if (possible_more_char) {
-            next = string.find(to_escape, last);
+        auto next = std::string::npos;
+        if (possibleMoreChar) {
+            next = string.find(toEscape, last);
             if (next == std::string::npos)
-                possible_more_char = false;
+                possibleMoreChar = false;
         }
 
-        if (next == std::string::npos || (next_esc != std::string::npos && next_esc < next)) {
-            next = next_esc;
+        if (next == std::string::npos || (nextEsc != std::string::npos && nextEsc < next)) {
+            next = nextEsc;
         }
 
         if (next == std::string::npos)
             next = len;
-        int cpLen = next - last;
+        auto cpLen = int(next - last);
         if (cpLen > 0) {
             buf.write(&string[last], cpLen);
         }
@@ -729,131 +499,19 @@ std::string escape(std::string string, char escape_char, char to_escape)
     return buf.str();
 }
 
-std::string unescape(std::string string, char escape)
+std::string fallbackString(const std::string& first, const std::string& fallback)
 {
-    std::ostringstream buf;
-    size_t len = string.length();
-
-    size_t last = std::string::npos;
-    do {
-        size_t next = string.find(escape, last + 1);
-        if (next == std::string::npos)
-            next = len;
-        if (last == std::string::npos)
-            last = 0;
-        int cpLen = next - last;
-        if (cpLen > 0)
-            buf.write(&string[last], cpLen);
-        last = next;
-        last++;
-    } while (last < len);
-
-    return buf.str();
+    return first.empty() ? fallback : first;
 }
 
-/*
-std::string xml_unescape(std::string_view sv)
+unsigned int stringHash(std::string_view str)
 {
-    std::ostringstream buf;
-    signed char *ptr = (signed char *)sv.data();
-    while (*ptr)
-    {
-        if (*ptr == '&')
-        {
-            if ((*(ptr + 1) == 'l') && (*(ptr + 2) == 't') && 
-                (*(ptr + 3) == ';'))
-            {
-                buf << '<';
-                ptr = ptr + 3;
-            }
-            else if ((*(ptr + 1) == 'g') && (*(ptr + 2) == 't') && 
-                     (*(ptr + 3) == ';'))
-            {
-                buf << '>';
-                ptr = ptr + 3;
-            }
-            else if ((*(ptr + 1) == 'q') && (*(ptr + 2) == 'u') && 
-                     (*(ptr + 3) == 'o') && (*(ptr + 4) == 't') &&
-                     (*(ptr + 5) == ';'))
-            {
-                buf << '"';
-                ptr = ptr + 5;
-            }
-            else if (*(ptr + 1) == 'a')
-            {
-                if ((*(ptr + 2) == 'm') && (*(ptr + 3) == 'p') && 
-                    (*(ptr + 4) == ';'))
-                    {
-                        buf << '&';
-                        ptr = ptr + 4;
-                    }
-                else if ((*(ptr + 2) == 'p') && (*(ptr + 3) == 'o') &&
-                         (*(ptr + 4) == 's') && (*(ptr + 5) == ';'))
-                {
-                    buf << '\'';
-                    ptr = ptr + 5;
-                }
-            }
-            else
-                buf << *ptr;
-        }
-        else
-            buf << *ptr;
-
-        ptr++;
-    }
-
-    return buf.str();
-}
-*/
-
-std::string unescape_amp(std::string string)
-{
-    if (string.empty())
-        return "";
-
-    std::ostringstream buf;
-    size_t len = string.length();
-
-    size_t last = 0;
-    do {
-        int skip = 0;
-        size_t next = last - 1;
-        do {
-            next = string.find('&', next + 1);
-            if (next == std::string::npos)
-                break;
-            if ((next < len) && (string.at(next + 1) == 'a') && (string.at(next + 2) == 'm') && (string.at(next + 3) == 'p') && (string.at(next + 4) == ';')) {
-                skip = 4;
-            }
-        } while (next > 0 && skip == 0);
-
-        if (next == std::string::npos)
-            next = len;
-
-        int cpLen = next - last + 1;
-        buf.write(&string[last], cpLen);
-        last = next + skip + 1;
-    } while (last <= len);
-
-    return buf.str();
+    return std::accumulate(str.begin(), str.end(), 5381U, [](auto h, auto ch) { return ((h << 5) + h) ^ ch; });
 }
 
-std::string fallbackString(std::string first, std::string fallback)
+std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval)
 {
-    if (first.empty())
-        return fallback;
-    return first;
-}
-
-unsigned int stringHash(const std::string& str)
-{
-    unsigned int hash = 5381;
-    auto data = str.c_str();
-    int c;
-    while ((c = *data++))
-        hash = ((hash << 5) + hash) ^ c; /* (hash * 33) ^ c */
-    return hash;
+    return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
@@ -861,124 +519,46 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::string toCSV(const std::shared_ptr<std::unordered_set<int>>& array)
+std::chrono::seconds currentTime()
 {
-    if (array->empty())
-        return "";
-    return join(*array, ",");
+    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-void getTimespecNow(struct timespec* ts)
+std::chrono::milliseconds currentTimeMS()
 {
-    struct timeval tv;
-    int ret = gettimeofday(&tv, nullptr);
-    if (ret != 0)
-        throw_std_runtime_error("gettimeofday failed: " + mt_strerror(errno));
-
-    ts->tv_sec = tv.tv_sec;
-    ts->tv_nsec = tv.tv_usec * 1000;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 }
 
-long getDeltaMillis(struct timespec* first)
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms)
 {
-    struct timespec now;
-    getTimespecNow(&now);
-    return getDeltaMillis(first, &now);
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    return now - ms;
 }
 
-long getDeltaMillis(struct timespec* first, struct timespec* second)
+std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second)
 {
-    return (second->tv_sec - first->tv_sec) * 1000 + (second->tv_nsec - first->tv_nsec) / 1000000;
+    return second - first;
 }
 
-void getTimespecAfterMillis(long delta, struct timespec* ret, struct timespec* start)
-{
-    struct timespec now;
-    if (start == nullptr) {
-        getTimespecNow(&now);
-        start = &now;
-    }
-    ret->tv_sec = start->tv_sec + delta / 1000;
-    ret->tv_nsec = (start->tv_nsec + (delta % 1000) * 1000000);
-    if (ret->tv_nsec >= 1000000000) // >= 1 second
-    {
-        ret->tv_sec++;
-        ret->tv_nsec -= 1000000000;
-    }
-
-    // log_debug("timespec: sec: {}, nsec: {}", ret->tv_sec, ret->tv_nsec);
-}
-
-std::string interfaceToIP(const std::string& interface)
-{
-
-    struct if_nameindex* iflist = nullptr;
-    struct if_nameindex* iflist_free = nullptr;
-    struct ifreq if_request;
-    struct sockaddr_in local_address;
-    int local_socket;
-
-    if (interface.empty())
-        return "";
-
-    local_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (local_socket < 0) {
-        log_error("Could not create local socket: {}",
-            mt_strerror(errno).c_str());
-        return "";
-    }
-
-    iflist = iflist_free = if_nameindex();
-    if (iflist == nullptr) {
-        log_error("Could not get interface list: {}",
-            mt_strerror(errno).c_str());
-        close(local_socket);
-        return "";
-    }
-
-    while (iflist->if_index || iflist->if_name) {
-        if (interface == iflist->if_name) {
-            strncpy(if_request.ifr_name, iflist->if_name, IF_NAMESIZE);
-            if (ioctl(local_socket, SIOCGIFADDR, &if_request) != 0) {
-                log_error("Could not determine interface address: {}",
-                    mt_strerror(errno).c_str());
-                close(local_socket);
-                if_freenameindex(iflist_free);
-                return "";
-            }
-
-            memcpy(&local_address, &if_request.ifr_addr, sizeof(if_request.ifr_addr));
-            std::string ip = inet_ntoa(local_address.sin_addr);
-            if_freenameindex(iflist_free);
-            close(local_socket);
-            return ip;
-        }
-        iflist++;
-    }
-
-    close(local_socket);
-    if_freenameindex(iflist_free);
-    return "";
-}
-
-std::string ipToInterface(const std::string& ip)
+std::string ipToInterface(std::string_view ip)
 {
     if (ip.empty()) {
-        return "";
+        return {};
     }
 
-    log_debug("Looking for '{}'", ip.c_str());
+    log_warning("Please provide an interface name instead! LibUPnP does not support specifying an IP in current versions.");
+    log_info("Attempting to map {} to an interface", ip);
 
     struct ifaddrs *ifaddr, *ifa;
     int family, s, n;
     char host[NI_MAXHOST];
 
     if (getifaddrs(&ifaddr) == -1) {
-        log_error("Could not getifaddrs: {}", mt_strerror(errno).c_str());
+        log_error("Could not getifaddrs: {}", std::strerror(errno));
     }
 
-    for (ifa = ifaddr, n = 0; ifa != nullptr; ifa = ifa->ifa_next, n++) {
-        if (ifa->ifa_addr == nullptr)
+    for (ifa = ifaddr, n = 0; ifa; ifa = ifa->ifa_next, n++) {
+        if (!ifa->ifa_addr)
             continue;
 
         family = ifa->ifa_addr->sa_family;
@@ -990,7 +570,7 @@ std::string ipToInterface(const std::string& ip)
                 host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
             if (s != 0) {
                 log_error("getnameinfo() failed: {}", gai_strerror(s));
-                return "";
+                return {};
             }
 
             std::string ipaddr = host;
@@ -1002,186 +582,63 @@ std::string ipToInterface(const std::string& ip)
     }
 
     freeifaddrs(ifaddr);
-    log_warning("Failed to find interface for IP: {}", ip.c_str());
-    return "";
+    log_warning("Failed to find interface for IP: {}", ip);
+    return {};
 }
 
-bool validateYesNo(const std::string& value)
+bool validateYesNo(std::string_view value)
 {
-    return !((value != "yes") && (value != "no"));
+    return value == "yes" || value == "no";
 }
 
-std::vector<std::string> populateCommandLine(const std::string& line, const std::string& in, const std::string& out, const std::string& range)
+std::vector<std::string> populateCommandLine(const std::string& line,
+    const std::string& in,
+    const std::string& out,
+    const std::string& range,
+    const std::string& title)
 {
-    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}'", line, in, out, range);
-    std::vector<std::string> params = split_string(line, ' ');
+    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
+    std::vector<std::string> params = splitString(line, ' ');
     if (in.empty() && out.empty())
         return params;
 
-    for (auto& param : params) {
-        size_t inPos = param.find("%in");
+    for (auto&& param : params) {
+        auto inPos = param.find("%in");
         if (inPos != std::string::npos) {
             std::string newParam = param.replace(inPos, 3, in);
         }
 
-        size_t outPos = param.find("%out");
+        auto outPos = param.find("%out");
         if (outPos != std::string::npos) {
             std::string newParam = param.replace(outPos, 4, out);
         }
 
-        size_t rangePos = param.find("%range");
+        auto rangePos = param.find("%range");
         if (rangePos != std::string::npos) {
-            std::string newParam = param.replace(rangePos, 5, range);
+            std::string newParam = param.replace(rangePos, 6, range);
+        }
+
+        auto titlePos = param.find("%title");
+        if (titlePos != std::string::npos) {
+            std::string newParam = param.replace(titlePos, 6, title);
         }
     }
-
     return params;
 }
 
-// The tempName() function is borrowed from gfileutils.c from the glibc package
-
-/* gfileutils.c - File utility functions
- *
- *  Copyright 2000 Red Hat, Inc.
- *
- * GLib is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * GLib is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with GLib; see the file COPYING.LIB.  If not,
- * write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- *   Boston, MA 02111-1307, USA.
- */
-/*
- * create_temp_file based on the mkstemp implementation from the GNU C library.
- * Copyright (C) 1991,92,93,94,95,96,97,98,99 Free Software Foundation, Inc.
- */
-// tempName is based on create_temp_file, see (C) above
-fs::path tempName(const fs::path& leadPath, char* tmpl)
-{
-    char* XXXXXX;
-    int count;
-    static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static const int NLETTERS = sizeof(letters) - 1;
-    long value;
-    struct timeval tv;
-    static int counter = 0;
-    struct stat statbuf;
-    int ret = 0;
-
-    /* find the last occurrence of "XXXXXX" */
-    XXXXXX = strstr(tmpl, "XXXXXX");
-
-    if (!XXXXXX || strncmp(XXXXXX, "XXXXXX", 6) != 0) {
-        return "";
-    }
-
-    /* Get some more or less random data.  */
-    gettimeofday(&tv, nullptr);
-    value = (tv.tv_usec ^ tv.tv_sec) + counter++;
-
-    for (count = 0; count < 100; value += 7777, ++count) {
-        long v = value;
-
-        /* Fill in the random bits.  */
-        XXXXXX[0] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[1] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[2] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[3] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[4] = letters[v % NLETTERS];
-        v /= NLETTERS;
-        XXXXXX[5] = letters[v % NLETTERS];
-
-        fs::path check = leadPath / tmpl;
-        ret = stat(check.c_str(), &statbuf);
-        if (ret != 0) {
-            if ((errno == ENOENT) || (errno == ENOTDIR))
-                return check;
-
-            return "";
-        }
-    }
-
-    /* We got out of the loop because we ran out of combinations to try.  */
-    return "";
-}
-
-bool isTheora(const fs::path& ogg_filename)
-{
-    FILE* f;
-    char buffer[7];
-    f = fopen(ogg_filename.c_str(), "rb");
-
-    if (!f) {
-        throw_std_runtime_error("Error opening " + ogg_filename.string() + " : " + mt_strerror(errno));
-    }
-
-    if (fread(buffer, 1, 4, f) != 4) {
-        fclose(f);
-        throw_std_runtime_error("Error reading " + ogg_filename.string());
-    }
-
-    if (memcmp(buffer, "OggS", 4) != 0) {
-        fclose(f);
-        return false;
-    }
-
-    if (fseek(f, 28, SEEK_SET) != 0) {
-        fclose(f);
-        throw_std_runtime_error("Incomplete file " + ogg_filename.string());
-    }
-
-    if (fread(buffer, 1, 7, f) != 7) {
-        fclose(f);
-        throw_std_runtime_error("Error reading " + ogg_filename.string());
-    }
-
-    if (memcmp(buffer, "\x80theora", 7) != 0) {
-        fclose(f);
-        return false;
-    }
-
-    fclose(f);
-    return true;
-}
-
-fs::path get_last_path(const fs::path& path)
-{
-    fs::path ret;
-
-    auto it = std::prev(path.end()); // filename
-    if (it != path.end())
-        it = std::prev(it); // last path
-    if (it != path.end())
-        ret = *it;
-
-    return ret;
-}
-
-ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
+ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 {
     ssize_t pos = -1;
-    size_t len = str.length();
+    auto len = str.length();
 
-    if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
+    if ((len == 0) || (cutpos > ssize_t(len)))
         return pos;
 
 #if 0
-    printf("Character at cut position: %0x\n", static_cast<char>(str.at(cutpos)));
-    printf("Character at cut-1 position: %0x\n", static_cast<char>(str.at(cutpos - 1)));
-    printf("Character at cut-2 position: %0x\n", static_cast<char>(str.at(cutpos - 2)));
-    printf("Character at cut-3 position: %0x\n", static_cast<char>(str.at(cutpos - 3)));
+    printf("Character at cut position: %0x\n", char(str.at(cutpos)));
+    printf("Character at cut-1 position: %0x\n", char(str.at(cutpos - 1)));
+    printf("Character at cut-2 position: %0x\n", char(str.at(cutpos - 2)));
+    printf("Character at cut-3 position: %0x\n", char(str.at(cutpos - 3)));
 #endif
 
     // > 0x7f, we are dealing with a non-ascii character
@@ -1201,104 +658,51 @@ ssize_t getValidUTF8CutPosition(std::string str, ssize_t cutpos)
     return pos;
 }
 
-std::string getDLNAprofileString(const std::string& contentType)
+std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
 {
-    std::string profile;
-    if (contentType == CONTENT_TYPE_MP4)
-        profile = D_PN_AVC_MP4_EU;
-    else if (contentType == CONTENT_TYPE_MKV)
-        profile = D_PN_MKV;
-    else if (contentType == CONTENT_TYPE_AVI)
-        profile = D_PN_AVI;
-    else if (contentType == CONTENT_TYPE_MPEG)
-        profile = D_PN_MPEG_PS_PAL;
-    else if (contentType == CONTENT_TYPE_MP3)
-        profile = D_MP3;
-    else if (contentType == CONTENT_TYPE_PCM)
-        profile = D_LPCM;
-    else
-        profile = "";
+    // get profiles from <contenttype-dlnaprofile> mappings
+    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    auto profile = getValueOrDefault(mappings, fmt::format("{}-{}-{}", contentType, vCodec, aCodec), "");
+    if (profile.empty())
+        profile = getValueOrDefault(mappings, contentType, "");
 
-    if (!profile.empty())
-        profile = std::string(D_PROFILE) + "=" + profile;
-    return profile;
+    return profile.empty() ? "" : fmt::format("{}={};", UPNP_DLNA_PROFILE, profile);
 }
 
-std::string getDLNAContentHeader(const std::shared_ptr<ConfigManager>& config, const std::string& contentType)
+std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec)
 {
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        std::string content_parameter;
-        content_parameter = getDLNAprofileString(contentType);
-        if (!content_parameter.empty())
-            content_parameter = D_PROFILE + std::string("=") + content_parameter + ";";
-        // enabling or disabling seek
-        if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_DLNA_SEEK))
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_ENABLED + ";";
-        else
-            content_parameter = content_parameter + D_OP + "=" + D_OP_SEEK_DISABLED + ";";
-        content_parameter = content_parameter + D_CONVERSION_INDICATOR + "=" + D_NO_CONVERSION + ";";
-        content_parameter = content_parameter + D_FLAGS "=" D_TR_FLAGS_AV;
-        return content_parameter;
-    }
-    return "";
+    std::string contentParameter = getDLNAprofileString(config, contentType, vCodec, aCodec);
+    return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
+        UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
+        UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
+        UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
 }
 
-std::string getDLNATransferHeader(const std::shared_ptr<ConfigManager>& config, const std::string& mimeType)
+std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, std::string_view mimeType)
 {
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO)) {
-        std::string transfer_parameter;
-        if (startswith(mimeType, "image"))
-            transfer_parameter = D_HTTP_TRANSFER_MODE_INTERACTIVE;
-        else if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-            transfer_parameter = D_HTTP_TRANSFER_MODE_STREAMING;
-
-        if (!transfer_parameter.empty()) {
-            return transfer_parameter;
-        }
+    if (startswith(mimeType, "image")) {
+        return UPNP_DLNA_TRANSFER_MODE_INTERACTIVE;
     }
-    return "";
+
+    if (startswith(mimeType, "audio") || startswith(mimeType, "video")) {
+        return UPNP_DLNA_TRANSFER_MODE_STREAMING;
+    }
+
+    return {};
 }
 
-#ifndef HAVE_FFMPEG
-std::string getAVIFourCC(const fs::path& avi_filename)
+std::string getHostName(const struct sockaddr* addr)
 {
-#define FCC_OFFSET 0xbc
-    char* buffer;
-    FILE* f = fopen(avi_filename.c_str(), "rb");
-    if (!f)
-        throw_std_runtime_error("could not open file " + avi_filename.native() + " : " + mt_strerror(errno));
-
-    buffer = static_cast<char*>(malloc(FCC_OFFSET + 6));
-    if (buffer == nullptr) {
-        fclose(f);
-        throw_std_runtime_error("Out of memory when allocating buffer for file " + avi_filename.native());
+    char hoststr[NI_MAXHOST];
+    char portstr[NI_MAXSERV];
+    int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
+    int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NOFQDN);
+    if (ret != 0) {
+        log_debug("could not determine getnameinfo: {}", std::strerror(errno));
     }
 
-    size_t rb = fread(buffer, 1, FCC_OFFSET + 4, f);
-    fclose(f);
-    if (rb != FCC_OFFSET + 4) {
-        free(buffer);
-        throw_std_runtime_error("could not read header of " + avi_filename.native() + " : " + mt_strerror(errno));
-    }
-
-    buffer[FCC_OFFSET + 5] = '\0';
-
-    if (strncmp(buffer, "RIFF", 4) != 0) {
-        free(buffer);
-        return "";
-    }
-
-    if (strncmp(buffer + 8, "AVI ", 4) != 0) {
-        free(buffer);
-        return "";
-    }
-
-    std::string fourcc = std::string(buffer + FCC_OFFSET, 4);
-    free(buffer);
-
-    return fourcc;
+    return hoststr;
 }
-#endif
 
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
 {
@@ -1310,74 +714,21 @@ int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
     }
 
     if (sa->sa_family == AF_INET6) {
-        return memcmp((char*)&(SOCK_ADDR_IN6_ADDR(sa)), (char*)&(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
+        return std::memcmp(&(SOCK_ADDR_IN6_ADDR(sa)), &(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
     }
 
-    throw_std_runtime_error("unsupported address family :" + std::to_string(sa->sa_family));
+    throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);
 }
 
 std::string sockAddrGetNameInfo(const struct sockaddr* sa)
 {
     char hoststr[NI_MAXHOST];
     char portstr[NI_MAXSERV];
-    int ret = getnameinfo(sa, sizeof(struct sockaddr), hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
+    int len = sa->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
+    int ret = getnameinfo(sa, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     if (ret != 0) {
-        throw_std_runtime_error("could not determine getnameinfo (" + mt_strerror(errno) + ")");
+        throw_std_runtime_error("could not determine getnameinfo: {}", std::strerror(errno));
     }
 
-    return std::string(hoststr) + ":" + std::string(portstr);
+    return fmt::format("{}:{}", hoststr, portstr);
 }
-
-#ifdef SOPCAST
-/// \brief
-int find_local_port(unsigned short range_min, unsigned short range_max)
-{
-    int fd;
-    int retry_count = 0;
-    int port;
-    struct sockaddr_in server_addr;
-    struct hostent* server;
-
-    if (range_min > range_max) {
-        log_error("min port range > max port range!");
-        return -1;
-    }
-
-    do {
-        port = rand() % (range_max - range_min) + range_min;
-
-        fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0) {
-            log_error("could not determine free port: error creating socket ({})\n",
-                mt_strerror(errno).c_str());
-            return -1;
-        }
-
-        server = gethostbyname("127.0.0.1");
-        if (server == nullptr) {
-            log_error("could not resolve localhost");
-            close(fd);
-            return -1;
-        }
-
-        memset(&server_addr, 0, sizeof(server_addr));
-        server_addr.sin_family = AF_INET;
-        memcpy(&server_addr.sin_addr.s_addr, server->h_addr, server->h_length);
-        server_addr.sin_port = htons(port);
-
-        if (connect(fd, reinterpret_cast<struct sockaddr*>(&server_addr),
-                sizeof(server_addr))
-            == -1) {
-            close(fd);
-            return port;
-        }
-
-        retry_count++;
-
-    } while (retry_count < USHRT_MAX);
-
-    log_error("Could not find free port on localhost");
-
-    return -1;
-}
-#endif

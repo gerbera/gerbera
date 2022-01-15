@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     timer.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -34,11 +34,10 @@
 
 #include <algorithm>
 #include <atomic>
-#include <condition_variable>
-#include <list>
 #include <memory>
 
 #include "common.h"
+#include "thread_runner.h"
 #include "tools.h"
 
 class Timer {
@@ -54,9 +53,9 @@ public:
         };
 
         Parameter(timer_param_t param, int id)
+            : param(param)
+            , id(id)
         {
-            this->param = param;
-            this->id = id;
         }
 
         timer_param_t whoami() const { return param; }
@@ -70,14 +69,14 @@ public:
 
     class Subscriber {
     public:
-        virtual ~Subscriber() { log_debug("Subscriber destroyed"); }
-        virtual void timerNotify(std::shared_ptr<Parameter> parameter) = 0;
+        Subscriber() = default;
+        virtual ~Subscriber() = default;
+        virtual void timerNotify(const std::shared_ptr<Parameter>& parameter) = 0;
     };
 
-    Timer();
-    void run();
+    explicit Timer(std::shared_ptr<Config> config);
 
-    virtual ~Timer() { log_debug("Timer destroyed"); }
+    void run();
     void shutdown();
 
     /// \brief Add a subscriber
@@ -87,18 +86,17 @@ public:
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
-    void addTimerSubscriber(Subscriber* timerSubscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter = nullptr, bool once = false);
-    void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter = nullptr, bool dontFail = false);
+    void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, const std::shared_ptr<Parameter>& parameter, bool once = false);
+    void removeTimerSubscriber(Subscriber* timerSubscriber, const std::shared_ptr<Parameter>& parameter, bool dontFail = false);
     void triggerWait();
-    inline void signal() { cond.notify_one(); }
 
 protected:
     class TimerSubscriberElement {
     public:
-        TimerSubscriberElement(Subscriber* subscriber, unsigned int notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
+        TimerSubscriberElement(Subscriber* subscriber, std::chrono::seconds notifyInterval, const std::shared_ptr<Parameter>& parameter, bool once = false)
             : subscriber(subscriber)
             , notifyInterval(notifyInterval)
-            , parameter(std::move(parameter))
+            , parameter(parameter)
             , once(once)
         {
             updateNextNotify();
@@ -111,13 +109,14 @@ protected:
                 log_error("timer caught exception!\n");
             }
         }
-        inline void updateNextNotify()
+        void updateNextNotify()
         {
-            getTimespecAfterMillis(notifyInterval * 1000, &nextNotify);
+            auto start = currentTimeMS();
+            nextNotify = start + notifyInterval;
         }
-        inline struct timespec* getNextNotify() { return &nextNotify; }
+        std::chrono::milliseconds getNextNotify() const { return nextNotify; }
 
-        inline std::shared_ptr<Parameter> getParameter() const { return parameter; }
+        std::shared_ptr<Parameter> getParameter() const { return parameter; }
 
         bool operator==(const TimerSubscriberElement& other) const
         {
@@ -127,27 +126,23 @@ protected:
 
     protected:
         Subscriber* subscriber;
-        unsigned int notifyInterval;
+        std::chrono::milliseconds notifyInterval;
         std::shared_ptr<Parameter> parameter;
-        struct timespec nextNotify;
+        std::chrono::milliseconds nextNotify {};
         bool once;
     };
 
     std::mutex waitMutex;
-    std::condition_variable cond;
-    std::list<TimerSubscriberElement> subscribers;
-    std::atomic_bool shutdownFlag;
+    std::vector<TimerSubscriberElement> subscribers;
+    std::atomic_bool shutdownFlag {};
 
     void notify();
-    struct timespec* getNextNotifyTime();
+    std::chrono::milliseconds getNextNotifyTime() const;
 
 private:
-    static void* staticThreadProc(void* arg);
     void threadProc();
-    pthread_t thread;
-
-    std::mutex mutex;
-    using AutoLock = std::lock_guard<decltype(mutex)>;
+    std::shared_ptr<Config> config;
+    std::unique_ptr<StdThreadRunner> threadRunner;
 };
 
 #endif // __TIMER_H__

@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_clients.cc - this file is part of Gerbera.
-    
-    Copyright (C) 2020 Gerbera Contributors
-    
+
+    Copyright (C) 2020-2022 Gerbera Contributors
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -25,146 +25,284 @@
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 
 #include "upnp_clients.h" // API
-
+#include "config/client_config.h"
+#include "config/config.h"
 #include "util/tools.h"
 
-// table of supported clients (sequence of entries matters!)
-static const struct ClientInfo clientInfo[] = {
-    // Used for not explicitely listed clients, must be first entry
-    {
-        "Unknown",
-        ClientType::Unknown,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::None,
-        NULL },
-    // User-Agent: Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
-    {
-        "BubbleUPnP",
-        ClientType::BubbleUPnP,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::UserAgent,
-        "UPnP/1.0 BubbleUPnP" },
-    // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
-    {
-        "AllShare",
-        ClientType::SamsungAllShare,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::UserAgent,
-        "SEC_HHP_[PC]" },
-    // Samsung Series [Q] TVs (2019)
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
-    {
-        "Samsung Series [Q] TVs",
-        ClientType::SamsungSeriesQ,
-        QUIRK_FLAG_SAMSUNG,
-        ClientMatchType::UserAgent,
-        "SEC_HHP_[TV] Samsung Q" },
-    // Samsung Blu-ray Player BD-D5100
-    // User-Agent: DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
-    {
-        "Samsung Blu-ray Player BD-D5100",
-        ClientType::SamsungBDP,
-        QUIRK_FLAG_SAMSUNG,
-        ClientMatchType::UserAgent,
-        "SEC_HHP_BD" },
-    // Samsung other TVs
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
-    // User-Agent: DLNADOC/1.50 SEC_HHP_ Family TV/1.0
-    // User-Agent: DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
-    {
-        "Samsung other TVs",
-        ClientType::SamsungSeriesCDE,
-        QUIRK_FLAG_SAMSUNG,
-        ClientMatchType::UserAgent,
-        "SEC_HHP_" },
-    // Samsung Blu-ray Player J5500
-    {
-        "Samsung Blu-ray Player J5500",
-        ClientType::SamsungBDJ5500,
-        QUIRK_FLAG_SAMSUNG,
-        ClientMatchType::UserAgent,
-        "[BD]J5500" },
-    // Gerbera, FRITZ!Box, etc...
-    // User-Agent: Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
-    // User-Agent: FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
-    {
-        "Standard UPnP",
-        ClientType::StandardUPnP,
-        QUIRK_FLAG_NONE,
-        ClientMatchType::UserAgent,
-        "UPnP/1.0" }
-};
+#include <array>
 
-void Clients::addClient(const struct sockaddr_storage* addr, const std::string& userAgent)
+#include <upnp.h>
+
+Clients::Clients(const std::shared_ptr<Config>& config)
 {
-    // detect type
-    const ClientInfo* info = nullptr;
-    for (const auto& i : clientInfo) {
-        if (!i.match)
-            continue;
-        if (i.matchType == ClientMatchType::UserAgent) {
-            if (userAgent.find(i.match) != std::string::npos) {
-                info = &i;
-                break;
-            }
-        }
-    }
+    refresh(config);
+}
 
-    {
-        AutoLock lock(mutex);
+void Clients::refresh(const std::shared_ptr<Config>& config)
+{
+    // table of supported clients (reverse search, sequence of entries matters!)
+    clientInfo = {
+        // Used for not explicitly listed clients, must be first entry
+        {
+            "Unknown",
+            ClientType::Unknown,
+            QUIRK_FLAG_NONE,
+            ClientMatchType::None,
+            "",
+        },
 
-        // even if not detect type we add entry, to log 'Found client' not to often
-        bool found = false;
-        for (auto& entry : *cache) {
-            if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) != 0)
-                continue;
-            entry.age = std::chrono::steady_clock::now();
-            if (entry.pInfo != info) {
-                assert(clientInfo[0].type == ClientType::Unknown);
-                log_debug("client change: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
-            }
-            entry.pInfo = info;
-            found = true;
-            break;
-        }
+        // Gerbera, FRITZ!Box, Windows 10, etc...
+        // User-Agent(actionReq): Linux/5.4.0-4-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.6
+        // User-Agent(actionReq): FRITZ!Box 5490 UPnP/1.0 AVM FRITZ!Box 5490 151.07.12
+        // User-Agent(actionReq): Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50
+        {
+            "Standard UPnP",
+            ClientType::StandardUPnP,
+            QUIRK_FLAG_NONE,
+            ClientMatchType::UserAgent,
+            "UPnP/1.0",
+        },
 
-        if (!found) {
-            assert(clientInfo[0].type == ClientType::Unknown);
-            log_debug("client add: {} '{}' -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), userAgent, info ? info->name : clientInfo[0].name);
-            auto add = ClientCacheEntry();
-            add.addr = *addr;
-            add.age = std::chrono::steady_clock::now();
-            add.pInfo = info;
-            cache->push_back(add);
-        }
+        // User-Agent(discovery): Linux/3.18.91-14843133-QB28034466 UPnP/1.0 BubbleUPnP/3.4.4
+        // User-Agent(fileInfo ): BubbleUPnP UPnP/1.1
+        // User-Agent(actionReq): Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4
+        {
+            "BubbleUPnP",
+            ClientType::BubbleUPnP,
+            QUIRK_FLAG_NONE,
+            ClientMatchType::UserAgent,
+            "BubbleUPnP",
+        },
+
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_ Family TV/1.0
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
+        {
+            "Samsung other TVs",
+            ClientType::SamsungSeriesCDE,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
+            ClientMatchType::UserAgent,
+            "SEC_HHP_",
+        },
+
+        // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
+        {
+            "AllShare",
+            ClientType::SamsungAllShare,
+            QUIRK_FLAG_NONE,
+            ClientMatchType::UserAgent,
+            "SEC_HHP_[PC]",
+        },
+
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
+        {
+            "Samsung Series [Q] TVs",
+            ClientType::SamsungSeriesQ,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
+            ClientMatchType::UserAgent,
+            "SEC_HHP_[TV] Samsung Q",
+        },
+
+        // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
+        {
+            "Samsung Blu-ray Player BD-D5100",
+            ClientType::SamsungBDP,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            ClientMatchType::UserAgent,
+            "SEC_HHP_BD",
+        },
+
+        // User-Agent: ?
+        {
+            "Samsung Blu-ray Player J5500",
+            ClientType::SamsungBDJ5500,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            ClientMatchType::UserAgent,
+            "[BD]J5500",
+        },
+
+        // User-Agent: ?
+        {
+            "Dual CR 510",
+            ClientType::IRadio,
+            QUIRK_FLAG_IRADIO,
+            ClientMatchType::UserAgent,
+            "EC-IRADIO/1.0",
+        },
+    };
+
+    auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
+    for (std::size_t i = 0; i < clientConfigList->size(); i++) {
+        auto clientConfig = clientConfigList->get(i);
+        clientInfo.push_back(*clientConfig->getClientInfo());
     }
 }
 
-void Clients::getInfo(const struct sockaddr_storage* addr, ClientInfo* pInfo)
+void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
+{
+#if 0 // only needed if UserAgent is not good enough
+    const ClientInfo* info = nullptr;
+
+    auto descXml = downloadDescription(descLocation);
+    if (descXml) {
+        // TODO: search for FriendlyName + ModelName
+        //(void)getInfoByType(userAgent, ClientMatchType::FriendlyName, &info);
+    }
+#endif
+}
+
+const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
+{
+    // 1. by IP address
+    auto info = getInfoByAddr(addr);
+    if (!info) {
+        // 2. by User-Agent
+        info = getInfoByType(userAgent, ClientMatchType::UserAgent);
+    }
+
+    // update IP or User-Agent match in cache
+    if (info) {
+        updateCache(addr, userAgent, info);
+    } else {
+        // 3. by cache
+        // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+        info = getInfoByCache(addr);
+    }
+
+    if (!info) {
+        // always return something, 'Unknown' if we do not know better
+        assert(clientInfo[0].type == ClientType::Unknown);
+        info = &clientInfo[0];
+
+        // also add to cache, for web-ui proposes only
+        updateCache(addr, userAgent, info);
+    }
+
+    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    return info;
+}
+
+const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) const
+{
+    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
+        if (c.matchType != ClientMatchType::IP)
+            return false;
+
+        if (c.match.find(':') != std::string::npos) {
+            // IPv6
+            struct sockaddr_in6 clientAddr = {};
+            clientAddr.sin6_family = AF_INET6;
+            if ((inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0))
+                return true;
+        } else if (c.match.find('.') != std::string::npos) {
+            // IPv4
+            struct sockaddr_in clientAddr = {};
+            clientAddr.sin_family = AF_INET;
+            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
+            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0)
+                return true;
+        }
+
+        return false;
+    });
+
+    if (it != clientInfo.end()) {
+        auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
+        log_debug("found client by IP (ip='{}')", ip);
+        return &(*it);
+    }
+
+    return nullptr;
+}
+
+const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchType type) const
+{
+    if (!match.empty()) {
+        auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
+        if (it != clientInfo.rend()) {
+            log_debug("found client by type (match='{}')", match);
+            return &(*it);
+        }
+    }
+
+    return nullptr;
+}
+
+const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) const
+{
+    AutoLock lock(mutex);
+
+    auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+
+    if (it != cache.end()) {
+        auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
+        log_debug("found client by cache (hostname='{}')", hostName);
+        return it->pInfo;
+    }
+
+    return nullptr;
+}
+
+void Clients::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
 {
     AutoLock lock(mutex);
 
     // house cleaning, remove old entries
-    auto now = std::chrono::steady_clock::now();
-    cache->erase(
-        std::remove_if(cache->begin(), cache->end(),
-            [now](const auto& entry) { return entry.age + std::chrono::hours(1) < now; }),
-        cache->end());
+    auto now = currentTime();
+    cache.erase(std::remove_if(cache.begin(), cache.end(),
+                    [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
+        cache.end());
 
-    const ClientInfo* info = &clientInfo[0]; // we always return something, 'Unknown' if we do not know better
-    assert(info->type == ClientType::Unknown);
-    for (const auto& entry : *cache) {
-        if (sockAddrCmpAddr((struct sockaddr*)&entry.addr, (struct sockaddr*)addr) != 0)
-            continue;
-        if (entry.pInfo)
-            info = entry.pInfo;
-        break;
+    auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
+        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+
+    if (it != cache.end()) {
+        it->last = now;
+        if (it->pInfo != pInfo) {
+            // client info changed, update all
+            it->age = now;
+            it->userAgent = userAgent;
+            it->pInfo = pInfo;
+        }
+    } else {
+        // add new client
+        cache.emplace_back(*addr, userAgent, now, now, pInfo);
     }
-
-    log_debug("client info: {} -> '{}'", sockAddrGetNameInfo((struct sockaddr*)addr), info->name);
-    *pInfo = *info;
 }
 
-std::mutex Clients::mutex;
-std::unique_ptr<std::vector<struct ClientCacheEntry>> Clients::cache = std::make_unique<std::vector<struct ClientCacheEntry>>();
+std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
+{
+#if defined(USING_NPUPNP)
+    std::string description, ct;
+    int errCode = UpnpDownloadUrlItem(location, description, ct);
+    if (errCode != UPNP_E_SUCCESS) {
+        log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
+        return {};
+    }
+    auto xml = std::make_unique<pugi::xml_document>();
+    auto ret = xml->load_string(description.c_str());
+#else
+    IXML_Document* descDoc = nullptr;
+    int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
+    if (errCode != UPNP_E_SUCCESS) {
+        log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
+        return {};
+    }
+
+    DOMString cxml = ixmlPrintDocument(descDoc);
+    auto xml = std::make_unique<pugi::xml_document>();
+    auto ret = xml->load_string(cxml);
+
+    ixmlFreeDOMString(cxml);
+    ixmlDocument_free(descDoc);
+#endif
+
+    if (ret.status != pugi::xml_parse_status::status_ok) {
+        log_debug("Unable to parse xml client description from {}", location);
+        return {};
+    }
+
+    return xml;
+}

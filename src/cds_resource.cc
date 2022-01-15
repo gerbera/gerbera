@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     cds_resource.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -32,52 +32,49 @@
 #include "cds_resource.h" // API
 
 #include <sstream>
-#include <utility>
 
 #include "util/tools.h"
 
 #define RESOURCE_PART_SEP '~'
 
-CdsResource::CdsResource(int handlerType)
+CdsResource::CdsResource(int handlerType, std::string_view options, std::string_view parameters)
+    : handlerType(handlerType)
 {
-    this->handlerType = handlerType;
+    this->options = dictDecode(options);
+    this->parameters = dictDecode(parameters);
 }
+
 CdsResource::CdsResource(int handlerType,
-    const std::map<std::string, std::string>& attributes,
-    const std::map<std::string, std::string>& parameters,
-    const std::map<std::string, std::string>& options)
+    std::map<std::string, std::string> attributes,
+    std::map<std::string, std::string> parameters,
+    std::map<std::string, std::string> options)
+    : handlerType(handlerType)
+    , attributes(std::move(attributes))
+    , parameters(std::move(parameters))
+    , options(std::move(options))
 {
-    this->handlerType = handlerType;
-    this->attributes = attributes;
-    this->parameters = parameters;
-    this->options = options;
 }
 
-void CdsResource::addAttribute(const std::string& name, std::string value)
+void CdsResource::addAttribute(resource_attributes_t res, const std::string& value)
 {
-    attributes[name] = std::move(value);
-}
-
-void CdsResource::removeAttribute(const std::string& name)
-{
-    attributes.erase(name);
+    attributes[MetadataHandler::getResAttrName(res)] = value;
 }
 
 void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
 {
-    for (const auto& it : additional) {
-        attributes[it.first] = it.second;
+    for (auto&& [key, val] : additional) {
+        attributes[key] = val;
     }
 }
 
-void CdsResource::addParameter(const std::string& name, std::string value)
+void CdsResource::addParameter(std::string name, std::string value)
 {
-    parameters[name] = std::move(value);
+    parameters.insert_or_assign(std::move(name), std::move(value));
 }
 
-void CdsResource::addOption(const std::string& name, std::string value)
+void CdsResource::addOption(std::string name, std::string value)
 {
-    options[name] = std::move(value);
+    options.insert_or_assign(std::move(name), std::move(value));
 }
 
 int CdsResource::getHandlerType() const
@@ -85,24 +82,24 @@ int CdsResource::getHandlerType() const
     return handlerType;
 }
 
-std::map<std::string, std::string> CdsResource::getAttributes() const
+const std::map<std::string, std::string>& CdsResource::getAttributes() const
 {
     return attributes;
 }
 
-std::map<std::string, std::string> CdsResource::getParameters() const
+const std::map<std::string, std::string>& CdsResource::getParameters() const
 {
     return parameters;
 }
 
-std::map<std::string, std::string> CdsResource::getOptions() const
+const std::map<std::string, std::string>& CdsResource::getOptions() const
 {
     return options;
 }
 
-std::string CdsResource::getAttribute(const std::string& name) const
+std::string CdsResource::getAttribute(resource_attributes_t res) const
 {
-    return getValueOrDefault(attributes, name);
+    return getValueOrDefault(attributes, MetadataHandler::getResAttrName(res));
 }
 
 std::string CdsResource::getParameter(const std::string& name) const
@@ -129,40 +126,26 @@ std::shared_ptr<CdsResource> CdsResource::clone()
     return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
 }
 
-std::string CdsResource::encode()
-{
-    // encode resources
-    std::ostringstream buf;
-    buf << handlerType;
-    buf << RESOURCE_PART_SEP;
-    buf << dict_encode(attributes);
-    buf << RESOURCE_PART_SEP;
-    buf << dict_encode(parameters);
-    buf << RESOURCE_PART_SEP;
-    buf << dict_encode(options);
-    return buf.str();
-}
-
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 {
-    std::vector<std::string> parts = split_string(serial, RESOURCE_PART_SEP, true);
-    int size = parts.size();
+    std::vector<std::string> parts = splitString(serial, RESOURCE_PART_SEP, true);
+    auto size = parts.size();
     if (size < 2 || size > 4)
         throw_std_runtime_error("Could not parse resources");
 
     int handlerType = std::stoi(parts[0]);
 
     std::map<std::string, std::string> attr;
-    dict_decode(parts[1], &attr);
-
     std::map<std::string, std::string> par;
-    if (size >= 3)
-        dict_decode(parts[2], &par);
-
     std::map<std::string, std::string> opt;
-    if (size >= 4)
-        dict_decode(parts[3], &opt);
 
-    auto resource = std::make_shared<CdsResource>(handlerType, attr, par, opt);
-    return resource;
+    attr = dictDecode(parts[1]);
+
+    if (size >= 3)
+        par = dictDecode(parts[2]);
+
+    if (size >= 4)
+        opt = dictDecode(parts[3]);
+
+    return std::make_shared<CdsResource>(handlerType, std::move(attr), std::move(par), std::move(opt));
 }

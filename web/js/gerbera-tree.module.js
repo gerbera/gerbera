@@ -4,7 +4,7 @@
 
     gerbera-tree.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -35,6 +35,7 @@ const treeViewCss = {
 
 let currentTree = [];
 let currentType = 'db';
+let pendingItems = [];
 
 const destroy = () => {
   currentTree = [];
@@ -55,15 +56,16 @@ const selectType = (type, parentId) => {
   currentType = type;
   const linkType = (currentType === 'db') ? 'containers' : 'directories';
 
+  var requestData = {
+    req_type: linkType,
+    parent_id: parentId,
+    select_it: 0
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: linkType,
-      sid: Auth.getSessionId(),
-      parent_id: parentId,
-      select_it: 0
-    }
+    data: requestData
   })
     .then((response) => loadTree(response))
     .then(() => checkForUpdates())
@@ -73,6 +75,8 @@ const selectType = (type, parentId) => {
 const onItemSelected = (event) => {
   const folderList = event.target.parentElement;
   const item = event.data;
+
+  GerberaApp.setCurrentItem(event);
 
   selectTreeItem(folderList);
   Items.treeItemSelected(item);
@@ -84,11 +88,15 @@ const onItemExpanded = (event) => {
   const folderList = event.target.parentElement;
   const item = event.data;
 
+  GerberaApp.setCurrentItem(event);
+
   if (item.gerbera && item.gerbera.id) {
     if (tree.tree('closed', folderName) && item.gerbera.childCount > 0) {
       fetchChildren(item.gerbera).then(function (response) {
         var childTree = transformContainers(response, false);
         tree.tree('append', $(folderList), childTree);
+
+        initSelection(pendingItems);
       })
     } else {
       tree.tree('collapse', $(folderList));
@@ -116,7 +124,7 @@ const loadTree = (response, config) => {
   config = $.extend({}, treeViewCss, treeViewEvents, config);
   if (response.success) {
     if (tree.hasClass('grb-tree')) {
-      tree.tree('destroy')
+      tree.tree('destroy');
     }
 
     Trail.destroy();
@@ -128,23 +136,52 @@ const loadTree = (response, config) => {
     });
 
     Trail.makeTrail($('#tree span.folder-title').first());
+
+    pendingItems = GerberaApp.currentItem();
+
+    if (pendingItems){
+      initSelection(pendingItems);
+    }
+  }
+};
+
+const initSelection = (currentItems) => {
+  pendingItems = [];
+  var success = false;
+  currentItems.forEach((item) => {
+    if (item.startsWith('grb-tree')) {
+      var jq = $('#' + item);
+      if (jq && jq.length > 0 && jq[0].children && jq[0].children.length > 1 && jq[0].children[1]) {
+        jq[0].children[1].click();
+        success = true;
+      } else {
+        pendingItems.push(item);
+      }
+    }
+  });
+  if (!success) { // avoid loop if no item was in tree (anymore)
+    pendingItems = [];
   }
 };
 
 const fetchChildren = (gerberaData) => {
   currentType = GerberaApp.getType();
   const linkType = (currentType === 'db') ? 'containers' : 'directories';
+  var requestData = {
+    req_type: linkType,
+    parent_id: gerberaData.id,
+    select_it: 0
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: linkType,
-      sid: Auth.getSessionId(),
-      parent_id: gerberaData.id,
-      select_it: 0
-    }
+    data: requestData
   })
-    .catch((err) => GerberaApp.error(err));
+  .catch((err) => {
+    console.log(err);
+    GerberaApp.error(err);
+  });
 };
 
 const transformContainers = (response, createParent) => {
@@ -182,8 +219,12 @@ const transformContainers = (response, createParent) => {
       id: item.id,
       childCount: item.child_count,
       autoScanMode: item.autoscan_mode,
-      autoScanType: item.autoscan_type
+      autoScanType: item.autoscan_type,
+      image: ('image' in item) ? item.image : null
     };
+    if (!GerberaApp.serverConfig.enableThumbnail) {
+      node.gerbera.image = null;
+    }
     if (createParent) {
       parent.nodes.push(node);
     } else {

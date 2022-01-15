@@ -1,37 +1,108 @@
-FROM alpine:3.11
+FROM alpine:3.15 AS builder
 
-RUN apk add --no-cache tini gcc g++ pkgconf make automake autoconf libtool \
-	util-linux-dev sqlite-dev mariadb-connector-c-dev cmake zlib-dev fmt-dev \
-	file-dev libexif-dev curl-dev ffmpeg-dev ffmpegthumbnailer-dev wget xz \
-	libmatroska-dev libebml-dev taglib-dev
+RUN apk add --no-cache  \
+    bash \
+    cmake zlib-dev \
+    curl-dev \
+    duktape-dev \
+    ffmpeg-dev \
+    ffmpegthumbnailer-dev \
+    file-dev \
+    fmt-dev \
+    g++ \
+    gcc \
+    git \
+    libebml-dev \
+    libexif-dev \
+    libmatroska-dev \
+    make \
+    mariadb-connector-c-dev \
+    pkgconf \
+    pugixml-dev \
+    spdlog-dev \
+    sqlite-dev \
+    taglib-dev \
+    tini \
+    util-linux-dev \
+    # packages to build libupnp
+    autoconf \
+    automake \
+    libtool \
+    file
 
+# Build libupnp
+WORKDIR /libupnp_build
+COPY scripts/install-pupnp.sh scripts/versions.sh ./
+RUN ./install-pupnp.sh
+
+# Build Gerbera
 WORKDIR /gerbera_build
-
 COPY . .
+RUN cmake -S . -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_CXX_FLAGS=-g1 \
+        -DWITH_MAGIC=YES \
+        -DWITH_MYSQL=YES \
+        -DWITH_CURL=YES \
+        -DWITH_JS=YES \
+        -DWITH_TAGLIB=YES \
+        -DWITH_AVCODEC=YES \
+        -DWITH_FFMPEGTHUMBNAILER=YES \
+        -DWITH_EXIF=YES \
+        -DWITH_LASTFM=NO \
+        -DWITH_SYSTEMD=NO \
+        -DWITH_DEBUG=YES \
+    && \
+    cmake --build build -v -j$(nproc)
 
-RUN mkdir build && \
-    cd build && \
-    sh ../scripts/install-pugixml.sh && \
-    sh ../scripts/install-pupnp.sh && \
-    sh ../scripts/install-duktape.sh && \
-    sh ../scripts/install-spdlog.sh && \
-    cmake ../ -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
-        -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 \
-        -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 && \
-    make -j`nproc` && \
-    make install && \
-    rm -rf /gerbera_build
+FROM alpine:3.15 AS gerbera
+RUN apk add --no-cache \
+    curl \
+    duktape \
+    ffmpeg-libs \
+    ffmpegthumbnailer \
+    file \
+    fmt \
+    libebml \
+    libexif \
+    libmatroska \
+    mariadb-connector-c \
+    pugixml \
+    spdlog \
+    sqlite \
+    sqlite-libs \
+    su-exec \
+    taglib \
+    tini \
+    tzdata \
+    util-linux \
+    zlib
 
-RUN mkdir -p /root/.config/gerbera &&\
-    gerbera --create-config > /root/.config/gerbera/config.xml &&\
-    sed 's/<import hidden-files="no">/<import hidden-files="no">\n\
-<autoscan use-inotify="yes">\n\
-<directory location="\/root" mode="inotify" level="full" \
-recursive="yes" hidden-files="no"\/>\n\
-<\/autoscan>/' -i /root/.config/gerbera/config.xml
+# Copy libupnp
+COPY --from=builder /usr/local/lib/libixml.so.* /usr/local/lib/libupnp.so.* /usr/lib/
 
-EXPOSE 49152
+# Copy Gerbera
+COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
+COPY --from=builder /gerbera_build/scripts/js /usr/local/share/gerbera/js
+COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
+COPY --from=builder /gerbera_build/src/database/*/*.sql /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
+COPY --from=builder /gerbera_build/scripts/docker/docker-entrypoint.sh /usr/local/bin
+
+RUN addgroup -S gerbera 2>/dev/null && \
+    adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G gerbera -g gerbera gerbera 2>/dev/null && \
+    mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
+    mkdir /content && chmod 777 /content
+
+EXPOSE 49494
 EXPOSE 1900/udp
 
-ENTRYPOINT ["/sbin/tini", "--"]
-CMD [ "gerbera","-p", "49152" ]
+ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
+CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
+
+FROM gerbera AS with_transcoding
+RUN apk add --no-cache \
+    ffmpeg \
+    libheif-tools \
+    vlc
+
+FROM gerbera AS default

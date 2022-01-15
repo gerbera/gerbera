@@ -13,12 +13,6 @@ is needed to work within the recent technologies of the web.  The Gerbera
 user interface leverages new conventions to improve the maintainability of the
 code and provide new user features.
 
-### old.html
-
-The `/web/old.html` file is the old frameset user interface.  You can continue to access the old webpage
-by clicking the `Leave Beta` link on the Gerbera UI menu.
-
-
 ### Reporting an Issue
 
 If, while using Gerbera Web UI, you have suggestions for improvement

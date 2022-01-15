@@ -1,6 +1,6 @@
-# Find a UUID Implementaion
+# Find a UUID Implementation
 #
-# Supports e2fsprogs libuuid or BSD native UUID
+# Supports e2fsprogs UUID or BSD native UUID
 #
 # UUID_FOUND               True if a uuid got found
 # UUID_INCLUDE_DIRS        Location of uuid headers
@@ -9,7 +9,6 @@
 # FOUND_LIBUUID            e2fsprogs UUID found
 #
 
-INCLUDE(FindPkgConfig)
 INCLUDE(CheckCXXSourceRuns)
 INCLUDE(FindPackageHandleStandardArgs)
 
@@ -27,19 +26,35 @@ check_cxx_source_runs("
 if (FOUND_BSD_UUID)
 	message(STATUS "Looking for BSD native UUID - found")
 	set(UUID_FOUND 1)
+
+	FIND_PATH(UUID_INCLUDE_DIRS uuid.h)
+	add_library(UUID::UUID INTERFACE IMPORTED)
+	set_property(TARGET UUID::UUID PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}")
+	set_property(TARGET UUID::UUID PROPERTY INTERFACE_COMPILE_DEFINITIONS "BSD_NATIVE_UUID")
 endif()
 
 if(NOT UUID_FOUND)
 	message(STATUS "Looking for libuuid")
-	pkg_search_module(_UUID libuuid QUIET)
-	if(NOT _UUID_FOUND)
+	find_package(PkgConfig QUIET)
+	pkg_search_module(PC_UUID QUIET IMPORTED_TARGET GLOBAL uuid)
+	if(PC_UUID_FOUND)
+		message(STATUS "Looking for libuuid - found")
+		add_library(UUID::UUID ALIAS PkgConfig::PC_UUID)
+		set(UUID_FOUND 1)
+	else()
 		FIND_PATH(UUID_INCLUDE_DIRS uuid/uuid.h)
 		FIND_LIBRARY(UUID_LIBRARIES uuid)
 
 		if(UUID_INCLUDE_DIRS)
 			message(STATUS "Looking for libuuid - found")
+
+			if(NOT TARGET UUID::UUID)
+				add_library(UUID::UUID INTERFACE IMPORTED)
+				set_property(TARGET UUID::UUID PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${UUID_INCLUDE_DIRS}")
+				set_property(TARGET UUID::UUID PROPERTY INTERFACE_LINK_LIBRARIES "${UUID_LIBRARIES}")
+			endif()
+
 			set(UUID_FOUND 1)
-			set(FOUND_LIBUUID 1)
 		endif()
 	endif()
 endif()

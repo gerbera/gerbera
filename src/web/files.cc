@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     files.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,52 +31,51 @@
 
 #include "pages.h" // API
 
-#include <utility>
-
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-web::files::files(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+void Web::Files::process()
 {
-}
+    checkRequest();
 
-void web::files::process()
-{
-    check_request();
-
-    std::string path;
     std::string parentID = param("parent_id");
-    if (parentID == "0")
-        path = FS_ROOT_DIRECTORY;
-    else
-        path = hex_decode_string(parentID);
+    std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);
 
     auto root = xmlDoc->document_element();
 
     auto files = root.append_child("files");
     xml2JsonHints->setArrayName(files, "file");
+    xml2JsonHints->setFieldType("filename", "string");
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 
-    bool exclude_config_files = true;
+    bool excludeConfigFiles = true;
 
-    for (auto& it : fs::directory_iterator(path)) {
+    std::error_code ec;
+    std::map<std::string, fs::path> filesMap;
+    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
+
+    for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
-        std::error_code ec;
-        if (!isRegularFile(it.path(), ec))
+        if (!isRegularFile(it, ec))
             continue;
-        if (exclude_config_files && startswith(filepath.filename(), "."))
+        if (excludeConfigFiles && startswith(filepath.filename().string(), "."))
             continue;
+        if (!includesFullpath.empty()
+            && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
+                [=](auto&& sub) { return startswith(filepath.string(), sub); }))
+            continue; // skip unwanted file
 
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        std::string id = hexEncode(filepath.c_str(), filepath.string().length());
+        filesMap.try_emplace(id, filepath.filename());
+    }
 
+    auto f2i = StringConverter::f2i(config);
+    for (auto&& [key, val] : filesMap) {
         auto fe = files.append_child("file");
-        fe.append_attribute("id") = id.c_str();
-        auto f2i = StringConverter::f2i(config);
-        fe.append_attribute("filename") = f2i->convert(filepath.filename()).c_str();
+        fe.append_attribute("id") = key.c_str();
+        fe.append_attribute("filename") = f2i->convert(val).c_str();
     }
 }

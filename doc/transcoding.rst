@@ -284,14 +284,6 @@ We also provide a way to specify that a profile should only process the Theora c
 
     <accept-ogg-theora>yes</accept-ogg-theora>
 
-A new feature that was added in the 0.12 version possibility to specify that transcoded streams should be sent out using
-chunked HTTP encoding. This is now the default setting, since chunked encoding is preferred with content where the content
-length is not known. The setting can be controlled on a per profile basis using the following parameter:
-
-.. code-block:: xml
-
-    <use-chunked-encoding>yes</use-chunked-encoding>
-
 
 Testing And Troubleshooting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

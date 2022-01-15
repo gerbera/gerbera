@@ -3,7 +3,7 @@
 
   playlists.js - this file is part of Gerbera.
 
-  Copyright (C) 2018 Gerbera Contributors
+  Copyright (C) 2018-2022 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -20,174 +20,38 @@
   $Id$
 */
 
-var title, line, matches, file, lastId, id,
-    type, playlistLocation, playlistOrder = 1,
-    playlist_title, dot_index, playlistChain, playlistDirChain,
-    last_path;
-
-// doc-add-playlist-item-begin
-function addPlaylistItem(location, title, playlistChain, order) {
-    // Determine if the item that we got is an URL or a local file.
-
-    if (location.match(/^.*:\/\//)) {
-        var exturl = {};
-
-        // Setting the mimetype is crucial and tricky... if you get it
-        // wrong your renderer may show the item as unsupported and refuse
-        // to play it. Unfortunately most playlist formats do not provide
-        // any mimetype information.
-
-        exturl.mimetype = 'audio/mpeg';
-
-        // Make sure to correctly set the object type, then populate the
-        // remaining fields.
-
-        exturl.objectType = OBJECT_TYPE_ITEM_EXTERNAL_URL;
-
-        exturl.location = location;
-        exturl.title = (title ? title : location);
-        exturl.protocol = 'http-get';
-        exturl.upnpclass = UPNP_CLASS_ITEM_MUSIC_TRACK;
-        exturl.description = "Song from " + playlist.title;
-
-        // This is a special field which ensures that your playlist files
-        // will be displayed in the correct order inside a playlist
-        // container. It is similar to the id3 track number that is used
-        // to sort the media in album containers.
-
-        exturl.playlistOrder = (order ? order : playlistOrder++);
-
-        // Your item will be added to the container named by the playlist
-        // that you are currently parsing.
-
-        addCdsObject(exturl, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
-    } else {
-        if (location.substr(0,1) !== '/') {
-            location = playlistLocation + location;
-        }
-
-        var cds = getCdsObject(location);
-        var item = copyObject(cds);
-
-        item.playlistOrder = (order ? order : playlistOrder++);
-        item.title = item.meta[M_TITLE];
-        addCdsObject(item, playlistChain,  UPNP_CLASS_PLAYLIST_CONTAINER);
-    }
-}
-// doc-add-playlist-item-end
-
 print("Processing playlist: " + playlist.location);
 
-playlistLocation = playlist.location.substring(0, playlist.location.lastIndexOf('/') + 1);
+const playlistLocation = playlist.location.substring(0, playlist.location.lastIndexOf('/') + 1);
 
 // the function getPlaylistType is defined in common.js
-type = getPlaylistType(playlist.mimetype);
+const type = getPlaylistType(playlist.mimetype);
+var playlist_title = playlist.title;
+var last_path = getLastPath(playlist.location);
 
-// the function createContainerChain is defined in common.js
-playlist_title = playlist.title;
-dot_index = playlist_title.lastIndexOf('.');
-if (dot_index > 1) {
-    playlist_title = playlist_title.substring(0, dot_index);
-}
+const chain = {
+    playlistRoot: { title: 'Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
+    allPlaylists: { title: 'All Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
-playlistChain = createContainerChain(['Playlists', 'All Playlists', playlist_title]);
-last_path = getLastPath(playlist.location);
+    title: { title: playlist_title, refID: playlist.id, objectType: OBJECT_TYPE_CONTAINER, mtime: playlist.mtime, upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER, metaData: [] },
+    lastPath: { title: last_path, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
+};
+chain.playlistRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
 
+var playlistChain = addContainerTree([chain.playlistRoot, chain.allPlaylists, chain.title]);
+
+var playlistDirChain;
 if (last_path) {
-    playlistDirChain = createContainerChain(['Playlists', 'Directories', last_path, playlist_title]);
+    playlistDirChain = addContainerTree([chain.playlistRoot, chain.allDirectories, chain.lastPath, chain.title]);
 }
 
 if (type === '') {
     print("Unknown playlist mimetype: '" + playlist.mimetype + "' of playlist '" + playlist.location + "'");
-}
-// doc-playlist-m3u-parse-begin
-else if (type === 'm3u') {
-    title = null;
-    line = readln();
-
-    // Here is the do - while loop which will read the playlist line by line.
-    do {
-        var matches = line.match(/^#EXTINF:(-?\d+),\s?(\S.+)$/i);
-        if (matches) {
-            // duration = matches[1]; // currently unused
-            title = matches[2];
-        }
-        else if (!line.match(/^(#|\s*$)/)) {
-            // Call the helper function to add the item once you gathered the data:
-            addPlaylistItem(line, title, playlistChain);
-
-            // Also add to "Directories"
-            if (playlistDirChain)
-                addPlaylistItem(line, title, playlistDirChain);
-
-            title = null;
-        }
-        
-        line = readln();
-    } while (line);
-}
-// doc-playlist-m3u-parse-end
-else if (type === 'pls') {
-    title = null;
-    file = null;
-    lastId = -1;
-    line = readln();
-    do {
-        if (line.match(/^\[playlist\]$/i)) {
-            // It seems to be a correct playlist, but we will try to parse it
-            // anyway even if this header is missing, so do nothing.
-        } else if (line.match(/^NumberOfEntries=(\d+)$/i)) {
-            // var numEntries = RegExp.$1;
-        } else if (line.match(/^Version=(\d+)$/i)) {
-            // var plsVersion =  RegExp.$1;
-        } else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i)) {
-            matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
-            var thisFile = matches[2];
-            id = parseInt(matches[1], 10);
-            if (lastId === -1)
-                lastId = id;
-            if (lastId !== id)
-            {
-                if (file)
-                {
-                    addPlaylistItem(file, title, playlistChain, lastId);
-                    if (playlistDirChain)
-                        addPlaylistItem(file, title, playlistDirChain, lastId);
-                }
-
-                title = null;
-                lastId = id;
-            }
-            file = thisFile
-        } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
-            matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
-            var thisTitle = matches[2];
-            id = parseInt(matches[1], 10);
-            if (lastId === -1)
-                lastId = id;
-            if (lastId !== id)
-            {
-                if (file)
-                {
-                    addPlaylistItem(file, title, playlistChain, lastId);
-                    if (playlistDirChain)
-                        addPlaylistItem(file, title, playlistDirChain, lastId);
-                }
-
-                file = null;
-                lastId = id;
-            }
-            title = thisTitle;
-        } else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i)) {
-            // currently unused
-        }
-        
-        line = readln();
-    } while (line);
-    
-    if (file) {
-        addPlaylistItem(file, title, playlistChain, lastId);
-        if (playlistDirChain)
-            addPlaylistItem(file, title, playlistDirChain, lastId);
-    }
+} else if (type === 'm3u') {
+    readM3uPlaylist(playlist_title, playlistChain, playlistDirChain);
+} else if (type === 'pls') {
+    readPlsPlaylist(playlist_title, playlistChain, playlistDirChain);
+} else if (type === 'asx') {
+    readAsxPlaylist(playlist_title, playlistChain, playlistDirChain);
 }

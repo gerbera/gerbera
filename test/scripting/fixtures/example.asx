@@ -1,0 +1,10 @@
+<ASX version = "3.0">
+<TITLE>ASX Playlist</TITLE>
+<ENTRY>
+<TITLE>ASX Playlist Entry</TITLE>
+<AUTHOR>Gerbera Team</AUTHOR>
+<COPYRIGHT>GPL</COPYRIGHT>
+<REF HREF = "https://10.0.0.10/pl/stream/12110/1641070200" />
+<param name="mimetype" value="video/mp4"/>
+</ENTRY>
+</ASX>

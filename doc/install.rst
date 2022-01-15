@@ -12,6 +12,8 @@ Docker
 
 Docker images are provided on `Docker Hub <https://hub.docker.com/r/gerbera/gerbera>`_, we recommend running a tagged version.
 
+On Raspbian the container must be run with ``privileged: true`` to get time sync running.
+
 .. code-block:: sh
 
     docker pull gerbera/gerbera
@@ -21,7 +23,23 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`_.
+We maintain a `Ubuntu Repository <https://gerbera.jfrog.io/>`_.
+
+To install the latest tagged release (>=1.8.0):
+
+.. code-block:: sh
+
+    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
+    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian
+
+Or for the latest code install git builds:
+
+.. code-block:: sh
+
+    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
+    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian-git
+
+Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`_.
 
 .. code-block:: sh
 
@@ -54,6 +72,22 @@ Gerbera is available in Fedora 29 or later.
 .. code-block:: sh
 
     sudo dnf install gerbera
+
+FreeBSD
+~~~~~~~~~~~~~~~~~
+.. index:: FreeBSD
+
+Gerbera is available via packages and ports collection.
+
+.. code-block:: sh
+
+    pkg install gerbera
+
+or
+
+.. code-block:: sh
+
+   cd /usr/ports/net/gerbera/ && make install clean
 
 CentOS
 ~~~~~~~~~~~~~~~~~
@@ -92,6 +126,13 @@ Entware (Optware)
 .. index:: Optware
 
 Gerbera is available in `Entware <https://github.com/Entware/rtndev/tree/master/gerbera>`_ for your embedded device/router!
+
+
+OpenWrt (OpenWrt)
+~~~~~~~~~~~~~~~~~
+.. index:: OpenWrt
+
+Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`_ for your embedded device/router!
 
 
 macOS

@@ -1,7 +1,615 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### v1.1.0
+### v1.9.2
 
+- replace POSIX remove with fs::remove
+- Don't erase from empty vector
+- replace some {} with ()
+- Make title of search result configurable + set searchable container flag
+- fix lastfm compilation
+- small fmt::format conversion
+- clang-tidy
+- Handle multi-valued meta data
+- Refactor TranscodeExternalHandler
+- Modernize parts of the request handling with C++17 and add UTs
+- std::find conversion
+- static_cast conversions
+- Canonicalize path from playlist file
+- Rewrite split string
+- Update command generator method
+- std mem conversions
+- Unify simple SQL queries
+- std file conversions
+- capture several lambda refs by value
+- Replace stdio with fmt calls
+- Simplify AddUpdateTable vectors without shared_ptr
+- replace several substr calls with startswith
+- use std::int32_t
+- Allow adding metadata from media file tags
+- replace substr with startswith
+- use std::exit
+- use std::abort
+- Fix regressions of 1.9.1
+- Downgrade libspdlog dependency to 1.8.1
+- Update instructions to match CMake requirements
+- use std::system
+- use std::strlen
+- change size_t to std
+- const ref conversion
+- more emplace conversions
+- taglib: demote warning to debug
+- rvalue conversions
+- move variables down
+- clang-tidy: remove redundant c_str
+- simplify it loop slightly
+- remove dead assignments
+- clang-tidy: performance fixes
+- fix wrong value being assigned
+- remove std::insert
+- replace loop with std::find
+- simplify loop
+- Only count items with distinct IDs in TotalMatches search result.
+- Optimize CdsObject creation/updates
+- Ensure Root dir teminates with /
+- Update build scripts to run on Raspbian
+- fix some weird memory leak
+- remove last std::list
+- remove some lambdas
+- std::shared_ptr<Executor> value conversions
+- add std::move for some maps
+- use auto for Timer constructors
+- rename several shadowed variables
+- use auto
+- splitUrl: use std::string
+- remove sort of redundant std::move
+- use string::npos
+- use C++ macro to check for starts_with
+- trimString changes
+- use C++ macro to check for to_underlying
+- Add Composer Tag to Metacontent Handler
+- Use lambda in UpnpXMLBuilder::renderObject to trim strings
+- gitignore: Add buildconfig
+- use auto with constexpr
+- remove unused variables
+- replace pointers with references
+- remove unique_ptr casts to base class
+- some matroska cleanups
+- remove return after throw
+- remove pointless size_t casts
+- add maybe_unused for builds without DEBUG
+- Refactor database schema to remove unused indices
+- Remove unique_ptr objects where stack memory is sufficient
+- Ensure EnumMapper creates its own copies
+- don't pass string_view by reference
+- default init mode
+- don't assign nullptr to std::string
+- replace find_if with any_of
+- move getLocation call down
+- Batch inserts to metadata table
+- Revert "use targets for libmatroska and libebml"
+- Update README.md
+- update FindFilesystem.cmake
+- convert reference to value
+- use targets for libmatroska and libebml
+- remove optional check
+- use updated FindLibExiv2
+- use normal libcurl search
+- CamelCase changes
+- Conan: Require CMake >=3.18
+- Fix FreeBSD with libinotify, add to CI
+- use updated FindTagLib.cmake
+- const ref conversion
+- Simplify or remove unnecessary fmt::format calls
+- remove unused assigned values
+- remove unused variable
+- cppcheck: add const
+- default init some members
+- cppcheck: fix inconsistent declarations
+- avoid nullptr assignment
+
+### v1.9.1
+
+- use const auto&
+- replace for_each with copy_if
+- avoid default nullptr initialization
+- remove some string calls
+- make shared_ptr reference const
+- remove pointless empty line
+- get rid of auto&& with structured bindings
+- simplify bool
+- some auto&& removals
+- add missing std::vector
+-  string_view should not be taken by reference 
+- Build debian with arguments
+- libfmt formatters for quoted SQL identifiers
+- Read flac audio properties even if image does not exist
+- Split CI validation jobs
+- Fix linkage error in on aarch64 with g++-10
+- match return type
+- Add support for default values in config UI
+- improve debian script
+- Use correct codename for unstable debian
+- debian::unstable uses libduktape206
+- add PathBase constructor
+- use some auto
+- simplify while loop slightly
+- avoid doing work in if statements
+- manual const conversions
+- clang-tidy: make member function const
+- more move with push_back
+- use more auto in taglib
+- get rid of unused variable
+- pass std::string by const reference
+- add variout maybe_unused
+- change to auto&&
+- Add validation for DynamicContent::location
+- pass ClientInfo by unique_ptr
+- add ClientCacheEntry constructor
+- use some auto and CTAD
+- remove pointless to_string
+- remove single argument std::string
+- convert vector to deque
+- replace several emplace_back with push_back
+- convert Quirks to unique_ptr
+- Refresh Clients config in ClientList after change of config in UI
+- Code refactoring and performance enhancements in sql_database
+- convert vector to deque
+- rvalue reference conversions
+- several auto conversions
+- Add M3U8 support
+- remove shared_ptr from vector
+- test cleanups
+- get rid of ClientCacheEntry pointer
+- fix bad unique_ptr usage
+- Make UpnpXMLBuilder::orderedHandler nonstatic
+- Fix mapConfigOption return
+- {} conversions
+- prefer xml-node children over xpath
+- add missing move
+- basic clang tidy
+- replace several inserts with std::copy
+- clang-tidy: use emplace_back
+- use std::string_view in if statements
+- remove const char version of quote
+- use auto and CTAD
+- Update required versions for spdlog and libfmt
+- Use fixed spdlog and fmt in all debian systems
+- use newer spdlog and fmt for debian
+- Add dynamic containers setup
+- fmt disallows string_view as format specifier
+- Change generation of SQL statements to format
+- final unique_ptr removals
+- Fix broken upgrade script
+- const ref conversions
+- move unique_ptr removals
+- emplace_back conversions
+- const ref conversions
+- replace temp variable with returns
+- Update Dockerfile
+- return string instead of const char
+
+### v1.9.0
+
+- fix wrong define
+- use auto instead of const char*
+- move several variables down
+- unique_ptr removals
+- getTimespecAfterMillis: return ret instead of void
+- Generate namespace attributes required for properties
+- replace reference parameter with std::pair
+- clang-tidy 8 fixes
+- Allow setting resource order
+- remove pointless {}
+- use map.emplace
+- remove some = {}
+- use thread constructor
+- Re-add CI check with clang
+- Send container updates
+- fixup lambda for C++20 compatibility
+- lastfm: switch to C++ API
+- move make_unique down
+- use move with shared_ptr
+- make uiUpdateIDs a unique_ptr
+- remove pointless const_cast
+- Factor out transactions to reduce overhead when disabled
+- Fix X_GetFeatureList (Samsung)
+- some move
+- move make_shared outside of initializer list
+- switch xmlDoc to unique_ptr
+- remove ret variable
+- lambda conversion
+- more unique_ptr
+- some CTAD
+- remove pointless temporary
+- small cleanups
+- Add more documentation and cleanup SQL init code
+- remove wrong static
+- Move resources to separate table
+- several string_view conversions
+- convert expandName to string_view
+- Add link to database doc
+- Add migration hook to version update
+- Automatically load options
+- use make_pair in std::array
+- remove std from std::next
+- remove aslowercase
+- pass by value
+- Add DLNA profiles strings and visible file system directories to configuration
+- don't default assign nullptr to smart pointers
+- add missing const
+- remove == nullptr
+- Add ProductCap to please Samsung TVs
+- simplify pidfile write
+- Move db upgrade commands to config file
+- clang-tidy: remove implicit bool conversions
+- Add codec info to resource data
+- Subtitle: Add resouce and CaptionInfoEx
+- remove pointless constructor
+- clang-tidy: don't use else after return
+- several constructor changes
+- static
+- change length parameter to size_t
+- add missing header
+- Implement EnumIterator
+- SQLDatabase: Refactor init and upgrade
+- const member function conversions
+- clang-tidy: add missing functions
+- add a missing this->
+- pass 0 to std::unordered_
+- replace std::list with std::vector
+- remove manual loop
+- remove pointless find
+- small lambda conversion
+- Regression: Samsung Compatibility
+- switch to C++ ffmpegthumbnailer API
+- cosmetic map changes
+- remove two pointless unique_ptrs
+- declare AVFormatContext as struct
+- default init some members
+- Fix MySQL migration
+- switch several for loops to use size_t
+- replace POSIX file stuff with C
+- Implemement dynamic containers
+- small error handle
+- replace several usages of format with to_string
+- remove several {}
+- don't throw in noexcept destructors
+- Fix lastfm compilation
+- use make_pair
+- use a unique_ptr in lambda
+- nppnp changes
+- Close memory leak by duplicate call to ixmlCloneDOMString
+- replace rand with std::random
+- server: default init some variables
+- fix std::accumulate
+- add missing default initialization
+- default initialize some io stuff
+- add missing close
+- add missing nullptr check
+- default initialize members in mysql
+- Simplify and cleanup
+- string ref to string_view conversion
+- Cleanup exifhandler
+- Assign clientInfo in a default constructor
+- pass by value and std::move
+- use sizeof for snprintf
+- Add configuration option for SopCast mimetypes
+- fix replace string functions
+- lambda conversion
+- clang-tidy: remove redundant specifiers
+- clang-tidy: use auto
+- clang-tidy: simplify boolean expression
+- Configuration of folders for resources
+- remove const so move can be used
+- replace const static with static const
+- default member init
+- use std::replace instead of replaceAllString
+- replace stringHash with single accumulate call
+- remove pointless blank lines
+- match else and if blocks
+- remove duplicate include
+- use raw strings for multi line ones
+- Dockerfile: add tzdata
+- more make_unique changes
+- make bultinClientInfo constexpr
+- add m4a support for taglib
+- add back several defaulted destructors
+- avoid unused template warning
+- clang: add missing move
+- default init some members
+- Cleanup legacy code
+- Clean up a bit
+- Cppcheck
+- Add documentation and template for Apache/NGinx as reverse proxy
+- Fix script syntax
+- clang-tidy applied to tests
+- Add build for ubuntu 21.04 hirsute hippo
+- create-config: Reset config dir to empty if not in command line
+- TagLib: Add support for aux data to all supported media types
+- Haiku patches
+- clangh-tidy: non const reference removal
+- manual structured binding conversions
+- clang-tidy: pass unique_ptr by value
+- clang-tidy: get rid of some long and short
+- clang-tidy: fix some narrowing conversions
+- clang-tidy: use auto&& to avoid warning
+- clang-tidy: C to C++ headers
+- clang-tidy: initialize some members
+- Refactor SearchHandler to use ColumnMapper instead of hard coded texts.
+- mostly unique_ptr changes
+- move some initializations up
+- Revert "initialize several unique_ptrs"
+- initialize several unique_ptrs
+
+### v1.8.2
+
+- Disable transactions by default
+- Refactor sort parsing to make it testable
+- Support configuration of structured layout
+- Factor out handling of config definitions into separate class
+- Display default config values on Web UI
+- initialize several unique_ptrs
+- move resize option to constructor
+- string_view to string conversions
+- pass SearchLexer by value
+- return std::nullopt for std::optional
+- remove pointless const_cast
+- Improve handling of default config values
+- several clang-tidy and manual cleanups
+- Fix parseSortStatement
+- mostly pass by value changes
+- Revert last_write_time to seconds since 1970
+- Encoding of web editor arguments
+- clang-analyzer and misc
+- Search query sign from beginning
+- use C++ cast
+- manual destructor changes
+- Fix double truncation of playlist name
+- clang: add missing moves
+- clang: remove CTAD in some places
+- Generate correct statement for metadata table
+- clang fixes
+- Make transactions for SQLite thread safe
+- CI: Bump Clang version
+- random stuff
+- add support for Cygwin
+- Enable tests for non-git-builds
+
+### v1.8.1
+- Mysql transactions
+- Support creation_time on FFmpeg handler.
+- Bump lodash from 4.17.19 to 4.17.21 in /gerbera-web
+- Synchronize threads properly
+- add missing optional header for GCC11
+- Misc improvements
+- remove several implicit fs::path conversions
+- Concatenate multivalue field with entrySeparator
+- Revert "replace find() end() comparisons with count()"
+- remove push_back branch
+- change some size_t to bool
+- remove some pointless lambdas
+- remove std::distance where empty is sufficient
+- Implement SAMSUNG X_GetFeatureList
+- More chrono optimizations
+- CI: FreeBSD: Add Sqlite3 package
+- algorithm cleanups
+- Added documentation how to build the docker container
+- Determine container art image from files
+- massive std::chrono conversion
+- string_view conversions
+- Add support for Windows Media Player
+- Conan: Tidy up CMake conan integration
+- Implement UPnP SortCriteria
+- Avoid needless process elevation requirement on illumos
+- cmake: Remove unused vars
+- Only use music tracks as container art source
+- Work around undefined syscalls on solaroid systems
+- Documentation for exiv2 meta data usage
+- Clean compilation and errno fix
+- Enable ContainerArt for PC Directory
+- auto&& conversions
+- Docker.md: add docker-compose instructions
+- fs::path conversions
+- Fix debian buster compilation
+- Cleanup path handling
+- add -d, -u and -P commandline options to docs
+- Fixed required versions of libupnp and libnpupnp.
+- fix UPNP_USING_CHUNKED breaks npupnp compatibility
+- clang-tidy: replace typedef with using
+- Add cmdline options -u, -d and -P
+- Fix transcoded media ends before file is complete
+- Documentation still points to bintray.com
+- Bump master post release
+
+### v1.8.0
+- Significant improvement in import speeds with large collections
+- Handle Samsung X_SetBookmark action, for saving position of viewed media, when enabled by flag
+- New search support for containers, i.e. Albums, Artists and Genres
+- Extract metadata information from mp3 files with ID3v1 tags, not just v2
+- Added a retry when binding to interfaces, should make Gerbera much more reliable to start with slow network startup.
+- Hack around broken libstdc++ large file support on Debian 10 with 32-bit OS (mostly older ARM devices)
+- Fix build with GCC11
+- Fix Debian/Ubuntu packages to work out of the box
+- Beautify titles which are generated from file names
+
+### v1.7.0
+
+- You can now use libnupnp instead of libupnp as the underlying UPnP library
+- Multiple disk albums are now sorted correctly and are disks distinguished by part number field
+- Container images are now possible on containers without files
+- Subtitle resources should now work on Samsung clients
+- Thumbnails, album art and container images now shown in the Web UI Database view
+- Set additional import options per directory on filesystem page
+- You can now edit configuration (most of it) in the Web UI!
+- Charset can be specific to import library (section: import/library options), e g. if your pictures use different encoding than your music
+- Resource configuration can be used for container images (section: import/resources): define image name filters and strategy for container hierarchy
+- Additional metadata stored from import scan
+- Modification time for autoscan directories now reflects sub directories and reduces startup footprint
+- Container images are stored as resources so browsing can return them directly
+- All scripting functions have been moved to common js
+- A custom script file can be set in `config xml`. It may contain additional functions or override the existing.
+- A new builtin script function `addContainerTree` can be used to set container properties
+- Most entries from configuration can be accessed via new global variable `config`.
+- The script file import structured js has been dropped. The layout can now be selected with the configuration attribute audio layout in virtual layout element.
+- Depending on your previous changes script changes adjustments are recommended - although no breaking changes have been made.
+- Internal refactoring and code improvements
+- Many bug fixes
+
+In order to benefit from all these improvements it is recommended to clear your database and rescan your media library.
+
+### v1.6.4
+- Fix regression introduced in 1.6.2 in SQL generation
+
+### v1.6.3
+- Fix a regression introduced in 1.6.2 when adding resources
+
+### v1.6.2
+- Fixed a regression where some files could be removed from the library on a restart due to a race
+- Fixed a crash in ffmpeg hander where metadata date field was non-numeric
+- Add Samsung X_SetBookmark stub
+- Bump jimp (fixes vuln jpeg-js)
+- UI: Dont update mimetype to empty
+- Fix tests with npupnp
+- fix compilation with libcxx
+- libevix2 fixes
+- npupnp changes
+- doc: add OpenWrt section
+- clang-tidy fixes
+- cxxopts: update to 2.2.1
+- Update README badges
+
+
+### v1.6.1
+- fixed mime type retrieval for symlinks with libmagic
+- Drop travis
+- Actions: Run docker build on tags too
+- Bump js stuff to fix security warnings
+- Color folders with children instead of badges saying true
+- Improve Resource Handling
+- Add subtitle as resource and update entries with resources attached, improve ContentHandler
+- Bump elliptic from 6.5.2 to 6.5.3 in /gerbera-web
+- fix upnp header include
+- Build fixes
+- std::algorithm conversions
+
+
+### v1.6.0
+- Allow configuration of separator for multi-valued tags
+- Show duk script error message on load
+- Show all object details on UI
+- Updated config.xml XSD
+- Added support for Conan package manager
+- Add friendly messages when finding spdlog as library
+- Refactored caching of ffmpeg thumbnails.
+- lots more!
+
+### v1.5.0
+- Client Auto detection and DLNA quirks always enabled.
+- C++ Standardisation
+- UI Enhancements
+- Transcoding Enhancements
+- Expat has been replaced with pugixml
+- Spdlog is now used for logging
+- libfmt is now used for string formatting
+- The latest 1.12.1 version of libupnp is now required.
+
+### v1.4.0
+- Metadata MKV support via libmatroska
+- SQLite: Add migration to v5 schema
+- Update web modules
+- Dockerfile: Add MKV support
+- README update, minor doc tidy
+- Docs: Scripting - tidy
+- install-pupnp: Bump to 1.8.6, fix #534
+- remove not used variables
+- Docs: Scripting: remove docs for removed code, fix Note formatting
+- Minor UI improvements
+
+### v1.3.4/5
+- Fix the build with LibUPnP 1.10
+- Build against libupnp 1.8.5
+- Fedora installation.
+- UI e2e: Bump chromedriver
+
+### v1.3.3
+- Remove Storage Cache
+- my_bool is not defined with mysql-connector-c 8.0
+- Update config.xml
+- Support inotify kernel driver on illumos/OmniOS
+- Fix up docs and start script now that -P/--pidfile is removed
+- Set language to support xenial & latest chrome
+- Correct add file docs
+- Update Web Development Dependencies
+- Dockerfile created
+- SQLite: Turn on foreign key support at runtime
+- Fix error in sqlite schema
+- Add DeviceDescriptionHandler
+- Update lodash
+- Rename handlers to util
+- Convert Gerbera UI to ES6
+
+### v1.3.2
+- Allow to set the manufacturer and the modelURL via config file
+- Fix find_program taglib-config when cross-compiling
+- Update config-import.rst
+- Add Gerbera version to UI
+- cmake/FindFFMPEG: do not quieten messages when using pkg-config
+- Fixture upgrade
+- Update js cookie
+- Add virtualUrl to AlbumArt resource for consistent resource URIs
+- Use exiv2 header that include all headers
+- Update vendor dependencies
+- Docs: Bump version
+- feat: provide a way to toggle DLNA-seeking with a config
+- main: bugfix `interface` CLI option
+- Generate config.xml with XML Declaration
+
+
+### v1.3.1
+- Build system improvements
+- Fixes for DLNA Headers handling
+- Add support for TXXX AuxData extraction from MP3
+- Fix External URL resource generation
+- Latest NPM Updates
+
+### v1.3.0
+- C++17 is now required to build (clang, gcc-7, gcc-8)
+- Improved Samsung DTV Support (Still not entirely complete, but some more models may work)
+- Added FLAC, Wavpack, DSD to default configuration
+- Fixed Transcoding bugs with HTTP Protocol
+- Properly handle upnp:date for Album sorting on UPNP devices
+- Exposed resource options to import scripts (audio channels etc)
+- Added support for Classical music tags: Composer, Conductor, Orchestra
+- Fix UI update bug for macOS
+- Add online-content examples
+- Improve scripted installation
+- Add configurable title for UI Home
+- Fix SQL bugs
+- Create Gerbera Homebrew Tap (for macOS High Sierra & Mojave)
+- Various bug fixes and ongoing refactoring
+- Add CentOS install instructions
+
+### v1.2.0
+- Amazing new web ui
+- UPnP Search implemented
+- Improved Docs: docs.gerbera.io, kindly hosted by Read the Docs.
+- Broken Youtube support removed
+- Fixed AUXDATA truncation with UTF-8 characters.
+- Improved message when libupnp fails to bind correctly.
+- Allow use of FFMpeg to extract AUXDATA
+- Duktape JS scripting errors are now visible in log file
+- Fixed a crash in EXIV2 image handler.
+- Fixed "root path" sometimes missing for scripted layouts.
+
+### v1.1.0
+- Modern UI Preview
+- Raspberry Pi / 32bit fixes
+- Video thumbnail support
+- Protocol Extensions
+- BSD Fixes
+- Album Artist support
+- The --pidfile option has been removed, as we removed the --daemon option in the previous release retaining --pidfile option did not make sense
+- This release supports <=libupnp 1.8.2 due to breaking changes in libupnp master branch, 1.2 will most likely require >=1.8.3.
 
 ### v1.0.0
 - Rebranded as Gerbera, new Logo!

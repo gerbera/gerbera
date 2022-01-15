@@ -4,7 +4,7 @@
 
     gerbera-updates.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -49,6 +49,7 @@ const errorCheck = (event, xhr) => {
 
 const showMessage = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
+  console.log(message);
   if (callback) {
     toast.callback = callback;
   }
@@ -66,10 +67,9 @@ const showTask = (message, callback, type, icon) => {
 const getUpdates = (force) => {
   if (GerberaApp.isLoggedIn()) {
     let requestData = {
-      req_type: 'void',
-      sid: Auth.getSessionId()
+      req_type: 'void'
     };
-
+    requestData[Auth.SID] = Auth.getSessionId();
     let checkUpdates;
     if (GerberaApp.getType() !== 'db') {
       checkUpdates = {};

@@ -1,0 +1,205 @@
+<upgrade>
+    <version number="2">
+        <script>DROP INDEX mt_autoscan_obj_id</script>
+        <script>CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id)</script>
+        <script>ALTER TABLE "mt_autoscan" ADD "path_ids" text</script>
+    </version>
+    <version number="3">
+        <script>ALTER TABLE "mt_cds_object" ADD "service_id" varchar(255) default NULL</script>
+        <script>CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id)</script>
+    </version>
+    <version number="4" remark="Move to Metadata table">
+        <script>
+        CREATE TABLE "mt_metadata" (
+            "id" integer primary key,
+            "item_id" integer NOT NULL,
+            "property_name" varchar(255) NOT NULL,
+            "property_value" text NOT NULL,
+            CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE )
+        </script>
+        <script>CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id)</script>
+    </version>
+    <version number="5" remark="Fix incorrect SQLite foreign key">
+        <script>
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE mt_cds_object_new (
+            id integer primary key,
+            ref_id integer default NULL CONSTRAINT cds_object_ibfk_1 REFERENCES mt_cds_object (id) ON UPDATE CASCADE ON DELETE CASCADE,
+            parent_id integer default '0' not null constraint cds_object_ibfk_2 references mt_cds_object (id) ON update cascade on delete cascade,
+            object_type tinyint unsigned not null,
+            upnp_class varchar(80) default NULL,
+            dc_title varchar(255) default NULL,
+            location text default NULL,
+            location_hash integer unsigned default NULL,
+            metadata text default NULL,
+            auxdata text default NULL,
+            resources text default NULL,
+            update_id integer default '0' not null,
+            mime_type varchar(40) default NULL,
+            flags integer unsigned default '1' not null,
+            track_number integer default NULL,
+            service_id varchar(255) default NULL );
+        INSERT INTO mt_cds_object_new(id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id)
+        SELECT id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, metadata, auxdata, resources, update_id, mime_type, flags, track_number, service_id FROM mt_cds_object;
+        DROP TABLE mt_cds_object;
+        ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object;
+        CREATE INDEX mt_cds_object_parent_id ON mt_cds_object (parent_id, object_type, dc_title);
+        CREATE INDEX mt_cds_object_ref_id ON mt_cds_object (ref_id);
+        CREATE INDEX mt_cds_object_service_id ON mt_cds_object (service_id);
+        CREATE INDEX mt_location_parent ON mt_cds_object (location_hash, parent_id);
+        CREATE INDEX mt_object_type ON mt_cds_object (object_type);
+        CREATE INDEX mt_track_number on mt_cds_object (track_number);
+        PRAGMA foreign_keys = ON;
+        </script>
+    </version>
+    <version number="6" remark="add config value table">
+        <script>
+        CREATE TABLE "grb_config_value" (
+            "item" varchar(255) primary key,
+            "key" varchar(255) NOT NULL,
+            "item_value" varchar(255) NOT NULL,
+            "status" varchar(20) NOT NULL)
+        </script>
+        <script>CREATE INDEX grb_config_value_item ON grb_config_value(item)</script>
+    </version>
+    <version number="7">
+        <script>DROP TABLE mt_cds_active_item</script>
+    </version>
+    <version number="8" remark="part_number">
+        <script>ALTER TABLE "mt_cds_object" ADD "part_number" integer default NULL</script>
+        <script>DROP INDEX mt_track_number</script>
+        <script>CREATE INDEX "grb_track_number" ON mt_cds_object (part_number,track_number)</script>
+    </version>
+    <version number="9" remark="bookmark_pos">
+        <script>ALTER TABLE "mt_cds_object" ADD "bookmark_pos" integer unsigned NOT NULL default 0</script>
+    </version>
+    <version number="10" remark="last_modified">
+        <script>ALTER TABLE "mt_cds_object" ADD "last_modified" integer unsigned default NULL</script>
+    </version>
+    <version number="11" remark="last_updated">
+        <script>ALTER TABLE "mt_cds_object" ADD "last_updated" integer unsigned default 0</script>
+        <script>UPDATE "mt_cds_object" SET "last_updated"="last_modified"</script>
+    </version>
+    <version number="12" remark="drop metadata column">
+        <script migration="metadata">
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE "mt_cds_object_new" (
+          "id" integer primary key,
+          "ref_id" integer default NULL,
+          "parent_id" integer NOT NULL default 0,
+          "object_type" tinyint unsigned NOT NULL,
+          "upnp_class" varchar(80) default NULL,
+          "dc_title" varchar(255) default NULL,
+          "location" text default NULL,
+          "location_hash" integer unsigned default NULL,
+          "auxdata" text default NULL,
+          "resources" text default NULL,
+          "update_id" integer NOT NULL default 0,
+          "mime_type" varchar(40) default NULL,
+          "flags" integer unsigned NOT NULL default 1,
+          "part_number" integer default NULL,
+          "track_number" integer default NULL,
+          "service_id" varchar(255) default NULL,
+          "bookmark_pos" integer unsigned NOT NULL default 0,
+          "last_modified" integer unsigned default NULL,
+          "last_updated" integer unsigned default 0,
+          CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO mt_cds_object_new(
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
+        ) SELECT
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, resources, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
+        FROM mt_cds_object;
+        DROP TABLE mt_cds_object;
+        ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object;
+        CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
+        CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
+        CREATE INDEX mt_object_type ON mt_cds_object(object_type);
+        CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
+        CREATE INDEX grb_track_number ON mt_cds_object(part_number,track_number);
+        CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
+        PRAGMA foreign_keys = ON;
+        VACUUM;
+        </script>
+    </version>
+    <version number="13" remark="add resource table">
+        <script>
+        CREATE TABLE "grb_cds_resource" (
+            "id" integer primary key,
+            "item_id" integer NOT NULL,
+            "res_id" integer NOT NULL,
+            "handlerType" integer NOT NULL,
+            "options" text default NULL,
+            "parameters" text default NULL,
+            CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
+        CREATE INDEX grb_cds_resource_id ON grb_cds_resource(item_id,res_id);
+        </script>
+        <script migration="resources">
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE "mt_cds_object_new" (
+          "id" integer primary key,
+          "ref_id" integer default NULL,
+          "parent_id" integer NOT NULL default 0,
+          "object_type" tinyint unsigned NOT NULL,
+          "upnp_class" varchar(80) default NULL,
+          "dc_title" varchar(255) default NULL,
+          "location" text default NULL,
+          "location_hash" integer unsigned default NULL,
+          "auxdata" text default NULL,
+          "update_id" integer NOT NULL default 0,
+          "mime_type" varchar(40) default NULL,
+          "flags" integer unsigned NOT NULL default 1,
+          "part_number" integer default NULL,
+          "track_number" integer default NULL,
+          "service_id" varchar(255) default NULL,
+          "bookmark_pos" integer unsigned NOT NULL default 0,
+          "last_modified" integer unsigned default NULL,
+          "last_updated" integer unsigned default 0,
+          CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO mt_cds_object_new(
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
+        ) SELECT
+            id, ref_id, parent_id, object_type, upnp_class, dc_title, location, location_hash, auxdata, update_id, mime_type, flags, track_number, part_number, service_id, bookmark_pos, last_modified, last_updated
+        FROM mt_cds_object;
+        DROP TABLE mt_cds_object;
+        ALTER TABLE mt_cds_object_new RENAME TO mt_cds_object;
+        CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
+        CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
+        CREATE INDEX mt_object_type ON mt_cds_object(object_type);
+        CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
+        CREATE INDEX grb_track_number ON mt_cds_object(part_number,track_number);
+        CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
+        PRAGMA foreign_keys = ON;
+        VACUUM;
+        </script>
+    </version>
+    <version number="14" remark="drop redundant index">
+        <script>DROP INDEX grb_config_value_item;</script>
+    </version>
+    <version number="15" remark="Replace primary key on grb_cds_resource">
+        <script>
+        CREATE TABLE "grb_cds_resource_new" (
+            "item_id" integer NOT NULL,
+            "res_id" integer NOT NULL,
+            "handlerType" integer NOT NULL,
+            "options" text default NULL,
+            "parameters" text default NULL,
+            "size" varchar(255) default NULL, "duration" varchar(255) default NULL, "bitrate" varchar(255) default NULL, "sampleFrequency" varchar(255) default NULL, "nrAudioChannels" varchar(255) default NULL, "resolution" varchar(255) default NULL, "colorDepth" varchar(255) default NULL, "protocolInfo" varchar(255) default NULL, "resFile" varchar(255) default NULL, "type" varchar(255) default NULL, "fanArtObject" varchar(255) default NULL, "fanArtResource" varchar(255) default NULL, "bitsPerSample" varchar(255) default NULL, "dc:language" varchar(255) default NULL, "sec:acodec" varchar(255) default NULL, "sec:vcodec" varchar(255) default NULL,
+            PRIMARY KEY ("item_id", "res_id"),
+            CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO "grb_cds_resource_new" (
+            "item_id", "res_id", "handlerType", "options", "parameters", "size", "duration", "bitrate", "sampleFrequency", "nrAudioChannels", "resolution", "colorDepth", "protocolInfo", "resFile", "type", "fanArtObject", "fanArtResource", "bitsPerSample", "dc:language", "sec:acodec", "sec:vcodec"
+        ) SELECT
+            "item_id", "res_id", "handlerType", "options", "parameters", "size", "duration", "bitrate", "sampleFrequency", "nrAudioChannels", "resolution", "colorDepth", "protocolInfo", "resFile", "type", "fanArtObject", "fanArtResource", "bitsPerSample", "dc:language", "sec:acodec", "sec:vcodec"
+        FROM "grb_cds_resource";
+        DROP TABLE grb_cds_resource;
+        ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
+        </script>
+    </version>
+</upgrade>

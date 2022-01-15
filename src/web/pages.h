@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     pages.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -34,142 +34,145 @@
 
 #include "cds_objects.h"
 #include "common.h"
+#include "config/config_setup.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
 // forward declaration
-class ConfigManager;
-class Storage;
+class Config;
+class Database;
+class UpnpXMLBuilder;
 
-namespace web {
+namespace Web {
 
 // forward declaration
 class SessionManager;
 
 /// \brief Authentication handler (used over AJAX)
-class auth : public WebRequestHandler {
+class Auth : public WebRequestHandler {
 protected:
-    int timeout;
+    std::chrono::seconds timeout {};
 
 public:
-    auth(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    explicit Auth(const std::shared_ptr<ContentManager>& content);
     void process() override;
 };
 
 /// \brief Browser container tree
-class containers : public WebRequestHandler {
+class Containers : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    containers(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    explicit Containers(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser directory tree
-class directories : public WebRequestHandler {
+class Directories : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    directories(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief Browser file list
-class files : public WebRequestHandler {
+class Files : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    files(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief Browser item list
-class items : public WebRequestHandler {
+class Items : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    items(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    explicit Items(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser add item
-class add : public WebRequestHandler {
+class Add : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    add(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief Browser remove item
-class remove : public WebRequestHandler {
+class Remove : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    remove(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief Browser remove item
-class edit_load : public WebRequestHandler {
+class EditLoad : public WebRequestHandler {
+protected:
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
 public:
-    edit_load(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
+    explicit EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
 /// \brief Browser remove item
-class edit_save : public WebRequestHandler {
+class EditSave : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    edit_save(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief Browser add object.
-class addObject : public WebRequestHandler {
+class AddObject : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    addObject(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 
 protected:
     void addContainer(int parentID);
-    std::shared_ptr<CdsObject> addItem(int parentID, std::shared_ptr<CdsItem> item);
-    std::shared_ptr<CdsObject> addUrl(int parentID, std::shared_ptr<CdsItemExternalURL> item, bool addProtocol);
-    std::shared_ptr<CdsObject> addActiveItem(int parentID);
+    std::shared_ptr<CdsObject> addItem(int parentID, const std::shared_ptr<CdsItem>& item);
+    std::shared_ptr<CdsObject> addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol);
 };
 
 /// \brief autoscan add and remove
-class autoscan : public WebRequestHandler {
+class Autoscan : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    autoscan(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 
 protected:
-    static void autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node* element);
+    static void autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node& element);
 };
 
 /// \brief nothing :)
-class voidType : public WebRequestHandler {
+class VoidType : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    voidType(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-        : WebRequestHandler(config, storage, content, sessionManager)
-    {
-    }
     void process() override;
 };
 
 /// \brief task list and task cancel
-class tasks : public WebRequestHandler {
+class Tasks : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
 /// \brief UI action button
-class action : public WebRequestHandler {
+class Action : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
 public:
-    action(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager);
     void process() override;
 };
 
@@ -177,10 +180,45 @@ public:
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<ConfigManager>& config, const std::shared_ptr<Storage>& storage,
-    const std::shared_ptr<ContentManager>& content, const std::shared_ptr<SessionManager>& sessionManager,
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::string& page);
 
-} // namespace
+/// \brief Browse clients list
+class Clients : public WebRequestHandler {
+    using WebRequestHandler::WebRequestHandler;
+
+public:
+    void process() override;
+};
+
+/// \brief load configuration
+class ConfigLoad : public WebRequestHandler {
+protected:
+    std::vector<ConfigValue> dbEntries;
+    std::map<std::string, std::string> allItems;
+    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
+    template <typename T>
+    static void setValue(pugi::xml_node& item, const T& value);
+
+    static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
+
+public:
+    explicit ConfigLoad(const std::shared_ptr<ContentManager>& content);
+    void process() override;
+};
+
+/// \brief save configuration
+class ConfigSave : public WebRequestHandler {
+protected:
+    std::shared_ptr<Context> context;
+
+public:
+    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content);
+    void process() override;
+};
+
+} // namespace Web
 
 #endif // __WEB_PAGES_H__

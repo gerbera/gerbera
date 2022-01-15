@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     io_handler_chainer.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,36 +31,36 @@
 
 #include "io_handler_chainer.h" // API
 
-#include <cstdlib>
+#include <thread>
 
 #include "exceptions.h"
 
-IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler>& readFrom, std::unique_ptr<IOHandler>& writeTo, int chunkSize)
+IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize)
 {
     if (chunkSize <= 0)
         throw_std_runtime_error("chunkSize must be positive");
-    if (readFrom == nullptr || writeTo == nullptr)
+    if (!readFrom || !writeTo)
         throw_std_runtime_error("readFrom and writeTo need to be set");
     status = 0;
+    readFrom->open(UPNP_READ);
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);
     this->writeTo = std::move(writeTo);
-    readFrom->open(UPNP_READ);
-    buf = static_cast<char*>(malloc(chunkSize));
+    buf = new char[chunkSize];
     startThread();
 }
 
 void IOHandlerChainer::threadProc()
 {
     try {
-        bool again = false;
+        bool again;
         do {
             try {
                 writeTo->open(UPNP_WRITE);
                 again = false;
             } catch (const TryAgainException& e) {
                 again = true;
-                sleep(1);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         } while (!threadShutdownCheck() && again);
 

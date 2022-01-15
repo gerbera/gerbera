@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     buffered_io_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,14 +31,14 @@
 
 #include "buffered_io_handler.h" // API
 
-#include <cassert>
-
 #include "util/tools.h"
 
-BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandler, size_t bufSize, size_t maxChunkSize, size_t initialFillSize)
-    : IOHandlerBufferHelper(bufSize, initialFillSize)
+class Config;
+
+BufferedIOHandler::BufferedIOHandler(const std::shared_ptr<Config>& config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize)
+    : IOHandlerBufferHelper(config, bufSize, initialFillSize)
 {
-    if (underlyingHandler == nullptr)
+    if (!underlyingHandler)
         throw_std_runtime_error("underlyingHandler must not be nullptr");
     if (maxChunkSize == 0)
         throw_std_runtime_error("maxChunkSize must be greater than 0");
@@ -46,7 +46,7 @@ BufferedIOHandler::BufferedIOHandler(std::unique_ptr<IOHandler>& underlyingHandl
     this->maxChunkSize = maxChunkSize;
 
     // test it first!
-    //seekEnabled = true;
+    // seekEnabled = true;
 }
 
 void BufferedIOHandler::open(enum UpnpOpenFileMode mode)
@@ -65,28 +65,28 @@ void BufferedIOHandler::close()
 
 void BufferedIOHandler::threadProc()
 {
-    int readBytes;
-    size_t maxWrite;
+    int readBytes = 0;
+    std::size_t maxWrite;
+    StdThreadRunner::waitFor("BufferedIOHandler", [this] { return threadRunner != nullptr; });
 
 #ifdef TOMBDEBUG
-    struct timespec last_log;
-    bool first_log = true;
+    std::chrono::milliseconds lastLog;
+    bool firstLog = true;
 #endif
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     do {
-
 #ifdef TOMBDEBUG
-        if (first_log || getDeltaMillis(&last_log) > 1000) {
-            if (first_log)
-                first_log = false;
-            getTimespecNow(&last_log);
-            float percentFillLevel = 0;
+        if (firstLog || getDeltaMillis(lastLog) > std::chrono::milliseconds(100)) {
+            if (firstLog)
+                firstLog = false;
+            lastLog = currentTimeMS();
+            [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
-                int currentFillSize = b - a;
+                auto currentFillSize = int(b - a);
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
-                percentFillLevel = (static_cast<float>(currentFillSize) / static_cast<float>(bufSize)) * 100;
+                percentFillLevel = (float(currentFillSize) / float(bufSize)) * 100;
             }
             log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
         }
@@ -95,11 +95,11 @@ void BufferedIOHandler::threadProc()
             a = b = 0;
 
         if (doSeek && !empty && (seekWhence == SEEK_SET || (seekWhence == SEEK_CUR && seekOffset > 0))) {
-            int currentFillSize = b - a;
+            auto currentFillSize = int(b - a);
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
 
-            int relSeek = seekOffset;
+            auto relSeek = int(seekOffset);
             if (seekWhence == SEEK_SET)
                 relSeek -= posRead;
 
@@ -116,7 +116,7 @@ void BufferedIOHandler::threadProc()
                 /// \todo do we need to wait for initialFillSize again?
 
                 doSeek = false;
-                cond.notify_one();
+                threadRunner->notify();
             }
         }
 
@@ -136,15 +136,15 @@ void BufferedIOHandler::threadProc()
             waitForInitialFillSize = (initialFillSize > 0);
 
             doSeek = false;
-            cond.notify_one();
+            threadRunner->notify();
         }
 
         maxWrite = (empty ? bufSize : (a < b ? bufSize - b : a - b));
         if (maxWrite == 0) {
-            cond.wait(lock);
+            threadRunner->wait(lock);
         } else {
             lock.unlock();
-            size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
+            std::size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
             readBytes = underlyingHandler->read(buffer + b, chunkSize);
             lock.lock();
             if (readBytes > 0) {
@@ -154,21 +154,21 @@ void BufferedIOHandler::threadProc()
                     b = 0;
                 if (empty) {
                     empty = false;
-                    cond.notify_one();
+                    threadRunner->notify();
                 }
                 if (waitForInitialFillSize) {
-                    int currentFillSize = b - a;
+                    auto currentFillSize = int(b - a);
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if (static_cast<size_t>(currentFillSize) >= initialFillSize) {
+                    if (std::size_t(currentFillSize) >= initialFillSize) {
                         log_debug("buffer: initial fillsize reached");
                         waitForInitialFillSize = false;
-                        cond.notify_one();
+                        threadRunner->notify();
                     }
                 }
             } else if (readBytes == CHECK_SOCKET) {
                 checkSocket = true;
-                cond.notify_one();
+                threadRunner->notify();
             }
         }
     } while ((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && !threadShutdown);
@@ -179,5 +179,5 @@ void BufferedIOHandler::threadProc()
             readError = true;
     }
     // ensure that read() doesn't wait for me to fill the buffer
-    cond.notify_one();
+    threadRunner->notify();
 }

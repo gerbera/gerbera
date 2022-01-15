@@ -16,6 +16,18 @@ These settings define the server configuration, this includes UPnP behavior, sel
 
 This section defines the server configuration parameters.
 
+**Attributes:**
+
+    ::
+
+        system-threads="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines if mutli-threading in server will use all system resources. If set to **no** it only uses resources assigned to the server process.
+
 ``port``
 ~~~~~~~~
 
@@ -77,6 +89,19 @@ Server friendly name, you will see this on your devices that you use to access t
 
 This tag sets the manufacturer URL of a UPnP device, a custom setting may be necessary to trick some renderers in order
 to enable special features that otherwise are only active with the vendor implemented server.
+
+``virtualURL``
+~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <virtualURL>http://gerbera.io/</virtualURL>
+
+* Optional
+* Default: unset
+
+This tag sets the virtual URL of Gerbera web UI, a custom setting may be necessary if you want to access the web page via a reverse proxy.
+The value defaults to `http://<ip>:port`.
 
 ``modelName``
 ~~~~~~~~~~~~~
@@ -202,24 +227,6 @@ The gerbera.html bookmark file will also be generated in that directory.
 
 Root directory for the web server, this is the location where device description documents, UI html and js files, icons, etc. are stored.
 
-``serverdir``
-~~~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <servedir>/home/myuser/mystuff</servedir>
-
-* Optional
-* Default: **empty (disabled)**
-
-Files from this directory will be served as from a regular web server. They do not need to be added to the database,
-but they are also not served via UPnP browse requests. Directory listing is not supported, you have to specify full paths.
-
-**Example:**
-    The file something.jar is located in ``/home/myuser/mystuff/javasubdir/something.jar`` on your filesystem.
-    Your ip address is 192.168.0.23, the server is running on port 50500. Assuming the above configuration you
-    could download it by entering this link in your web browser: ``http://192.168.0.23:50500/content/serve/javasubdir/something.jar``
-
 ``alive``
 ~~~~~~~~~
 
@@ -228,21 +235,19 @@ but they are also not served via UPnP browse requests. Directory listing is not 
     <alive>180</alive>
 
 * Optional
-* Default: **180**, `this is according to the UPnP specification.`
+* Default: **180**, (Results in alive messages every 60s, see below) `this is according to the UPnP specification.`
+* Min: 62 (A message sent every 1s, see below)
 
 Interval for broadcasting SSDP:alive messages
 
-``protocolInfo``
-~~~~~~~~~~~~~~~~
+An advertisement will be sent by LibUPnP every (this value/2)-30 seconds, and will have a cache-control max-age of this value.
 
-.. code-block:: xml
+For example: A value of 62 will result in an SSDP advertisement being sent every second. (62 / 2 = 31) - 30 = 1.
+The default value of 180 results results in alive messages every 60s. (180 / 2 = 90) - 30 = 60.
 
-    <protocolInfo extend="no"/>
-
-* Optional
-* Default: **no**
-
-Adds specific tags to the protocolInfo attribute, this is required to enable MP3 and MPEG4 playback on Playstation 3.
+Note:
+   If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes, 
+   you can try changing the alive value to 86400 (which is 24 hours)
 
 ``pc-directory``
 ~~~~~~~~~~~~~~~~
@@ -285,32 +290,6 @@ The bookmark file offers an easy way to access the user interface, it is especia
 not configured to run on a fixed port. Each time the server is started, the bookmark file will be filled in with a
 redirect to the servers current IP address and port. To use it, simply bookmark this file in your browser,
 the default location is ``~/.config/gerbera/gerbera.html``
-
-``custom-http-headers``
-~~~~~~~~~~~~~~~~~~~~~~~
-
-`Not yet supported with` **pupnp 1.8.x**
-
-.. code-block:: xml
-
-    <custom-http-headers>
-
-* Optional
-
-This section holds the user defined HTTP headers that will be added to all HTTP responses that come from the server.
-
-    **Child tags:**
-
-       .. code-block:: xml
-
-            <add header="..."/>
-            <add header="..."/>
-
-    * Optional
-
-    | Specify a header to be added to the response.
-    | If you have a DSM-320 use ``<add header="X-User-Agent: redsonic"/>``
-    | to fix the .AVI playback problem.
 
 ``upnp-string-limit``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -370,6 +349,24 @@ Note:
     * Default: **yes**
 
     This setting specifies if icon tooltips should be shown in the web UI.
+
+    ::
+
+        show-numbering=...
+
+    * Optional
+    * Default: **yes**
+
+    Set track number to be shown in the web UI.
+
+    ::
+
+        show-thumbnail=...
+
+    * Optional
+    * Default: **yes**
+
+    This setting specifies if thumbnails or cover art should be shown in the web UI.
 
     ::
 
@@ -479,103 +476,128 @@ Note:
 
 .. code-block:: xml
 
-    <storage caching="yes">
+    <storage use-transactions="yes">
 
 * Required
 
-Defines the storage section - database selection is done here. Currently sqlite3 and mysql are supported.
+Defines the storage section - database selection is done here. Currently SQLite3 and MySQL are supported.
 Each storage driver has it's own configuration parameters.
 
-    **Child Tags**
+Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available options depend on the selected driver.
+
+
+    **Attributes**
     ::
 
-        caching="yes"
+        use-transactions="yes"
 
     * Optional
 
-    * Default: **yes**
+    * Default: **no**
 
-    Enables caching, this feature should improve the overall import speed.
+    Enables transactions. This feature should improve the overall import speed and avoid race-conditions on import.
+    The feature caused some issues and set to **no**. If you want to support testing, turn it to **yes** and report 
+    if you can reproduce the issue.
+
+    **SQLite**
 
     .. code-block:: xml
 
-        <sqlite enabled="yes>
+        <sqlite enabled="yes">
 
-    * Required **if MySQL is not defined**
-
-    Allowed values are ``sqlite3`` or ``mysql``, the available options depend on the selected driver.
-
-    ::
-
-        enabled="yes"
-
-    * Optional
-    * Default: **yes**
-
-    Below are the sqlite driver options:
-
-    .. code-block:: xml
-
-        <database-file>gerbera.db</database-file>
-
-    * Optional
-    * Default: **gerbera.db**
-
-    The database location is relative to the server's home, if the sqlite database does not exist it will be
-    created automatically.
-
-    .. code-block:: xml
-
-        <synchronous>off</synchronous>
-
-    * Optional
-    * Default: **off**
-
-    Possible values are ``off``, ``normal`` and ``full``.
-
-    This option sets the SQLite pragma **synchronous**. This setting will affect the performance of the database
-    write operations. For more information about this option see the SQLite documentation: http://www.sqlite.org/pragma.html#pragma_synchronous
-
-    .. code-block:: xml
-
-        <on-error>restore</on-error>
-
-    * Optional
-    * Default: **restore**
-
-    Possible values are ``restore`` and ``fail``.
-
-    This option tells Gerbera what to do if an SQLite error occurs (no database or a corrupt database).
-    If it is set to **restore** it will try to restore the database from a backup file (if one exists) or try to
-    recreate a new database from scratch.
-
-    If the option is set to **fail**, Gerbera will abort on an SQLite error.
-
-    .. code-block:: xml
-
-        <backup enabled="no" interval="6000"/>
-
-    * Optional
-
-    Backup parameters:
+    Defines the SQLite storage driver section.
 
         ::
 
-            enabled=...
+            enabled="yes"
 
         * Optional
-        * Default: **no**
+        * Default: **yes**
 
-        Enables or disables database backup.
+        Below are the sqlite driver options:
 
-        ::
+        .. code-block:: xml
 
-            interval=...
+            <init-sql-file>/etc/gerbera/sqlite3.sql</init-sql-file>
 
         * Optional
-        * Default: **600**
+        * Default: **Datadir / sqlite3.sql**
 
-        Defines the backup interval in seconds.
+        The full path to the init script for the database
+
+        .. code-block:: xml
+
+            <upgrade-file>/etc/gerbera/sqlite3-upgrade.xml</upgrade-file>
+
+        * Optional
+        * Default: **Datadir / sqlite3-upgrade.xml**
+
+        The full path to the upgrade settings for the database
+
+        .. code-block:: xml
+
+            <database-file>gerbera.db</database-file>
+
+        * Optional
+        * Default: **gerbera.db**
+
+        The database location is relative to the server's home, if the sqlite database does not exist it will be
+        created automatically.
+
+        .. code-block:: xml
+
+            <synchronous>off</synchronous>
+
+        * Optional
+        * Default: **off**
+
+        Possible values are ``off``, ``normal`` and ``full``.
+
+        This option sets the SQLite pragma **synchronous**. This setting will affect the performance of the database
+        write operations. For more information about this option see the SQLite documentation: http://www.sqlite.org/pragma.html#pragma_synchronous
+
+        .. code-block:: xml
+
+            <on-error>restore</on-error>
+
+        * Optional
+        * Default: **restore**
+
+        Possible values are ``restore`` and ``fail``.
+
+        This option tells Gerbera what to do if an SQLite error occurs (no database or a corrupt database).
+        If it is set to **restore** it will try to restore the database from a backup file (if one exists) or try to
+        recreate a new database from scratch.
+
+        If the option is set to **fail**, Gerbera will abort on an SQLite error.
+
+        .. code-block:: xml
+
+            <backup enabled="no" interval="6000"/>
+
+        * Optional
+
+        Backup parameters:
+
+                ::
+
+                    enabled=...
+
+                * Optional
+                * Default: **no**
+
+                Enables or disables database backup.
+
+                ::
+
+                    interval=...
+
+                * Optional
+                * Default: **600**
+
+                Defines the backup interval in seconds.
+
+    **MySQL**
 
     .. code-block:: xml
 
@@ -588,56 +610,409 @@ Each storage driver has it's own configuration parameters.
             enabled=...
 
         * Optional
-        * Default: **yes**
+        * Default: **no**
 
         Enables or disables the MySQL driver.
 
-    Below are the child tags for MySQL:
+        Below are the child tags for MySQL:
+
+        .. code-block:: xml
+
+            <host>localhost</host>
+
+        * Optional
+        * Default: **"localhost"**
+
+        This specifies the host where your MySQL database is running.
+
+        .. code-block:: xml
+
+            <port>0</port>
+
+        * Optional
+        * Default: **0**
+
+        This specifies the port where your MySQL database is running.
+
+        .. code-block:: xml
+
+            <username>root</username>
+
+        * Optional
+        * Default: **"gerbera"**
+
+        This option sets the user name that will be used to connect to the database.
+
+        .. code-block:: xml
+
+            <password></password>
+
+        * Optional
+        * Default: **no password**
+
+        Defines the password for the MySQL user. If the tag doesn't exist Gerbera will use no password, if
+        the tag exists, but is empty Gerbera will use an empty password. MySQL has a distinction between
+        no password and an empty password.
+
+        .. code-block:: xml
+
+            <database>gerbera</database>
+
+        * Optional
+
+        * Default: **"gerbera"**
+
+        Name of the database that will be used by Gerbera.
+
+        .. code-block:: xml
+
+            <init-sql-file>/etc/gerbera/mysql.sql</init-sql-file>
+
+        * Optional
+        * Default: **Datadir / mysql.sql**
+
+        The full path to the init script for the database
+
+        .. code-block:: xml
+
+            <upgrade-file>/etc/gerbera/mysql-upgrade.xml</upgrade-file>
+
+        * Optional
+        * Default: **Datadir / mysql-upgrade.xml**
+
+        The full path to the upgrade settings for the database
+
+
+``upnp``
+~~~~~~~~
+
+.. code-block:: xml
+
+    <upnp multi-value="yes" search-result-separator=" : ">
+
+* Optional
+
+Modify the settings for UPnP items.
+
+This section defines the properties which are send to UPnP clients as part of the response.
+
+    **Attributes**
+        ::
+
+            searchable-container-flag="yes"
+
+        * Optional
+
+        * Default: **"no"**
+
+        Only return containers that have the flag **searchable** set.
+
+        ::
+
+            search-result-separator=" : "
+
+        * Optional
+
+        * Default: **" - "**
+
+        String used to concatenate result segments as defined in ``search-item-result``
+
+        ::
+
+            multi-value="yes"
+
+        * Optional
+
+        * Default: **no**
+
+        Enables sending multi-valued metadata in separate items. If set to **no** all values are concatenated by CFG_IMPORT_LIBOPTS_ENTRY_SEP. Otherwise each item is added separately.
+
+        * Example:
+            The follow data is sent if set to **no**
+
+            .. code-block:: xml
+
+                <upnp:artist>First Artist / Second Artist</upnp:artist>
+
+            The follow data is sent if set to **yes**
+
+            .. code-block:: xml
+
+                <upnp:artist>First Artist</upnp:artist>
+                <upnp:artist>Second Artist</upnp:artist>
+
+        ::
+
+            search-filename="yes"
+
+        * Optional
+
+        * Default: **no**
+
+        Older versions of gerbera have been searching in the file name instead of the title metadata. If set to yes this behaviour is back, even if the result of the search shows another title.
+
+    **Child tags:**
 
     .. code-block:: xml
 
-        <host>localhost</host>
+        <search-item-result>
+            <add-data tag="M_ARTIST"/>
+            <add-data tag="M_TITLE"/>
+        </search-item-result>
 
     * Optional
-    * Default: **"localhost"**
 
-    This specifies the host where your MySQL database is running.
+    Set the meta-data search tags to use in search result for title. The default settings as shown above produces ``artist - title`` in the result list.
 
     .. code-block:: xml
 
-        <port>0</port>
+        <album-properties>...</album-properties>
+        <artist-properties>...</artist-properties>
+        <genre-properties>...</genre-properties>
+        <playlist-properties>...</playlist-properties>
+        <title-properties>...</title-properties>
 
     * Optional
-    * Default: **0**
 
-    This specifies the port where your MySQL database is running.
+    Defines the properties to send in the response.
+
+    It contains the following entries.
 
     .. code-block:: xml
 
-        <username>root</username>
-
-    * Optional
-    * Default: **"gerbera"**
-
-    This option sets the user name that will be used to connect to the database.
-
-    .. code-block:: xml
-
-        <password></password>
-
-    * Optional
-    * Default: **no password**
-
-    Defines the password for the MySQL user. If the tag doesn't exist Gerbera will use no password, if
-    the tag exists, but is empty Gerbera will use an empty password. MySQL has a distinction between
-    no password and an empty password.
-
-    .. code-block:: xml
-
-        <database>gerbera</database>
+        <upnp-namespace xmlns="gerbera" uri="https://gerbera.io"/>
+        <upnp-property upnp-tag="gerbera:artist" meta-data="M_ARTIST"/>
 
     * Optional
 
-    * Default: **"gerbera"**
+    Defines an UPnP property and references the namespace for the property.
 
-    Name of the database that will be used by Gerbera.
+    The attributes specify the property:
+
+        ::
+
+            xmlns="..."
+
+        * Required
+
+        Key for the namespace
+
+        ::
+
+            uri="..."
+
+        * Required
+
+        Uri for the namespace
+
+        ::
+
+            upnp-tag="..."
+
+        * Required
+
+        UPnP tag to be send. See the UPnP specification for valid entries.
+
+        ::
+
+            meta-data="..."
+
+        * Required
+
+        Name of the metadata tag to export in upnp response. The following values are supported: 
+        M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION, 
+        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_CREATOR, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
+        M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
+
+        Instead of metadata, you may also use auxdata entries as defined in ``library-options``.
+
+    **Defaults:**
+
+    * Album-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``dc:creator``       | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``dc:date``          | ``M_UPNP_DATE``   |
+    +----------------------+-------------------+
+    | ``dc:publisher``     | ``M_PUBLISHER``   |
+    +----------------------+-------------------+
+    | ``upnp:artist``      | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:albumArtist`` | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:composer``    | ``M_COMPOSER``    |
+    +----------------------+-------------------+
+    | ``upnp:conductor``   | ``M_CONDUCTOR``   |
+    +----------------------+-------------------+
+    | ``upnp:date``        | ``M_UPNP_DATE``   |
+    +----------------------+-------------------+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+    | ``upnp:orchestra``   | ``M_ORCHESTRA``   |
+    +----------------------+-------------------+
+    | ``upnp:producer``    | ``M_PRODUCER``    |
+    +----------------------+-------------------+
+
+    * Artist-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``upnp:artist``      | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:albumArtist`` | ``M_ALBUMARTIST`` |
+    +----------------------+-------------------+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+
+    * Genre-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``upnp:genre``       | ``M_GENRE``       |
+    +----------------------+-------------------+
+
+    * Playlist-Properties
+
+    +----------------------+-------------------+
+    | upnp-tag             | meta-data         |
+    +======================+===================+
+    | ``dc:date``          | ``M_UPNP_DATE``   |
+    +----------------------+-------------------+
+
+    * Title-Properties
+
+    The title properties cannot be changed, but you may add them under another tag.
+
+    +-----------------------------------+-----------------------+
+    | upnp-tag                          | meta-data             |
+    +===================================+=======================+
+    | ``dc:date``                       | ``M_DATE``            |
+    +-----------------------------------+-----------------------+
+    | ``dc:description``                | ``M_DESCRIPTION``     |
+    +-----------------------------------+-----------------------+
+    | ``dc:publisher``                  | ``M_PUBLISHER``       |
+    +-----------------------------------+-----------------------+
+    | ``dc:title``                      | ``M_TITLE``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:actor``                    | ``M_ACTOR``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:album``                    | ``M_ALBUM``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:albumArtURI``              | ``M_ALBUMARTURI``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:artist``                   | ``M_ARTIST``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:artist@role[AlbumArtist]`` | ``M_ALBUMARTIST``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:author``                   | ``M_AUTHOR``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:composer``                 | ``M_COMPOSER``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:conductor``                | ``M_CONDUCTOR``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:date``                     | ``M_UPNP_DATE``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:director``                 | ``M_DIRECTOR``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:episodeSeason``            | ``M_PARTNUMBER``      |
+    +-----------------------------------+-----------------------+
+    | ``upnp:genre``                    | ``M_GENRE``           |
+    +-----------------------------------+-----------------------+
+    | ``upnp:longDescription``          | ``M_LONGDESCRIPTION`` |
+    +-----------------------------------+-----------------------+
+    | ``upnp:orchestra``                | ``M_ORCHESTRA``       |
+    +-----------------------------------+-----------------------+
+    | ``upnp:originalTrackNumber``      | ``M_TRACKNUMBER``     |
+    +-----------------------------------+-----------------------+
+    | ``upnp:producer``                 | ``M_PRODUCER``        |
+    +-----------------------------------+-----------------------+
+    | ``upnp:rating``                   | ``M_RATING``          |
+    +-----------------------------------+-----------------------+
+    | ``upnp:region``                   | ``M_REGION``          |
+    +-----------------------------------+-----------------------+
+
+
+``containers``
+~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <containers enabled="yes">
+
+* Optional
+
+Add dynamic containers to virtual layout.
+
+This section sets the rules for additional containers which have calculated content.
+
+    **Attributes:**
+
+    ::
+
+        enabled=...
+
+    * Optional
+    * Default: **yes**
+
+    Enables or disables the dynamic containers driver.
+
+    **Child tags:**
+
+    ::
+
+
+        <container location="/New" title="Recently added" sort="-last_updated">
+            <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+        </container>
+
+    * Optional
+
+    Defines the properties of the dynamic container.
+
+    It contains the following entries.
+
+        .. code-block:: xml
+
+            <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+
+        * Required
+
+        Filter to run to get the contents of the container. It uses the syntax of UPnP search with additional properties ``last_modified`` and ``last_updated``.
+        It also support comparing against a special value ``"@last*"`` where ``*`` can be any integer which evaluates to the current time minus the number of days as specified.
+
+        ::
+
+            location="..."
+
+        * Required
+
+        Position in the virtual layout where the node is added. If it is in a sub-container, e.g. ``/Audio/New``, it only becomes visible if the import generates the parent container.
+
+        ::
+
+            title="..."
+
+        * Optional
+
+        Text to display as title of the container. If it is empty the last section of the location is used.
+
+        ::
+
+            sort="..."
+
+        * Optional
+
+        UPnP sort statement to use as sorting criteria for the container.
+
+        ::
+
+            image="..."
+
+        * Optional
+
+        Path to an image to display for the container. It still depends on the client whether the image becomes visible.

@@ -4,7 +4,7 @@
 
     gerbera-app.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -25,17 +25,37 @@ import {Autoscan} from './gerbera-autoscan.module.js';
 import {Items} from './gerbera-items.module.js';
 import {Menu} from './gerbera-menu.module.js';
 import {Trail} from './gerbera-trail.module.js';
+import {Tweaks} from "./gerbera-tweak.module.js";
 import {Tree} from './gerbera-tree.module.js';
 import {Updates} from './gerbera-updates.module.js';
+import {Clients} from './gerbera-clients.module.js';
+import {Config} from './gerbera-config.module.js';
 
 export class App {
-
   constructor(clientConfig, serverConfig) {
     this.clientConfig = clientConfig;
     this.serverConfig = serverConfig;
     this.loggedIn = false;
     this.currentTreeItem = undefined;
-    this.pageInfo = {};
+    this.initDone = false;
+    this.pageInfo = {
+      dbType: 'home',
+      configMode: 'minimal',
+      currentItem: {
+        'home': [],
+        'db': [],
+        'fs': [],
+        'clients': [],
+        'config': [],
+      }
+    };
+    this.navLinks = {
+      'home': '#nav-home',
+      'db': '#nav-db',
+      'fs': '#nav-fs',
+      'clients': '#nav-clients',
+      'config': '#nav-config',
+    };
   }
 
   isTypeDb() {
@@ -43,19 +63,58 @@ export class App {
   }
 
   getType() {
-    return Cookies.get('TYPE');
+    return this.pageInfo.dbType;
+  }
+
+  writeLocalStorage() {
+    if (this.initDone) {
+      localStorage.setItem('pageInfo', JSON.stringify(this.pageInfo));
+    }
   }
 
   setType(type) {
-    Cookies.set('TYPE', type);
+    this.pageInfo.dbType = type;
+    this.writeLocalStorage();
+  }
+
+  currentItem() {
+    if (this.pageInfo.currentItem && this.pageInfo.dbType in this.pageInfo.currentItem) {
+      return this.pageInfo.currentItem[this.pageInfo.dbType];
+    }
+    return [];
   }
 
   currentPage() {
     return this.pageInfo.currentPage;
   }
 
+  configMode() {
+    return this.pageInfo.configMode;
+  }
+
   setCurrentPage(page) {
     this.pageInfo.currentPage = page;
+    this.writeLocalStorage();
+  }
+
+  setCurrentConfig(mode) {
+    this.pageInfo.configMode = mode;
+    this.writeLocalStorage();
+  }
+
+  setCurrentItem(item) {
+    var parentElement = item.target;
+    var tree = [];
+    var cnt = 0;
+    while (parentElement && cnt < 100) {
+      cnt++; // avoid inifinite loop
+      if (parentElement.id && parentElement.id !== '') {
+        tree.unshift(parentElement.id);
+      }
+      parentElement = parentElement.parentElement;
+    }
+    this.pageInfo.currentItem[this.pageInfo.dbType] = tree;
+    this.writeLocalStorage();
   }
 
   isLoggedIn(){
@@ -64,9 +123,25 @@ export class App {
 
   setLoggedIn(isLoggedIn){
     this.loggedIn = isLoggedIn;
+    if (this.loggedIn) {
+        this.getStatus(this.clientConfig).then((response) => { return this.displayStatus(response); });
+    }
   }
 
   initialize () {
+    $('#server-status').hide();
+
+    this.pageInfo = {
+      dbType: 'home',
+      configMode: 'minimal',
+      currentItem: {
+        'home': [],
+        'db': [],
+        'fs': [],
+        'clients': [],
+        'config': [],
+      }
+    };
     return Updates.initialize()
       .then(() => this.configureDefaults())
       .then(() => {
@@ -83,6 +158,18 @@ export class App {
         this.loggedIn = loggedIn;
         this.displayLogin(loggedIn);
         Menu.initialize(this.serverConfig);
+      })
+      .then(() => {
+        if (localStorage.getItem('pageInfo')) {
+          this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
+          if (!('configMode' in this.pageInfo)) {
+            this.pageInfo.configMode = 'minimal';
+          }
+          if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
+            $(this.navLinks[this.pageInfo.dbType]).click();
+          }
+        }
+        this.initDone = true;
       })
       .catch((error) => {
         this.error(error);
@@ -101,16 +188,50 @@ export class App {
     return Promise.resolve();
   }
 
-  getConfig (clientConfig) {
+  getStatus (clientConfig) {
+    var data = {
+      req_type: 'config_load',
+      action: 'status'
+    };
+    data[Auth.SID] = Auth.getSessionId();
     return $.ajax({
       url: clientConfig.api,
       type: 'get',
+      data: data,
       async: false,
-      data: {
-        req_type: 'auth',
-        sid: Auth.getSessionId(),
-        action: 'get_config'
-      }
+    });
+  }
+
+  getStatusValue(itemList, entry) {
+    const found = itemList.filter(i => i.item === '/status/attribute::' + entry);
+    if (found && found.length > 0) {
+      return found[0].value;
+    }
+    return "";
+  }
+
+  displayStatus (response) {
+    if (response.success) {
+      $('#server-status').show();
+      $('#status-total').html(this.getStatusValue(response.values.item, 'total'));
+      $('#status-audio').html(this.getStatusValue(response.values.item, 'audio'));
+      $('#status-video').html(this.getStatusValue(response.values.item, 'video'));
+      $('#status-image').html(this.getStatusValue(response.values.item, 'image'));
+    }
+    return Promise.resolve();
+  }
+
+  getConfig (clientConfig) {
+    var data = {
+      req_type: 'auth',
+      action: 'get_config'
+    };
+    data[Auth.SID] = Auth.getSessionId();
+    return $.ajax({
+      url: clientConfig.api,
+      type: 'get',
+      data: data,
+      async: false,
     });
   }
 
@@ -135,9 +256,9 @@ export class App {
     let viewItemsCount;
     const itemsPerPage = this.serverConfig['items-per-page'];
     if (itemsPerPage && itemsPerPage.default) {
-      viewItemsCount = itemsPerPage.default
+      viewItemsCount = itemsPerPage.default;
     } else {
-      viewItemsCount = 25
+      viewItemsCount = 25;
     }
     return viewItemsCount;
   }
@@ -147,14 +268,19 @@ export class App {
       $('.login-field').hide();
       $('#login-submit').hide();
       if (this.accounts) {
-        $('#logout').show().click(Auth.logout)
+        $('#logout').show().click(Auth.logout);
       }
       Items.initialize();
       Tree.initialize();
       Trail.initialize();
       Autoscan.initialize();
       Updates.initialize();
+      Clients.initialize();
+      Config.initialize();
+      Tweaks.initialize();
+      this.getStatus(this.clientConfig).then((response) => {return this.displayStatus(response); });
     } else {
+      $('#server-status').hide();
       $('.login-field').show();
       $('#login-form').submit(function (event) {
         Auth.authenticate(event);
@@ -184,7 +310,7 @@ export class App {
       type = 'danger';
       icon = 'fa-frown-o';
     }
-    Updates.showMessage(message, undefined, type, icon)
+    Updates.showMessage(message, undefined, type, icon);
   }
 
   disable() {
@@ -194,6 +320,8 @@ export class App {
     Tree.destroy();
     Trail.destroy();
     Items.destroy();
+    Clients.destroy();
+    Config.destroy();
   }
 
   reload(path) {

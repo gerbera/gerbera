@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     exiv2_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -35,29 +35,30 @@
 #include <exiv2/exiv2.hpp>
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "iohandler/io_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-Exiv2Handler::Exiv2Handler(std::shared_ptr<ConfigManager> config)
-    : MetadataHandler(config)
+Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
+    : MetadataHandler(context)
 {
+    // silence exiv2 messages without debug
+    Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
 }
 
-void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
+void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
 {
     try {
         std::string value;
-        auto sc = StringConverter::m2i(config);
+        const auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation(), config);
 
-        Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open(std::string(item->getLocation().c_str()));
+        const auto image = Exiv2::ImageFactory::open(item->getLocation());
         image->readMetadata();
         Exiv2::ExifData& exifData = image->exifData();
         Exiv2::XmpData& xmpData = image->xmpData();
 
         // first retrieve jpeg comment
-        std::string comment = const_cast<char*>(image->comment().c_str());
+        std::string comment = image->comment();
 
         if (exifData.empty()) {
             // no exiv2 record found in image
@@ -67,14 +68,14 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         // get date/time
         auto md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
         if (md != exifData.end()) {
-            value = sc->convert(const_cast<char*>(md->toString().c_str()));
+            value = sc->convert(md->toString());
 
             /// \todo convert date to ISO 8601 as required in the UPnP spec
             // from YYYY:MM:DD to YYYY-MM-DD
             if (value.length() >= 11) {
-                value = value.substr(0, 4) + "-" + value.substr(5, 2) + "-" + value.substr(8, 2);
-                log_debug("date: {}", value.c_str());
-                item->setMetadata(MetadataHandler::getMetaFieldName(M_DATE), value);
+                value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
+                log_debug("date: {}", value);
+                item->addMetaData(M_DATE, value);
             }
         }
 
@@ -83,8 +84,8 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         if (comment.empty()) {
             md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
             if (md != exifData.end())
-                comment = const_cast<char*>(md->toString().c_str());
-            log_debug("Comment: {}", comment.c_str());
+                comment = md->toString();
+            log_debug("Comment: {}", comment);
         }
 
         // if the image has no comment, compose something nice out of the exiv information
@@ -136,48 +137,74 @@ void Exiv2Handler::fillMetadata(std::shared_ptr<CdsItem> item)
         log_debug("Fabricated Comment: {}", comment.c_str());
         }  */
 
-        if (!comment.empty())
-            item->setMetadata(MT_KEYS[M_DESCRIPTION].upnp, sc->convert(comment));
+        if (!comment.empty()) {
+            item->addMetaData(M_DESCRIPTION, sc->convert(comment));
+        }
+
+        // if there are any metadata tags that the user wants - add them
+        const auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
+        if (!meta.empty()) {
+            for (auto&& [metatag, metakey] : meta) {
+                std::string metaval;
+                log_debug("metatag: {} ", metatag.c_str());
+                if (startswith(metatag, "Exif")) {
+                    md = exifData.findKey(Exiv2::ExifKey(metatag));
+                    if (md != exifData.end())
+                        metaval = md->toString();
+                } else if (startswith(metatag, "Xmp")) {
+                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(metatag));
+                    if (xmpMd != xmpData.end())
+                        metaval = xmpMd->toString();
+                } else {
+                    log_debug("Invalid meta Tag {}", metatag.c_str());
+                    break;
+                }
+                if (!metaval.empty()) {
+                    metaval = sc->convert(metaval);
+                    item->addMetaData(metakey, metaval);
+                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, metaval);
+                }
+            }
+        } else {
+            log_debug("No aux data requested");
+        }
 
         // if there are any auxilary tags that the user wants - add them
-        auto aux = config->getStringArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
+        const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
         if (!aux.empty()) {
-            std::string value;
-            std::string auxtag;
-
-            for (const auto& j : aux) {
-                value = "";
-                auxtag = j;
+            for (auto&& auxtag : aux) {
+                std::string auxval;
                 log_debug("auxtag: {} ", auxtag.c_str());
-                if (auxtag.substr(0, 4) == "Exif") {
-                    auto md = exifData.findKey(Exiv2::ExifKey(auxtag));
+                if (startswith(auxtag, "Exif")) {
+                    md = exifData.findKey(Exiv2::ExifKey(auxtag));
                     if (md != exifData.end())
-                        value = const_cast<char*>(md->toString().c_str());
-                } else if (auxtag.substr(0, 3) == "Xmp") {
-                    auto md = xmpData.findKey(Exiv2::XmpKey(auxtag));
-                    if (md != xmpData.end())
-                        value = const_cast<char*>(md->toString().c_str());
+                        auxval = md->toString();
+                } else if (startswith(auxtag, "Xmp")) {
+                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
+                    if (xmpMd != xmpData.end())
+                        auxval = xmpMd->toString();
                 } else {
                     log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;
                 }
-                if (!value.empty()) {
-                    value = sc->convert(value);
-                    item->setAuxData(auxtag, value);
-                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value.c_str());
+                if (!auxval.empty()) {
+                    auxval = sc->convert(auxval);
+                    item->setAuxData(auxtag, auxval);
+                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), auxval.c_str());
                 }
             }
 
         } else {
             log_debug("No aux data requested");
         }
-
-    } catch (Exiv2::AnyError& ex) {
+    } catch (const Exiv2::AnyError& ex) {
         log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().c_str(), ex.what());
     }
+
+    Exiv2::XmpProperties::unregisterNs();
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(std::shared_ptr<CdsItem> item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(const std::shared_ptr<CdsObject>& item, int resNum)
 {
     return nullptr;
 }

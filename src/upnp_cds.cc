@@ -31,114 +31,122 @@
 
 #include "upnp_cds.h" // API
 
-#include <memory>
-#include <string>
-#include <utility>
+#include <sstream>
 #include <vector>
 
 #include "config/config_manager.h"
-#include "search_handler.h"
-#include "server.h"
-#include "storage/storage.h"
+#include "database/database.h"
+#include "database/sql_database.h"
+#include "util/upnp_quirks.h"
 
-ContentDirectoryService::ContentDirectoryService(std::shared_ptr<ConfigManager> config,
-    std::shared_ptr<Storage> storage,
-    UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
-    : systemUpdateID(0)
-    , stringLimit(stringLimit)
-    , config(std::move(config))
-    , storage(std::move(storage))
+ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
+    : stringLimit(stringLimit)
+    , config(context->getConfig())
+    , database(context->getDatabase())
     , deviceHandle(deviceHandle)
-    , xmlBuilder(xmlBuilder)
+    , xmlBuilder(std::move(xmlBuilder))
 {
+    titleSegments = this->config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
+    resultSeparator = this->config->getOption(CFG_UPNP_SEARCH_SEPARATOR);
+    searchableContainers = this->config->getBoolOption(CFG_UPNP_SEARCH_CONTAINER_FLAG);
 }
-
-ContentDirectoryService::~ContentDirectoryService() = default;
 
 void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
 {
     log_debug("start");
 
     auto req = request->getRequest();
-    auto req_root = req->document_element();
-    std::string objID = req_root.child("ObjectID").text().as_string();
-    std::string BrowseFlag = req_root.child("BrowseFlag").text().as_string();
-    //std::string Filter; // not yet supported
-    std::string StartingIndex = req_root.child("StartingIndex").text().as_string();
-    std::string RequestedCount = req_root.child("RequestedCount").text().as_string();
-    // std::string SortCriteria; // not yet supported
+    auto reqRoot = req->document_element();
+#ifdef DEBUG_UPNP
+    for (auto&& child : req_root.children()) {
+        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
+    }
+#endif
+    std::string objID = reqRoot.child("ObjectID").text().as_string();
+    std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
+    // std::string filter; // not yet supported
+    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}]",
-        objID.c_str(), BrowseFlag.c_str(), StartingIndex.c_str(), RequestedCount.c_str());
+    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
+        objID, browseFlag, startingIndex, requestedCount, sortCriteria);
 
-    int objectID;
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
-    objectID = std::stoi(objID);
+    auto&& quirks = request->getQuirks();
+    auto arr = quirks->getSamsungFeatureRoot(objID);
+    int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
-    if (BrowseFlag == "BrowseDirectChildren")
+    if (browseFlag == "BrowseDirectChildren")
         flag |= BROWSE_DIRECT_CHILDREN;
-    else if (BrowseFlag != "BrowseMetadata")
+    else if (browseFlag != "BrowseMetadata")
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
-            "invalid browse flag: " + BrowseFlag);
+            "Invalid browse flag: " + browseFlag);
 
-    auto parent = storage->loadObject(objectID);
-    if ((parent->getClass() == UPNP_DEFAULT_CLASS_MUSIC_ALBUM) || (parent->getClass() == UPNP_DEFAULT_CLASS_PLAYLIST_CONTAINER))
+    auto parent = database->loadObject(objectID);
+    if (sortCriteria.empty() && (parent->getClass() == UPNP_CLASS_MUSIC_ALBUM || parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
-    auto param = std::make_unique<BrowseParam>(objectID, flag);
+    auto param = BrowseParam(parent, flag);
 
-    param->setStartingIndex(std::stoi(StartingIndex));
-    param->setRequestedCount(std::stoi(RequestedCount));
+    param.setDynamicContainers(!quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
+    param.setStartingIndex(stoiString(startingIndex));
+    param.setRequestedCount(stoiString(requestedCount));
+    param.setSortCriteria(trimString(sortCriteria));
 
-    std::vector<std::shared_ptr<CdsObject>> arr;
     try {
-        arr = storage->browse(param);
+        if (arr.empty())
+            arr = database->browse(param);
     } catch (const std::runtime_error& e) {
+        log_error("No such object: {}", e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    pugi::xml_document didl_lite;
-    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
+    pugi::xml_document didlLite;
+    if (!quirks->blockXmlDeclaration()) {
+        auto decl = didlLite.prepend_child(pugi::node_declaration);
+        decl.append_attribute("version") = "1.0";
+        decl.append_attribute("encoding") = "UTF-8";
     }
+    auto didlLiteRoot = didlLite.append_child("DIDL-Lite");
+    didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
-    for (const auto& obj : arr) {
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && obj->getFlag(OBJECT_FLAG_PLAYED)) {
-            std::string title = obj->getTitle();
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-            else
-                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-
-            obj->setTitle(title);
+    for (auto&& obj : arr) {
+        if (!config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) || !obj->getFlag(OBJECT_FLAG_PLAYED)) {
+            xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
+            continue;
         }
 
-        xmlBuilder->renderObject(obj, false, stringLimit, &didl_lite_root);
+        std::string title = obj->getTitle();
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+            title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+        else
+            title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+        obj->setTitle(title);
+        xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
     }
 
-    std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
-    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(arr.size()).c_str());
-    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(param->getTotalMatches()).c_str());
-    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
-    request->setResponse(response);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto respRoot = response->document_element();
+    respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
+    respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
+    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
+    respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    request->setResponse(std::move(response));
 
     log_debug("end");
 }
@@ -148,62 +156,87 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     log_debug("start");
 
     auto req = request->getRequest();
-    auto req_root = req->document_element();
-    std::string containerID = req_root.child("ContainerID").text().as_string();
-    std::string searchCriteria = req_root.child("SearchCriteria").text().as_string();
-    std::string startingIndex = req_root.child("StartingIndex").text().as_string();
-    std::string requestedCount = req_root.child("RequestedCount").text().as_string();
-
-    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
-        containerID.c_str(), searchCriteria.c_str(), startingIndex.c_str(), requestedCount.c_str());
-
-    pugi::xml_document didl_lite;
-    auto didl_lite_root = didl_lite.append_child("DIDL-Lite");
-    didl_lite_root.append_attribute(XML_NAMESPACE_ATTR) = XML_DIDL_LITE_NAMESPACE;
-    didl_lite_root.append_attribute(XML_DC_NAMESPACE_ATTR) = XML_DC_NAMESPACE;
-    didl_lite_root.append_attribute(XML_UPNP_NAMESPACE_ATTR) = XML_UPNP_NAMESPACE;
-
-    if (config->getBoolOption(CFG_SERVER_EXTEND_PROTOCOLINFO_SM_HACK)) {
-        didl_lite_root.append_attribute(XML_SEC_NAMESPACE_ATTR) = XML_SEC_NAMESPACE;
+    auto reqRoot = req->document_element();
+#ifdef DEBUG_UPNP
+    for (auto&& child : req_root.children()) {
+        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
     }
+#endif
+    std::string containerID = reqRoot.child("ContainerID").text().as_string();
+    std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
+    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    auto searchParam = std::make_unique<SearchParam>(containerID, searchCriteria,
-        std::stoi(startingIndex, nullptr), std::stoi(requestedCount, nullptr));
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
+        containerID, searchCriteria, startingIndex, requestedCount, requestedCount);
+
+    auto&& quirks = request->getQuirks();
+    pugi::xml_document didlLite;
+    if (!quirks->blockXmlDeclaration()) {
+        auto decl = didlLite.prepend_child(pugi::node_declaration);
+        decl.append_attribute("version") = "1.0";
+        decl.append_attribute("encoding") = "UTF-8";
+    }
+    auto didlLiteRoot = didlLite.append_child("DIDL-Lite");
+    didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
+    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+
+    const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
+        stoiString(startingIndex), stoiString(requestedCount), searchableContainers);
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
-        results = storage->search(searchParam, &numMatches);
+        results = database->search(searchParam, &numMatches);
+        log_debug("Found {}/{} items", results.size(), numMatches);
     } catch (const std::runtime_error& e) {
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
-    for (const auto& cdsObject : results) {
+    for (auto&& cdsObject : results) {
+        if (!cdsObject->isItem()) {
+            xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
+            continue;
+        }
+
+        std::string title = cdsObject->getTitle();
+        if (!titleSegments.empty()) {
+            std::vector<std::string> values;
+            for (auto&& segment : titleSegments) {
+                auto mtField = MetadataHandler::remapMetaDataField(segment);
+                auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
+                if (!value.empty())
+                    values.push_back(value);
+            }
+            if (!values.empty())
+                title = fmt::format("{}", fmt::join(values, resultSeparator));
+        }
+
         if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
-            std::string title = cdsObject->getTitle();
             if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
                 title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
             else
                 title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-
-            cdsObject->setTitle(title);
         }
 
-        xmlBuilder->renderObject(cdsObject, false, stringLimit, &didl_lite);
+        cdsObject->setTitle(title);
+        xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
     }
 
-    std::ostringstream buf;
-    didl_lite.print(buf, "", 0);
-    std::string didl_lite_xml = buf.str();
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
-    auto resp_root = response->document_element();
-    resp_root.append_child("Result").append_child(pugi::node_pcdata).set_value(didl_lite_xml.c_str());
-    resp_root.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(std::to_string(results.size()).c_str());
-    resp_root.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(std::to_string(numMatches).c_str());
-    resp_root.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
-    request->setResponse(response);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto respRoot = response->document_element();
+    respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
+    respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
+    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
+    respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    request->setResponse(std::move(response));
 
     log_debug("end");
 }
@@ -212,10 +245,10 @@ void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<Acti
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value("dc:title,upnp:class,upnp:artist,upnp:album");
-    request->setResponse(response);
+    root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
+    request->setResponse(std::move(response));
 
     log_debug("end");
 }
@@ -224,22 +257,58 @@ void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<Action
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value("");
-    request->setResponse(response);
+    root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
+    request->setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("Id").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
-    request->setResponse(response);
+    root.append_child("Id").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    request->setResponse(std::move(response));
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->saveSamsungBookMarkedPosition(request);
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungFeatureList(request);
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungObjectIDfromIndex(request);
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request)
+{
+    log_debug("start");
+
+    request->getQuirks()->getSamsungIndexfromRID(request);
 
     log_debug("end");
 }
@@ -258,11 +327,18 @@ void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionR
         doGetSystemUpdateID(request);
     } else if (request->getActionName() == "Search") {
         doSearch(request);
+    } else if (request->getActionName() == "X_SetBookmark") {
+        doSamsungBookmark(request);
+    } else if (request->getActionName() == "X_GetFeatureList") {
+        doSamsungFeatureList(request);
+    } else if (request->getActionName() == "X_GetObjectIDfromIndex") {
+        doSamsungGetObjectIDfromIndex(request);
+    } else if (request->getActionName() == "X_GetIndexfromRID") {
+        doSamsungGetIndexfromRID(request);
     } else {
         // invalid or unsupported action
-        log_info("unrecognized action {}", request->getActionName().c_str());
+        log_warning("Unrecognized action {}", request->getActionName().c_str());
         request->setErrorCode(UPNP_E_INVALID_ACTION);
-        // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("ContentDirectoryService::processActionRequest: end");
@@ -274,15 +350,20 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
-    auto obj = storage->loadObject(0);
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
+    auto obj = database->loadObject(0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", +cont->getUpdateID()).c_str());
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if defined(USING_NPUPNP)
+    UpnpAcceptSubscriptionXML(
+        deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        UPNP_DESC_CDS_SERVICE_ID, xml, request->getSubscriptionID().c_str());
+#else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -291,13 +372,14 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
+#endif
     log_debug("end");
 }
 
-void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDs_CSV)
+void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv)
 {
     log_debug("start");
 
@@ -305,13 +387,17 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDs_CSV.c_str());
-    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(std::to_string(systemUpdateID).c_str());
+    property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDsCsv.c_str());
+    property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
     std::ostringstream buf;
     propset->print(buf, "", 0);
     std::string xml = buf.str();
 
+#if defined(USING_NPUPNP)
+    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        UPNP_DESC_CDS_SERVICE_ID, xml);
+#else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
     if (err != IXML_SUCCESS) {
@@ -321,9 +407,10 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     UpnpNotifyExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        DESC_CDS_SERVICE_ID, event);
+        UPNP_DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);
+#endif
 
     log_debug("end");
 }

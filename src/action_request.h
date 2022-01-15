@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     action_request.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -38,7 +38,10 @@
 #include <upnp.h>
 
 #include "common.h"
-#include "util/upnp_clients.h"
+
+// forward declaration
+class Context;
+class Quirks;
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///
@@ -52,7 +55,7 @@ protected:
     UpnpActionRequest* upnp_request;
 
     /// \brief Error code that is returned to the SDK.
-    int errCode;
+    int errCode { UPNP_E_SUCCESS };
 
     /// \brief Name of the action.
     ////request///
@@ -69,8 +72,8 @@ protected:
     /// Returned by getServiceID()
     std::string serviceID;
 
-    /// \brief Client Info
-    ClientInfo clientInfo;
+    /// \brief Client quirks
+    std::unique_ptr<Quirks> quirks;
 
     /// \brief XML holding the response, we fill it in.
     ///
@@ -80,7 +83,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    explicit ActionRequest(UpnpActionRequest* upnp_request);
+    explicit ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnpRequest);
 
     /// \brief Returns the name of the action.
     std::string getActionName() const;
@@ -94,9 +97,12 @@ public:
     /// \brief Returns the XML representation of the request, that comes to us.
     std::unique_ptr<pugi::xml_document> getRequest() const;
 
+    /// \brief Returns the client quirks
+    const std::unique_ptr<Quirks>& getQuirks() const;
+
     /// \brief Sets the response (XML created outside as the answer to the request)
     /// \param response XML holding the action response.
-    void setResponse(std::unique_ptr<pugi::xml_document>& response);
+    void setResponse(std::unique_ptr<pugi::xml_document> response);
 
     /// \brief Set the error code for the SDK.
     /// \param errCode UPnP error code.

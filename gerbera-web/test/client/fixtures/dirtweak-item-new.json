@@ -1,0 +1,15 @@
+{
+	"location": "/home/gerbera/Music",
+	"id": "-1",
+	"index": "0",
+	"status": "added",
+	"inherit": true,
+	"follow-symlinks": false,
+	"recursive": false,
+	"case-sensitive": false,
+	"hidden-files": false,
+	"meta-charset": "",
+	"fanart-file": "",
+	"subtitle-file": "",
+	"resource-file": ""
+}

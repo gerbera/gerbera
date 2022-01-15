@@ -43,6 +43,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="server"/>
+                <xs:element ref="clients" minOccurs="0"/>
                 <xs:element ref="import" minOccurs="0"/>
                 <xs:element ref="transcoding" minOccurs="0"/>
             </xs:all>
@@ -63,7 +64,6 @@
                 <xs:element ref="home"/>
                 <xs:element ref="webroot"/>
                 <xs:element ref="storage"/>
-                <xs:element ref="servedir" minOccurs="0"/>
                 <xs:element ref="ip" minOccurs="0"/>
                 <xs:element ref="interface" minOccurs="0"/>
                 <xs:element ref="modelName" minOccurs="0"/>
@@ -71,17 +71,19 @@
                 <xs:element ref="bookmark" minOccurs="0"/>
                 <xs:element ref="model" minOccurs="0"/>
                 <xs:element ref="manufacturerURL" minOccurs="0"/>
+                <xs:element ref="virtualURL" minOccurs="0"/>
                 <xs:element ref="presentationURL" minOccurs="0"/>
                 <xs:element ref="upnp-string-limit" minOccurs="0"/>
                 <xs:element ref="alive" minOccurs="0"/>
-                <xs:element ref="custom-http-headers" minOccurs="0"/>
                 <xs:element ref="modelDescription" minOccurs="0"/>
                 <xs:element ref="serialNumber" minOccurs="0"/>
-                <xs:element ref="protocolInfo" minOccurs="0"/>
                 <xs:element ref="pc-directory" minOccurs="0"/>
                 <xs:element ref="tmpdir" minOccurs="0"/>
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
+                <xs:element ref="upnp" minOccurs="0"/>
+                <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="system-threads" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
@@ -125,25 +127,9 @@
 
     <xs:element name="webroot" type="xs:string"/>
 
-    <xs:element name="servedir" type="xs:string" default=""/>
-
     <xs:element name="alive" type="xs:positiveInteger" default="180"/>
 
-    <xs:element name="custom-http-headers">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="add" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-
     <xs:element name="serialNumber" type="xs:string"/>
-
-    <xs:element name="protocolInfo">
-        <xs:complexType>
-            <xs:attribute name="extend" type="boolean" default="no"/>
-        </xs:complexType>
-    </xs:element>
 
     <xs:element name="add">
         <xs:complexType>
@@ -206,7 +192,30 @@
     </xs:element>
 
     <xs:element name="option" type="xs:positiveInteger"/>
-    
+
+    <xs:element name="containers">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="container" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="filter" minOccurs="1" maxOccurs="1"/>
+            </xs:all>
+            <xs:attribute name="location" type="xs:string" use="required"/>
+            <xs:attribute name="title" type="xs:string"/>
+            <xs:attribute name="image" type="xs:string"/>
+            <xs:attribute name="sort" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="filter" type="xs:string"/>
+
     <!--  Storage -->
 
     <xs:element name="storage">
@@ -215,17 +224,19 @@
                 <xs:element ref="sqlite3" minOccurs="0"/>
                 <xs:element ref="mysql" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="use-transactions" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
-
 
     <xs:element name="sqlite3">
         <xs:complexType>
             <xs:all>
                 <xs:element ref="database-file" minOccurs="0"/>
+                <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="synchronous" minOccurs="0"/>
                 <xs:element ref="on-error" minOccurs="0"/>
                 <xs:element ref="backup" minOccurs="0"/>
+                <xs:element ref="upgrade-file" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
@@ -266,6 +277,8 @@
                 <xs:element ref="username" minOccurs="0"/>
                 <xs:element ref="password" minOccurs="0"/>
                 <xs:element ref="database" minOccurs="0"/>
+                <xs:element ref="init-sql-file" minOccurs="0"/>
+                <xs:element ref="upgrade-file" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
@@ -275,7 +288,98 @@
     <xs:element name="username" type="xs:string" default="mediatomb"/>
     <xs:element name="password" type="xs:string"/>
     <xs:element name="database" type="xs:string" default="localhost"/>
-    
+    <xs:element name="upgrade-file" type="xs:string"/>
+
+    <xs:element name="upnp">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="album-properties" minOccurs="0"/>
+                <xs:element ref="artist-properties" minOccurs="0"/>
+                <xs:element ref="genre-properties" minOccurs="0"/>
+                <xs:element ref="playlist-properties" minOccurs="0"/>
+                <xs:element ref="title-properties" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="album-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="artist-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="playlist-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="title-properties">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="upnp-namespace" minOccurs="0"/>
+                <xs:element ref="upnp-property" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="upnp-property">
+        <xs:complexType>
+            <xs:attribute name="upnp-tag" type="xs:string" use="required"/>
+            <xs:attribute name="meta-data" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="upnp-namespace">
+        <xs:complexType>
+            <xs:attribute name="xmlns" type="xs:string" use="required"/>
+            <xs:attribute name="uri" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Clients -->
+
+    <xs:element name="clients">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="client" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="client">
+        <xs:complexType>
+            <xs:attribute name="ip" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="flags" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
     <!-- Import -->
 
     <xs:element name="import">
@@ -287,11 +391,18 @@
                 <xs:element ref="metadata-charset" minOccurs="0"/>
                 <xs:element ref="playlist-charset" minOccurs="0"/>
                 <xs:element ref="autoscan" minOccurs="0"/>
+                <xs:element ref="system-directories" minOccurs="0"/>
+                <xs:element ref="visible-directories" minOccurs="0"/>
+                <xs:element ref="directories" minOccurs="0"/>
+                <xs:element ref="layout" minOccurs="0"/>
+                <xs:element ref="resources" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
                 <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
+            <xs:attribute name="follow-symlinks" type="boolean" default="yes"/>
+            <xs:attribute name="readable-names" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
@@ -299,6 +410,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="common-script" minOccurs="0"/>
+                <xs:element ref="custom-script" minOccurs="0"/>
                 <xs:element ref="playlist-script" minOccurs="0"/>
                 <xs:element ref="virtual-layout" minOccurs="0"/>
             </xs:all>
@@ -307,6 +419,7 @@
     </xs:element>
 
     <xs:element name="common-script" type="xs:string"/>
+    <xs:element name="custom-script" type="xs:string"/>
 
     <xs:element name="playlist-script">
         <xs:complexType>
@@ -322,6 +435,9 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="import-script" minOccurs="0"/>
+                <xs:element ref="script-options" minOccurs="0"/>
+                <xs:element ref="genre-map" minOccurs="0"/>
+                <xs:element ref="structured-layout " minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -332,10 +448,77 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="audio-layout" type="string"/>
+            <xs:attribute name="video-layout" type="string"/>
+            <xs:attribute name="image-layout" type="string"/>
+            <xs:attribute name="trailer-layout" type="string"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="import-script" type="xs:string"/>
+
+    <xs:element name="system-directories">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-path" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="visible-directories">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-path" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-path">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="script-options">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="script-option" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="script-option">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="genre" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="genre">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="structured-layout">
+        <xs:complexType>
+            <xs:attribute name="skip-chars" type="xs:string"/>
+            <xs:attribute name="album-box" type="xs:string" default="6"/>
+            <xs:attribute name="artist-box" type="xs:string" default="9"/>
+            <xs:attribute name="genre-box" type="xs:string" default="6"/>
+            <xs:attribute name="track-box" type="xs:string" default="6"/>
+            <xs:attribute name="div-char" type="xs:string" default="-"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="filesystem-charset" type="xs:string"/>
 
@@ -370,14 +553,43 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="level" use="required">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="full"/>
-                        <xs:enumeration value="basic"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="directories">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="tweak" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="tweak">
+        <xs:complexType>
+            <xs:attribute name="location" type="xs:string" use="required"/>
+            <xs:attribute name="inherit" type="boolean" use="required"/>
+            <xs:attribute name="hidden-files"/>
+            <xs:attribute name="recursive" type="boolean"/>
+            <xs:attribute name="case-sensitive" type="boolean"/>
+            <xs:attribute name="fanart-file" type="xs:string"/>
+            <xs:attribute name="subtitle-file" type="xs:string"/>
+            <xs:attribute name="resource-file" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="layout">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="path" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="path">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
@@ -387,6 +599,7 @@
                 <xs:element ref="extension-mimetype" minOccurs="0"/>
                 <xs:element ref="mimetype-contenttype" minOccurs="0"/>
                 <xs:element ref="mimetype-upnpclass" minOccurs="0"/>
+                <xs:element ref="contenttype-dlnaprofile" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -432,13 +645,102 @@
         </xs:complexType>
     </xs:element>
 
+    <xs:element name="contenttype-dlnaprofile">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="resources">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="order" minOccurs="0"/>
+                <xs:element ref="container" minOccurs="0"/>
+                <xs:element ref="fanart" minOccurs="0"/>
+                <xs:element ref="subtitle" minOccurs="0"/>
+                <xs:element ref="resource" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="order">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="handler" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="parentCount"/>
+            <xs:attribute name="minDepth"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="fanart">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="subtitle">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="resource">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="handler">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-file">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-dir">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="ext" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="library-options">
         <xs:complexType>
             <xs:all>
                 <xs:element ref="libexif" minOccurs="0"/>
-                <xs:element ref="libextractor" minOccurs="0"/>
+                <xs:element ref="exiv2" minOccurs="0"/>
+                <xs:element ref="ffmpeg" minOccurs="0"/>
                 <xs:element ref="id3" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="multi-value-separator" type="xs:string" minOccurs="0" default="; "/>
+            <xs:attribute name="legacy-value-separator" type="xs:string" minOccurs="0"/>
         </xs:complexType>
     </xs:element>
 
@@ -448,22 +750,34 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
-    <xs:element name="libextractor">
+    <xs:element name="exiv2">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
-    
+
+    <xs:element name="ffmpeg">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="auxdata" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+    </xs:element>
+
     <xs:element name="id3">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
+       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="auxdata">
@@ -499,6 +813,7 @@
             <xs:sequence>
                 <xs:element ref="transcode" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -514,6 +829,7 @@
             <xs:sequence>
                 <xs:element ref="profile" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="allow-unused" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -531,6 +847,7 @@
                 <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="client-flags" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" use="required"/>
             <xs:attribute name="type" use="required">
                 <xs:simpleType>
@@ -570,96 +887,54 @@
     <xs:element name="resolution" type="xs:string"/>
     
     <xs:element name="thumbnail" type="boolean"/>
-    
+
     <!-- online-content -->
 
     <xs:element name="online-content">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="YouTube" minOccurs="0"/>
+                <xs:element ref="AppleTrailers" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="YouTube">
+    <xs:element name="AppleTrailers">
         <xs:complexType>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="favorites"/>
-                <xs:element ref="featured"/>
-                <xs:element ref="tag"/>
-                <xs:element ref="user"/>
-                <xs:element ref="playlist"/>
-                <xs:element ref="popular"/>
-                <xs:element ref="category-and-tag"/>
-            </xs:choice>
-            <xs:attribute name="enabled" type="boolean" default="no"/>
-            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="0"/>
-            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" default="0"/>
-            <xs:attribute name="update-at-start" type="boolean" default="no"/>
-            <xs:attribute name="dev-id" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="favorites">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="featured"/>
-
-    <xs:element name="tag">
-        <xs:complexType>
-            <xs:attribute name="tag" type="xs:string" use="required"/>
-            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
-            <!-- to be done better; can be a number or "all" -->
-            <xs:attribute name="amount" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="user">
-        <xs:complexType>
-            <xs:attribute name="user" type="xs:string" use="required"/>
-            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
-            <!-- to be done better; can be a number or "all" -->
-            <xs:attribute name="amount" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="playlist">
-        <xs:complexType>
-            <xs:attribute name="id" type="xs:string" use="required"/>
-            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
-            <!-- to be done better; can be a number or "all" -->
-            <xs:attribute name="amount" type="xs:string" use="required"/>
-            <xs:attribute name="name" type="xs:string" use="required"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="popular">
-        <xs:complexType>
-            <xs:attribute name="time-range" use="required">
+            <xs:attribute name="enabled" default="no">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
-                        <xs:enumeration value="all"/>
-                        <xs:enumeration value="day"/>
-                        <xs:enumeration value="week"/>
-                        <xs:enumeration value="month"/>
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="43200"/>
+            <xs:attribute name="update-at-start" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="purge-after" default="no">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="resolution" type="xs:nonNegativeInteger" default="640"/>
         </xs:complexType>
     </xs:element>
-
-    <xs:element name="category-and-tag">
+    <xs:element name="mimetype-mappings">
         <xs:complexType>
-            <xs:attribute name="category" type="xs:string" use="required"/>
-            <xs:attribute name="tag" type="xs:string" use="required"/>
-            <xs:attribute name="start-page" type="xs:nonNegativeInteger" use="required"/>
-            <!-- to be done better; can be a number or "all" -->
-            <xs:attribute name="amount" type="xs:string" use="required"/>
+            <xs:sequence>
+                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 

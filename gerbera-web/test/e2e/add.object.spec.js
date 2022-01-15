@@ -28,7 +28,7 @@ describe('Add Object Suite', () => {
 
   describe('The add new object', () => {
     it('a gerbera tree db item container adds new object with parent id', async () => {
-      const itemCountBefore = 13;
+      const itemCountBefore = 12;
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Video');
       let result = await homePage.items();

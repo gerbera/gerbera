@@ -1,0 +1,3 @@
+# Common requirements for Gerbera
+[settings]
+compiler.cppstd=17

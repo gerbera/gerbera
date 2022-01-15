@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     auth.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,47 +31,38 @@
 
 #include "pages.h" // API
 
-#include <chrono>
-#include <sys/time.h>
-#include <utility>
-
 #include "config/config_manager.h"
 #include "session_manager.h"
 #include "util/tools.h"
 
-#define LOGIN_TIMEOUT 10 // in seconds
+static constexpr auto loginTimeout = std::chrono::seconds(10);
 
-static long get_time()
+static std::string generateToken()
 {
-    return std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now()).time_since_epoch().count();
+    auto expiration = currentTime() + loginTimeout;
+    std::string salt = generateRandomId();
+    return fmt::format("{}_{}", expiration.count(), salt);
 }
 
-static std::string generate_token()
+static bool checkToken(const std::string& token, const std::string& password, const std::string& encPassword)
 {
-    long expiration = get_time() + LOGIN_TIMEOUT;
-    std::string salt = generate_random_id();
-    return std::to_string(expiration) + '_' + salt;
-}
-
-static bool check_token(const std::string& token, const std::string& password, const std::string& encPassword)
-{
-    std::vector<std::string> parts = split_string(token, '_');
+    std::vector<std::string> parts = splitString(token, '_');
     if (parts.size() != 2)
         return false;
-    long expiration = std::stol(parts[0]);
-    if (expiration < get_time())
+    auto expiration = std::chrono::seconds(std::stol(parts[0]));
+    if (expiration < currentTime())
         return false;
-    std::string checksum = hex_string_md5(token + password);
+    std::string checksum = hexStringMd5(token + password);
     return (checksum == encPassword);
 }
 
-web::auth::auth(const std::shared_ptr<ConfigManager>& config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(config, std::move(storage), std::move(content), std::move(sessionManager))
+Web::Auth::Auth(const std::shared_ptr<ContentManager>& content)
+    : WebRequestHandler(content)
+    , timeout(std::chrono::minutes(config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
 {
-    timeout = 60 * config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT);
 }
-void web::auth::process()
+
+void Web::Auth::process()
 {
     std::string action = param("action");
     auto root = xmlDoc->document_element();
@@ -84,6 +75,9 @@ void web::auth::process()
     if (action == "get_config") {
         auto cfg = root.append_child("config");
         cfg.append_attribute("accounts") = accountsEnabled();
+        cfg.append_attribute("enableNumbering") = config->getBoolOption(CFG_SERVER_UI_ENABLE_NUMBERING);
+        cfg.append_attribute("enableThumbnail") = config->getBoolOption(CFG_SERVER_UI_ENABLE_THUMBNAIL);
+        cfg.append_attribute("enableVideo") = config->getBoolOption(CFG_SERVER_UI_ENABLE_VIDEO);
         cfg.append_attribute("show-tooltips") = config->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS);
         cfg.append_attribute("poll-when-idle") = config->getBoolOption(CFG_SERVER_UI_POLL_WHEN_IDLE);
         cfg.append_attribute("poll-interval") = config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL);
@@ -93,9 +87,9 @@ void web::auth::process()
         xml2JsonHints->setArrayName(ipp, "option");
         ipp.append_attribute("default") = config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
-        auto menu_opts = config->getStringArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
-        for (const auto& menu_opt : menu_opts) {
-            ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menu_opt.c_str());
+        auto menuOpts = config->getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        for (auto&& menuOpt : menuOpts) {
+            ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menuOpt.c_str());
         }
 
 #ifdef HAVE_INOTIFY
@@ -106,65 +100,65 @@ void web::auth::process()
 
         auto actions = cfg.append_child("actions");
         xml2JsonHints->setArrayName(actions, "action");
-        //actions->appendTextChild("action", "fokel1");
-        //actions->appendTextChild("action", "fokel2");
+        // actions->appendTextChild("action", "fokel1");
+        // actions->appendTextChild("action", "fokel2");
 
         auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
         friendlyName.set_value(config->getOption(CFG_SERVER_NAME).c_str());
 
         auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
-        gerberaVersion.set_value(VERSION);
+        gerberaVersion.set_value(GERBERA_VERSION);
     } else if (action == "get_sid") {
         log_debug("checking/getting sid...");
-        std::shared_ptr<Session> session = nullptr;
-        std::string sid = param("sid");
+        std::shared_ptr<Session> session;
+        std::string sid = param(SID);
 
-        if (sid.empty() || (session = sessionManager->getSession(sid)) == nullptr) {
+        if (sid.empty() || !(session = sessionManager->getSession(sid))) {
             session = sessionManager->createSession(timeout);
             root.append_attribute("sid_was_valid") = false;
         } else {
             session->clearUpdateIDs();
             root.append_attribute("sid_was_valid") = true;
         }
-        root.append_attribute("sid") = session->getID().c_str();
+        root.append_attribute(SID) = session->getID().c_str();
 
         if (!session->isLoggedIn() && !accountsEnabled()) {
             session->logIn();
-            //throw SessionException("not logged in");
+            // throw SessionException("not logged in");
         }
         root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {
-        check_request();
-        std::string sid = param("sid");
+        checkRequest();
+        std::string sid = param(SID);
         auto session = sessionManager->getSession(sid);
-        if (session == nullptr)
+        if (!session)
             throw_std_runtime_error("illegal session id");
         sessionManager->removeSession(sid);
     } else if (action == "get_token") {
-        check_request(false);
+        checkRequest(false);
 
         // sending token
-        std::string token = generate_token();
+        std::string token = generateToken();
         session->put("token", token);
         root.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
     } else if (action == "login") {
-        check_request(false);
+        checkRequest(false);
 
         // authentication
         std::string username = param("username");
         std::string encPassword = param("password");
-        std::string sid = param("sid");
+        std::string sid = param(SID);
 
         if (username.empty() || encPassword.empty())
             throw LoginException("Missing username or password");
 
         auto session = sessionManager->getSession(sid);
-        if (session == nullptr)
+        if (!session)
             throw_std_runtime_error("illegal session id");
 
         std::string correctPassword = sessionManager->getUserPassword(username);
 
-        if (correctPassword.empty() || !check_token(session->get("token"), correctPassword, encPassword))
+        if (correctPassword.empty() || !checkToken(session->get("token"), correctPassword, encPassword))
             throw LoginException("Invalid username or password");
 
         session->logIn();

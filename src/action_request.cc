@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     action_request.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,19 +31,18 @@
 
 #include "action_request.h" // API
 
-#include <sstream>
+#include "upnp_xml.h"
+#include "util/upnp_quirks.h"
 
-#include "util/tools.h"
-
-ActionRequest::ActionRequest(UpnpActionRequest* upnp_request)
-    : upnp_request(upnp_request)
-    , errCode(UPNP_E_SUCCESS)
-    , actionName(UpnpActionRequest_get_ActionName_cstr(upnp_request))
-    , UDN(UpnpActionRequest_get_DevUDN_cstr(upnp_request))
-    , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnp_request))
+ActionRequest::ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnpRequest)
+    : upnp_request(upnpRequest)
+    , actionName(UpnpActionRequest_get_ActionName_cstr(upnpRequest))
+    , UDN(UpnpActionRequest_get_DevUDN_cstr(upnpRequest))
+    , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnpRequest))
 {
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnp_request);
-    Clients::getInfo(ctrlPtIPAddr, &clientInfo);
+    auto ctrlPtIPAddr = UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest);
+    std::string userAgent = UpnpActionRequest_get_Os_cstr(upnpRequest);
+    quirks = std::make_unique<Quirks>(context, ctrlPtIPAddr, userAgent);
 }
 
 std::string ActionRequest::getActionName() const
@@ -61,12 +60,21 @@ std::string ActionRequest::getServiceID() const
     return serviceID;
 }
 
+const std::unique_ptr<Quirks>& ActionRequest::getQuirks() const
+{
+    return quirks;
+}
+
 std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 {
-    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     auto request = std::make_unique<pugi::xml_document>();
+#if defined(USING_NPUPNP)
+    auto ret = request->load_string(upnp_request->xmlAction.c_str());
+#else
+    DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
     auto ret = request->load_string(cxml);
     ixmlFreeDOMString(cxml);
+#endif
 
     if (ret.status != pugi::xml_parse_status::status_ok)
         throw_std_runtime_error("Unable to parse ixml");
@@ -74,7 +82,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
     return request;
 }
 
-void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document>& response)
+void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document> response)
 {
     this->response = std::move(response);
 }
@@ -86,23 +94,28 @@ void ActionRequest::setErrorCode(int errCode)
 
 void ActionRequest::update()
 {
-    if (response != nullptr) {
-        std::ostringstream buf;
-        response->print(buf, "", 0);
-        std::string xml = buf.str();
-        log_debug("ActionRequest::update(): {}", xml.c_str());
+    if (response) {
+        std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
+        log_debug("ActionRequest::update(): {}", xml);
 
+#if defined(USING_NPUPNP)
+        UpnpActionRequest_set_xmlResponse(upnp_request, xml);
+        UpnpActionRequest_set_ErrCode(upnp_request, errCode);
+#else
         IXML_Document* result = nullptr;
         int err = ixmlParseBufferEx(xml.c_str(), &result);
 
         if (err != IXML_SUCCESS) {
             log_error("ActionRequest::update(): could not convert to iXML");
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
+            if (result)
+                ixmlDocument_free(result);
         } else {
             log_debug("ActionRequest::update(): converted to iXML, code {}", errCode);
             UpnpActionRequest_set_ActionResult(upnp_request, result);
             UpnpActionRequest_set_ErrCode(upnp_request, errCode);
         }
+#endif
     } else {
         // ok, here there can be two cases
         // either the function below already did set an error code,
@@ -112,6 +125,6 @@ void ActionRequest::update()
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
         }
 
-        log_error("ActionRequest::update(): response is nullptr, code {} for {}", errCode, actionName.c_str());
+        log_error("ActionRequest::update(): response is nullptr, code {} for {}", errCode, actionName);
     }
 }

@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     mem_io_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,39 +31,23 @@
 
 #include "mem_io_handler.h" // API
 
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <ixml.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include "cds_objects.h"
-#include "server.h"
-#include "update_manager.h"
-#include "util/process.h"
-
 MemIOHandler::MemIOHandler(const void* buffer, int length)
-    : buffer(static_cast<char*>(malloc(length)))
+    : buffer(new char[length])
     , length(length)
-    , pos(-1)
 {
-    memcpy(this->buffer, buffer, length);
+    std::memcpy(this->buffer, buffer, length);
 }
 
 MemIOHandler::MemIOHandler(const std::string& str)
-    : buffer(static_cast<char*>(malloc(str.length())))
+    : buffer(new char[str.length()])
     , length(str.length())
-    , pos(-1)
 {
-    memcpy(this->buffer, str.c_str(), length);
+    std::memcpy(this->buffer, str.c_str(), length);
 }
 
 MemIOHandler::~MemIOHandler()
 {
-    free(buffer);
+    delete[] buffer;
 }
 
 void MemIOHandler::open(enum UpnpOpenFileMode mode)
@@ -71,9 +55,9 @@ void MemIOHandler::open(enum UpnpOpenFileMode mode)
     pos = 0;
 }
 
-size_t MemIOHandler::read(char* buf, size_t length)
+std::size_t MemIOHandler::read(char* buf, std::size_t length)
 {
-    size_t ret = 0;
+    std::size_t ret;
 
     // we indicate EOF by setting pos to -1
     if (pos == -1) {
@@ -81,12 +65,12 @@ size_t MemIOHandler::read(char* buf, size_t length)
     }
 
     off_t rest = this->length - pos;
-    if (length > static_cast<size_t>(rest))
+    if (length > std::size_t(rest))
         length = rest;
 
-    memcpy(buf, buffer + pos, length);
+    std::memcpy(buf, buffer + pos, length);
     pos = pos + length;
-    ret = static_cast<int>(length);
+    ret = int(length);
 
     if (pos >= this->length) {
         pos = -1;
@@ -109,23 +93,26 @@ void MemIOHandler::seek(off_t offset, int whence)
 
         pos = offset;
     } else if (whence == SEEK_CUR) {
-        long temp;
-
-        if (pos == -1) {
-            temp = length;
-        } else {
-            temp = pos;
+        off_t temp = (pos == -1) ? length : pos;
+        //  (((temp + offset) > length) || ((temp + offset) < 0))
+        if (offset > 0 && (length < offset || temp > length - offset)) {
+            throw_std_runtime_error("seek failed: trying to seek past end of file");
         }
 
-        if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw_std_runtime_error("seek failed: trying to seek before the beginning/past end of file");
+        if (offset < 0 && temp < -offset) {
+            throw_std_runtime_error("seek failed: trying to seek before the beginning of file");
         }
 
         pos = temp + offset;
     } else if (whence == SEEK_END) {
-        long temp = length;
-        if (((temp + offset) > length) || ((temp + offset) < 0)) {
-            throw_std_runtime_error("seek failed: trying to seek before the beginning/past end of file");
+        off_t temp = length;
+        //  (((temp + offset) > length) || ((temp + offset) < 0))
+        if (offset > 0 && (length < offset || temp > length - offset)) {
+            throw_std_runtime_error("seek failed: trying to seek past end of file");
+        }
+
+        if (offset < 0 && temp < -offset) {
+            throw_std_runtime_error("seek failed: trying to seek before the beginning of file");
         }
 
         pos = temp + offset;

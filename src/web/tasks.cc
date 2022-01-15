@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     tasks.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,19 +31,11 @@
 
 #include "pages.h" // API
 
-#include <utility>
+#include "content/content_manager.h"
 
-#include "content_manager.h"
-
-web::tasks::tasks(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
+void Web::Tasks::process()
 {
-}
-
-void web::tasks::process()
-{
-    check_request();
+    checkRequest();
     std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("called with illegal action");
@@ -54,8 +46,8 @@ void web::tasks::process()
         auto tasksEl = root.append_child("tasks");
         xml2JsonHints->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
-        for (const auto& i : taskList) {
-            appendTask(i, &tasksEl);
+        for (auto&& task : taskList) {
+            appendTask(task, tasksEl);
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");

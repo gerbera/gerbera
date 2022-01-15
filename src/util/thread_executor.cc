@@ -31,12 +31,6 @@
 
 #include "thread_executor.h" // API
 
-ThreadExecutor::ThreadExecutor()
-    : threadShutdown(false)
-    , thread(0)
-{
-}
-
 ThreadExecutor::~ThreadExecutor()
 {
     kill();
@@ -44,12 +38,21 @@ ThreadExecutor::~ThreadExecutor()
 
 void ThreadExecutor::startThread()
 {
-    threadRunning = true;
-    pthread_create(
+    int ret = pthread_create(
         &thread,
-        nullptr, // attr
-        ThreadExecutor::staticThreadProc,
+        nullptr,
+        [](void* arg) -> void* {
+            auto inst = static_cast<ThreadExecutor*>(arg);
+            inst->threadProc();
+            pthread_exit(nullptr);
+        },
         this);
+
+    if (ret != 0) {
+        log_error("Could not start thread: {}", std::strerror(ret));
+    } else {
+        threadRunning = true;
+    }
 }
 
 bool ThreadExecutor::kill()
@@ -65,13 +68,7 @@ bool ThreadExecutor::kill()
     if (thread) {
         threadRunning = false;
         pthread_join(thread, nullptr);
+        thread = 0;
     }
     return true;
-}
-
-void* ThreadExecutor::staticThreadProc(void* arg)
-{
-    auto inst = static_cast<ThreadExecutor*>(arg);
-    inst->threadProc();
-    pthread_exit(nullptr);
 }

@@ -8,8 +8,8 @@ Gerbera is an UPnP Media Server.
 
 It allows you to stream your digital media through your home network and listen to/watch it on a variety of UPnP compatible devices.
 
-Gerbera should work with any UPnP compliant client, please tell us if you experience difficulties with
-particular models, also take a look at the :ref:`Supported Devices <supported-devices>` list for more information.
+Gerbera should work with any UPnP compliant client.  Please tell us if you experience difficulties with
+particular models. Please see the the :ref:`Supported Devices <supported-devices>` list for related information.
 
 Features
 ~~~~~~~~
@@ -54,7 +54,7 @@ Copyright
       | Sergey Bostandzhyan <jin at mediatomb dot cc>
       | Leonhard Wimmer <leo at mediatomb dot cc>
 
-   Copyright (C) 2016-2019
+   Copyright (C) 2016-2022
       | Gerbera Contributors
 
 License
@@ -86,7 +86,7 @@ Contributions
 - Initial version of the MediaTomb start up script was contributed by Iain Lea <iain at bricbrac dot de>
 - TagLib support patch was contributed by Benhur Stein <benhur.stein at gmail dot com>
 - ffmpeg metadata handler was contributed by Ingo Preiml <ipreiml at edu dot uni-klu dot ac dot at>
-- ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb at ebixio dot com
+- ID3 keyword extraction patch was contributed by Gabriel Burca <gburca-mediatomb at ebixio dot com>
 - Photo layout by year/month was contributed by Aleix Conchillo Flaqué <aleix at member dot fsf dot org>
 - lastfmlib patch was contributed by Dirk Vanden Boer <dirk dot vdb at gmail dot com>
 - NetBSD patches were contributed by Jared D. McNeill <jmcneill at NetBSD dot org>
@@ -99,6 +99,7 @@ Contributions
    Run Gerbera                <run>
    Gerbera Daemon             <daemon>
    Gerbera UI                 <ui>
+   Supported File Types       <supported-types>
    Supported Devices          <supported-devices>
    Transcoding                <transcoding>
    Scripting                  <scripting>

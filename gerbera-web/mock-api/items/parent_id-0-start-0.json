@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "items": {
+    "parent_id": 0,
+    "location": "/Video/Directories/video/Test",
+    "virtual": true,
+    "start": 0,
+    "total_matches": 0,
+    "autoscan_mode": "none",
+    "autoscan_type": "none",
+    "protect_container": false,
+    "protect_items": false,
+    "item": []
+  }
+}

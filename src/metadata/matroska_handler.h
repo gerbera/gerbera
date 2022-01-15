@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     matroska_handler.h - this file is part of Gerbera.
-    
-    Copyright (C) 2019-2020 Gerbera Contributors
-    
+
+    Copyright (C) 2019-2022 Gerbera Contributors
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -36,24 +36,26 @@
 #include "metadata_handler.h"
 
 // forward declaration
-class CdsItem;
-class ConfigManager;
 class MemIOHandler;
 
 /// \brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MetadataHandler {
+    using MetadataHandler::MetadataHandler;
+
 public:
-    explicit MatroskaHandler(std::shared_ptr<ConfigManager> config);
-    void fillMetadata(std::shared_ptr<CdsItem> item) override;
-    std::unique_ptr<IOHandler> serveContent(std::shared_ptr<CdsItem> item, int resNum) override;
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
 private:
-    void parseMKV(const std::shared_ptr<CdsItem>& item, MemIOHandler** p_io_handler);
-    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlElement* el_l1, MemIOHandler** p_io_handler);
-    void parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* info);
-    static void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebml_stream, LIBEBML_NAMESPACE::EbmlMaster* attachments, MemIOHandler** io_handler);
-    static std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData* data);
-    static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& art_mimetype);
+    int activeFlag {};
+
+    void parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler);
+    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler);
+    void parseHead(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler);
+    void parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info);
+    void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler);
+    std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData& data) const;
+    static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
 };
 
 #endif

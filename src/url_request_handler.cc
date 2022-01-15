@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     url_request_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -32,94 +32,53 @@
 #ifdef HAVE_CURL
 #include "url_request_handler.h" // API
 
-#include <ixml.h>
-#include <utility>
-
-#include "config/config_manager.h"
-#include "content_manager.h"
-#include "server.h"
-#include "storage/storage.h"
-
 #include "cds_objects.h"
-#include "iohandler/buffered_io_handler.h"
-
-#ifdef ONLINE_SERVICES
-#include "onlineservice/online_service_helper.h"
-#endif
+#include "config/config_manager.h"
+#include "content/content_manager.h"
+#include "database/database.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
-#include "url.h"
+#include "util/url.h"
 
-URLRequestHandler::URLRequestHandler(std::shared_ptr<ConfigManager> config,
-    std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content)
-    : RequestHandler(std::move(config), std::move(storage))
-    , content(std::move(content))
-{
-}
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service_helper.h"
+#endif
 
 void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
-    std::string parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
-
-    std::map<std::string, std::string> params;
-    dict_decode_simple(parameters, &params);
-
-    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
-
-    auto objIdIt = params.find("object_id");
-    if (objIdIt == params.end()) {
-        //log_error("object_id not found in url");
-        throw_std_runtime_error("getInfo: object_id not found");
-    }
-    int objectID = std::stoi(objIdIt->second);
-    //log_debug("got ObjectID: {}", objectID);
-
-    auto obj = storage->loadObject(objectID);
-
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
+    auto obj = loadObject(params);
+    if (!obj->isExternalItem()) {
         throw_std_runtime_error("getInfo: object is not an external url item");
     }
 
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 
-    std::string header;
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+
     std::string mimeType;
 
-    if (!tr_profile.empty()) {
+    if (!trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
-        if (tp == nullptr)
-            throw_std_runtime_error("Transcoding requested but no profile matching the name "
-                + tr_profile + " found");
+                      ->getByName(trProfile);
+        if (!tp)
+            throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", trProfile);
 
         mimeType = tp->getTargetMimeType();
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
-        auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
-        std::string url;
-
 #ifdef ONLINE_SERVICES
-        if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-            /// \todo write a helper class that will handle various online
-            /// services
-            auto helper = std::make_unique<OnlineServiceHelper>();
-            url = helper->resolveURL(item);
-        } else
+        std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+#else
+        std::string url = item->getLocation();
 #endif
-        {
-            url = item->getLocation();
-        }
-
-        log_debug("Online content url: {}", url.c_str());
+        log_debug("Online content url: {}", url);
         try {
             auto st = URL::getInfo(url);
             UpnpFileInfo_set_FileLength(info, st->getSize());
-            header = "Accept-Ranges: bytes";
-            log_debug("URL used for request: {}", st->getURL().c_str());
+            log_debug("URL used for request: {}", st->getURL());
         } catch (const std::runtime_error& ex) {
             log_warning("{}", ex.what());
             UpnpFileInfo_set_FileLength(info, -1);
@@ -132,21 +91,17 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_LastModified(info, 0);
     UpnpFileInfo_set_IsDirectory(info, 0);
 
-    // FIX EXTRA HEADERS
-    //    if (!header.empty()) {
-    //        UpnpFileInfo_set_ExtraHeaders(info,
-    //            ixmlCloneDOMString(header.c_str()));
-    //    }
-
-    UpnpFileInfo_set_ContentType(info, ixmlCloneDOMString(mimeType.c_str()));
+#ifdef USING_NPUPNP
+    info->content_type = std::move(mimeType);
+#else
+    UpnpFileInfo_set_ContentType(info, mimeType.c_str());
+#endif
     log_debug("web_get_info(): end");
 
     /// \todo transcoding for get_info
 }
 
-std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
-    enum UpnpOpenFileMode mode,
-    const std::string& range)
+std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     log_debug("start");
 
@@ -155,84 +110,40 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename,
     if (mode != UPNP_READ)
         throw_std_runtime_error("UPNP_WRITE unsupported");
 
-    std::string parameters = (filename + strlen(LINK_URL_REQUEST_HANDLER));
-
-    std::map<std::string, std::string> params;
-    dict_decode_simple(parameters, &params);
-    log_debug("full url (filename): {}, parameters: {}", filename, parameters.c_str());
-
-    auto objIdIt = params.find("object_id");
-    if (objIdIt == params.end()) {
-        //log_error("object_id not found in url");
-        throw_std_runtime_error("getInfo: object_id not found");
-    }
-    int objectID = std::stoi(objIdIt->second);
-    //log_debug("got ObjectID: {}", objectID);
-
-    auto obj = storage->loadObject(objectID);
-
-    int objectType = obj->getObjectType();
-    if (!IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
+    auto obj = loadObject(params);
+    if (!obj->isExternalItem()) {
         throw_std_runtime_error("object is not an external url item");
     }
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
-
-    std::string url;
 #ifdef ONLINE_SERVICES
-    if (item->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        auto helper = std::make_unique<OnlineServiceHelper>();
-        url = helper->resolveURL(item);
-    } else
+    std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+#else
+    std::string url = item->getLocation();
 #endif
-    {
-        url = item->getLocation();
-    }
+    log_debug("Online content url: {}", url);
 
-    log_debug("Online content url: {}", url.c_str());
-
-    //info->is_readable = 1;
-    //info->last_modified = 0;
-    //info->is_directory = 0;
-    //info->http_header = NULL;
-
-    std::string tr_profile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-
-    if (!tr_profile.empty()) {
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (!trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
-                      ->getByName(tr_profile);
-        if (tp == nullptr)
-            throw_std_runtime_error("Transcoding of file " + url + " but no profile matching the name " + tr_profile + " found");
+                      ->getByName(trProfile);
+        if (!tp)
+            throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, trProfile);
 
-        auto tr_d = std::make_unique<TranscodeDispatcher>(config, content);
-        return tr_d->open(tp, url, item, range);
+        auto trD = std::make_unique<TranscodeDispatcher>(content);
+        auto ioHandler = trD->serveContent(tp, url, item, "");
+        ioHandler->open(mode);
+
+        log_debug("end");
+        return ioHandler;
     }
-
-    std::string header;
-    auto u = std::make_unique<URL>();
-    try {
-        auto st = u->getInfo(url);
-        // info->file_length = st->getSize();
-        header = "Accept-Ranges: bytes";
-        log_debug("URL used for request: {}", st->getURL().c_str());
-    } catch (const std::runtime_error& ex) {
-        log_warning("{}", ex.what());
-        //info->file_length = -1;
-    }
-
-    std::string mimeType = item->getMimeType();
-    // info->content_type = ixmlCloneDOMString(mimeType.c_str());
-
-    /* FIXME headers
-    if (!header.empty())
-        info->http_header = ixmlCloneDOMString(header.c_str());
-    */
 
     ///\todo make curl io handler configurable for url request handler
-    auto io_handler = std::make_unique<CurlIOHandler>(url, nullptr, 1024 * 1024, 0);
-    io_handler->open(mode);
+    auto ioHandler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
+    ioHandler->open(mode);
     content->triggerPlayHook(obj);
-    return io_handler;
+    return ioHandler;
 }
 
 #endif // HAVE_CURL

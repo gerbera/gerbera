@@ -3,6 +3,6 @@
   "task": {
     "id": 4,
     "cancellable": true,
-    "text": "Performing full scan: /Movies"
+    "text": "Scan: /Movies"
   }
 }

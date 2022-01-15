@@ -11,12 +11,20 @@ import containerAsTree from './fixtures/container-data-astree';
 
 
 describe('Gerbera Tree', () => {
-  let tree;
+  let tree, lsSpy;
 
+  beforeAll(() => {
+    GerberaApp.initialize();
+  });
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     tree = $('#tree');
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+    GerberaApp.setType('db');
+    GerberaApp.setCurrentItem([]);
   });
   afterEach(() => {
     fixture.cleanup();
@@ -190,7 +198,7 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
       );
     });
 
@@ -209,7 +217,7 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none'}}
+        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
       );
     });
 
@@ -240,7 +248,7 @@ describe('Gerbera Tree', () => {
       ajaxSpy.and.callThrough();
     });
 
-    it('calls for child items based on the response', () => {
+    it('calls for child items based on the response', async () => {
       ajaxSpy.and.callFake(() => {
         return Promise.resolve(childTreeResponse);
       });
@@ -249,12 +257,11 @@ describe('Gerbera Tree', () => {
         onSelection: onSelectionSpy
       };
       spyOn(GerberaApp, 'getType').and.returnValue('db');
-
       Tree.loadTree(treeResponse, treeViewConfig);
 
       // click an item
       const item = $($('#tree li').get(4));
-      item.children('span.folder-title').click();
+      await item.children('span.folder-title').click();
 
       expect(ajaxSpy.calls.count()).toBe(1);
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('containers');
@@ -346,7 +353,7 @@ describe('Gerbera Tree', () => {
         title: 'Audio',
         badge: [6],
         nodes: [],
-        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none' }
+        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none', image: null }
       });
     });
   });

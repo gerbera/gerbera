@@ -2,7 +2,8 @@
   "success": true,
   "config": {
     "accounts": true,
-    "enableThumbnail": false,
+    "enableThumbnail": true,
+    "enableNumbering": true,
     "enableVideo": false,
     "show-tooltips": true,
     "poll-when-idle": false,
@@ -21,6 +22,6 @@
       "action": []
     },
     "friendlyName" : "Gerbera Media Server",
-    "version": "1.4.0alpha"
+    "version": "1.9.2"
   }
 }

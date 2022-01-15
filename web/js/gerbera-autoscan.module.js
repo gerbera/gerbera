@@ -4,7 +4,7 @@
 
     gerbera-autoscan.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -34,11 +34,11 @@ const addAutoscan = (event) => {
   if (item) {
     let requestData = {
       req_type: 'autoscan',
-      sid: Auth.getSessionId(),
       object_id: item.id,
       action: 'as_edit_load',
       from_fs: fromFs
     };
+    requestData[Auth.SID] = Auth.getSessionId();
 
     if (GerberaApp.getType() === 'db') {
       requestData = $.extend({}, requestData, {updates: 'check'});
@@ -69,10 +69,10 @@ const submitAutoscan = () => {
   const autoscanModal = $('#autoscanModal');
   const item = autoscanModal.autoscanmodal('saveItem');
   const request = {
-    sid: Auth.getSessionId(),
     req_type: 'autoscan',
     action: 'as_edit_save'
   };
+  request[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, request, item);
 
   if (item) {

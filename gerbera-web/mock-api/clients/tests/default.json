@@ -1,0 +1,8 @@
+{
+  "" : {
+    "count" : 0,
+    "responses" : {
+      "default" : "./clients/clients-data.json"
+    }
+  }
+}

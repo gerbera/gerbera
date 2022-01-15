@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     upnp_mrreg.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -37,11 +37,9 @@
 
 #include "action_request.h"
 #include "common.h"
+#include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
-
-// forward declaration
-class ConfigManager;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
@@ -52,10 +50,6 @@ class ConfigManager;
 /// \todo the whole service class should be rewritten with the use of inheritance
 class MRRegistrarService {
 protected:
-    /// \brief UPnP standard defined service type
-    /// \todo Check if it makes sense to use it as it is done now...why not define constants here?
-    static std::string serviceType;
-
     /// \brief ID of the service.
     static std::string serviceID;
 
@@ -81,17 +75,16 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     static void doIsValidated(const std::unique_ptr<ActionRequest>& request);
 
-    std::shared_ptr<ConfigManager> config;
+    std::shared_ptr<Config> config;
 
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
-    MRRegistrarService(std::shared_ptr<ConfigManager> config,
-        UpnpXMLBuilder* xmlBuilder, UpnpDevice_Handle deviceHandle);
-    ~MRRegistrarService();
+    MRRegistrarService(const std::shared_ptr<Context>& context,
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
@@ -117,4 +110,4 @@ public:
     //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
 };
 
-#endif // __UPNP_CM_H__
+#endif // __UPNP_MRREG_H__

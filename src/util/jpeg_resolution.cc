@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     jpeg_resolution.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,19 +31,11 @@
 
 #include "tools.h" // API
 
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include <cstddef>
 
 #include "iohandler/io_handler.h"
 
 using uchar = unsigned char;
-
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
 
 #define M_SOF0 0xC0 // Start Of Frame N
 #define M_SOF1 0xC1 // N indicates which compression process
@@ -69,38 +61,33 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int Get16m(const void* Short)
+static int get16m(std::byte* shrt)
 {
-    return (static_cast<uchar*>(const_cast<void*>(Short))[0] << 8) | static_cast<uchar*>(const_cast<void*>(Short))[1];
+    return std::to_integer<int>((shrt[0] << 8) | shrt[1]);
 }
 
-static int ioh_fgetc(const std::unique_ptr<IOHandler>& ioh)
+static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
 {
-    uchar c[1] = { 0 };
+    std::byte c[1] {};
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
     if (ret < 0)
         return ret;
-    return static_cast<int>(c[0]);
+    return int(c[0]);
 }
 
-static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, int* h)
+static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& ioh)
 {
-    int a;
+    int a = iohFgetc(ioh);
 
-    a = ioh_fgetc(ioh);
-
-    if (a != 0xff || ioh_fgetc(ioh) != M_SOI)
+    if (a != 0xff || iohFgetc(ioh) != M_SOI)
         throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
 
     for (;;) {
-        int itemlen;
-        off_t skip;
         int marker = 0;
-        int ll, lh, got;
-        uchar Data[ITEM_BUF_SIZE];
+        std::byte data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
-            marker = ioh_fgetc(ioh);
+            marker = iohFgetc(ioh);
             if (marker != 0xff)
                 break;
 
@@ -113,25 +100,24 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
             throw_std_runtime_error("get_jpeg_resolution: too many padding bytes");
 
         // Read the length of the section.
-        lh = ioh_fgetc(ioh);
-        ll = ioh_fgetc(ioh);
+        int lh = iohFgetc(ioh);
+        int ll = iohFgetc(ioh);
 
-        itemlen = (lh << 8) | ll;
-
+        int itemlen = (lh << 8) | ll;
         if (itemlen < 2)
             throw_std_runtime_error("get_jpeg_resolution: invalid marker");
 
-        skip = 0;
+        off_t skip = 0;
         if (itemlen > ITEM_BUF_SIZE) {
             skip = itemlen - ITEM_BUF_SIZE;
             itemlen = ITEM_BUF_SIZE;
         }
 
         // Store first two pre-read bytes.
-        Data[0] = static_cast<uchar>(lh);
-        Data[1] = static_cast<uchar>(ll);
+        data[0] = std::byte(lh);
+        data[1] = std::byte(ll);
 
-        got = ioh->read(reinterpret_cast<char*>(Data + 2), itemlen - 2);
+        int got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
         if (got != itemlen - 2)
             throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
 
@@ -153,25 +139,23 @@ static void get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh, int* w, i
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            *w = Get16m(Data + 5);
-            *h = Get16m(Data + 3);
-            return;
+            return { get16m(data + 5), get16m(data + 3) };
         }
     }
     throw_std_runtime_error("get_jpeg_resolution: resolution not found");
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(const std::unique_ptr<IOHandler>& ioh)
+std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh)
 {
-    int w, h;
+    auto wh = std::pair<int, int>();
     try {
-        get_jpeg_resolution(ioh, &w, &h);
+        wh = getJpegResolution(ioh);
     } catch (const std::runtime_error& e) {
         ioh->close();
         throw e;
     }
     ioh->close();
 
-    return std::to_string(w) + "x" + std::to_string(h);
+    return fmt::format("{}x{}", wh.first, wh.second);
 }

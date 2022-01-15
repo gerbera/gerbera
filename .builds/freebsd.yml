@@ -1,0 +1,34 @@
+image: freebsd/12.x
+packages:
+  - cmake
+  - sudo
+  - curl
+  - wget
+  - pugixml
+  - upnp
+  - duktape-lib
+  - spdlog
+  - magic
+  - taglib
+  - ffmpeg
+  - ffmpegthumbnailer
+  - libexif
+  - libmatroska
+  - libiconv
+  - sqlite3
+  - libinotify
+sources:
+  - https://github.com/gerbera/gerbera
+tasks:
+  - install-deps: |
+      sudo bash ./gerbera/scripts/install-googletest.sh
+  - build: |
+      mkdir build
+      cd build
+      CXXFLAGS="-DLIBICONV_PLUG" cmake ../gerbera \
+      -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON \
+      -DWITH_INOTIFY=1 -DWITH_MAGIC=1 -DWITH_MYSQL=0 -DWITH_CURL=1 -DWITH_JS=1 \
+      -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 \
+      -DWITH_EXIF=1 -DWITH_LASTFM=0 -DWITH_SYSTEMD=0 -DWITH_DEBUG=1 -DWITH_TESTS=1
+      make -j2
+      make test

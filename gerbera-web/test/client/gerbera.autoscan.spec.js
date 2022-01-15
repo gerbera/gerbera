@@ -7,11 +7,17 @@ import autoscanResponse from './fixtures/autoscan-add-response';
 import submitCompleteResponse from './fixtures/submit-complete-2f6d';
 
 describe('Gerbera Autoscan', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
+
   describe('initialize()', () => {
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
-    let autoscanLevel;
     let autoscanPersistent;
     let autoscanRecursive;
     let autoscanHidden;
@@ -24,7 +30,6 @@ describe('Gerbera Autoscan', () => {
       fixture.load('index.html');
       autoscanId = $('#autoscanId');
       autoscanMode = $('input[name=autoscanMode]');
-      autoscanLevel = $('input[name=autoscanLevel]');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanPersistent = $('#autoscanPersistent');
       autoscanRecursive = $('#autoscanRecursive');
@@ -45,7 +50,6 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanId.val()).toBe('');
       expect(autoscanFromFs.is(':checked')).toBeFalsy();
       expect(autoscanMode.val()).toBe('none');
-      expect(autoscanLevel.val()).toBe('basic');
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeFalsy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
@@ -79,9 +83,9 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
-        sid: 'SESSION_ID',
         from_fs: true
       };
+      data[Auth.SID] = 'SESSION_ID';
 
       Autoscan.addAutoscan(event);
 
@@ -95,10 +99,10 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
-        sid: 'SESSION_ID',
         from_fs: false,
         updates: 'check'
       };
+      data[Auth.SID] = 'SESSION_ID';
 
       Autoscan.addAutoscan(event);
 
@@ -110,7 +114,6 @@ describe('Gerbera Autoscan', () => {
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
-    let autoscanLevel;
     let autoscanPersistent;
     let autoscanRecursive;
     let autoscanHidden;
@@ -124,7 +127,6 @@ describe('Gerbera Autoscan', () => {
       autoscanId = $('#autoscanId');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanMode = $('input[name=autoscanMode]');
-      autoscanLevel = $('input[name=autoscanLevel]');
       autoscanPersistent = $('#autoscanPersistent');
       autoscanRecursive = $('#autoscanRecursive');
       autoscanHidden = $('#autoscanHidden');
@@ -147,11 +149,9 @@ describe('Gerbera Autoscan', () => {
       Autoscan.loadNewAutoscan(autoscanResponse);
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
-      autoscanLevel = $('input[name=autoscanLevel][value=full]');
       expect(autoscanId.val()).toBe('2f6d6');
       expect(autoscanFromFs.is(':checked')).toBeTruthy();
       expect(autoscanMode.is(':checked')).toBeTruthy();
-      expect(autoscanLevel.is(':checked')).toBeTruthy();
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeTruthy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
@@ -193,20 +193,20 @@ describe('Gerbera Autoscan', () => {
       Autoscan.loadNewAutoscan(autoscanResponse);
 
       Autoscan.submitAutoscan();
-
-      expect(ajaxSpy.calls.count()).toBe(1);
-      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual({
-        sid: 'SESSION_ID',
+      var data = {
         req_type: 'autoscan',
         action: 'as_edit_save',
         object_id: '2f6d6',
         from_fs: true,
         scan_mode: 'timed',
-        scan_level: 'full',
         recursive: true,
         hidden: false,
         interval: '1800'
-      });
+      };
+      data[Auth.SID] = 'SESSION_ID';
+
+      expect(ajaxSpy.calls.count()).toBe(1);
+      expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(data);
     });
   });
   describe('submitComplete()', () => {
@@ -227,7 +227,7 @@ describe('Gerbera Autoscan', () => {
 
       Autoscan.submitComplete(submitCompleteResponse);
 
-      expect(Updates.showMessage).toHaveBeenCalledWith('Performing full scan: /Movies', undefined, 'success', 'fa-check');
+      expect(Updates.showMessage).toHaveBeenCalledWith('Scan: /Movies', undefined, 'success', 'fa-check');
     });
 
     it('when successful for one-time scan reports message to user', () => {

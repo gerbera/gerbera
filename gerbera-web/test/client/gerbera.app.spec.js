@@ -12,6 +12,12 @@ import mockConfig from './fixtures/config';
 import uiDisabled from './fixtures/ui-disabled';
 
 describe('Gerbera UI App', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
 
   describe('initialize()', () => {
     let ajaxSpy, ajaxSetupSpy, cookieSpy;
@@ -27,8 +33,7 @@ describe('Gerbera UI App', () => {
 
     beforeEach(() => {
       cookieSpy = spyOn(Cookies, 'get').and.callFake((name) => {
-        if (name === 'TYPE') return 'db';
-        if (name === 'SID') return 'A_MOCK_SID';
+        if (name === Auth.SID) return 'A_MOCK_SID';
         return 'A_MOCK_COOKIE';
       });
     });
@@ -42,10 +47,11 @@ describe('Gerbera UI App', () => {
       expect(GerberaApp).toBeDefined();
     });
 
-    it('provides access to the TYPE cookie', () => {
+    it('provides access to the localStorage', () => {
+      GerberaApp.initialize();
       const result = GerberaApp.getType();
 
-      expect(result).toEqual('db');
+      expect(result).toEqual('home');
     });
 
     it('retrieves the configuration from the server using AJAX', async () => {
@@ -54,13 +60,14 @@ describe('Gerbera UI App', () => {
       });
 
       await GerberaApp.initialize();
-
-      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
-      expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual({
+      var data = {
         req_type: 'auth',
-        sid: 'A_MOCK_SID',
         action: 'get_config'
-      });
+      };
+      data[Auth.SID] = 'A_MOCK_SID';
+
+      expect(ajaxSpy.calls.first().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.first().args[0]['data']).toEqual(data);
 
       expect(GerberaApp.serverConfig).toEqual(convertedConfig.config);
       expect(Auth.checkSID).toHaveBeenCalled();
@@ -97,20 +104,20 @@ describe('Gerbera UI App', () => {
       });
 
       await GerberaApp.initialize();
+      GerberaApp.setType('db');
 
       expect(GerberaApp.getType()).toEqual('db');
       expect(GerberaApp.isTypeDb()).toBeTruthy();
     });
 
-    it('defaults the TYPE to `db` when none is set', async () => {
+    it('defaults the TYPE to `home` when none is set', async () => {
       ajaxSpy.and.callFake(() => {
         return Promise.resolve(mockConfig);
       });
-      cookieSpy.and.callThrough();
 
       await GerberaApp.initialize();
-      expect(GerberaApp.getType()).toEqual('db');
-      expect(GerberaApp.isTypeDb()).toBeTruthy();
+      expect(GerberaApp.getType()).toEqual('home');
+      expect(GerberaApp.isTypeDb()).toBeFalsy();
     });
 
     it('initializes all GERBERA components when logged in', async () => {

@@ -36,19 +36,15 @@
 
 #include "action_request.h"
 #include "common.h"
+#include "context.h"
 #include "subscription_request.h"
 #include "upnp_xml.h"
-#include <string>
-
-// forward declaration
-class ConfigManager;
-class Storage;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
 /// Handles subscription and action invocation requests for the CDS.
 class ContentDirectoryService {
-protected:
+private:
     /// \brief The system update ID indicates changes in the content directory.
     ///
     /// Whenever something in the content directory changes, the value of
@@ -56,10 +52,10 @@ protected:
     /// devices.
     /// Also, this variable is returned by the upnp_action_GetSystemUpdateID()
     /// action.
-    int systemUpdateID;
+    int systemUpdateID {};
 
     /// \brief All strings in the XML will be cut at this length.
-    int stringLimit;
+    int stringLimit {};
 
     /// \brief UPnP standard defined action: Browse()
     /// \param request Incoming ActionRequest.
@@ -93,21 +89,41 @@ protected:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request);
+    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const;
 
-    std::shared_ptr<ConfigManager> config;
-    std::shared_ptr<Storage> storage;
+    /// \brief Samsung Extension X_SetBookmark
+    /// \param request Incoming ActionRequest.
+    ///
+    static void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request);
 
-    UpnpDevice_Handle deviceHandle;
-    UpnpXMLBuilder* xmlBuilder;
+    /// \brief Samsung Extension X_GetFeatureListResponse
+    /// \param request Incoming ActionRequest.
+    ///
+    static void doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request);
+
+    /// \brief Samsung Extension X_GetObjectIDfromIndex
+    /// \param request Incoming ActionRequest.
+    static void doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request);
+
+    /// \brief Samsung Extension X_GetIndexfromRID
+    /// \param request Incoming ActionRequest.
+    static void doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request);
+
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
+
+    UpnpDevice_Handle deviceHandle {};
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
+    std::vector<std::string> titleSegments;
+    std::string resultSeparator;
+    bool searchableContainers { false };
 
 public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
-    explicit ContentDirectoryService(std::shared_ptr<ConfigManager> config,
-        std::shared_ptr<Storage> storage,
-        UpnpXMLBuilder* builder, UpnpDevice_Handle deviceHandle, int stringLimit);
-    ~ContentDirectoryService();
+    explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit);
 
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request ActionRequest to be processed by the function.
@@ -128,8 +144,8 @@ public:
     ///
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,
-    /// and of course the mimimum required - systemUpdateID.
-    void sendSubscriptionUpdate(const std::string& containerUpdateIDs_CSV);
+    /// and of course the minimum required - systemUpdateID.
+    void sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv);
 };
 
 #endif // __UPNP_CDS_H__

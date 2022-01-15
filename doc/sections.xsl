@@ -5,5 +5,4 @@
                 exclude-result-prefixes="#default">
 
 <xsl:param name="section.autolabel" select="1"></xsl:param>
-
 </xsl:stylesheet>

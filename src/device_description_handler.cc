@@ -4,7 +4,7 @@
 
     device_description_handler.cc - this file is part of Gerbera.
 
-    Copyright (C) 2020 Gerbera Contributors
+    Copyright (C) 2020-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -23,17 +23,14 @@
 
 #include "device_description_handler.h" // API
 
-#include <utility>
+#include <sstream>
 
 #include "iohandler/mem_io_handler.h"
-#include "util/tools.h"
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    UpnpXMLBuilder* xmlBuilder)
-    : RequestHandler(std::move(config), std::move(storage))
+DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
+    : RequestHandler(content)
     , xmlBuilder(xmlBuilder)
 {
-
     auto desc = xmlBuilder->renderDeviceDescription();
 
     std::ostringstream buf;
@@ -43,18 +40,18 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(std::shared_ptr<ConfigManager
 
 void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    // We should be able to do the generation here, but libupnp doesnt support the request cookies yet
+    // We should be able to do the generation here, but libupnp doesn't support the request cookies yet
     UpnpFileInfo_set_FileLength(info, -1);
     UpnpFileInfo_set_ContentType(info, "application/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
 }
 
-std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode, const std::string& range)
+std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     log_debug("Device description requested");
 
-    auto t = std::make_unique<MemIOHandler>(deviceDescription);
-    t->open(mode);
-    return t;
+    auto ioHandler = std::make_unique<MemIOHandler>(deviceDescription);
+    ioHandler->open(mode);
+    return ioHandler;
 }

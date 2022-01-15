@@ -32,6 +32,7 @@ The server configuration file has several options.  Below are links to the confi
 
 * :doc:`Server </config-server>`
 * :doc:`Extended Runtime Options </config-extended>`
+* :doc:`Clients </config-clients>`
 * :doc:`Import Content </config-import>`
 * :doc:`Online Content </config-online>`
 * :doc:`Transcode Content </config-transcode>`
@@ -43,6 +44,7 @@ The server configuration file has several options.  Below are links to the confi
    Config Generation        <config-generate>
    Server Options           <config-server>
    Extended Options         <config-extended>
+   Clients                  <config-clients>
    Content Import Options   <config-import>
    Online Content Options   <config-online>
    Transcoding Options      <config-transcode>

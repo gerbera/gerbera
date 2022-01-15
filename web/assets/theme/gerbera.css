@@ -11,7 +11,7 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -61,10 +61,15 @@ a:hover {
     border-bottom: 1px solid #ff7f00;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-}
 
 li.nav-item > a {
     color: #bbb;
+}
+
+@media (max-width: 1110px) and (min-width: 768px) {
+    .nav-link span {
+        display: none;
+    }
 }
 
 .navbar-brand,
@@ -93,6 +98,9 @@ li.nav-item.active a {
     box-shadow:inset 0px 3px 3px -1px #888;
 }
 
+.modal-dialog {
+}
+
 .modal-header {
     background-color: #222;
     color: #FFF;
@@ -117,6 +125,48 @@ li.nav-item.active a {
 }
 .close:hover {
     color: #FFF;
+}
+
+#mediaimage {
+    width: 150px;
+    object-fit: contain;
+}
+.edit-dialog {
+    height: calc( 100vh - 3.5rem );
+}
+.edit-content {
+    height: 90vh;
+}
+.edit-body {
+    height: calc( 100vh - 3.5rem - 70px - 72px );
+    overflow-y: auto;
+}
+.editor-form {
+    min-width: calc( 500px - 3rem );
+}
+.edit-table {
+}
+.edit-cell {
+}
+.edit-form {
+    width: calc( 500px - 2rem );
+}
+
+.detail-table {
+    width: 500px;
+    margin-left: 1rem;
+    margin-bottom: 10px;
+}
+.detail-column {
+    width: 250px;
+}
+
+.details-visible {
+    max-width: calc( 1000px + 1rem );
+}
+.detail-area {
+    /*max-height: calc( 100% - 70px - 72px );*/
+    display: inline-block;
 }
 
 .btn-danger {
@@ -213,6 +263,17 @@ body,
     overflow: auto;
 }
 
+#clients {
+    height: 100%;
+    overflow: auto;
+}
+
+#config {
+    display: flex;
+    height: calc( 100% - 115px );
+    width: 100%;
+}
+
 #left {
     height: 100%;
     flex: 1;
@@ -232,13 +293,25 @@ body,
     flex-grow: 5;
 }
 
-#datagrid {
+#datagrid,
+#clientgrid {
     height: 100%;
     overflow: auto;
     background-color: #fefefe;
 }
 
-#datagrid table {
+#configframe {
+    height: 100%;
+    width: 100%;
+}
+
+#configgrid {
+    height: calc( 100% - 60px );
+    overflow-y: auto;
+    background-color: #fefefe;
+}
+
+#datagrid table, #clientgrid table {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -246,10 +319,20 @@ body,
     vertical-align: middle;
 }
 
+#clientgrid table {
+    display: table;
+}
+
 #datagrid table tbody {
     flex: 1 0 auto;
     overflow-y: scroll;
     display: table;
+    width: 100%;
+}
+
+#clientgrid table tbody,
+#clientgrid table thead {
+    overflow-y: scroll;
     width: 100%;
 }
 
@@ -265,8 +348,58 @@ body,
     width: 100%;
 }
 
-#datagrid table tbody tr:hover {
+#datagrid table tbody tr:hover,
+#clientgrid table tbody tr:hover {
     background-color: #e9ecef;
+}
+
+#clientgrid,
+#configgrid {
+    margin: 30px;
+}
+
+#configgrid {
+    margin-left: 0px;
+}
+
+#configgrid .configListItem {
+    margin-left: 20px;
+    list-style:none;
+}
+
+#configgrid .changed {
+    background-color: #ff7f0060;
+}
+#configgrid .changed input {
+    background-color: #ff7f0030;
+}
+
+#configgrid .removed {
+    background-color: #ff7ff060;
+}
+#configgrid .removed input {
+    background-color: #ff7ff030;
+}
+
+#configgrid .added {
+    background-color: lightyellow;
+}
+#configgrid .added input {
+    background-color: lightyellow;
+}
+
+#configgrid .default {
+    color: darkgray;
+}
+#configgrid .default input {
+    color: darkgray;
+}
+
+#configgrid .reset {
+    background-color: lightgreen;
+}
+#configgrid .reset input {
+    background-color: lightgreen;
 }
 
 .page-item.active .page-link {
@@ -300,6 +433,11 @@ body,
     padding-bottom: 0px;
     border: 0px;
     background-color: transparent;
+    color: #3c3c3c;
+}
+
+.list-group-item.has-children > span.fa {
+    color: #ff7f00;
 }
 
 .list-group-item:first-child,
@@ -350,7 +488,7 @@ body,
 .grb-item-buttons {
 }
 
-.grb-trail  .breadcrumb > li + li:before {
+.grb-trail .breadcrumb > li + li:before {
     content: ">";
     padding: 0 5px;
     color: rgba(255, 255, 255, 0.5);
@@ -377,6 +515,8 @@ body,
 .grb-trail-buttons li a {
     color: #ededed;
 }
+
+.grb-trail-button,
 .grb-trail-add,
 .grb-trail-add-autoscan,
 .grb-trail-edit-autoscan,
@@ -386,13 +526,21 @@ body,
     text-decoration: none;
 }
 
+.grb-trail-button:hover,
 .grb-trail-add:hover,
 .grb-trail-add-autoscan:hover,
 .grb-trail-edit-autoscan:hover,
 .grb-trail-edit:hover,
 .grb-trail-delete:hover,
 .grb-trail-delete-all:hover {
+    cursor: pointer;
     text-decoration: underline;
+}
+
+@media (max-width: 1110px) {
+    .grb-trail-button span {
+        display: none;
+    }
 }
 
 .overflow {
@@ -461,6 +609,10 @@ body,
     text-decoration: none;
 }
 
-#home a > h4 {
+#home a > h4, #home h4 {
     margin-top: 2em;
+}
+
+#status-total, #status-audio, #status-video, #status-image {
+    text-align: end;
 }

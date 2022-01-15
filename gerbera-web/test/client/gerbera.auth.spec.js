@@ -11,6 +11,13 @@ import mockToken from './fixtures/get_token.success';
 import mockLogin from './fixtures/login.success';
 
 describe('Gerbera Auth', () => {
+  let lsSpy;
+  beforeEach(() => {
+    lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
+        return;
+    });
+  });
+
   describe('checkSID()', () => {
     let ajaxSpy;
 
@@ -31,7 +38,7 @@ describe('Gerbera Auth', () => {
 
       it('calls the server for a new SID and sets the cookie for SID', async () => {
         await Auth.checkSID();
-        const sessionId = Cookies.get('SID');
+        const sessionId = Cookies.get(Auth.SID);
         expect(sessionId).toBe('563806f88aea6b33429ebdb85ce14beb');
         expect(GerberaApp.isLoggedIn()).toBeFalsy();
       });
@@ -48,7 +55,7 @@ describe('Gerbera Auth', () => {
   });
   describe('handleLogout()', () => {
     beforeEach(() => {
-      Cookies.set('SID', '563806f88aea6b33429ebdb85ce14beb');
+      Cookies.set(Auth.SID, '563806f88aea6b33429ebdb85ce14beb');
       GerberaApp.setLoggedIn(true);
     });
 
@@ -76,7 +83,7 @@ describe('Gerbera Auth', () => {
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
         return Promise.resolve({success: true});
       });
-      Cookies.set('SID', '12345');
+      Cookies.set(Auth.SID, '12345');
       GerberaApp.setLoggedIn(true);
     });
 
@@ -136,7 +143,7 @@ describe('Gerbera Auth', () => {
       await Auth.authenticate();
 
       expect(GerberaApp.isLoggedIn()).toBeTruthy();
-      expect(ajaxSpy.calls.count()).toBe(2);
+      expect(ajaxSpy.calls.count()).toBe(3);
       expect(Tree.initialize).toHaveBeenCalled();
       expect(Items.initialize).toHaveBeenCalled();
       expect(Menu.initialize).toHaveBeenCalled();

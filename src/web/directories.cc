@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     directories.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,90 +31,72 @@
 
 #include "pages.h" // API
 
-#include <utility>
-
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-web::directories::directories(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-    std::shared_ptr<ContentManager> content, std::shared_ptr<SessionManager> sessionManager)
-    : WebRequestHandler(std::move(config), std::move(storage), std::move(content), std::move(sessionManager))
-{
-}
+using dirInfo = std::pair<fs::path, bool>;
 
-void web::directories::process()
+void Web::Directories::process()
 {
-    check_request();
+    checkRequest();
 
-    fs::path path;
     std::string parentID = param("parent_id");
-    if (parentID.empty() || parentID == "0")
-        path = FS_ROOT_DIRECTORY;
-    else
-        path = hex_decode_string(parentID);
+    auto path = fs::path(parentID.empty() || parentID == "0" ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
 
     auto root = xmlDoc->document_element();
 
     auto containers = root.append_child("containers");
     xml2JsonHints->setArrayName(containers, "container");
+    xml2JsonHints->setFieldType("title", "string");
     containers.append_attribute("parent_id") = parentID.c_str();
     if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    std::vector<fs::path> excludes_fullpath = {
-        "/bin",
-        "/boot",
-        "/dev",
-        "/etc",
-        "/lib", "/lib32", "/lib64", "/libx32",
-        "/proc",
-        "/run",
-        "/sbin",
-        "/sys",
-        "/tmp",
-        "/usr",
-        "/var"
-    };
+    auto&& excludesFullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
+    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
-    std::vector<std::string> excludes_dirname = {
+    constexpr auto excludesDirname = std::array {
         "lost+found",
     };
-    bool exclude_config_dirs = true;
+    bool excludeConfigDirs = true;
 
-    for (auto& it : fs::directory_iterator(path)) {
+    std::error_code ec;
+    std::map<std::string, dirInfo> filesMap;
+
+    for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
-        std::error_code ec;
         if (!it.is_directory(ec))
             continue;
-        if (std::find(excludes_fullpath.begin(), excludes_fullpath.end(), filepath) != excludes_fullpath.end())
-            continue;
-        if (std::find(excludes_dirname.begin(), excludes_dirname.end(), filepath.filename()) != excludes_dirname.end()
-            || (exclude_config_dirs && startswith(filepath.filename(), ".")))
-            continue;
-
-        bool hasContent = false;
-        for (auto& subIt : fs::directory_iterator(path)) {
-            if (!subIt.is_directory(ec) && !isRegularFile(subIt.path(), ec))
-                continue;
-            hasContent = true;
-            break;
+        if (!includesFullpath.empty()
+            && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
+                [&](auto&& sub) { return startswith(filepath.string(), sub) || startswith(sub, filepath.string()); }))
+            continue; // skip unwanted dir
+        if (includesFullpath.empty()) {
+            if (std::find(excludesFullpath.begin(), excludesFullpath.end(), filepath) != excludesFullpath.end())
+                continue; // skip excluded dir
+            if (std::find(excludesDirname.begin(), excludesDirname.end(), filepath.filename()) != excludesDirname.end()
+                || (excludeConfigDirs && startswith(filepath.filename().string(), ".")))
+                continue; // skip dir with leading .
         }
+        auto dir = fs::directory_iterator(filepath, ec);
+        bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 
-        /// \todo replace hex_encode with base64_encode?
-        std::string id = hex_encode(filepath.c_str(), filepath.string().length());
+        /// \todo replace hexEncode with base64_encode?
+        std::string id = hexEncode(filepath.c_str(), filepath.string().length());
+        filesMap.emplace(id, std::pair(filepath.filename(), hasContent));
+    }
 
+    auto f2i = StringConverter::f2i(config);
+    for (auto&& [key, val] : filesMap) {
+        auto&& [file, has] = val;
         auto ce = containers.append_child("container");
-        ce.append_attribute("id") = id.c_str();
-        if (hasContent)
-            ce.append_attribute("child_count") = 1;
-        else
-            ce.append_attribute("child_count") = 0;
+        ce.append_attribute("id") = key.c_str();
+        ce.append_attribute("child_count") = has;
 
-        auto f2i = StringConverter::f2i(config);
-        ce.append_attribute("title") = f2i->convert(filepath.filename()).c_str();
+        ce.append_attribute("title") = f2i->convert(file).c_str();
     }
 }

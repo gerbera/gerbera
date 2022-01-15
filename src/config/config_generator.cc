@@ -1,10 +1,10 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     config_generator.cc - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -25,390 +25,364 @@ Gerbera - https://gerbera.io/
 
 #include "config_generator.h"
 
-#include <string>
-#include <utility>
+#include <sstream>
 
-#ifdef BSD_NATIVE_UUID
-#include <uuid.h>
-#else
-#include <uuid/uuid.h>
-#endif
-
-#include "metadata/metadata_handler.h"
+#include "config/config_definition.h"
+#include "config/config_setup.h"
 #include "util/tools.h"
 
-ConfigGenerator::ConfigGenerator() = default;
-
-ConfigGenerator::~ConfigGenerator() = default;
-
-std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, const fs::path& magicFile)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
-    pugi::xml_document doc;
+    if (generated.find("") == generated.end()) {
+        auto config = doc.append_child("config");
+        generated[""] = std::make_shared<pugi::xml_node>(config);
+    }
+    return generated[""];
+}
 
+std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag) const
+{
+    log_debug("reading '{}' -> {}", tag, generated.find(tag) == generated.end());
+    return generated.at(tag);
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::string& value, bool makeLastChild)
+{
+    auto split = splitString(tag, '/');
+    std::shared_ptr<pugi::xml_node> result;
+    if (!split.empty()) {
+        std::string parent;
+        std::string nodeKey;
+        std::string attribute;
+
+        for (auto&& part : split) {
+            nodeKey += "/" + part;
+            if (generated.find(nodeKey) == generated.end()) {
+                if (startswith(part, ConfigDefinition::ATTRIBUTE)) {
+                    attribute = part.substr(ConfigDefinition::ATTRIBUTE.size()); // last attribute gets the value
+                } else {
+                    auto newNode = generated[parent]->append_child(part.c_str());
+                    generated[nodeKey] = std::make_shared<pugi::xml_node>(newNode);
+                    result = generated[nodeKey]; // returns the last generated node even if there is an attribute
+                    log_debug("{}: added node '{}' to '{}'", nodeKey, part, parent);
+                    parent = nodeKey;
+                }
+            } else {
+                if (makeLastChild && tag == nodeKey + "/") {
+                    auto newNode = generated[parent]->append_child(part.c_str());
+                    generated[nodeKey] = std::make_shared<pugi::xml_node>(newNode);
+                    log_debug("{}: added multi-node '{}' to '{}'", nodeKey, part, parent);
+                }
+                result = generated[nodeKey]; // returns the last generated node even if there is an attribute
+                parent = nodeKey;
+            }
+        }
+        if (tag.back() != '/') { // create entries without content
+            if (attribute.empty()) {
+                log_debug("setting value '{}' to {}", value, nodeKey);
+                generated[nodeKey]->append_child(pugi::node_pcdata).set_value(value.c_str());
+            } else {
+                log_debug("setting value '{}' to {}:{}", value, parent, attribute);
+                generated[parent]->append_attribute(attribute.c_str()) = value.c_str();
+            }
+        }
+    }
+    return result;
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& value)
+{
+    auto cs = ConfigDefinition::findConfigSetup(option);
+    return setValue(cs->xpath, value.empty() ? cs->getDefaultValue() : value);
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value)
+{
+    auto cs = std::string(ConfigDefinition::mapConfigOption(option));
+    if (startswith(cs, ConfigDefinition::ATTRIBUTE)) {
+        cs = ConfigDefinition::removeAttribute(option);
+        parent->append_attribute(cs.c_str()) = value.c_str();
+    } else {
+        parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
+    }
+    return parent;
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t attr, const std::string& value)
+{
+    auto cs = ConfigDefinition::findConfigSetup(option);
+    return setValue(fmt::format("{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(attr)), value);
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, const std::string& key, const std::string& value)
+{
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
+    if (!cs)
+        return nullptr;
+
+    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
+    return generated[cs->xpath];
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(config_option_t option)
+{
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
+    if (!cs)
+        return nullptr;
+
+    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    for (auto&& [key, value] : cs->getXmlContent({})) {
+        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
+    }
+    return generated[cs->xpath];
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value)
+{
+    auto cs = ConfigDefinition::findConfigSetup(option);
+    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(dict), ConfigDefinition::ensureAttribute(attr)), value);
+}
+
+std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile)
+{
     auto decl = doc.prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";
 
-    auto config = doc.append_child("config");
-    config.append_attribute("version") = CONFIG_XML_VERSION;
-    config.append_attribute("xmlns") = (XML_XMLNS + std::to_string(CONFIG_XML_VERSION)).c_str();
-    config.append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
-    config.append_attribute("xsi:schemaLocation") = (std::string(XML_XMLNS) + std::to_string(CONFIG_XML_VERSION) + " " + XML_XMLNS + std::to_string(CONFIG_XML_VERSION) + ".xsd").c_str();
+    auto config = init();
 
-    auto docinfo = config.append_child(pugi::node_comment);
-    docinfo.set_value("\n\
-     See http://gerbera.io or read the docs for more\n\
-     information on creating and using config.xml configration files.\n\
-    ");
+    config->append_attribute("version") = CONFIG_XML_VERSION;
+    config->append_attribute("xmlns") = fmt::format("{}{}", XML_XMLNS, CONFIG_XML_VERSION).c_str();
+    config->append_attribute("xmlns:xsi") = XML_XMLNS_XSI;
+    config->append_attribute("xsi:schemaLocation") = fmt::format("{}{} {}{}.xsd", XML_XMLNS, CONFIG_XML_VERSION, XML_XMLNS, CONFIG_XML_VERSION).c_str();
 
-    generateServer(userHome, configDir, prefixDir, &config);
-    generateImport(prefixDir, magicFile, &config);
-    generateTranscoding(&config);
+    auto docinfo = config->append_child(pugi::node_comment);
+    docinfo.set_value(R"(
+     See https://gerbera.io or read the docs for more
+     information on creating and using config.xml configuration files.
+    )");
+
+    generateServer(userHome, configDir, dataDir);
+    generateImport(dataDir, magicFile);
+    generateTranscoding();
 
     std::ostringstream buf;
     doc.print(buf, "  ");
     return buf.str();
 }
 
-void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& prefixDir, pugi::xml_node* config)
+void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
 {
-    auto server = config->append_child("server");
+    auto server = setValue("/server/");
+    generateUi();
+    setValue(CFG_SERVER_NAME);
 
-    generateUi(&server);
-    server.append_child("name").append_child(pugi::node_pcdata).set_value(PACKAGE_NAME);
-
-    generateUdn(&server);
+    generateUdn();
 
     fs::path homepath = userHome / configDir;
-    server.append_child("home").append_child(pugi::node_pcdata).set_value(homepath.c_str());
+    setValue(CFG_SERVER_HOME, homepath);
 
-    std::string webRoot = prefixDir / DEFAULT_WEB_DIR;
-    server.append_child("webroot").append_child(pugi::node_pcdata).set_value(webRoot.c_str());
+    fs::path webRoot = dataDir / DEFAULT_WEB_DIR;
+    setValue(CFG_SERVER_WEBROOT, webRoot);
 
-    auto aliveinfo = server.append_child(pugi::node_comment);
-    aliveinfo.set_value(
-        ("\n\
-        How frequently (in seconds) to send ssdp:alive advertisements.\n\
-        Minimum alive value accepted is: "
-            + std::to_string(ALIVE_INTERVAL_MIN) + "\n\n\
-        The advertisement will be sent every (A/2)-30 seconds,\n\
-        and will have a cache-control max-age of A where A is\n\
-        the value configured here. Ex: A value of 62 will result\n\
-        in an SSDP advertisement being sent every second.\n\
-    ")
-            .c_str());
-    server.append_child("alive").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_ALIVE_INTERVAL).c_str());
+    auto aliveinfo = server->append_child(pugi::node_comment);
+    aliveinfo.set_value(fmt::format(R"(
+        How frequently (in seconds) to send ssdp:alive advertisements.
+        Minimum alive value accepted is: {}
 
-    generateStorage(&server);
+        The advertisement will be sent every (A/2)-30 seconds,
+        and will have a cache-control max-age of A where A is
+        the value configured here. Ex: A value of 62 will result
+        in an SSDP advertisement being sent every second.
+    )",
+        ALIVE_INTERVAL_MIN)
+                            .c_str());
+    setValue(CFG_SERVER_ALIVE_INTERVAL);
 
-    auto ps3protinfo = server.append_child(pugi::node_comment);
-    ps3protinfo.set_value(R"( For PS3 support change "extend" to "yes" )");
-
-    auto protocolinfo = server.append_child("protocolInfo");
-    protocolinfo.append_attribute("extend") = DEFAULT_EXTEND_PROTOCOLINFO;
-    protocolinfo.append_attribute("dlna-seek") = DEFAULT_EXTEND_PROTOCOLINFO_DLNA_SEEK;
-
-    auto redinfo = server.append_child(pugi::node_comment);
-    redinfo.set_value("\n\
-       Uncomment the lines below to get rid of jerky avi playback on the\n\
-       DSM320 or to enable subtitles support on the DSM units\n\
-    ");
-
-    auto redsonic = server.append_child(pugi::node_comment);
-    redsonic.set_value("\n\
-    <custom-http-headers>\n\
-      <add header=\"X-User-Agent: redsonic\" />\n\
-    </custom-http-headers>\n\
-\n\
-    <manufacturerURL>redsonic.com</manufacturerURL>\n\
-    <modelNumber>105</modelNumber>\n\
-    ");
-
-    auto tg100info = server.append_child(pugi::node_comment);
-    tg100info.set_value(" Uncomment the line below if you have a Telegent TG100 ");
-
-    auto tg100 = server.append_child(pugi::node_comment);
-    tg100.set_value("\n\
-       <upnp-string-limit>101</upnp-string-limit>\n\
-    ");
-
-    generateExtendedRuntime(&server);
+    generateDatabase();
+    generateDynamics();
+    generateExtendedRuntime();
 }
 
-void ConfigGenerator::generateUi(pugi::xml_node* server)
+void ConfigGenerator::generateUi()
 {
-    auto ui = server->append_child("ui");
-    ui.append_attribute("enabled") = DEFAULT_UI_EN_VALUE;
-    ui.append_attribute("show-tooltips") = DEFAULT_UI_SHOW_TOOLTIPS_VALUE;
-
-    auto accounts = ui.append_child("accounts");
-    accounts.append_attribute("enabled") = DEFAULT_ACCOUNTS_EN_VALUE;
-    accounts.append_attribute("session-timeout") = DEFAULT_SESSION_TIMEOUT;
-
-    auto account = accounts.append_child("account");
-    account.append_attribute("user") = DEFAULT_ACCOUNT_USER;
-    account.append_attribute("password") = DEFAULT_ACCOUNT_PASSWORD;
+    setValue(CFG_SERVER_UI_ENABLED);
+    setValue(CFG_SERVER_UI_SHOW_TOOLTIPS);
+    setValue(CFG_SERVER_UI_ACCOUNTS_ENABLED);
+    setValue(CFG_SERVER_UI_SESSION_TIMEOUT);
+    setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, DEFAULT_ACCOUNT_USER);
+    setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, DEFAULT_ACCOUNT_PASSWORD);
 }
 
-void ConfigGenerator::generateStorage(pugi::xml_node* server)
+void ConfigGenerator::generateDynamics()
 {
-    auto storage = server->append_child("storage");
+    setValue(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
+    setDictionary(CFG_SERVER_DYNAMIC_CONTENT_LIST);
 
-#ifdef HAVE_SQLITE3
-    auto sqlite3 = storage.append_child("sqlite3");
-    sqlite3.append_attribute("enabled") = DEFAULT_SQLITE_ENABLED;
-    sqlite3.append_child("database-file").append_child(pugi::node_pcdata).set_value(DEFAULT_SQLITE3_DB_FILENAME);
+    auto&& containersTag = ConfigDefinition::mapConfigOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+    auto&& containerTag = ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER);
+
+    auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    setValue(container, ATTR_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_TITLE, "Recently Added");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_SORT, "-last_updated");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
+
+    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    setValue(container, ATTR_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_SORT, "-last_modified");
+    setValue(container, ATTR_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
+}
+
+void ConfigGenerator::generateDatabase()
+{
+    setValue(CFG_SERVER_STORAGE_SQLITE_ENABLED);
+    setValue(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+
 #ifdef SQLITE_BACKUP_ENABLED
-    //    <backup enabled="no" interval="6000" />
-    auto backup = sqlite3->append_child("backup");
-    backup.append_attribute("enabled") = YES;
-    backup.append_attribute("interval") = DEFAULT_SQLITE_BACKUP_INTERVAL;
-#endif
+    setValue(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
+    setValue(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 #endif
 
 #ifdef HAVE_MYSQL
-    auto mysql = storage.append_child("mysql");
-#ifndef HAVE_SQLITE3
-    mysql.append_attribute("enabled") = DEFAULT_MYSQL_ENABLED;
-    mysql_flag = true;
-#else
-    mysql.append_attribute("enabled") = NO;
-#endif
-    mysql.append_child("host").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_HOST);
-    mysql.append_child("username").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_USER);
-    mysql.append_child("database").append_child(pugi::node_pcdata).set_value(DEFAULT_MYSQL_DB);
+    setValue(CFG_SERVER_STORAGE_MYSQL_ENABLED, NO);
+    setValue(CFG_SERVER_STORAGE_MYSQL_HOST);
+    setValue(CFG_SERVER_STORAGE_MYSQL_USERNAME);
+    setValue(CFG_SERVER_STORAGE_MYSQL_DATABASE);
 #endif
 }
 
-void ConfigGenerator::generateExtendedRuntime(pugi::xml_node* server)
+void ConfigGenerator::generateExtendedRuntime()
 {
-    auto extended = server->append_child("extended-runtime-options");
-
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    auto ffth = extended.append_child("ffmpegthumbnailer");
-    ffth.append_attribute("enabled") = DEFAULT_FFMPEGTHUMBNAILER_ENABLED;
-    ffth.append_child("thumbnail-size").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE).c_str());
-    ffth.append_child("seek-percentage").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE).c_str());
-    ffth.append_child("filmstrip-overlay").append_child(pugi::node_pcdata).set_value(DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
-    ffth.append_child("workaround-bugs").append_child(pugi::node_pcdata).set_value(DEFAULT_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
-    ffth.append_child("image-quality").append_child(pugi::node_pcdata).set_value(std::to_string(DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY).c_str());
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_WORKAROUND_BUGS);
+    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
 #endif
 
-    auto mark = extended.append_child("mark-played-items");
-    mark.append_attribute("enabled") = DEFAULT_MARK_PLAYED_ITEMS_ENABLED;
-    mark.append_attribute("suppress-cds-updates") = DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES;
-    auto mark_string = mark.append_child("string");
-    mark_string.append_attribute("mode") = DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE;
-    mark_string.append_child(pugi::node_pcdata).set_value(DEFAULT_MARK_PLAYED_ITEMS_STRING);
-
-    auto mark_content_section = mark.append_child("mark");
-    auto content_video = mark_content_section.append_child("content");
-    content_video.append_child(pugi::node_pcdata).set_value(DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
+    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
+    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
+    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
+    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& magicFile, pugi::xml_node* config)
+void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& magicFile)
 {
-    auto import = config->append_child("import");
-    import.append_attribute("hidden-files") = DEFAULT_HIDDEN_FILES_VALUE;
+    setValue(CFG_IMPORT_HIDDEN_FILES);
 
 #ifdef HAVE_MAGIC
     if (!magicFile.empty()) {
-        import.append_child("magic-file").append_child(pugi::node_pcdata).set_value(magicFile.c_str());
+        setValue(CFG_IMPORT_MAGIC_FILE, magicFile);
     }
 #endif
 
-    auto scripting = import.append_child("scripting");
-    scripting.append_attribute("script-charset") = DEFAULT_JS_CHARSET;
-
 #ifdef HAVE_JS
+    setValue(CFG_IMPORT_SCRIPTING_CHARSET);
+
     std::string script;
     script = prefixDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT;
-    scripting.append_child("common-script").append_child(pugi::node_pcdata).set_value(script.c_str());
+    setValue(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT, script);
 
     script = prefixDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT;
-    scripting.append_child("playlist-script").append_child(pugi::node_pcdata).set_value(script.c_str());
+    setValue(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT, script);
 #endif
 
-    auto layout = scripting.append_child("virtual-layout");
-    layout.append_attribute("type") = DEFAULT_LAYOUT_TYPE;
+    setValue(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
 
 #ifdef HAVE_JS
     script = prefixDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT;
-    layout.append_child("import-script").append_child(pugi::node_pcdata).set_value(script.c_str());
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT, script);
 #endif
 
-    generateMappings(&import);
+    generateMappings();
 #ifdef ONLINE_SERVICES
-    generateOnlineContent(&import);
+    generateOnlineContent();
 #endif
 }
 
-void ConfigGenerator::generateMappings(pugi::xml_node* import)
+void ConfigGenerator::generateMappings()
 {
-    auto mappings = import->append_child("mappings");
+    auto ext2mt = setValue(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
+    setDictionary(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
-    auto ext2mt = mappings.append_child("extension-mimetype");
-    ext2mt.append_attribute("ignore-unknown") = DEFAULT_IGNORE_UNKNOWN_EXTENSIONS;
-    map_from_to("mp3", "audio/mpeg", &ext2mt);
-    map_from_to("ogx", "application/ogg", &ext2mt);
-    map_from_to("ogv", "video/ogg", &ext2mt);
-    map_from_to("oga", "audio/ogg", &ext2mt);
-    map_from_to("ogg", "audio/ogg", &ext2mt);
-    map_from_to("ogm", "video/ogg", &ext2mt);
-    map_from_to("asf", "video/x-ms-asf", &ext2mt);
-    map_from_to("asx", "video/x-ms-asf", &ext2mt);
-    map_from_to("wma", "audio/x-ms-wma", &ext2mt);
-    map_from_to("wax", "audio/x-ms-wax", &ext2mt);
-    map_from_to("wmv", "video/x-ms-wmv", &ext2mt);
-    map_from_to("wvx", "video/x-ms-wvx", &ext2mt);
-    map_from_to("wm", "video/x-ms-wm", &ext2mt);
-    map_from_to("wmx", "video/x-ms-wmx", &ext2mt);
-    map_from_to("m3u", "audio/x-mpegurl", &ext2mt);
-    map_from_to("pls", "audio/x-scpls", &ext2mt);
-    map_from_to("flv", "video/x-flv", &ext2mt);
-    map_from_to("mkv", "video/x-matroska", &ext2mt);
-    map_from_to("mka", "audio/x-matroska", &ext2mt);
-    map_from_to("dsf", "audio/x-dsd", &ext2mt);
-    map_from_to("dff", "audio/x-dsd", &ext2mt);
-    map_from_to("wv", "audio/x-wavpack", &ext2mt);
+    ext2mt->append_child(pugi::node_comment).set_value(" Uncomment the line below for PS3 divx support ");
+    ext2mt->append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/divx" /> )");
 
-    ext2mt.append_child(pugi::node_comment).set_value(" Uncomment the line below for PS3 divx support ");
-    ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/divx" /> )");
+    ext2mt->append_child(pugi::node_comment).set_value(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 ");
+    ext2mt->append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/avi" /> )");
 
-    ext2mt.append_child(pugi::node_comment).set_value(" Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 ");
-    ext2mt.append_child(pugi::node_comment).set_value(R"( <map from="avi" to="video/avi" /> )");
-
-    auto mtupnp = mappings.append_child("mimetype-upnpclass");
-    map_from_to("audio/*", UPNP_DEFAULT_CLASS_MUSIC_TRACK, &mtupnp);
-    map_from_to("video/*", UPNP_DEFAULT_CLASS_VIDEO_ITEM, &mtupnp);
-    map_from_to("image/*", "object.item.imageItem", &mtupnp);
-    map_from_to("application/ogg", UPNP_DEFAULT_CLASS_MUSIC_TRACK, &mtupnp);
-
-    auto mtcontent = mappings.append_child("mimetype-contenttype");
-    treat_as("audio/mpeg", CONTENT_TYPE_MP3, &mtcontent);
-    treat_as("application/ogg", CONTENT_TYPE_OGG, &mtcontent);
-    treat_as("audio/ogg", CONTENT_TYPE_OGG, &mtcontent);
-    treat_as("audio/x-flac", CONTENT_TYPE_FLAC, &mtcontent);
-    treat_as("audio/flac", CONTENT_TYPE_FLAC, &mtcontent);
-    treat_as("audio/x-ms-wma", CONTENT_TYPE_WMA, &mtcontent);
-    treat_as("audio/x-wavpack", CONTENT_TYPE_WAVPACK, &mtcontent);
-    treat_as("image/jpeg", CONTENT_TYPE_JPG, &mtcontent);
-    treat_as("audio/x-mpegurl", CONTENT_TYPE_PLAYLIST, &mtcontent);
-    treat_as("audio/x-scpls", CONTENT_TYPE_PLAYLIST, &mtcontent);
-    treat_as("audio/x-wav", CONTENT_TYPE_PCM, &mtcontent);
-    treat_as("audio/L16", CONTENT_TYPE_PCM, &mtcontent);
-    treat_as("video/x-msvideo", CONTENT_TYPE_AVI, &mtcontent);
-    treat_as("video/mp4", CONTENT_TYPE_MP4, &mtcontent);
-    treat_as("audio/mp4", CONTENT_TYPE_MP4, &mtcontent);
-    treat_as("video/x-matroska", CONTENT_TYPE_MKV, &mtcontent);
-    treat_as("audio/x-matroska", CONTENT_TYPE_MKA, &mtcontent);
-    treat_as("audio/x-dsd", CONTENT_TYPE_DSD, &mtcontent);
+    setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
 }
 
-void ConfigGenerator::generateOnlineContent(pugi::xml_node* import)
+void ConfigGenerator::generateOnlineContent()
 {
-    auto onlinecontent = import->append_child("online-content");
 #ifdef ATRAILERS
-    auto at = onlinecontent.append_child("AppleTrailers");
-    at.append_attribute("enabled") = DEFAULT_ATRAILERS_ENABLED;
-    at.append_attribute("refresh") = DEFAULT_ATRAILERS_REFRESH;
-    at.append_attribute("update-at-start") = DEFAULT_ATRAILERS_UPDATE_AT_START;
-    at.append_attribute("resolution") = DEFAULT_ATRAILERS_RESOLUTION;
-#endif
-}
-
-void ConfigGenerator::generateTranscoding(pugi::xml_node* config)
-{
-    auto transcoding = config->append_child("transcoding");
-    transcoding.append_attribute("enabled") = DEFAULT_TRANSCODING_ENABLED;
-
-    auto mt_prof_map = transcoding.append_child("mimetype-profile-mappings");
-
-    auto prof_flv = mt_prof_map.append_child("transcode");
-    prof_flv.append_attribute("mimetype") = "video/x-flv";
-    prof_flv.append_attribute("using") = "vlcmpeg";
-
-    auto prof_theora = mt_prof_map.append_child("transcode");
-    prof_theora.append_attribute("mimetype") = "application/ogg";
-    prof_theora.append_attribute("using") = "vlcmpeg";
-
-    auto prof_ogg = mt_prof_map.append_child("transcode");
-    prof_ogg.append_attribute("mimetype") = "audio/ogg";
-    prof_ogg.append_attribute("using") = "ogg2mp3";
-
-    auto profiles = transcoding.append_child("profiles");
-
-    auto oggmp3 = profiles.append_child("profile");
-    oggmp3.append_attribute("name") = "ogg2mp3";
-    oggmp3.append_attribute("enabled") = NO;
-    oggmp3.append_attribute("type") = "external";
-
-    oggmp3.append_child("mimetype").append_child(pugi::node_pcdata).set_value("audio/mpeg");
-    oggmp3.append_child("accept-url").append_child(pugi::node_pcdata).set_value(NO);
-    oggmp3.append_child("first-resource").append_child(pugi::node_pcdata).set_value(YES);
-    oggmp3.append_child("accept-ogg-theora").append_child(pugi::node_pcdata).set_value(NO);
-
-    auto oggmp3_agent = oggmp3.append_child("agent");
-    oggmp3_agent.append_attribute("command") = "ffmpeg";
-    oggmp3_agent.append_attribute("arguments") = "-y -i %in -f mp3 %out";
-
-    auto oggmp3_buffer = oggmp3.append_child("buffer");
-    oggmp3_buffer.append_attribute("size") = DEFAULT_AUDIO_BUFFER_SIZE;
-    oggmp3_buffer.append_attribute("chunk-size") = DEFAULT_AUDIO_CHUNK_SIZE;
-    oggmp3_buffer.append_attribute("fill-size") = DEFAULT_AUDIO_FILL_SIZE;
-
-    auto vlcmpeg = profiles.append_child("profile");
-    vlcmpeg.append_attribute("name") = "vlcmpeg";
-    vlcmpeg.append_attribute("enabled") = NO;
-    vlcmpeg.append_attribute("type") = "external";
-
-    vlcmpeg.append_child("mimetype").append_child(pugi::node_pcdata).set_value("video/mpeg");
-    vlcmpeg.append_child("accept-url").append_child(pugi::node_pcdata).set_value(YES);
-    vlcmpeg.append_child("first-resource").append_child(pugi::node_pcdata).set_value(YES);
-    vlcmpeg.append_child("accept-ogg-theora").append_child(pugi::node_pcdata).set_value(YES);
-
-    auto vlcmpeg_agent = vlcmpeg.append_child("agent");
-    vlcmpeg_agent.append_attribute("command") = "vlc";
-    vlcmpeg_agent.append_attribute("arguments") = "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit";
-
-    auto vlcmpeg_buffer = vlcmpeg.append_child("buffer");
-    vlcmpeg_buffer.append_attribute("size") = DEFAULT_VIDEO_BUFFER_SIZE;
-    vlcmpeg_buffer.append_attribute("chunk-size") = DEFAULT_VIDEO_CHUNK_SIZE;
-    vlcmpeg_buffer.append_attribute("fill-size") = DEFAULT_VIDEO_FILL_SIZE;
-}
-
-void ConfigGenerator::generateUdn(pugi::xml_node* server)
-{
-    uuid_t uuid;
-#ifdef BSD_NATIVE_UUID
-    char* uuid_str;
-    uint32_t status;
-    uuid_create(&uuid, &status);
-    uuid_to_string(&uuid, &uuid_str, &status);
+    setValue(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
+    setValue(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
+    setValue(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
+    setValue(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
 #else
-    char uuid_str[37];
-    uuid_generate(uuid);
-    uuid_unparse(uuid, uuid_str);
-#endif
-
-    log_debug("UUID generated: {}", uuid_str);
-    server->append_child("udn").append_child(pugi::node_pcdata).set_value(("uuid:" + std::string(uuid_str)).c_str());
-
-#ifdef BSD_NATIVE_UUID
-    free(uuid_str);
+    setValue("/import/online-content/");
 #endif
 }
 
-void ConfigGenerator::map_from_to(const std::string& from, const std::string& to, pugi::xml_node* parent)
+void ConfigGenerator::generateTranscoding()
 {
-    auto map = parent->append_child("map");
-    map.append_attribute("from") = from.c_str();
-    map.append_attribute("to") = to.c_str();
+    setValue(CFG_TRANSCODING_TRANSCODING_ENABLED);
+    setDictionary(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
+
+    const auto profileTag = ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);
+
+    auto oggmp3 = setValue(fmt::format("{}/", profileTag), "", true);
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "audio/mpeg");
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, NO);
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
+    setValue(oggmp3, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
+
+    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
+    setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
+
+    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
+
+    auto vlcmpeg = setValue(fmt::format("{}/", profileTag), "", true);
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "video/mpeg");
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL, YES);
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
+    setValue(vlcmpeg, ATTR_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
+
+    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
+    setValue(agent, ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit");
+
+    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
+    setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
 }
 
-void ConfigGenerator::treat_as(const std::string& mimetype, const std::string& as, pugi::xml_node* parent)
+void ConfigGenerator::generateUdn()
 {
-    auto treat = parent->append_child("treat");
-    treat.append_attribute("mimetype") = mimetype.c_str();
-    treat.append_attribute("as") = as.c_str();
+    setValue(CFG_SERVER_UDN, fmt::format("uuid:{}", generateRandomId()));
 }

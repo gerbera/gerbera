@@ -4,7 +4,7 @@
 
     gerbera-items.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -48,17 +48,18 @@ const treeItemSelected = function (data) {
 };
 
 const retrieveGerberaItems = (type, parentId, start, count) => {
+  var requestData = {
+    req_type: type,
+    parent_id: parentId,
+    start: start,
+    count: count,
+    updates: 'check'
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: type,
-      sid: Auth.getSessionId(),
-      parent_id: parentId,
-      start: start,
-      count: count,
-      updates: 'check'
-    }
+    data: requestData
   });
 };
 
@@ -82,7 +83,7 @@ const loadItems = (response) => {
         totalMatches: response.items.total_matches,
         itemsPerPage: GerberaApp.viewItems(),
         parentId: response.items.parent_id
-      }
+      };
     } else if (type === 'fs') {
       items = transformFiles(response.files.file);
       parentItem = response.files;
@@ -151,15 +152,16 @@ const previousPage = function (event) {
 const editItem = (event) => {
   const item = event.data;
   if (item) {
+    var requestData = {
+      req_type: 'edit_load',
+      object_id: item.id,
+      updates: 'check'
+    };
+    requestData[Auth.SID] = Auth.getSessionId();
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
-      data: {
-        req_type: 'edit_load',
-        sid: Auth.getSessionId(),
-        object_id: item.id,
-        updates: 'check'
-      }
+      data: requestData
     })
       .then((response) => loadEditItem(response))
       .catch((err) => GerberaApp.error(err));
@@ -177,16 +179,17 @@ const deleteItemFromList = (event) => {
 
 const deleteGerberaItem = (item, includeAll) => {
   const deleteAll = includeAll ? 1 : 0;
+  var requestData = {
+    req_type: 'remove',
+    object_id: item.id,
+    all: deleteAll,
+    updates: 'check'
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: {
-      req_type: 'remove',
-      sid: Auth.getSessionId(),
-      object_id: item.id,
-      all: deleteAll,
-      updates: 'check'
-    }
+    data: requestData
   });
 };
 
@@ -204,21 +207,30 @@ const deleteComplete = (response) => {
 const downloadItem = (event) => {
   const item = event.data;
   event.preventDefault();
-  // TODO: content type
-  window.location.href = item.url;
+
+  var link = document.createElement("a");
+  link.download = item.text;
+  link.type = item.mtype;
+  link.href = item.url;
+
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
 };
 
 const addFileItem = (event) => {
   const item = event.data;
   if (item) {
+    var requestData = {
+      req_type: 'add',
+      object_id: item.id
+    };
+    requestData[Auth.SID] = Auth.getSessionId();
     $.ajax({
       url: GerberaApp.clientConfig.api,
       type: 'get',
-      data: {
-        req_type: 'add',
-        sid: Auth.getSessionId(),
-        object_id: item.id
-      }
+      data: requestData
     })
       .then((response) => addFileItemComplete(response))
       .catch((err) => GerberaApp.error(err));
@@ -247,9 +259,9 @@ const addObject = () => {
   const item = $('#editModal').editmodal('addObject');
   const addObjectData = {
     req_type: 'add_object',
-    sid: Auth.getSessionId(),
     updates: 'check'
   };
+  addObjectData[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, item, addObjectData);
 
   if (requestData.parent_id && requestData.parent_id >= 0) {
@@ -282,7 +294,9 @@ const loadEditItem = (response) => {
   if (response.success) {
     editModal.editmodal('loadItem', {
       item: response.item,
-      onSave: saveItem
+      onSave: saveItem,
+      onDetails: showDetails,
+      onHide: hideDetails
     });
 
     editModal.editmodal('show');
@@ -297,11 +311,19 @@ const transformItems = (items) => {
     const item = {
       id: gItem.id,
       text: gItem.title,
-      url: gItem.res
+      url: gItem.res,
+      mtype: ('mtype' in gItem) ? gItem.mtype : null,
+      image: ('image' in gItem) ? gItem.image : null,
+      part: ('part' in gItem) ? gItem.part : null,
+      track: ('track' in gItem) ? gItem.track : null
     };
 
-    if (GerberaApp.serverConfig.enableThumbnail) {
-      item.img = '/content/media/object_id/' + gItem.id + '/res_id/1/rh/6/ext/file.jpg';
+    if (!GerberaApp.serverConfig.enableNumbering) {
+      item.part = null;
+      item.track = null;
+    }
+    if (!GerberaApp.serverConfig.enableThumbnail) {
+      item.image = null;
     }
     if (GerberaApp.serverConfig.enableVideo) {
       item.video = '/content/media/object_id/' + gItem.id + '/res_id/0/ext/file.mp4';
@@ -341,9 +363,9 @@ const saveItem = () => {
   const item = $('#editModal').editmodal('saveItem');
   const saveData = {
     req_type: 'edit_save',
-    sid: Auth.getSessionId(),
     updates: 'check'
   };
+  saveData[Auth.SID] = Auth.getSessionId();
   const requestData = $.extend({}, item, saveData);
 
   if (requestData.object_id && requestData.object_id > 0) {
@@ -355,6 +377,14 @@ const saveItem = () => {
       .then((response) => saveItemComplete(response))
       .catch((err) => GerberaApp.error(err))
   }
+};
+
+const showDetails = () => {
+  $('#editModal').editmodal('showDetails');
+};
+
+const hideDetails = () => {
+  $('#editModal').editmodal('hideDetails');
 };
 
 const saveItemComplete = (response) => {

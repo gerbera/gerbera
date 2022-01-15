@@ -33,36 +33,32 @@
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
-#include <iostream>
-#include <utility>
 #endif
 
-#ifdef HAVE_LASTFMLIB
-#include "onlineservice/lastfm_scrobbler.h"
+#include <upnpconfig.h>
+#ifdef UPNP_HAVE_TOOLS
+#include <upnptools.h>
 #endif
+
+#include <thread>
 
 #include "config/config_manager.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
+#include "database/database.h"
+#include "device_description_handler.h"
 #include "file_request_handler.h"
-#include "storage/storage.h"
-#include "update_manager.h"
-#include "util/task_processor.h"
+#include "util/mime.h"
 #include "util/upnp_clients.h"
+#include "web/pages.h"
 #include "web/session_manager.h"
-#ifdef HAVE_JS
-#include "scripting/runtime.h"
-#endif
+
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
-#include "device_description_handler.h"
-#include "serve_request_handler.h"
-#include "web/pages.h"
 
-Server::Server(std::shared_ptr<ConfigManager> config)
+Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
 {
-    server_shutdown_flag = false;
 }
 
 void Server::init()
@@ -76,97 +72,72 @@ void Server::init()
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
 
-    // initalize what is needed
+    // initialize what is needed
     auto self = shared_from_this();
-    timer = std::make_shared<Timer>();
-#ifdef ONLINE_SERVICES
-    task_processor = std::make_shared<TaskProcessor>();
-#endif
-#ifdef HAVE_JS
-    scripting_runtime = std::make_shared<Runtime>();
-#endif
-    storage = Storage::createInstance(config, timer);
-    update_manager = std::make_shared<UpdateManager>(storage, self);
-    session_manager = std::make_shared<web::SessionManager>(config, timer);
-#ifdef HAVE_LASTFMLIB
-    last_fm = std::make_shared<LastFm>(config);
-#endif
-    content = std::make_shared<ContentManager>(
-        config, storage, update_manager, session_manager, timer, task_processor, scripting_runtime, last_fm);
-}
+    timer = std::make_shared<Timer>(config);
 
-Server::~Server() { log_debug("Server destroyed"); }
+    clients = std::make_shared<Clients>(config);
+    mime = std::make_shared<Mime>(config);
+    timer->run();
+    database = Database::createInstance(config, mime, timer);
+    config->updateConfigFromDatabase(database);
+    session_manager = std::make_shared<Web::SessionManager>(config, timer);
+    context = std::make_shared<Context>(config, clients, mime, database, self, session_manager);
+
+    content = std::make_shared<ContentManager>(context, self, timer);
+}
 
 void Server::run()
 {
-    int ret = 0; // general purpose error code
-    log_debug("start");
+    log_debug("Starting...");
+
+    // run what is needed
+    try {
+        content->run();
+    } catch (const std::runtime_error& ex) {
+        log_error("Activating ContentService failed {}", ex.what());
+        throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", ex.what()));
+    }
 
     std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
-    std::string ip = config->getOption(CFG_SERVER_IP);
+    ip = config->getOption(CFG_SERVER_IP);
 
     if (!ip.empty() && !iface.empty())
-        throw_std_runtime_error("You can not specify interface and IP at the same time");
+        throw_std_runtime_error("You cannot specify interface {} and IP {} at the same time", iface, ip);
 
     if (iface.empty())
         iface = ipToInterface(ip);
 
     if (!ip.empty() && iface.empty())
-        throw_std_runtime_error("Could not find ip: " + ip);
+        throw_std_runtime_error("Could not find IP: {}", ip);
 
-    int port = config->getIntOption(CFG_SERVER_PORT);
+    // check webroot directory
+    std::string webRoot = config->getOption(CFG_SERVER_WEBROOT);
+    if (webRoot.empty()) {
+        throw_std_runtime_error("Invalid web server root directory {}", webRoot);
+    }
 
-    log_debug("Initialising libupnp with interface: '{}', port: {}", iface.c_str(), port);
-    const char* IfName = nullptr;
-    if (!iface.empty())
-        IfName = iface.c_str();
-    ret = UpnpInit2(IfName, port);
+    auto configPort = in_port_t(config->getIntOption(CFG_SERVER_PORT));
+    auto ret = startupInterface(iface, configPort);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpInit failed");
+        throw UpnpException(ret, fmt::format("UpnpInit failed {} {}", iface, port));
     }
 
-    port = UpnpGetServerPort();
-    log_info("Initialized port: {}", port);
-
-    if (ip.empty()) {
-        ip = UpnpGetServerIpAddress();
+    if (configPort > 0 && port != configPort) {
+        throw UpnpException(ret, fmt::format("LibUPnP failed to bind to request port! Bound to {}, requested: {}", port, configPort));
     }
 
-    log_info("Server bound to: {}", ip.c_str());
-
-    virtualUrl = "http://" + ip + ":" + std::to_string(port) + "/" + virtual_directory;
-
-    // next set webroot directory
-    std::string web_root = config->getOption(CFG_SERVER_WEBROOT);
-
-    if (web_root.empty()) {
-        throw_std_runtime_error("invalid web server root directory");
-    }
-
-    ret = UpnpSetWebServerRootDir(web_root.c_str());
+    ret = UpnpSetWebServerRootDir(webRoot.c_str());
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpSetWebServerRootDir failed");
+        throw UpnpException(ret, fmt::format("UpnpSetWebServerRootDir failed {}", webRoot));
     }
 
-    log_debug("webroot: {}", web_root.c_str());
+    log_debug("webroot: {}", webRoot);
 
-    std::vector<std::string> arr = config->getStringArrayOption(CFG_SERVER_CUSTOM_HTTP_HEADERS);
-    for (const auto& tmp : arr) {
-        if (!tmp.empty()) {
-            log_info("(NOT) Adding HTTP header \"{}\"", tmp.c_str());
-            // FIXME upstream upnp
-            //ret = UpnpAddCustomHTTPHeader(tmp.c_str());
-            //if (ret != UPNP_E_SUCCESS)
-            //{
-            //    throw UpnpException(ret, "run: UpnpAddCustomHTTPHeader failed");
-            //}
-        }
-    }
-
-    log_debug("Setting virtual dir to: {}", virtual_directory.c_str());
+    log_debug("Setting virtual dir to: {}", virtual_directory);
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpAddVirtualDir failed");
+        throw UpnpException(ret, fmt::format("run: UpnpAddVirtualDir failed {}", virtual_directory));
     }
 
     ret = registerVirtualDirCallbacks();
@@ -175,35 +146,25 @@ void Server::run()
         throw UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
     }
 
-    std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
-    if (presentationURL.empty()) {
-        presentationURL = "http://" + ip + ":" + std::to_string(port) + "/";
-    } else {
-        std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
-        if (appendto == "ip") {
-            presentationURL = "http://" + ip + ":" + presentationURL;
-        } else if (appendto == "port") {
-            presentationURL = "http://" + ip + ":" + std::to_string(port) + "/" + presentationURL;
-        } // else appendto is none and we take the URL as it entered by user
-    }
+    std::string presentationURL = getPresentationUrl();
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_unique<UpnpXMLBuilder>(config, storage, virtualUrl, presentationURL);
+    xmlbuilder = std::make_shared<UpnpXMLBuilder>(context, virtualUrl, presentationURL);
 
     // register root device with the library
     auto desc = xmlbuilder->renderDeviceDescription();
     std::ostringstream buf;
     desc->print(buf, "", 0);
     std::string deviceDescription = buf.str();
-    //log_debug("Device Description: {}", deviceDescription.c_str());
+    // log_debug("Device Description: {}", deviceDescription.c_str());
 
     log_debug("Registering with UPnP...");
     ret = UpnpRegisterRootDevice2(
         UPNPREG_BUF_DESC,
         deviceDescription.c_str(),
-        static_cast<size_t>(deviceDescription.length()) + 1,
+        deviceDescription.length() + 1,
         true,
-        handleUpnpRootDeviceEventCallback,
+        [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
         &rootDeviceHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -211,7 +172,7 @@ void Server::run()
     }
 
     ret = UpnpRegisterClient(
-        handleUpnpClientEventCallback,
+        [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event); },
         this,
         &clientHandle);
     if (ret != UPNP_E_SUCCESS) {
@@ -219,38 +180,133 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(config, storage, xmlbuilder.get(), rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder, rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(config, storage, xmlbuilder.get(), rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder, rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(config, xmlbuilder.get(), rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder, rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
-    log_debug("Sending UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
+    log_info("Will send UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(rootDeviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, "run: UpnpSendAdvertisement failed");
+        throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
-    // run what is needed
-    timer->run();
-#ifdef ONLINE_SERVICES
-    task_processor->run();
-#endif
-    update_manager->run();
-#ifdef HAVE_LASTFMLIB
-    last_fm->run();
-#endif
-    content->run();
+    UpnpSetHostValidateCallback(
+        [](auto host, auto cookie) -> int {
+            auto hostStr = std::string(host);
+            auto ip = std::string(UpnpGetServerIpAddress());
+            auto ip6 = std::string(UpnpGetServerIp6Address());
+            auto ip6gla = std::string(UpnpGetServerUlaGuaIp6Address());
 
-    config->writeBookmark(ip, std::to_string(port));
-    log_info("The Web UI can be reached by following this link: http://{}:{}/", ip.c_str(), port);
+            if (hostStr.find(ip) != std::string::npos || hostStr.find(ip6) != std::string::npos || hostStr.find(ip6gla) != std::string::npos) {
+                return UPNP_E_SUCCESS;
+            }
 
-    log_debug("end");
+            auto virtualURL = static_cast<Server*>(cookie)->getVirtualUrl();
+            if (!virtualURL.empty() && virtualURL.find(host) != std::string::npos) {
+                return UPNP_E_SUCCESS;
+            }
+            log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL: '{}'. "
+                        "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
+                host, static_cast<Server*>(cookie)->config->getOption(CFG_VIRTUAL_URL));
+            return UPNP_E_BAD_HTTPMSG;
+        },
+        this);
+
+    std::string url = config->getOption(CFG_VIRTUAL_URL);
+    if (url.empty()) {
+        url = renderWebUri(ip, port);
+    }
+    if (!startswith(url, "http")) { // url does not start with http
+        url = fmt::format("http://{}", url);
+    }
+    writeBookmark(url);
+    log_info("The Web UI can be reached by following this link: {}", url);
+}
+
+int Server::startupInterface(const std::string& iface, in_port_t inPort)
+{
+    log_info("Initialising UPnP with interface: {}, port: {}",
+        iface.empty() ? "<unset>" : iface, inPort == 0 ? "<unset>" : fmt::to_string(inPort));
+    const char* ifName = iface.empty() ? nullptr : iface.c_str();
+
+    int ret = UPNP_E_INIT_FAILED;
+    for (std::size_t attempt = 0; attempt < 4; attempt++) {
+        ret = UpnpInit2(ifName, inPort);
+        if (ret == UPNP_E_SUCCESS)
+            break;
+
+#ifdef UPNP_HAVE_TOOLS
+        log_warning("UPnP Init {}:{} failed: {} ({}). Retrying in {} seconds...", ifName, inPort, UpnpGetErrorMessage(ret), ret, attempt + 1);
+#else
+        log_warning("UPnP Init {}:{} failed: ({}). Retrying in {} seconds...", ifName, inPort, ret, attempt + 1);
+#endif
+        std::this_thread::sleep_for(std::chrono::seconds(attempt + 1));
+    }
+
+    if (ret != UPNP_E_SUCCESS) {
+        throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName, inPort));
+    }
+
+    port = UpnpGetServerPort();
+    /* The IP libupnp picks is not always the same as passed into config, as we map it to an interface */
+    ip = UpnpGetServerIpAddress();
+
+    log_info("IPv4: Server bound to: {}:{}", ip, port);
+    log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(), UpnpGetServerPort6());
+    log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
+
+    virtualUrl = fmt::format("http://{}:{}/{}", ip, port, virtual_directory);
+
+    return ret;
+}
+
+std::string Server::getPresentationUrl() const
+{
+    std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
+    if (presentationURL.empty()) {
+        presentationURL = fmt::format("http://{}:{}/", ip, port);
+    } else {
+        std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+        if (appendto == "ip") {
+            presentationURL = fmt::format("http://{}:{}", ip, presentationURL);
+        } else if (appendto == "port") {
+            presentationURL = fmt::format("http://{}:{}/{}", ip, port, presentationURL);
+        } // else appendto is none and we take the URL as it entered by user
+    }
+    return presentationURL;
+}
+
+void Server::writeBookmark(const std::string& addr)
+{
+    const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
+        ? httpRedirectTo(addr)
+        : httpRedirectTo(addr, "disabled.html");
+
+    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    log_debug("Writing bookmark file to: {}", path.c_str());
+    GrbFile(std::move(path)).writeTextFile(data);
+}
+
+void Server::emptyBookmark()
+{
+    const std::string_view data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
+
+    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    log_debug("Clearing bookmark file at: {}", path.c_str());
+    GrbFile(std::move(path)).writeTextFile(data);
+}
+
+std::string Server::getVirtualUrl() const
+{
+    auto cfgVirt = config->getOption(CFG_VIRTUAL_URL);
+    return cfgVirt.empty() ? virtualUrl : fmt::format("{}/{}", cfgVirt, virtual_directory);
 }
 
 bool Server::getShutdownStatus() const
@@ -262,7 +318,7 @@ void Server::shutdown()
 {
     int ret = 0; // return code
 
-    config->emptyBookmark();
+    emptyBookmark();
     server_shutdown_flag = true;
 
     log_debug("Server shutting down");
@@ -284,64 +340,53 @@ void Server::shutdown()
     log_debug("now calling upnp finish");
     UpnpFinish();
 
-    content->shutdown();
-    content = nullptr;
-#ifdef HAVE_LASTFMLIB
-    last_fm->shutdown();
-    last_fm = nullptr;
-#endif
-    session_manager = nullptr;
-    update_manager->shutdown();
-    update_manager = nullptr;
+    if (content) {
+        content->shutdown();
+        content = nullptr;
+    }
 
-    if (storage->threadCleanupRequired()) {
+    session_manager = nullptr;
+
+    if (database->threadCleanupRequired()) {
         try {
-            storage->threadCleanup();
+            database->threadCleanup();
         } catch (const std::runtime_error& ex) {
         }
     }
-    storage->shutdown();
-    storage = nullptr;
+    database->shutdown();
+    database = nullptr;
 
-    scripting_runtime = nullptr;
-#ifdef ONLINE_SERVICES
-    task_processor->shutdown();
-    task_processor = nullptr;
-#endif
     timer->shutdown();
     timer = nullptr;
+
+    context = nullptr;
+
+    mime = nullptr;
+    clients = nullptr;
 }
 
-int Server::handleUpnpRootDeviceEventCallback(Upnp_EventType eventtype, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventtype, event);
-}
-
-int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event)
+int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
 {
     int ret = UPNP_E_SUCCESS; // general purpose return code
 
     log_debug("start");
 
     // check parameters
-    if (event == nullptr) {
+    if (!event) {
         log_debug("handleUpnpRootDeviceEvent: NULL event structure");
         return UPNP_E_BAD_REQUEST;
     }
 
     // dispatch event based on event type
-    switch (eventtype) {
-
+    switch (eventType) {
     case UPNP_CONTROL_ACTION_REQUEST:
-        // a CP is invoking an action
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = std::make_unique<ActionRequest>(static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = std::make_unique<ActionRequest>(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request->update();
-            // set in update() ((struct Upnp_Action_Request *)event)->ErrCode = ret;
-        } catch (const UpnpException& upnp_e) {
-            ret = upnp_e.getErrorCode();
+        } catch (const UpnpException& upnpE) {
+            ret = upnpE.getErrorCode();
             UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
         } catch (const std::runtime_error& e) {
             log_info("Exception: {}", e.what());
@@ -349,20 +394,19 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
         break;
 
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
-        // a cp wants a subscription
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST");
         try {
             auto request = std::make_unique<SubscriptionRequest>(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
             routeSubscriptionRequest(request);
-        } catch (const UpnpException& upnp_e) {
-            log_warning("Subscription exception: {}", upnp_e.what());
-            ret = upnp_e.getErrorCode();
+        } catch (const UpnpException& upnpE) {
+            log_warning("Subscription exception: {}", upnpE.what());
+            ret = upnpE.getErrorCode();
         }
         break;
 
     default:
         // unhandled event type
-        log_warning("unsupported event type: {}", eventtype);
+        log_warning("unsupported event type: {}", eventType);
         ret = UPNP_E_BAD_REQUEST;
         break;
     }
@@ -371,15 +415,10 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* even
     return ret;
 }
 
-int Server::handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie)
-{
-    return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event);
-}
-
 int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
 {
     // check parameters
-    if (event == nullptr) {
+    if (!event) {
         log_debug("handleUpnpClientEvent: NULL event structure");
         return UPNP_E_BAD_REQUEST;
     }
@@ -387,25 +426,12 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     switch (eventType) {
     case UPNP_DISCOVERY_ADVERTISEMENT_ALIVE:
     case UPNP_DISCOVERY_SEARCH_RESULT: {
-        const UpnpDiscovery* d_event = (UpnpDiscovery*)event;
-        const char* userAgent = UpnpString_get_String(UpnpDiscovery_get_Os(d_event));
-        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(d_event);
+        auto dEvent = static_cast<const UpnpDiscovery*>(event);
+        const char* userAgent = UpnpDiscovery_get_Os_cstr(dEvent);
+        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(dEvent);
+        const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
-        IXML_Document* descDoc = nullptr;
-#if 0
-        const char* location = UpnpString_get_String(UpnpDiscovery_get_Location(d_event));
-        int errCode = UpnpDownloadXmlDoc(location, &descDoc);
-        if (errCode != UPNP_E_SUCCESS) {
-            log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
-        } else {
-            DOMString cxml = ixmlPrintDocument(descDoc);
-        }
-#endif
-        Clients::addClient(destAddr, userAgent);
-
-        if (descDoc) {
-            ixmlDocument_free(descDoc);
-        }
+        clients->addClientByDiscovery(destAddr, userAgent, location);
         break;
     }
     default:
@@ -413,16 +439,6 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     }
 
     return 0;
-}
-
-std::string Server::getIP()
-{
-    return UpnpGetServerIpAddress();
-}
-
-std::string Server::getPort()
-{
-    return std::to_string(UpnpGetServerPort());
 }
 
 void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) const
@@ -436,15 +452,15 @@ void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) c
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == DESC_CM_SERVICE_ID) {
+    if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service");
         cmgr->processActionRequest(request);
-    } else if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
-        //log_debug("routeActionRequest: request for content directory service");
+        // log_debug("routeActionRequest: request for content directory service");
         cds->processActionRequest(request);
-    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
@@ -458,21 +474,20 @@ void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>
     // make sure that the request is for our device
     if (request->getUDN() != serverUDN) {
         // not for us
-        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}",
-            request->getUDN().c_str(), serverUDN.c_str());
+        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request->getUDN(), serverUDN);
         throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == DESC_CDS_SERVICE_ID) {
+    if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
-        //log_debug("routeSubscriptionRequest: request for content directory service");
+        // log_debug("routeSubscriptionRequest: request for content directory service");
         cds->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == DESC_CM_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
-        //log_debug("routeSubscriptionRequest: request for connection manager service");
+        // log_debug("routeSubscriptionRequest: request for connection manager service");
         cmgr->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == DESC_MRREG_SERVICE_ID) {
+    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processSubscriptionRequest(request);
     } else {
         // cp asks for a nonexistent service or for a service that
@@ -492,53 +507,43 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::string link = urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
-    std::unique_ptr<RequestHandler> ret = nullptr;
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
+        return std::make_unique<FileRequestHandler>(content, xmlbuilder);
+    }
 
-    if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_MEDIA_HANDLER)) {
-        ret = std::make_unique<FileRequestHandler>(config, storage, content, update_manager, session_manager, xmlbuilder.get());
-    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_UI_HANDLER)) {
-        std::string parameters;
-        std::string path;
-        RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR, path, parameters);
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
+        auto&& [path, parameters] = RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-        std::map<std::string, std::string> params;
-        dict_decode(parameters, &params);
+        auto params = dictDecode(parameters);
 
         auto it = params.find(URL_REQUEST_TYPE);
-        std::string r_type = it != params.end() && !it->second.empty() ? it->second : "index";
+        std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        ret = web::createWebRequestHandler(config, storage, content, session_manager, r_type);
-    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + DEVICE_DESCRIPTION_PATH)) {
-        ret = std::make_unique<DeviceDescriptionHandler>(config, storage, xmlbuilder.get());
-    } else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_SERVE_HANDLER)) {
-        if (!config->getOption(CFG_SERVER_SERVEDIR).empty())
-            ret = std::make_unique<ServeRequestHandler>(config, storage);
-        else
-            throw_std_runtime_error("Serving directories is not enabled in configuration");
+        return Web::createWebRequestHandler(context, content, xmlbuilder, rType);
     }
+
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
+        return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder);
+    }
+
 #if defined(HAVE_CURL)
-    else if (startswith(link, std::string("/") + SERVER_VIRTUAL_DIR + "/" + CONTENT_ONLINE_HANDLER)) {
-        ret = std::make_unique<URLRequestHandler>(config, storage, content);
+    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER))) {
+        return std::make_unique<URLRequestHandler>(content);
     }
 #endif
-    else {
-        throw_std_runtime_error(std::string("no valid handler type in ") + filename);
-    }
 
-    return ret;
+    throw_std_runtime_error("No valid handler type in {}", filename);
 }
 
 int Server::registerVirtualDirCallbacks()
 {
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
-#else
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie) -> int {
-#endif
         try {
-            auto reqHandler = static_cast<const Server *>(cookie)->createRequestHandler(filename);
-            reqHandler->getInfo(filename, info);
+            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
+            std::string link = urlUnescape(filename);
+            reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
+            return 0;
         } catch (const ServerShutdownException& se) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {
@@ -548,24 +553,18 @@ int Server::registerVirtualDirCallbacks()
             log_error("{}", e.what());
             return -1;
         }
-        return 0; });
-    if (ret != 0)
+    });
+    if (ret != UPNP_E_SUCCESS)
         return ret;
 
     log_debug("Setting UpnpVirtualDir OpenCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
-#else
-    ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie) -> UpnpWebFileHandle {
-#endif
-        std::string link = urlUnescape(filename);
-
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            auto ioHandler = reqHandler->open(link.c_str(), mode, "");
-            auto ioPtr = static_cast<UpnpWebFileHandle>(ioHandler.release());
-            //log_debug("%p open({})", ioPtr, filename);
-            return ioPtr;
+            std::string link = urlUnescape(filename);
+            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
+            ioHandler->open(mode);
+            return ioHandler.release();
         } catch (const ServerShutdownException& se) {
             return nullptr;
         } catch (const SubtitlesNotFoundException& sex) {
@@ -580,12 +579,8 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir ReadCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
-#else
-    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie) -> int {
-#endif
-        //log_debug("%p read({})", f, length);
+    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
+        // log_debug("{} read({})", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
@@ -596,57 +591,41 @@ int Server::registerVirtualDirCallbacks()
         return ret;
 
     log_debug("Setting UpnpVirtualDir WriteCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
-    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie, const void* requestCookie) -> int {
-#else
-    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, size_t length, const void* cookie) -> int {
-#endif
-        //log_debug("%p write({})", f, length);
+    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
+        // log_debug("{} write({})", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     log_debug("Setting UpnpVirtualDir SeekCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
-#else
-    ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie) -> int {
-#endif
-        //log_debug("%p seek({}, {})", f, offset, whence);
+        // log_debug("{} seek({}, {})", f, offset, whence);
         try {
             auto handler = static_cast<IOHandler*>(f);
             handler->seek(offset, whence);
+            return 0;
         } catch (const std::runtime_error& e) {
             log_error("Exception during seek: {}", e.what());
             return -1;
         }
-
-        return 0;
     });
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
-#ifdef UPNP_HAS_REQUEST_COOKIES
-    UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-#else
-    UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie) -> int {
-#endif
-        int ret_close = 0;
-        //log_debug("%p close()", f);
-        auto handler = static_cast<IOHandler*>(f);
+    ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
+        // log_debug("{} close()", f);
+        int retClose = 0;
+        auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
         try {
             handler->close();
         } catch (const std::runtime_error& e) {
             log_error("Exception during close: {}", e.what());
-            ret_close = -1;
+            retClose = -1;
         }
 
-        delete handler;
-        handler = nullptr;
-
-        return ret_close;
+        return retClose;
     });
 
     return ret;

@@ -1,10 +1,10 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     device_description_handler.h - this file is part of Gerbera.
 
-    Copyright (C) 2020 Gerbera Contributors
+    Copyright (C) 2020-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -30,15 +30,14 @@ Gerbera - https://gerbera.io/
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
-    explicit DeviceDescriptionHandler(std::shared_ptr<ConfigManager> config, std::shared_ptr<Storage> storage,
-        UpnpXMLBuilder* xmlBuilder);
+    explicit DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder);
 
     void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode, const std::string& range) override;
+    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 
 protected:
-    UpnpXMLBuilder* xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     std::string deviceDescription;
 };
 
-#endif //GERBERA_DEVICE_DESCRIPTION_HANDLER_H
+#endif // GERBERA_DEVICE_DESCRIPTION_HANDLER_H

@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     cds_objects.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,24 +31,11 @@
 
 #include "cds_objects.h" // API
 
-#include <filesystem>
-#include <utility>
-
-#include "storage/storage.h"
+#include "database/database.h"
 #include "util/tools.h"
 
-CdsObject::CdsObject(std::shared_ptr<Storage> storage)
-    : storage(std::move(storage))
-{
-    id = INVALID_OBJECT_ID;
-    parentID = INVALID_OBJECT_ID;
-    refID = INVALID_OBJECT_ID;
-    mtime = 0;
-    sizeOnDisk = 0;
-    virt = false;
-    sortPriority = 0;
-    objectFlags = OBJECT_FLAG_RESTRICTED;
-}
+static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
+static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
 
 void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
@@ -61,14 +48,14 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
-    obj->setMetadata(metadata);
+    obj->setMetaData(metaData);
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortPriority(sortPriority);
-    for (auto& resource : resources)
+    for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
-int CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     if (!(id == obj->getID()
             && parentID == obj->getParentID()
@@ -76,39 +63,34 @@ int CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
             && title == obj->getTitle()
             && upnpClass == obj->getClass()
             && sortPriority == obj->getSortPriority()))
-        return 0;
+        return false;
 
     if (!resourcesEqual(obj))
-        return 0;
+        return false;
 
-    if (!std::equal(metadata.begin(), metadata.end(), obj->getMetadata().begin()))
-        return 0;
+    if (metaData != obj->getMetaData())
+        return false;
 
-    if (exactly
+    return !(exactly
         && !(location == obj->getLocation()
             && mtime == obj->getMTime()
             && sizeOnDisk == obj->getSizeOnDisk()
             && virt == obj->isVirtual()
             && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
-            && objectFlags == obj->getFlags()))
-        return 0;
-    return 1;
+            && objectFlags == obj->getFlags()));
 }
 
-int CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj)
+bool CdsObject::resourcesEqual(const std::shared_ptr<CdsObject>& obj) const
 {
     if (resources.size() != obj->resources.size())
-        return 0;
+        return false;
 
     // compare all resources
-    for (size_t i = 0; i < resources.size(); i++) {
-        if (!resources[i]->equals(obj->resources[i]))
-            return 0;
-    }
-    return 1;
+    return std::equal(resources.begin(), resources.end(), obj->resources.begin(),
+        [](auto&& r1, auto&& r2) { return r1->equals(r2); });
 }
 
-void CdsObject::validate()
+void CdsObject::validate() const
 {
     if (this->title.empty())
         throw_std_runtime_error("Object validation failed: missing title");
@@ -117,58 +99,53 @@ void CdsObject::validate()
         throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
-std::shared_ptr<CdsObject> CdsObject::createObject(const std::shared_ptr<Storage>& storage, unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
-    std::shared_ptr<CdsObject> obj;
-
     if (IS_CDS_CONTAINER(objectType)) {
-        obj = std::make_shared<CdsContainer>(storage);
-    } else if (IS_CDS_ITEM_INTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemInternalURL>(storage);
-    } else if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
-        obj = std::make_shared<CdsItemExternalURL>(storage);
-    } else if (IS_CDS_ACTIVE_ITEM(objectType)) {
-        obj = std::make_shared<CdsActiveItem>(storage);
-    } else if (IS_CDS_ITEM(objectType)) {
-        obj = std::make_shared<CdsItem>(storage);
-    } else {
-        throw_std_runtime_error("invalid object type: " + std::to_string(objectType));
+        return std::make_shared<CdsContainer>();
     }
-    return obj;
+
+    if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+        return std::make_shared<CdsItemExternalURL>();
+    }
+
+    if (isCdsItem(objectType)) {
+        return std::make_shared<CdsItem>();
+    }
+
+    throw_std_runtime_error("invalid object type: {}", objectType);
 }
 
 /* CdsItem */
 
-CdsItem::CdsItem(std::shared_ptr<Storage> storage)
-    : CdsObject(std::move(storage))
+CdsItem::CdsItem()
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
-    trackNumber = 0;
-    serviceID = "";
 }
 
 void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     CdsObject::copyTo(obj);
-    if (!IS_CDS_ITEM(obj->getObjectType()))
+    if (!obj->isItem())
         return;
     auto item = std::static_pointer_cast<CdsItem>(obj);
     //    item->setDescription(description);
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
+    item->setPartNumber(partNumber);
     item->setServiceID(serviceID);
+    item->setBookMarkPos(bookMarkPos);
 }
-int CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto item = std::static_pointer_cast<CdsItem>(obj);
     if (!CdsObject::equals(obj, exactly))
-        return 0;
-    return (mimeType == item->getMimeType() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID());
+        return false;
+    return (mimeType == item->getMimeType() && partNumber == item->getPartNumber() && trackNumber == item->getTrackNumber() && serviceID == item->getServiceID() && bookMarkPos == item->getBookMarkPos());
 }
 
-void CdsItem::validate()
+void CdsItem::validate() const
 {
     CdsObject::validate();
     //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
@@ -178,61 +155,24 @@ void CdsItem::validate()
     if (this->location.empty())
         throw_std_runtime_error("Item validation failed: missing location");
 
+    if (isExternalItem())
+        return;
+
     std::error_code ec;
     if (!isRegularFile(location, ec))
-        throw_std_runtime_error("Item validation failed: file " + location.string() + " not found");
+        throw_std_runtime_error("Item validation failed: file {} not found", location.c_str());
 }
 
-CdsActiveItem::CdsActiveItem(std::shared_ptr<Storage> storage)
-    : CdsItem(std::move(storage))
-{
-    objectType |= OBJECT_TYPE_ACTIVE_ITEM;
-
-    upnpClass = UPNP_DEFAULT_CLASS_ACTIVE_ITEM;
-    mimeType = MIMETYPE_DEFAULT;
-}
-
-void CdsActiveItem::copyTo(const std::shared_ptr<CdsObject>& obj)
-{
-    CdsItem::copyTo(obj);
-    if (!IS_CDS_ACTIVE_ITEM(obj->getObjectType()))
-        return;
-    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-    item->setAction(action);
-    item->setState(state);
-}
-int CdsActiveItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
-{
-    auto item = std::static_pointer_cast<CdsActiveItem>(obj);
-    if (!CdsItem::equals(obj, exactly))
-        return 0;
-    if (exactly && (action != item->getAction() || state != item->getState()))
-        return 0;
-    return 1;
-}
-
-void CdsActiveItem::validate()
-{
-    CdsItem::validate();
-    if (this->action.empty())
-        throw_std_runtime_error("Active Item validation failed: missing action");
-
-    std::error_code ec;
-    if (!isRegularFile(this->action, ec))
-        throw_std_runtime_error("Active Item validation failed: action script " + action + " not found");
-}
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL(std::shared_ptr<Storage> storage)
-    : CdsItem(std::move(storage))
+CdsItemExternalURL::CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
 
-    upnpClass = UPNP_DEFAULT_CLASS_ITEM;
-    mimeType = MIMETYPE_DEFAULT;
+    upnpClass = UPNP_CLASS_ITEM;
 }
 
-void CdsItemExternalURL::validate()
+void CdsItemExternalURL::validate() const
 {
     CdsItem::validate();
     if (this->mimeType.empty())
@@ -243,115 +183,43 @@ void CdsItemExternalURL::validate()
 }
 //---------
 
-CdsItemInternalURL::CdsItemInternalURL(std::shared_ptr<Storage> storage)
-    : CdsItemExternalURL(std::move(storage))
-{
-    objectType |= OBJECT_TYPE_ITEM_INTERNAL_URL;
-
-    upnpClass = "object.item";
-    mimeType = MIMETYPE_DEFAULT;
-}
-
-void CdsItemInternalURL::validate()
-{
-    CdsItemExternalURL::validate();
-
-    if (startswith(this->location, "http://"))
-        throw_std_runtime_error("Internal URL item validation failed: only realative URLs allowd");
-}
-
-CdsContainer::CdsContainer(std::shared_ptr<Storage> storage)
-    : CdsObject(std::move(storage))
+CdsContainer::CdsContainer()
 {
     objectType = OBJECT_TYPE_CONTAINER;
-    updateID = 0;
-    // searchable = 0; is now in objectFlags; by default all flags (except "restricted") are not set
-    childCount = -1;
-    upnpClass = UPNP_DEFAULT_CLASS_CONTAINER;
-    autoscanType = OBJECT_AUTOSCAN_NONE;
+    upnpClass = UPNP_CLASS_CONTAINER;
 }
 
 void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     CdsObject::copyTo(obj);
-    if (!IS_CDS_CONTAINER(obj->getObjectType()))
+    if (!obj->isContainer())
         return;
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
 }
-int CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly)
+bool CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
-    return (
-        CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable());
+    return CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable();
 }
 
-void CdsContainer::validate()
+/*
+void CdsContainer::validate() const
 {
     CdsObject::validate();
     /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
-    /*    if (!fs::is_directory(this->location, true))
-        throw_std_runtime_error("validation failed"); */
+      if (!fs::is_directory(this->location, true))
+        throw_std_runtime_error("validation failed");
 }
+*/
 
-std::string CdsContainer::getVirtualPath() const
-{
-    std::string location;
-    if (getID() == CDS_ID_ROOT) {
-        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR);
-    } else if (getID() == CDS_ID_FS_ROOT) {
-        location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName();
-    } else if (!getLocation().empty()) {
-        location = getLocation();
-        if (!isVirtual()) {
-            location = std::string(1, VIRTUAL_CONTAINER_SEPARATOR) + storage->getFsRootName() + location;
-        }
-    }
-
-    if (location.empty())
-        throw_std_runtime_error("virtual location not available");
-
-    return location;
-}
-
-std::string CdsItem::getVirtualPath() const
-{
-    auto cont = storage->loadObject(getParentID());
-    std::string location = cont->getVirtualPath();
-    location = location + VIRTUAL_CONTAINER_SEPARATOR + getTitle();
-
-    if (location.empty())
-        throw_std_runtime_error("virtual location not available");
-
-    return location;
-}
-
-std::string CdsObject::mapObjectType(int type)
+std::string_view CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;
-    if (IS_CDS_PURE_ITEM(type))
+    if (isCdsPureItem(type))
         return STRING_OBJECT_TYPE_ITEM;
-    if (IS_CDS_ACTIVE_ITEM(type))
-        return STRING_OBJECT_TYPE_ACTIVE_ITEM;
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
-    if (IS_CDS_ITEM_INTERNAL_URL(type))
-        return STRING_OBJECT_TYPE_INTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: " + std::to_string(type));
-}
-
-int CdsObject::remapObjectType(const std::string& objectType)
-{
-    if (objectType == STRING_OBJECT_TYPE_CONTAINER)
-        return OBJECT_TYPE_CONTAINER;
-    if (objectType == STRING_OBJECT_TYPE_ITEM)
-        return OBJECT_TYPE_ITEM;
-    if (objectType == STRING_OBJECT_TYPE_ACTIVE_ITEM)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ACTIVE_ITEM;
-    if (objectType == STRING_OBJECT_TYPE_EXTERNAL_URL)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
-    if (objectType == STRING_OBJECT_TYPE_INTERNAL_URL)
-        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL | OBJECT_TYPE_ITEM_INTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: " + objectType);
+    throw_std_runtime_error("illegal objectType: {}", type);
 }

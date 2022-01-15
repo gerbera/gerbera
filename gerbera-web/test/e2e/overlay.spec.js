@@ -5,7 +5,7 @@ let driver;
 const HomePage = require('./page/home.page');
 const LoginPage = require('./page/login.page');
 
-describe('Overlay Suite', () => {
+describe('Edit Overlay Suite', () => {
   let loginPage, homePage;
 
   before(async () => {
@@ -24,7 +24,7 @@ describe('Overlay Suite', () => {
 
   after(() => driver && driver.quit());
 
-  describe('The overlay page', () => {
+  describe('The edit overlay page', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();
@@ -92,7 +92,7 @@ describe('Overlay Suite', () => {
     });
   });
 
-  describe('The overlay item type selection', () => {
+  describe('The edit overlay item type selection', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();
@@ -126,8 +126,6 @@ describe('Overlay Suite', () => {
         { id : 'editLocation',     visible : false},
         { id : 'editDesc',         visible : false},
         { id : 'editMime',         visible : false},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -140,22 +138,6 @@ describe('Overlay Suite', () => {
         { id : 'editLocation',     visible : true},
         { id : 'editDesc',         visible : true},
         { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
-    it('only shows title, location, class, desc, mime, actionScript, state when adding activeItem type', async () => {
-      await itemSelectionTest('active_item', 'object.item.activeItem', [
-        { id : 'editObjectType',   visible : true},
-        { id : 'editTitle',        visible : true},
-        { id : 'editClass',        visible : true},
-        { id : 'editLocation',     visible : true},
-        { id : 'editDesc',         visible : true},
-        { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : true},
-        { id : 'editState',        visible : true},
         { id : 'editProtocol',     visible : false}
       ]);
     });
@@ -168,30 +150,14 @@ describe('Overlay Suite', () => {
         { id : 'editLocation',     visible : true},
         { id : 'editDesc',         visible : true},
         { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : true}
       ]);
       const editProtocol = await homePage.editOverlayFieldValue('editProtocol');
       expect(editProtocol).to.equal('http-get');
     });
-
-    it('only shows title, location, class, desc, mime when adding internal_url type', async () => {
-      await itemSelectionTest('internal_url', 'object.item', [
-        { id : 'editObjectType',   visible : true},
-        { id : 'editTitle',        visible : true},
-        { id : 'editClass',        visible : true},
-        { id : 'editLocation',     visible : true},
-        { id : 'editDesc',         visible : true},
-        { id : 'editMime',         visible : true},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
   });
 
-  describe('The overlay load item', () => {
+  describe('The edit overlay load item', () => {
 
     afterEach(async () => {
       await homePage.cancelEdit();
@@ -229,36 +195,18 @@ describe('Overlay Suite', () => {
         { id : 'editLocation',     visible : false},
         { id : 'editDesc',         visible : false},
         { id : 'editMime',         visible : false},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
-        { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
-    it('loads an active item to edit with correct fields populated', async () => {
-      await itemLoadTest(10, [
-        { id : 'editObjectType',   visible : true, value : 'active_item'},
-        { id : 'editTitle',        visible : true, value : 'Test Active Item'},
-        { id : 'editClass',        visible : true, value : 'object.item.activeItem'},
-        { id : 'editLocation',     visible : true, value : '/home/test.txt'},
-        { id : 'editDesc',         visible : true, value : 'test'},
-        { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : true, value : '/home/echoText.sh'},
-        { id : 'editState',        visible : true, value : 'test-state'},
         { id : 'editProtocol',     visible : false}
       ]);
     });
 
     it('loads an external url to edit with correct fields populated', async () => {
-      await itemLoadTest(11, [
+      await itemLoadTest(10, [
         { id : 'editObjectType',   visible : true, value : 'external_url'},
         { id : 'editTitle',        visible : true, value : 'title'},
         { id : 'editClass',        visible : true, value : 'object.item'},
         { id : 'editLocation',     visible : true, value : 'http://localhost'},
         { id : 'editDesc',         visible : true, value : 'description'},
         { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : true, value : 'http-get'}
       ]);
     });
@@ -266,28 +214,12 @@ describe('Overlay Suite', () => {
     it('loads an simple item to edit with correct fields populated', async () => {
       await itemLoadTest(0, [
         { id : 'editObjectType',   visible : true, value : 'item'},
-        { id : 'editTitle',        visible : true, value : 'Test.mp4'},
+        { id : 'editTitle',        visible : true, value : 'My Title'},
         { id : 'editClass',        visible : true, value : 'object.item.videoItem'},
         { id : 'editLocation',     visible : true, value : '/folder/location/Test.mp4'},
         { id : 'editDesc',         visible : true, value : 'A description'},
         { id : 'editMime',         visible : true, value : 'video/mp4'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
         { id : 'editProtocol',     visible : false}
-      ]);
-    });
-
-    it('loads an internal url to edit with correct fields populated', async () => {
-      await itemLoadTest(12, [
-        { id : 'editObjectType',   visible : true, value : 'internal_url'},
-        { id : 'editTitle',        visible : true, value : 'title'},
-        { id : 'editClass',        visible : true, value : 'object.item'},
-        { id : 'editLocation',     visible : true, value : './test'},
-        { id : 'editDesc',         visible : true, value : 'description'},
-        { id : 'editMime',         visible : true, value : 'text/plain'},
-        { id : 'editActionScript', visible : false},
-        { id : 'editState',        visible : false},
-        { id : 'editProtocol',     visible : true, value : 'http-get'}
       ]);
     });
   });

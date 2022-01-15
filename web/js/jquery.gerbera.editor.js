@@ -4,7 +4,7 @@
 
     jquery.gerbera.editor.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2020 Gerbera Contributors
+    Copyright (C) 2016-2021 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -44,8 +44,6 @@
     const editClass = modal.find('#editClass');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
     const saveButton = modal.find('#editSave');
 
@@ -74,24 +72,15 @@
     if (itemType === 'container') {
       editClass.val('object.container');
       showFields([editObjectType, editTitle, editClass]);
-      hideFields([editLocation, editDesc, editMime, editActionScript, editState, editProtocol]);
+      hideFields([editLocation, editDesc, editMime, editProtocol]);
     } else if (itemType === 'item') {
       editClass.val('object.item');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
-      hideFields([editActionScript, editState, editProtocol]);
-    } else if (itemType === 'active_item') {
-      editClass.val('object.item.activeItem');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editActionScript, editState]);
       hideFields([editProtocol]);
     } else if (itemType === 'external_url') {
       editClass.val('object.item');
       editProtocol.val('http-get');
       showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol]);
-      hideFields([editActionScript, editState]);
-    } else if (itemType === 'internal_url') {
-      editClass.val('object.item');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
-      hideFields([editActionScript, editState, editProtocol]);
     }
   }
 
@@ -106,29 +95,124 @@
     modal.find('#editClass').val('').prop('disabled', false);
     modal.find('#editDesc').val('').prop('disabled', false);
     modal.find('#editMime').val('').prop('disabled', false);
-    modal.find('#editActionScript').val('').prop('disabled', false);
-    modal.find('#editState').val('').prop('disabled', false);
+    modal.find('#editLmt').val('').prop('disabled', true);
     modal.find('#editProtocol').val('').prop('disabled', false);
     modal.find('#editSave').text('Save Item');
+
+    modal.find('#metadata').empty();
+    modal.find('#auxdata').empty();
+    modal.find('#resdata').empty();
+    modal.find('#mediaimage').empty();
+
+    hideDetails(modal);
+    modal.find('#mediaimage').hide();
+    modal.find('#detailbutton').hide();
+    modal.find('#hidebutton').hide();
+  }
+
+  function appendMetaItem(tbody, name, value, special = null) {
+    let row, content, text;
+    row = $('<tr></tr>');
+    content = $('<td></td>');
+    content.addClass('detail-column');
+    text = $('<span></span>');
+    text.text(name).appendTo(content);
+    row.append(content);
+    content = $('<td></td>');
+    if (value !== null) {
+      const nl = '\n';
+      text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
+      text.appendTo(content);
+    }
+    if (special !== null) {
+        special.appendTo(content);
+    }
+    row.append(content);
+    tbody.append(row);
+  }
+
+  function showDetails(modal) {
+    modal.find('.modal-dialog').addClass('details-visible');
+    modal.find('#metadata').show();
+    modal.find('#auxdata').show();
+    modal.find('#resdata').show();
+    modal.find('#detailbutton').hide();
+    modal.find('#hidebutton').show();
+  }
+
+  function hideDetails(modal) {
+    modal.find('.modal-dialog').removeClass('details-visible');
+    modal.find('#detailbutton').show();
+    modal.find('#hidebutton').hide();
+    modal.find('#metadata').hide();
+    modal.find('#auxdata').hide();
+    modal.find('#resdata').hide();
   }
 
   function loadItem (modal, itemData) {
     const item = itemData.item;
     if (item) {
       reset(modal);
+      if (item.image) {
+        modal.find('#mediaimage').prop('src', item.image.value);
+        modal.find('#mediaimage').show();
+      }
       modal.find('#editObjectType').val(item.obj_type);
       modal.find('#editObjectType').prop('disabled', true);
       modal.find('#editObjectType').prop('readonly', true);
       modal.find('#editdObjectIdTxt').text(item.object_id).closest('.form-group').show();
       modal.find('#objectId').val(item.object_id).prop('disabled', true);
+      if ('last_modified' in item && item.last_modified !== '') {
+        modal.find('#editLmt').val(item.last_modified).prop('disabled', true);
+      } else {
+        modal.find('#editLmt').text('').closest('.form-group').hide();
+      }
+
+      const metatable = modal.find('#metadata');
+      const detailButton = modal.find('#detailbutton');
+      let tbody;
+      if (item.metadata && item.metadata.metadata.length) {
+        detailButton.show();
+        $('<thead><tr><th colspan="2">Metadata</th></tr></thead>').appendTo(metatable);
+        tbody = $('<tbody></tbody>');
+        for (let i = 0; i < item.metadata.metadata.length; i++) {
+          appendMetaItem(tbody, item.metadata.metadata[i].metaname, item.metadata.metadata[i].metavalue);
+        }
+        metatable.append(tbody);
+      }
+
+      const auxtable = modal.find('#auxdata');
+      if (item.auxdata && item.auxdata.auxdata.length) {
+        detailButton.show();
+        $('<thead><tr><th colspan="2">Aux Data</th></tr></thead>').appendTo(auxtable);
+        tbody = $('<tbody></tbody>');
+        for (let i = 0; i < item.auxdata.auxdata.length; i++) {
+          appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue);
+        }
+        auxtable.append(tbody);
+      }
+
+      const restable = modal.find('#resdata');
+      if (item.resources && item.resources.resources.length) {
+        detailButton.show();
+        for (let i = 0; i < item.resources.resources.length; i++) {
+          if (item.resources.resources[i].resname === '----RESOURCE----') {
+            $(`<thead><tr><th>Resource</th><th>${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
+            tbody = $('<tbody></tbody>');
+            restable.append(tbody);
+          } else if (item.resources.resources[i].resname === 'image') {
+            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="' +  item.resources.resources[i].resvalue + '"/>'));
+          } else if (item.resources.resources[i].resname === 'link') {
+            appendMetaItem(tbody, 'content', null, $('<a href=' +  item.resources.resources[i].resvalue + '>Open</span>'));
+          } else {
+            appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue);
+          }
+        }
+      }
 
       switch (item.obj_type) {
         case 'item': {
           loadSimpleItem(modal, item);
-          break;
-        }
-        case 'active_item': {
-          loadActiveItem(modal, item);
           break;
         }
         case 'container': {
@@ -139,12 +223,10 @@
           loadExternalUrl(modal, item);
           break;
         }
-        case 'internal_url': {
-          loadInternalUrl(modal, item);
-          break;
-        }
       }
 
+      modal.find('#detailbutton').off('click').on('click', itemData.onDetails);
+      modal.find('#hidebutton').off('click').on('click', itemData.onHide);
       modal.find('#editSave').off('click').on('click', itemData.onSave);
       modal.find('#editSave').text('Save Item');
       modal.find('.modal-title').text('Edit Item');
@@ -177,48 +259,29 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
-    hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState'),
-      modal.find('#editProtocol')
-    ]);
-  }
+    if ('last_modified' in item && item['last_modified'].value !== '') {
+      modal.find('#editLmt')
+        .val(item['last_modified'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLmt')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
 
-  function loadActiveItem (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editLocation')
-      .val(item.location.value)
-      .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editDesc')
-      .val(item.description.value)
-      .prop('disabled', !item.description.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editMime')
-      .val(item['mime-type'].value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editActionScript')
-      .val(item.action.value)
-      .prop('disabled', !item.action.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editState')
-      .val(item.state.value)
-      .prop('disabled', !item.state.editable)
-      .closest('.form-group').show();
+    if ('last_updated' in item && item['last_updated'].value !== '') {
+      modal.find('#editLut')
+        .val(item['last_updated'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLut')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
 
     hideFields([
       modal.find('#editProtocol')
@@ -236,12 +299,34 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
+    if ('last_modified' in item && item['last_modified'].value !== '') {
+      modal.find('#editLmt')
+        .val(item['last_modified'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLmt')
+        .text('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+
+    if ('last_updated' in item && item['last_updated'].value !== '') {
+      modal.find('#editLut')
+        .val(item['last_updated'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLut')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+
     hideFields([
       modal.find('#editLocation'),
       modal.find('#editMime'),
       modal.find('#editDesc'),
-      modal.find('#editActionScript'),
-      modal.find('#editState'),
       modal.find('#editProtocol')
     ]);
   }
@@ -269,55 +354,13 @@
 
     modal.find('#editMime')
       .val(item['mime-type'].value)
-      .prop('disabled', true)
+      .prop('disabled', !item['mime-type'].editable)
       .closest('.form-group').show();
 
     modal.find('#editProtocol')
       .val(item.protocol.value)
       .prop('disabled', !item.protocol.editable)
       .closest('.form-group').show();
-
-    hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState')
-    ]);
-  }
-
-  function loadInternalUrl (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editLocation')
-      .val(item.location.value)
-      .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editDesc')
-      .val(item.description.value)
-      .prop('disabled', !item.description.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editMime')
-      .val(item['mime-type'].value)
-      .prop('disabled', true)
-      .closest('.form-group').show();
-
-    modal.find('#editProtocol')
-      .val(item.protocol.value)
-      .prop('disabled', !item.protocol.editable)
-      .closest('.form-group').show();
-
-    hideFields([
-      modal.find('#editActionScript'),
-      modal.find('#editState')
-    ]);
   }
 
   function saveItem (modal) {
@@ -328,54 +371,31 @@
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
 
     switch (editObjectType.val()) {
       case 'item': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val()
-        };
-        break;
-      }
-      case 'active_item': {
-        item = {
-          object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
-          action: editActionScript.val(),
-          state: editState.val()
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val())
         };
         break;
       }
       case 'container': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val()
+          title: encodeURIComponent(editTitle.val())
         };
         break;
       }
       case 'external_url': {
         item = {
           object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          protocol: editProtocol.val()
-        };
-        break;
-      }
-      case 'internal_url': {
-        item = {
-          object_id: objectId.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val()),
+          location: encodeURIComponent(editLocation.val()),
+          'mime-type': encodeURIComponent(editMime.val()),
           protocol: editProtocol.val()
         };
         break;
@@ -393,8 +413,6 @@
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
-    const editActionScript = modal.find('#editActionScript');
-    const editState = modal.find('#editState');
     const editProtocol = modal.find('#editProtocol');
 
     switch (editObjectType.val()) {
@@ -403,23 +421,9 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val(),
-          location: editLocation.val(),
-          description: editDesc.val()
-        };
-        break;
-      }
-      case 'active_item': {
-        item = {
-          parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
-          class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          'mime-type': editMime.val(),
-          action: editActionScript.val(),
-          state: editState.val()
+          title: encodeURIComponent(editTitle.val()),
+          location: encodeURIComponent(editLocation.val()),
+          description: encodeURIComponent(editDesc.val())
         };
         break;
       }
@@ -428,7 +432,7 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val()
+          title: encodeURIComponent(editTitle.val())
         };
         break;
       }
@@ -437,21 +441,10 @@
           parent_id: parentId.val(),
           obj_type: editObjectType.val(),
           class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
-          protocol: editProtocol.val()
-        };
-        break;
-      }
-      case 'internal_url': {
-        item = {
-          parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
-          class: editClass.val(),
-          title: editTitle.val(),
-          description: editDesc.val(),
-          location: editLocation.val(),
+          title: encodeURIComponent(editTitle.val()),
+          description: encodeURIComponent(editDesc.val()),
+          location: encodeURIComponent(editLocation.val()),
+          'mime-type': encodeURIComponent(editMime.val()),
           protocol: editProtocol.val()
         };
         break;
@@ -481,6 +474,12 @@
     },
     reset: function () {
       return reset($(this._element));
+    },
+    showDetails: function () {
+      return showDetails($(this._element));
+    },
+    hideDetails: function () {
+      return hideDetails($(this._element));
     },
     loadItem: function (itemData) {
       return loadItem($(this._element), itemData);

@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     string_converter.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,31 +31,26 @@
 
 #include "string_converter.h" // API
 
-#include <cstdlib>
-#include <utility>
-
-#include "config/config_manager.h"
+#include "config/directory_tweak.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
+    : cd(iconv_open(to.c_str(), from.c_str()))
 {
-    dirty = false;
-
-    cd = iconv_open(to.c_str(), from.c_str());
-    if (cd == reinterpret_cast<iconv_t>(-1)) {
-        cd = static_cast<iconv_t>(nullptr);
-        throw_std_runtime_error(std::string("iconv: ") + strerror(errno));
+    if (!cd) {
+        cd = {};
+        throw_std_runtime_error("iconv: {}", std::strerror(errno));
     }
 }
 
 StringConverter::~StringConverter()
 {
-    if (cd != static_cast<iconv_t>(nullptr))
+    if (cd)
         iconv_close(cd);
 }
 
 std::string StringConverter::convert(std::string str, bool validate)
 {
-    size_t stoppedAt = 0;
+    std::size_t stoppedAt = 0;
     std::string ret;
 
     if (str.empty())
@@ -67,7 +62,7 @@ std::string StringConverter::convert(std::string str, bool validate)
             break;
 
         ret = ret + "?";
-        if ((stoppedAt + 1) < static_cast<size_t>(str.length()))
+        if ((stoppedAt + 1) < str.length())
             str = str.substr(stoppedAt + 1);
         else
             break;
@@ -89,29 +84,34 @@ bool StringConverter::validate(const std::string& str)
 }
 
 std::string StringConverter::_convert(const std::string& str, bool validate,
-    size_t* stoppedAt)
+    std::size_t* stoppedAt)
 {
-    std::string ret_str;
-
-    int buf_size = str.length() * 4;
+    std::string retStr;
 
     auto input = str.c_str();
-    auto output = static_cast<char*>(malloc(buf_size));
-    if (!output) {
-        log_debug("Could not allocate memory for string conversion!");
-        throw_std_runtime_error("Could not allocate memory for string conversion");
+    auto length = str.length();
+    if (length < (std::string::npos / 4)) {
+        length *= 4;
+    } else {
+        log_debug("Could not determine memory for string conversion!");
+        throw_std_runtime_error("Could not determine memory for string conversion");
     }
 
-    const char* input_copy = input;
-    char* output_copy = output;
+    char* output;
+    try {
+        output = new char[length];
+    } catch (const std::bad_alloc& ex) {
+        log_debug("Could not allocate memory for string conversion!\n{}", ex.what());
+        throw_std_runtime_error("Could not allocate memory for string conversion");
+    }
+    const char* inputCopy = input;
+    char* outputCopy = output;
 
-    const char** input_ptr = &input_copy;
-    char** output_ptr = &output_copy;
+    const char** inputPtr = &inputCopy;
+    char** outputPtr = &outputCopy;
 
-    auto input_bytes = static_cast<size_t>(str.length());
-    auto output_bytes = static_cast<size_t>(buf_size);
-
-    int ret;
+    auto inputBytes = str.length();
+    auto outputBytes = length;
 
     // reset to initial state
     if (dirty) {
@@ -119,18 +119,18 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         dirty = false;
     }
 
-    //log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
-    //       input_bytes, output_bytes));
+    // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
+    //        input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
-    ret = iconv(cd, input_ptr, &input_bytes,
+    int ret = iconv(cd, input_ptr, &input_bytes,
         output_ptr, &output_bytes);
 #else
-    ret = iconv(cd, const_cast<char**>(input_ptr), &input_bytes,
-        output_ptr, &output_bytes);
+    int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
+        outputPtr, &outputBytes);
 #endif
 
     if (ret == -1) {
-        log_error("iconv: {}", strerror(errno));
+        log_error("iconv: {}", std::strerror(errno));
         std::string err;
         switch (errno) {
         case EILSEQ:
@@ -145,87 +145,87 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             }
 
             if (stoppedAt)
-                *stoppedAt = static_cast<size_t>(str.length()) - input_bytes;
-            ret_str = std::string(output, output_copy - output);
+                *stoppedAt = str.length() - inputBytes;
+            retStr = std::string(output, outputCopy - output);
             dirty = true;
-            *output_copy = 0;
-            free(output);
-            return ret_str;
+            *outputCopy = 0;
+            delete[] output;
+            return retStr;
         case E2BIG:
             /// \todo should encode the whole string anyway
             err = "iconv: Insufficient space in output buffer";
             break;
         default:
-            err = std::string("iconv: ") + strerror(errno);
+            err = fmt::format("iconv: {}", std::strerror(errno));
             break;
         }
-        *output_copy = 0;
-        log_error("{}", err.c_str());
+        *outputCopy = 0;
+        log_error("{}", err);
         //        log_debug("iconv: input: {}", input);
         //        log_debug("iconv: converted part:  {}", output);
         dirty = true;
-        if (output)
-            free(output);
+        delete[] output;
         throw_std_runtime_error(err);
     }
 
-    //log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
-    //       input_bytes, output_bytes);
-    //log_debug("iconv: returned {}", ret);
+    // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
+    //        input_bytes, output_bytes);
+    // log_debug("iconv: returned {}", ret);
 
-    ret_str = std::string(output, output_copy - output);
-    free(output);
+    retStr = std::string(output, outputCopy - output);
+    delete[] output;
     if (stoppedAt)
         *stoppedAt = 0; // no error
-    return ret_str;
+    return retStr;
 }
 
 /// \todo iconv caching
-std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET));
-    //        INTERNAL_CHARSET, cm->getFilesystemCharset()));
-    return conv;
 }
-std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
-std::unique_ptr<StringConverter> StringConverter::m2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
-        cm->getOption(CFG_IMPORT_METADATA_CHARSET),
-        DEFAULT_INTERNAL_CHARSET);
-    return conv;
+    auto charset = cm->getOption(option);
+    if (charset.empty()) {
+        charset = cm->getOption(CFG_IMPORT_METADATA_CHARSET);
+    }
+    auto tweak = cm->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+    if (tweak && tweak->hasMetaCharset()) {
+        charset = tweak->getMetaCharset();
+        log_debug("Using charset {} for {}", charset, location.string());
+    }
+
+    return std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
 }
 
 #ifdef HAVE_JS
-std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 
-std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         cm->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 #endif
 
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
-std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<ConfigManager>& cm)
+std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<Config>& cm)
 {
-    auto conv = std::make_unique<StringConverter>(
+    return std::make_unique<StringConverter>(
         DEFAULT_INTERNAL_CHARSET,
         DEFAULT_INTERNAL_CHARSET);
-    return conv;
 }
 #endif

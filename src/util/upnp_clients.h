@@ -1,11 +1,11 @@
 /*GRB*
 
     Gerbera - https://gerbera.io/
-    
+
     upnp_clients.h - this file is part of Gerbera.
-    
-    Copyright (C) 2020 Gerbera Contributors
-    
+
+    Copyright (C) 2020-2022 Gerbera Contributors
+
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -31,10 +31,14 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <pugixml.hpp>
 #include <sys/socket.h>
 #include <vector>
 
 #include "util/upnp_quirks.h"
+
+// forward declaration
+class Config;
 
 // specific customer products
 enum class ClientType {
@@ -45,44 +49,71 @@ enum class ClientType {
     SamsungBDP,
     SamsungSeriesCDE,
     SamsungBDJ5500,
+    IRadio,
     StandardUPnP
 };
 
 // specify what must match
 enum class ClientMatchType {
     None,
-    UserAgent,
-    //FriendlyName,
-    //ModelName,
+    UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
+    // FriendlyName,
+    // ModelName,
+    IP, // use client's network address
 };
 
 struct ClientInfo {
-    const char* name; // used for logging/debugging proposes only
-    ClientType type;
-    QuirkFlags flags;
+    std::string name { "Unknown" }; // used for logging/debugging proposes only
+    ClientType type { ClientType::Unknown };
+    QuirkFlags flags { QUIRK_FLAG_NONE };
 
     // to match the client
-    ClientMatchType matchType;
-    const char* match;
+    ClientMatchType matchType { ClientMatchType::None };
+    std::string match;
 };
 
 struct ClientCacheEntry {
-    struct sockaddr_storage addr;
-    std::chrono::time_point<std::chrono::steady_clock> age;
+    ClientCacheEntry(const struct sockaddr_storage& addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+        : addr(addr)
+        , userAgent(std::move(userAgent))
+        , last(last)
+        , age(age)
+        , pInfo(pInfo)
+    {
+    }
 
+    struct sockaddr_storage addr;
+    std::string userAgent;
+    std::chrono::seconds last;
+    std::chrono::seconds age;
     const struct ClientInfo* pInfo;
 };
 
 class Clients {
 public:
-    static void addClient(const struct sockaddr_storage* addr, const std::string& userAgent);
-    static void getInfo(const struct sockaddr_storage* addr, ClientInfo* info);
+    explicit Clients(const std::shared_ptr<Config>& config);
+    void refresh(const std::shared_ptr<Config>& config);
+
+    // always return something, 'Unknown' if we do not know better
+    const ClientInfo* getInfo(const struct sockaddr_storage* addr, const std::string& userAgent);
+
+    void addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation);
+    const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
-    static std::mutex mutex;
-    using AutoLock = std::lock_guard<std::mutex>;
+    const ClientInfo* getInfoByAddr(const struct sockaddr_storage* addr) const;
+    const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
-    static std::unique_ptr<std::vector<struct ClientCacheEntry>> cache;
+    const ClientInfo* getInfoByCache(const struct sockaddr_storage* addr) const;
+    void updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo);
+
+    static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
+
+    mutable std::mutex mutex;
+    using AutoLock = std::scoped_lock<std::mutex>;
+    std::vector<ClientCacheEntry> cache;
+
+    std::vector<ClientInfo> clientInfo;
 };
 
 #endif // __UPNP_CLIENTS_H__

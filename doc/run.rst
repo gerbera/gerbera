@@ -46,14 +46,46 @@ you should try the following settings
 
 .. code-block:: console
 
-    # route add -net 239.0.0.0 netmask 255.0.0.0 eth1
-    # ifconfig eth1 allmulti
+    $ route add -net 239.0.0.0 netmask 255.0.0.0 eth1
+    $ ifconfig eth1 allmulti
 
 Those settings will be applied automatically by the init.d startup script.
 
 You should also make sure that your firewall is not blocking port UDP port ``1900`` (required for SSDP) and UDP/TCP
 port of Gerbera. By default Gerbera will select a free port starting with ``49152``, however you can specify a port
 of your choice in the configuration file.
+
+Reverse Proxy Setup
+~~~~~~~~~~~~~~~~~~~
+
+If you want to access the web interface from other sources or use a ssl certificate it is recommended to hide gerbera UI behind a reverse proxy.
+
+* Set virtualURL in config.xml to point to ``https://gerbera.DOMAINNAME``
+* Add ``gerbera`` to your DNS and have it point to the server
+
+Apache
+------
+
+* Enable Apache modules
+
+::
+
+    $ sudo a2enmod proxy proxy_http ssl
+
+* Add virtual host to your apache config (``/etc/apache2/vhosts.d/``) and modify according to your settings
+
+    .. literalinclude:: ../scripts/apache/gerbera.conf
+
+* Restart apache service
+
+Nginx
+-----
+
+* Add server config to your nginx config (``/etc/nginx/vhosts.d/``) and modify according to your settings
+
+    .. literalinclude:: ../scripts/nginx/gerbera.conf
+
+* Restart Nginx service
 
 .. index:: Sqlite
 
@@ -114,7 +146,7 @@ password (the defaults) use:
     mysql> GRANT ALL ON gerbera.* TO 'gerbera'@'localhost';
 
 If Gerbera was compiled with database auto creation the tables will be created automatically during the first startup.
-All table names have a ``mt_`` prefix, so you can theoretically share the database with a different application.
+All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
 However, this is not recommended.
 
 If database auto creation was not compiled in you have to create the tables manually:
@@ -169,6 +201,35 @@ Port
 Specify the server port that will be used for the web user interface, for serving media and for UPnP requests,
 minimum allowed value is ``49152``. If this option is omitted a default port will be chosen, however, in
 this case it is possible that the port will change upon server restart.
+
+Daemon
+------
+
+::
+
+    --daemon or -d
+    
+Daemonize after startup. This option is useful if your system does not use Systemd or similar
+mechanisms to start services. See also --user and --pidfile options, below.
+
+User
+----
+
+::
+
+    --user or -u
+    
+After startup when started by user root try to change all UIDs and GIDs to those belonging to user USER.
+Also supplementary GIDs will be set.
+
+Pidfile
+-------
+
+::
+
+    --pidfile or -P
+
+Write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
 
 Configuration File
 ------------------

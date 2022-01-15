@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     server.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -33,6 +33,7 @@
 #define __SERVER_H__
 
 #include "action_request.h"
+#include "context.h"
 #include "request_handler.h"
 #include "subscription_request.h"
 #include "upnp_cds.h"
@@ -40,59 +41,42 @@
 #include "upnp_mrreg.h"
 
 // forward declaration
-class ConfigManager;
-class Storage;
-class UpdateManager;
 class Timer;
-namespace web {
-class SessionManager;
-}
-class TaskProcessor;
-class Runtime;
-class LastFm;
 class ContentManager;
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
 class Server : public std::enable_shared_from_this<Server> {
 public:
-    explicit Server(std::shared_ptr<ConfigManager> config);
+    explicit Server(std::shared_ptr<Config> config);
 
     /// \brief Initializes the server.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    virtual void init();
-
-    virtual ~Server();
+    void init();
 
     /// \brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
-    /// update manager task, storage task, content manager.
+    /// update manager task, database task, content manager.
     void shutdown();
 
     /// \brief Initializes UPnP portion, only ip or interface can be given
     ///
     /// Reads information from the config and creates a
     /// device description document. Initializes the UPnP SDK,
-    /// sets up the virutal web server directories and registers
+    /// sets up the virtual web server directories and registers
     /// web callbacks. Starts the update manager task.
     void run();
 
-    /// \brief Returns the IP address of the server.
+    /// \brief Returns the content url of the server.
     ///
-    /// Returns a string representation of the IP where the server is
-    /// running. This is useful for constructing URL's, etc.
-    static std::string getIP();
-
-    /// \brief Returns the port of the server.
-    ///
-    /// Returns a string representation of the server port. Allthough
+    /// Returns a string representation of the server url. Although
     /// the port is also specified in the config, we can never be sure
     /// that we actually get that port after startup. This function
-    /// returns the port on which the server is actually running.
-    static std::string getPort();
+    /// contains the port on which the server is actually running.
+    std::string getVirtualUrl() const;
 
     /// \brief Tells if the server is about to be terminated.
     ///
@@ -105,22 +89,25 @@ public:
     std::shared_ptr<ContentManager> getContent() const { return content; }
 
 protected:
-    std::shared_ptr<ConfigManager> config;
-    std::shared_ptr<Storage> storage;
-    std::shared_ptr<UpdateManager> update_manager;
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Clients> clients;
+    std::shared_ptr<Mime> mime;
+    std::shared_ptr<Database> database;
+    std::shared_ptr<Web::SessionManager> session_manager;
+    std::shared_ptr<Context> context;
+
     std::shared_ptr<Timer> timer;
-    std::shared_ptr<web::SessionManager> session_manager;
-    std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<Runtime> scripting_runtime;
-    std::shared_ptr<LastFm> last_fm;
     std::shared_ptr<ContentManager> content;
 
+    std::string ip;
+    in_port_t port {};
+
     /// \brief This flag is set to true by the upnp_cleanup() function.
-    bool server_shutdown_flag;
+    bool server_shutdown_flag {};
 
     /// \brief Handle for our upnp callbacks.
-    UpnpDevice_Handle rootDeviceHandle;
-    UpnpDevice_Handle clientHandle;
+    UpnpDevice_Handle rootDeviceHandle {};
+    UpnpDevice_Handle clientHandle {};
 
     /// \brief Unique Device Number of the server.
     ///
@@ -143,20 +130,12 @@ protected:
     /// is returned by the getVirtualURL() function.
     std::string virtualUrl;
 
-    /// \brief Device description document is created on the fly and
-    /// stored here.
-    ///
-    /// All necessary values for the device description document are
-    /// read from the configuration and the device desc doc is created
-    /// on the fly.
-    std::string device_description_document;
-
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
-    int aliveAdvertisementInterval;
+    int aliveAdvertisementInterval {};
 
-    std::unique_ptr<UpnpXMLBuilder> xmlbuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlbuilder;
 
     /// \brief ContentDirectoryService instance.
     ///
@@ -227,15 +206,21 @@ protected:
     /// data structures (ActionRequest or SubscriptionRequest) and is then
     /// passed on to the appropriate request handler - to routeActionEvent() or
     /// upnp_subscriptions()
-    static int handleUpnpRootDeviceEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
-    int handleUpnpRootDeviceEvent(Upnp_EventType eventtype, const void* event);
+    int handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Dispatch incoming UPnP client events.
     /// \param eventtype Upnp_EventType, identifying what kind of event came in.
     /// \param event Pointer to the event.
     ///
-    static int handleUpnpClientEventCallback(Upnp_EventType eventType, const void* event, void* cookie);
     int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
+
+    /// \brief Creates a html file that is a redirector to the current server i
+    /// instance
+    void writeBookmark(const std::string& addr);
+    void emptyBookmark();
+
+    std::string getPresentationUrl() const;
+    int startupInterface(const std::string& iface, in_port_t inPort);
 };
 
 #endif // __SERVER_H__

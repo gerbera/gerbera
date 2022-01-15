@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     upnp_xml.h - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -32,20 +32,20 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
+#include <deque>
 #include <memory>
 #include <pugixml.hpp>
+#include <vector>
 
 #include "cds_objects.h"
 #include "common.h"
-
-// forward declaration
-class ConfigManager;
-class Storage;
+#include "config/config.h"
+#include "context.h"
+#include "util/upnp_quirks.h"
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(std::shared_ptr<ConfigManager> config,
-        std::shared_ptr<Storage> storage,
+    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context,
         std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.
@@ -61,16 +61,10 @@ public:
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
-    /// \param renderActions If true, also render special elements of an active item.
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
-    /// either a container or an item. The renderActions parameter tells us whether to also
-    /// show the special fields of an active item in the XML. This is currently used when
-    /// providing the XML representation of an active item to a trigger/toggle script.
-    void renderObject(const std::shared_ptr<CdsObject>& obj, bool renderActions, size_t stringLimit, pugi::xml_node* parent);
-
-    /// \todo change the text string to element, parsing should be done outside
-    static void updateObject(const std::shared_ptr<CdsObject>& obj, const std::string& text);
+    /// either a container or an item
+    void renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks = nullptr);
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
@@ -86,41 +80,50 @@ public:
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node* parent);
+    static void renderResource(const std::string& URL, const std::map<std::string, std::string>& attributes, pugi::xml_node& parent);
 
-    /// \brief Renders a subtitle resource tag
-    /// \param URL download location of the video item
-    void renderCaptionInfo(const std::string& URL, pugi::xml_node* parent);
+    std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
+    std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
+    static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
+    static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
-    static void renderCreator(const std::string& creator, pugi::xml_node* parent);
-    static void renderAlbumArtURI(const std::string& uri, pugi::xml_node* parent);
-    static void renderComposer(const std::string& composer, pugi::xml_node* parent);
-    static void renderConductor(const std::string& conductor, pugi::xml_node* parent);
-    static void renderOrchestra(const std::string& orchestra, pugi::xml_node* parent);
-    static void renderAlbumDate(const std::string& date, pugi::xml_node* parent);
+    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks);
 
-    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node* parent);
-
-    // FIXME: This needs to go, once we sort a nicer way for the webui code to access this
+    /// \brief build path for first resource from item
+    /// depending on the item type it returns the url to the media
     static std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item);
 
+    /// \brief convert xml tree to string
+    static std::string printXml(const pugi::xml_node& entry, const char* indent = PUGIXML_TEXT("\t"), int flags = pugi::format_default);
+
 protected:
-    std::shared_ptr<ConfigManager> config;
-    std::shared_ptr<Storage> storage;
+    std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
+
+    std::vector<int> orderedHandler;
 
     const std::string virtualURL;
     const std::string presentationURL;
+    std::string entrySeparator;
+    bool multiValue;
+    std::map<std::string, std::string> ctMappings;
 
-    // Holds a part of path and bool which says if we need to append the resource
-    // TODO: Remove this and use centralised routing instead of building URLs all over the place
-    class PathBase {
-    public:
+    /// \brief Holds a part of path and bool which says if we need to append the resource
+    struct PathBase {
+        PathBase(std::string pathBase, bool addResID)
+            : pathBase(std::move(pathBase))
+            , addResID(addResID)
+        {
+        }
         std::string pathBase;
         bool addResID;
     };
+    std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
-    static std::string renderExtension(const std::string& contentType, const std::string& location);
-    std::string getArtworkUrl(const std::shared_ptr<CdsItem>& item) const;
+    static std::string renderExtension(const std::string& contentType, const fs::path& location);
+    static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
+    void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
+    std::string dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType);
 };
 #endif // __UPNP_XML_H__

@@ -3,14 +3,13 @@ name: lint-clang-format
 on: [push, pull_request]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v1
-    - uses: DoozyX/clang-format-lint-action@v0.5
+    - uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: './src'
-        exclude: './contrib'
+        exclude: './src/contrib'
         extensions: 'h,cc'
-        clangFormatVersion: 9
+        clangFormatVersion: 13

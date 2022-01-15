@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     curl_io_handler.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -35,18 +35,18 @@
 #include "config/config_manager.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t bufSize, size_t initialFillSize)
-    : IOHandlerBufferHelper(bufSize, initialFillSize)
+CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
+    : IOHandlerBufferHelper(config, bufSize, initialFillSize)
 {
-    if (URL.empty())
+    if (url.empty())
         throw_std_runtime_error("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
-        throw_std_runtime_error(fmt::format("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE));
+        throw_std_runtime_error("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE);
 
-    this->URL = URL;
-    this->external_curl_handle = (curl_handle != nullptr);
-    this->curl_handle = curl_handle;
-    //bytesCurl = 0;
+    this->URL = url;
+    this->external_curl_handle = curlHandle;
+    this->curl_handle = curlHandle;
+    // bytesCurl = 0;
     signalAfterEveryRead = true;
 
     // still todo:
@@ -56,9 +56,9 @@ CurlIOHandler::CurlIOHandler(const std::string& URL, CURL* curl_handle, size_t b
 
 void CurlIOHandler::open(enum UpnpOpenFileMode mode)
 {
-    if (curl_handle == nullptr) {
+    if (!curl_handle) {
         curl_handle = curl_easy_init();
-        if (curl_handle == nullptr)
+        if (!curl_handle)
             throw_std_runtime_error("failed to init curl");
     } else
         curl_easy_reset(curl_handle);
@@ -70,18 +70,20 @@ void CurlIOHandler::close()
 {
     IOHandlerBufferHelper::close();
 
-    if (external_curl_handle && curl_handle != nullptr)
+    if (external_curl_handle && curl_handle)
         curl_easy_cleanup(curl_handle);
 }
 
 void CurlIOHandler::threadProc()
 {
+    StdThreadRunner::waitFor("CurlIOHandler", [this] { return threadRunner != nullptr; });
+
     CURLcode res;
-    assert(curl_handle != nullptr);
+    assert(curl_handle);
     assert(!URL.empty());
 
-    //char error_buffer[CURL_ERROR_SIZE] = {'\0'};
-    //curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
+    // char error_buffer[CURL_ERROR_SIZE] = {'\0'};
+    // curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
@@ -97,18 +99,18 @@ void CurlIOHandler::threadProc()
     if (logEnabled)
         curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
 
-    //curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
+    // curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
 
-    //proxy..
+    // proxy..
 
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, CurlIOHandler::curlCallback);
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void*)this);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, static_cast<void*>(this));
 
-    std::unique_lock<std::mutex> lock(mutex, std::defer_lock);
+    auto lock = threadRunner->uniqueLock(std::defer_lock);
     do {
         lock.lock();
         if (doSeek) {
-            log_debug("SEEK: %lld {}", seekOffset, seekWhence);
+            log_debug("SEEK: {} {}", seekOffset, seekWhence);
 
             if (seekWhence == SEEK_SET) {
                 posRead = seekOffset;
@@ -118,14 +120,14 @@ void CurlIOHandler::threadProc()
                 curl_easy_setopt(curl_handle, CURLOPT_RESUME_FROM_LARGE, posRead);
             } else {
                 log_error("CurlIOHandler currently does not support SEEK_END");
-                static_assert(1);
+                static_assert(true);
             }
 
             /// \todo should we do that?
             waitForInitialFillSize = (initialFillSize > 0);
 
             doSeek = false;
-            cond.notify_one();
+            threadRunner->notify();
         }
         lock.unlock();
         res = curl_easy_perform(curl_handle);
@@ -136,30 +138,31 @@ void CurlIOHandler::threadProc()
     else
         eof = true;
 
-    cond.notify_one();
+    threadRunner->notify();
 }
 
-size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* data)
+std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t nmemb, void* data)
 {
     auto ego = static_cast<CurlIOHandler*>(data);
-    size_t wantWrite = size * nmemb;
+    std::size_t wantWrite = size * nmemb;
 
     assert(wantWrite <= ego->bufSize);
+    auto& threadRunner = ego->threadRunner;
 
-    //log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
+    // log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
 
-    std::unique_lock<std::mutex> lock(ego->mutex);
+    auto lock = threadRunner->uniqueLock();
 
     bool first = true;
 
-    int bufFree = 0;
+    int bufFree;
     do {
         if (ego->doSeek && !ego->empty && (ego->seekWhence == SEEK_SET || (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0))) {
-            int currentFillSize = ego->b - ego->a;
+            auto currentFillSize = int(ego->b - ego->a);
             if (currentFillSize <= 0)
                 currentFillSize += ego->bufSize;
 
-            int relSeek = ego->seekOffset;
+            auto relSeek = int(ego->seekOffset);
             if (ego->seekWhence == SEEK_SET)
                 relSeek -= ego->posRead;
 
@@ -175,7 +178,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
                 /// \todo do we need to wait for initialFillSize again?
 
                 ego->doSeek = false;
-                ego->cond.notify_one();
+                threadRunner->notify();
             }
         }
 
@@ -192,7 +195,7 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
         }
 
         if (!first) {
-            ego->cond.wait(lock);
+            threadRunner->wait(lock);
         } else
             first = false;
 
@@ -207,42 +210,42 @@ size_t CurlIOHandler::curlCallback(void* ptr, size_t size, size_t nmemb, void* d
             if (bufFree < 0)
                 bufFree += ego->bufSize;
         }
-    } while (static_cast<size_t>(bufFree) < wantWrite);
+    } while (std::size_t(bufFree) < wantWrite);
 
-    size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
-    size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
-    size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
+    std::size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
+    std::size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
+    std::size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
 
-    size_t bLocal = ego->b;
+    std::size_t bLocal = ego->b;
 
     lock.unlock();
 
-    memcpy(ego->buffer + bLocal, ptr, write1);
+    std::memcpy(ego->buffer + bLocal, ptr, write1);
     if (write2)
-        memcpy(ego->buffer, static_cast<char*>(ptr) + maxWrite, write2);
+        std::memcpy(ego->buffer, static_cast<char*>(ptr) + maxWrite, write2);
 
     lock.lock();
 
-    //ego->bytesCurl += wantWrite;
+    // ego->bytesCurl += wantWrite;
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
         ego->b -= ego->bufSize;
     if (ego->empty) {
         ego->empty = false;
-        ego->cond.notify_one();
+        threadRunner->notify();
     }
     if (ego->waitForInitialFillSize) {
-        int currentFillSize = ego->b - ego->a;
+        auto currentFillSize = int(ego->b - ego->a);
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
-        if (static_cast<size_t>(currentFillSize) >= ego->initialFillSize) {
+        if (std::size_t(currentFillSize) >= ego->initialFillSize) {
             log_debug("buffer: initial fillsize reached");
             ego->waitForInitialFillSize = false;
-            ego->cond.notify_one();
+            threadRunner->notify();
         }
     }
 
     return wantWrite;
 }
 
-#endif //HAVE_CURL
+#endif // HAVE_CURL

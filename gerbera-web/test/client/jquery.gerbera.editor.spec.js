@@ -1,7 +1,5 @@
-import activeItem from './fixtures/active-item';
 import container from './fixtures/container';
 import externalUrl from './fixtures/external-url';
-import internalUrl from './fixtures/internal-url';
 import itemJson from './fixtures/item';
 
 describe('The jQuery Gerbera Editor Overlay', () => {
@@ -12,8 +10,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
   let editClass;
   let editDesc;
   let editMime;
-  let editActionScript;
-  let editState;
   let editProtocol;
   let editSaveButton;
   let addParentId;
@@ -36,10 +32,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     editDesc.val('TEST');
     editMime = $('#editMime');
     editMime.val('TEST');
-    editActionScript = $('#editActionScript');
-    editActionScript.val('TEST');
-    editState = $('#editState');
-    editState.val('TEST');
     editProtocol = $('#editProtocol');
     editProtocol.val('TEST');
     editSaveButton = $('#editSave');
@@ -88,20 +80,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editMime.val()).toBe('');
     });
 
-    it('defaults editable fields when active_item is selected', () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
-
-      expect(editTitle.val()).toBe('');
-      expect(editLocation.val()).toBe('');
-      expect(editLocation.is(':disabled')).toBeFalsy();
-      expect(editClass.val()).toBe('object.item.activeItem');
-      expect(editClass.is(':disabled')).toBeFalsy();
-      expect(editDesc.val()).toBe('');
-      expect(editMime.val()).toBe('');
-      expect(editActionScript.val()).toBe('');
-      expect(editState.val()).toBe('');
-    });
-
     it('defaults editable fields when external_url is selected', () => {
       editModal.editmodal('addNewItem', {type: 'external_url', item: item});
 
@@ -115,21 +93,9 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editProtocol.val()).toBe('http-get');
     });
 
-    it('defaults editable fields when internal_url is selected', () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      expect(editTitle.val()).toBe('');
-      expect(editLocation.val()).toBe('');
-      expect(editLocation.is(':disabled')).toBeFalsy();
-      expect(editClass.val()).toBe('object.item');
-      expect(editClass.is(':disabled')).toBeFalsy();
-      expect(editDesc.val()).toBe('');
-      expect(editMime.val()).toBe('');
-    });
-
     it('binds the onSave event to the Add button', () => {
       const saveSpy = jasmine.createSpy('save');
-      const itemData = {type: 'internal_url', item: item, onSave: saveSpy};
+      const itemData = {type: 'external_url', item: item, onSave: saveSpy};
 
       editModal.editmodal('addNewItem', itemData);
       $('#editSave').click();
@@ -154,8 +120,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('');
       expect(editDesc.val()).toEqual('');
       expect(editMime.val()).toEqual('');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -194,8 +158,6 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.container');
       expect(editDesc.val()).toEqual('');
       expect(editMime.val()).toEqual('');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -217,37 +179,12 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editClass.val()).toEqual('object.item.videoItem');
       expect(editDesc.val()).toEqual('A description');
       expect(editMime.val()).toEqual('video/mp4');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
       expect(editProtocol.val()).toEqual('');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
       expect(addParentIdTxt.text()).toBe('');
       expect(objectId.val()).toBe('39479');
       expect(objectIdTxt.text()).toBe('39479');
-    });
-
-    it('should set fields in editor for `active_item`', () => {
-      const itemData = {
-        item: activeItem
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      expect(editObjectType.val()).toEqual('active_item');
-      expect(editTitle.val()).toEqual('Test Active Item');
-      expect(editLocation.val()).toEqual('/home/test.txt');
-      expect(editClass.val()).toEqual('object.item.activeItem');
-      expect(editDesc.val()).toEqual('test');
-      expect(editMime.val()).toEqual('text/plain');
-      expect(editActionScript.val()).toEqual('/home/echoText.sh');
-      expect(editState.val()).toEqual('test-state');
-      expect(editProtocol.val()).toEqual('');
-      expect(editSaveButton.text()).toEqual('Save Item');
-      expect(addParentId.val()).toBe('');
-      expect(addParentIdTxt.text()).toBe('');
-      expect(objectId.val()).toBe('1306');
-      expect(objectIdTxt.text()).toBe('1306');
     });
 
     it('should set fields in editor for `external_url`', () => {
@@ -262,9 +199,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editLocation.val()).toEqual('http://localhost');
       expect(editClass.val()).toEqual('object.item');
       expect(editDesc.val()).toEqual('description');
-      expect(editMime.val()).toEqual('text/plain');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
+      expect(editMime.val()).toEqual('video/ts');
       expect(editProtocol.val()).toEqual('http-get');
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
@@ -273,33 +208,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(objectIdTxt.text()).toBe('1469');
     });
 
-    it('should set fields in editor for `internal_url`', () => {
-      const itemData = {
-        item: internalUrl
-      };
-
-      editModal.editmodal('loadItem', itemData);
-
-      expect(editObjectType.val()).toEqual('internal_url');
-      expect(editTitle.val()).toEqual('title');
-      expect(editLocation.val()).toEqual('./test');
-      expect(editClass.val()).toEqual('object.item');
-      expect(editDesc.val()).toEqual('description');
-      expect(editMime.val()).toEqual('text/plain');
-      expect(editActionScript.val()).toEqual('');
-      expect(editState.val()).toEqual('');
-      expect(editProtocol.val()).toEqual('http-get');
-      expect(editSaveButton.text()).toEqual('Save Item');
-      expect(addParentId.val()).toBe('');
-      expect(addParentIdTxt.text()).toBe('');
-      expect(objectId.val()).toBe('1470');
-      expect(objectIdTxt.text()).toBe('1470');
-    });
-
     it('binds the onSave event to the save button', () => {
       const saveSpy = jasmine.createSpy('save');
       const itemData = {
-        item: internalUrl,
+        item: externalUrl,
         onSave: saveSpy
       };
 
@@ -326,7 +238,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '39479',
         title: 'Test.mp4',
-        description: 'A description'
+        description: 'A%20description'
       });
     });
 
@@ -338,7 +250,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       expect(result).toEqual({
         object_id: '1471',
-        title: 'container title'
+        title: 'container%20title'
       });
     });
 
@@ -351,41 +263,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '1469',
         title: 'title',
-        location: 'http://localhost',
+        location: 'http%3A%2F%2Flocalhost',
         description: 'description',
+        'mime-type': 'video%2Fts',
         protocol: 'http-get'
-      });
-    });
-
-    it('gives proper data for `internal_url` object to save', () => {
-      const itemData = { item: internalUrl };
-      editModal.editmodal('loadItem', itemData);
-
-      const result = editModal.editmodal('saveItem');
-
-      expect(result).toEqual({
-        object_id: '1470',
-        title: 'title',
-        location: './test',
-        description: 'description',
-        protocol: 'http-get'
-      });
-    });
-
-    it('gives proper data for `active_item` object to save', () => {
-      const itemData = { item: activeItem };
-      editModal.editmodal('loadItem', itemData);
-
-      const result = editModal.editmodal('saveItem');
-
-      expect(result).toEqual({
-        object_id: '1306',
-        title: 'Test Active Item',
-        location: '/home/test.txt',
-        description: 'test',
-        'mime-type': 'text/plain',
-        action: '/home/echoText.sh',
-        state: 'test-state'
       });
     });
   });
@@ -441,41 +322,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         title: '',
         location: '',
         description: '',
-        protocol: 'http-get'
-      });
-    });
-
-    it('gives proper data for `internal_url` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'internal_url', item: item});
-
-      const result = editModal.editmodal('addObject');
-
-      expect(result).toEqual({
-        parent_id: '9999',
-        obj_type: 'internal_url',
-        class: 'object.item',
-        title: '',
-        location: '',
-        description: '',
-        protocol: ''
-      });
-    });
-
-    it('gives proper data for `active_item` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'active_item', item: item});
-
-      const result = editModal.editmodal('addObject');
-
-      expect(result).toEqual({
-        parent_id: '9999',
-        obj_type: 'active_item',
-        class: 'object.item.activeItem',
-        title: '',
-        location: '',
-        description: '',
         'mime-type': '',
-        action: '',
-        state: ''
+        protocol: 'http-get'
       });
     });
   });

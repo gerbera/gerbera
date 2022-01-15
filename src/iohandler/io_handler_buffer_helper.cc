@@ -1,29 +1,29 @@
 /*MT*
-    
+
     MediaTomb - http://www.mediatomb.cc/
-    
+
     io_handler_buffer_helper.cc - this file is part of MediaTomb.
-    
+
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
-    
+
     Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
-    
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
-    
+
     MediaTomb is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     version 2 along with MediaTomb; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
-    
+
     $Id$
 */
 
@@ -31,67 +31,54 @@
 
 #include "io_handler_buffer_helper.h" // API
 
-#include <cstdlib>
-
 #include "config/config_manager.h"
 
-IOHandlerBufferHelper::IOHandlerBufferHelper(size_t bufSize, size_t initialFillSize)
+IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize)
+    : config(std::move(config))
+    , bufSize(bufSize)
+    , initialFillSize(initialFillSize)
+    , waitForInitialFillSize(initialFillSize > 0)
 {
     if (bufSize == 0)
         throw_std_runtime_error("bufSize must be greater than 0");
     if (initialFillSize > bufSize)
         throw_std_runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
-
-    this->bufSize = bufSize;
-    this->initialFillSize = initialFillSize;
-    waitForInitialFillSize = (initialFillSize > 0);
-    buffer = nullptr;
-    isOpen = false;
-    threadShutdown = false;
-    eof = false;
-    readError = false;
-    a = b = posRead = 0;
-    empty = true;
-    signalAfterEveryRead = false;
-    checkSocket = false;
-
-    seekEnabled = false;
-    doSeek = false;
 }
 
 void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 {
     if (isOpen)
         throw_std_runtime_error("tried to reopen an open IOHandlerBufferHelper");
-    buffer = static_cast<char*>(malloc(bufSize));
-    if (buffer == nullptr)
-        throw_std_runtime_error("Failed to allocate memory for transcoding buffer");
 
+    buffer = new char[bufSize];
     startBufferThread();
     isOpen = true;
 }
 
-IOHandlerBufferHelper::~IOHandlerBufferHelper()
+IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
 {
     if (isOpen)
         close();
 }
 
-size_t IOHandlerBufferHelper::read(char* buf, size_t length)
+std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);
     // length must be positive
     assert(length > 0);
 
-    std::unique_lock<std::mutex> lock(mutex);
+    // Lovely hack to ensure constuction of the child is complete before we try to do anything
+    StdThreadRunner::waitFor(
+        "IOHandlerBufferHelper", [this] { return threadRunner != nullptr; }, 100);
+    auto lock = threadRunner->uniqueLock();
 
     while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {
         if (checkSocket) {
             checkSocket = false;
             return CHECK_SOCKET;
         }
-        cond.wait(lock);
+        threadRunner->wait(lock);
     }
 
     if (readError || threadShutdown)
@@ -99,32 +86,32 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     if (empty && eof)
         return 0;
 
-    size_t bLocal = b;
+    std::size_t bLocal = b;
     lock.unlock();
 
     // we ensured with the while above that the buffer isn't empty
-    int currentFillSize = bLocal - a;
+    auto currentFillSize = int(bLocal - a);
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
-    size_t maxRead1 = (a < bLocal ? bLocal - a : bufSize - a);
-    size_t read1 = (maxRead1 > length ? length : maxRead1);
-    size_t maxRead2 = currentFillSize - read1;
-    size_t read2 = (read1 < length ? length - read1 : 0);
+    auto maxRead1 = std::size_t(a < bLocal ? bLocal - a : bufSize - a);
+    auto read1 = std::size_t(maxRead1 > length ? length : maxRead1);
+    auto maxRead2 = std::size_t(currentFillSize - read1);
+    auto read2 = std::size_t(read1 < length ? length - read1 : 0);
     if (read2 > maxRead2)
         read2 = maxRead2;
 
-    memcpy(buf, buffer + a, read1);
+    std::memcpy(buf, buffer + a, read1);
     if (read2)
-        memcpy(buf + read1, buffer, read2);
+        std::memcpy(buf + read1, buffer, read2);
 
-    size_t didRead = read1 + read2;
+    std::size_t didRead = read1 + read2;
 
     lock.lock();
 
     bool signalled = false;
     // was the buffer full or became it "full" while we read?
     if (signalAfterEveryRead || a == b) {
-        cond.notify_one();
+        threadRunner->notify();
         signalled = true;
     }
 
@@ -134,7 +121,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
     if (a == b) {
         empty = true;
         if (!signalled)
-            cond.notify_one();
+            threadRunner->notify();
     }
 
     posRead += didRead;
@@ -143,7 +130,7 @@ size_t IOHandlerBufferHelper::read(char* buf, size_t length)
 
 void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
-    log_debug("seek called: %lld {}", offset, whence);
+    log_debug("seek called: {} {}", offset, whence);
     if (!seekEnabled)
         throw_std_runtime_error("seek currently disabled in this IOHandlerBufferHelper");
 
@@ -158,7 +145,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     if (whence == SEEK_CUR && offset == 0)
         return;
 
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
 
     // if another seek isn't processed yet - well we don't care as this new seek
     // will change the position anyway
@@ -167,10 +154,10 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     seekWhence = whence;
 
     // tell the probably sleeping thread to process our seek
-    cond.notify_one();
+    threadRunner->notify();
 
     // wait until the seek has been processed
-    cond.wait(lock, [&]() {
+    threadRunner->wait(lock, [&]() {
         return !doSeek || threadShutdown || eof || readError;
     });
 }
@@ -178,10 +165,10 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
 void IOHandlerBufferHelper::close()
 {
     if (!isOpen)
-        throw_std_runtime_error("close called on closed IOHandlerBufferHelper");
+        log_error("close called on closed IOHandlerBufferHelper");
     isOpen = false;
     stopBufferThread();
-    free(buffer);
+    delete[] buffer;
     buffer = nullptr;
 }
 
@@ -189,30 +176,21 @@ void IOHandlerBufferHelper::close()
 
 void IOHandlerBufferHelper::startBufferThread()
 {
-    pthread_create(
-        &bufferThread,
-        nullptr, // attr
-        IOHandlerBufferHelper::staticThreadProc,
-        this);
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "BufferHelperThread", [](void* arg) {
+            auto inst = static_cast<IOHandlerBufferHelper*>(arg);
+            inst->threadProc();
+        },
+        this, config);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
 {
-    std::unique_lock<std::mutex> lock(mutex);
+    auto lock = threadRunner->uniqueLock();
     threadShutdown = true;
-    cond.notify_one();
+    threadRunner->notify();
     lock.unlock();
 
-    if (bufferThread)
-        pthread_join(bufferThread, nullptr);
-    bufferThread = 0;
-}
-
-void* IOHandlerBufferHelper::staticThreadProc(void* arg)
-{
-    log_debug("starting buffer thread... thread: {}", pthread_self());
-    auto inst = static_cast<IOHandlerBufferHelper*>(arg);
-    inst->threadProc();
-    log_debug("buffer thread shut down. thread: {}", pthread_self());
-    pthread_exit(nullptr);
+    threadRunner->join();
+    threadRunner = nullptr;
 }

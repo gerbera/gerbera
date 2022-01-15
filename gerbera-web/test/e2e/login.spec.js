@@ -76,8 +76,8 @@ describe('Login Suite', () => {
         expect(style).to.equal('display: none;');
       }
 
-      const sid = await loginPage.getCookie('SID');
-      expect(sid).to.be.null
+      const sid = await loginPage.getCookie('GerberaSID');
+      expect(sid).to.be.null;
     });
 
     it('when session expires reloads the page and lets user login again.', async () => {

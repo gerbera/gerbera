@@ -28,6 +28,7 @@ describe('Autoscan Suite', () => {
 
     it('a gerbera tree fs item container opens autoscan overlay when trail add autoscan is clicked', async () => {
       await homePage.clickMenu('nav-fs');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('etc');
 
       await homePage.clickTrailAddAutoscan();
@@ -36,9 +37,6 @@ describe('Autoscan Suite', () => {
       expect(result).to.be.true;
 
       result = await homePage.getAutoscanModeTimed();
-      expect(result).to.equal('true');
-
-      result = await homePage.getAutoscanLevelBasic();
       expect(result).to.equal('true');
 
       result = await homePage.getAutoscanRecursive();
@@ -55,6 +53,7 @@ describe('Autoscan Suite', () => {
 
     it('autoscan displays message when properly submitted to server', async () => {
       await homePage.clickMenu('nav-fs');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('etc');
       await homePage.clickTrailAddAutoscan();
 
@@ -67,13 +66,14 @@ describe('Autoscan Suite', () => {
       expect(result).to.be.false;
 
       result = await homePage.getToastMessage();
-      expect(result).to.equal('Performing full scan: /Movies');
+      expect(result).to.equal('Scan: /Movies');
 
       await homePage.closeToast();
     });
 
     it('an existing autoscan item loads edit overlay', async () => {
       await homePage.clickMenu('nav-db');
+      driver.sleep(500); // allow for load
       await homePage.clickTree('Playlists');
       await homePage.clickAutoscanEdit(1);
 

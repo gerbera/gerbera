@@ -15,7 +15,8 @@
           "id": 8,
           "childCount": 6,
           "autoScanMode": "none",
-          "autoScanType": "none"
+          "autoScanType": "none",
+          "image": null
         }
       },
       {
@@ -26,7 +27,8 @@
           "id": 1,
           "childCount": 1,
           "autoScanMode": "none",
-          "autoScanType": "none"
+          "autoScanType": "none",
+          "image": null
         }
       },
       {
@@ -37,7 +39,8 @@
           "id": 2779,
           "childCount": 2,
           "autoScanMode": "none",
-          "autoScanType": "none"
+          "autoScanType": "none",
+          "image": null
         }
       },
       {
@@ -48,7 +51,8 @@
           "id": 3808,
           "childCount": 2,
           "autoScanMode": "none",
-          "autoScanType": "ui"
+          "autoScanType": "ui",
+          "image": null
         }
       },
       {
@@ -59,7 +63,8 @@
           "id": 7443,
           "childCount": 2,
           "autoScanMode": "none",
-          "autoScanType": "persistent"
+          "autoScanType": "persistent",
+          "image": null
         }
       }
     ]
