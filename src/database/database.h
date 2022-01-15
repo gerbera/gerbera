@@ -218,8 +218,7 @@ public:
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
     virtual std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
 
-    class ChangedContainers {
-    public:
+    struct ChangedContainers {
         // Signed because IDs start at -1.
         std::vector<std::int32_t> upnp;
         std::vector<std::int32_t> ui;
