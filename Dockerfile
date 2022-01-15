@@ -1,4 +1,5 @@
-FROM alpine:3.15 AS builder
+ARG BASE_IMAGE=alpine:3.15
+FROM ${BASE_IMAGE} AS builder
 
 RUN apk add --no-cache  \
     bash \
@@ -55,7 +56,7 @@ RUN cmake -S . -B build \
     && \
     cmake --build build -v -j$(nproc)
 
-FROM alpine:3.15 AS gerbera
+FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
     duktape \
