@@ -121,7 +121,7 @@ std::string_view AutoscanDirectory::mapScanmode(ScanMode scanmode)
     case ScanMode::INotify:
         return "inotify";
     }
-    throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
+    throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", static_cast<int>(scanmode));
 }
 
 ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
