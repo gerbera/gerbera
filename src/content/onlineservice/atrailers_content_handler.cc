@@ -129,16 +129,16 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
     item->setClass("object.item.videoItem");
 
-    auto propertyMap = std::vector<std::pair<std::string, metadata_fields_t>> {
-        { "rating", M_RATING },
-        { "studio", M_PRODUCER },
-        { "director", M_DIRECTOR },
-        { "releasedate", M_DATE },
+    auto propertyMap = std::array {
+        std::pair("rating", M_RATING),
+        std::pair("studio", M_PRODUCER),
+        std::pair("director", M_DIRECTOR),
+        std::pair("releasedate", M_DATE),
         /// \todo cut out a small part for the usual description
-        { "description", M_LONGDESCRIPTION },
+        std::pair("description", M_LONGDESCRIPTION),
     };
     for (auto&& [key, tag] : propertyMap) {
-        temp = info.child(key.c_str()).text().as_string();
+        temp = info.child(key).text().as_string();
         if (!temp.empty()) {
             item->addMetaData(tag, temp);
         }

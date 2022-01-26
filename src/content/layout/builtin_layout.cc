@@ -84,7 +84,7 @@ BuiltinLayout::BuiltinLayout(const std::shared_ptr<ContentManager>& content)
     container["Albums"] = std::make_shared<CdsContainer>("Albums");
     chain["/Audio/Albums"] = this->content->addContainerTree({ container["Audio"], container["Albums"] });
     container["Artists"] = std::make_shared<CdsContainer>("Artists");
-    chain["/Audio/Artists"] = this->content->addContainerTree(std::vector<std::shared_ptr<CdsObject>> { container["Audio"], container["Artists"] });
+    chain["/Audio/Artists"] = this->content->addContainerTree({ container["Audio"], container["Artists"] });
     container["Genres"] = std::make_shared<CdsContainer>("Genres");
     chain["/Audio/Genres"] = this->content->addContainerTree({ container["Audio"], container["Genres"] });
     container["Composers"] = std::make_shared<CdsContainer>("Composers");
