@@ -110,7 +110,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     return buffer.str();
 }
 
-std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle)
+URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
 {
     long retcode;
     bool cleanup = false;
@@ -165,7 +165,7 @@ std::unique_ptr<URL::Stat> URL::getInfo(const std::string& url, CURL* curlHandle
     if (cleanup)
         curl_easy_cleanup(curlHandle);
 
-    return std::make_unique<Stat>(usedUrl, off_t(cl), mt);
+    return { usedUrl, cl, mt };
 }
 
 std::size_t URL::dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data)

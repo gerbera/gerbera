@@ -77,8 +77,8 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         log_debug("Online content url: {}", url);
         try {
             auto st = URL::getInfo(url);
-            UpnpFileInfo_set_FileLength(info, st->getSize());
-            log_debug("URL used for request: {}", st->getURL());
+            UpnpFileInfo_set_FileLength(info, st.getSize());
+            log_debug("URL used for request: {}", st.getURL());
         } catch (const std::runtime_error& ex) {
             log_warning("{}", ex.what());
             UpnpFileInfo_set_FileLength(info, -1);

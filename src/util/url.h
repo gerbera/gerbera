@@ -51,7 +51,7 @@ public:
         ///
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
-        Stat(std::string url, off_t size, std::string mimetype)
+        Stat(std::string url, curl_off_t size, std::string mimetype)
             : url(std::move(url))
             , size(size)
             , mimetype(std::move(mimetype))
@@ -59,12 +59,12 @@ public:
         }
 
         std::string getURL() const { return url; }
-        off_t getSize() const { return size; }
+        curl_off_t getSize() const { return size; }
         std::string getMimeType() const { return mimetype; }
 
     protected:
         std::string url;
-        off_t size;
+        curl_off_t size;
         std::string mimetype;
     };
 
@@ -86,7 +86,7 @@ public:
         bool verbose = false,
         bool redirect = false);
 
-    static std::unique_ptr<Stat> getInfo(const std::string& url, CURL* curlHandle = nullptr);
+    static Stat getInfo(const std::string& url, CURL* curlHandle = nullptr);
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when
