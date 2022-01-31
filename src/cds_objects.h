@@ -416,7 +416,11 @@ public:
     std::string getMimeType() const { return mimeType; }
 
     /// \brief Sets the upnp:originalTrackNumber property
-    void setTrackNumber(int trackNumber) { this->trackNumber = trackNumber; }
+    void setTrackNumber(int trackNumber)
+    {
+        if (trackNumber >= 0)
+            this->trackNumber = trackNumber;
+    }
 
     int getTrackNumber() const { return trackNumber; }
 
