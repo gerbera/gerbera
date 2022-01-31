@@ -747,6 +747,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
     // setting legacy metadata
 
+    auto item = std::static_pointer_cast<CdsItem>(obj);
     auto metaGroups = obj->getMetaGroups();
     {
         duk_push_object(ctx);
@@ -755,12 +756,11 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         for (auto&& [key, attr] : metaGroups) {
             setProperty(key, fmt::format("{}", fmt::join(attr, entrySeparator)));
         }
+        if (item && item->getTrackNumber() > 0)
+            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), fmt::to_string(item->getTrackNumber()));
 
-        if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()));
-
-        if (std::static_pointer_cast<CdsItem>(obj)->getPartNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_PARTNUMBER), fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()));
+        if (item && item->getPartNumber() > 0)
+            setProperty(MetadataHandler::getMetaFieldName(M_PARTNUMBER), fmt::to_string(item->getPartNumber()));
 
         duk_put_prop_string(ctx, -2, "meta");
         // stack: js
@@ -769,11 +769,11 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     {
         duk_push_object(ctx);
         // stack: js meta_js
-        if (std::static_pointer_cast<CdsItem>(obj)->getTrackNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getTrackNumber()) };
+        if (item && item->getTrackNumber() > 0) {
+            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = { fmt::to_string(item->getTrackNumber()) };
         }
-        if (std::static_pointer_cast<CdsItem>(obj)->getPartNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = { fmt::to_string(std::static_pointer_cast<CdsItem>(obj)->getPartNumber()) };
+        if (item && item->getPartNumber() > 0) {
+            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = { fmt::to_string(item->getPartNumber()) };
         }
         for (auto&& [key, array] : metaGroups) {
             auto dukArray = duk_push_array(ctx);
@@ -839,8 +839,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     }
 
     // CdsItem
-    if (obj->isItem()) {
-        auto item = std::static_pointer_cast<CdsItem>(obj);
+    if (obj->isItem() && item) {
         val = item->getMimeType();
         if (!val.empty())
             setProperty("mimetype", val);
