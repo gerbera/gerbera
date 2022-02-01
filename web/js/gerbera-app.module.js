@@ -211,7 +211,7 @@ export class App {
   }
 
   displayStatus (response) {
-    if (response.success) {
+    if (response.success && response.values) {
       $('#server-status').show();
       $('#status-total').html(this.getStatusValue(response.values.item, 'total'));
       $('#status-audio').html(this.getStatusValue(response.values.item, 'audio'));

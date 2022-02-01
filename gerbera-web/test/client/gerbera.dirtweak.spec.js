@@ -15,6 +15,13 @@ describe('Gerbera DirTweaks', () => {
     });
   });
 
+  afterEach(() => {
+    $("body").on('transitionend', function(event){
+      $('#dirTweakModal').remove();
+    });
+    fixture.cleanup();
+  });
+
   describe('initialize()', () => {
 
     let dirTweakLocation;
@@ -58,7 +65,6 @@ describe('Gerbera DirTweaks', () => {
     });
     afterEach(() => {
       fixture.cleanup();
-      dirTweakModal.remove();
     });
     it('clears all fields in the tweak modal', () => {
       dirTweakModal.dirtweakmodal('loadItem', dirTweakItem);
@@ -96,6 +102,7 @@ describe('Gerbera DirTweaks', () => {
 
     afterEach(() => {
       fixture.cleanup();
+      ajaxSpy.and.callThrough();
     });
 
     it('calls the server to obtain config including directory tweaks', () => {
@@ -133,6 +140,8 @@ describe('Gerbera DirTweaks', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('index.html');
+      Updates.initialize();
+      Tweaks.initialize();
 
       dirTweakLocation = $('#dirTweakLocation');
       dirTweakId = $('#dirTweakId');
@@ -153,12 +162,8 @@ describe('Gerbera DirTweaks', () => {
       dirTweakModal = $('#dirTweakModal');
     });
 
-    afterEach((done) => {
-      $("body").on('transitionend', function(event){
-        fixture.cleanup();
-        dirTweakModal.remove();
-        done();
-      });
+    afterEach(() => {
+      fixture.cleanup();
     });
 
     it('using the response loads the dirtweak overlay', () => {
@@ -189,15 +194,14 @@ describe('Gerbera DirTweaks', () => {
         return Promise.resolve({});
       });
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(Updates, 'showMessage');
+      spyOn(Updates, 'getUpdates');
+      spyOn(Updates, 'clearAll');
     });
 
-    afterEach((done) => {
-      $("body").on('transitionend', function(event){
-        fixture.cleanup();
-        $('#dirTweakModal').remove();
-        ajaxSpy.and.callThrough();
-        done();
-      });
+    afterEach(() => {
+      fixture.cleanup();
+      ajaxSpy.and.callThrough();
     });
 
     it('collects all the form data from the dirtweak modal to call the server', () => {
@@ -222,6 +226,9 @@ describe('Gerbera DirTweaks', () => {
         return Promise.resolve({});
       });
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
+      spyOn(Updates, 'showMessage');
+      spyOn(Updates, 'getUpdates');
+      spyOn(Updates, 'clearAll');
     });
 
     it('collects all the form data from the dirtweak modal to call the server', async () => {
@@ -233,13 +240,9 @@ describe('Gerbera DirTweaks', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data).toEqual(dirTweakDeleteContent);
     });
 
-    afterEach((done) => {
-      $("body").on('transitionend', function(event){
-        fixture.cleanup();
-        $('#dirTweakModal').remove();
-        ajaxSpy.and.callThrough();
-        done();
-      });
+    afterEach(() => {
+      fixture.cleanup();
+      ajaxSpy.and.callThrough();
     });
   });
 
@@ -256,6 +259,7 @@ describe('Gerbera DirTweaks', () => {
 
     it('when successful reports a message to the user and starts task interval', () => {
       Tweaks.initialize();
+      Updates.initialize();
       spyOn(Updates, 'showMessage');
 
       Tweaks.submitDirTweakComplete(submitCompleteResponse);
@@ -265,6 +269,7 @@ describe('Gerbera DirTweaks', () => {
 
     it('when successful for full scan reports message to user', () => {
       Tweaks.initialize();
+      Updates.initialize();
       spyOn(Updates, 'showMessage');
 
       Tweaks.submitDirTweakComplete({

@@ -282,11 +282,11 @@ describe('Gerbera Updates', function () {
 
     beforeEach(() => {
       updateSpy.calls.reset();
-      Updates.clearAll();
+      Updates.clearAll({});
     });
 
     afterAll(() => {
-      Updates.clearAll();
+      Updates.clearAll({});
     });
 
     it('uses the default interval to set a timeout', (done) => {
@@ -327,7 +327,7 @@ describe('Gerbera Updates', function () {
 
     beforeEach(() => {
       updateSpy.calls.reset();
-      Updates.clearAll();
+      Updates.clearAll({});
     });
 
     it('sets a recurring interval based on the poll-interval configuration', (done) => {
