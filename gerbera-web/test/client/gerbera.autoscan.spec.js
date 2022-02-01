@@ -160,7 +160,6 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanSave.is(':disabled')).toBeFalsy();
 
       expect(Updates.updateTreeByIds).toHaveBeenCalled();
-      $('#autoscanModal').remove();
     });
   });
   describe('submit()', () => {

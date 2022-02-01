@@ -26,10 +26,8 @@ describe('Gerbera Items', () => {
   });
   afterEach((done) => {
     $("body").on('transitionend', function(event){
-      fixture.cleanup();
       $('#editModal').remove();
       $('.modal-backdrop').remove();
-      done();
     });
     fixture.cleanup();
     done();
