@@ -482,7 +482,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
     return genre;
 }
 
-void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& contentType)
+void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType)
 {
     log_debug("Process CDS Object: {}", obj->getTitle());
     auto clone = CdsObject::createObject(obj->getObjectType());
@@ -507,17 +507,18 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
     } else {
 #endif
 
-        if (startswith(mimetype, "video"))
-            addVideo(clone, rootpath);
-        else if (startswith(mimetype, "image"))
-            addImage(clone, rootpath);
-        else if (startswith(mimetype, "audio") && (contentType != CONTENT_TYPE_PLAYLIST))
-            addAudio(clone, rootpath);
-        else if (contentType == CONTENT_TYPE_OGG) {
+        auto objCls = std::static_pointer_cast<CdsItem>(obj)->getClass();
+        if (contentType == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
                 addVideo(clone, rootpath);
             else
                 addAudio(clone, rootpath);
+        } else if (objCls == UPNP_CLASS_VIDEO_ITEM) {
+            addVideo(clone, rootpath);
+        } else if (objCls == UPNP_CLASS_IMAGE_ITEM) {
+            addImage(clone, rootpath);
+        } else if (objCls == UPNP_CLASS_MUSIC_TRACK && contentType != CONTENT_TYPE_PLAYLIST) {
+            addAudio(clone, rootpath);
         }
 
 #ifdef ONLINE_SERVICES

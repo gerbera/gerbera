@@ -46,7 +46,7 @@ public:
     JSLayout(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& mimetype, const std::string& contentType) override;
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType) override;
 };
 
 #endif // __JS_LAYOUT_H__

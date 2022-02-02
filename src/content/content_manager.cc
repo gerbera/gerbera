@@ -411,7 +411,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
 
             { // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
-                layout->processCdsObject(obj, rootPath, mimetype, contentType);
+                layout->processCdsObject(obj, rootPath, contentType);
             }
 
 #ifdef HAVE_JS
@@ -1762,7 +1762,7 @@ void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
     }
 
 #ifdef HAVE_LASTFMLIB
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && startswith(std::static_pointer_cast<CdsItem>(obj)->getMimeType(), ("audio"))) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && std::static_pointer_cast<CdsItem>(obj)->getClass() == UPNP_CLASS_MUSIC_TRACK) {
         last_fm->startedPlaying(std::static_pointer_cast<CdsItem>(obj));
     }
 #endif

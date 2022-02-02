@@ -170,7 +170,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     int audioch, samplefreq;
     bool audioset, videoset;
     auto resource = item->getResource(0);
-    bool isAudioFile = startswith(item->getMimeType(), "audio") && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
+    bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
     auto resource2 = isAudioFile ? item->getResource(1) : item->getResource(0);
 
     // duration
@@ -241,7 +241,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     }
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && (startswith(item->getMimeType(), "video") || item->getFlag(OBJECT_FLAG_OGG_THEORA))) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && item->getClass() == UPNP_CLASS_VIDEO_ITEM) {
         std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
         auto [x, y] = checkResolution(videoresolution);
 
