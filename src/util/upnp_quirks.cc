@@ -50,7 +50,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::uni
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
 
-    if (!startswith(item->getMimeType(), "video"))
+    if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
     auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item);

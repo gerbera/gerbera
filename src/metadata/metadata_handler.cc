@@ -82,6 +82,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
     auto mappings = context->getConfig()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string contentType = getValueOrDefault(mappings, mimetype);
+    auto itemCls = item->getClass();
 
     if ((contentType == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
@@ -112,7 +113,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (contentType != CONTENT_TYPE_PLAYLIST && ((contentType == CONTENT_TYPE_OGG && item->getFlag(OBJECT_FLAG_OGG_THEORA)) || startswith(item->getMimeType(), "video") || startswith(item->getMimeType(), "audio"))) {
+    if (contentType != CONTENT_TYPE_PLAYLIST && (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)) {
         FfmpegHandler(context).fillMetadata(item);
     }
 #else
@@ -126,11 +127,11 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #endif // HAVE_FFMPEG
 
     // Fanart for audio and video
-    if (startswith(mimetype, "video") || startswith(mimetype, "audio"))
+    if (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)
         FanArtHandler(context).fillMetadata(item);
 
     // Subtitles for videos
-    if (startswith(mimetype, "video"))
+    if (itemCls == UPNP_CLASS_VIDEO_ITEM)
         SubtitleHandler(context).fillMetadata(item);
 
     ResourceHandler(context).fillMetadata(item);
