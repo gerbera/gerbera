@@ -126,12 +126,13 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
 
         obj->setVirtual(true);
 
-        auto old = database->loadObjectByServiceID(std::static_pointer_cast<CdsItem>(obj)->getServiceID());
+        auto item = std::static_pointer_cast<CdsItem>(obj);
+        auto old = database->loadObjectByServiceID(item->getServiceID());
         if (!old) {
             log_debug("Adding new {} object", serviceName);
 
             if (layout) {
-                std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
+                std::string mimetype = item->getMimeType();
                 auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                 std::string contentType = getValueOrDefault(mappings, mimetype);
 
