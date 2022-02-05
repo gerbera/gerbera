@@ -111,6 +111,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         std::pair(M_COMPOSER, "composer"),
     };
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
+        std::string key = e->key;
         std::string value = e->value;
         auto it = specialPropertyMap.find(e->key);
         if (it != specialPropertyMap.end()) {
@@ -122,7 +123,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             }
         }
         auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
-            [&](auto&& p) { return strcmp(p.second, e->key) == 0 && item->getMetaData(p.first).empty(); });
+            [&](auto&& p) { return p.second == key && item->getMetaData(p.first).empty(); });
         if (pIt != propertyMap.end()) {
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             field = pIt->first;
@@ -134,7 +135,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             }
             continue; // iterate while loop
         }
-        if (std::strcmp(e->key, "date") == 0) {
+        if (key == "date") {
             field = M_DATE;
             /// \todo parse possible ISO8601 timestamp
             if (item->getMetaData(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
@@ -143,7 +144,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 
                 item->addMetaData(field, value);
             }
-        } else if (std::strcmp(e->key, "creation_time") == 0) {
+        } else if (key == "creation_time") {
             field = M_CREATION_DATE;
             if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
