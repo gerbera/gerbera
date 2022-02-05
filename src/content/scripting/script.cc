@@ -504,6 +504,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     duk_get_prop_string(ctx, -1, "metaData");
     if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
         auto keys = getPropertyNames();
         for (auto&& sym : keys) {
             auto arrayVal = getArrayProperty(sym);
@@ -513,16 +514,16 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                         int j = stoiString(val, 0);
                         if (j > 0) {
                             obj->addMetaData(sym, val);
-                            std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(j);
+                            item->setTrackNumber(j);
                         } else
-                            std::static_pointer_cast<CdsItem>(obj)->setTrackNumber(0);
+                            item->setTrackNumber(0);
                     } else if (sym == MetadataHandler::getMetaFieldName(M_PARTNUMBER)) {
                         int j = stoiString(val, 0);
                         if (j > 0) {
                             obj->addMetaData(sym, val);
-                            std::static_pointer_cast<CdsItem>(obj)->setPartNumber(j);
+                            item->setPartNumber(j);
                         } else
-                            std::static_pointer_cast<CdsItem>(obj)->setPartNumber(0);
+                            item->setPartNumber(0);
                     } else {
                         val = sc->convert(val);
                         obj->addMetaData(sym, val);
