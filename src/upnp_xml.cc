@@ -632,7 +632,11 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (tp->hideOriginalResource())
                 hideOriginalResource = true;
 
-            auto urlBase = (skipURL) ? getPathBase(item, true) : getPathBase(item);
+            auto urlBase = [&] {
+                if (skipURL)
+                    return getPathBase(item, true);
+                return getPathBase(item);
+            }();
             tRes->addOption("urlBase", fmt::format("{}{}", urlBase->pathBase, URL_VALUE_TRANSCODE_NO_RES_ID));
 
             if (tp->firstResource()) {
