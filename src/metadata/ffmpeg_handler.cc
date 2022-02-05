@@ -122,20 +122,19 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             }
         }
         auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
-            [&](auto&& p) { return p.second == e->key && item->getMetaData(p.first).empty(); });
+            [&](auto&& p) { return strcmp(p.second, e->key) == 0 && item->getMetaData(p.first).empty(); });
         if (pIt != propertyMap.end()) {
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             field = pIt->first;
             item->addMetaData(field, sc->convert(trimString(value)));
-        }
-
-        if (field != M_MAX) {
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
             } else if (field == M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
             }
-        } else if (std::strcmp(e->key, "date") == 0) {
+            continue; // iterate while loop
+        }
+        if (std::strcmp(e->key, "date") == 0) {
             field = M_DATE;
             /// \todo parse possible ISO8601 timestamp
             if (item->getMetaData(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
