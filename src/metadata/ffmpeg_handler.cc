@@ -167,7 +167,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 // ffmpeg library calls
 void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
 {
-    int audioch, samplefreq;
+    int audioch, sampleFreq;
     bool audioset, videoset;
     auto resource = item->getResource(0);
     bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
@@ -225,10 +225,19 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
+
             if (as_codecpar(st)->sample_rate > 0) {
-                samplefreq = as_codecpar(st)->sample_rate;
-                log_debug("Added sample frequency: {} Hz from stream {}", samplefreq, i);
-                resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(samplefreq));
+                sampleFreq = as_codecpar(st)->sample_rate;
+
+                // Fix up Sample rate reporting
+                // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
+                log_debug("Bits per raw sample: {}", as_codecpar(st)->bits_per_raw_sample);
+                int bitsPerSample = as_codecpar(st)->bits_per_coded_sample;
+                log_debug("Bits per coded sample: {}", bitsPerSample);
+
+                sampleFreq = sampleFreq * (bitsPerSample > 0 ? bitsPerSample : 1);
+                log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
+                resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioset = true;
 
                 audioch = as_codecpar(st)->channels;

@@ -252,8 +252,9 @@ static const std::map<std::string, std::string> mtTransferDefaults {
 static const std::map<std::string, std::string> extMtDefaults {
     { "asf", "video/x-ms-asf" },
     { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
-    { "dff", "audio/x-dsd" },
-    { "dsf", "audio/x-dsd" },
+    { "dff", "audio/x-dff" },
+    { "dsd", "audio/x-dsd" },
+    { "dsf", "audio/x-dsf" },
     { "flv", "video/x-flv" },
     { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
     { "m3u", "audio/x-mpegurl" },
