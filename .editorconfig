@@ -1,2 +1,5 @@
+[*.js]
+indent_size = 2
+
 [*.xsd]
 indent_size = 4
