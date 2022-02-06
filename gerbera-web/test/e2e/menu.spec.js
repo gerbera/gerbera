@@ -68,12 +68,6 @@ describe('Menu Suite', () => {
       expect(tree.length).to.equal(0);
     });
 
-    it('shows the friendly name in the Home menu', async () => {
-      const homeMenu = await homePage.getHomeMenu();
-      const text = await homeMenu.getText();
-      expect(text).to.equal('Home [Gerbera Media Server]')
-    });
-
     it('shows the friendly name in the document title', async () => {
       const title = await homePage.getTitle();
       expect(title).to.equal('Gerbera Media Server | Gerbera Media Server')
@@ -92,4 +86,3 @@ describe('Menu Suite', () => {
     });
   });
 });
-

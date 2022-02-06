@@ -29,7 +29,7 @@ import {Clients} from "./gerbera-clients.module.js";
 import {Config} from "./gerbera-config.module.js";
 
 const disable = () => {
-  const allLinks = $('nav li a');
+  const allLinks = $('nav li a, nav > a.navbar-brand');
   $('.nav li').removeClass('active');
   allLinks.addClass('disabled');
   allLinks.click(function () {
@@ -49,14 +49,11 @@ const hideMenu = () => {
 };
 
 const initialize = () => {
-  const allLinks = $('nav li a');
+  const allLinks = $('nav li a, nav > a.navbar-brand');
   if (GerberaApp.isLoggedIn()) {
     allLinks.click(Menu.click);
     allLinks.removeClass('disabled');
     $('#nav-home').click();
-    if(GerberaApp.serverConfig.friendlyName) {
-      $('#nav-home').text('Home [' + GerberaApp.serverConfig.friendlyName +']');
-    }
     const version = $('#gerbera-version');
     if(GerberaApp.serverConfig.version) {
       version.children('span').text(GerberaApp.serverConfig.version);
@@ -111,7 +108,12 @@ const selectConfig = (menuItem) => {
 };
 
 var click = (event) => {
-  const menuItem = $(event.target).closest('.nav-link');
+  var menuItem;
+  if ($(event.target).closest('a').attr('id') == 'nav-home') {
+    menuItem = $(event.target).closest('a');
+  } else {
+    menuItem = $(event.target).closest('.nav-link');
+  }
 
   if (!menuItem.hasClass("noactive")) {
     $('.nav-item').removeClass('active');
