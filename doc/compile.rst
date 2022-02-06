@@ -21,13 +21,13 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | Library             | Required?     | Note                       | Compile-time option     | Default  | Script                       |
 +=====================+===============+============================+=========================+==========+==============================+
-| libupnp             | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh             |
+| libpupnp_           | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh             |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libnpupnp           | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                              |
+| libnpupnp_          | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libuuid             | Depends on OS | Not required on \*BSD      |                         |          |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| pugixml             | Required      | XML file and data support  |                         |          | install-pugixml.sh           |
+| pugixml_            | Required      | XML file and data support  |                         |          | install-pugixml.sh           |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libiconv            | Required      | Charset conversion         |                         |          |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
@@ -35,22 +35,22 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | zlib                | Required      | Data compression           |                         |          |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| fmtlib              | Required      | Fast string formatting     |                         |          | install-fmt.sh               |
+| fmtlib_             | Required      | Fast string formatting     |                         |          | install-fmt.sh               |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| spdlog              | Required      | Runtime logging            |                         |          | install-spdlog.sh            |
+| spdlog_             | Required      | Runtime logging            |                         |          | install-spdlog.sh            |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| duktape             | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
+| duktape_            | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | mysql               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | curl                | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| taglib              | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
+| taglib_             | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libmagic            | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libmatroska         | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
-| libebml             | Optional      | required for MKV           |                         | Enabled  | install-ebml.sh              |
+| libmatroska_        | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
+| libebml_            | Optional      | required for MKV           |                         | Enabled  | install-ebml.sh              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | ffmpeg/libav        | Optional      | File metadata              | WITH\_AVCODEC           | Disabled |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
@@ -58,26 +58,24 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libexiv2            | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| lastfmlib           | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
+| lastfmlib_          | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| ffmpegthumbnailer   | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
+| ffmpegthumbnailer_  | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | inotify             | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 
-Referenced packages:
-
-.. _<duktape>: http://duktape.org
-.. _<ffmpegthumbnailer>: https://github.com/dirkvdb/ffmpegthumbnailer
-.. _<fmtlib>: https://github.com/fmtlib/fmt
-.. _<lastfmlib>: https://github.com/dirkvdb/lastfmlib
-.. _<libmatroska>: https://github.com/Matroska-Org/libmatroska
-.. _<libebml>, Extensible Binary Markup Language: https://github.com/Matroska-Org/libebml
-.. _<npupnp>: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
-.. _<pugixml>: https://github.com/zeux/pugixml
-.. _<pupnp>: https://github.com/pupnp/pupnp
-.. _<spdlog>: https://github.com/gabime/spdlog
-.. _<taglib>: http://taglib.org/
+.. _duktape: http://duktape.org
+.. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
+.. _fmtlib: https://github.com/fmtlib/fmt
+.. _lastfmlib: https://github.com/dirkvdb/lastfmlib
+.. _libmatroska: https://github.com/Matroska-Org/libmatroska
+.. _libebml: https://github.com/Matroska-Org/libebml
+.. _libnpupnp: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
+.. _pugixml: https://github.com/zeux/pugixml
+.. _libpupnp: https://github.com/pupnp/pupnp
+.. _spdlog: https://github.com/gabime/spdlog
+.. _taglib: http://taglib.org/
 
 Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version of the package.
 Make sure no other version of the development package is installed.
