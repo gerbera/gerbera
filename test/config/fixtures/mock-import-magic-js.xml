@@ -11,8 +11,9 @@
     <extension-mimetype ignore-unknown="no">
       <map from="asf" to="video/x-ms-asf" />
       <map from="asx" to="video/x-ms-asx" />
-      <map from="dff" to="audio/x-dsd" />
-      <map from="dsf" to="audio/x-dsd" />
+      <map from="dff" to="audio/x-dff" />
+      <map from="dsd" to="audio/x-dsd" />
+      <map from="dsf" to="audio/x-dsf" />
       <map from="flv" to="video/x-flv" />
       <map from="m2ts" to="video/mp2t" />
       <map from="m3u" to="audio/x-mpegurl" />
