@@ -70,7 +70,7 @@ sudo make install
 | inotify       |               |               |               | Optional      | Efficient file monitoring  | Enabled  |
 
 
-## Licence
+## License
 
     GPLv2
 
