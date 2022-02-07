@@ -106,8 +106,8 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         value.push_back(tag->comment().to8Bit(true));
         break;
     case M_TRACKNUMBER: {
-        unsigned int i = tag->track();
-        if (i == 0 || i > (unsigned int)std::numeric_limits<int>::max())
+        std::uint32_t i = tag->track();
+        if (i == 0 || i > std::uint32_t(std::numeric_limits<int>::max()))
             return;
         value.push_back(fmt::to_string(i));
         item->setTrackNumber(i);

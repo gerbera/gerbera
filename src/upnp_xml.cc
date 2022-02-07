@@ -787,10 +787,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             continue;
         }
 
-        if (handlerType == CH_DEFAULT && captionInfoEx.size() > 0 && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
+        if (handlerType == CH_DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
             auto captionInfo = captionInfoEx[0];
-            resAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]).c_str();
-            resAttrs["pv:subtitleFileUri"] = captionInfo[""].c_str();
+            resAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]);
+            resAttrs["pv:subtitleFileUri"] = captionInfo[""];
         }
 
         if (!isExtThumbnail) {
