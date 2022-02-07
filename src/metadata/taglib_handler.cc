@@ -137,8 +137,8 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         if (list.isEmpty())
             return;
         for (auto&& entry : list) {
-            for (auto&& val : entry.split(legacyEntrySeparator))
-                value.push_back(val.to8Bit(true));
+            auto split = entry.split(legacyEntrySeparator);
+            std::transform(split.begin(), split.end(), std::back_inserter(value), [](auto&& val) { return val.to8Bit(true); });
         }
     }
     }
@@ -464,11 +464,12 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
                 if (!textFrame)
                     continue;
                 for (auto&& field : textFrame->fieldList()) {
-                    if (legacyEntrySeparator.empty())
+                    if (legacyEntrySeparator.empty()) {
                         content.push_back(sc->convert(field.to8Bit(true)));
-                    else
-                        for (auto&& val : field.split(legacyEntrySeparator))
-                            content.push_back(sc->convert(val.to8Bit(true)));
+                    } else {
+                        auto split = field.split(legacyEntrySeparator);
+                        std::transform(split.begin(), split.end(), std::back_inserter(content), [&](auto&& val) { return sc->convert(val.to8Bit(true)); });
+                    }
                 }
             }
             if (!content.empty()) {
@@ -496,8 +497,8 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
                     } else if (legacyEntrySeparator.empty()) {
                         content.push_back(sc->convert(field.to8Bit(true)));
                     } else {
-                        for (auto&& val : field.split(legacyEntrySeparator))
-                            content.push_back(sc->convert(val.to8Bit(true)));
+                        auto split = field.split(legacyEntrySeparator);
+                        std::transform(split.begin(), split.end(), std::back_inserter(content), [&](auto&& val) { return sc->convert(val.to8Bit(true)); });
                     }
                 }
                 log_debug("TXXX Tag: {}", subTag);

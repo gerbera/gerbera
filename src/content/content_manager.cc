@@ -1057,9 +1057,7 @@ void ContentManager::addContainer(int parentID, const std::string& title, const 
 {
     fs::path cPath = database->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
     std::vector<std::shared_ptr<CdsObject>> cVec;
-    for (auto&& segment : cPath) {
-        cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
-    }
+    std::transform(cPath.begin(), cPath.end(), cVec.begin(), [&](auto&& segment) { return std::make_shared<CdsContainer>(segment.string(), upnpClass); });
     addContainerTree(cVec);
 }
 
