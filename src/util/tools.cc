@@ -568,15 +568,15 @@ std::string ipToInterface(std::string_view ip)
     log_warning("Please provide an interface name instead! LibUPnP does not support specifying an IP in current versions.");
     log_info("Attempting to map {} to an interface", ip);
 
-    struct ifaddrs *ifaddr, *ifa;
-    int family, s, n;
+    struct ifaddrs* ifaddr;
+    int family, s;
     char host[NI_MAXHOST];
 
     if (getifaddrs(&ifaddr) == -1) {
         log_error("Could not getifaddrs: {}", std::strerror(errno));
     }
 
-    for (ifa = ifaddr, n = 0; ifa; ifa = ifa->ifa_next, n++) {
+    for (auto ifa = ifaddr; ifa; ifa = ifa->ifa_next) {
         if (!ifa->ifa_addr)
             continue;
 
