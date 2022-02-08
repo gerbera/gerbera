@@ -1634,7 +1634,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
     std::size_t count = list.size();
-    if (count <= 0)
+    if (count == 0)
         return nullptr;
 
     auto it = std::find_if(list.begin(), list.end(), IS_FORBIDDEN_CDS_ID);

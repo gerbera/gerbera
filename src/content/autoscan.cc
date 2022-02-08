@@ -76,7 +76,7 @@ void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds 
 
 bool AutoscanDirectory::updateLMT()
 {
-    bool result = taskCount <= 0 && activeScanCount <= 0;
+    bool result = taskCount <= 0 && activeScanCount == 0;
     if (result) {
         result = last_mod_previous_scan < last_mod_current_scan;
         last_mod_previous_scan = last_mod_current_scan;
