@@ -61,7 +61,7 @@ using uchar = unsigned char;
 #define M_DRI 0xDD
 
 #define ITEM_BUF_SIZE 16
-static int get16m(std::byte* shrt)
+static int get16m(const std::byte* shrt)
 {
     return std::to_integer<int>((shrt[0] << 8) | shrt[1]);
 }
