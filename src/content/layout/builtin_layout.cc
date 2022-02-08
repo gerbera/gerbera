@@ -181,7 +181,6 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
                 month = month.substr(0, m);
         }
 
-        std::string chain;
         if ((y > 0) && (m > 0)) {
             std::vector<std::shared_ptr<CdsObject>> ct;
             ct.reserve(4);
@@ -232,7 +231,6 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
                 month = month.substr(0, m);
         }
 
-        std::string chain;
         if ((y > 0) && (m > 0)) {
             std::vector<std::shared_ptr<CdsObject>> ct;
             ct.push_back(container["Photos"]);
