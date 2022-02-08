@@ -178,11 +178,11 @@ public:
     int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
     void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
     template <typename T>
-    void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view where_key, const T& where_value);
+    void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);
     void deleteAll(std::string_view tableName);
     template <typename T>
-    void deleteRow(std::string_view tableName, std::string_view where_key, const T& where_value);
-    void deleteRows(std::string_view tableName, std::string_view where_key, const std::vector<int>& where_values);
+    void deleteRow(std::string_view tableName, std::string_view key, const T& value);
+    void deleteRows(std::string_view tableName, std::string_view key, const std::vector<int>& values);
 
 protected:
     explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime);
@@ -302,9 +302,9 @@ private:
 };
 
 template <typename T>
-void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view where_key, const T& where_value)
+void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value)
 {
-    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(tableName), fmt::join(values, ", "), identifier(where_key), quote(where_value)));
+    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(tableName), fmt::join(values, ", "), identifier(key), quote(value)));
 }
 
 template <typename T>

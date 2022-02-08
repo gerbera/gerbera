@@ -340,7 +340,7 @@ protected:
     void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr) const;
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
-    void assignFanArt(const std::shared_ptr<CdsContainer>& containerList, const std::shared_ptr<CdsObject>& origObj, int count) const;
+    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const;
 
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
