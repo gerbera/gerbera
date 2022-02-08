@@ -106,7 +106,7 @@ protected:
     bool virt {};
 
     /// \brief type of the object: item, container, etc.
-    unsigned int objectType;
+    unsigned int objectType {};
 
     /// \brief field which can hold various flags for the object
     unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
