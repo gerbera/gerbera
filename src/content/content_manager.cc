@@ -1155,7 +1155,6 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
             }
             database->updateObject(container, nullptr);
         }
-        count++;
     }
 }
 
