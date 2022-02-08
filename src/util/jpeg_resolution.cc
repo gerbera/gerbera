@@ -151,9 +151,9 @@ std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh)
     auto wh = std::pair<int, int>();
     try {
         wh = getJpegResolution(ioh);
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         ioh->close();
-        throw e;
+        throw;
     }
     ioh->close();
 

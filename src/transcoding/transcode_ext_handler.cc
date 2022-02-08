@@ -162,9 +162,9 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
         auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
         auto ch = std::make_unique<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
         procList.push_back(std::make_unique<ProcListItem>(std::move(ch)));
-    } catch (const std::runtime_error& ex) {
+    } catch (const std::runtime_error&) {
         unlink(ret.c_str());
-        throw ex;
+        throw;
     }
 
     return ret;
