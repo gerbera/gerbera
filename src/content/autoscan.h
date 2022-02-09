@@ -141,7 +141,7 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
     /* helpers for autoscan stuff */
-    static std::string_view mapScanmode(ScanMode scanmode);
+    static const char* mapScanmode(ScanMode scanmode);
     static ScanMode remapScanmode(const std::string& scanmode);
 
 protected:

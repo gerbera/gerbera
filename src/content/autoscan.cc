@@ -113,7 +113,7 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
-std::string_view AutoscanDirectory::mapScanmode(ScanMode scanmode)
+const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
     switch (scanmode) {
     case ScanMode::Timed:

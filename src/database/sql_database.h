@@ -95,10 +95,9 @@ class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
     virtual std::string quote(const std::string& str) const = 0;
-    /* wrapper functions for different types */
-    std::string quote(std::string_view str) const { return quote(std::string(str)); }
     // required to handle #defines
     std::string quote(const char* str) const { return quote(std::string(str)); }
+    /* wrapper functions for different types */
     std::string quote(char val) const { return quote(fmt::to_string(val)); }
     static std::string quote(int val) { return fmt::to_string(val); }
     static std::string quote(unsigned int val) { return fmt::to_string(val); }
