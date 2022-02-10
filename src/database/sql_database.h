@@ -95,15 +95,17 @@ class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
     virtual std::string quote(const std::string& str) const = 0;
-    /* wrapper functions for different types */
-    std::string quote(const char* str) const { return quote(std::string(str)); }
-    std::string quote(char val) const { return quote(fmt::to_string(val)); }
-    static std::string quote(int val) { return fmt::to_string(val); }
-    static std::string quote(unsigned int val) { return fmt::to_string(val); }
-    static std::string quote(long val) { return fmt::to_string(val); }
-    static std::string quote(unsigned long val) { return fmt::to_string(val); }
-    static std::string quote(bool val) { return val ? "1" : "0"; }
-    static std::string quote(long long val) { return fmt::to_string(val); }
+    template <typename T>
+    std::string quote(T val)
+    {
+        if constexpr (std::is_same_v<T, bool>)
+            return val ? "1" : "0";
+        if constexpr (std::is_same_v<T, char>)
+            return quote(fmt::to_string(val));
+        if constexpr (std::is_integral_v<T>)
+            return fmt::to_string(val);
+        return quote(fmt::to_string(val));
+    }
 
     // hooks for transactions
     virtual void beginTransaction(std::string_view tName) { }

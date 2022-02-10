@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <fmt/chrono.h>
+#include <fmt/ostream.h>
 #include <vector>
 
 #include "cds_objects.h"
