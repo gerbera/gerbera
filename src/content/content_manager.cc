@@ -1603,7 +1603,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirec
     auto all = autoscan_timed->getArrayCopy();
 
     auto ino = autoscan_inotify->getArrayCopy();
-    std::copy(ino.begin(), ino.end(), std::back_inserter(all));
+    std::move(ino.begin(), ino.end(), std::back_inserter(all));
     return all;
 #else
     return autoscan_timed->getArrayCopy();
