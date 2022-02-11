@@ -390,7 +390,6 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
-    auto item = std::static_pointer_cast<CdsItem>(obj);
 
     if (!obj) {
         obj = createObjectFromFile(dirEnt, followSymlinks);
@@ -403,11 +402,11 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::extractMetaData(context, item, dirEnt);
+        MetadataHandler::extractMetaData(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
     }
     if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
-            std::string mimetype = item->getMimeType();
+            std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
             { // only lock mutex while processing item layout
