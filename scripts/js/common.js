@@ -431,8 +431,14 @@ function addAudio(obj) {
     addCdsObject(obj, container);
 
     chain.genre.searchable = true;
-    container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
-    addCdsObject(obj, container);
+    if (obj.metaData[M_GENRE]) {
+        for (var oneGenre in obj.metaData[M_GENRE]) {
+            chain.genre.title = obj.metaData[M_GENRE][oneGenre];
+            chain.genre.metaData[M_GENRE] = [ oneGenre ];
+            container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
+            addCdsObject(obj, container);
+        }
+    }
 
     container = addContainerTree([chain.audio, chain.allYears, chain.year]);
     addCdsObject(obj, container);
@@ -632,15 +638,27 @@ function addAudioStructured(obj) {
     obj.title = title + ' - ' + artist_full;
     chain.entryAll.title = '--all--';
     chain.entryAll.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_GENRE;
-    container = addContainerTree([chain.allGenres, chain.genre, chain.entryAll]);
-    addCdsObject(obj, container);
+    if (obj.metaData[M_GENRE]) {
+        for (var oneGenre in obj.metaData[M_GENRE]) {
+            chain.genre.title = obj.metaData[M_GENRE][oneGenre];
+            chain.genre.metaData[M_GENRE] = [ oneGenre ];
+            container = addContainerTree([chain.allGenres, chain.genre, chain.entryAll]);
+            addCdsObject(obj, container);
+        }
+    }
 
     for (i = 0; i < artCnt; i++) {
         chain.abc.title = abcbox(artist[i], boxConfig.genre, boxConfig.divChar);
         isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
         chain.album_artist.searchable = true;
-        container = addContainerTree(isSingleCharBox ? [chain.allGenres, chain.genre, chain.abc, chain.album_artist] : [chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
-        addCdsObject(obj, container);
+        if (obj.metaData[M_GENRE]) {
+            for (var oneGenre in obj.metaData[M_GENRE]) {
+                chain.genre.title = obj.metaData[M_GENRE][oneGenre];
+                chain.genre.metaData[M_GENRE] = [ oneGenre ];
+                container = addContainerTree(isSingleCharBox ? [chain.allGenres, chain.genre, chain.abc, chain.album_artist] : [chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
+                addCdsObject(obj, container);
+            }
+        }
     }
     chain.album_artist.searchable = false;
         

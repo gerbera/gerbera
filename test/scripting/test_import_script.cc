@@ -54,7 +54,8 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/Artists/Artist/All - full name", "45" },
         { "/Audio/Artists/Artist/Album", "46" },
         { "/Audio/Albums/Album", "47" },
-        { "/Audio/Genres/Genre", "48" },
+        { "/Audio/Genres/Genre", "481" },
+        { "/Audio/Genres/Genre2", "482" },
         { "/Audio/Composers/Composer", "49" },
         { "/Audio/Year/2018", "50" },
         { "/Video/All Video", "60" },
@@ -159,6 +160,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     std::string date = "2018-01-01";
     std::string year = "2018";
     std::string genre = "Genre";
+    std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
@@ -167,7 +169,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     int theora = 0;
     std::map<std::string, std::string> aux;
 
-    std::map<std::string, std::string> meta {
+    std::vector<std::pair<std::string, std::string>> meta {
         { "dc:date", date },
         { "dc:description", desc },
         { "dc:title", title },
@@ -177,6 +179,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         { "upnp:conductor", conductor },
         { "upnp:date", year },
         { "upnp:genre", genre },
+        { "upnp:genre", genre2 },
         { "upnp:orchestra", orchestra },
     };
 
@@ -194,7 +197,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         { "metaData['upnp:composer']", composer },
         { "metaData['upnp:conductor']", conductor },
         { "metaData['upnp:date']", year },
-        { "metaData['upnp:genre']", genre },
+        { "metaData['upnp:genre']", fmt::format("{},{}", genre, genre2) },
         { "metaData['upnp:orchestra']", orchestra },
         { "title", title },
     };
@@ -228,7 +231,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "48", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "482", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
@@ -250,7 +255,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     auto onlineService = int(OS_None);
     int theora = 0;
     std::map<std::string, std::string> aux;
-    std::map<std::string, std::string> meta;
+    std::vector<std::pair<std::string, std::string>> meta;
     std::map<std::string, std::string> res;
 
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -288,7 +293,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     int theora = 0;
     std::map<std::string, std::string> res;
 
-    std::map<std::string, std::string> meta {
+    std::vector<std::pair<std::string, std::string>> meta {
         { "dc:date", date },
         { "upnp:genre", genre },
     };
@@ -336,7 +341,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     auto onlineService = int(OS_ATrailers);
     int theora = 0;
 
-    std::map<std::string, std::string> meta {
+    std::vector<std::pair<std::string, std::string>> meta {
         { "dc:date", date },
     };
 
@@ -382,7 +387,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     auto onlineService = int(OS_None);
     int theora = 1;
     std::map<std::string, std::string> aux;
-    std::map<std::string, std::string> meta;
+    std::vector<std::pair<std::string, std::string>> meta;
     std::map<std::string, std::string> res;
 
     // Represents the values passed to `addCdsObject`, extracted from keys defined there.
@@ -428,7 +433,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     int theora = 0;
     std::map<std::string, std::string> aux;
 
-    std::map<std::string, std::string> meta {
+    std::vector<std::pair<std::string, std::string>> meta {
         { "dc:title", title },
         { "upnp:artist", artist },
         { "upnp:album", album },
@@ -489,7 +494,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "48", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
