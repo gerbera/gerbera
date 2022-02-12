@@ -56,8 +56,10 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/-Artist-/-ABCD-/-all-/Artist", "46" },
         { "/-Artist-/-ABCD-/A/Artist/-all-", "47" },
         { "/-Artist-/-ABCD-/A/Artist/Album (2018)", "48" },
-        { "/-Genre-/Genre/--all--", "49" },
-        { "/-Genre-/Genre/-A-/Album - Artist", "50" },
+        { "/-Genre-/Genre/--all--", "491" },
+        { "/-Genre-/Genre2/--all--", "492" },
+        { "/-Genre-/Genre/-A-/Album - Artist", "501" },
+        { "/-Genre-/Genre2/-A-/Album - Artist", "502" },
         { "/-Track-/-ABCD-/A", "51" },
         { "/-Track-/--all--", "52" },
         { "/-Year-/2010 - 2019/-all-", "53" },
@@ -156,6 +158,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     std::string date = "2018-01-01";
     std::string year = "2018";
     std::string genre = "Genre";
+    std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
@@ -164,13 +167,14 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     std::map<std::string, std::string> aux;
     std::map<std::string, std::string> res;
 
-    std::map<std::string, std::string> meta {
+    std::vector<std::pair<std::string, std::string>> meta {
         { "dc:title", title },
         { "upnp:artist", artist },
         { "upnp:album", album },
         { "dc:date", date },
         { "upnp:date", year },
         { "upnp:genre", genre },
+        { "upnp:genre", genre2 },
         { "dc:description", desc },
     };
 
@@ -182,7 +186,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
         { "metaData['upnp:album']", album },
         { "metaData['dc:date']", date },
         { "metaData['upnp:date']", year },
-        { "metaData['upnp:genre']", genre },
+        { "metaData['upnp:genre']", fmt::format("{},{}", genre, genre2) },
         { "metaData['dc:description']", desc },
     };
 
@@ -234,11 +238,15 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 
     // GENRE //
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "--all--"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "49", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre2", "--all--"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "491", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "492", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, abcBox(Eq("Artist"), Eq(26), Eq("-"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "-A-", "Album - Artist"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "50", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre2", "-A-", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "501", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "502", UNDEFINED)).WillOnce(Return(0));
 
     // TRACKS //
     EXPECT_CALL(*commonScriptMock, abcBox(Eq("Audio Title"), Eq(6), Eq("-"))).WillOnce(Return(1));

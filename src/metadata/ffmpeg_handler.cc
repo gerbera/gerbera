@@ -167,8 +167,6 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 // ffmpeg library calls
 void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
 {
-    int audioch, sampleFreq;
-    bool audioset, videoset;
     auto resource = item->getResource(0);
     bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
     auto resource2 = isAudioFile ? item->getResource(1) : item->getResource(0);
@@ -190,12 +188,12 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     }
 
     // video resolution, audio sampling rate, nr of audio channels
-    audioset = false;
-    videoset = false;
+    bool audioSet = false;
+    bool videoSet = false;
     for (std::size_t i = 0; i < pFormatCtx->nb_streams; i++) {
         auto st = pFormatCtx->streams[i];
 
-        if (st && !videoset && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO)) {
+        if (st && !videoSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO) {
             auto codecId = as_codecpar(st)->codec_id;
             resource2->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
 
@@ -213,21 +211,21 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                     resource->addOption(RESOURCE_OPTION_FOURCC, fcc);
             }
 
-            if ((as_codecpar(st)->width > 0) && (as_codecpar(st)->height > 0)) {
+            if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
                 resource2->addAttribute(R_RESOLUTION, resolution);
-                videoset = true;
+                videoSet = true;
             }
         }
-        if (st && !audioset && (as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO)) {
+        if (st && !audioSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO) {
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
 
             if (as_codecpar(st)->sample_rate > 0) {
-                sampleFreq = as_codecpar(st)->sample_rate;
+                int sampleFreq = as_codecpar(st)->sample_rate;
 
                 // Fix up Sample rate reporting
                 // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
@@ -235,15 +233,15 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 int bitsPerSample = as_codecpar(st)->bits_per_coded_sample;
                 log_debug("Bits per coded sample: {}", bitsPerSample);
 
-                sampleFreq = sampleFreq * (bitsPerSample > 0 ? bitsPerSample : 1);
+                sampleFreq *= bitsPerSample > 0 ? bitsPerSample : 1;
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
                 resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
-                audioset = true;
+                audioSet = true;
 
-                audioch = as_codecpar(st)->channels;
-                if (audioch > 0) {
-                    log_debug("Added number of audio channels: {} from stream {}", audioch, i);
-                    resource->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(audioch));
+                int audioCh = as_codecpar(st)->channels;
+                if (audioCh > 0) {
+                    log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
+                    resource->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(audioCh));
                 }
             }
         }
@@ -274,6 +272,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     }
 #endif // HAVE_FFMPEGTHUMBNAILER
 }
+
 void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

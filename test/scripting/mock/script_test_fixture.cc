@@ -52,7 +52,7 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
 }
 
 duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
-    const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
+    const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
     const std::string& location, int onlineService)
 {
     const std::string objectName = "orig";

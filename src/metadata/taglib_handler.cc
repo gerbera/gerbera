@@ -81,6 +81,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         { M_ALBUMARTIST, "ALBUMARTIST" },
         { M_COMPOSER, "COMPOSER" },
         { M_CONDUCTOR, "CONDUCTOR" },
+        { M_GENRE, "GENRE" },
         { M_ORCHESTRA, "ORCHESTRA" },
     };
 
@@ -99,9 +100,6 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         value.push_back(fmt::format("{}-01-01", i));
         break;
     }
-    case M_GENRE:
-        value.push_back(tag->genre().to8Bit(true));
-        break;
     case M_DESCRIPTION:
         value.push_back(tag->comment().to8Bit(true));
         break;

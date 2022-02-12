@@ -55,7 +55,7 @@ public:
 
     // Creates a mock item(orig) global object in Duktape context
     static duk_ret_t dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
-        const std::map<std::string, std::string>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
+        const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
         const std::string& location, int onlineService);
 
     // Load playlist file from fixtures
