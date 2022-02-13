@@ -98,6 +98,9 @@ representing the local filesystem.  You can choose folders and items to add to y
 You can add items to the database view, making them accessible to UPNP clients.  A successful addition of a filesystem
 item results in that item being indexed and available in the Database view.
 
+If the file is listed in "Database > PC Directory", then Gerbera already knows about it,
+and clicking "add" does not do anything.
+
 
 Database View
 ~~~~~~~~~~~~~
@@ -116,7 +119,7 @@ You can maintain the database view removing items and edit existing items to kee
 Clients View
 ~~~~~~~~~~~~
 
-The clients view is accessible through the `Clients` menu item.  The view contains details on all clients that contacted the server. 
+The clients view is accessible through the `Clients` menu item.  The view contains details on all clients that contacted the server.
 
 .. image:: _static/clients-view.png
    :alt: Clients view
@@ -158,6 +161,22 @@ operations
 - Deleting the item removes it from the virtual Database View
 
 Item operations act upon existing database items.  You can create new custom items using the Gerbera Trail.
+
+
+PC Directory
+------------
+
+When files are added to Gerbera, they first get added to "Database > PC Directory".
+After that, *virtual items* are added in "Audio", "Photos" or "Video".
+The virtual items reference the entries inside "PC Directory".
+
+When deleting virtual items, only the virtual item itself is deleted.
+When deleting an item inside the "PC Directory" folder, all
+virtual items referencing this item are deleted.
+
+After deleting an entry in the "PC Directory", Gerbera does not know about
+the file anymore. It can be re-added in the "File System" view.
+
 
 Trail Operations
 ~~~~~~~~~~~~~~~~
@@ -211,4 +230,3 @@ the task message bar at the top of the page.
 .. image:: _static/task-message.png
    :alt: Task message
    :target: _static/task-message.png
-
