@@ -56,6 +56,7 @@
 #include "metadata/matroska_handler.h"
 #endif
 
+#include "ffmpeg_thumbnailer_handler.h"
 #include "metadata/metacontent_handler.h"
 
 MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
@@ -126,6 +127,12 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     }
 #endif // HAVE_FFMPEG
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    // Thumbnails for videos
+    if (itemCls == UPNP_CLASS_VIDEO_ITEM)
+        FfmpegThumbnailerHandler(context).fillMetadata(item);
+#endif
+
     // Fanart for audio and video
     if (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)
         FanArtHandler(context).fillMetadata(item);
@@ -172,9 +179,9 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case CH_MATROSKA:
         return std::make_unique<MatroskaHandler>(context);
 #endif
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+#ifdef HAVE_FFMPEGTHUMBNAILER
     case CH_FFTH:
-        return std::make_unique<FfmpegHandler>(context);
+        return std::make_unique<FfmpegThumbnailerHandler>(context);
 #endif
     case CH_FANART:
         return std::make_unique<FanArtHandler>(context);
@@ -204,7 +211,7 @@ static constexpr std::array chKeys = {
     std::pair(CH_TRANSCODE, "Transcode"),
     std::pair(CH_EXTURL, "Exturl"),
     std::pair(CH_MP4, "MP4"),
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+#ifdef HAVE_FFMPEGTHUMBNAILER
     std::pair(CH_FFTH, "FFmpegThumbnailer"),
 #endif
     std::pair(CH_FLAC, "Flac"),

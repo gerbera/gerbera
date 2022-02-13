@@ -56,20 +56,24 @@ public:
     std::string getMimeType() const override;
 
 private:
-    // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
-    // Add a lock around the usage to avoid crashing randomly.
-    mutable std::mutex thumb_mutex;
     std::map<std::string, std::string> specialPropertyMap;
 
     void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
-    std::optional<std::vector<std::byte>> readThumbnailCacheFile(const fs::path& movieFilename) const;
-    void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
-};
 
-fs::path getThumbnailCacheBasePath(const Config& config);
-fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
+    static constexpr auto propertyMap = std::array {
+        std::pair(M_TITLE, "title"),
+        std::pair(M_ARTIST, "artist"),
+        std::pair(M_ALBUM, "album"),
+        std::pair(M_GENRE, "genre"),
+        std::pair(M_DESCRIPTION, "description"),
+        std::pair(M_TRACKNUMBER, "track"),
+        std::pair(M_PARTNUMBER, "discnumber"),
+        std::pair(M_ALBUMARTIST, "album_artist"),
+        std::pair(M_COMPOSER, "composer"),
+    };
+};
 
 #endif //__FFMPEG_HANDLER_H__
 #endif // HAVE_FFMPEG
