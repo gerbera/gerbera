@@ -51,12 +51,6 @@ extern "C" {
 
 } // extern "C"
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
-#include "iohandler/mem_io_handler.h"
-#include <libffmpegthumbnailer/filmstripfilter.h>
-#include <libffmpegthumbnailer/videothumbnailer.h>
-#endif
-
 #include "cds_objects.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -98,17 +92,6 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
 
-    constexpr auto propertyMap = std::array {
-        std::pair(M_TITLE, "title"),
-        std::pair(M_ARTIST, "artist"),
-        std::pair(M_ALBUM, "album"),
-        std::pair(M_GENRE, "genre"),
-        std::pair(M_DESCRIPTION, "description"),
-        std::pair(M_TRACKNUMBER, "track"),
-        std::pair(M_PARTNUMBER, "discnumber"),
-        std::pair(M_ALBUMARTIST, "album_artist"),
-        std::pair(M_COMPOSER, "composer"),
-    };
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
         std::string key = e->key;
         std::string value = e->value;
@@ -246,31 +229,6 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             }
         }
     }
-
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && item->getClass() == UPNP_CLASS_VIDEO_ITEM) {
-        std::string videoresolution = item->getResource(0)->getAttribute(R_RESOLUTION);
-        auto [x, y] = checkResolution(videoresolution);
-
-        if (!videoresolution.empty() && x && y) {
-            auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
-            auto it = mappings.find(CONTENT_TYPE_JPG);
-            std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
-
-            auto ffres = std::make_shared<CdsResource>(CH_FFTH);
-            ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
-            ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
-
-            y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
-            x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-            std::string resolution = fmt::format("{}x{}", x, y);
-            ffres->addAttribute(R_RESOLUTION, resolution);
-            item->addResource(ffres);
-            log_debug("Adding resource for video thumbnail");
-        }
-    }
-#endif // HAVE_FFMPEGTHUMBNAILER
 }
 
 void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
@@ -291,9 +249,7 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     av_register_all();
 #endif
     // Open video file
-    if (avformat_open_input(&pFormatCtx,
-            item->getLocation().c_str(), nullptr, nullptr)
-        != 0)
+    if (avformat_open_input(&pFormatCtx, item->getLocation().c_str(), nullptr, nullptr) != 0)
         return; // Couldn't open file
 
     // Retrieve stream information
@@ -312,85 +268,9 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     avformat_close_input(&pFormatCtx);
 }
 
-#ifdef HAVE_FFMPEGTHUMBNAILER
-
-fs::path getThumbnailCacheBasePath(const Config& config)
-{
-    auto configuredDir = config.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
-    if (!configuredDir.empty())
-        return std::move(configuredDir);
-
-    auto home = config.getOption(CFG_SERVER_HOME);
-    return fs::path(std::move(home)) / "cache-dir";
-}
-
-fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie)
-{
-    assert(movie.is_absolute());
-
-    auto path = base / movie.relative_path();
-    path += "-thumb.jpg";
-    return path;
-}
-
-std::optional<std::vector<std::byte>> FfmpegHandler::readThumbnailCacheFile(const fs::path& movieFilename) const
-{
-    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
-    return GrbFile(path).readBinaryFile();
-}
-
-void FfmpegHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const
-{
-    try {
-        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
-        fs::create_directories(path.parent_path());
-        GrbFile(path).writeBinaryFile(data, size);
-    } catch (const std::runtime_error& e) {
-        log_error("Failed to write thumbnail cache: {}", e.what());
-    }
-}
-#endif
-
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
-#ifdef HAVE_FFMPEGTHUMBNAILER
-    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
-        return nullptr;
-
-    if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
-        return nullptr;
-
-    auto cacheEnabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
-    if (cacheEnabled) {
-        auto data = readThumbnailCacheFile(item->getLocation());
-        if (data) {
-            log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
-            return std::make_unique<MemIOHandler>(data->data(), data->size());
-        }
-    }
-
-    auto thumbLock = std::scoped_lock<std::mutex>(thumb_mutex);
-
-    auto th = ffmpegthumbnailer::VideoThumbnailer(config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE), false, true, config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY), false);
-    std::vector<uint8_t> img;
-
-    th.setSeekPercentage(config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
-        th.addFilter(new ffmpegthumbnailer::FilmStripFilter());
-
-    log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
-
-    th.generateThumbnail(item->getLocation().c_str(), Jpeg, img);
-    if (cacheEnabled) {
-        writeThumbnailCacheFile(item->getLocation(),
-            reinterpret_cast<std::byte*>(img.data()), img.size());
-    }
-
-    return std::make_unique<MemIOHandler>(img.data(), img.size());
-#else
     return nullptr;
-#endif
 }
 
 std::string FfmpegHandler::getMimeType() const

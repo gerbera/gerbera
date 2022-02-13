@@ -146,6 +146,8 @@ add_library(libgerbera STATIC
         src/metadata/exiv2_handler.h
         src/metadata/ffmpeg_handler.cc
         src/metadata/ffmpeg_handler.h
+        src/metadata/ffmpeg_thumbnailer_handler.cc
+        src/metadata/ffmpeg_thumbnailer_handler.h
         src/metadata/metadata_handler.cc
         src/metadata/metadata_handler.h
         src/metadata/libexif_handler.cc
