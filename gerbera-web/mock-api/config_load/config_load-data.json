@@ -1065,7 +1065,7 @@
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
-				"value": "1.7.0"
+				"value": "1.9.2"
 			},
 			{
 				"item": "/server/modelURL",
@@ -1460,7 +1460,7 @@
 				"item": "/server/modelNumber",
 				"id": "8",
 				"type": "String",
-				"value": "1.7.0_git"
+				"value": "1.9.2_git"
 			},
 			{
 				"item": "/server/modelURL",
