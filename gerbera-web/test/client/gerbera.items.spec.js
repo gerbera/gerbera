@@ -32,6 +32,9 @@ describe('Gerbera Items', () => {
     fixture.cleanup();
     done();
   });
+  beforeAll(() => {
+    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => {});
+  });
 
   describe('initialize()', () => {
    beforeEach(() => {
@@ -64,6 +67,7 @@ describe('Gerbera Items', () => {
       };
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       GerberaApp.serverConfig = {};
+      GerberaApp.pageInfo.viewItems = 25;
 
       await Items.initialize();
       Items.treeItemSelected(data);
@@ -127,7 +131,7 @@ describe('Gerbera Items', () => {
     it('sets pager click to the callback method', () => {
       itemsResponse.success = true;
       spyOn(Items, 'retrieveItemsForPage');
-      spyOn(GerberaApp, 'viewItems').and.returnValue(25);
+      spyOn(GerberaApp, 'viewItems').and.returnValue(10);
 
       Items.loadItems(itemsResponse);
       $($('#datagrid nav.grb-pager > ul > li').get(1)).find('a').click();
@@ -782,7 +786,7 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         parent_id: 1235,
         start: 25,
-        count: 50,
+        count: 25,
         updates: 'check'
       };
       data[Auth.SID] = 'SESSION_ID';
@@ -824,7 +828,7 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         parent_id: 1235,
         start: 0,
-        count: 50,
+        count: 25,
         updates: 'check'
       };
       data[Auth.SID] = 'SESSION_ID';

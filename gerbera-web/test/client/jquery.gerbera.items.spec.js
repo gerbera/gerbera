@@ -1,6 +1,6 @@
 import datagridData from './fixtures/datagrid-data';
 
-describe('The jQuery Datagrid', () => {
+describe('The jQuery Items Datagrid', () => {
   'use strict';
   let dataGrid;
 
@@ -183,13 +183,13 @@ describe('The jQuery Datagrid', () => {
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(4);
   });
 
-  it('does not create a pager when no page info exists', () => {
+  it('does not create a pager when no pageCount 0', () => {
     dataGrid.dataitems({
       data: datagridData,
       pager: {pageCount: 0}
     });
 
-    expect($('#datagrid nav.grb-pager').length).toBe(0);
+    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(0);
   });
 
   it('does not create a pager when no page info exists', () => {
@@ -197,7 +197,23 @@ describe('The jQuery Datagrid', () => {
       data: datagridData
     });
 
-    expect($('#datagrid nav.grb-pager').length).toBe(0);
+    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(0);
+  });
+
+  it('creates a items per page select', () => {
+    dataGrid.dataitems({
+      data: datagridData,
+      pager: {pageCount: 10,
+        currentPage: 2,
+        totalMatches: 20,
+        onItemsPerPage: '-',
+        ippOptions: [10, 20, 30],
+        itemsPerPage: 10
+        }
+    });
+
+    expect($('#datagrid nav.grb-pager > ul > select').length).toBe(1);
+    expect($('#datagrid nav.grb-pager > ul > select > option').length).toBe(4);
   });
 
   it('creates a pager that goes to specific page when clicked', () => {
@@ -225,7 +241,7 @@ describe('The jQuery Datagrid', () => {
     dataGrid.dataitems({
       data: datagridData,
       pager: {
-        currentPage: 1,
+        currentPage: 2,
         pageCount: 10,
         onClick: clickSpy,
         onNext: nextSpy,

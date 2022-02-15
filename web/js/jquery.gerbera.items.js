@@ -37,7 +37,7 @@ $.widget('grb.dataitems', {
     let row, content, text;
 
     if (data.length > 0) {
-      for (let i = 0; i < data.length; i++) {
+      for (let i in data) {
         const item = data[i];
         row = $('<tr></tr>');
         content = $('<td></td>');
@@ -60,7 +60,9 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          text.prepend($('<img class="rounded" style="margin-right: 10px" width="36" src="' + item.image + '"/>'));
+          text.prepend($('<img class="rounded grb-thumbnail" src="' + item.image + '"/>'));
+        } else {
+          text.prepend($('<img class="rounded grb-thumbnail"/>'));
         }
         text.addClass('grb-item-url');
 
@@ -134,68 +136,87 @@ $.widget('grb.dataitems', {
     const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
     const grbPager = $('<nav class="grb-pager"></nav>');
     const list = $('<ul class="pagination"></ul>');
-    const previous = $('<li class="page-item">' +
-        '<a class="page-link" href="#" aria-label="Previous">' +
-        '<span aria-hidden="true">&laquo;</span>' +
-        '<span class="sr-only">Previous</span></a>' +
+
+    if (pager && pager.onItemsPerPage && pager.ippOptions) {
+      const itemsPerPage = $('<select name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
+
+      const ippOptions = pager.ippOptions;
+      const pageParams = {
+        itemsPerPage: pager.itemsPerPage,
+        totalMatches: pager.totalMatches,
+        parentId: pager.parentId
+      };
+      for (let ipp in ippOptions) {
+        const ippOption = $('<option'+ (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') +'value="'+ippOptions[ipp]+'">'+ippOptions[ipp]+'</option>' );
+        ippOption.appendTo(itemsPerPage);
+      }
+      $('<option'+ (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') +'value="0">All</option>').appendTo(itemsPerPage);
+      list.append(itemsPerPage);
+      itemsPerPage.change(function () { pager.onItemsPerPage(pageParams, Number.parseInt(itemsPerPage.val())); });
+    }
+
+    if (pager && pager.pageCount && pager.itemsPerPage > 0) {
+      const previous = $('<li class="page-item">' +
+          '<a class="page-link" aria-label="Previous">' +
+          '<span aria-hidden="true">&laquo;</span>' +
+          '<span class="sr-only">Previous</span></a>' +
+          '</li>');
+      const next = $('<li class="page-item">' +
+        '<a class="page-link" aria-label="Next">' +
+        '<span aria-hidden="true">&raquo;</span>' +
+        '<span class="sr-only">Next</span></a>' +
         '</li>');
-    const next = $('<li class="page-item">' +
-      '<a class="page-link" href="#" aria-label="Next">' +
-      '<span aria-hidden="true">&raquo;</span>' +
-      '<span class="sr-only">Next</span></a>' +
-      '</li>');
-    let maxPages;
-    let pageItem;
-    let pageLink;
-    let pageParams;
-
-    list.append(previous);
-
-    if (pager && pager.pageCount) {
-      maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
-
-      if (pager.onNext) {
-        pageParams = {
-          itemsPerPage: pager.itemsPerPage,
-          totalMatches: pager.totalMatches,
-          parentId: pager.parentId
-        };
-        next.find('a').click(pageParams, pager.onNext);
-      }
-
-      if (pager.onPrevious) {
-        pageParams = {
-          itemsPerPage: pager.itemsPerPage,
-          totalMatches: pager.totalMatches,
-          parentId: pager.parentId
-        };
-        previous.find('a').click(pageParams, pager.onPrevious);
-      }
-
-      for (let page = 1; page <= maxPages; page++) {
-        pageItem = $('<li class="page-item"></li>');
-        pageLink = $('<a class="page-link" href="#">' + page + '</a>');
-        pageLink.appendTo(pageItem);
-
-        if (pager.onClick) {
-          pageParams = {
-            pageNumber: page,
+      const maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
+      if (maxPages > 1) {
+        if (pager.onNext) {
+          const pageParams = {
             itemsPerPage: pager.itemsPerPage,
+            totalMatches: pager.totalMatches,
             parentId: pager.parentId
           };
-          pageLink.click(pageParams, pager.onClick);
+          next.find('a').click(pageParams, pager.onNext);
         }
 
-        if (page === pager.currentPage) {
-          pageItem.addClass('active');
+        list.append(previous);
+        if (pager.onPrevious && pager.currentPage > 1) {
+          const pageParams = {
+            itemsPerPage: pager.itemsPerPage,
+            totalMatches: pager.totalMatches,
+            parentId: pager.parentId
+          };
+          previous.find('a').click(pageParams, pager.onPrevious);
+        } else {
+          previous.addClass('disabled');
         }
 
-        list.append(pageItem);
+        for (let page = 1; page <= maxPages; page++) {
+          const pageItem = $('<li class="page-item"></li>');
+          const pageLink = $('<a class="page-link">' + page + '</a>');
+          pageLink.appendTo(pageItem);
+
+          if (pager.onClick) {
+            const pageParams = {
+              pageNumber: page,
+              itemsPerPage: pager.itemsPerPage,
+              parentId: pager.parentId
+            };
+            pageLink.click(pageParams, pager.onClick);
+          }
+
+          if (page === pager.currentPage) {
+            pageItem.addClass('active');
+          }
+
+          list.append(pageItem);
+        }
+        list.append(next);
+        if (pager.currentPage >= maxPages) {
+          next.addClass('disabled');
+        }
       }
-      list.append(next);
-      grbPager.append(list);
-      tfoot.find('td').append(grbPager);
     }
+    grbPager.append(list);
+    tfoot.find('td').append(grbPager);
 
     return tfoot;
   },

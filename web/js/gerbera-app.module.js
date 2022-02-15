@@ -4,7 +4,7 @@
 
     gerbera-app.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2021 Gerbera Contributors
+    Copyright (C) 2016-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -41,6 +41,8 @@ export class App {
     this.pageInfo = {
       dbType: 'home',
       configMode: 'minimal',
+      currentPage: 0,
+      viewItems: 25,
       currentItem: {
         'home': [],
         'db': [],
@@ -102,6 +104,11 @@ export class App {
     this.writeLocalStorage();
   }
 
+  setViewItems(mode) {
+    this.pageInfo.viewItems = mode;
+    this.writeLocalStorage();
+  }
+
   setCurrentItem(item) {
     var parentElement = item.target;
     var tree = [];
@@ -134,6 +141,8 @@ export class App {
     this.pageInfo = {
       dbType: 'home',
       configMode: 'minimal',
+      currentPage: 0,
+      viewItems: 25,
       currentItem: {
         'home': [],
         'db': [],
@@ -165,6 +174,13 @@ export class App {
           if (!('configMode' in this.pageInfo)) {
             this.pageInfo.configMode = 'minimal';
           }
+          if (!('viewItems' in this.pageInfo)) {
+            const itemsPerPage = this.serverConfig['items-per-page'];
+            if (itemsPerPage && itemsPerPage.default) {
+              this.pageInfo.viewItems = itemsPerPage.default;
+            } else {
+              this.pageInfo.viewItems = 25;
+          }}
           if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
             $(this.navLinks[this.pageInfo.dbType]).click();
           }
@@ -253,14 +269,13 @@ export class App {
   }
 
   viewItems () {
-    let viewItemsCount;
-    const itemsPerPage = this.serverConfig['items-per-page'];
-    if (itemsPerPage && itemsPerPage.default) {
-      viewItemsCount = itemsPerPage.default;
-    } else {
-      viewItemsCount = 25;
-    }
-    return viewItemsCount;
+    return this.pageInfo.viewItems;
+  }
+
+  itemsPerPage () {
+    if (this.serverConfig['items-per-page'] && this.serverConfig['items-per-page'].option)
+      return this.serverConfig['items-per-page'].option;
+    return [10,25,50,100];
   }
 
   displayLogin (loggedIn) {

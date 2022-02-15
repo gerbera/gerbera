@@ -4,7 +4,7 @@
 
     gerbera-items.module.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2021 Gerbera Contributors
+    Copyright (C) 2016-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -80,8 +80,10 @@ const loadItems = (response) => {
         onClick: Items.retrieveItemsForPage,
         onNext: Items.nextPage,
         onPrevious: Items.previousPage,
+        onItemsPerPage: Items.changeItemsPerPage,
         totalMatches: response.items.total_matches,
         itemsPerPage: GerberaApp.viewItems(),
+        ippOptions: GerberaApp.itemsPerPage(),
         parentId: response.items.parent_id
       };
     } else if (type === 'fs') {
@@ -116,6 +118,24 @@ const setPage = (pageNumber) => {
 const nextPage = (event) => {
   const pageItem = event.data;
   const pageNumber = GerberaApp.currentPage() + 1;
+  const start = (pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
+  if (start < pageItem.totalMatches) {
+    const pageEvent = {
+      data: {
+        pageNumber: pageNumber,
+        itemsPerPage: pageItem.itemsPerPage,
+        parentId: pageItem.parentId
+      }
+    };
+    return retrieveItemsForPage(pageEvent)
+  } else {
+    return Promise.resolve();
+  }
+};
+
+const changeItemsPerPage = (pageItem, newValue) => {
+  const pageNumber = 1;
+  GerberaApp.setViewItems(newValue);
   const start = (pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
   if (start < pageItem.totalMatches) {
     const pageEvent = {
@@ -351,7 +371,7 @@ const retrieveItemsForPage = (event) => {
   const pageItem = event.data;
   const linkType = (GerberaApp.getType() === 'db') ? 'items' : 'files';
   const start = (pageItem.pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
-  return retrieveGerberaItems(linkType, pageItem.parentId, start, GerberaApp.viewItems())
+  return retrieveGerberaItems(linkType, pageItem.parentId, start, pageItem.itemsPerPage)
     .then((response) => loadItems(response))
     .then(() => {
       setPage(pageItem.pageNumber)
@@ -418,6 +438,7 @@ export const Items = {
   saveItem,
   saveItemComplete,
   setPage,
+  changeItemsPerPage,
   nextPage,
   previousPage,
   transformItems,
