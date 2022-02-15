@@ -11,7 +11,7 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
-    Copyright (C) 2016-2021 Gerbera Contributors
+    Copyright (C) 2016-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -64,6 +64,10 @@ a:hover {
 
 li.nav-item > a {
     color: #bbb;
+}
+
+.nav-link {
+    cursor: pointer;
 }
 
 @media (max-width: 1110px) and (min-width: 768px) {
@@ -415,6 +419,22 @@ body,
 
 .page-link {
     color: #ff7f00;
+    cursor: pointer;
+}
+
+.page-select > option {
+    padding: .5rem .75rem;
+    line-height: 1.25em;
+}
+
+.page-select {
+    color: #ff7f00;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+    border-bottom-right-radius: .25rem;
 }
 
 .page-link:focus,
@@ -486,6 +506,14 @@ body,
 }
 
 .grb-item-buttons {
+}
+
+.grb-thumbnail {
+    margin-right: 10px;
+    object-fit: contain;
+    background: #e9ecef;
+    height: 36px;
+    width: 48px;
 }
 
 .grb-trail .breadcrumb > li + li:before {

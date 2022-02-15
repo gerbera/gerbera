@@ -18,6 +18,9 @@ describe('Gerbera UI App', () => {
         return;
     });
   });
+  beforeAll(() => {
+    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => {});
+  });
 
   describe('initialize()', () => {
     let ajaxSpy, ajaxSetupSpy, cookieSpy;
@@ -223,13 +226,14 @@ describe('Gerbera UI App', () => {
   describe('viewItems()', () => {
     it('returns the default value from server config', () => {
       GerberaApp.serverConfig = convertedConfig.config;
+      GerberaApp.pageInfo.viewItems = convertedConfig.config['items-per-page'].default;
 
       const result = GerberaApp.viewItems();
 
       expect(result).toEqual(50);
     });
     it('loads the # of view items based on default(25) when app config is undefined', async () => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.pageInfo.viewItems = 25;
       expect(GerberaApp.viewItems()).toBe(25);
     });
   });

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" Access-Control-Allow-Origin="*">
     <title>Gerbera Media Server</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/ico">
     <link rel="stylesheet" href="vendor/font-awesome/css/font-awesome.css"/>
@@ -18,20 +18,20 @@
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a id="nav-home" class="navbar-brand" href="#" data-gerbera-menu-cmd="HOME" title="Gerbera"><img src="assets/theme/gerbera-logo-white.png" class="d-inline-block align-top" alt="Gerbera Logo"></a>
+            <a id="nav-home" class="navbar-brand" data-gerbera-menu-cmd="HOME" title="Gerbera"><img src="assets/theme/gerbera-logo-white.png" class="d-inline-block align-top" alt="Gerbera Logo"></a>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a id="nav-db" class="nav-link disabled" href="#database" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i><span> Database</span></a>
+                        <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i><span> Database</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-fs" class="nav-link disabled" href="#filesystem" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i><span> File System</span></a>
+                        <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i><span> File System</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-clients" class="nav-link disabled" href="#clientList" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i><span> Clients</span></a>
+                        <a id="nav-clients" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i><span> Clients</span></a>
                     </li>
                     <li class="nav-item">
-                        <a id="nav-config" class="nav-link disabled" href="#configEditor" data-gerbera-menu-cmd="SELECT_CONFIG" data-gerbera-type="config"><i class="fa fa-sliders"></i><span> Config</span></a>
+                        <a id="nav-config" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CONFIG" data-gerbera-type="config"><i class="fa fa-sliders"></i><span> Config</span></a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
