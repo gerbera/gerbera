@@ -134,21 +134,15 @@ const nextPage = (event) => {
 };
 
 const changeItemsPerPage = (pageItem, newValue) => {
-  const pageNumber = 1;
   GerberaApp.setViewItems(newValue);
-  const start = (pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
-  if (start < pageItem.totalMatches) {
-    const pageEvent = {
-      data: {
-        pageNumber: pageNumber,
-        itemsPerPage: pageItem.itemsPerPage,
-        parentId: pageItem.parentId
-      }
-    };
-    return retrieveItemsForPage(pageEvent)
-  } else {
-    return Promise.resolve();
-  }
+  const pageEvent = {
+    data: {
+      pageNumber: 1,
+      itemsPerPage: newValue,
+      parentId: pageItem.parentId
+    }
+  };
+  return retrieveItemsForPage(pageEvent)
 };
 
 const previousPage = function (event) {
