@@ -32,6 +32,8 @@
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 
+#include <cstddef>
+
 #include <upnp.h>
 
 #include "common.h"
