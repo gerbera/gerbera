@@ -23,7 +23,7 @@ public:
     }
 
     UpnpFileInfo* info;
-    std::unique_ptr<Headers> subject { std::make_unique<Headers>() };
+    Headers subject {};
 };
 
 #if !defined(USING_NPUPNP)
@@ -36,8 +36,8 @@ TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine)
     expected[key] = value;
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -53,8 +53,8 @@ TEST_F(HeadersHelperTest, DoesNotAddTerminationCarriageNewLineWhenAlreadyExists)
     expected[key] = "attachment; filename=\"file.mp3\"";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -70,9 +70,9 @@ TEST_F(HeadersHelperTest, MultipleHeaders)
 
     // act
     for (auto&& add : expected) {
-        subject->addHeader(add.first, add.second);
+        subject.addHeader(add.first, add.second);
     }
-    subject->writeHeaders(info);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -91,9 +91,9 @@ TEST_F(HeadersHelperTest, MultipleHeadersSingleCarriageNewLine)
     expected[key2] = "bytes";
 
     // act
-    subject->addHeader(key, value);
-    subject->addHeader(key2, value2);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.addHeader(key2, value2);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -112,9 +112,9 @@ TEST_F(HeadersHelperTest, MultiBothCarriageNewLine)
     expected[key2] = "bytes";
 
     // act
-    subject->addHeader(key, value);
-    subject->addHeader(key2, value2);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.addHeader(key2, value2);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -130,8 +130,8 @@ TEST_F(HeadersHelperTest, IgnoresDataAfterFirstCarriageNewLine)
     expected[key] = "attachment; filename=\"file.mp3\"";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -145,8 +145,8 @@ TEST_F(HeadersHelperTest, HeaderIsOnlyLinebreakReturnsEmpty)
     std::map<std::string, std::string> expected;
 
     // act
-    subject->addHeader(header, header);
-    subject->writeHeaders(info);
+    subject.addHeader(header, header);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -160,8 +160,8 @@ TEST_F(HeadersHelperTest, HeaderIsEmptyReturnsEmpty)
     std::map<std::string, std::string> expected;
 
     // act
-    subject->addHeader(header, header);
-    subject->writeHeaders(info);
+    subject.addHeader(header, header);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -177,8 +177,8 @@ TEST_F(HeadersHelperTest, HandlesSingleCarriageReturn)
     expected[key] = "attachment; filename=\"file.mp3\"";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -194,8 +194,8 @@ TEST_F(HeadersHelperTest, HandlesSingleNewLine)
     expected[key] = "attachment; filename=\"file.mp3\"";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -209,8 +209,8 @@ TEST_F(HeadersHelperTest, EmptyValueNotAdded)
     std::map<std::string, std::string> expected;
 
     // act
-    subject->addHeader(key, "");
-    subject->writeHeaders(info);
+    subject.addHeader(key, "");
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -224,8 +224,8 @@ TEST_F(HeadersHelperTest, HandlesEmptyString)
     std::map<std::string, std::string> expected;
 
     // act
-    subject->addHeader(header, header);
-    subject->writeHeaders(info);
+    subject.addHeader(header, header);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -241,8 +241,8 @@ TEST_F(HeadersHelperTest, HandlesExtraContent)
     expected[key] = "bar";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
@@ -258,8 +258,8 @@ TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
     expected[key] = "bar";
 
     // act
-    subject->addHeader(key, value);
-    subject->writeHeaders(info);
+    subject.addHeader(key, value);
+    subject.writeHeaders(info);
 
     // assert
     auto actual = Headers::readHeaders(info);
