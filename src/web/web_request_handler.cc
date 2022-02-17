@@ -90,7 +90,8 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {
-        params.merge(decodedParams);
+        for (auto&& [key, value] : decodedParams)
+            params.emplace(key, value);
     }
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
@@ -120,7 +121,8 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {
-        params.merge(decodedParams);
+        for (auto&& [key, value] : decodedParams)
+            params.emplace(key, value);
     }
 
     xmlDoc = std::make_unique<pugi::xml_document>();
