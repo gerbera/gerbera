@@ -85,6 +85,9 @@ public:
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
     explicit ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnpRequest);
 
+    ActionRequest(ActionRequest&&) = default;
+    ActionRequest& operator=(ActionRequest&&) = default;
+
     /// \brief Returns the name of the action.
     std::string getActionName() const;
 

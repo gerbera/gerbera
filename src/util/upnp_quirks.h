@@ -56,7 +56,7 @@ public:
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
-    void addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Headers>& headers) const;
+    void addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers);
 
     /** \brief Add Samsung specific bookmark information to the request's result.
      *
@@ -73,7 +73,7 @@ public:
      * \return void
      *
      */
-    void saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>& request) const;
+    void saveSamsungBookMarkedPosition(ActionRequest& request);
 
     /** \brief get Samsung Feature List
      *
@@ -81,7 +81,7 @@ public:
      * \return void
      *
      */
-    void getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const;
+    void getSamsungFeatureList(ActionRequest& request);
     std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId);
 
     /** \brief get Samsung ObjectID from Index
@@ -90,7 +90,7 @@ public:
      * \return void
      *
      */
-    void getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request) const;
+    void getSamsungObjectIDfromIndex(ActionRequest& request);
 
     /** \brief get Samsung Index from RID
      *
@@ -98,7 +98,7 @@ public:
      * \return void
      *
      */
-    void getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const;
+    void getSamsungIndexfromRID(ActionRequest& request);
 
     /** \brief block XML header in response for broken clients
      *

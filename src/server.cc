@@ -382,9 +382,9 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = std::make_unique<ActionRequest>(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
-            request->update();
+            request.update();
         } catch (const UpnpException& upnpE) {
             ret = upnpE.getErrorCode();
             UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
@@ -441,26 +441,26 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     return 0;
 }
 
-void Server::routeActionRequest(const std::unique_ptr<ActionRequest>& request) const
+void Server::routeActionRequest(ActionRequest& request)
 {
     log_debug("start");
 
     // make sure the request is for our device
-    if (request->getUDN() != serverUDN) {
+    if (request.getUDN() != serverUDN) {
         // not for us
         throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
+    if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
         // log_debug("request for connection manager service");
         cmgr->processActionRequest(request);
-    } else if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
+    } else if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         // log_debug("routeActionRequest: request for content directory service");
         cds->processActionRequest(request);
-    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+    } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service

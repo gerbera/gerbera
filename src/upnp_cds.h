@@ -63,7 +63,7 @@ private:
     /// Browse(string ObjectID, string BrowseFlag, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void doBrowse(const std::unique_ptr<ActionRequest>& request);
+    void doBrowse(ActionRequest& request);
 
     /// \brief UPnP standard defined action: Search()
     /// \param request Incoming ActionRequest.
@@ -71,43 +71,43 @@ private:
     /// Search(string ContainerID, string SearchCriteria, string Filter, ui4 StartingIndex,
     /// ui4 RequestedCount, string SortCriteria, string Result, ui4 NumberReturned,
     /// ui4 TotalMatches, ui4 UpdateID)
-    void doSearch(const std::unique_ptr<ActionRequest>& request);
+    void doSearch(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetSearchCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    static void doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request);
+    static void doGetSearchCapabilities(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    static void doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request);
+    static void doGetSortCapabilities(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const;
+    void doGetSystemUpdateID(ActionRequest& request);
 
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungBookmark(const std::unique_ptr<ActionRequest>& request);
+    static void doSamsungBookmark(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetFeatureListResponse
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request);
+    static void doSamsungFeatureList(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetObjectIDfromIndex
     /// \param request Incoming ActionRequest.
-    static void doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request);
+    static void doSamsungGetObjectIDfromIndex(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetIndexfromRID
     /// \param request Incoming ActionRequest.
-    static void doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request);
+    static void doSamsungGetIndexfromRID(ActionRequest& request);
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
@@ -130,7 +130,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(const std::unique_ptr<ActionRequest>& request);
+    void processActionRequest(ActionRequest& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request SubscriptionRequest to be processed by the function.

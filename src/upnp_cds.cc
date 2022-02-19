@@ -52,11 +52,11 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
     searchableContainers = this->config->getBoolOption(CFG_UPNP_SEARCH_CONTAINER_FLAG);
 }
 
-void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doBrowse(ActionRequest& request)
 {
     log_debug("start");
 
-    auto req = request->getRequest();
+    auto req = request.getRequest();
     auto reqRoot = req->document_element();
 #ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
@@ -76,7 +76,7 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
-    auto&& quirks = request->getQuirks();
+    auto&& quirks = request.getQuirks();
     auto arr = quirks->getSamsungFeatureRoot(objID);
     int objectID = stoiString(objID);
 
@@ -140,22 +140,22 @@ void ContentDirectoryService::doBrowse(const std::unique_ptr<ActionRequest>& req
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
     log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto respRoot = response->document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
     respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
     respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doSearch(ActionRequest& request)
 {
     log_debug("start");
 
-    auto req = request->getRequest();
+    auto req = request.getRequest();
     auto reqRoot = req->document_element();
 #ifdef DEBUG_UPNP
     for (auto&& child : req_root.children()) {
@@ -171,7 +171,7 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
         containerID, searchCriteria, startingIndex, requestedCount, requestedCount);
 
-    auto&& quirks = request->getQuirks();
+    auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
     if (!quirks->blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
@@ -232,115 +232,115 @@ void ContentDirectoryService::doSearch(const std::unique_ptr<ActionRequest>& req
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
     log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto respRoot = response->document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
     respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
     respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSearchCapabilities(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSortCapabilities(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSystemUpdateID(const std::unique_ptr<ActionRequest>& request) const
+void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungBookmark(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doSamsungBookmark(ActionRequest& request)
 {
     log_debug("start");
 
-    request->getQuirks()->saveSamsungBookMarkedPosition(request);
+    request.getQuirks()->saveSamsungBookMarkedPosition(request);
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungFeatureList(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doSamsungFeatureList(ActionRequest& request)
 {
     log_debug("start");
 
-    request->getQuirks()->getSamsungFeatureList(request);
+    request.getQuirks()->getSamsungFeatureList(request);
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungGetObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doSamsungGetObjectIDfromIndex(ActionRequest& request)
 {
     log_debug("start");
 
-    request->getQuirks()->getSamsungObjectIDfromIndex(request);
+    request.getQuirks()->getSamsungObjectIDfromIndex(request);
 
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungGetIndexfromRID(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::doSamsungGetIndexfromRID(ActionRequest& request)
 {
     log_debug("start");
 
-    request->getQuirks()->getSamsungIndexfromRID(request);
+    request.getQuirks()->getSamsungIndexfromRID(request);
 
     log_debug("end");
 }
 
-void ContentDirectoryService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
+void ContentDirectoryService::processActionRequest(ActionRequest& request)
 {
     log_debug("start");
 
-    if (request->getActionName() == "Browse") {
+    if (request.getActionName() == "Browse") {
         doBrowse(request);
-    } else if (request->getActionName() == "GetSearchCapabilities") {
+    } else if (request.getActionName() == "GetSearchCapabilities") {
         doGetSearchCapabilities(request);
-    } else if (request->getActionName() == "GetSortCapabilities") {
+    } else if (request.getActionName() == "GetSortCapabilities") {
         doGetSortCapabilities(request);
-    } else if (request->getActionName() == "GetSystemUpdateID") {
+    } else if (request.getActionName() == "GetSystemUpdateID") {
         doGetSystemUpdateID(request);
-    } else if (request->getActionName() == "Search") {
+    } else if (request.getActionName() == "Search") {
         doSearch(request);
-    } else if (request->getActionName() == "X_SetBookmark") {
+    } else if (request.getActionName() == "X_SetBookmark") {
         doSamsungBookmark(request);
-    } else if (request->getActionName() == "X_GetFeatureList") {
+    } else if (request.getActionName() == "X_GetFeatureList") {
         doSamsungFeatureList(request);
-    } else if (request->getActionName() == "X_GetObjectIDfromIndex") {
+    } else if (request.getActionName() == "X_GetObjectIDfromIndex") {
         doSamsungGetObjectIDfromIndex(request);
-    } else if (request->getActionName() == "X_GetIndexfromRID") {
+    } else if (request.getActionName() == "X_GetIndexfromRID") {
         doSamsungGetIndexfromRID(request);
     } else {
         // invalid or unsupported action
-        log_warning("Unrecognized action {}", request->getActionName().c_str());
-        request->setErrorCode(UPNP_E_INVALID_ACTION);
+        log_warning("Unrecognized action {}", request.getActionName().c_str());
+        request.setErrorCode(UPNP_E_INVALID_ACTION);
     }
 
     log_debug("ContentDirectoryService::processActionRequest: end");

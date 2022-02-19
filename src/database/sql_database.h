@@ -270,11 +270,11 @@ private:
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<std::int32_t>& objectIDs);
 
-    std::unique_ptr<ChangedContainers> _recursiveRemove(
+    ChangedContainers _recursiveRemove(
         const std::vector<std::int32_t>& items,
         const std::vector<std::int32_t>& containers, bool all);
 
-    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty);
+    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(ChangedContainers maybeEmpty);
 
     /* helpers for autoscan */
     void _removeAutoscanDirectory(int autoscanID);

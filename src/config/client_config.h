@@ -71,7 +71,7 @@ protected:
 /// \brief Provides information about one manual client.
 class ClientConfig {
 public:
-    ClientConfig();
+    ClientConfig() = default;
 
     /// \brief Creates a new ClientConfig object.
     /// \param flags quirks flags
@@ -79,29 +79,29 @@ public:
     /// \param userAgent user agent
     ClientConfig(int flags, std::string_view ip, std::string_view userAgent, int captionInfoCount);
 
-    const std::unique_ptr<ClientInfo>& getClientInfo() const { return clientInfo; }
+    const ClientInfo& getClientInfo() const { return clientInfo; }
 
-    int getFlags() const { return clientInfo->flags; }
-    void setFlags(int flags) { this->clientInfo->flags = flags; }
+    int getFlags() const { return clientInfo.flags; }
+    void setFlags(int flags) { this->clientInfo.flags = flags; }
 
-    int getCaptionInfoCount() const { return this->clientInfo->captionInfoCount; }
+    int getCaptionInfoCount() const { return this->clientInfo.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)
     {
-        this->clientInfo->captionInfoCount = captionInfoCount;
+        this->clientInfo.captionInfoCount = captionInfoCount;
     }
 
-    std::string getIp() const { return (this->clientInfo->matchType == ClientMatchType::IP) ? this->clientInfo->match : ""; }
+    std::string getIp() const { return (this->clientInfo.matchType == ClientMatchType::IP) ? this->clientInfo.match : ""; }
     void setIp(std::string_view ip)
     {
-        this->clientInfo->matchType = ClientMatchType::IP;
-        this->clientInfo->match = ip;
+        this->clientInfo.matchType = ClientMatchType::IP;
+        this->clientInfo.match = ip;
     }
 
-    std::string getUserAgent() const { return (this->clientInfo->matchType == ClientMatchType::UserAgent) ? this->clientInfo->match : ""; }
+    std::string getUserAgent() const { return (this->clientInfo.matchType == ClientMatchType::UserAgent) ? this->clientInfo.match : ""; }
     void setUserAgent(std::string_view userAgent)
     {
-        this->clientInfo->matchType = ClientMatchType::UserAgent;
-        this->clientInfo->match = userAgent;
+        this->clientInfo.matchType = ClientMatchType::UserAgent;
+        this->clientInfo.match = userAgent;
     }
 
     /* helpers for clientType stuff */
@@ -118,7 +118,7 @@ public:
 
 protected:
     bool isOrig {};
-    std::unique_ptr<ClientInfo> clientInfo;
+    ClientInfo clientInfo {};
 };
 
 #endif

@@ -46,60 +46,60 @@ ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context
 {
 }
 
-void ConnectionManagerService::doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request)
+void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
-    request->setResponse(std::move(response));
-    request->setErrorCode(UPNP_E_SUCCESS);
+    request.setResponse(std::move(response));
+    request.setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
 }
 
-void ConnectionManagerService::doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request)
+void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request)
 {
     log_debug("start");
 
-    request->setErrorCode(UPNP_E_NOT_EXIST);
+    request.setErrorCode(UPNP_E_NOT_EXIST);
 
     log_debug("doGetCurrentConnectionInfo: end");
 }
 
-void ConnectionManagerService::doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request)
+void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto root = response->document_element();
 
     root.append_child("Source").append_child(pugi::node_pcdata).set_value(csv.c_str());
     root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
 
-    request->setResponse(std::move(response));
-    request->setErrorCode(UPNP_E_SUCCESS);
+    request.setResponse(std::move(response));
+    request.setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
 }
 
-void ConnectionManagerService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
+void ConnectionManagerService::processActionRequest(ActionRequest& request)
 {
     log_debug("start");
 
-    if (request->getActionName() == "GetCurrentConnectionIDs") {
+    if (request.getActionName() == "GetCurrentConnectionIDs") {
         doGetCurrentConnectionIDs(request);
-    } else if (request->getActionName() == "GetCurrentConnectionInfo") {
+    } else if (request.getActionName() == "GetCurrentConnectionInfo") {
         doGetCurrentConnectionInfo(request);
-    } else if (request->getActionName() == "GetProtocolInfo") {
+    } else if (request.getActionName() == "GetProtocolInfo") {
         doGetProtocolInfo(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action {}", request->getActionName().c_str());
-        request->setErrorCode(UPNP_E_INVALID_ACTION);
+        log_debug("unrecognized action {}", request.getActionName().c_str());
+        request.setErrorCode(UPNP_E_INVALID_ACTION);
         //        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
