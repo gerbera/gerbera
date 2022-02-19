@@ -34,7 +34,7 @@ else
     EBML="1.4.2"
     EXIV2="v0.27.5"
     FFMPEGTHUMBNAILER="2.2.2"
-    FMT="8.0.1"
+    FMT="8.1.1"
     GOOGLETEST="1.11.0"
     LASTFM="0.4.0"
     MATROSKA="1.6.3"
