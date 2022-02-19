@@ -51,7 +51,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    static void doGetCurrentConnectionIDs(const std::unique_ptr<ActionRequest>& request);
+    static void doGetCurrentConnectionIDs(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -60,13 +60,13 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    static void doGetCurrentConnectionInfo(const std::unique_ptr<ActionRequest>& request);
+    static void doGetCurrentConnectionInfo(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
     ///
     /// GetProtocolInfo(string Source, string Sink)
-    void doGetProtocolInfo(const std::unique_ptr<ActionRequest>& request);
+    void doGetProtocolInfo(ActionRequest& request);
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
@@ -86,7 +86,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(const std::unique_ptr<ActionRequest>& request);
+    void processActionRequest(ActionRequest& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.

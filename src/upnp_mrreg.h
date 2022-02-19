@@ -59,7 +59,7 @@ protected:
     /// IsAuthorized(string DeviceID, i4 Result)
     ///
     /// This is currently unsupported (always returns 1)
-    static void doIsAuthorized(const std::unique_ptr<ActionRequest>& request);
+    static void doIsAuthorized(ActionRequest& request);
 
     /// \brief Media Receiver Registrar service action: RegisterDevice()
     /// \param request Incoming ActionRequest.
@@ -67,13 +67,13 @@ protected:
     /// RegisterDevice(bin.base64 RegistrationReqMsg, bin.base64 RegistrationRespMsg)
     ///
     /// This action is currently unsupported.
-    static void doRegisterDevice(const std::unique_ptr<ActionRequest>& request);
+    static void doRegisterDevice(ActionRequest& request);
 
     /// \brief Media Receiver Registrar service action: IsValidated()
     /// \param request Incoming ActionRequest.
     ///
     /// IsValidated(string DeviceID, i4 Result)
-    static void doIsValidated(const std::unique_ptr<ActionRequest>& request);
+    static void doIsValidated(ActionRequest& request);
 
     std::shared_ptr<Config> config;
 
@@ -91,7 +91,7 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    static void processActionRequest(const std::unique_ptr<ActionRequest>& request);
+    static void processActionRequest(ActionRequest& request);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.

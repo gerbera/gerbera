@@ -45,7 +45,7 @@ int Quirks::checkFlags(int flags) const
     return pClientInfo ? pClientInfo->flags & flags : 0;
 }
 
-void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Headers>& headers) const
+void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
@@ -56,19 +56,19 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, const std::uni
     auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", url);
-        headers->addHeader("CaptionInfo.sec", url);
-        headers->addHeader("getCaptionInfo.sec", url);
+        headers.addHeader("CaptionInfo.sec", url);
+        headers.addHeader("getCaptionInfo.sec", url);
     }
 }
 
-void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request) const
+void Quirks::getSamsungFeatureList(ActionRequest& request)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
 
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     pugi::xml_document respRoot;
     auto features = respRoot.append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
@@ -92,7 +92,7 @@ void Quirks::getSamsungFeatureList(const std::unique_ptr<ActionRequest>& request
     }
 
     response->document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 }
 
 std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId)
@@ -115,14 +115,14 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
     return {};
 }
 
-void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& request) const
+void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
-    auto reqRoot = request->getRequest()->document_element();
+    auto reqRoot = request.getRequest()->document_element();
 
     log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
@@ -131,18 +131,18 @@ void Quirks::getSamsungObjectIDfromIndex(const std::unique_ptr<ActionRequest>& r
 
     log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 }
 
-void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& request) const
+void Quirks::getSamsungIndexfromRID(ActionRequest& request)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
-    auto reqRoot = request->getRequest()->document_element();
+    auto reqRoot = request.getRequest()->document_element();
 
     log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
@@ -151,9 +151,9 @@ void Quirks::getSamsungIndexfromRID(const std::unique_ptr<ActionRequest>& reques
 
     log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
-    request->setResponse(std::move(response));
+    request.setResponse(std::move(response));
 }
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result) const
@@ -172,13 +172,13 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
     result.append_child("sec:dcmInfo").append_child(pugi::node_pcdata).set_value(dcmInfo.c_str());
 }
 
-void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>& request) const
+void Quirks::saveSamsungBookMarkedPosition(ActionRequest& request)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
         log_debug("saveSamsungBookMarkedPosition called, but it is not enabled for this client");
     } else {
         auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
-        auto reqRoot = request->getRequest()->document_element();
+        auto reqRoot = request.getRequest()->document_element();
         auto objectID = reqRoot.child("ObjectID").text().as_string();
         auto bookMarkPos = std::to_string(stoiString(reqRoot.child("PosSecond").text().as_string()) / divider);
         [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
@@ -191,8 +191,8 @@ void Quirks::saveSamsungBookMarkedPosition(const std::unique_ptr<ActionRequest>&
         };
         content->updateObject(stoiString(objectID), m);
     }
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    request->setResponse(std::move(response));
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    request.setResponse(std::move(response));
 }
 
 bool Quirks::blockXmlDeclaration() const

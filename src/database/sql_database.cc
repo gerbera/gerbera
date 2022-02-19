@@ -1660,7 +1660,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     }
 
     auto rr = _recursiveRemove(items, containers, all);
-    return _purgeEmptyContainers(rr);
+    return _purgeEmptyContainers(std::move(rr));
 }
 
 void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
@@ -1733,10 +1733,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
         itemIds.push_back(objectID);
     }
     auto changedContainers = _recursiveRemove(itemIds, containerIds, all);
-    return _purgeEmptyContainers(changedContainers);
+    return _purgeEmptyContainers(std::move(changedContainers));
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
+Database::ChangedContainers SQLDatabase::_recursiveRemove(
     const std::vector<std::int32_t>& items, const std::vector<std::int32_t>& containers,
     bool all)
 {
@@ -1846,13 +1846,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_recursiveRemove(
     if (!removeIds.empty())
         _removeObjects(removeIds);
     log_debug("end");
-    return std::make_unique<ChangedContainers>(changedContainers);
+    return changedContainers;
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const std::unique_ptr<ChangedContainers>& maybeEmpty)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(ChangedContainers maybeEmpty)
 {
-    log_debug("start upnp: {}; ui: {}", fmt::to_string(fmt::join(maybeEmpty->upnp, ",")), fmt::to_string(fmt::join(maybeEmpty->ui, ",")));
-    if (maybeEmpty->upnp.empty() && maybeEmpty->ui.empty())
+    log_debug("start upnp: {}; ui: {}", fmt::to_string(fmt::join(maybeEmpty.upnp, ",")), fmt::to_string(fmt::join(maybeEmpty.ui, ",")));
+    if (maybeEmpty.upnp.empty() && maybeEmpty.ui.empty())
         return {};
 
     auto tabAlias = identifier("fol");
@@ -1873,8 +1873,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
     ChangedContainers changedContainers;
 
-    auto selUi = std::vector(maybeEmpty->ui);
-    auto selUpnp = std::vector(maybeEmpty->upnp);
+    auto selUi = std::vector(maybeEmpty.ui);
+    auto selUpnp = std::vector(maybeEmpty.upnp);
 
     bool again;
     int count = 0;
@@ -1947,7 +1947,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
-    return std::make_unique<ChangedContainers>(changedContainers);
+    return std::make_unique<ChangedContainers>(std::move(changedContainers));
 }
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)

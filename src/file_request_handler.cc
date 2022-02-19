@@ -102,7 +102,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // for transcoded resources res_id will always be negative
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
 
-    auto headers = std::make_unique<Headers>();
+    auto headers = Headers();
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     std::string mimeType = item ? item->getMimeType() : "";
 
@@ -159,7 +159,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, mimeType), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
         if (!dlnaContentHeader.empty()) {
-            headers->addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
+            headers.addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
     }
 
@@ -168,7 +168,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
     if (!dlnaTransferHeader.empty()) {
-        headers->addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
+        headers.addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
 #ifdef USING_NPUPNP
@@ -177,7 +177,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_ContentType(info, mimeType.c_str());
 #endif
 
-    headers->writeHeaders(info);
+    headers.writeHeaders(info);
 
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
     //      filename, object_id.c_str(), path.c_str(), info->content_type);

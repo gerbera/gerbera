@@ -46,57 +46,57 @@ MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
 {
 }
 
-void MRRegistrarService::doIsAuthorized(const std::unique_ptr<ActionRequest>& request)
+void MRRegistrarService::doIsAuthorized(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
-    request->setResponse(std::move(response));
-    request->setErrorCode(UPNP_E_SUCCESS);
+    request.setResponse(std::move(response));
+    request.setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
 }
 
-void MRRegistrarService::doRegisterDevice(const std::unique_ptr<ActionRequest>& request)
+void MRRegistrarService::doRegisterDevice(ActionRequest& request)
 {
     log_debug("start");
 
-    request->setErrorCode(UPNP_E_NOT_EXIST);
+    request.setErrorCode(UPNP_E_NOT_EXIST);
 
     log_debug("upnpActionGetCurrentConnectionInfo: end");
 }
 
-void MRRegistrarService::doIsValidated(const std::unique_ptr<ActionRequest>& request)
+void MRRegistrarService::doIsValidated(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request->getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
+    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
-    request->setResponse(std::move(response));
-    request->setErrorCode(UPNP_E_SUCCESS);
+    request.setResponse(std::move(response));
+    request.setErrorCode(UPNP_E_SUCCESS);
 
     log_debug("end");
 }
 
-void MRRegistrarService::processActionRequest(const std::unique_ptr<ActionRequest>& request)
+void MRRegistrarService::processActionRequest(ActionRequest& request)
 {
     log_debug("start");
 
-    if (request->getActionName() == "IsAuthorized") {
+    if (request.getActionName() == "IsAuthorized") {
         doIsAuthorized(request);
-    } else if (request->getActionName() == "RegisterDevice") {
+    } else if (request.getActionName() == "RegisterDevice") {
         doRegisterDevice(request);
-    } else if (request->getActionName() == "IsValidated") {
+    } else if (request.getActionName() == "IsValidated") {
         doIsValidated(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action {}", request->getActionName());
-        request->setErrorCode(UPNP_E_INVALID_ACTION);
+        log_debug("unrecognized action {}", request.getActionName());
+        request.setErrorCode(UPNP_E_INVALID_ACTION);
         // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
