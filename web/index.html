@@ -20,23 +20,23 @@
             </button>
             <a id="nav-home" class="navbar-brand" data-gerbera-menu-cmd="HOME" title="Gerbera"><img src="assets/theme/gerbera-logo-white.png" class="d-inline-block align-top" alt="Gerbera Logo"></a>
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
+                <ul id="navbar" class="navbar-nav mr-auto">
+                    <li class="nav-item" style="display: none">
                         <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i><span> Database</span></a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" style="display: none">
                         <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i><span> File System</span></a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" style="display: none">
                         <a id="nav-clients" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i><span> Clients</span></a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" style="display: none">
                         <a id="nav-config" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CONFIG" data-gerbera-type="config"><i class="fa fa-sliders"></i><span> Config</span></a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a id="docs" class="nav-link disabled noactive" href="https://docs.gerbera.io/en/stable/" target="_blank"><i class="fa fa-question-circle"></i><span> Documentation</span></a>
+                        <a id="docs" class="nav-link noactive" href="https://docs.gerbera.io/en/stable/" target="_blank"><i class="fa fa-question-circle"></i><span> Documentation</span></a>
                     </li>
                     <li class="nav-item">
                         <a id="report-issue" class="nav-link noactive" href="https://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i><span> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></span></a>
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="homelinks" style="display: none">
             <div class="col-sm offset-sm-2">
                 <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
                     <h4><i class="fa fa-plus"></i> Add some files</h4>

@@ -130,6 +130,8 @@ const checkLogin = (response) => {
     if (GerberaApp.serverConfig.accounts) {
       $('#logout').show().click(logout);
     }
+    $('#homelinks').show();
+    $('#navbar li').show();
     GerberaApp.setLoggedIn(true);
     Tree.initialize();
     Items.initialize();

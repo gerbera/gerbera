@@ -282,9 +282,11 @@ export class App {
     if (loggedIn) {
       $('.login-field').hide();
       $('#login-submit').hide();
-      if (this.accounts) {
+      if (this.serverConfig.accounts) {
         $('#logout').show().click(Auth.logout);
       }
+      $('#homelinks').show();
+      $('#navbar li').show();
       Items.initialize();
       Tree.initialize();
       Trail.initialize();
