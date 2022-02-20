@@ -319,7 +319,6 @@ body,
     width: 100%;
     display: flex;
     flex-direction: column;
-    line-height: 1em;
     vertical-align: middle;
 }
 
@@ -483,11 +482,12 @@ body,
     cursor: copy;
 }
 
-.grb-item > td > img {
-    margin-left: -0.5rem; /* Counter BS style */
-    margin-top: -0.25rem;
-    margin-bottom: -0.25rem;
-    margin-right: .5rem;
+.grb-item > td {
+    vertical-align: middle;
+}
+
+.grb-item > td {
+    line-height: 36px;
 }
 
 .grb-item-delete,
@@ -511,7 +511,8 @@ body,
 .grb-thumbnail {
     margin-right: 10px;
     object-fit: contain;
-    background: #e9ecef;
+    background: #eee;
+    border: 1px solid #ddd;
     height: 36px;
     width: 48px;
 }

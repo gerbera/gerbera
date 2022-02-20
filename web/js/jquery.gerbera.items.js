@@ -60,9 +60,19 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          text.prepend($('<img class="rounded grb-thumbnail" src="' + item.image + '"/>'));
+          text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
         } else {
-          text.prepend($('<img class="rounded grb-thumbnail"/>'));
+          let icon = "fa-file-o";
+          if (item.mtype) {
+            if (item.mtype.startsWith("audio")) {
+              icon = "fa-music"
+            } else if (item.mtype.startsWith("video")) {
+              icon = "fa-film"
+            } else if (item.mtype.startsWith("image")) {
+              icon = "fa-camera"
+            }
+          }
+          text.prepend($('<div class="d-flex pull-left rounded grb-thumbnail justify-content-center align-items-center"><i style="width: 1em; height: 1em;" class="text-muted fa ' + icon + '"></i></div>'));
         }
         text.addClass('grb-item-url');
 
