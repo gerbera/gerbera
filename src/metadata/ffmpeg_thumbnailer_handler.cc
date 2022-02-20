@@ -33,17 +33,14 @@ fs::path FfmpegThumbnailerHandler::getThumbnailCacheBasePath(const Config& confi
     if (!configuredDir.empty())
         return configuredDir;
 
-    auto home = config_.getOption(CFG_SERVER_HOME);
-    return fs::path(home) / "cache-dir";
+    return fs::path(config_.getOption(CFG_SERVER_HOME)) / "cache-dir";
 }
 
 fs::path FfmpegThumbnailerHandler::getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 {
     assert(movie.is_absolute());
 
-    auto path = base / movie.relative_path();
-    path += "-thumb.jpg";
-    return path;
+    return base / movie.relative_path() + "-thumb.jpg";
 }
 
 std::optional<std::vector<std::byte>> FfmpegThumbnailerHandler::readThumbnailCacheFile(const fs::path& movieFilename) const
