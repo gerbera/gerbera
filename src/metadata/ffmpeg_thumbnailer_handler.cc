@@ -27,13 +27,13 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
-fs::path FfmpegThumbnailerHandler::getThumbnailCacheBasePath(const Config& config_)
+fs::path FfmpegThumbnailerHandler::getThumbnailCacheBasePath() const
 {
-    auto configuredDir = config_.getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    auto configuredDir = config->getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
     if (!configuredDir.empty())
         return configuredDir;
 
-    auto home = config_.getOption(CFG_SERVER_HOME);
+    auto home = config->getOption(CFG_SERVER_HOME);
     return fs::path(home) / "cache-dir";
 }
 
@@ -48,14 +48,14 @@ fs::path FfmpegThumbnailerHandler::getThumbnailCachePath(const fs::path& base, c
 
 std::optional<std::vector<std::byte>> FfmpegThumbnailerHandler::readThumbnailCacheFile(const fs::path& movieFilename) const
 {
-    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
+    auto path = getThumbnailCachePath(getThumbnailCacheBasePath(), movieFilename);
     return GrbFile(path).readBinaryFile();
 }
 
 void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const
 {
     try {
-        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(*config), movieFilename);
+        auto path = getThumbnailCachePath(getThumbnailCacheBasePath(), movieFilename);
         fs::create_directories(path.parent_path());
         GrbFile(path).writeBinaryFile(data, size);
     } catch (const std::runtime_error& e) {
@@ -65,11 +65,11 @@ void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFile
 
 std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
 {
-    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!enabled)
         return nullptr;
 
-    if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (!item)
         return nullptr;
 
     auto cacheEnabled = config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
@@ -102,14 +102,11 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
 
 void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
-    if (!config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED))
+    if (!enabled)
         return;
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
-        return;
-
-    if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
     std::string videoResolution = item->getResource(0)->getAttribute(R_RESOLUTION);
@@ -134,8 +131,9 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     }
 }
 
-FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context)
+FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context, config_option_t checkOption)
     : MetadataHandler(context)
+    , enabled(config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && config->getBoolOption(checkOption))
 {
 }
 

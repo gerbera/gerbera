@@ -33,12 +33,12 @@ Gerbera - https://gerbera.io/
 
 class FfmpegThumbnailerHandler : public MetadataHandler {
 public:
-    explicit FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context);
+    explicit FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context, config_option_t checkOption);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
     // fixme: these should be private
-    static fs::path getThumbnailCacheBasePath(const Config& config);
+    fs::path getThumbnailCacheBasePath() const;
     static fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
 
 private:
@@ -46,6 +46,7 @@ private:
     // Add a lock around the usage to avoid crashing randomly.
     mutable std::mutex thumb_mutex;
 
+    bool enabled {};
     std::optional<std::vector<std::byte>> readThumbnailCacheFile(const fs::path& movieFilename) const;
     void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
 };

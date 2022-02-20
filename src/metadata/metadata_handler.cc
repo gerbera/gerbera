@@ -121,8 +121,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     if (contentType == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(dirEnt.path());
         if (!fourcc.empty()) {
-            item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC,
-                fourcc);
+            item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC, fourcc);
         }
     }
 #endif // HAVE_FFMPEG
@@ -130,7 +129,9 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #ifdef HAVE_FFMPEGTHUMBNAILER
     // Thumbnails for videos
     if (itemCls == UPNP_CLASS_VIDEO_ITEM)
-        FfmpegThumbnailerHandler(context).fillMetadata(item);
+        FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED).fillMetadata(item);
+    else if (itemCls == UPNP_CLASS_IMAGE_ITEM)
+        FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED).fillMetadata(item);
 #endif
 
     // Fanart for audio and video
@@ -181,7 +182,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
 #endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
     case CH_FFTH:
-        return std::make_unique<FfmpegThumbnailerHandler>(context);
+        return std::make_unique<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
 #endif
     case CH_FANART:
         return std::make_unique<FanArtHandler>(context);

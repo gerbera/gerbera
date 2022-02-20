@@ -4,7 +4,7 @@
 
     jquery.gerbera.items.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2021 Gerbera Contributors
+    Copyright (C) 2016-2022 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -27,6 +27,7 @@ $.widget('grb.dataitems', {
     this.element.addClass('grb-dataitems');
     const table = $('<table></table>').addClass('table');
     const tbody = $('<tbody></tbody>');
+    let tcontainer = tbody;
     const data = this.options.data;
     const onDelete = this.options.onDelete;
     const onEdit = this.options.onEdit;
@@ -37,10 +38,32 @@ $.widget('grb.dataitems', {
     let row, content, text;
 
     if (data.length > 0) {
-      for (let i in data) {
-        const item = data[i];
+      if (itemType === 'db' && pager && pager.gridMode > 0) {
         row = $('<tr></tr>');
         content = $('<td></td>');
+        const div = $('<div style="display: flex; flex-wrap: wrap;"></div>');
+        content.append(div);
+        row.append(content);
+        tbody.append(row);
+        tbody.appendTo(table);
+        tcontainer = div;
+      } else {
+        tcontainer.appendTo(table);
+      }
+      for (let i in data) {
+        const item = data[i];
+        const gm = (pager) ? pager.gridMode : 0;
+        switch (gm) {
+          case 1:
+            content = $('<div class="grb-item-grid grb-item-grid-normal justify-content-center align-items-center"></div>');
+            break;
+          case 2:
+            content = $('<div class="grb-item-grid grb-item-grid-large justify-content-center align-items-center"></div>');
+            break;
+          default:
+            content = $('<td></td>');
+            row = $('<tr class="datagrid-row"></tr>');
+        }
 
         var itemText = item.text;
         if (item.track) {
@@ -54,7 +77,23 @@ $.widget('grb.dataitems', {
           text = $('<a></a>');
           text.attr('title', 'Open ' + item.text);
           text.attr('type', item.mtype);
-          text.attr('href', item.url).text(itemText).appendTo(content);
+          text.attr('href', item.url);
+          if (!pager || pager.gridMode === 0) {
+            text.text(itemText);
+            text.appendTo(content);
+          } else {
+            const div = $('<div style="display: grid;"></div>');
+            text.appendTo(div);
+            if (pager.gridMode === 2) {
+              const text2 = $('<a></a>');
+              text2.attr('title', 'Open ' + item.text);
+              text2.attr('type', item.mtype);
+              text2.attr('href', item.url);
+              text2.text(itemText);
+              text2.appendTo(div);
+            }
+            div.appendTo(content);
+          }
         } else {
           text = $('<span></span>');
           text.text(itemText).appendTo(content);
@@ -63,23 +102,23 @@ $.widget('grb.dataitems', {
           text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
         } else {
           let icon = "fa-file-o";
-          if (item.mtype) {
-            if (item.mtype.startsWith("audio")) {
+          if (item.upnp_class) {
+            if (item.upnp_class.startsWith("object.item.audioItem")) {
               icon = "fa-music"
-            } else if (item.mtype.startsWith("video")) {
+            } else if (item.upnp_class.startsWith("object.item.videoItem")) {
               icon = "fa-film"
-            } else if (item.mtype.startsWith("image")) {
+            } else if (item.upnp_class.startsWith("object.item.imageItem")) {
               icon = "fa-camera"
             }
           }
-          text.prepend($('<div class="d-flex pull-left rounded grb-thumbnail justify-content-center align-items-center"><i style="width: 1em; height: 1em;" class="text-muted fa ' + icon + '"></i></div>'));
+          text.prepend($('<div class="d-flex pull-left rounded grb-thumbnail justify-content-center align-items-center"><i class="grb-item-icon text-muted fa ' + icon + '"></i></div>'));
         }
         text.addClass('grb-item-url');
 
         let buttons;
         if (itemType === 'db') {
           buttons = $('<div></div>');
-          buttons.addClass('grb-item-buttons pull-right');
+          buttons.addClass('grb-item-buttons pull-right justify-content-center align-items-center');
 
           const downloadIcon = $('<span></span>');
           downloadIcon.prop('title', 'Download item');
@@ -89,24 +128,24 @@ $.widget('grb.dataitems', {
             downloadIcon.click(item, onDownload);
           }
 
-          const editIcon = $('<span></span>');
-          editIcon.prop('title', 'Edit item');
-          editIcon.addClass('grb-item-edit fa fa-pencil');
-          editIcon.appendTo(buttons);
-          if (onEdit) {
-            editIcon.click(item, onEdit);
-          }
-
-          const deleteIcon = $('<span></span>');
-          deleteIcon.prop('title', 'Delete item');
-          deleteIcon.addClass('grb-item-delete fa fa-trash-o');
-          deleteIcon.appendTo(buttons);
-          if (onDelete) {
-            deleteIcon.click(item, function (event) {
-              row.remove();
-              onDelete(event);
-            });
-          }
+          if (!pager || pager.gridMode === 0) {
+            const editIcon = $('<span></span>');
+            editIcon.prop('title', 'Edit item');
+            editIcon.addClass('grb-item-edit fa fa-pencil');
+            editIcon.appendTo(buttons);
+            if (onEdit) {
+              editIcon.click(item, onEdit);
+            }
+            const deleteIcon = $('<span></span>');
+            deleteIcon.prop('title', 'Delete item');
+            deleteIcon.addClass('grb-item-delete fa fa-trash-o');
+            deleteIcon.appendTo(buttons);
+            if (onDelete) {
+              deleteIcon.click(item, function (event) {
+                row.remove();
+                onDelete(event);
+              });
+          }}
           buttons.appendTo(content);
         } else if (itemType === 'fs') {
           buttons = $('<div></div>');
@@ -121,19 +160,22 @@ $.widget('grb.dataitems', {
           }
           buttons.appendTo(content);
         }
-
-        row.addClass('grb-item');
-        row.append(content);
-        tbody.append(row);
+        if (!pager || pager.gridMode === 0) {
+          row.addClass('grb-item');
+          row.append(content);
+          tcontainer.append(row);
+        } else {
+          content.addClass('grb-item');
+          tcontainer.append(content);
+        }
       }
     } else {
       row = $('<tr></tr>');
       content = $('<td></td>');
       $('<span>No Items found</span>').appendTo(content);
       row.append(content);
-      tbody.append(row);
+      tcontainer.append(row);
     }
-    tbody.appendTo(table);
 
     const tfoot = this.buildFooter(pager);
     table.append(tfoot);
@@ -148,21 +190,43 @@ $.widget('grb.dataitems', {
     const list = $('<ul class="pagination"></ul>');
 
     if (pager && pager.onItemsPerPage && pager.ippOptions) {
-      const itemsPerPage = $('<select name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
+      const ippSelect = $('<select name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
 
       const ippOptions = pager.ippOptions;
       const pageParams = {
         itemsPerPage: pager.itemsPerPage,
+        gridMode: pager.gridMode,
         totalMatches: pager.totalMatches,
         parentId: pager.parentId
       };
       for (let ipp in ippOptions) {
-        const ippOption = $('<option'+ (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') +'value="'+ippOptions[ipp]+'">'+ippOptions[ipp]+'</option>' );
-        ippOption.appendTo(itemsPerPage);
+        const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">' + ippOptions[ipp] + '</option>' );
+        ippOption.appendTo(ippSelect);
       }
-      $('<option'+ (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') +'value="0">All</option>').appendTo(itemsPerPage);
-      list.append(itemsPerPage);
-      itemsPerPage.change(function () { pager.onItemsPerPage(pageParams, Number.parseInt(itemsPerPage.val())); });
+      $('<option' + (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') + 'value="0">All</option>').appendTo(ippSelect);
+      list.append(ippSelect);
+      ippSelect.change(function () { pager.onItemsPerPage(pageParams, Number.parseInt(ippSelect.val())); });
+    }
+    if (pager && pager.onModeSelect) {
+      const gridModes = [
+        { id: 0, label: 'Table' },
+        { id: 1, label: 'Grid' },
+        { id: 2, label: 'Large Grid' },
+      ];
+      const pageParams = {
+        pageNumber: pager.currentPage,
+        itemsPerPage: pager.itemsPerPage,
+        gridMode: pager.gridMode,
+        totalMatches: pager.totalMatches,
+        parentId: pager.parentId
+      };
+      const gmSelect = $('<select name="gridSelect" id="gridSelect" style="margin-right: 10px" class="page-link page-select"></select>');
+      for (let gm in gridModes) {
+        const gridModeOption = $('<option' + (pager.gridMode === gridModes[gm].id ? ' selected="selected" ' : ' ') + 'value="' + gridModes[gm].id + '">' + gridModes[gm].label + '</option>' );
+        gridModeOption.appendTo(gmSelect);
+      }
+      list.append(gmSelect);
+      gmSelect.change(function () { pager.onModeSelect(pageParams, Number.parseInt(gmSelect.val())); });
     }
 
     if (pager && pager.pageCount && pager.itemsPerPage > 0) {
@@ -181,6 +245,7 @@ $.widget('grb.dataitems', {
         if (pager.onNext) {
           const pageParams = {
             itemsPerPage: pager.itemsPerPage,
+            gridMode: pager.gridMode,
             totalMatches: pager.totalMatches,
             parentId: pager.parentId
           };
@@ -191,6 +256,7 @@ $.widget('grb.dataitems', {
         if (pager.onPrevious && pager.currentPage > 1) {
           const pageParams = {
             itemsPerPage: pager.itemsPerPage,
+            gridMode: pager.gridMode,
             totalMatches: pager.totalMatches,
             parentId: pager.parentId
           };
@@ -207,6 +273,7 @@ $.widget('grb.dataitems', {
           if (pager.onClick) {
             const pageParams = {
               pageNumber: page,
+              gridMode: pager.gridMode,
               itemsPerPage: pager.itemsPerPage,
               parentId: pager.parentId
             };
