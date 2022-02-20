@@ -6,7 +6,6 @@ Configure Extended Runtime Options
 ``extended-runtime-options``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 ::
 
     <extended-runtime-options>
@@ -37,6 +36,24 @@ can try enabling this option.
 
 The following options allow to control the ffmpegthumbnailer library (these are basically the same options as the
 ones offered by the ffmpegthumbnailer command line application). All tags below are optional and have sane default values.
+
+    ::
+
+            video-enabled=...
+
+    * Optional
+    * Default: **yes**
+
+    Enables or disables the use thumbnails for videos, set to ``no`` to disable the feature.
+
+    ::
+
+            image-enabled=...
+
+    * Optional
+    * Default: **yes**
+
+    Enables or disables the use thumbnails for images, set to ``no`` to disable the feature.
 
     ::
 

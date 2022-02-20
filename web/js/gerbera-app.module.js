@@ -43,6 +43,7 @@ export class App {
       configMode: 'minimal',
       currentPage: 0,
       viewItems: 25,
+      gridMode: 0,
       currentItem: {
         'home': [],
         'db': [],
@@ -104,6 +105,11 @@ export class App {
     this.writeLocalStorage();
   }
 
+  setGridMode(mode) {
+    this.pageInfo.gridMode = mode;
+    this.writeLocalStorage();
+  }
+
   setViewItems(mode) {
     this.pageInfo.viewItems = mode;
     this.writeLocalStorage();
@@ -143,6 +149,7 @@ export class App {
       configMode: 'minimal',
       currentPage: 0,
       viewItems: 25,
+      gridMode: 0,
       currentItem: {
         'home': [],
         'db': [],
@@ -173,6 +180,9 @@ export class App {
           this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
           if (!('configMode' in this.pageInfo)) {
             this.pageInfo.configMode = 'minimal';
+          }
+          if (!('gridMode' in this.pageInfo)) {
+            this.pageInfo.gridMode = 0;
           }
           if (!('viewItems' in this.pageInfo)) {
             const itemsPerPage = this.serverConfig['items-per-page'];
@@ -270,6 +280,10 @@ export class App {
 
   viewItems () {
     return this.pageInfo.viewItems;
+  }
+
+  gridMode () {
+    return this.pageInfo.gridMode;
   }
 
   itemsPerPage () {

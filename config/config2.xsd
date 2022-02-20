@@ -152,6 +152,8 @@
                 <xs:element ref="image-quality" minOccurs="1"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="no"/>
+            <xs:attribute name="video-enabled" type="boolean" default="yes"/>
+            <xs:attribute name="image-enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

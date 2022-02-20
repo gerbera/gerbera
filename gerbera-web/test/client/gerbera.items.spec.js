@@ -96,6 +96,7 @@ describe('Gerbera Items', () => {
     beforeEach(() => {
       GerberaApp.serverConfig = {};
       spyOn(GerberaApp, 'getType').and.returnValue('db');
+      spyOn(GerberaApp, 'gridMode').and.returnValue(0);
       $('#tree').tree({
         data: treeDataJson,
         config: {

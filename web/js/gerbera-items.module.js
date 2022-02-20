@@ -77,10 +77,12 @@ const loadItems = (response) => {
       pager = {
         currentPage: Math.ceil(response.items.start / GerberaApp.viewItems()) + 1,
         pageCount: 10,
+        gridMode: GerberaApp.gridMode(),
         onClick: Items.retrieveItemsForPage,
         onNext: Items.nextPage,
         onPrevious: Items.previousPage,
         onItemsPerPage: Items.changeItemsPerPage,
+        onModeSelect: Items.changeGridMode,
         totalMatches: response.items.total_matches,
         itemsPerPage: GerberaApp.viewItems(),
         ippOptions: GerberaApp.itemsPerPage(),
@@ -139,6 +141,20 @@ const changeItemsPerPage = (pageItem, newValue) => {
     data: {
       pageNumber: 1,
       itemsPerPage: newValue,
+      gridMode: pageItem.gridMode,
+      parentId: pageItem.parentId
+    }
+  };
+  return retrieveItemsForPage(pageEvent)
+};
+
+const changeGridMode = (pageItem, newValue) => {
+  GerberaApp.setGridMode(newValue);
+  const pageEvent = {
+    data: {
+      pageNumber: pageItem.pageNumber,
+      itemsPerPage: pageItem.itemsPerPage,
+      gridMode: newValue,
       parentId: pageItem.parentId
     }
   };
@@ -327,6 +343,7 @@ const transformItems = (items) => {
       text: gItem.title,
       url: gItem.res,
       mtype: ('mtype' in gItem) ? gItem.mtype : null,
+      upnp_class: ('upnp_class' in gItem) ? gItem.upnp_class : null,
       image: ('image' in gItem) ? gItem.image : null,
       part: ('part' in gItem) ? gItem.part : null,
       track: ('track' in gItem) ? gItem.track : null
@@ -433,6 +450,7 @@ export const Items = {
   saveItemComplete,
   setPage,
   changeItemsPerPage,
+  changeGridMode,
   nextPage,
   previousPage,
   transformItems,

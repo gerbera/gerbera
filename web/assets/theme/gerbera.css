@@ -351,7 +351,7 @@ body,
     width: 100%;
 }
 
-#datagrid table tbody tr:hover,
+.datagrid-row:hover,
 #clientgrid table tbody tr:hover {
     background-color: #e9ecef;
 }
@@ -507,7 +507,10 @@ body,
 
 .grb-item-buttons {
 }
-
+.grb-item-icon {
+    width: 1em;
+    height: 1em;
+}
 .grb-thumbnail {
     margin-right: 10px;
     object-fit: contain;
@@ -515,6 +518,48 @@ body,
     border: 1px solid #ddd;
     height: 36px;
     width: 48px;
+}
+
+.grb-item-grid {
+    display: grid;
+    align-content: center;
+    padding: 8px;
+    border: 1px solid #e9ecef;
+}
+.grb-item-grid .grb-item-icon {
+    font-size: x-large;
+}
+
+.grb-item-grid-normal .grb-thumbnail {
+    margin-right: 0;
+    height: 90px;
+    width: 120px;
+}
+.grb-item-grid-normal > div > a {
+    font-size: x-small;
+    width: 120px;
+}
+
+.grb-item-grid-large .grb-thumbnail {
+    margin-right: 0;
+    height: 120px;
+    width: 160px;
+}
+.grb-item-grid-large > div > a {
+    font-size: x-small;
+    width: 160px;
+}
+
+.grb-item-grid:hover {
+    background-color: #e9ecef;
+}
+
+.grb-item-grid > div {
+    display: grid;
+}
+
+.grb-item-grid .grb-item-download {
+    margin: 0;
 }
 
 .grb-trail .breadcrumb > li + li:before {
