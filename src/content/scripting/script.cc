@@ -68,15 +68,14 @@ static constexpr auto jsGlobalFunctions = std::array {
 
 std::string Script::getProperty(const std::string& name) const
 {
-    std::string ret;
     if (!duk_is_object_coercible(ctx, -1))
-        return ret;
+        return {};
     duk_get_prop_string(ctx, -1, name.c_str());
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
         duk_pop(ctx);
-        return ret;
+        return {};
     }
-    ret = duk_get_string(ctx, -1);
+    auto ret = duk_get_string(ctx, -1);
     duk_pop(ctx);
     return ret;
 }
@@ -111,14 +110,14 @@ int Script::getIntProperty(const std::string& name, int def) const
 
 std::vector<std::string> Script::getArrayProperty(const std::string& name) const
 {
-    std::vector<std::string> result;
     if (!duk_is_object_coercible(ctx, -1))
-        return result;
+        return {};
     duk_get_prop_string(ctx, -1, name.c_str());
     if (duk_is_null_or_undefined(ctx, -1) || !duk_is_array(ctx, -1)) {
         duk_pop(ctx);
-        return result;
+        return {};
     }
+    std::vector<std::string> result;
     duk_enum(ctx, -1, 0);
     while (duk_next(ctx, -1, 1 /* get_value */)) {
         duk_get_string(ctx, -1);

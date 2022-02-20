@@ -98,14 +98,14 @@ void Session::containerChangedUI(const std::vector<int>& objectIDs)
 
 std::string Session::getUIUpdateIDs()
 {
-    std::string ret;
     if (!hasUIUpdateIDs())
-        return ret;
+        return {};
     AutoLockR lock(rmutex);
     if (updateAll) {
         updateAll = false;
         return "all";
     }
+    std::string ret;
     if (!uiUpdateIDs.empty()) {
         ret = fmt::format("{}", fmt::join(uiUpdateIDs, ","));
         uiUpdateIDs.clear();
