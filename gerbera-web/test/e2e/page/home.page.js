@@ -320,6 +320,14 @@ module.exports = function (driver) {
     return await driver.findElements(By.css('.page-item'));
   };
 
+  this.setSelectValue = async (key, value) => {
+    var dropDown = await driver.findElement(By.id(key));
+    await dropDown.click();
+    //Select value from first dropDown
+    await dropDown.findElement(By.css("option[value='" + value + "']")).click();
+    await driver.sleep(500); // wait a bit
+  };
+
   this.clients = async () => {
     await driver.wait(until.elementLocated(By.id('clientgrid')), 1000);
     return await driver.findElements(By.className('grb-client'));

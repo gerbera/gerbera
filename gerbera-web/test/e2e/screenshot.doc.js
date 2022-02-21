@@ -77,6 +77,38 @@ suite(() => {
       image.resize(1280, Jimp.AUTO).write(fileName);
     });
 
+    it('for [database small grid view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'database-smallgrid-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.setSelectValue('gridSelect', 1);
+      await homePage.setSelectValue('ippSelect', 0);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
+    it('for [database large grid view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'database-largegrid-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Video');
+      await homePage.setSelectValue('gridSelect', 2);
+      await homePage.setSelectValue('ippSelect', 10);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
     it('for [filesystem view]', async () => {
       const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png';
       await loginPage.username('user');
