@@ -31,6 +31,7 @@
 
 #include "pages.h" // API
 
+#include "content/content_manager.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -65,6 +66,7 @@ void Web::Directories::process()
 
     std::error_code ec;
     std::map<std::string, dirInfo> filesMap;
+    auto autoscanDirs = content->getAutoscanDirectories();
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
@@ -87,16 +89,21 @@ void Web::Directories::process()
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap.emplace(id, std::pair(filepath.filename(), hasContent));
+        filesMap.emplace(id, std::pair(filepath, hasContent));
     }
 
     auto f2i = StringConverter::f2i(config);
     for (auto&& [key, val] : filesMap) {
-        auto&& [file, has] = val;
+        auto file = val.first;
+        auto&& has = val.second;
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
         ce.append_attribute("child_count") = has;
-
-        ce.append_attribute("title") = f2i->convert(file).c_str();
+        auto aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return file == a->getLocation(); });
+        if (aDir != autoscanDirs.end()) {
+            ce.append_attribute("autoscan_type") = (*aDir)->persistent() ? "persistent" : "ui";
+            ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
+        }
+        ce.append_attribute("title") = f2i->convert(file.filename()).c_str();
     }
 }
