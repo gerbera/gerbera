@@ -82,7 +82,7 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
     if (a != 0xff || iohFgetc(ioh) != M_SOI)
         throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
 
-    for (;;) {
+    while (true) {
         int marker = 0;
         std::byte data[ITEM_BUF_SIZE];
 
