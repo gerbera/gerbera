@@ -103,6 +103,12 @@ void Web::Directories::process()
         if (aDir != autoscanDirs.end()) {
             ce.append_attribute("autoscan_type") = (*aDir)->persistent() ? "persistent" : "ui";
             ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
+        } else {
+            aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return a->getRecursive() && startswith(file.string(), a->getLocation().string()); });
+            if (aDir != autoscanDirs.end()) {
+                ce.append_attribute("autoscan_type") = "parent";
+                ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
+            }
         }
         ce.append_attribute("title") = f2i->convert(file.filename()).c_str();
     }

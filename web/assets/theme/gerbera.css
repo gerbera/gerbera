@@ -654,6 +654,9 @@ body,
     background-color: darkorange;
 }
 
+.autoscan-child {
+    background-color: #e9ecef;
+}
 .badge {
     margin-left: 5px;
     margin-right: 5px;

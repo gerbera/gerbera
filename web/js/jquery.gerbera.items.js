@@ -104,11 +104,11 @@ $.widget('grb.dataitems', {
           let icon = "fa-file-o";
           if (item.upnp_class) {
             if (item.upnp_class.startsWith("object.item.audioItem")) {
-              icon = "fa-music"
+              icon = "fa-music";
             } else if (item.upnp_class.startsWith("object.item.videoItem")) {
-              icon = "fa-film"
+              icon = "fa-film";
             } else if (item.upnp_class.startsWith("object.item.imageItem")) {
-              icon = "fa-camera"
+              icon = "fa-camera";
             }
           }
           text.prepend($('<div class="d-flex pull-left rounded grb-thumbnail justify-content-center align-items-center"><i class="grb-item-icon text-muted fa ' + icon + '"></i></div>'));
