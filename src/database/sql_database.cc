@@ -2473,12 +2473,13 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             resId++;
         }
         // res_id in db resources but not obj resources, so needs a delete
-        for (; resId < dbResources.size(); resId++) {
+        while (resId < dbResources.size()) {
             if (dbResources.at(resId)) {
                 std::map<std::string, std::string> resourceSql;
                 resourceSql["res_id"] = quote(resId);
                 operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete);
             }
+            ++resId;
         }
     }
 }
