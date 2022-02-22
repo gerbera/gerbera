@@ -69,10 +69,16 @@ $.widget('grb.tree', {
       if (data[i].badge) {
         for (const badgeData of data[i].badge) {
           if (badgeData === 'a') {
-            const aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').html("<i class=\"fa fa-refresh\"/> Autoscan Folder");
+            const aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').html('<i class="fa fa-refresh"/> Autoscan Folder');
             aBadge.addClass('pull-right autoscan');
             aBadge.click({id: data[i].gerbera.id}, config.onAutoscanEdit);
             aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType);
+            badges.push(aBadge);
+          } else if (badgeData === 'p') {
+            const aBadge = $('<span></span>').addClass('badge badge-pill badge-secondary').html('<i class="fa fa-refresh"/>');
+            aBadge.addClass('pull-right');
+            aBadge.addClass('autoscan-child');
+            aBadge.prop('title', 'Autoscan by ' + data[i].gerbera.autoScanType);
             badges.push(aBadge);
           } else if (!isNaN(badgeData)) {
             item.addClass("has-children");

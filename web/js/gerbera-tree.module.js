@@ -243,6 +243,8 @@ const generateBadges = (item) => {
 
   if (item.autoscan_type === 'ui' || item.autoscan_type === 'persistent') {
     badges.push('a');
+  } else if (item.autoscan_type === 'parent') {
+    badges.push('p');
   }
 
   return badges;
