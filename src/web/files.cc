@@ -61,11 +61,11 @@ void Web::Files::process()
 
         if (!isRegularFile(it, ec))
             continue;
-        if (excludeConfigFiles && startswith(filepath.filename().string(), "."))
+        if (excludeConfigFiles && (filepath.filename() <= "."))
             continue;
         if (!includesFullpath.empty()
             && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
-                [=](auto&& sub) { return startswith(filepath.string(), sub); }))
+                [=](auto&& sub) { return filepath <= sub; }))
             continue; // skip unwanted file
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());

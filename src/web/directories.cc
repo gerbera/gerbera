@@ -75,13 +75,13 @@ void Web::Directories::process()
             continue;
         if (!includesFullpath.empty()
             && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
-                [&](auto&& sub) { return startswith(filepath.string(), sub) || startswith(sub, filepath.string()); }))
+                [&](auto&& sub) { return (filepath <= sub); }))
             continue; // skip unwanted dir
         if (includesFullpath.empty()) {
             if (std::find(excludesFullpath.begin(), excludesFullpath.end(), filepath) != excludesFullpath.end())
                 continue; // skip excluded dir
             if (std::find(excludesDirname.begin(), excludesDirname.end(), filepath.filename()) != excludesDirname.end()
-                || (excludeConfigDirs && startswith(filepath.filename().string(), ".")))
+                || (excludeConfigDirs && (filepath.filename() <= ".")))
                 continue; // skip dir with leading .
         }
         auto dir = fs::directory_iterator(filepath, ec);
@@ -104,7 +104,7 @@ void Web::Directories::process()
             ce.append_attribute("autoscan_type") = (*aDir)->persistent() ? "persistent" : "ui";
             ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
         } else {
-            aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return a->getRecursive() && startswith(file.string(), a->getLocation().string()); });
+            aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return a->getRecursive() && (file <= a->getLocation()); });
             if (aDir != autoscanDirs.end()) {
                 ce.append_attribute("autoscan_type") = "parent";
                 ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
