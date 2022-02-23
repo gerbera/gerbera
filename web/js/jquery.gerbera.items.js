@@ -37,6 +37,13 @@ $.widget('grb.dataitems', {
     const pager = this.options.pager;
     let row, content, text;
 
+    if (data.length === 0) {
+      /* Show a friendly message if there are no rows */
+      this.element.append("<h5 class=\"mt-4 text-center text-muted\">Empty</h5>" +
+          "<h6 class=\"mt-0 text-center text-muted\">Please pick another container from the tree</h6>");
+      return;
+    }
+
     if (data.length > 0) {
       if (itemType === 'db' && pager && pager.gridMode > 0) {
         row = $('<tr></tr>');
