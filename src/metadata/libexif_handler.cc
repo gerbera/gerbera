@@ -178,7 +178,7 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
     std::array<char, BUFLEN> exif_entry_buffer;
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer.data(), BUFLEN)
 
-    for (std::size_t i = 0; i < content->count; i++) {
+    for (std::size_t i = 0; i < content->count; ++i) {
         ExifEntry* e = content->entries[i];
 
         // log_debug("Processing entry: {}", i);

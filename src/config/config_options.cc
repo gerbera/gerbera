@@ -43,7 +43,7 @@ std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool fo
 
     std::map<std::string, std::string> editOption;
     auto editSize = getEditSize();
-    for (std::size_t i = 0; i < editSize; i++) {
+    for (std::size_t i = 0; i < editSize; ++i) {
         // add index in front of key to get items correct sorting in map
         if (indexMap.find(i) != indexMap.end() && !indexMap.at(i).empty()) {
             editOption[fmt::format("{:05d}{}", i, indexMap.at(i))] = option.at(indexMap.at(i));
@@ -63,7 +63,7 @@ void DictionaryOption::setKey(std::size_t keyIndex, const std::string& newKey)
         if (!newKey.empty()) {
             option[newKey] = oldValue;
         } else {
-            for (std::size_t i = getEditSize() - 1; i >= origSize; i--) {
+            for (std::size_t i = getEditSize() - 1; i >= origSize; --i) {
                 if (indexMap.find(i) != indexMap.end() && indexMap[keyIndex].empty()) {
                     option.erase(indexMap[i]);
                 } else {
@@ -91,7 +91,7 @@ std::vector<std::string> ArrayOption::getArrayOption(bool forEdit) const
     auto editSize = getEditSize();
     std::vector<std::string> editOption;
     editOption.reserve(editSize);
-    for (std::size_t i = 0; i < editSize; i++) {
+    for (std::size_t i = 0; i < editSize; ++i) {
         editOption.push_back((indexMap.find(i) != indexMap.end() && indexMap.at(i) < std::numeric_limits<std::size_t>::max()) ? option[indexMap.at(i)] : "");
     }
     return editOption;
@@ -103,12 +103,12 @@ void ArrayOption::setItem(std::size_t index, const std::string& value)
     if (indexMap.find(index) != indexMap.end() && value.empty()) {
         option.erase(option.begin() + indexMap[index]);
         indexMap[index] = std::numeric_limits<std::size_t>::max();
-        for (std::size_t i = index + 1; i < editSize; i++) {
+        for (std::size_t i = index + 1; i < editSize; ++i) {
             if (indexMap[i] < std::numeric_limits<std::size_t>::max()) {
                 indexMap[i]--;
             }
         }
-        for (std::size_t i = editSize - 1; i >= origSize; i--) {
+        for (std::size_t i = editSize - 1; i >= origSize; --i) {
             if (indexMap[i] == std::numeric_limits<std::size_t>::max())
                 indexMap.erase(i);
             else {
@@ -117,14 +117,14 @@ void ArrayOption::setItem(std::size_t index, const std::string& value)
         }
     } else if (indexMap.find(index) != indexMap.end()) {
         if (indexMap[index] == std::numeric_limits<std::size_t>::max()) {
-            for (std::size_t i = editSize - 1; i > index; i--) {
+            for (std::size_t i = editSize - 1; i > index; --i) {
                 if (indexMap[i] < std::numeric_limits<std::size_t>::max()) {
                     indexMap[index] = indexMap[i];
-                    indexMap[i]++;
+                    ++indexMap[i];
                 }
             }
             if (indexMap[index] == std::numeric_limits<std::size_t>::max()) {
-                for (std::size_t i = 0; i < index; i++) {
+                for (std::size_t i = 0; i < index; ++i) {
                     if (indexMap[i] < std::numeric_limits<std::size_t>::max()) {
                         indexMap[index] = indexMap[i] + 1;
                     }

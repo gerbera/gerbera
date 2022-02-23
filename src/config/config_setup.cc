@@ -588,7 +588,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         }
 
         auto editSize = value->getEditSize();
-        for (i = 0; i < editSize; i++) {
+        for (i = 0; i < editSize; ++i) {
             if (updateItem(i, optItem, config, value, optValue)) {
                 return true;
             }
@@ -798,7 +798,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
             if (updateItem(i, optItem, config, value, key, optValue)) {
                 return true;
             }
-            i++;
+            ++i;
         }
     }
     return false;
@@ -987,7 +987,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
                 return true;
             }
         }
-        for (i = 0; i < list->getEditSize(); i++) {
+        for (i = 0; i < list->getEditSize(); ++i) {
             auto entry = list->get(i, true);
             if (updateItem(i, optItem, config, entry, optValue)) {
                 return true;
@@ -1242,7 +1242,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     // log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
                     return false;
                 }
-                i++;
+                ++i;
             }
         }
         i = 0;
@@ -1439,7 +1439,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 entry->setAVIFourCCList(fccList, fccMode);
                 return true;
             }
-            i++;
+            ++i;
         }
     }
     return false;
@@ -1565,7 +1565,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
                 return true;
             }
         }
-        for (std::size_t client = 0; client < list->size(); client++) {
+        for (std::size_t client = 0; client < list->size(); ++client) {
             auto entry = value->getClientConfigListOption()->get(client);
             if (updateItem(client, optItem, config, entry, optValue)) {
                 return true;
@@ -1799,7 +1799,7 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
                 return true;
             }
         }
-        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
+        for (std::size_t tweak = 0; tweak < list->size(); ++tweak) {
             auto entry = value->getDirectoryTweakOption()->get(tweak);
             if (updateItem(tweak, optItem, config, entry, optValue)) {
                 return true;
@@ -1964,7 +1964,7 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::st
                 return true;
             }
         }
-        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
+        for (std::size_t tweak = 0; tweak < list->size(); ++tweak) {
             auto entry = value->getDynamicContentListOption()->get(tweak);
             if (updateItem(tweak, optItem, config, entry, optValue)) {
                 return true;

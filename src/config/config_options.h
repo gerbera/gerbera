@@ -147,7 +147,7 @@ public:
         std::size_t i = 0;
         for (auto&& [key, val] : this->option) {
             this->indexMap[i] = key;
-            i++;
+            ++i;
         }
     }
 
@@ -176,7 +176,7 @@ public:
         : option(std::move(option))
     {
         this->origSize = this->option.size();
-        for (std::size_t i = 0; i < this->origSize; i++) {
+        for (std::size_t i = 0; i < this->origSize; ++i) {
             this->indexMap[i] = i;
         }
     }

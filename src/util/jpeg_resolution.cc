@@ -86,7 +86,7 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         int marker = 0;
         std::byte data[ITEM_BUF_SIZE];
 
-        for (a = 0; a < 7; a++) {
+        for (a = 0; a < 7; ++a) {
             marker = iohFgetc(ioh);
             if (marker != 0xff)
                 break;

@@ -98,7 +98,7 @@ public:
     /// subdirectories, the taskCount will be incremented. When a task is
     /// done the count will be decremented. When timer gets to zero,
     /// we will resubscribe.
-    void incTaskCount() { taskCount++; }
+    void incTaskCount() { ++taskCount; }
 
     void decTaskCount() { taskCount--; }
 

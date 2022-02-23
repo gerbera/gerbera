@@ -149,6 +149,6 @@ void Web::Items::process()
         if (artAdded) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }
-        cnt++;
+        ++cnt;
     }
 }

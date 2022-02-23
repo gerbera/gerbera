@@ -424,9 +424,9 @@ void ConfigManager::load(const fs::path& userHome)
     auto configTimedList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
     auto configInotifyList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
 
-    for (std::size_t i = 0; i < configInotifyList->size(); i++) {
+    for (std::size_t i = 0; i < configInotifyList->size(); ++i) {
         auto iDir = configInotifyList->get(i);
-        for (std::size_t j = 0; j < configTimedList->size(); j++) {
+        for (std::size_t j = 0; j < configTimedList->size(); ++j) {
             auto tDir = configTimedList->get(j);
             if (iDir->getLocation() == tDir->getLocation())
                 throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");

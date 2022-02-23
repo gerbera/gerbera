@@ -62,11 +62,11 @@ void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds 
     }
     if (lmt == std::chrono::seconds::zero()) {
         if (firstScan) {
-            activeScanCount++;
+            ++activeScanCount;
         }
     } else {
         if (activeScan && activeScanCount > 0) {
-            activeScanCount--;
+            --activeScanCount;
         }
         if (lmt > last_mod_current_scan) {
             last_mod_current_scan = lmt;

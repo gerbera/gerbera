@@ -385,7 +385,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 {
     log_debug("start");
 
-    systemUpdateID++;
+    ++systemUpdateID;
 
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();

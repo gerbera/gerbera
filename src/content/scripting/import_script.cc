@@ -64,7 +64,7 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
 
     processed = nullptr;
 
-    gc_counter++;
+    ++gc_counter;
     if (gc_counter > JS_CALL_GC_AFTER_NUM) {
         duk_gc(ctx, 0);
         gc_counter = 0;

@@ -71,7 +71,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     std::vector<std::shared_ptr<CdsObject>> result;
     auto length = duk_get_length(ctx, -1);
 
-    for (duk_uarridx_t i = 0; i < length; i++) {
+    for (duk_uarridx_t i = 0; i < length; ++i) {
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx);

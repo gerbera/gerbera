@@ -274,7 +274,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto dukArray = duk_push_array(ctx);
-        for (duk_uarridx_t i = 0; i < array.size(); i++) {
+        for (duk_uarridx_t i = 0; i < array.size(); ++i) {
             auto&& entry = array[i];
             duk_push_string(ctx, entry.c_str());
             duk_put_prop_index(ctx, dukArray, i);
@@ -286,7 +286,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     std::string autoscanItemPath;
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
-        for (std::size_t i = 0; i < autoscan->size(); i++) {
+        for (std::size_t i = 0; i < autoscan->size(); ++i) {
             auto&& entry = autoscan->get(i);
             auto&& adir = this->content->getAutoscanDirectory(entry->getLocation());
 
@@ -585,7 +585,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                         res->addOption(key, val);
                     }
                 }
-                resCount++;
+                ++resCount;
             }
         }
         duk_pop(ctx); // res
@@ -779,7 +779,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         }
         for (auto&& [key, array] : metaGroups) {
             auto dukArray = duk_push_array(ctx);
-            for (duk_uarridx_t i = 0; i < array.size(); i++) {
+            for (duk_uarridx_t i = 0; i < array.size(); ++i) {
                 duk_push_string(ctx, array[i].c_str());
                 duk_put_prop_index(ctx, dukArray, i);
             }
@@ -832,7 +832,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
                 for (auto&& [key, opt] : options) {
                     setProperty(fmt::format("{}%{}", resCount, key), opt);
                 }
-                resCount++;
+                ++resCount;
             }
         }
 

@@ -171,7 +171,7 @@ std::string hexEncode(const void* data, std::size_t len)
     auto buf = std::string(2 * len, '\0');
 
     auto chars = static_cast<const unsigned char*>(data);
-    for (std::size_t i = 0; i < len; i++) {
+    for (std::size_t i = 0; i < len; ++i) {
         unsigned char c = chars[i];
         unsigned char hi = c >> 4;
         unsigned char lo = c & 0xF;
@@ -499,7 +499,7 @@ std::string escape(std::string_view string, char escapeChar, char toEscape)
             buf << string.at(next);
         }
         last = next;
-        last++;
+        ++last;
     } while (last < len);
 
     return buf.str();

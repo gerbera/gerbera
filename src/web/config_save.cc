@@ -65,7 +65,7 @@ void Web::ConfigSave::process()
     }
 
     // go through all config items from UI
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < count; ++i) {
         try {
             auto key = fmt::format("data[{}][{}]", i, "id");
             auto item = fmt::format("data[{}][{}]", i, "item");

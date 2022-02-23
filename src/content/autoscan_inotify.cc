@@ -346,7 +346,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, const std::vector<std
         if (i == 0)
             buf << DIR_SEPARATOR;
         else {
-            for (std::size_t j = 0; j < i; j++) {
+            for (std::size_t j = 0; j < i; ++j) {
                 buf << DIR_SEPARATOR << pathAr.at(j);
                 //                log_debug("adding: {}", pathAr->get(j)->data);
             }

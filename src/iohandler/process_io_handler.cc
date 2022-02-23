@@ -193,7 +193,7 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
                 return 0;
             }
 
-            timeoutCount++;
+            ++timeoutCount;
             if (timeoutCount > MAX_TIMEOUTS) {
                 log_debug("max timeouts, checking socket!");
                 return CHECK_SOCKET;

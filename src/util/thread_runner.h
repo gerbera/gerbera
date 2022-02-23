@@ -157,7 +157,7 @@ public:
         while (!(pred()) && count < max_count) {
             log_debug("ThreadRunner: wait for pred {}", threadName);
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
-            count++;
+            ++count;
         }
         if (count >= max_count) {
             log_error("ThreadRunner: broke lock for {}", threadName);

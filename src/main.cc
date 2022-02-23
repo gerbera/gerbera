@@ -117,7 +117,7 @@ static void signalHandler(int signum)
     }
 
     if ((signum == SIGINT) || (signum == SIGTERM)) {
-        _ctx.shutdownFlag++;
+        ++_ctx.shutdownFlag;
         if (_ctx.shutdownFlag == 1) {
             log_info("Gerbera shutting down. Please wait...");
         } else if (_ctx.shutdownFlag == 2) {
@@ -340,7 +340,7 @@ int main(int argc, char** argv, char** envp)
                 std::exit(EXIT_FAILURE);
             }
             // close open filedescriptors belonging to a tty
-            for (auto fd = int(sysconf(_SC_OPEN_MAX)); fd >= 0; fd--) {
+            for (auto fd = int(sysconf(_SC_OPEN_MAX)); fd >= 0; --fd) {
                 if (isatty(fd))
                     close(fd);
             }

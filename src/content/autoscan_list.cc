@@ -35,7 +35,7 @@ AutoscanList::AutoscanList(std::shared_ptr<Database> database)
 void AutoscanList::updateLMinDB()
 {
     AutoLock lock(mutex);
-    for (std::size_t i = 0; i < list.size(); i++) {
+    for (std::size_t i = 0; i < list.size(); ++i) {
         log_debug("i: {}", i);
         auto ad = list[i];
         database->updateAutoscanDirectory(ad);

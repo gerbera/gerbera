@@ -70,7 +70,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
         case '=': {
             auto token = std::string(&ch, 1);
             TokenType tokenType = tokenTypes.at(token);
-            currentPos++;
+            ++currentPos;
             return std::make_unique<SearchToken>(tokenType, std::move(token));
         }
         case '>':
@@ -85,18 +85,18 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             } else {
                 auto token = std::string(&ch, 1);
                 TokenType tokenType = tokenTypes.at(token);
-                currentPos++;
+                ++currentPos;
                 return std::make_unique<SearchToken>(tokenType, std::move(token));
             }
         case '"':
             if (!inQuotes) {
                 auto token = std::string(&ch, 1);
-                currentPos++;
+                ++currentPos;
                 inQuotes = true;
                 return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
             } else {
                 auto token = std::string(&ch, 1);
-                currentPos++;
+                ++currentPos;
                 inQuotes = false;
                 return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
             }
@@ -107,7 +107,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                     return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
             }
             if (std::isspace(ch)) {
-                currentPos++;
+                ++currentPos;
             } else {
                 auto tokenStr = nextStringToken(input);
                 if (!tokenStr.empty()) {
@@ -137,7 +137,7 @@ std::string SearchLexer::getQuotedValue(const std::string& input)
             if (ch != '\\')
                 escaping = false;
         }
-        currentPos++;
+        ++currentPos;
     }
     return token;
 }
@@ -148,7 +148,7 @@ std::string SearchLexer::nextStringToken(const std::string& input)
     while (currentPos < input.length()) {
         auto ch = input[currentPos];
         if (std::isalnum(ch) || ch == ':' || ch == '@' || ch == '.' || ch == '_')
-            currentPos++;
+            ++currentPos;
         else
             break;
     }
@@ -699,7 +699,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
                     sortSql));
 
                 sort.push_back(fmt::format("{}.{} {}", metaMapper->quote(metaAlias), metaMapper->mapQuoted(META_VALUE, true), (desc ? "DESC" : "ASC")));
-                cnt++;
+                ++cnt;
             } else {
                 log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
             }

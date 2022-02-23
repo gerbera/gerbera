@@ -181,7 +181,7 @@ void Web::ConfigLoad::process()
     // write client configuration
     auto cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
-    for (std::size_t i = 0; i < clientConfig->size(); i++) {
+    for (std::size_t i = 0; i < clientConfig->size(); ++i) {
         auto client = clientConfig->get(i);
 
         auto item = values.append_child("item");
@@ -214,7 +214,7 @@ void Web::ConfigLoad::process()
     // write import tweaks
     cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
-    for (std::size_t i = 0; i < directoryConfig->size(); i++) {
+    for (std::size_t i = 0; i < directoryConfig->size(); ++i) {
         auto dir = directoryConfig->get(i);
 
         auto item = values.append_child("item");
@@ -261,7 +261,7 @@ void Web::ConfigLoad::process()
     // write dynamic content
     cs = ConfigDefinition::findConfigSetup(CFG_SERVER_DYNAMIC_CONTENT_LIST);
     auto dynContent = cs->getValue()->getDynamicContentListOption();
-    for (std::size_t i = 0; i < dynContent->size(); i++) {
+    for (std::size_t i = 0; i < dynContent->size(); ++i) {
         auto cont = dynContent->get(i);
 
         auto item = values.append_child("item");
@@ -317,7 +317,7 @@ void Web::ConfigLoad::process()
             setValue(item, name->getName());
             profiles.emplace(name->getName(), pr);
 
-            pr++;
+            ++pr;
         }
     }
 
@@ -409,13 +409,13 @@ void Web::ConfigLoad::process()
                 setValue(item, std::accumulate(next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
             }
         }
-        pr++;
+        ++pr;
     }
 
     // write autoscan configuration
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
-        for (std::size_t i = 0; i < autoscan->size(); i++) {
+        for (std::size_t i = 0; i < autoscan->size(); ++i) {
             auto&& entry = autoscan->get(i);
             auto&& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
@@ -489,14 +489,14 @@ void Web::ConfigLoad::process()
             item = values.append_child("item");
             createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption, dcs);
             setValue(item, val);
-            i++;
+            ++i;
         }
     }
 
     // write content of all arrays
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
-        for (std::size_t i = 0; i < array.size(); i++) {
+        for (std::size_t i = 0; i < array.size(); ++i) {
             auto&& entry = array[i];
             auto item = values.append_child("item");
             createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != CFG_MAX ? acs->attrOption : acs->nodeOption, acs);

@@ -458,7 +458,7 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
             throw_std_runtime_error("Wrong hash for version {}", version + 1);
         }
         dbUpdates.push_back(std::move(versionCmds));
-        version++;
+        ++version;
     }
 
     if (version != DBVERSION)
@@ -485,7 +485,7 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
             dbVersion = version + 1;
             log_info("Database upgrade to version {} successful.", dbVersion);
         }
-        version++;
+        ++version;
     }
 
     if (dbVersion != DBVERSION)
@@ -968,7 +968,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     if (param.getDynamicContainers() && config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
         auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
-            for (std::size_t count = 0; count < dynContent->size(); count++) {
+            for (std::size_t count = 0; count < dynContent->size(); ++count) {
                 auto dynConfig = dynContent->get(count);
                 if (parent->getLocation() == dynConfig->getLocation().parent_path() || (parent->getLocation().empty() && dynConfig->getLocation().parent_path() == "/")) {
                     auto dynId = std::int32_t(std::int64_t(-(parent->getID() + 1)) * 10000 - count);
@@ -995,14 +995,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         dynamicContainers.emplace(dynId, std::move(dynFolder));
                     }
                     result.push_back(dynamicContainers[dynId]);
-                    childCount++;
+                    ++childCount;
                 }
             }
         } else {
             for (auto&& [dynId, dynFolder] : dynamicContainers) {
                 if (dynFolder->getParentID() == parent->getID()) {
                     result.push_back(dynFolder);
-                    childCount++;
+                    ++childCount;
                 }
             }
         }
@@ -1443,7 +1443,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
                 cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
         } else
             cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
-        matchedTypes++;
+        ++matchedTypes;
     }
 
     if (obj->isItem()) {
@@ -1471,7 +1471,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         else
             item->setServiceID(getCol(row, BrowseCol::ServiceId));
 
-        matchedTypes++;
+        ++matchedTypes;
     }
 
     if (!matchedTypes) {
@@ -2036,7 +2036,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
 
     std::size_t listSize = list->size();
     log_debug("updating/adding persistent autoscans (count: {})", listSize);
-    for (std::size_t i = 0; i < listSize; i++) {
+    for (std::size_t i = 0; i < listSize; ++i) {
         log_debug("getting ad {} from list..", i);
         auto ad = list->get(i);
         if (!ad)
@@ -2447,7 +2447,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql[key] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
-            resId++;
+            ++resId;
         }
     } else {
         // get current resoures from DB
@@ -2470,7 +2470,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql[key] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
-            resId++;
+            ++resId;
         }
         // res_id in db resources but not obj resources, so needs a delete
         for (; resId < dbResources.size(); resId++) {
@@ -2716,7 +2716,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 values.push_back(val);
             }
             insert(RESOURCE_TABLE, fields, values);
-            resId++;
+            ++resId;
         }
     } else {
         log_debug("Skipping migration - no resources for cds object {}", objectId);
