@@ -188,15 +188,19 @@ $.widget('grb.dataitems', {
     table.append(tfoot);
 
     this.element.append(table);
+    const activePagerItem = this.element.find('#activePagerItem');
+    if (activePagerItem && activePagerItem[0] && activePagerItem[0].nextSibling) {
+      activePagerItem[0].nextSibling.scrollIntoView({ behavior: 'smooth'});
+    }
     this.element.addClass('with-data');
   },
 
   buildFooter: function (pager) {
     const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
-    const grbPager = $('<nav class="grb-pager"></nav>');
-    const list = $('<ul class="pagination"></ul>');
+    const grbPager = $('<nav class="grb-pager" style="display: flex"></nav>');
 
     if (pager && pager.onItemsPerPage && pager.ippOptions) {
+      const list = $('<ul class="pagination"></ul>');
       const ippSelect = $('<select name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
 
       const ippOptions = pager.ippOptions;
@@ -213,8 +217,10 @@ $.widget('grb.dataitems', {
       $('<option' + (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') + 'value="0">All</option>').appendTo(ippSelect);
       list.append(ippSelect);
       ippSelect.change(function () { pager.onItemsPerPage(pageParams, Number.parseInt(ippSelect.val())); });
+      grbPager.append(list);
     }
     if (pager && pager.onModeSelect) {
+      const list = $('<ul class="pagination"></ul>');
       const gridModes = [
         { id: 0, label: 'Table' },
         { id: 1, label: 'Grid' },
@@ -234,9 +240,11 @@ $.widget('grb.dataitems', {
       }
       list.append(gmSelect);
       gmSelect.change(function () { pager.onModeSelect(pageParams, Number.parseInt(gmSelect.val())); });
+      grbPager.append(list);
     }
 
     if (pager && pager.pageCount && pager.itemsPerPage > 0) {
+      const list = $('<ul class="pagination" style="overflow-x:scroll; width: 55vw;"></ul>');
       const previous = $('<li class="page-item">' +
           '<a class="page-link" aria-label="Previous">' +
           '<span aria-hidden="true">&laquo;</span>' +
@@ -289,6 +297,7 @@ $.widget('grb.dataitems', {
 
           if (page === pager.currentPage) {
             pageItem.addClass('active');
+            pageItem.attr('id','activePagerItem');
           }
 
           list.append(pageItem);
@@ -298,8 +307,8 @@ $.widget('grb.dataitems', {
           next.addClass('disabled');
         }
       }
+      grbPager.append(list);
     }
-    grbPager.append(list);
     tfoot.find('td').append(grbPager);
 
     return tfoot;
