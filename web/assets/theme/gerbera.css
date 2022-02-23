@@ -344,11 +344,13 @@ body,
     width: 100%;
     flex-shrink: 0;
     display: block;
+    border-top: 1px solid #dee2e6;
 }
 
 #datagrid table tfoot tr,
 #datagrid table tfoot td {
     width: 100%;
+    border: none;
 }
 
 .datagrid-row:hover,
@@ -453,6 +455,8 @@ body,
     border: 0px;
     background-color: transparent;
     color: #3c3c3c;
+    display: inline-block;
+    white-space: nowrap;
 }
 
 .list-group-item.has-children > span.fa {
@@ -482,12 +486,15 @@ body,
     cursor: copy;
 }
 
-.grb-item > td {
-    vertical-align: middle;
+.grb-item-url {
+    display: inline-block;
 }
 
 .grb-item > td {
+    vertical-align: middle;
     line-height: 36px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .grb-item-delete,
