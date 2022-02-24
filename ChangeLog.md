@@ -1,5 +1,317 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.10.0
+
+- Add all metadata to search capabilities
+- add another using declaration
+- Add configuration for extensions to ignore on import
+- add const for getter functions
+- add const to get functions
+- add const to various get functions
+- add explicit
+- Add flag to hide dynamic content on Samsung devices
+- add mising header for size_t
+- add missing defines
+- Add mutext to lock access to layout
+- add parentheses to macros
+- Add screenshots for grid view
+- Add support for ASX playlists
+- Add two moves.
+- Allow IPs in request validation
+- Allow setting environment variables in transcoding sub processes
+- Also display autoscan badge in filesystem view
+- append with fmt
+- Attempt to close leak
+- Avoid locking mutex for too long
+- avoid some copies
+- avoid some shared_ptr copies
+- avoid some shared_ptr copying
+- Avoid storing reference to node
+- avoid using new for a char array
+- Batch-execute multiple getChildCount queries
+- Bleeding edge
+- Block negative track numbers
+- Block XML Declaration for IRadio based devices
+- Bring back selection of items per page on items page
+- BufferedIOHandler: Fix random exceptions
+- Build armv7/arm64 deb images
+- Build libupnp in Dockerfile
+- Bump follow-redirects from 1.14.7 to 1.14.8 in /gerbera-web
+- Bump jquery-ui from 1.12.1 to 1.13.0 in /gerbera-web
+- Bump JS libs
+- Bump karma from 6.3.13 to 6.3.14 in /gerbera-web
+- C++ cast
+- cast to proper type
+- CdsContainer: Comment out overriden function
+- change checkResolution to return a pair
+- change class to struct
+- Change compare order for to IPV6 then IPV4
+- CI: Bump CI to clang-format-13
+- clang-tidy: pass by value
+- clang-tidy: renames to WebKit style
+- clang-tidy: run through readability checks
+- clang-tidy: use WebKit style for ffmpeg variables
+- clang-tidy: various renamings
+- CMake: UUID target/MacOS fixes
+- Code cleanup for #2033
+- comment fixes
+- comment out some unused code
+- Conan: Dont install CMake
+- Conan: Use taglib package from conan
+- const auto ref conversion
+- const exiv2 exception
+- const pointer
+- const ref conversion
+- content manager changes
+- convert all enum members to upper case
+- convert all usages of toCString to to8Bit
+- convert double pointer to pointer ref
+- convert function to static
+- convert map to simple array
+- convert std::array to normal array
+- convert string to fs::path
+- convert string to fs::path
+- copy shared pointer instead of passing reference
+- cppcheck fixes
+- deb: Drop Ubuntu 20.10, add 21.10
+- default init some shared pointers
+- default initialize some fields in the constructor
+- Delay loading of status after login
+- Delay release of ixmlDocument
+- deque removal
+- Display status details on home page
+- Docker: Add transcoding tag
+- Docker: Bump alpine to 3.14
+- Docker: Enable github actions based layer caching
+- Docs: sphinx 4.2, pin versions, fix warnings
+- Document the special role of "PC Directory"
+- Don't iterate on different copies
+- don't use else after return
+- Dont trigger play hooks for metadata resources
+- Drop resourceHandler concept
+- Drop servedir feature.
+- Drop SopCast "support"
+- early exit
+- Enable colour log levels
+- exiv2: silence messages without debug
+- Feature/dockerfile
+- ffmpeg: const additions
+- FFMpegThumbnailer: Split into its own handler
+- find_if conversion
+- Fix bad static_pointer_cast transformation
+- fix bugs in addFfmpegMetadataFields()
+- fix definition of M_CONTENT_CLASS
+- fix deprecated copy warning
+- Fix detection of content type for thumbnails
+- Fix display of container art
+- Fix focal build
+- Fix for fmt > 8.0
+- Fix function to change items per page
+- Fix join statement for multiple metadata search
+- Fix library links in compilation docs
+- fix memory leak
+- fix mismatching declaration
+- Fix npm audit messages
+- Fix playlist numbering
+- fix some implicit conversion warnings
+- fix subtitle type value
+- Fix transcoding regression
+- fix variable names to WebKit style
+- fix wrong case
+- fix wrong cast
+- fix wrong macro comments
+- fmt c++20 fixes
+- follow rule of zero with some classes
+- Free EBML memory
+- Free libMatroska memory
+- Free XMP namespaces
+- fs::path conversion
+- get logfile from command line
+- get rid of static_pointer_cast
+- grammar fixes
+- grb_fs: run through clang-tidy
+- Handle path comparison correctly
+- Happy New Year
+- https
+- Implement libupnp hostname validation
+- Implement sort on metadata
+- Import script hints
+- Improve DLNA compatibility
+- Improve matroska parsing speed
+- Improve support for Samsung UPnP extension X_GetFeatureList
+- Improve upgrade file checks and messages
+- Initialize builtin layout properly
+- JS: add array check to getArrayProperty
+- lambda conversion
+- Layout: remove unused profiling code
+- make all mutexes mutable
+- make maps and vectors const
+- make startswith constexpr
+- manual header removals
+- matroska_handler: default init activeFlag
+- Mention "gerbera --compile-info" on compilation docs
+- merge some if statements
+- merge various if statements
+- Minor UI Improvements
+- Misc fixes
+- more unneeded headers
+- Move DB defines out of common
+- move filesystem declaration after headers
+- Move filesystem function to grb_fs
+- move several methods out of line
+- move std::function stuff
+- Multiply out sample rate reported by FFMpeg
+- MySQL fix warnings with glibc 2.34, pass a real pointer
+- mysql: rename variables based on WebKit style
+- Only set DNLA headers for resources we know about
+- Optimize Ffmpeg handler
+- Optimize SQL Statements / result gathering
+- Optimize the use of references
+- pair conversion
+- pass by value
+- pass shared_ptr constructors by reference
+- Path to map rework, handle empty values
+- place it variable in lambda
+- pointer to reference conversions
+- Process: misc tidy ups
+- ProcessExecutor: small std::array conversion
+- Provide documentation for file types, metadata and playlists
+- random sonarlint cleanups
+- readability clang-tidy fixes
+- Reduce Docker image size
+- reduce lambda size slightly
+- ref conversion
+- Refactor file_request_handler
+- Remove .c_str() for fmt-string arguments
+- remove cast with make_shared
+- remove const from several unique_ptrs
+- remove custom destructor
+- remove custom merge function
+- remove dead assignment
+- remove defaulted parameter.
+- Remove duplicate logic from file_request_handler
+- remove extra semicolon
+- remove FileIOHandler destroctor
+- remove get() calls and match types
+- remove initializer_list usage
+- remove mimetype parameter
+- remove not really used bool
+- remove old libupnp compatibility
+- remove old PRETTY_FUNCTION define
+- remove pointless move
+- remove pointless reference
+- remove pointless void cast
+- remove random header
+- remove redundant base class init
+- Remove root from container path
+- remove several unused functions
+- remove some C arrays
+- remove some chrono code duplication
+- remove some chrono includes
+- remove some more headers
+- remove some uninitialized variables
+- remove some unused macros
+- remove some {}.
+- remove stat include
+- remove string_view quote
+- remove time_t stuff
+- Remove trailing slash from URL
+- remove unique_ptr
+- remove unique_ptr from tests
+- remove unused class
+- remove unused enum
+- remove unused friend declaration
+- remove unused optional header.
+- remove unused parameter
+- remove various shared_ptr copies
+- rename const variables to WebKit style
+- Rename session cookie to GerberaSID.
+- replace all lock_guard with scoped_lock
+- replace C function pointer with std::function
+- replace callbacks with lambdas
+- replace constructor with using
+- replace constructors with using declarations
+- replace copy with move
+- Replace double-pointer out-param with return value
+- replace fatalHandler with lambda
+- replace findinotify with KDE's version
+- replace for loop with while
+- replace insert with emplace
+- Replace removed app.add_stylesheet() by app.add_css_file()
+- restore log level to debug
+- return function directly
+- return pair instead of by reference param
+- return std::pair for stripLocationPrefix
+- Reuse Request Handler
+- Revert "replace all lock_guard with scoped_lock"
+- Revert "silence exiv2 warnings"
+- Rework creation of containers
+- rework for loop
+- run clang-format on test files
+- Search title in metadata instead of file name
+- Send alive messages every 60s by default
+- set by move
+- Set refId for playlist container
+- Set video codec for artwork resource if media is an audio file
+- several duktake type fixes
+- shared to unique_ptr conversions
+- Show numbering of items in UI
+- Show subdir of recursive autoscan in directory tree
+- silence exiv2 warnings
+- simplify bool
+- simplify loop
+- Simplify makeFifo, unify with curl and tidy unused
+- simplify shared_ptr assignment
+- simplify some if statements
+- simplify some static_pointer_cast
+- small typo
+- some stuff
+- static function conversion
+- static in front
+- std::string_view conversions
+- Support for multiple entries in genre
+- Switch staticThreadProc to lambda
+- Taglib: Handle OGG containing Opus, Speex or FLAC
+- test: apply the same strlen removal as main.cc
+- test: Increase gtest discovery timeout
+- test: some more make_unique conversions
+- test: Use correct option for test discovery timeout
+- test: use make_unique instead of new
+- tests: remove various using namespace
+- test_upnp_headers: init changes
+- Thumbnails for images and grid view for items
+- Tools optimizations
+- turn vector to array
+- UI: Hide more when not logged in
+- UI: Tidy homepage
+- unique_ptr conversions
+- unused enum
+- unused includes
+- Update fmt version
+- Update man page and help text to reflect the current situation
+- Update node modules to fix security issues
+- use auto
+- use auto with cast
+- Use better primary key for grb_cds_resource 
+- use braced init list
+- Use correct method to set attribute
+- use dynamic cast for derived classes
+- use lambda and fs::path
+- use operator < instead of startswith
+- use operator< instead of creating temporaries
+- use some type deduction
+- use startswith
+- use std::byte
+- use std::function
+- use std::pair for checkFileAndSubtitle
+- use to_string for bool
+- use underlying_type_t
+- Validate bound port
+- various fixes
+- Web logo link
+- Web: remove unused, duplicate code. Rename check_request
+- WebUI: bump bootstrap to 4.6.1, delete non min files
+
 ### v1.9.2
 
 - replace POSIX remove with fs::remove

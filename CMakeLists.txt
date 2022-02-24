@@ -3,7 +3,7 @@ cmake_policy(VERSION 3.13)
 
 # Only set for release tags
 # You should only see version "git" when built from a git snapshot tarball
-set(GERBERA_VERSION "git")
+set(GERBERA_VERSION "1.10.0")
 
 project(Gerbera
         DESCRIPTION "UPnP Media Server"
