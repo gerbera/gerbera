@@ -15,7 +15,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
-    DUKTAPE="2.5.0"
+    DUKTAPE="2.6.0"
     EBML="1.3.9"
     EXIV2="v0.26"
     FFMPEGTHUMBNAILER="2.2.0"
@@ -30,7 +30,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
 else
 
-    DUKTAPE="2.6.0"
+    DUKTAPE="2.7.0"
     EBML="1.4.2"
     EXIV2="v0.27.5"
     FFMPEGTHUMBNAILER="2.2.2"

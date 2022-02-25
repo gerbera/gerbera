@@ -141,8 +141,10 @@ else
     libduktape="libduktape202"
   elif [ "$lsb_codename" == "buster" ]; then
     libduktape="libduktape203"
-  elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:testing" -o "${my_sys}" == "debian:unstable" ]; then
+  elif [ "$lsb_codename" == "bookworm" -o "${my_sys}" == "debian:testing" ]; then
     libduktape="libduktape206"
+  elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:unstable" ]; then
+    libduktape="libduktape207"
   fi
   libduktape="duktape-dev ${libduktape}"
   echo "Selecting $libduktape for $lsb_distro $lsb_codename"
