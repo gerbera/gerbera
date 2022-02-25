@@ -55,7 +55,7 @@ sudo make install
 | zlib          |               |               |               | Required      | Data compression           |          |
 | [fmtlib]      | 7.1.3         | 7.1.3         | 8.1.1         | Required      | Fast string formatting     |          |
 | [spdlog]      | 1.8.1         | 1.8.5         | 1.9.2         | Required      | Runtime logging            |          |
-| [duktape]     | 2.1.0         | 2.5.0         | 2.6.0         | Optional      | Scripting Support          | Enabled  |
+| [duktape]     | 2.1.0         | 2.6.0         | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql         |               |               |               | Optional      | Alternate database storage | Disabled |
 | curl          |               |               |               | Optional      | Enables web services       | Enabled  |
 | [taglib]      | 1.12          | 1.12          | 1.12          | Optional      | Audio tag support          | Enabled  |

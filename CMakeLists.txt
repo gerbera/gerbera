@@ -534,7 +534,7 @@ if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
             set (SYSTEMD_AFTER_TARGET "mysql.target network-online.target")
             set (SYSTEMD_DESCRIPTION "Gerbera Media Server with MySQL")
         else()
-            set (SYSTEMD_AFTER_TARGET "network.target")
+            set (SYSTEMD_AFTER_TARGET "network.target network-online.target")
             set (SYSTEMD_DESCRIPTION "Gerbera Media Server")
         endif()
 
