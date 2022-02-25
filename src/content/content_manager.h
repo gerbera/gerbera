@@ -37,9 +37,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "autoscan.h"
 #include "cds_objects.h"
 #include "common.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "context.h"
 #include "util/generic_task.h"
 #include "util/thread_runner.h"
@@ -56,9 +56,9 @@ class ScriptingRuntime;
 
 #include "layout/layout.h"
 
-#include "autoscan_list.h"
+#include "content/autoscan/autoscan_list.h"
 #ifdef HAVE_INOTIFY
-#include "autoscan_inotify.h"
+#include "content/autoscan/autoscan_inotify.h"
 #endif // HAVE_INOTIFY
 
 #include "config/directory_tweak.h"

@@ -38,11 +38,8 @@
 #include "util/timer.h"
 
 // forward declarations
-class AutoscanDirectory;
 class CdsContainer;
 class Database;
-
-#define INVALID_SCAN_ID (-1)
 
 ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
 enum class ScanMode {
@@ -62,8 +59,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
-        int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
+    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
@@ -76,16 +72,16 @@ public:
     ScanMode getScanMode() const { return mode; }
 
     void setRecursive(bool recursive) { this->recursive = recursive; }
-    bool getRecursive() const { return recursive; }
+    [[nodiscard]] bool isRecursive() const { return recursive; }
 
-    void setOrig(bool orig) { this->isOrig = orig; }
-    bool getOrig() const { return isOrig; }
+    void setOriginal(bool orig) { this->isOrig = orig; }
+    [[nodiscard]] bool isOriginal() const { return isOrig; }
 
     void setHidden(bool hidden) { this->hidden = hidden; }
-    bool getHidden() const { return hidden; }
+    [[nodiscard]] bool getHidden() const { return hidden; }
 
     void setInterval(std::chrono::seconds interval) { this->interval = interval; }
-    std::chrono::seconds getInterval() const { return interval; }
+    [[nodiscard]] std::chrono::seconds getInterval() const { return interval; }
 
     /// \brief Increments the task count.
     ///
@@ -97,7 +93,7 @@ public:
     /// we will resubscribe.
     void incTaskCount() { taskCount++; }
     void decTaskCount() { taskCount--; }
-    int getTaskCount() const { return taskCount; }
+    [[nodiscard]] int getTaskCount() const { return taskCount; }
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
     /// \brief Sets the task ID.
@@ -106,13 +102,13 @@ public:
     /// belongs. Recursive scans spawn new tasks - they all should have
     /// the same id.
     void setScanID(int id);
-    int getScanID() const { return scanID; }
+    [[nodiscard]] int getScanID() const { return scanID; }
 
     void setObjectID(int id) { objectID = id; }
-    int getObjectID() const { return objectID; }
+    [[nodiscard]] int getObjectID() const { return objectID; }
 
     void setPersistent(bool persistent_flag) { this->persistent_flag = persistent_flag; }
-    bool persistent() const { return persistent_flag; }
+    [[nodiscard]] bool isPersistent() const { return persistent_flag; }
 
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
@@ -141,8 +137,11 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
     /* helpers for autoscan stuff */
-    static const char* mapScanmode(ScanMode scanmode);
-    static ScanMode remapScanmode(const std::string& scanmode);
+    static const char* mapScanMode(ScanMode scanmode);
+    static ScanMode remapScanMode(const std::string& scanmode);
+
+    static constexpr int INVALID_SCAN_ID = -1;
+    [[nodiscard]] bool isValid() const {return scanID != INVALID_SCAN_ID; };
 
 protected:
     fs::path location;
@@ -158,7 +157,7 @@ protected:
     int databaseID { INVALID_OBJECT_ID };
     std::chrono::seconds last_mod_previous_scan {};
     std::chrono::seconds last_mod_current_scan {};
-    std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
+    std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, AutoscanDirectory::INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
 };

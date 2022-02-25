@@ -33,7 +33,7 @@
 #include "config/config_setup.h"
 #include "config/directory_tweak.h"
 #include "config/dynamic_content.h"
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
@@ -424,7 +424,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MODE);
-            setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setValue(item, AutoscanDirectory::mapScanMode(adir->getScanMode()));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
@@ -432,7 +432,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
-            setValue(item, adir->getRecursive());
+            setValue(item, adir->isRecursive());
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);

@@ -76,12 +76,12 @@ add_library(libgerbera STATIC
         src/config/directory_tweak.h
         src/config/dynamic_content.cc
         src/config/dynamic_content.h
-        src/content/autoscan.cc
-        src/content/autoscan.h
-        src/content/autoscan_list.cc
-        src/content/autoscan_list.h
-        src/content/autoscan_inotify.cc
-        src/content/autoscan_inotify.h
+        src/content/autoscan/autoscan_directory.cc
+        src/content/autoscan/autoscan_directory.h
+        src/content/autoscan/autoscan_list.cc
+        src/content/autoscan/autoscan_list.h
+        src/content/autoscan/autoscan_inotify.cc
+        src/content/autoscan/autoscan_inotify.h
         src/content/content_manager.cc
         src/content/content_manager.h
         src/content/layout/builtin_layout.cc

@@ -39,7 +39,7 @@
 #include "config/config_manager.h"
 #include "config/config_setup.h"
 #include "config/dynamic_content.h"
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "metadata/metadata_handler.h"
 #include "search_handler.h"
 #include "upnp_xml.h"
@@ -292,7 +292,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "hidden", AutoscanColumn::Hidden },
     { "interval", AutoscanColumn::Interval },
     { "last_modified", AutoscanColumn::LastModified },
-    { "persistent", AutoscanColumn::Persistent },
+    { "isPersistent", AutoscanColumn::Persistent },
     { "location", AutoscanColumn::Location },
     { "obj_location", AutoscanColumn::ObjLocation },
 };
@@ -1689,7 +1689,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             } else {
                 deleteAs.push_back(colId);
             }
-            log_debug("relevant autoscan: {}; persistent: {}", colId, persistent);
+            log_debug("relevant autoscan: {}; isPersistent: {}", colId, persistent);
         }
 
         if (!deleteAs.empty()) {
@@ -2028,10 +2028,10 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
-    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
+    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanMode(scanmode));
 
     beginTransaction("updateAutoscanList");
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}touched{1} = {3} WHERE {0}persistent{1} = {4} AND {0}scan_mode{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(true), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    exec(fmt::format("UPDATE {0}{2}{1} SET {0}touched{1} = {3} WHERE {0}isPersistent{1} = {4} AND {0}scan_mode{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(true), quote(AutoscanDirectory::mapScanMode(scanmode))));
     commit("updateAutoscanList");
 
     std::size_t listSize = list->size();
@@ -2043,7 +2043,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
             continue;
 
         // only persistent asD should be given to getAutoscanList
-        assert(ad->persistent());
+        assert(ad->isPersistent());
         // the scanmode should match the given parameter
         assert(ad->getScanMode() == scanmode);
 
@@ -2072,13 +2072,13 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
     }
 
     beginTransaction("updateAutoscanList delete");
-    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}touched{1} = {3} AND {0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}touched{1} = {3} AND {0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(AutoscanDirectory::mapScanMode(scanmode))));
     commit("updateAutoscanList delete");
 }
 
 std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
 {
-    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, AUS_ALIAS, quote(AutoscanDirectory::mapScanmode(scanmode)));
+    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, AUS_ALIAS, quote(AutoscanDirectory::mapScanMode(scanmode)));
 
     auto res = select(selectSql);
     if (!res)
@@ -2130,7 +2130,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
             return nullptr;
     }
 
-    ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
+    ScanMode mode = AutoscanDirectory::remapScanMode(getCol(row, AutoscanColumn::ScanMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
@@ -2141,7 +2141,9 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 
     log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent);
+    dir->setInterval(std::chrono::seconds(interval));
+    dir->setHidden(hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", lastModified);
@@ -2159,8 +2161,8 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
     if (adir->getDatabaseID() >= 0)
         throw_std_runtime_error("tried to add autoscan directory with a database id set");
     int objectID = (adir->getLocation() == FS_ROOT_DIRECTORY) ? CDS_ID_FS_ROOT : findObjectIDByPath(adir->getLocation());
-    if (!adir->persistent() && objectID < 0)
-        throw_std_runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
+    if (!adir->isPersistent() && objectID < 0)
+        throw_std_runtime_error("tried to add non-isPersistent autoscan directory with an illegal objectID or location");
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
@@ -2181,12 +2183,12 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
     auto values = std::vector {
         objectID >= 0 ? quote(objectID) : SQL_NULL,
         quote("full"),
-        quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
-        quote(adir->getRecursive()),
+        quote(AutoscanDirectory::mapScanMode(adir->getScanMode())),
+        quote(adir->isRecursive()),
         quote(adir->getHidden()),
         quote(adir->getInterval().count()),
         quote(adir->getPreviousLMT().count()),
-        quote(adir->persistent()),
+        quote(adir->isPersistent()),
         objectID >= 0 ? SQL_NULL : quote(adir->getLocation()),
         pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))),
     };
@@ -2211,11 +2213,11 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     auto fields = std::vector {
         ColumnUpdate(identifier("obj_id"), objectID >= 0 ? quote(objectID) : SQL_NULL),
         ColumnUpdate(identifier("scan_level"), quote("full")),
-        ColumnUpdate(identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
-        ColumnUpdate(identifier("recursive"), quote(adir->getRecursive())),
+        ColumnUpdate(identifier("scan_mode"), quote(AutoscanDirectory::mapScanMode(adir->getScanMode()))),
+        ColumnUpdate(identifier("recursive"), quote(adir->isRecursive())),
         ColumnUpdate(identifier("hidden"), quote(adir->getHidden())),
         ColumnUpdate(identifier("interval"), quote(adir->getInterval().count())),
-        ColumnUpdate(identifier("persistent"), quote(adir->persistent())),
+        ColumnUpdate(identifier("persistent"), quote(adir->isPersistent())),
         ColumnUpdate(identifier("location"), objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
         ColumnUpdate(identifier("path_ids"), pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
         ColumnUpdate(identifier("touched"), quote(true)),
@@ -2298,7 +2300,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         }
     }
 
-    if (adir->getRecursive()) {
+    if (adir->isRecursive()) {
         auto where = std::vector {
             fmt::format("{} LIKE {}", identifier("path_ids"), quote(fmt::format("%,{},%", checkObjectID))),
         };

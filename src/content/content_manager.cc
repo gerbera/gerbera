@@ -554,7 +554,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             location = (containerID == CDS_ID_FS_ROOT) ? FS_ROOT_DIRECTORY : obj->getLocation();
             parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
         } catch (const std::runtime_error&) {
-            if (adir->persistent()) {
+            if (adir->isPersistent()) {
                 containerID = INVALID_OBJECT_ID;
             } else {
                 removeAutoscanDirectory(adir);
@@ -567,7 +567,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         if (!fs::is_directory(adir->getLocation())) {
             adir->setObjectID(INVALID_OBJECT_ID);
             database->updateAutoscanDirectory(adir);
-            if (adir->persistent()) {
+            if (adir->isPersistent()) {
                 return;
             }
 
@@ -607,7 +607,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         log_error("Could not open {}: {}", location.c_str(), ec.message());
     }
     if (ec || !dIter) {
-        if (adir->persistent()) {
+        if (adir->isPersistent()) {
             removeObject(adir, containerID, false);
             if (location == adir->getLocation()) {
                 adir->setObjectID(INVALID_OBJECT_ID);
@@ -625,7 +625,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     AutoScanSetting asSetting;
     asSetting.adir = adir;
-    asSetting.recursive = adir->getRecursive();
+    asSetting.recursive = adir->isRecursive();
     asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
     asSetting.hidden = adir->getHidden();
     asSetting.mergeOptions(config, location);
@@ -659,7 +659,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
         // it is possible that someone hits remove while the container is being scanned
         // in this case we will invalidate the autoscan entry
-        if (adir->getScanID() == INVALID_SCAN_ID) {
+        if (!adir->isValid()) {
             log_info("lost autoscan for {}", newPath.c_str());
             finishScan(adir, location, parentContainer, lastModifiedNewMax);
             return;
@@ -675,7 +675,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             continue;
         }
 
-        asSetting.recursive = adir->getRecursive();
+        asSetting.recursive = adir->isRecursive();
         asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
         asSetting.hidden = adir->getHidden();
         asSetting.mergeOptions(config, location);
@@ -733,7 +733,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
                 // it is possible that someone hits remove while the container is being scanned
                 // in this case we will invalidate the autoscan entry
-                if (adir->getScanID() == INVALID_SCAN_ID) {
+                if (!adir->isValid()) {
                     log_info("lost autoscan for {}", newPath.c_str());
                     finishScan(adir, location, parentContainer, lastModifiedNewMax);
                     return;
@@ -1637,7 +1637,7 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
 
 void ContentManager::handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    if (adir->persistent()) {
+    if (adir->isPersistent()) {
         adir->setObjectID(INVALID_OBJECT_ID);
         database->updateAutoscanDirectory(adir);
     } else {
@@ -1712,7 +1712,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     original->copyTo(copy);
 
     copy->setHidden(dir->getHidden());
-    copy->setRecursive(dir->getRecursive());
+    copy->setRecursive(dir->isRecursive());
     copy->setInterval(dir->getInterval());
 
     if (copy->getScanMode() == ScanMode::Timed) {

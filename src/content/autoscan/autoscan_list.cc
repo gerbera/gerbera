@@ -24,7 +24,7 @@
 /// \file autoscan_list.cc
 #include "autoscan_list.h"
 
-#include "autoscan.h"
+#include "autoscan_directory.h"
 #include "database/database.h"
 
 AutoscanList::AutoscanList(std::shared_ptr<Database> database)
@@ -56,7 +56,7 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
-        dir->setOrig(true);
+        dir->setOriginal(true);
     } else {
         dir->setPersistent(true);
     }
@@ -132,7 +132,7 @@ void AutoscanList::remove(std::size_t id, bool edit)
             return;
         }
         auto dir = list[id];
-        dir->setScanID(INVALID_SCAN_ID);
+        dir->setScanID(AutoscanDirectory::INVALID_SCAN_ID);
 
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
@@ -143,7 +143,7 @@ void AutoscanList::remove(std::size_t id, bool edit)
         }
         auto&& dir = indexMap[id];
         auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getScanID()](auto&& item) { return loc == item->getScanID(); });
-        dir->setScanID(INVALID_SCAN_ID);
+        dir->setScanID(AutoscanDirectory::INVALID_SCAN_ID);
         list.erase(entry);
 
         if (id >= origSize) {
@@ -163,7 +163,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
         auto dir = *it;
 
         if (parent <= dir->getLocation()) {
-            if (dir->persistent() && !persistent) {
+            if (dir->isPersistent() && !persistent) {
                 ++it;
                 continue;
             }
@@ -173,7 +173,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
             copy->setScanID(dir->getScanID());
             rmIdList->add(copy);
 
-            dir->setScanID(INVALID_SCAN_ID);
+            dir->setScanID(AutoscanDirectory::INVALID_SCAN_ID);
             it = list.erase(it);
             continue;
         }

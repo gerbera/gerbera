@@ -31,7 +31,7 @@
 
 #include "pages.h" // API
 
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 
@@ -84,7 +84,7 @@ void Web::Autoscan::process()
             bool hidden = boolParam("hidden");
             // bool persistent = boolParam("persistent");
 
-            ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
+            ScanMode scanMode = AutoscanDirectory::remapScanMode(scanModeStr);
             int interval = intParam("interval", 0);
             if (scanMode == ScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
@@ -99,10 +99,9 @@ void Web::Autoscan::process()
                 "", // location
                 scanMode,
                 recursive,
-                false, // persistent
-                INVALID_SCAN_ID, // autoscan id - used only internally by CM
-                interval,
-                hidden);
+                false);
+            autoscan->setInterval(std::chrono::seconds(interval));
+            autoscan->setHidden(hidden);
             autoscan->setObjectID(objectID);
             content->setAutoscanDirectory(autoscan);
         }
@@ -122,8 +121,8 @@ void Web::Autoscan::process()
             autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
 
             autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
-            autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
-            autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
+            autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanMode(autoscanDir->getScanMode()));
+            autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->isPersistent() ? "1" : "0");
             // autoscanEl.append_child("scan_level").append_child(pugi::node_pcdata)
             //     .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
         }
@@ -140,10 +139,10 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
     } else {
-        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
-        element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
+        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanMode(adir->getScanMode()));
+        element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->isRecursive() ? "1" : "0");
         element.append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
         element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
-        element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
+        element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->isPersistent() ? "1" : "0");
     }
 }

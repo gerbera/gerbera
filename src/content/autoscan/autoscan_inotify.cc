@@ -34,10 +34,8 @@
 
 #include <sstream>
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
-
-#define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
 AutoscanInotify::AutoscanInotify(const std::shared_ptr<ContentManager>& content)
     : config(content->getContext()->getConfig())
@@ -107,7 +105,7 @@ void AutoscanInotify::threadProc()
                 // read dir
                 auto dirEnt = fs::directory_entry(location, ec);
 
-                if (adir->getRecursive()) {
+                if (adir->isRecursive()) {
                     log_debug("Removing recursive watch: {}", location.c_str());
                     monitorUnmonitorRecursive(dirEnt, true, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                 } else {
@@ -135,7 +133,7 @@ void AutoscanInotify::threadProc()
                 auto dirEnt = fs::directory_entry(location, ec);
                 if (!ec) {
                     // handle dir recursively
-                    if (adir->getRecursive()) {
+                    if (adir->isRecursive()) {
                         log_debug("Adding recursive watch: {}", location.c_str());
                         monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
                     } else {
@@ -196,7 +194,7 @@ void AutoscanInotify::threadProc()
                         recheckNonexistingMonitors(wd, wdObj);
                     }
 
-                    if (adir && adir->getRecursive() && (mask & IN_CREATE)) {
+                    if (adir && adir->isRecursive() && (mask & IN_CREATE)) {
                         if (adir->getHidden() || name.at(0) != '.') {
                             log_debug("Detected new dir, adding to inotify: {}", path.c_str());
                             auto dirEnt = fs::directory_entry(path, ec);
@@ -222,7 +220,7 @@ void AutoscanInotify::threadProc()
                             if (mask & IN_MOVE_SELF)
                                 inotify->removeWatch(wd);
                             auto watch = getStartPoint(wdObj);
-                            if (watch && adir->persistent()) {
+                            if (watch && adir->isPersistent()) {
                                 monitorNonexisting(path, watch->getAutoscanDirectory());
                                 content->handlePeristentAutoscanRemove(adir);
                             }
@@ -240,7 +238,7 @@ void AutoscanInotify::threadProc()
                             AutoScanSetting asSetting;
                             asSetting.adir = adir;
                             asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-                            asSetting.recursive = adir->getRecursive();
+                            asSetting.recursive = adir->isRecursive();
                             asSetting.hidden = adir->getHidden();
                             asSetting.rescanResource = true;
                             asSetting.mergeOptions(config, path);
@@ -278,7 +276,7 @@ void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir)
 void AutoscanInotify::unmonitor(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     // must not be persistent
-    assert(!dir->persistent());
+    assert(!dir->isPersistent());
 
     log_debug("Requested to stop monitoring \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
@@ -397,7 +395,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                 auto watchToRemove = getStartPoint(wdToRemove);
                 if (watchToRemove) {
                     auto adir = watchToRemove->getAutoscanDirectory();
-                    if (adir->persistent()) {
+                    if (adir->isPersistent()) {
                         monitorNonexisting(path, adir);
                         content->handlePeristentAutoscanRemove(adir);
                     }
@@ -476,7 +474,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& start
             continue;
         }
 
-        if (dirEnt.is_directory(ec) && adir->getRecursive()) {
+        if (dirEnt.is_directory(ec) && adir->isRecursive()) {
             monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
         }
 
@@ -490,7 +488,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 {
     int wd = inotify->addWatch(path, events);
     if (wd < 0) {
-        if (startPoint && adir->persistent()) {
+        if (startPoint && adir->isPersistent()) {
             monitorNonexisting(path, adir);
         }
     } else {

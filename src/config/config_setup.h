@@ -34,8 +34,8 @@
 #include "config.h"
 #include "config_manager.h"
 #include "config_options.h"
-#include "content/autoscan.h"
-#include "content/autoscan_list.h"
+#include "content/autoscan/autoscan_directory.h"
+#include "content/autoscan/autoscan_list.h"
 
 class ConfigOption;
 class DirectoryTweak;
@@ -597,7 +597,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getUniquePath() const override { return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode)); }
+    std::string getUniquePath() const override { return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanMode(scanMode)); }
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 

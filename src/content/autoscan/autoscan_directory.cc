@@ -29,20 +29,16 @@
 
 /// \file autoscan.cc
 
-#include "autoscan.h" // API
+#include "autoscan_directory.h" // API
 
-#include "content_manager.h"
+#include "content/content_manager.h"
 #include "database/database.h"
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
-    int id, unsigned int interval, bool hidden)
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
-    , hidden(hidden)
     , persistent_flag(persistent)
-    , interval(interval)
-    , scanID(id)
 {
 }
 
@@ -113,7 +109,7 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
-const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
+const char* AutoscanDirectory::mapScanMode(ScanMode scanmode)
 {
     switch (scanmode) {
     case ScanMode::Timed:
@@ -121,17 +117,17 @@ const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
     case ScanMode::INotify:
         return "inotify";
     }
-    throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
+    throw_std_runtime_error("Illegal scanmode ({}) given to mapScanMode()", scanmode);
 }
 
-ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
+ScanMode AutoscanDirectory::remapScanMode(const std::string& scanmode)
 {
     if (scanmode == "timed")
         return ScanMode::Timed;
     if (scanmode == "inotify")
         return ScanMode::INotify;
 
-    throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode);
+    throw_std_runtime_error("Illegal scanmode ({}) given to remapScanMode()", scanmode);
 }
 
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const

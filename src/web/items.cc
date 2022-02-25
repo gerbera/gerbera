@@ -32,7 +32,7 @@
 #include "pages.h" // API
 
 #include "cds_objects.h"
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "database/database.h"
 #include "server.h"
 #include "upnp_xml.h"
@@ -87,7 +87,7 @@ void Web::Items::process()
     auto parentDir = database->getAutoscanDirectory(parentID);
     int autoscanType = 0;
     if (parentDir) {
-        autoscanType = parentDir->persistent() ? 2 : 1;
+        autoscanType = parentDir->isPersistent() ? 2 : 1;
         autoscanMode = "timed";
     }
 
@@ -99,7 +99,7 @@ void Web::Items::process()
             auto pathIDs = database->getPathIDs(parentID);
             for (int pathId : pathIDs) {
                 auto pathDir = database->getAutoscanDirectory(pathId);
-                if (pathDir && pathDir->getRecursive()) {
+                if (pathDir && pathDir->isRecursive()) {
                     startpointId = pathId;
                     break;
                 }
@@ -112,7 +112,7 @@ void Web::Items::process()
             auto startPtDir = database->getAutoscanDirectory(startpointId);
             if (startPtDir && startPtDir->getScanMode() == ScanMode::INotify) {
                 protectItems = true;
-                if (autoscanType == 0 || startPtDir->persistent())
+                if (autoscanType == 0 || startPtDir->isPersistent())
                     protectContainer = true;
 
                 autoscanMode = "inotify";

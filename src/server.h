@@ -112,7 +112,7 @@ protected:
     /// \brief Unique Device Number of the server.
     ///
     /// The UDN is read from the config, it must be unique and
-    /// persistent over reboots.
+    /// isPersistent over reboots.
     std::string serverUDN;
 
     /// \brief Name of the virtual web server directory.

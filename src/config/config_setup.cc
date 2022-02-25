@@ -29,7 +29,7 @@
 #include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "directory_tweak.h"
 #include "dynamic_content.h"
 #include "metadata/metadata_handler.h"
@@ -849,11 +849,11 @@ std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<st
 std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
     if (index > ITEM_PATH_ROOT)
-        return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption));
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanMode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption));
     if (index == ITEM_PATH_ROOT)
-        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanMode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
     if (index == ITEM_PATH_NEW)
-        return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), ConfigDefinition::ensureAttribute(propOption));
+        return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanMode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), ConfigDefinition::ensureAttribute(propOption));
 
     return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
 }
@@ -893,7 +893,9 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
 
-        auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, INVALID_SCAN_ID, interval, hidden);
+        auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true);
+        dir->setInterval(std::chrono::seconds(interval));
+        dir->setHidden(hidden);
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
@@ -913,7 +915,7 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
     }
 
     if (optItem == index) {
-        if (entry->getOrig())
+        if (entry->isOriginal())
             config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
         if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
@@ -925,13 +927,13 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
 
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE);
     if (optItem == index) {
-        log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
+        log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanMode(entry->getScanMode()));
         return true;
     }
 
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
     if (optItem == index) {
-        if (entry->getOrig())
+        if (entry->isOriginal())
             config->setOrigValue(index, fmt::to_string(entry->getInterval().count()));
         entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getInterval().count());
@@ -940,16 +942,16 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
 
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
     if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getRecursive());
+        if (entry->isOriginal())
+            config->setOrigValue(index, entry->isRecursive());
         entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getRecursive());
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->isRecursive());
         return true;
     }
 
     index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
     if (optItem == index) {
-        if (entry->getOrig())
+        if (entry->isOriginal())
             config->setOrigValue(index, entry->getHidden());
         entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)->get(i)->getHidden());

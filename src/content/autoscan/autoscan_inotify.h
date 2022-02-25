@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "autoscan.h"
+#include "autoscan_directory.h"
 #include "config/config.h"
 #include "context.h"
 #include "util/mt_inotify.h"
@@ -84,6 +84,8 @@ private:
 
     // event mask with events to watch for (set by constructor);
     int events;
+
+    static constexpr std::string_view INOTIFY_MAX_USER_WATCHES_FILE = "/proc/sys/fs/inotify/max_user_watches";
 
     enum class WatchType {
         Autoscan,

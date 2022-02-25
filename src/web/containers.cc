@@ -32,7 +32,7 @@
 #include "pages.h" // API
 
 #include "cds_objects.h"
-#include "content/autoscan.h"
+#include "content/autoscan/autoscan_directory.h"
 #include "database/database.h"
 #include "server.h"
 #include "upnp_xml.h"
