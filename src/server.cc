@@ -544,7 +544,7 @@ int Server::registerVirtualDirCallbacks()
             std::string link = urlUnescape(filename);
             reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
             return 0;
-        } catch (const ServerShutdownException& se) {
+        } catch (const ServerShutdownException&) {
             return -1;
         } catch (const SubtitlesNotFoundException& sex) {
             log_warning("{}", sex.what());
