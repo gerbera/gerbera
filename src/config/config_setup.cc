@@ -170,7 +170,7 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
         return false;
     }
     pathValue.assign(resolvePath(optValue));
-    return !(notEmpty && pathValue.empty());
+    return !notEmpty || !pathValue.empty();
 }
 
 bool ConfigPathSetup::checkAgentPath(std::string& optValue)
@@ -394,17 +394,17 @@ bool ConfigIntSetup::CheckMinValue(int value, int minValue)
 
 bool ConfigIntSetup::CheckImageQualityValue(int value)
 {
-    return !(value < 0 || value > 10);
+    return value >= 0 && value <= 10;
 }
 
 bool ConfigIntSetup::CheckUpnpStringLimitValue(int value)
 {
-    return !((value != -1) && (value < 4));
+    return value == -1 || value >= 4;
 }
 
 bool ConfigIntSetup::CheckPortValue(int value)
 {
-    return !(value < 0 || value > 65535);
+    return value >= 0 && value <= 65535;
 }
 
 void ConfigBoolSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
