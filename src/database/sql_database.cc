@@ -1562,7 +1562,7 @@ int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, cons
     if (!upnpClass.empty()) {
         where.push_back(fmt::format("{} LIKE {}", identifier("upnp_class"), quote(fmt::format("{}%", upnpClass))));
     }
-    where.push_back(fmt::format("{} LIKE {}", identifier("location"), quote(fmt::format("{}%", (isVirtual) ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", identifier("location"), quote(fmt::format("{}%", isVirtual ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
     //<< " AND is_virtual = 0";
 
     auto query = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND "));
@@ -1612,7 +1612,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     auto table = identifier(CDS_OBJECT_TABLE);
     auto colParentId = identifier("parent_id");
 
-    auto getSql = (withoutContainer) //
+    auto getSql = withoutContainer //
         ? fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} != {}", colId, table, colParentId, parentID, identifier("object_type"), OBJECT_TYPE_CONTAINER)
         : fmt::format("SELECT {} FROM {} WHERE {} = {}", colId, table, colParentId, parentID);
     auto res = select(getSql);
@@ -1754,7 +1754,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
     // select statements
     auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
     auto itemSql = fmt::format("SELECT DISTINCT {0}id{1}, {0}parent_id{1} FROM {0}{2}{1} WHERE {0}ref_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
-    auto containersSql = (all) //
+    auto containersSql = all //
         ? fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE) //
         : fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
 
