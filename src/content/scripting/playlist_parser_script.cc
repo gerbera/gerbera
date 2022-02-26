@@ -218,8 +218,8 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
+    GrbFile file(item->getLocation());
     if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
-        GrbFile file(item->getLocation());
         currentHandle = file.open("r");
     } else {
         pugi::xml_parse_result result = xmlDoc->load_file(item->getLocation().c_str());
