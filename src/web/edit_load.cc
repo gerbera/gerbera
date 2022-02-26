@@ -188,7 +188,7 @@ void Web::EditLoad::process()
 
         auto location = item.append_child("location");
         location.append_attribute("value") = objItem->getLocation().c_str();
-        location.append_attribute("editable") = !(obj->isPureItem() || !obj->isVirtual());
+        location.append_attribute("editable") = !obj->isPureItem() && obj->isVirtual();
 
         auto mimeType = item.append_child("mime-type");
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();

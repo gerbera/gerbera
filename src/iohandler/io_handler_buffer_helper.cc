@@ -73,7 +73,7 @@ std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
         "IOHandlerBufferHelper", [this] { return threadRunner != nullptr; }, 100);
     auto lock = threadRunner->uniqueLock();
 
-    while ((empty || waitForInitialFillSize) && !(threadShutdown || eof || readError)) {
+    while ((empty || waitForInitialFillSize) && !threadShutdown && !eof && !readError) {
         if (checkSocket) {
             checkSocket = false;
             return CHECK_SOCKET;
