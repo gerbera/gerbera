@@ -90,7 +90,7 @@ void Sqlite3Database::init()
     // try to detect already active database client and terminate before doing any harm
     try {
         prepare();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         shutdown();
         throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath.c_str());
     }
@@ -99,7 +99,7 @@ void Sqlite3Database::init()
     fs::path dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str());
     try {
         dbVersion = getInternalSetting("db_version");
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
         if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
@@ -114,7 +114,7 @@ void Sqlite3Database::init()
                     btask->waitForTask();
                     prepare();
                     dbVersion = getInternalSetting("db_version");
-                } catch (const std::runtime_error& err) {
+                } catch (const std::runtime_error&) {
                 }
             }
         } else {
@@ -323,7 +323,7 @@ void Sqlite3Database::threadProc()
             }
             db = nullptr;
         }
-    } catch (const std::runtime_error& e) {
+    } catch (const std::runtime_error&) {
         log_error("Aborting thread");
     }
 }

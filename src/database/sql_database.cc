@@ -549,7 +549,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
             auto refObj = loadObject(refID);
             if (refObj && refObj->getLocation() == location)
                 return refObj;
-        } catch (const std::runtime_error& e) {
+        } catch (const std::runtime_error&) {
             throw_std_runtime_error("illegal refID was set");
         }
     }

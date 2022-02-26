@@ -75,7 +75,7 @@ void Web::Autoscan::process()
             try {
                 auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
                 content->removeAutoscanDirectory(adir);
-            } catch (const std::runtime_error& e) {
+            } catch (const std::runtime_error&) {
                 // didn't work, well we don't care in this case
             }
         } else {
