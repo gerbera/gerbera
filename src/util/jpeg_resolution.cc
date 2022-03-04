@@ -72,7 +72,7 @@ static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
     int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
     if (ret < 0)
         return ret;
-    return int(c[0]);
+    return std::to_integer<int>(c[0]);
 }
 
 static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& ioh)
