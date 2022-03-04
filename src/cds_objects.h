@@ -261,13 +261,7 @@ public:
     void clearMetaData() { metaData.clear(); }
 
     /// \brief Set entire metadata dictionary.
-    void setMetaData(const std::vector<std::pair<std::string, std::string>>& metaData)
-    {
-        this->metaData = metaData;
-    }
-
-    /// \brief Set entire metadata dictionary by moving
-    void setMetaData(std::vector<std::pair<std::string, std::string>>&& metaData)
+    void setMetaData(std::vector<std::pair<std::string, std::string>> metaData)
     {
         this->metaData = std::move(metaData);
     }
@@ -322,13 +316,7 @@ public:
     }
 
     /// \brief Set resources
-    void setResources(const std::vector<std::shared_ptr<CdsResource>>& res)
-    {
-        resources = res;
-    }
-
-    /// \brief Set resources by move
-    void setResources(std::vector<std::shared_ptr<CdsResource>>&& res)
+    void setResources(std::vector<std::shared_ptr<CdsResource>> res)
     {
         resources = std::move(res);
     }
