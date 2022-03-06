@@ -120,14 +120,6 @@ openSUSE
 
 Gerbera is available on `software.opensuse.org <https://software.opensuse.org/package/gerbera>`_.
 
-Entware (Optware)
-~~~~~~~~~~~~~~~~~
-.. index:: Entware
-.. index:: Optware
-
-Gerbera is available in `Entware <https://github.com/Entware/rtndev/tree/master/gerbera>`_ for your embedded device/router!
-
-
 OpenWrt (OpenWrt)
 ~~~~~~~~~~~~~~~~~
 .. index:: OpenWrt
