@@ -82,7 +82,7 @@ static struct {
 static void printCopyright()
 {
     fmt::print("\nGerbera UPnP Server {}\n"
-               "Copyright 2016-2021 Gerbera Contributors.\n"
+               "Copyright 2016-2022 Gerbera Contributors.\n"
                "Licence GPLv2: GNU GPL version 2.\n"
                "This is free software: you are free to change and redistribute it.\n\n",
         GERBERA_VERSION);
@@ -91,7 +91,7 @@ static void printCopyright()
 static void logCopyright()
 {
     log_info("Gerbera UPnP Server {} - {}", GERBERA_VERSION, DESC_MANUFACTURER_URL);
-    log_info("Copyright 2016-2021 Gerbera Contributors.");
+    log_info("Copyright 2016-2022 Gerbera Contributors.");
     log_info("Gerbera is free software, covered by the GNU General Public License version 2");
 }
 

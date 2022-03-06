@@ -27,6 +27,16 @@ This section defines the client behaviour additions.
 
     This attribute defines if client overriding is enabled as a whole, possible values are ”yes” or ”no”.
 
+
+    ::
+
+        cache-threshold=...
+
+    * Optional
+    * Default: **6**
+
+    This attribute sets the amount of hours a client entry is kept in the cache.
+
 **Child tags:**
 
 ``client``

@@ -46,6 +46,7 @@
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+#include "util/upnp_clients.h"
 
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
@@ -1984,7 +1985,7 @@ std::vector<ConfigValue> SQLDatabase::getConfigValues()
             row->col(3) });
     }
 
-    log_debug("loading {} items", result.size());
+    log_debug("loaded {} items from {}", result.size(), CONFIG_VALUE_TABLE);
     return result;
 }
 
@@ -2026,12 +2027,68 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
     }
 }
 
+/* clients methods */
+std::vector<ClientCacheEntry> SQLDatabase::getClients()
+{
+    auto fields = std::vector {
+        identifier("addr"),
+        identifier("port"),
+        identifier("addrFamily"),
+        identifier("userAgent"),
+        identifier("last"),
+        identifier("age"),
+    };
+    std::vector<ClientCacheEntry> result;
+    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CLIENTS_TABLE)));
+    if (!res)
+        return result;
+
+    result.reserve(res->getNumRows());
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        struct sockaddr_storage sa = readAddr(row->col(0), row->col_int(2, AF_INET));
+        reinterpret_cast<struct sockaddr_in*>(&sa)->sin_port = row->col_int(1, 0);
+        result.push_back({ sa,
+            row->col(3),
+            std::chrono::seconds(row->col_int(4, 0)),
+            std::chrono::seconds(row->col_int(5, 0)),
+            nullptr });
+    }
+
+    log_debug("Loaded {} items from {}", result.size(), CLIENTS_TABLE);
+    return result;
+}
+
+void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
+{
+    deleteAll(CLIENTS_TABLE);
+    auto fields = std::vector {
+        identifier("addr"),
+        identifier("port"),
+        identifier("addrFamily"),
+        identifier("userAgent"),
+        identifier("last"),
+        identifier("age"),
+    };
+    for (auto& client : cache) {
+        auto values = std::vector {
+            quote(sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&client.addr), false)),
+            quote(reinterpret_cast<const struct sockaddr_in*>(&client.addr)->sin_port),
+            quote(reinterpret_cast<const struct sockaddr*>(&client.addr)->sa_family),
+            quote(client.userAgent),
+            quote(client.last.count()),
+            quote(client.age.count()),
+        };
+        insert(CLIENTS_TABLE, fields, values);
+    }
+}
+
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
 
     beginTransaction("updateAutoscanList");
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}touched{1} = {3} WHERE {0}persistent{1} = {4} AND {0}scan_mode{1} = {5}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(true), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    exec(fmt::format("UPDATE {0} SET {1} = {2} WHERE {3} = {4} AND {5} = {6}", identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("persistent"), quote(true), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
     commit("updateAutoscanList");
 
     std::size_t listSize = list->size();
@@ -2056,7 +2113,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
         auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), objectID);
 
         beginTransaction("updateAutoscanList x");
-        auto res = select(fmt::format("SELECT {0}id{1} FROM {0}{2}{1} WHERE {3} LIMIT 1", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, where));
+        auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1", identifier("id"), identifier(AUTOSCAN_TABLE), where));
         if (!res) {
             rollback("updateAutoscanList x");
             throw DatabaseException("", "query error while selecting from autoscan list");
@@ -2072,7 +2129,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
     }
 
     beginTransaction("updateAutoscanList delete");
-    exec(fmt::format("DELETE FROM {0}{2}{1} WHERE {0}touched{1} = {3} AND {0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, AUTOSCAN_TABLE, quote(false), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    exec(fmt::format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}", identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
     commit("updateAutoscanList delete");
 }
 

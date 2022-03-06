@@ -25,7 +25,7 @@ public:
         auto clientConfig = std::make_shared<ClientConfig>(123, "192.168.1.100", "added by config", 1);
         config->list->add(clientConfig, 0);
 
-        subject = new Clients(config);
+        subject = new ClientManager(config, nullptr);
     }
 
     void TearDown() override
@@ -41,7 +41,7 @@ public:
         memcpy(addr, &sin, sizeof(sin));
     }
 
-    Clients* subject;
+    ClientManager* subject;
     std::shared_ptr<MyConfigMock> config;
 };
 

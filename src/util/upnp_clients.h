@@ -39,6 +39,7 @@
 
 // forward declaration
 class Config;
+class Database;
 
 // specific customer products
 enum class ClientType {
@@ -90,9 +91,9 @@ struct ClientCacheEntry {
     const struct ClientInfo* pInfo;
 };
 
-class Clients {
+class ClientManager {
 public:
-    explicit Clients(const std::shared_ptr<Config>& config);
+    explicit ClientManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database);
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
@@ -115,6 +116,8 @@ private:
     std::vector<ClientCacheEntry> cache;
 
     std::vector<ClientInfo> clientInfo;
+    std::shared_ptr<Database> database;
+    std::chrono::hours cacheThreshold;
 };
 
 #endif // __UPNP_CLIENTS_H__
