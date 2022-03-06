@@ -135,6 +135,13 @@ OpenWrt (OpenWrt)
 Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`_ for your embedded device/router!
 
 
+Buildroot
+~~~~~~~~~~~~~~~~~
+.. index:: Buildroot
+
+Gerbera is available in `Buildroot <https://git.buildroot.net/buildroot/tree/package/gerbera>`_.
+
+
 macOS
 ~~~~~
 .. index:: macOS
