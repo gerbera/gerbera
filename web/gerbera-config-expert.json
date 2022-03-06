@@ -1306,6 +1306,11 @@
 					"editable": true
 				},
 				{
+					"item": "/clients/attribute::cache-threshold",
+					"caption": "Cache Threshold",
+					"editable": true
+				},
+				{
 					"item": "/clients/client",
 					"type": "List",
 					"editable": true,

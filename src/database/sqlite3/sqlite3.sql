@@ -71,6 +71,15 @@ CREATE TABLE "grb_cds_resource" (
     PRIMARY KEY ("item_id", "res_id"),
     CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE "grb_client" (
+    "addr" varchar(32),
+    "port" integer NOT NULL,
+    "addrFamily" integer NOT NULL,
+    "userAgent" varchar(255) NOT NULL,
+    "last" integer NOT NULL,
+    "age" integer NOT NULL,
+    PRIMARY KEY ("addr", "port")
+);
 INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
 CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
 CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);

@@ -6,6 +6,7 @@
 #include "config/config.h"
 #include "config/config_setup.h"
 #include "database/database.h"
+#include "util/upnp_clients.h"
 
 class DatabaseMock : public Database {
 public:
@@ -48,13 +49,13 @@ public:
     std::string getInternalSetting(const std::string& key) override { return {}; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }
 
-    std::vector<ConfigValue> getConfigValues() override
-    {
-        std::vector<ConfigValue> result;
-        return result;
-    }
+    std::vector<ConfigValue> getConfigValues() override { return {}; }
     void removeConfigValue(const std::string& item) override { }
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override { }
+
+    /* clients methods */
+    virtual std::vector<ClientCacheEntry> getClients() override { return {}; }
+    virtual void saveClients(const std::vector<ClientCacheEntry>& cache) override { }
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
     void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }

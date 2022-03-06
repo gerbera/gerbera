@@ -47,7 +47,7 @@ class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 15
+#define DBVERSION 16
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -55,6 +55,7 @@ class SQLEmitter;
 #define METADATA_TABLE "mt_metadata"
 #define RESOURCE_TABLE "grb_cds_resource"
 #define CONFIG_VALUE_TABLE "grb_config_value"
+#define CLIENTS_TABLE "grb_client"
 
 class SQLRow {
 public:
@@ -161,6 +162,10 @@ public:
     std::vector<ConfigValue> getConfigValues() override;
     void removeConfigValue(const std::string& item) override;
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
+
+    /* clients methods */
+    virtual std::vector<ClientCacheEntry> getClients() override;
+    virtual void saveClients(const std::vector<ClientCacheEntry>& cache) override;
 
     std::vector<int> getPathIDs(int objectID) override;
 

@@ -43,6 +43,7 @@ class AutoscanDirectory;
 class AutoscanList;
 class CdsContainer;
 class CdsObject;
+struct ClientCacheEntry;
 class Config;
 class ConfigValue;
 class Mime;
@@ -271,6 +272,10 @@ public:
     virtual std::vector<ConfigValue> getConfigValues() = 0;
     virtual void removeConfigValue(const std::string& item) = 0;
     virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") = 0;
+
+    /* clients methods */
+    virtual std::vector<ClientCacheEntry> getClients() = 0;
+    virtual void saveClients(const std::vector<ClientCacheEntry>& cache) = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid

@@ -145,8 +145,6 @@ The clients view is accessible through the `Clients` menu item.  The view contai
    :alt: Clients view
    :target: _static/clients-view.png
 
-The clients list is purged when restarting the server.
-
 
 Config View
 ~~~~~~~~~~~

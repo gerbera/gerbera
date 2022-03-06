@@ -27,18 +27,36 @@
 #include "upnp_clients.h" // API
 #include "config/client_config.h"
 #include "config/config.h"
+#include "database/database.h"
 #include "util/tools.h"
 
 #include <array>
 
 #include <upnp.h>
 
-Clients::Clients(const std::shared_ptr<Config>& config)
+ClientManager::ClientManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database)
+    : database(database)
+    , cacheThreshold(config->getIntOption(CFG_CLIENTS_CACHE_THRESHOLD))
 {
     refresh(config);
+    if (this->database) {
+        auto dbCache = this->database->getClients();
+        for (auto&& entry : dbCache) {
+            auto info = getInfoByAddr(&entry.addr);
+            if (!info) {
+                info = getInfoByType(entry.userAgent, ClientMatchType::UserAgent);
+            }
+            if (!info) {
+                assert(clientInfo[0].type == ClientType::Unknown);
+                info = &clientInfo[0];
+            }
+            entry.pInfo = info;
+            cache.push_back(std::move(entry));
+        }
+    }
 }
 
-void Clients::refresh(const std::shared_ptr<Config>& config)
+void ClientManager::refresh(const std::shared_ptr<Config>& config)
 {
     // table of supported clients (reverse search, sequence of entries matters!)
     clientInfo = {
@@ -139,7 +157,7 @@ void Clients::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
-void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
+void ClientManager::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
@@ -152,7 +170,7 @@ void Clients::addClientByDiscovery(const struct sockaddr_storage* addr, const st
 #endif
 }
 
-const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
+const ClientInfo* ClientManager::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -183,7 +201,7 @@ const ClientInfo* Clients::getInfo(const struct sockaddr_storage* addr, const st
     return info;
 }
 
-const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) const
+const ClientInfo* ClientManager::getInfoByAddr(const struct sockaddr_storage* addr) const
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
@@ -216,7 +234,7 @@ const ClientInfo* Clients::getInfoByAddr(const struct sockaddr_storage* addr) co
     return nullptr;
 }
 
-const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchType type) const
+const ClientInfo* ClientManager::getInfoByType(const std::string& match, ClientMatchType type) const
 {
     if (!match.empty()) {
         auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
@@ -229,7 +247,7 @@ const ClientInfo* Clients::getInfoByType(const std::string& match, ClientMatchTy
     return nullptr;
 }
 
-const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) const
+const ClientInfo* ClientManager::getInfoByCache(const struct sockaddr_storage* addr) const
 {
     AutoLock lock(mutex);
 
@@ -245,14 +263,14 @@ const ClientInfo* Clients::getInfoByCache(const struct sockaddr_storage* addr) c
     return nullptr;
 }
 
-void Clients::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
+void ClientManager::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
 {
     AutoLock lock(mutex);
 
     // house cleaning, remove old entries
     auto now = currentTime();
     cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [now](auto&& entry) { return entry.last + std::chrono::hours(6) < now; }),
+                    [this, now](auto&& entry) { return entry.last + cacheThreshold < now; }),
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
@@ -270,9 +288,11 @@ void Clients::updateCache(const struct sockaddr_storage* addr, const std::string
         // add new client
         cache.emplace_back(*addr, userAgent, now, now, pInfo);
     }
+    if (this->database)
+        this->database->saveClients(cache);
 }
 
-std::unique_ptr<pugi::xml_document> Clients::downloadDescription(const std::string& location)
+std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std::string& location)
 {
     auto xml = std::make_unique<pugi::xml_document>();
 #if defined(USING_NPUPNP)

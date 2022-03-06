@@ -10,7 +10,7 @@ add_custom_command(TARGET testdb POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql.sql ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Copying Scripts"
+    COMMENT "Copying Database Scripts"
 )
 
 target_link_libraries(testdb PUBLIC

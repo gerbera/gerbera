@@ -26,7 +26,7 @@
 #include "context.h" // API
 
 Context::Context(std::shared_ptr<Config> config,
-    std::shared_ptr<Clients> clients,
+    std::shared_ptr<ClientManager> clients,
     std::shared_ptr<Mime> mime,
     std::shared_ptr<Database> database,
     std::shared_ptr<Server> server,

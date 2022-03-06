@@ -84,4 +84,17 @@
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `id`</script>
         <script>ALTER TABLE `grb_cds_resource` ADD PRIMARY KEY (`item_id`, `res_id`)</script>
     </version>
+    <version number="16" remark="add client table">
+        <script>
+        CREATE TABLE `grb_client` (
+            `addr` varchar(32),
+            `port` integer NOT NULL,
+            `addrFamily` integer NOT NULL,
+            `userAgent` varchar(255) NOT NULL,
+            `last` integer NOT NULL,
+            `age` integer NOT NULL,
+            PRIMARY KEY (`addr`, `port`)
+        ) ENGINE=MyISAM CHARSET=utf8
+        </script>
+    </version>
 </upgrade>

@@ -76,11 +76,11 @@ void Server::init()
     auto self = shared_from_this();
     timer = std::make_shared<Timer>(config);
 
-    clients = std::make_shared<Clients>(config);
     mime = std::make_shared<Mime>(config);
     timer->run();
     database = Database::createInstance(config, mime, timer);
     config->updateConfigFromDatabase(database);
+    clients = std::make_shared<ClientManager>(config, database);
     session_manager = std::make_shared<Web::SessionManager>(config, timer);
     context = std::make_shared<Context>(config, clients, mime, database, self, session_manager);
 

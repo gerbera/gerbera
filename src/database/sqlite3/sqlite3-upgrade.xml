@@ -202,4 +202,16 @@
         ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
         </script>
     </version>
+    <version number="16" remark="add client table">
+        <script>
+        CREATE TABLE "grb_client" (
+            "addr" varchar(32),
+            "port" integer NOT NULL,
+            "addrFamily" integer NOT NULL,
+            "userAgent" varchar(255) NOT NULL,
+            "last" integer NOT NULL,
+            "age" integer NOT NULL,
+            PRIMARY KEY ("addr", "port"))
+        </script>
+    </version>
 </upgrade>

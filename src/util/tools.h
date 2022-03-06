@@ -299,6 +299,7 @@ std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>
 #define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
 std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
-std::string sockAddrGetNameInfo(const struct sockaddr* sa);
+std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort = true);
+struct sockaddr_storage readAddr(std::string addr, int af);
 
 #endif // __TOOLS_H__
