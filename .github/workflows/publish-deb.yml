@@ -35,6 +35,7 @@ jobs:
           docker run \
             --platform=${{ matrix.arch }} \
             -e TZ=Etc/UTC \
+            -e ART_API_KEY \
             -v "$(pwd):/build" \
             -w /build \
           ${{ matrix.os-ver }} \
