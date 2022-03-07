@@ -254,6 +254,8 @@ if [[ "${my_sys}" != "HEAD" ]]; then
     [[ $is_tag == 1 ]] && upload_to_artifactory debian
     # Git builds go to git
     upload_to_artifactory debian-git
+  else
+    printf "Skipping upload due to missing ART_API_KEY"
   fi
 else
   ctest --output-on-failure
