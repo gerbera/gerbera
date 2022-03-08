@@ -116,7 +116,12 @@ public:
     void setLastPlayed() { this->lastPlayed = currentTime(); }
 
     std::chrono::milliseconds getLastPlayedPosition() const { return lastPlayedPosition; }
+    void setLastPlayedPosition(int lastPlayedPosition) { this->lastPlayedPosition = std::chrono::milliseconds(lastPlayedPosition); }
+
     std::chrono::milliseconds getBookMarkPosition() const { return bookMarkPos; }
+    void setBookMarkPosition(int bookMarkPos) { this->bookMarkPos = std::chrono::milliseconds(bookMarkPos); }
+
+    std::shared_ptr<ClientStatusDetail> clone() const;
 
 private:
     std::string group; // default for any, otherwise group name from config

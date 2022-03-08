@@ -33,6 +33,7 @@
 
 #include "database/database.h"
 #include "util/tools.h"
+#include "util/upnp_clients.h"
 
 static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
@@ -55,6 +56,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
+
 bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     if (id != obj->getID()
@@ -135,8 +137,11 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     item->setTrackNumber(trackNumber);
     item->setPartNumber(partNumber);
     item->setServiceID(serviceID);
+    if (playStatus)
+        item->setPlayStatus(playStatus->clone());
     item->setBookMarkPos(bookMarkPos);
 }
+
 bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto item = std::static_pointer_cast<CdsItem>(obj);

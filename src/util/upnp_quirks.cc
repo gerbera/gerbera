@@ -165,7 +165,8 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)
         return;
-    auto positionToRestore = item->getBookMarkPos().count();
+
+    auto positionToRestore = item->getPlayStatus() ? item->getPlayStatus()->getBookMarkPosition().count() : 0;
     if (positionToRestore > 10)
         positionToRestore -= 10;
     log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
@@ -184,17 +185,19 @@ void Quirks::saveSamsungBookMarkedPosition(ActionRequest& request)
     } else {
         auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
         auto reqRoot = request.getRequest()->document_element();
-        auto objectID = reqRoot.child("ObjectID").text().as_string();
-        auto bookMarkPos = std::to_string(stoiString(reqRoot.child("PosSecond").text().as_string()) / divider);
+        auto objectID = stoiString(reqRoot.child("ObjectID").text().as_string());
+        auto bookMarkPos = stoiString(reqRoot.child("PosSecond").text().as_string()) / divider;
         [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
         [[maybe_unused]] auto rID = reqRoot.child("RID").text().as_string();
 
         log_debug("saveSamsungBookMarkedPosition: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
-
-        std::map<std::string, std::string> m {
-            { "bookmarkpos", bookMarkPos },
-        };
-        content->updateObject(stoiString(objectID), m);
+        auto database = context->getDatabase();
+        auto playStatus = database->getPlayStatus(pClientInfo->group, objectID);
+        if (!playStatus)
+            playStatus = std::make_shared<ClientStatusDetail>(pClientInfo->group, objectID, 1, bookMarkPos, 0, 0);
+        else
+            playStatus->setBookMarkPosition(bookMarkPos);
+        database->savePlayStatus(playStatus);
     }
     auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     request.setResponse(std::move(response));

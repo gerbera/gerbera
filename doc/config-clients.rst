@@ -68,9 +68,19 @@ This section defines the client behaviour for one client.
     * Optional
     * Default: empty
     
-    This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client. 
+    This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client.
     Run a network sniffer like wireshark or some UPnP utility to discover the signature. 
     If ``ip`` is set ``userAgent`` is ignored.
+
+    ::
+
+        group=...
+
+    * Optional
+    * Default: "default"
+
+    This assigns the client to a group which is key to store details on played items (playbackCount, lastPlaybackTime, lastPlaybackPosition, bookmarkPosition).
+    If you select set another group here all actions are recorded for this group.
 
     ::
     
