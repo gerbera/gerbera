@@ -88,7 +88,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
             "Invalid browse flag: " + browseFlag);
 
-    auto parent = database->loadObject(objectID);
+    auto parent = database->loadObject(quirks->getGroup(), objectID);
     if (sortCriteria.empty() && (parent->getClass() == UPNP_CLASS_MUSIC_ALBUM || parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
         flag |= BROWSE_TRACK_SORT;
 
@@ -101,6 +101,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     param.setStartingIndex(stoiString(startingIndex));
     param.setRequestedCount(stoiString(requestedCount));
     param.setSortCriteria(trimString(sortCriteria));
+    param.setGroup(quirks->getGroup());
 
     try {
         if (arr.empty())
@@ -187,7 +188,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
 
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
-        stoiString(startingIndex), stoiString(requestedCount), searchableContainers);
+        stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
@@ -353,7 +354,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    auto obj = database->loadObject(0);
+    auto obj = database->loadObject(DEFAULT_CLIENT_GROUP, 0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 

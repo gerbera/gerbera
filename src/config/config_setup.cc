@@ -1468,11 +1468,12 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
         const pugi::xml_node& child = it.node();
 
         auto flags = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
+        auto group = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
         auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
 
-        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), ip, userAgent, captionInfoCount);
+        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), group, ip, userAgent, captionInfoCount);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -1510,10 +1511,20 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
     index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
     if (optItem == index) {
         if (entry->getOrig())
-            config->setOrigValue(index, entry->getIp().data());
+            config->setOrigValue(index, entry->getIp());
         if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
             entry->setIp(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_CLIENTS_CLIENT_GROUP);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getGroup());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
+            entry->setGroup(optValue);
+            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getGroup());
             return true;
         }
     }

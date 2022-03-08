@@ -92,6 +92,8 @@ static constexpr auto PROTOCOL = std::string_view("http-get");
 #define DEFAULT_COMMON_SCRIPT "common.js"
 #define DEFAULT_WEB_DIR "web"
 #define DEFAULT_JS_DIR "js"
+static constexpr auto CLIENT_GROUP_TAG = "group";
+#define DEFAULT_CLIENT_GROUP "default"
 static constexpr auto SESSION_TIMEOUT_CHECK_INTERVAL = std::chrono::minutes(5);
 
 #ifdef ONLINE_SERVICES

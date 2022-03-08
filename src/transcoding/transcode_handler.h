@@ -54,6 +54,7 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
         const fs::path& location,
         const std::shared_ptr<CdsObject>& obj,
+        const std::string& group,
         const std::string& range)
         = 0;
 

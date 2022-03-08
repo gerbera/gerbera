@@ -35,6 +35,8 @@
 #include <sys/socket.h>
 #include <vector>
 
+#include "common.h"
+#include "util/tools.h"
 #include "util/upnp_quirks.h"
 
 // forward declaration
@@ -65,6 +67,7 @@ enum class ClientMatchType {
 
 struct ClientInfo {
     std::string name { "Unknown" }; // used for logging/debugging proposes only
+    std::string group { DEFAULT_CLIENT_GROUP };
     ClientType type { ClientType::Unknown };
     QuirkFlags flags { QUIRK_FLAG_NONE };
 
@@ -89,6 +92,39 @@ struct ClientCacheEntry {
     std::chrono::seconds last;
     std::chrono::seconds age;
     const struct ClientInfo* pInfo;
+};
+
+class ClientStatusDetail {
+public:
+    ClientStatusDetail(const std::string& group, int itemId, int playCount, int lastPlayed, int lastPlayedPosition, int bookMarkPos)
+        : group(group)
+        , itemId(itemId)
+        , playCount(playCount)
+        , lastPlayed(lastPlayed)
+        , lastPlayedPosition(lastPlayedPosition)
+        , bookMarkPos(bookMarkPos)
+    {
+    }
+
+    std::string getGroup() const { return group; }
+    int getItemId() const { return itemId; }
+
+    int getPlayCount() const { return playCount; }
+    int increasePlayCount() { return ++playCount; }
+
+    std::chrono::seconds getLastPlayed() const { return lastPlayed; }
+    void setLastPlayed() { this->lastPlayed = currentTime(); }
+
+    std::chrono::milliseconds getLastPlayedPosition() const { return lastPlayedPosition; }
+    std::chrono::milliseconds getBookMarkPosition() const { return bookMarkPos; }
+
+private:
+    std::string group; // default for any, otherwise group name from config
+    int itemId { INVALID_OBJECT_ID };
+    int playCount { 0 };
+    std::chrono::seconds lastPlayed;
+    std::chrono::milliseconds lastPlayedPosition {};
+    std::chrono::milliseconds bookMarkPos {};
 };
 
 class ClientManager {

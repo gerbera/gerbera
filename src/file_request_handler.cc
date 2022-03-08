@@ -213,7 +213,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
 
     auto path = obj->getLocation();
 
-    content->triggerPlayHook(obj);
+    auto it = params.find(CLIENT_GROUP_TAG);
+    std::string group = DEFAULT_CLIENT_GROUP;
+    if (it != params.end()) {
+        group = it->second;
+    }
 
     // Transcoding
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
@@ -225,8 +229,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         std::string range = getValueOrDefault(params, "range");
 
         auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
-        return transcodeDispatcher->serveContent(transcodingProfile, path, obj, range);
+        return transcodeDispatcher->serveContent(transcodingProfile, path, obj, group, range);
     }
+
+    content->triggerPlayHook(group, obj);
 
     // Boring old file
     return std::make_unique<FileIOHandler>(path);

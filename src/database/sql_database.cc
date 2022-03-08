@@ -789,7 +789,29 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow(row);
+            auto result = createObjectFromRow("", row);
+            commit("loadObject");
+            return result;
+        }
+    }
+    log_debug("sql_query = {}", loadSql);
+    commit("loadObject");
+    throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
+}
+
+std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int objectID)
+{
+    if (dynamicContainers.find(objectID) != dynamicContainers.end()) {
+        return dynamicContainers.at(objectID);
+    }
+
+    beginTransaction("loadObject");
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::Id), objectID);
+    auto res = select(loadSql);
+    if (res) {
+        auto row = res->nextRow();
+        if (row) {
+            auto result = createObjectFromRow(group, row);
             commit("loadObject");
             return result;
         }
@@ -808,7 +830,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
         auto row = res->nextRow();
         if (row) {
             commit("loadObjectByServiceID");
-            return createObjectFromRow(row);
+            return createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
         }
     }
     commit("loadObjectByServiceID");
@@ -820,7 +842,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(co
 {
     auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
         fmt::format("{}=\"{}\"", MetadataHandler::getMetaFieldName(M_CONTENT_CLASS), contentClass),
-        "", 0, 1, false);
+        "", 0, 1, false, DEFAULT_CLIENT_GROUP);
     int numMatches = 0;
     log_debug("Running content class search for '{}'", contentClass);
     auto result = this->search(srcParam, &numMatches);
@@ -858,7 +880,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
-                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount(), false); // get params from browse
+                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount(), false, param.getGroup()); // get params from browse
             int numMatches = 0;
             auto result = this->search(srcParam, &numMatches);
             param.setTotalMatches(numMatches);
@@ -943,7 +965,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        auto obj = createObjectFromRow(row);
+        auto obj = createObjectFromRow(param.getGroup(), row);
         if (obj->isContainer()) {
             containers.push_back(std::static_pointer_cast<CdsContainer>(obj));
         }
@@ -1068,7 +1090,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     result.reserve(sqlResult->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = sqlResult->nextRow())) {
-        result.push_back(createObjectFromSearchRow(row));
+        result.push_back(createObjectFromSearchRow(param.getGroup(), row));
     }
 
     if (result.size() < requestedCount) {
@@ -1189,7 +1211,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         commit("findObjectByPath");
         return nullptr;
     }
-    auto result = createObjectFromRow(row);
+    auto result = createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
     commit("findObjectByPath");
     return result;
 }
@@ -1383,7 +1405,7 @@ std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLo
     return { dbLocation.substr(1), dbLocation.at(0) };
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_ptr<SQLRow>& row)
+std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(getCol(row, BrowseCol::ObjectType));
     auto obj = CdsObject::createObject(objectType);
@@ -1473,6 +1495,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
         else
             item->setServiceID(getCol(row, BrowseCol::ServiceId));
 
+        if (!group.empty()) {
+            auto playStatus = getPlayStatus(group, obj->getID());
+            if (playStatus)
+                item->setPlayStatus(playStatus);
+        }
         matchedTypes++;
     }
 
@@ -1483,7 +1510,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::unique_pt
     return obj;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row)
+std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(getCol(row, SearchCol::ObjectType));
     auto obj = CdsObject::createObject(objectType);
@@ -1528,6 +1555,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::uni
 
         item->setPartNumber(stoiString(getCol(row, SearchCol::PartNumber)));
         item->setTrackNumber(stoiString(getCol(row, SearchCol::TrackNumber)));
+
+        auto playStatus = getPlayStatus(group, obj->getID());
+        if (playStatus)
+            item->setPlayStatus(playStatus);
     } else if (!obj->isContainer()) {
         throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
     }
@@ -2084,12 +2115,60 @@ void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
     }
 }
 
+std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string& group, int objectId)
+{
+    auto fields = std::vector {
+        identifier("group"),
+        identifier("item_id"),
+        identifier("playCount"),
+        identifier("lastPlayed"),
+        identifier("lastPlayedPosition"),
+        identifier("bookMarkPos"),
+    };
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {}",
+        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
+        identifier("group"), quote(group), identifier("item_id"), quote(objectId)));
+    if (!res)
+        return {};
+
+    std::unique_ptr<SQLRow> row;
+    if ((row = res->nextRow())) {
+        log_debug("Loaded {},{} items from {}", group, objectId, PLAYSTATUS_TABLE);
+        return std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+    }
+
+    return {};
+}
+
+void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail)
+{
+    exec(fmt::format("DELETE FROM {} WHERE {} = {} AND {} = {}", PLAYSTATUS_TABLE, identifier("group"), quote(detail->getGroup()), identifier("item_id"), quote(detail->getItemId())));
+    auto fields = std::vector {
+        identifier("group"),
+        identifier("item_id"),
+        identifier("playCount"),
+        identifier("lastPlayed"),
+        identifier("lastPlayedPosition"),
+        identifier("bookMarkPos"),
+    };
+    auto values = std::vector {
+        quote(detail->getGroup()),
+        quote(detail->getItemId()),
+        quote(detail->getPlayCount()),
+        quote(detail->getLastPlayed().count()),
+        quote(detail->getLastPlayedPosition().count()),
+        quote(detail->getBookMarkPosition().count()),
+    };
+    insert(PLAYSTATUS_TABLE, fields, values);
+}
+
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
 
     beginTransaction("updateAutoscanList");
-    exec(fmt::format("UPDATE {0} SET {1} = {2} WHERE {3} = {4} AND {5} = {6}", identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("persistent"), quote(true), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    exec(fmt::format("UPDATE {0} SET {1} = {2} WHERE {3} = {4} AND {5} = {6}",
+        identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("persistent"), quote(true), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
     commit("updateAutoscanList");
 
     std::size_t listSize = list->size();

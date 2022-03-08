@@ -22,7 +22,7 @@ public:
     {
         config = std::make_shared<MyConfigMock>();
 
-        auto clientConfig = std::make_shared<ClientConfig>(123, "192.168.1.100", "added by config", 1);
+        auto clientConfig = std::make_shared<ClientConfig>(123, "default", "192.168.1.100", "added by config", 1);
         config->list->add(clientConfig, 0);
 
         subject = new ClientManager(config, nullptr);

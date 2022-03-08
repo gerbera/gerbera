@@ -42,6 +42,7 @@
 #include "util/string_converter.h"
 #include "util/timer.h"
 #include "util/tools.h"
+#include "util/upnp_clients.h"
 #include "web/session_manager.h"
 
 #ifdef HAVE_JS
@@ -1742,11 +1743,19 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         session_manager->containerChangedUI(copy->getObjectID());
 }
 
-void ContentManager::triggerPlayHook(const std::shared_ptr<CdsObject>& obj)
+void ContentManager::triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj)
 {
     log_debug("start");
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
+    auto playStatus = item->getPlayStatus();
+    if (!playStatus) {
+        playStatus = std::make_shared<ClientStatusDetail>(group, item->getID(), 0, 0, 0, 0);
+        item->setPlayStatus(playStatus);
+    }
+    playStatus->increasePlayCount();
+    playStatus->setLastPlayed();
+    database->savePlayStatus(playStatus);
 
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
         std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);

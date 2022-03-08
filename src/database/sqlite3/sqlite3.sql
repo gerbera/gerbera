@@ -72,7 +72,7 @@ CREATE TABLE "grb_cds_resource" (
     CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE "grb_client" (
-    "addr" varchar(32),
+    "addr" varchar(32) NOT NULL,
     "port" integer NOT NULL,
     "addrFamily" integer NOT NULL,
     "userAgent" varchar(255) NOT NULL,
@@ -81,13 +81,13 @@ CREATE TABLE "grb_client" (
     PRIMARY KEY ("addr", "port")
 );
 INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
-CREATE INDEX mt_cds_object_ref_id ON mt_cds_object(ref_id);
-CREATE INDEX mt_cds_object_parent_id ON mt_cds_object(parent_id,object_type,dc_title);
-CREATE INDEX mt_object_type ON mt_cds_object(object_type);
-CREATE INDEX mt_location_parent ON mt_cds_object(location_hash,parent_id);
-CREATE INDEX grb_track_number ON mt_cds_object(part_number,track_number);
-CREATE INDEX mt_internal_setting_key ON mt_internal_setting(key);
-CREATE UNIQUE INDEX mt_autoscan_obj_id ON mt_autoscan(obj_id);
-CREATE INDEX mt_cds_object_service_id ON mt_cds_object(service_id);
-CREATE INDEX mt_metadata_item_id ON mt_metadata(item_id);
+CREATE INDEX "mt_cds_object_ref_id" ON mt_cds_object(ref_id);
+CREATE INDEX "mt_cds_object_parent_id" ON mt_cds_object(parent_id,object_type,dc_title);
+CREATE INDEX "mt_object_type" ON mt_cds_object(object_type);
+CREATE INDEX "mt_location_parent" ON mt_cds_object(location_hash,parent_id);
+CREATE INDEX "grb_track_number" ON mt_cds_object(part_number,track_number);
+CREATE INDEX "mt_internal_setting_key" ON mt_internal_setting(key);
+CREATE UNIQUE INDEX "mt_autoscan_obj_id" ON mt_autoscan(obj_id);
+CREATE INDEX "mt_cds_object_service_id" ON mt_cds_object(service_id);
+CREATE INDEX "mt_metadata_item_id" ON mt_metadata(item_id);
 COMMIT;

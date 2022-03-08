@@ -51,7 +51,8 @@
 #endif
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
-    const fs::path& location, const std::shared_ptr<CdsObject>& obj, const std::string& range)
+    const fs::path& location, const std::shared_ptr<CdsObject>& obj,
+    const std::string& group, const std::string& range)
 {
     log_debug("Start transcoding file: {}", location.c_str());
     if (!profile)
@@ -102,7 +103,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     }
     auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
 
-    content->triggerPlayHook(obj);
+    content->triggerPlayHook(group, obj);
 
     auto processIoHandler = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifoName), std::move(mainProc), std::move(procList));
     return std::make_unique<BufferedIOHandler>(config, std::move(processIoHandler), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());

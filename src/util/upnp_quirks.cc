@@ -45,6 +45,11 @@ int Quirks::checkFlags(int flags) const
     return pClientInfo ? pClientInfo->flags & flags : 0;
 }
 
+std::string Quirks::getGroup() const
+{
+    return pClientInfo ? pClientInfo->group : DEFAULT_CLIENT_GROUP;
+}
+
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)

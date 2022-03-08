@@ -63,6 +63,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // Used for not explicitly listed clients, must be first entry
         {
             "Unknown",
+            DEFAULT_CLIENT_GROUP,
             ClientType::Unknown,
             QUIRK_FLAG_NONE,
             ClientMatchType::None,
@@ -75,6 +76,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50
         {
             "Standard UPnP",
+            DEFAULT_CLIENT_GROUP,
             ClientType::StandardUPnP,
             QUIRK_FLAG_NONE,
             ClientMatchType::UserAgent,
@@ -86,6 +88,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4
         {
             "BubbleUPnP",
+            DEFAULT_CLIENT_GROUP,
             ClientType::BubbleUPnP,
             QUIRK_FLAG_NONE,
             ClientMatchType::UserAgent,
@@ -97,6 +100,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
         {
             "Samsung other TVs",
+            DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesCDE,
             QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
             ClientMatchType::UserAgent,
@@ -107,6 +111,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
         {
             "AllShare",
+            DEFAULT_CLIENT_GROUP,
             ClientType::SamsungAllShare,
             QUIRK_FLAG_NONE,
             ClientMatchType::UserAgent,
@@ -116,6 +121,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
         {
             "Samsung Series [Q] TVs",
+            DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesQ,
             QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
             ClientMatchType::UserAgent,
@@ -125,6 +131,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
         {
             "Samsung Blu-ray Player BD-D5100",
+            DEFAULT_CLIENT_GROUP,
             ClientType::SamsungBDP,
             QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
@@ -134,6 +141,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent: ?
         {
             "Samsung Blu-ray Player J5500",
+            DEFAULT_CLIENT_GROUP,
             ClientType::SamsungBDJ5500,
             QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
             ClientMatchType::UserAgent,
@@ -143,6 +151,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         // User-Agent: ?
         {
             "Dual CR 510",
+            DEFAULT_CLIENT_GROUP,
             ClientType::IRadio,
             QUIRK_FLAG_IRADIO,
             ClientMatchType::UserAgent,

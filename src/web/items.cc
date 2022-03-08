@@ -65,7 +65,7 @@ void Web::Items::process()
     xml2JsonHints->setFieldType("track", "string");
     items.append_attribute("parent_id") = parentID;
 
-    auto container = database->loadObject(parentID);
+    auto container = database->loadObject(DEFAULT_CLIENT_GROUP, parentID);
     auto param = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param.setRange(start, count);
 
