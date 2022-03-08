@@ -77,7 +77,7 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, std::string_view ip, std::string_view userAgent, int captionInfoCount);
+    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount);
 
     const ClientInfo& getClientInfo() const { return clientInfo; }
 
@@ -95,6 +95,12 @@ public:
     {
         this->clientInfo.matchType = ClientMatchType::IP;
         this->clientInfo.match = ip;
+    }
+
+    std::string getGroup() const { return this->clientInfo.group; }
+    void setGroup(std::string_view group)
+    {
+        this->clientInfo.group = group;
     }
 
     std::string getUserAgent() const { return (this->clientInfo.matchType == ClientMatchType::UserAgent) ? this->clientInfo.match : ""; }

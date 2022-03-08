@@ -47,7 +47,7 @@ class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 16
+#define DBVERSION 17
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -56,6 +56,7 @@ class SQLEmitter;
 #define RESOURCE_TABLE "grb_cds_resource"
 #define CONFIG_VALUE_TABLE "grb_config_value"
 #define CLIENTS_TABLE "grb_client"
+#define PLAYSTATUS_TABLE "grb_playstatus"
 
 class SQLRow {
 public:
@@ -119,6 +120,7 @@ public:
     void updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override;
+    std::shared_ptr<CdsObject> loadObject(const std::string& group, int objectID) override;
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
 
@@ -164,8 +166,10 @@ public:
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
 
     /* clients methods */
-    virtual std::vector<ClientCacheEntry> getClients() override;
-    virtual void saveClients(const std::vector<ClientCacheEntry>& cache) override;
+    std::vector<ClientCacheEntry> getClients() override;
+    void saveClients(const std::vector<ClientCacheEntry>& cache) override;
+    std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) override;
+    void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override;
 
     std::vector<int> getPathIDs(int objectID) override;
 
@@ -232,8 +236,8 @@ private:
     // only columns listed here are added to the insert and update statements
     std::map<std::string, std::vector<std::string>> tableColumnOrder;
 
-    std::shared_ptr<CdsObject> createObjectFromRow(const std::unique_ptr<SQLRow>& row);
-    std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::unique_ptr<SQLRow>& row);
+    std::shared_ptr<CdsObject> createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row);
+    std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row);
     std::vector<std::pair<std::string, std::string>> retrieveMetaDataForObject(int objectId);
     std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 

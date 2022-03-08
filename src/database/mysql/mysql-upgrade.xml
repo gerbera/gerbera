@@ -87,14 +87,35 @@
     <version number="16" remark="add client table">
         <script>
         CREATE TABLE `grb_client` (
-            `addr` varchar(32),
-            `port` integer NOT NULL,
-            `addrFamily` integer NOT NULL,
+            `addr` varchar(32) NOT NULL,
+            `port` int(11) NOT NULL,
+            `addrFamily` int(11) NOT NULL,
             `userAgent` varchar(255) NOT NULL,
-            `last` integer NOT NULL,
-            `age` integer NOT NULL,
+            `last` int(11) NOT NULL,
+            `age` int(11) NOT NULL,
             PRIMARY KEY (`addr`, `port`)
         ) ENGINE=MyISAM CHARSET=utf8
+        </script>
+    </version>
+    <version number="17" remark="add playstatus table">
+        <script>
+        CREATE TABLE `grb_playstatus` (
+            `group` varchar(255) NOT NULL,
+            `item_id` int(11) NOT NULL,
+            `playCount` int(11) NOT NULL default(0),
+            `lastPlayed` int(11) NOT NULL default(0),
+            `lastPlayedPosition` int(11) NOT NULL default(0),
+            `bookMarkPos` int(11) NOT NULL default(0),
+            PRIMARY KEY (`group`, `item_id`),
+            CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=MyISAM CHARSET=utf8
+        </script>
+        <script>
+        INSERT INTO `grb_playstatus` (
+            `group`, `item_id`, `playCount`, `bookMarkPos`
+        ) SELECT
+            'default', `id`, 1, `bookmark_pos`
+        FROM `mt_cds_object` where `bookmark_pos` > 0;
         </script>
     </version>
 </upgrade>

@@ -31,6 +31,7 @@
 
 #include "upnp_xml.h" // API
 
+#include <fmt/chrono.h>
 #include <sstream>
 
 #include "config/config_manager.h"
@@ -38,6 +39,7 @@
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
 #include "transcoding/transcoding.h"
+#include "util/upnp_clients.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
@@ -179,6 +181,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         auto [url, artAdded] = renderItemImage(virtualURL, item);
         if (artAdded) {
             meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), url);
+        }
+        auto playStatus = item->getPlayStatus();
+        if (playStatus) {
+            auxData["upnp:playbackCount"] = fmt::format("{}", playStatus->getPlayCount());
+            auxData["upnp:lastPlaybackTime"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
+            auxData["upnp:lastPlaybackPosition"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
         }
 
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
@@ -729,7 +737,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     bool isExtThumbnail = false;
     for (auto&& res : orderedResources) {
         auto resAttrs = res->getAttributes();
-        auto&& resParams = res->getParameters();
+        auto resParams = res->getParameters();
         std::string protocolInfo = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_PROTOCOLINFO));
         std::string mimeType = getMTFromProtocolInfo(protocolInfo);
 
@@ -765,6 +773,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         } else {
             url = res->getOption("urlBase");
         }
+        resParams[CLIENT_GROUP_TAG] = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
         if (!resParams.empty()) {
             url.append(_URL_PARAM_SEPARATOR);
             url.append(dictEncodeSimple(resParams));

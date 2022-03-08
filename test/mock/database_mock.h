@@ -34,6 +34,7 @@ public:
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }
+    std::shared_ptr<CdsObject> loadObject(const std::string& group, int objectID) override { return nullptr; }
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override { return {}; }
 
@@ -56,6 +57,8 @@ public:
     /* clients methods */
     virtual std::vector<ClientCacheEntry> getClients() override { return {}; }
     virtual void saveClients(const std::vector<ClientCacheEntry>& cache) override { }
+    virtual std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) override { return {}; };
+    virtual void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override { };
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
     void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }

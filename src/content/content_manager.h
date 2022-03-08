@@ -281,7 +281,7 @@ public:
     /// The handler will then remove the executor from the list.
     void unregisterExecutor(const std::shared_ptr<Executor>& exec);
 
-    void triggerPlayHook(const std::shared_ptr<CdsObject>& obj);
+    void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj);
 
     void initLayout();
     void destroyLayout();

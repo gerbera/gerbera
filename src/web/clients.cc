@@ -58,6 +58,7 @@ void Web::Clients::process()
         item.append_attribute("last") = secondsToString(obj.last).c_str();
         item.append_attribute("userAgent") = obj.userAgent.c_str();
         item.append_attribute("name") = obj.pInfo->name.c_str();
+        item.append_attribute("group") = obj.pInfo->group.c_str();
         item.append_attribute("match") = obj.pInfo->match.c_str();
         auto flags = ClientConfig::mapFlags(obj.pInfo->flags);
         replaceAllString(flags, "|", " | ");

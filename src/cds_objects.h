@@ -70,6 +70,8 @@ static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type 
 #define OBJECT_AUTOSCAN_UI 1u
 #define OBJECT_AUTOSCAN_CFG 2u
 
+class ClientStatusDetail;
+
 /// \brief Generic object in the Content Directory.
 class CdsObject {
 protected:
@@ -402,6 +404,8 @@ protected:
 
     std::chrono::milliseconds bookMarkPos {};
 
+    std::shared_ptr<ClientStatusDetail> playStatus {};
+
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)
     CdsItem();
@@ -452,6 +456,12 @@ public:
 
     /// \brief Set the bookmark position in milliseconds.
     std::chrono::milliseconds getBookMarkPos() const { return bookMarkPos; }
+
+    /// \brief Retrieve Play Status details
+    void setPlayStatus(const std::shared_ptr<ClientStatusDetail>& playStatus) { this->playStatus = playStatus; }
+
+    /// \brief Set Play Status details
+    std::shared_ptr<ClientStatusDetail> getPlayStatus() const { return playStatus; }
 };
 
 /// \brief An item that is accessible via a URL.

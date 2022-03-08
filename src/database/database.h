@@ -44,6 +44,7 @@ class AutoscanList;
 class CdsContainer;
 class CdsObject;
 struct ClientCacheEntry;
+class ClientStatusDetail;
 class Config;
 class ConfigValue;
 class Mime;
@@ -65,6 +66,7 @@ protected:
     int startingIndex {};
     int requestedCount {};
     std::string sortCrit;
+    std::string group;
     bool showDynamicContainers { true };
 
     // output parameters
@@ -103,6 +105,11 @@ public:
         this->sortCrit = sortCrit;
     }
 
+    void setGroup(const std::string& group)
+    {
+        this->group = group;
+    }
+
     void setDynamicContainers(bool showDynamicContainers)
     {
         this->showDynamicContainers = showDynamicContainers;
@@ -113,6 +120,7 @@ public:
     int getRequestedCount() const { return requestedCount; }
     int getTotalMatches() const { return totalMatches; }
     const std::string& getSortCriteria() const { return sortCrit; }
+    const std::string& getGroup() const { return group; }
 
     void setTotalMatches(int totalMatches)
     {
@@ -128,16 +136,18 @@ protected:
     int startingIndex;
     int requestedCount;
     bool searchableContainers;
+    std::string group;
 
 public:
     SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
-        int requestedCount, bool searchableContainers)
+        int requestedCount, bool searchableContainers, const std::string& group)
         : containerID(std::move(containerID))
         , searchCrit(std::move(searchCriteria))
         , sortCrit(std::move(sortCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
         , searchableContainers(searchableContainers)
+        , group(group)
     {
     }
     const std::string& searchCriteria() const { return searchCrit; }
@@ -145,6 +155,7 @@ public:
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
     const std::string& getSortCriteria() const { return sortCrit; }
+    const std::string& getGroup() const { return group; }
 };
 
 class Database {
@@ -216,6 +227,7 @@ public:
 
     /* utility methods */
     virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
+    virtual std::shared_ptr<CdsObject> loadObject(const std::string& group, int objectID) = 0;
     virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
     virtual std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
 
@@ -276,6 +288,8 @@ public:
     /* clients methods */
     virtual std::vector<ClientCacheEntry> getClients() = 0;
     virtual void saveClients(const std::vector<ClientCacheEntry>& cache) = 0;
+    virtual std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) = 0;
+    virtual void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid

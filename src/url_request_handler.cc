@@ -124,6 +124,12 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 #endif
     log_debug("Online content url: {}", url);
 
+    auto it = params.find(CLIENT_GROUP_TAG);
+    std::string group = DEFAULT_CLIENT_GROUP;
+    if (it != params.end()) {
+        group = it->second;
+    }
+
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!trProfile.empty()) {
         auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
@@ -132,7 +138,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, trProfile);
 
         auto trD = std::make_unique<TranscodeDispatcher>(content);
-        auto ioHandler = trD->serveContent(tp, url, item, "");
+        auto ioHandler = trD->serveContent(tp, url, item, group, "");
         ioHandler->open(mode);
 
         log_debug("end");
@@ -142,7 +148,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
     ///\todo make curl io handler configurable for url request handler
     auto ioHandler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
     ioHandler->open(mode);
-    content->triggerPlayHook(obj);
+    content->triggerPlayHook(group, obj);
     return ioHandler;
 }
 

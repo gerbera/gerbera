@@ -123,6 +123,13 @@ public:
      */
     int getCaptionInfoCount() const;
 
+    /** \brief Get group for ClientStatusDetail
+     *
+     * \return group for ClientStatusDetail
+     *
+     */
+    std::string getGroup() const;
+
 private:
     std::shared_ptr<Context> context;
     std::shared_ptr<ContentManager> content;

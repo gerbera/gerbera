@@ -761,7 +761,7 @@ struct sockaddr_storage readAddr(std::string addr, int af)
     } else if (af == AF_INET6) {
         err = inet_pton(af, addr.c_str(), &(M_SOCK_ADDR_IN6_ADDR(&sa)));
     }
-    if (err)
+    if (err != 1)
         log_error("Could not parse address {}", addr);
     return sa;
 }

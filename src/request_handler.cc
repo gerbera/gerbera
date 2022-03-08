@@ -86,7 +86,12 @@ std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string
     if (it == params.end()) {
         throw_std_runtime_error("loadObject: object_id not found");
     }
-
     int objectID = stoiString(it->second);
-    return database->loadObject(objectID);
+    it = params.find(CLIENT_GROUP_TAG);
+    std::string group = DEFAULT_CLIENT_GROUP;
+    if (it != params.end()) {
+        group = it->second;
+    }
+
+    return database->loadObject(group, objectID);
 }

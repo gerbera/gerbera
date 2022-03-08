@@ -35,6 +35,7 @@ $.widget('grb.clients', {
       time: 'First Seen',
       last: 'Last Seen',
       host: 'Host Name',
+      group: 'Group',
       name: 'Profile',
       userAgent: 'User Agent',
       matchType: 'Match Type',
@@ -45,7 +46,7 @@ $.widget('grb.clients', {
 
     if (data.length > 0) {
 
-      const props = ['ip', 'host', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'last', 'flags' ];
+      const props = ['ip', 'host', 'group', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'last', 'flags' ];
       row = $('<tr></tr>');
       props.forEach( function(p) {
           content = $('<th></th>');
