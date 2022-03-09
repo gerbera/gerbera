@@ -677,10 +677,8 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        auto sortSql = colMapper ? colMapper->mapQuoted(seg) : "";
-        if (!sortSql.empty()) {
-            sort.push_back(fmt::format("{} {}", sortSql, (desc ? "DESC" : "ASC")));
-        } else {
+        if (!colMapper || !colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
+            std::string sortSql;
             for (auto&& metaId : MetadataIterator()) {
                 auto&& metaName = MetadataHandler::getMetaFieldName(metaId);
                 if (metaName == seg) {
