@@ -117,5 +117,6 @@
             'default', `id`, 1, `bookmark_pos`
         FROM `mt_cds_object` where `bookmark_pos` > 0;
         </script>
+        <script>ALTER TABLE `mt_cds_object` DROP COLUMN `bookmark_pos`</script>
     </version>
 </upgrade>

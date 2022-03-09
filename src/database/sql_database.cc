@@ -86,7 +86,6 @@ enum class BrowseCol {
     PartNumber,
     TrackNumber,
     ServiceId,
-    BookmarkPos,
     LastModified,
     LastUpdated,
     RefUpnpClass,
@@ -171,7 +170,6 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::PartNumber, { ITM_ALIAS, "part_number" } },
     { BrowseCol::TrackNumber, { ITM_ALIAS, "track_number" } },
     { BrowseCol::ServiceId, { ITM_ALIAS, "service_id" } },
-    { BrowseCol::BookmarkPos, { ITM_ALIAS, "bookmark_pos" } },
     { BrowseCol::LastModified, { ITM_ALIAS, "last_modified" } },
     { BrowseCol::LastUpdated, { ITM_ALIAS, "last_updated" } },
     { BrowseCol::RefUpnpClass, { REF_ALIAS, "upnp_class" } },
@@ -349,7 +347,7 @@ void SQLDatabase::init()
     /// \brief List of column names to be used in insert and update to ensure correct order of columns
     // only columns listed here are added to the insert and update statements
     tableColumnOrder = {
-        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "bookmark_pos", "last_modified", "last_updated" } },
+        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "last_modified", "last_updated" } },
         { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },
     };
@@ -669,8 +667,6 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         } else if (op == Operation::Update) {
             cdsObjectSql.emplace("part_number", SQL_NULL);
         }
-
-        cdsObjectSql.emplace("bookmark_pos", quote(item->getBookMarkPos().count()));
 
         if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
@@ -1487,7 +1483,6 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         }
 
         item->setTrackNumber(stoiString(getCol(row, BrowseCol::TrackNumber)));
-        item->setBookMarkPos(std::chrono::milliseconds(stoulString(getCol(row, BrowseCol::BookmarkPos))));
         item->setPartNumber(stoiString(getCol(row, BrowseCol::PartNumber)));
 
         if (!getCol(row, BrowseCol::RefServiceId).empty())
