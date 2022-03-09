@@ -93,8 +93,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
 
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
-        std::string key = e->key;
+        std::string key = toLower(e->key);
         std::string value = e->value;
+        log_debug("FFMpeg tag: {}: {}", key, value);
         auto it = specialPropertyMap.find(e->key);
         if (it != specialPropertyMap.end()) {
             // only use ffmpeg meta data if not found by other handler
@@ -105,7 +106,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             }
         }
         auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
-            [&](auto&& p) { return p.second == key && item->getMetaData(p.first).empty(); });
+            [&](auto&& p) {
+                return p.second == key && item->getMetaData(p.first).empty();
+            });
         if (pIt != propertyMap.end()) {
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             const auto field = pIt->first;
@@ -128,7 +131,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             constexpr auto field = M_CREATION_DATE;
             if (item->getMetaData(field).empty()) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
-                std::tm tmWork;
+                std::tm tmWork {};
                 if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
                     // convert creation_time to local time
                     auto utcTime = timegm(&tmWork);

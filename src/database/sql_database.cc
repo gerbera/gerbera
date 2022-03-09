@@ -236,6 +236,7 @@ static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autos
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap {
+    { MetadataHandler::getMetaFieldName(M_PARTNUMBER), BrowseCol::PartNumber },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::PartNumber },
     { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::TrackNumber },
     { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::DcTitle },

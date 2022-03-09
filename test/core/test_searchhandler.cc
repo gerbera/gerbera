@@ -45,6 +45,7 @@ enum class TestCol {
     Id = 0,
     ItemId,
     PropertyName,
+    PropertyName2,
     PropertyValue,
     UpnpClass,
     RefId,
@@ -56,6 +57,7 @@ const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
     { TestCol::Id, { "t", "id" } },
     { TestCol::ItemId, { "t", "item_id" } },
     { TestCol::PropertyName, { "t", "property_name" } },
+    { TestCol::PropertyName2, { "t", "property_name2" } },
     { TestCol::PropertyValue, { "t", "property_value" } },
     { TestCol::UpnpClass, { "t", "upnp_class" } },
     { TestCol::RefId, { "t", "ref_id" } },
@@ -65,7 +67,9 @@ const std::map<TestCol, std::pair<std::string, std::string>> testColMap = {
 const std::vector<std::pair<std::string, TestCol>> testSortMap = {
     { "id", TestCol::Id },
     { UPNP_SEARCH_ID, TestCol::ItemId },
+    { "double_name", TestCol::PropertyName },
     { META_NAME, TestCol::PropertyName },
+    { META_NAME, TestCol::PropertyName2 },
     { META_VALUE, TestCol::PropertyValue },
     { UPNP_SEARCH_CLASS, TestCol::UpnpClass },
     { UPNP_SEARCH_REFID, TestCol::RefId },
@@ -468,13 +472,19 @@ TEST(SearchParser, SearchCriteriaDynamic)
 TEST(SortParser, SortCriteria)
 {
     EXPECT_TRUE(executeSortParserTest("+id,-name,+value",
-        "_t_._id_ ASC, _t_._property_name_ DESC, _t_._property_value_ ASC"));
+        "_t_._id_ ASC, _t_._property_name_ DESC, _t_._property_name2_ DESC, _t_._property_value_ ASC"));
+}
+
+TEST(SortParser, SortCriteriaDoubleName)
+{
+    EXPECT_TRUE(executeSortParserTest("+id,+name,-double_name,+value",
+        "_t_._id_ ASC, _t_._property_name_ ASC, _t_._property_name2_ ASC, _t_._property_value_ ASC"));
 }
 
 TEST(SortParser, SortCriteriaNoDir)
 {
     EXPECT_TRUE(executeSortParserTest("+id,name,+value",
-        "_t_._id_ ASC, _t_._property_name_ ASC, _t_._property_value_ ASC"));
+        "_t_._id_ ASC, _t_._property_name_ ASC, _t_._property_name2_ ASC, _t_._property_value_ ASC"));
 }
 
 TEST(SortParser, SortCriteriaError)
