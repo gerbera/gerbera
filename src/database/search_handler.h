@@ -35,6 +35,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "util/tools.h"
+
 #define UPNP_SEARCH_CLASS "upnp:class"
 #define UPNP_SEARCH_ID "@id"
 #define UPNP_SEARCH_REFID "@refID"
@@ -308,6 +310,7 @@ public:
     virtual std::string getTableName() const = 0;
     virtual std::string tableQuoted() const = 0;
     virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
+    virtual bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const = 0;
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
     virtual std::string quote(const std::string& tag) const = 0;
 };
@@ -390,6 +393,25 @@ public:
     std::string tableQuoted() const override
     {
         return fmt::format("{0}{1}{3} {0}{2}{3}", table_quote_begin, tableName, tableAlias, table_quote_end);
+    }
+
+    bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const override
+    {
+        bool result = false;
+        for (auto&& [key, value] : keyMap) {
+            if (key == tag) {
+                result = true;
+                std::string sortCol;
+                if (colMap.at(value).first.empty())
+                    sortCol = fmt::format("{}{}{}", table_quote_begin, colMap.at(value).second, table_quote_end);
+                else
+                    sortCol = fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(value).first, colMap.at(value).second, table_quote_end);
+                auto it = std::find_if(sort.begin(), sort.end(), [=](auto&& col) { return startswith(col, sortCol); });
+                if (it == sort.end())
+                    sort.push_back(fmt::format("{} {}", sortCol, desc));
+            }
+        }
+        return result;
     }
 
     std::string mapQuoted(const std::string& tag, bool noAlias = false) const override
