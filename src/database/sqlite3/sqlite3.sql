@@ -15,7 +15,6 @@ CREATE TABLE "mt_cds_object" (
   "part_number" integer default NULL,
   "track_number" integer default NULL,
   "service_id" varchar(255) default NULL,
-  "bookmark_pos" integer unsigned NOT NULL default 0,
   "last_modified" integer unsigned default NULL,
   "last_updated" integer unsigned default 0,
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -79,6 +78,16 @@ CREATE TABLE "grb_client" (
     "last" integer NOT NULL,
     "age" integer NOT NULL,
     PRIMARY KEY ("addr", "port")
+);
+CREATE TABLE "grb_playstatus" (
+    "group" varchar(255) NOT NULL,
+    "item_id" integer NOT NULL,
+    "playCount" integer NOT NULL default(0),
+    "lastPlayed" integer NOT NULL default(0),
+    "lastPlayedPosition" integer NOT NULL default(0),
+    "bookMarkPos" integer NOT NULL default(0),
+    PRIMARY KEY ("group", "item_id"),
+    CONSTRAINT "grb_played_item" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
 CREATE INDEX "mt_cds_object_ref_id" ON mt_cds_object(ref_id);

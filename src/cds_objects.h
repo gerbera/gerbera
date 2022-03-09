@@ -402,8 +402,6 @@ protected:
     /// \brief unique service ID
     std::string serviceID;
 
-    std::chrono::milliseconds bookMarkPos {};
-
     std::shared_ptr<ClientStatusDetail> playStatus {};
 
 public:
@@ -450,12 +448,6 @@ public:
 
     /// \brief Retrieve the unique service ID.
     std::string getServiceID() const { return serviceID; }
-
-    /// \brief Retrieve the last known bookmark position in milliseconds.
-    void setBookMarkPos(std::chrono::milliseconds bookMarkPos) { this->bookMarkPos = bookMarkPos; }
-
-    /// \brief Set the bookmark position in milliseconds.
-    std::chrono::milliseconds getBookMarkPos() const { return bookMarkPos; }
 
     /// \brief Retrieve Play Status details
     void setPlayStatus(const std::shared_ptr<ClientStatusDetail>& playStatus) { this->playStatus = playStatus; }
