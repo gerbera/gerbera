@@ -295,6 +295,6 @@ std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>
 std::string getHostName(const struct sockaddr* addr);
 int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
 std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort = true);
-struct sockaddr_storage readAddr(std::string addr, int af);
+struct sockaddr_storage readAddr(std::string_view addr, int af);
 
 #endif // __TOOLS_H__
