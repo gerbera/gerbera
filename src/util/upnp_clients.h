@@ -134,7 +134,7 @@ private:
 
 class ClientManager {
 public:
-    explicit ClientManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database);
+    explicit ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database);
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
