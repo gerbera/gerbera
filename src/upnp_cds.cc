@@ -37,6 +37,7 @@
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "database/sql_database.h"
+#include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
@@ -124,17 +125,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     for (auto&& obj : arr) {
-        if (!config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) || !obj->getFlag(OBJECT_FLAG_PLAYED)) {
-            xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
-            continue;
-        }
-
-        std::string title = obj->getTitle();
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-            title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-        else
-            title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-        obj->setTitle(title);
+        markPlayedItem(obj, obj->getTitle());
         xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
     }
 
@@ -219,14 +210,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
                 title = fmt::format("{}", fmt::join(values, resultSeparator));
         }
 
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && cdsObject->getFlag(OBJECT_FLAG_PLAYED)) {
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-            else
-                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-        }
-
-        cdsObject->setTitle(title);
+        markPlayedItem(cdsObject, title);
         xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
     }
 
@@ -242,6 +226,31 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     request.setResponse(std::move(response));
 
     log_debug("end");
+}
+
+static const auto markContentMap = std::map<std::string, std::string> {
+    { DEFAULT_MARK_PLAYED_CONTENT_VIDEO, UPNP_CLASS_VIDEO_ITEM },
+    { DEFAULT_MARK_PLAYED_CONTENT_AUDIO, UPNP_CLASS_AUDIO_ITEM },
+    { DEFAULT_MARK_PLAYED_CONTENT_IMAGE, UPNP_CLASS_IMAGE_ITEM },
+};
+
+void ContentDirectoryService::markPlayedItem(const std::shared_ptr<CdsObject>& cdsObject, std::string title) const
+{
+    if (cdsObject->isItem()) {
+        auto item = std::static_pointer_cast<CdsItem>(cdsObject);
+        auto playStatus = item->getPlayStatus();
+        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && playStatus && playStatus->getPlayCount() > 0) {
+            std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+            bool mark = std::any_of(markList.begin(), markList.end(), [&](auto&& i) { return startswith(item->getClass(), markContentMap.at(i)); });
+            if (mark) {
+                if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                    title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+                else
+                    title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+                item->setTitle(title);
+            }
+        }
+    }
 }
 
 void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
