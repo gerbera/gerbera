@@ -187,6 +187,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             auxData["upnp:playbackCount"] = fmt::format("{}", playStatus->getPlayCount());
             auxData["upnp:lastPlaybackTime"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
             auxData["upnp:lastPlaybackPosition"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
+            addField(result, "upnp:playbackCount", auxData["upnp:playbackCount"]);
+            addField(result, "upnp:lastPlaybackTime", auxData["upnp:lastPlaybackTime"]);
+            addField(result, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]);
         }
 
         addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
