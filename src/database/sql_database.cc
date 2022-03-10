@@ -2075,11 +2075,11 @@ std::vector<ClientCacheEntry> SQLDatabase::getClients()
     while ((row = res->nextRow())) {
         struct sockaddr_storage sa = readAddr(row->col(0), row->col_int(2, AF_INET));
         reinterpret_cast<struct sockaddr_in*>(&sa)->sin_port = row->col_int(1, 0);
-        result.push_back({ sa,
+        result.emplace_back(sa,
             row->col(3),
             std::chrono::seconds(row->col_int(4, 0)),
             std::chrono::seconds(row->col_int(5, 0)),
-            nullptr });
+            nullptr);
     }
 
     log_debug("Loaded {} items from {}", result.size(), CLIENTS_TABLE);
