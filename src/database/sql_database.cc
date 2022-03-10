@@ -2135,6 +2135,33 @@ std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string
     return {};
 }
 
+std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(int objectId)
+{
+    auto fields = std::vector {
+        identifier("group"),
+        identifier("item_id"),
+        identifier("playCount"),
+        identifier("lastPlayed"),
+        identifier("lastPlayedPosition"),
+        identifier("bookMarkPos"),
+    };
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {}",
+        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
+        identifier("item_id"), quote(objectId)));
+    if (!res)
+        return {};
+
+    std::vector<std::shared_ptr<ClientStatusDetail>> result;
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        log_debug("Loaded {},{} items from {}", row->col(0), objectId, PLAYSTATUS_TABLE);
+        auto status = std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        result.push_back(std::move(status));
+    }
+
+    return result;
+}
+
 void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail)
 {
     exec(fmt::format("DELETE FROM {} WHERE {} = {} AND {} = {}", PLAYSTATUS_TABLE, identifier("group"), quote(detail->getGroup()), identifier("item_id"), quote(detail->getItemId())));

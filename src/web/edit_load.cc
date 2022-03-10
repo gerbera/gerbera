@@ -39,6 +39,7 @@
 #include "server.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
+#include "util/upnp_clients.h"
 
 Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)
@@ -199,6 +200,32 @@ void Web::EditLoad::process()
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();
             image.append_attribute("editable") = false;
+        }
+
+        for (auto&& playStatus : database->getPlayStatusList(objectID)) {
+            auto metaEntry = metaData.append_child("metadata");
+            metaEntry.append_attribute("metaname") = fmt::format("upnp:playbackCount@group[{}]", playStatus->getGroup()).c_str();
+            metaEntry.append_attribute("metavalue") = fmt::format("{}", playStatus->getPlayCount()).c_str();
+            metaEntry.append_attribute("editable") = false;
+
+            metaEntry = metaData.append_child("metadata");
+            metaEntry.append_attribute("metaname") = fmt::format("upnp:lastPlaybackTime@group[{}]", playStatus->getGroup()).c_str();
+            metaEntry.append_attribute("metavalue") = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count())).c_str();
+            metaEntry.append_attribute("editable") = false;
+
+            if (playStatus->getLastPlayedPosition() > std::chrono::seconds::zero()) {
+                metaEntry = metaData.append_child("metadata");
+                metaEntry.append_attribute("metaname") = fmt::format("upnp:lastPlaybackPosition@group[{}]", playStatus->getGroup()).c_str();
+                metaEntry.append_attribute("metavalue") = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count())).c_str();
+                metaEntry.append_attribute("editable") = false;
+            }
+
+            if (playStatus->getBookMarkPosition() > std::chrono::seconds::zero()) {
+                metaEntry = metaData.append_child("metadata");
+                metaEntry.append_attribute("metaname") = fmt::format("samsung:bookmarkpos@group[{}]", playStatus->getGroup()).c_str();
+                metaEntry.append_attribute("metavalue") = fmt::format("{}", millisecondsToHMSF(playStatus->getBookMarkPosition().count())).c_str();
+                metaEntry.append_attribute("editable") = false;
+            }
         }
 
         if (obj->isExternalItem()) {
