@@ -169,6 +169,7 @@ public:
     std::vector<ClientCacheEntry> getClients() override;
     void saveClients(const std::vector<ClientCacheEntry>& cache) override;
     std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) override;
+    std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) override;
     void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override;
 
     std::vector<int> getPathIDs(int objectID) override;

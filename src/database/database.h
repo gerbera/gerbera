@@ -290,6 +290,7 @@ public:
     virtual void saveClients(const std::vector<ClientCacheEntry>& cache) = 0;
     virtual std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) = 0;
     virtual void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) = 0;
+    virtual std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) = 0;
 
     /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid
