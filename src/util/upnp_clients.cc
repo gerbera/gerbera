@@ -39,8 +39,8 @@ std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const
     return std::make_shared<ClientStatusDetail>(group, itemId, playCount, lastPlayed.count(), lastPlayedPosition.count(), bookMarkPos.count());
 }
 
-ClientManager::ClientManager(const std::shared_ptr<Config>& config, const std::shared_ptr<Database>& database)
-    : database(database)
+ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database)
+    : database(std::move(database))
     , cacheThreshold(config->getIntOption(CFG_CLIENTS_CACHE_THRESHOLD))
 {
     refresh(config);
