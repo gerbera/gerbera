@@ -109,6 +109,11 @@ private:
     /// \param request Incoming ActionRequest.
     static void doSamsungGetIndexfromRID(ActionRequest& request);
 
+    /// \brief mark played item if activated
+    /// \param cdsObject item to mark
+    /// \param title current title of the item
+    void markPlayedItem(const std::shared_ptr<CdsObject>& cdsObject, std::string title) const;
+
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 

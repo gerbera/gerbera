@@ -227,14 +227,14 @@
             CONSTRAINT "grb_played_item" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
         );
         </script>
-	<script>
+        <script>
         INSERT INTO "grb_playstatus" (
             "group", "item_id", "playCount", "bookMarkPos"
         ) SELECT
             'default', "id", 1, "bookmark_pos"
-        FROM "mt_cds_object" where "bookmark_pos" > 0;
+        FROM "mt_cds_object" where "bookmark_pos" > 0 OR ("flags" &amp; 0x00000200) != 0;
         </script>
-	<script>
+        <script>
         PRAGMA foreign_keys = OFF;
         CREATE TABLE "mt_cds_object_new" (
           "id" integer primary key,

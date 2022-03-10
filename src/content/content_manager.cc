@@ -1753,18 +1753,10 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
     playStatus->setLastPlayed();
     database->savePlayStatus(playStatus);
 
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && !obj->getFlag(OBJECT_FLAG_PLAYED)) {
-        std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
-
-        bool mark = std::any_of(markList.begin(), markList.end(), [&](auto&& i) { return startswith(item->getMimeType(), i); });
-        if (mark) {
-            obj->setFlag(OBJECT_FLAG_PLAYED);
-
-            bool supress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-            log_debug("Marking object {} as played", obj->getTitle());
-            updateObject(obj, !supress);
-        }
-    }
+    bool suppress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+    log_debug("Marking object {} as played", obj->getTitle());
+    if (!suppress)
+        updateObject(obj, true);
 
 #ifdef HAVE_LASTFMLIB
     if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && item->getClass() == UPNP_CLASS_MUSIC_TRACK) {
