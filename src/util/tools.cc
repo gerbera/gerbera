@@ -745,16 +745,16 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort)
 #define M_SOCK_ADDR_IN_ADDR(sa) M_SOCK_ADDR_IN_PTR(sa)->sin_addr
 #define M_SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<struct sockaddr_in6*>(sa)
 #define M_SOCK_ADDR_IN6_ADDR(sa) M_SOCK_ADDR_IN6_PTR(sa)->sin6_addr
-struct sockaddr_storage readAddr(std::string addr, int af)
+struct sockaddr_storage readAddr(std::string_view addr, int af)
 {
     struct sockaddr_storage sa;
     bzero(&sa, sizeof(struct sockaddr_storage));
     reinterpret_cast<struct sockaddr*>(&sa)->sa_family = af;
     int err = 0;
     if (af == AF_INET) {
-        err = inet_pton(af, addr.c_str(), &(M_SOCK_ADDR_IN_ADDR(&sa)));
+        err = inet_pton(af, addr.data(), &(M_SOCK_ADDR_IN_ADDR(&sa)));
     } else if (af == AF_INET6) {
-        err = inet_pton(af, addr.c_str(), &(M_SOCK_ADDR_IN6_ADDR(&sa)));
+        err = inet_pton(af, addr.data(), &(M_SOCK_ADDR_IN6_ADDR(&sa)));
     }
     if (err != 1)
         log_error("Could not parse address {}", addr);
