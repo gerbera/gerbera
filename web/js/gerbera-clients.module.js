@@ -58,8 +58,10 @@ const retrieveGerberaItems = (type) => {
 const loadItems = (response) => {
   if (response.success) {
     let items;
+    let groups;
 
-    items = transformItems(response.clients.client);
+    items = 'clients' in response ? transformItems(response.clients.client) : [];
+    groups = 'groups' in response ? response.groups.group : [];
 
     const datagrid = $('#clientgrid');
 
@@ -69,6 +71,7 @@ const loadItems = (response) => {
 
     datagrid.clients({
       data: items,
+      groups: groups,
       itemType: 'clients'
     });
   }

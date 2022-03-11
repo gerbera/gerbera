@@ -47,8 +47,8 @@ void Web::Clients::process()
     auto clients = root.append_child("clients");
     xml2JsonHints->setArrayName(clients, "client");
 
-    auto&& arr = content->getContext()->getClients()->getClientList();
-    for (auto&& obj : arr) {
+    auto&& clientArr = content->getContext()->getClients()->getClientList();
+    for (auto&& obj : clientArr) {
         auto item = clients.append_child("client");
         auto ip = sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&obj.addr));
         item.append_attribute("ip") = ip.c_str();
@@ -65,5 +65,17 @@ void Web::Clients::process()
         item.append_attribute("flags") = flags.c_str();
         item.append_attribute("matchType") = ClientConfig::mapMatchType(obj.pInfo->matchType).data();
         item.append_attribute("clientType") = ClientConfig::mapClientType(obj.pInfo->type).data();
+    }
+
+    auto groups = root.append_child("groups");
+    xml2JsonHints->setArrayName(groups, "group");
+    auto&& groupArr = content->getContext()->getDatabase()->getClientGroupStats();
+    for (auto&& obj : groupArr) {
+        auto item = groups.append_child("group");
+        item.append_attribute("name") = obj.at("name").c_str();
+        item.append_attribute("count") = obj.at("count").c_str();
+        item.append_attribute("playCount") = obj.at("playCount").c_str();
+        item.append_attribute("bookmarks") = obj.at("bookmarks").c_str();
+        item.append_attribute("last") = obj.at("last").c_str(); // obj.last).c_str();
     }
 }

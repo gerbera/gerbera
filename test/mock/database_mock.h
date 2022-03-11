@@ -60,6 +60,7 @@ public:
     std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) override { return {}; };
     void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override { };
     std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) override { return {}; }
+    std::vector<std::map<std::string, std::string>> getClientGroupStats() override { return {}; }
 
     std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) override { return {}; }
     void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }

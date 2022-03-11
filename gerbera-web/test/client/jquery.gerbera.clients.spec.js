@@ -19,7 +19,7 @@ describe('The jQuery Clientgrid', () => {
       data: datagridData
     });
 
-    expect(dataGrid.find('tr').length).toBe(3);
+    expect(dataGrid.find('tr').length).toBe(4);
     expect(dataGrid.find('tr.grb-client').get(1).innerText).toContain(datagridData[0].ip);
   });
 });

@@ -80,7 +80,7 @@ This section defines the client behaviour for one client.
     * Default: "default"
 
     This assigns the client to a group which is key to store details on played items (playbackCount, lastPlaybackTime, lastPlaybackPosition, bookmarkPosition).
-    If you select set another group here all actions are recorded for this group.
+    If you set another group here all actions are recorded for this group.
 
     ::
     

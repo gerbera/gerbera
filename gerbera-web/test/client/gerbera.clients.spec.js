@@ -43,13 +43,13 @@ describe('Gerbera Clients', () => {
 
     it('does not create heading if result is empty', () => {
       Clients.loadItems(gerberaEmptyClients);
-      expect($('#clientgrid').find('tr').length).toEqual(1);
+      expect($('#clientgrid').find('tr').length).toEqual(2);
     });
     
     it('loads the response as items in the datagrid', () => {
       clientsDataJson.success = true;
       Clients.loadItems(clientsDataJson);
-      expect($('#clientgrid').find('tr').length).toEqual(3);
+      expect($('#clientgrid').find('tr').length).toEqual(4);
       clientsDataJson.success = true;
     });
   });

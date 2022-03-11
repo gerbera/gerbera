@@ -2184,6 +2184,28 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     insert(PLAYSTATUS_TABLE, fields, values);
 }
 
+std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()
+{
+    auto res = select(fmt::format("SELECT {}, COUNT(*), SUM({}), MAX({}), COUNT(NULLIF({},0)) FROM {} GROUP BY {}",
+        identifier("group"), identifier("playCount"), identifier("lastPlayed"), identifier("bookMarkPos"), identifier(PLAYSTATUS_TABLE), identifier("group")));
+    if (!res)
+        return {};
+
+    std::vector<std::map<std::string, std::string>> result;
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        log_debug("Loaded {} stats from {}", row->col(0), PLAYSTATUS_TABLE);
+        std::map<std::string, std::string> stats;
+        stats["name"] = row->col(0);
+        stats["count"] = fmt::format("{}", row->col_int(1, -1));
+        stats["playCount"] = fmt::format("{}", row->col_int(2, -1));
+        stats["last"] = fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(std::chrono::seconds(row->col_int(3, 0)).count()));
+        stats["bookmarks"] = fmt::format("{}", row->col_int(4, -1));
+        result.push_back(std::move(stats));
+    }
+    return result;
+}
+
 void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
     log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
