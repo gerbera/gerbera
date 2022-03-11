@@ -140,6 +140,7 @@ Clients View
 ~~~~~~~~~~~~
 
 The clients view is accessible through the `Clients` menu item.  The view contains details on all clients that contacted the server.
+The second section contains statistics on the items played by the client groups.
 
 .. image:: _static/clients-view.png
    :alt: Clients view

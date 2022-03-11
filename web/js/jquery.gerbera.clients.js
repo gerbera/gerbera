@@ -26,11 +26,7 @@ $.widget('grb.clients', {
     this.element.html('');
     this.element.addClass('grb-clients');
     const table = $('<table></table>').addClass('table');
-    const tbody = $('<tbody></tbody>');
-    const thead = $('<thead></thead>');
-    const data = this.options.data;
-    let row, content, text;
-    const headings = {
+    const clientHeadings = {
       ip: 'IP Address',
       time: 'First Seen',
       last: 'Last Seen',
@@ -43,10 +39,35 @@ $.widget('grb.clients', {
       clientType: 'Client Type',
       flags: 'Quirk Flags'
     };
+    const clientProps = ['ip', 'host', 'group', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'last', 'flags' ];
+    this.buildTable (table, this.options.data, clientHeadings, clientProps, 'Clients', clientProps.length);
 
-    if (data.length > 0) {
+    const groupHeadings = {
+      name: 'Group',
+      count: 'Count',
+      playCount: 'Play Count',
+      bookmarks: 'Bookmarks',
+      last: 'Last Action',
+      empty: '',
+    };
+    const groupProps = ['empty', 'empty', 'name', 'empty', 'empty', 'count', 'playCount', 'bookmarks', 'empty', 'last', 'empty' ];
+    this.buildTable (table, this.options.groups, groupHeadings, groupProps, 'Groups', clientProps.length);
+    this.element.append(table);
+    this.element.addClass('with-data');
+  },
 
-      const props = ['ip', 'host', 'group', 'name', 'userAgent', 'matchType', 'match', 'clientType', 'time', 'last', 'flags' ];
+  _destroy: function () {
+    this.element.children('table').remove();
+    this.element.removeClass('grb-clients');
+    this.element.removeClass('with-data');
+  },
+
+  buildTable: function (table, data, headings, props, caption, size) {
+    const tbody = $('<tbody></tbody>');
+    const thead = $('<thead></thead>');
+    let row, content, text;
+
+    if (data && data.length > 0) {
       row = $('<tr></tr>');
       props.forEach( function(p) {
           content = $('<th></th>');
@@ -78,21 +99,12 @@ $.widget('grb.clients', {
       thead.appendTo(table);
     } else {
       row = $('<tr></tr>');
-      content = $('<td></td>');
-      $('<span>No Clients found</span>').appendTo(content);
+      content = $('<td colspan="' + size + '"></td>');
+      $('<span>No ' + caption + ' found</span>').appendTo(content);
       row.append(content);
       tbody.append(row);
     }
 
     tbody.appendTo(table);
-
-    this.element.append(table);
-    this.element.addClass('with-data');
-  },
-
-  _destroy: function () {
-    this.element.children('table').remove();
-    this.element.removeClass('grb-clients');
-    this.element.removeClass('with-data');
   }
 });

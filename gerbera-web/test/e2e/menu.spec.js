@@ -53,7 +53,7 @@ describe('Menu Suite', () => {
     it('loads the clients list when clicking Clients', async () => {
       await homePage.clickMenu('nav-clients');
       const clients = await homePage.clients();
-      expect(clients.length).to.equal(3);  // head counts also
+      expect(clients.length).to.equal(5);  // head counts also
     });
 
     it('loads the parent filesystem container list when clicking Filesystem', async () => {
@@ -76,7 +76,7 @@ describe('Menu Suite', () => {
     it('shows the version in the menu', async () => {
       const version = await homePage.getVersion();
       const text = await version.getText();
-      expect(text).to.equal('1.9.2');
+      expect(text).to.equal('1.10.0');
     });
 
     it('loads the parent database container list when clicking Database Icon', async () => {

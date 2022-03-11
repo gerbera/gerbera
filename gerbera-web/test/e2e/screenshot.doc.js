@@ -90,7 +90,8 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 500).write(fileName);
     });
 
     it('for [database large grid view]', async () => {
@@ -106,7 +107,8 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 700).write(fileName);
     });
 
     it('for [filesystem view]', async () => {
@@ -133,7 +135,8 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 500).write(fileName);
     });
 
     it('for [config view]', async () => {
