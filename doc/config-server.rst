@@ -16,18 +16,6 @@ These settings define the server configuration, this includes UPnP behavior, sel
 
 This section defines the server configuration parameters.
 
-**Attributes:**
-
-    ::
-
-        system-threads="yes|no"
-
-    * Optional
-
-    * Default: **yes**
-
-    This attribute defines if mutli-threading in server will use all system resources. If set to **no** it only uses resources assigned to the server process.
-
 ``port``
 ~~~~~~~~
 

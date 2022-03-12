@@ -31,11 +31,6 @@
 
 #include "timer.h" // API
 
-Timer::Timer(std::shared_ptr<Config> config)
-    : config(std::move(config))
-{
-}
-
 void Timer::run()
 {
     log_debug("Starting Timer thread...");
@@ -44,7 +39,7 @@ void Timer::run()
             auto inst = static_cast<Timer*>(arg);
             inst->threadProc();
         },
-        this, config);
+        this);
 
     // wait for TimerThread to become ready
     threadRunner->waitForReady();

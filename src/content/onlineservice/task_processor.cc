@@ -47,7 +47,7 @@ void TaskProcessor::run()
             auto inst = static_cast<TaskProcessor*>(arg);
             inst->threadProc();
         },
-        this, config);
+        this);
 
     // wait for thread to become ready
     threadRunner->waitForReady();

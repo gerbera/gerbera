@@ -76,7 +76,7 @@ void Sqlite3Database::init()
     threadRunner = std::make_unique<StdThreadRunner>(
         "SQLiteThread", [](void* arg) {
             auto inst = static_cast<Sqlite3Database*>(arg);
-            inst->threadProc(); }, this, config);
+            inst->threadProc(); }, this);
 
     if (!threadRunner->isAlive()) {
         throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));

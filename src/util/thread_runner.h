@@ -41,9 +41,8 @@ using ThreadProc = std::function<void(void* target)>;
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
-    ThreadRunner(std::string name, ThreadProc targetProc, void* target, const std::shared_ptr<Config>& config)
-        : config(config)
-        , threadName(std::move(name))
+    ThreadRunner(std::string name, ThreadProc targetProc, void* target)
+        : threadName(std::move(name))
         , targetProc(std::move(targetProc))
         , target(target)
     {
@@ -165,8 +164,6 @@ public:
     }
 
 protected:
-    std::shared_ptr<Config> config;
-
     /// \brief thread method is injected
     void threadProc() override
     {
@@ -177,19 +174,6 @@ protected:
     /// \brief start the thread
     void startThread() override
     {
-#if !defined(SOLARIS) && !defined(__HAIKU__)
-        // default scoping on Solaroid systems is in fact PTHREAD_SCOPE_SYSTEM
-        // plus, setting PTHREAD_EXPLICIT_SCHED requires elevated privileges
-        // while Haiku doesn't implement pthread_attr_setinheritsched yet
-        if (config->getBoolOption(CFG_THREAD_SCOPE_SYSTEM)) {
-            attr = new pthread_attr_t;
-            pthread_attr_init(attr);
-            // pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED);
-            pthread_attr_setinheritsched(attr, PTHREAD_EXPLICIT_SCHED);
-            pthread_attr_setscope(attr, PTHREAD_SCOPE_SYSTEM);
-        }
-#endif
-
         int ret = pthread_create(
             &thread,
             attr,

@@ -524,10 +524,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/ui/attribute::show-tooltips", "config-server.html#ui",
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE),
 
-    std::make_shared<ConfigBoolSetup>(CFG_THREAD_SCOPE_SYSTEM,
-        "/server/attribute::system-threads", "config-server.html#system-threads",
-        YES),
-
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST,
         "/clients", "config-clients.html#clients"),
     std::make_shared<ConfigBoolSetup>(CFG_CLIENTS_LIST_ENABLED,

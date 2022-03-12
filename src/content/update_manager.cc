@@ -57,7 +57,7 @@ void UpdateManager::run()
             auto inst = static_cast<UpdateManager*>(arg);
             inst->threadProc();
         },
-        this, config);
+        this);
     // wait for thread to become ready
     threadRunner->waitForReady();
 }

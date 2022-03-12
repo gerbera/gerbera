@@ -74,7 +74,7 @@ public:
         virtual void timerNotify(const std::shared_ptr<Parameter>& parameter) = 0;
     };
 
-    explicit Timer(std::shared_ptr<Config> config);
+    Timer() = default;
 
     void run();
     void shutdown();
