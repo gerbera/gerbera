@@ -83,7 +83,6 @@
                 <xs:element ref="upnp" minOccurs="0"/>
                 <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
-            <xs:attribute name="system-threads" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

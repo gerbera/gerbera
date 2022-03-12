@@ -181,7 +181,7 @@ void IOHandlerBufferHelper::startBufferThread()
             auto inst = static_cast<IOHandlerBufferHelper*>(arg);
             inst->threadProc();
         },
-        this, config);
+        this);
 }
 
 void IOHandlerBufferHelper::stopBufferThread()
