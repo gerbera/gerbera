@@ -160,8 +160,8 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
-        containerID, searchCriteria, startingIndex, requestedCount, requestedCount);
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
+        containerID, searchCriteria, sortCriteria, startingIndex, requestedCount, requestedCount);
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
@@ -177,7 +177,9 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
     if (quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES))
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
-
+    if (sortCriteria.empty()) {
+        sortCriteria = fmt::format("+{}", MetadataHandler::getMetaFieldName(M_TITLE));
+    }
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
 

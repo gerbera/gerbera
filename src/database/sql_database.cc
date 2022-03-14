@@ -1061,7 +1061,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         SortParser sortParser(searchColumnMapper, metaColumnMapper, param.getSortCriteria());
         auto orderQb = sortParser.parse(addColumns, addJoin);
         if (orderQb.empty()) {
-            orderQb = searchColumnMapper->mapQuoted(SearchCol::Id);
+            orderQb = searchColumnMapper->mapQuoted(SearchCol::DcTitle);
         }
         return orderQb;
     };
