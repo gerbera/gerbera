@@ -115,7 +115,7 @@
             `group`, `item_id`, `playCount`, `bookMarkPos`
         ) SELECT
             'default', `id`, 1, `bookmark_pos`
-        FROM `mt_cds_object` where `bookmark_pos` > 0 OR ("flags" &amp; 0x00000200) != 0;
+        FROM `mt_cds_object` where `bookmark_pos` > 0 OR (`flags` &amp; 0x00000200) != 0
         </script>
         <script>ALTER TABLE `mt_cds_object` DROP COLUMN `bookmark_pos`</script>
     </version>
