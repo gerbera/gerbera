@@ -606,11 +606,6 @@ std::string ipToInterface(std::string_view ip)
     return {};
 }
 
-bool validateYesNo(std::string_view value)
-{
-    return value == "yes" || value == "no";
-}
-
 std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& in,
     const std::string& out,
