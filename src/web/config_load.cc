@@ -197,6 +197,10 @@ void Web::ConfigLoad::process()
         setValue(item, client->getUserAgent());
 
         item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_CLIENT_GROUP), cs->option, ATTR_CLIENTS_CLIENT_GROUP, cs);
+        setValue(item, client->getGroup());
+
+        item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ATTR_CLIENTS_UPNP_CAPTION_COUNT, cs);
         setValue(item, client->getCaptionInfoCount());
     }
@@ -209,6 +213,12 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_CLIENT_USERAGENT), cs->option, ATTR_CLIENTS_CLIENT_USERAGENT, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_CLIENT_USERAGENT));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_CLIENT_GROUP), cs->option, ATTR_CLIENTS_CLIENT_GROUP, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_CLIENT_GROUP));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ATTR_CLIENTS_UPNP_CAPTION_COUNT, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_CAPTION_COUNT));
     }
 
     // write import tweaks

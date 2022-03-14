@@ -331,6 +331,9 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
                 throw_std_runtime_error("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue);
             }
         }
+        if (parseValue)
+            return parseValue(sVal);
+
         return std::stoi(sVal);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal);
@@ -416,6 +419,11 @@ void ConfigBoolSetup::makeOption(const pugi::xml_node& root, const std::shared_p
 static bool validateTrueFalse(const std::string& optValue)
 {
     return (optValue == "true" || optValue == "false");
+}
+
+static bool validateYesNo(std::string_view value)
+{
+    return value == "yes" || value == "no";
 }
 
 void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -1057,7 +1065,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
         prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
-        prof->setClientFlags(ClientConfig::makeFlags(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child)));
+        prof->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
 
         pugi::xml_node sub;
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
@@ -1265,7 +1273,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getClientFlags());
-                entry->setClientFlags(ClientConfig::makeFlags(optValue));
+                entry->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getClientFlags());
                 return true;
             }
@@ -1467,13 +1475,13 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto flags = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
+        auto flags = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
         auto group = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
         auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
 
-        auto client = std::make_shared<ClientConfig>(ClientConfig::makeFlags(flags), group, ip, userAgent, captionInfoCount);
+        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, captionInfoCount);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -1502,11 +1510,9 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkValue(optValue)) {
-            entry->setFlags(ClientConfig::makeFlags(optValue));
-            log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
-            return true;
-        }
+        entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
+        log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
+        return true;
     }
     index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
     if (optItem == index) {

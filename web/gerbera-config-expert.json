@@ -1326,6 +1326,11 @@
 							"editable": true
 						},
 						{
+							"item": "/clients/client/attribute::group",
+							"caption": "Group",
+							"editable": true
+						},
+						{
 							"item": "/clients/client/attribute::flags",
 							"caption": "Flags",
 							"editable": true

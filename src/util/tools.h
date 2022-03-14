@@ -42,7 +42,6 @@
 
 // forward declaration
 class Config;
-class CdsItem;
 class IOHandler;
 
 /// \brief splits the given string into array of strings using a separator character.
@@ -265,10 +264,6 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::c
 /// \param ip i.e. 192.168.4.56.
 /// \return Interface name or nullptr if IP was not found.
 std::string ipToInterface(std::string_view ip);
-
-/// \brief Returns true if the given string is eitehr "yes" or "no", otherwise
-/// returns false.
-bool validateYesNo(std::string_view value);
 
 /// \brief Parses a command line, splitting the arguments into an array and
 /// substitutes %in and %out tokens with given strings.

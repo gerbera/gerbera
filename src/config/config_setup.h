@@ -50,6 +50,7 @@ using StringCheckFunction = std::function<bool(std::string& value)>;
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 using IntCheckFunction = std::function<bool(int value)>;
+using IntParseFunction = std::function<int(const std::string& value)>;
 using IntMinFunction = std::function<bool(int value, int minValue)>;
 
 using ConfigOptionIterator = EnumIterator<config_option_t, config_option_t::CFG_MIN, config_option_t::CFG_MAX>;
@@ -307,6 +308,7 @@ public:
 class ConfigIntSetup : public ConfigSetup {
 protected:
     IntCheckFunction valueCheck = nullptr;
+    IntParseFunction parseValue = nullptr;
     IntMinFunction minCheck = nullptr;
     int minValue {};
 
@@ -331,6 +333,14 @@ public:
 
     {
         this->defaultValue = fmt::to_string(0);
+    }
+
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntParseFunction parseValue)
+        : ConfigSetup(option, xpath, help)
+        , parseValue(std::move(parseValue))
+
+    {
+        this->defaultValue = fmt::to_string(defaultValue);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check)
@@ -363,7 +373,7 @@ public:
     {
     }
 
-    std::string getTypeString() const override { return "Number"; }
+    std::string getTypeString() const override { return parseValue ? "String" : "Number"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
