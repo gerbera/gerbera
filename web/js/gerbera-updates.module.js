@@ -95,7 +95,7 @@ const getUpdates = (force) => {
 
 const updateTask = (response) => {
   let promise;
-  if (response.success) {
+  if (response && response.success) {
     if (response.task) {
       const taskId = response.task.id;
       if (taskId === -1) {
@@ -108,17 +108,18 @@ const updateTask = (response) => {
     } else {
       promise = Updates.clearTaskInterval(response)
     }
-  } else {
+  } else if (response) {
     promise = Promise.resolve(response);
   }
   return promise;
 };
 
 const updateUi = (response) => {
-  if (response.success) {
+  if (response && response.success) {
     updateTreeByIds(response);
   }
-  return Promise.resolve(response);
+  if (response)
+    return Promise.resolve(response);
 };
 
 const clearTaskInterval = (response) => {
@@ -126,7 +127,8 @@ const clearTaskInterval = (response) => {
     window.clearInterval(POLLING_INTERVAL);
     POLLING_INTERVAL = false;
   }
-  return Promise.resolve(response);
+  if (response)
+    return Promise.resolve(response);
 };
 
 const clearUiTimer = (response) => {
@@ -134,7 +136,8 @@ const clearUiTimer = (response) => {
     window.clearTimeout(UI_TIMEOUT);
     UI_TIMEOUT = false;
   }
-  return Promise.resolve(response);
+  if (response)
+    return Promise.resolve(response);
 };
 
 const addUiTimer = (interval) => {
@@ -165,6 +168,7 @@ const isPolling = () => {
 const clearAll = (response) => {
   Updates.clearUiTimer(response);
   Updates.clearTaskInterval(response);
+
 };
 
 const updateTreeByIds = (response) => {
