@@ -97,7 +97,8 @@ static duk_ret_t jsReadln(duk_context* ctx)
 
     try {
         auto line = self->readLine();
-        duk_push_string(ctx, line.c_str());
+        duk_push_string(ctx, line.first.c_str());
+        return line.second ? 1 : 0;
     } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
@@ -105,8 +106,6 @@ static duk_ret_t jsReadln(duk_context* ctx)
         log_error("DUK exception: {}", e.what());
         return 0;
     }
-
-    return 1;
 }
 
 static duk_ret_t jsGetCdsObject(duk_context* ctx)
@@ -188,21 +187,20 @@ pugi::xml_node& PlaylistParserScript::readXml(int direction)
     return nullNode;
 }
 
-std::string PlaylistParserScript::readLine()
+std::pair<std::string, bool> PlaylistParserScript::readLine()
 {
     if (!currentHandle)
         throw_std_runtime_error("readLine not yet setup for use");
 
     if (currentTask && !currentTask->isValid())
-        return {};
+        return { {}, false };
 
     while (true) {
         if (!fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle))
-            return {};
-
+            return { {}, false };
         auto ret = trimString(currentLine);
         if (!ret.empty())
-            return ret;
+            return { ret, true };
     }
 }
 
