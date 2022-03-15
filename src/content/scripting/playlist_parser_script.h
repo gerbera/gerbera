@@ -48,7 +48,7 @@ public:
     PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
-    std::string readLine();
+    std::pair<std::string, bool> readLine();
     pugi::xml_node& readXml(int direction);
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptPath);
     script_class_t whoami() override;
