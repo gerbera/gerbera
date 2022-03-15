@@ -16,7 +16,9 @@ describe('Autoscan Suite', () => {
     homePage = new HomePage(driver);
 
     await TestUtils.resetCookies(driver);
+
     await loginPage.get(TestUtils.home());
+
     await loginPage.password('pwd');
     await loginPage.username('user');
     await loginPage.submitLogin();

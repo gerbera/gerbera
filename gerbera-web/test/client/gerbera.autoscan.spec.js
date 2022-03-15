@@ -75,6 +75,7 @@ describe('Gerbera Autoscan', () => {
 
     afterEach(() => {
       fixture.cleanup();
+      ajaxSpy.and.callThrough();
     });
 
     it('calls the server to obtain autoscan edit load', () => {
@@ -134,13 +135,9 @@ describe('Gerbera Autoscan', () => {
       autoscanPersistentMsg = $('#autoscan-persistent-msg');
       autoscanSave = $('#autoscanSave');
     });
-
-    afterEach((done) => {
-      $("body").on('transitionend', function(event){
-        fixture.cleanup();
-        $('#autoscanModal').remove();
-        done();
-      });
+    afterEach(() => {
+      fixture.cleanup();
+      $('#autoscanModal').remove();
     });
 
     it('using the response loads the autoscan overlay', () => {
@@ -176,13 +173,10 @@ describe('Gerbera Autoscan', () => {
       spyOn(Updates, 'getUpdates');
     });
 
-    afterEach((done) => {
-      $("body").on('transitionend', function(event){
-        fixture.cleanup();
-        $('#autoscanModal').remove();
-        ajaxSpy.and.callThrough();
-        done();
-      });
+    afterEach(() => {
+      fixture.cleanup();
+      $('#autoscanModal').remove();
+      ajaxSpy.and.callThrough();
     });
 
     it('collects all the form data from the autoscan modal to call the server', () => {
