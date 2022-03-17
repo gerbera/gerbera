@@ -132,21 +132,17 @@
   }
 
   function showDetails(modal) {
-    modal.find('.modal-dialog').addClass('details-visible');
-    modal.find('#metadata').show();
-    modal.find('#auxdata').show();
-    modal.find('#resdata').show();
+    modal.find('.modal-dialog').addClass('modal-xl');
+    $("#editCol").show();
     modal.find('#detailbutton').hide();
     modal.find('#hidebutton').show();
   }
 
   function hideDetails(modal) {
-    modal.find('.modal-dialog').removeClass('details-visible');
+    modal.find('.modal-dialog').removeClass('modal-xl');
     modal.find('#detailbutton').show();
     modal.find('#hidebutton').hide();
-    modal.find('#metadata').hide();
-    modal.find('#auxdata').hide();
-    modal.find('#resdata').hide();
+    $("#editCol").hide();
   }
 
   function loadItem (modal, itemData) {
