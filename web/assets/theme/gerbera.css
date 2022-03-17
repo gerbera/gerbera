@@ -98,35 +98,34 @@ li.nav-item.active a {
 
 .form-control:focus {
     background-color: #FFF;
-    border: 1px solid #ff7f00;
-    box-shadow:inset 0px 3px 3px -1px #888;
+    border: 2px solid #ff7f00;
+    box-shadow:inset 0 1px 0 -1px #888;
 }
 
 .modal-dialog {
 }
 
 .modal-header {
-    background-color: #222;
+    background-color: #3c3c3c;
     color: #FFF;
-    border: 1px solid #FFF;
-}
-
-.modal-footer {
-    background-color: #e9ecef;
-    border-bottom: 1px solid #FFF;
-    border-left: 1px solid #FFF;
-    border-right: 1px solid #FFF;
-}
-
-.modal-body {
-    background-color: #FFF;
-    border: 1px solid #FFF;
+    border-bottom: 1px solid #ff7f00;
 }
 
 .modal-header .close {
     opacity: 1;
     color: white;
 }
+
+.modal-footer .btn-primary {
+    background-color: #ff7f00;
+    border-color: #e57200;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #e57200;
+    border-color: #CC6500;
+}
+
 .close:hover {
     color: #FFF;
 }
@@ -134,43 +133,6 @@ li.nav-item.active a {
 #mediaimage {
     width: 150px;
     object-fit: contain;
-}
-.edit-dialog {
-    height: calc( 100vh - 3.5rem );
-}
-.edit-content {
-    height: 90vh;
-}
-.edit-body {
-    height: calc( 100vh - 3.5rem - 70px - 72px );
-    overflow-y: auto;
-}
-.editor-form {
-    min-width: calc( 500px - 3rem );
-}
-.edit-table {
-}
-.edit-cell {
-}
-.edit-form {
-    width: calc( 500px - 2rem );
-}
-
-.detail-table {
-    width: 500px;
-    margin-left: 1rem;
-    margin-bottom: 10px;
-}
-.detail-column {
-    width: 250px;
-}
-
-.details-visible {
-    max-width: calc( 1000px + 1rem );
-}
-.detail-area {
-    /*max-height: calc( 100% - 70px - 72px );*/
-    display: inline-block;
 }
 
 .btn-danger {

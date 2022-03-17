@@ -143,169 +143,174 @@
 
 
 <div id="editModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog edit-dialog" role="document">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
     <div class="modal-content edit-content">
       <div class="modal-header">
-        <h4 class="modal-title">Edit Item</h4>
+        <h5 class="modal-title">Edit Item</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body edit-body">
-        <table class="edit-table"><tbody><tr>
-          <td class="edit-cell">
-            <form class="editor-form">
-              <div class="form-group" id="objectIdGroup" hidden>
-                <label for="editdObjectIdTxt">ID</label>
-                <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
-              </div>
-              <div class="form-group" id="parentIdGroup" hidden>
-                <label for="addParentId">Parent ID</label>
-                <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
-              </div>
-              <div class="form-group" style="display: inline-flex">
-                <img id="mediaimage"/>
-                <div class="form-group" style="display: inline-block">
-                  <div class="form-group" style="margin-left: 1em;">
-                    <label for="editLmt">Last Modified</label>
-                    <input type="text" class="form-control" id="editLmt">
-                  </div>
-                  <div class="form-group" style="margin-left: 1em;">
-                    <label for="editLut">Last Updated</label>
-                    <input type="text" class="form-control" id="editLut">
-                  </div>
+        <div class="container-fluid edit-table p-0">
+          <div class="row no-gutters">
+            <div class="col">
+              <form class="editor-form">
+                <div class="form-group" id="objectIdGroup" hidden>
+                  <label for="editdObjectIdTxt">ID</label>
+                  <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
                 </div>
+                <div class="form-group" id="parentIdGroup" hidden>
+                  <label for="addParentId">Parent ID</label>
+                  <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
+                </div>
+                <div class="form-group">
+                  <img id="mediaimage" />
+                </div>
+                <div class="form-group">
+                  <label for="editObjectType">Type</label>
+                  <select id="editObjectType" class="form-control">
+                    <option value="container">Container</option>
+                    <option value="item">Item</option>
+                    <option value="external_url">External Link (URL)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="editTitle">Title</label>
+                  <input type="text" class="form-control" id="editTitle">
+                </div>
+                <div class="form-group">
+                  <label for="editTitle">Location</label>
+                  <input type="text" class="form-control" id="editLocation">
+                </div>
+                <div class="form-group">
+                  <label for="editClass">Class</label>
+                  <input type="text" class="form-control" id="editClass" value="default">
+                </div>
+                <div class="form-group">
+                  <label for="editDesc">Description</label>
+                  <input type="text" class="form-control" id="editDesc">
+                </div>
+                <div class="form-group">
+                  <label for="editMime">Mimetype</label>
+                  <input type="text" class="form-control" id="editMime">
+                </div>
+                <div class="form-group">
+                  <label for="editProtocol">Protocol</label>
+                  <input type="text" class="form-control" id="editProtocol">
+                </div>
+                <div class="form-group">
+                  <label for="editLmt">Last Modified</label>
+                  <input type="text" class="form-control" id="editLmt">
+                </div>
+                <div class="form-group">
+                  <label for="editLut">Last Updated</label>
+                  <input type="text" class="form-control" id="editLut">
+                </div>
+              </form>
+            </div>
+            <div class="col ml-2" id="editCol">
+              <div class="detail-area">
+                <table id="metadata" class="table"></table>
+                <table id="auxdata" class="table"></table>
+                <table id="resdata" class="table"></table>
               </div>
-              <div class="form-group">
-                <label for="editObjectType">Type</label>
-                <select id="editObjectType" class="form-control">
-                  <option value="container">Container</option>
-                  <option value="item">Item</option>
-                  <option value="external_url">External Link (URL)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="editTitle">Title</label>
-                <input type="text" class="form-control" id="editTitle">
-              </div>
-              <div class="form-group">
-                <label for="editTitle">Location</label>
-                <input type="text" class="form-control" id="editLocation">
-              </div>
-              <div class="form-group">
-                <label for="editClass">Class</label>
-                <input type="text" class="form-control" id="editClass" value="default">
-              </div>
-              <div class="form-group">
-                <label for="editDesc">Description</label>
-                <input type="text" class="form-control" id="editDesc">
-              </div>
-              <div class="form-group">
-                <label for="editMime">Mimetype</label>
-                <input type="text" class="form-control" id="editMime">
-              </div>
-              <div class="form-group">
-                <label for="editProtocol">Protocol</label>
-                <input type="text" class="form-control" id="editProtocol">
-              </div>
-            </form>
-          </td><td class="edit-cell">
-          <div class="detail-area">
-            <table id="metadata" class="detail-table"></table>
-            <table id="auxdata" class="detail-table"></table>
-            <table id="resdata" class="detail-table"></table>
+            </div>
           </div>
-        </td></tr></tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
+        </div>
+      </div><!-- /.modal-content -->
+      <div class="modal-footer bg-light">
         <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
         <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
         <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="editSave" type="submit" class="btn btn-primary">Save Item</button>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+    </div><!-- /.modal-dialog -->
+  </div>
 </div>
 
 <div id="autoscanModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Add Autoscan</h4>
+        <h5 class="modal-title">Add Autoscan</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <div class="container-fluid">
+        <div class="container-fluid p-0">
           <form>
-            <div class="form-group" id="autoscan-persistent-msg">
+            <div class="form-group row" id="autoscan-persistent-msg">
               <span>This is a persistent autoscan directory (defined in config), it can not be modified via the web UI.</span>
             </div>
-            <div class="form-group row " hidden>
-              <div class="col-md-6">
-                <label for="autoscanId">ID:</label>
+            <div class="form-group row no-gutters" hidden>
+              <div class="col">
+                <label for="autoscanId">ID</label>
               </div>
-              <div class="col-md-6">
+              <div class="col">
                 <span id="autoscanIdTxt" class="overflow"></span>
                 <input type="hidden" id="autoscanId"/>
                 <input type="checkbox" class="hidden" id="autoscanFromFs"/>
                 <input type="checkbox" class="hidden" id="autoscanPersistent"/>
               </div>
             </div>
-            <div class="form-check row">
-              <div class="col-md-6">
-                <label>Autoscan Mode:</label>
+            <div class="form-group row no-gutters">
+              <div class="col-3">
+                <label>Scan Mode</label>
               </div>
-              <div class="col-md-6">
-                <div class="form-check form-check-inline">
-                  <label for="autoscanModeNone" class="form-check-label">
-                    <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none"/> None
-                  </label>
+              <div class="col-9">
+                <div class="form-check">
+                  <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify" aria-describedby="autoscanModeInotifyHelp"/>
+                  <label for="autoscanModeInotify" class="form-check-label">INotify</label>
+                  <small id="autoscanModeInotifyHelp" class="form-text text-muted">
+                    Efficiently and quickly update based on system filesystem events. This is the suggested method unless the underlying system does not support it.
+                  </small>
                 </div>
-                <div class="form-check form-check-inline">
-                  <label for="autoscanModeTimed" class="form-check-label">
-                    <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed"/> Timed
-                  </label>
-                </div>
-                <div class="form-check form-check-inline">
-                  <label for="autoscanModeInotify" class="form-check-label">
-                    <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify"/> INotify
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="form-check form-check-inline row">
-              <div class="col-md-6 offset-md-6">
-                <div class="form-check form-check-inline">
-                  <label for="autoscanRecursive" class="form-check-label">
-                    <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input"/> Recursive
-                  </label>
+                <div class="form-check">
+                  <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed" aria-describedby="autoscanModeTimedHelp"/>
+                  <label for="autoscanModeTimed" class="form-check-label">Timed</label>
+                  <small id="autoscanModeTimedHelp" class="form-text text-muted">
+                    Re-scans the directory at set intervals. Resource intensive if run too often.
+                  </small>
                 </div>
               </div>
             </div>
-            <div class="form-check form-check-inline row">
-              <div class="col-md-6 offset-md-6">
-                <div class="form-check form-check-inline">
-                  <label for="autoscanHidden" class="form-check-label">
-                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input"/> Include hidden files/directories
-                  </label>
+            <div class="form-group row no-gutters">
+              <div class="col-3">
+                <label>Recursive</label>
+              </div>
+              <div class="col-9">
+                <div class="form-check">
+                  <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input" aria-describedby="autoscanRecursiveHelp"/>
+                  <label for="autoscanRecursive" class="form-check-label">Recursive</label>
+                  <small id="autoscanRecursiveHelp" class="form-text text-muted">
+                    Descend into child directories and index them.
+                  </small>
                 </div>
               </div>
             </div>
-            <div class="form-group row">
-              <div class="col-md-6">
-                <label for="autoscanInterval">Scan Interval (in seconds):</label>
+            <div class="form-group row no-gutters">
+              <label for="autoscanHidden" class="col-3 col-form-label">Include Hidden</label>
+              <div class="col-9">
+                <div class="form-check">
+                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input" aria-describedby="autoscanHiddenHelp"/> Include Hidden
+                    <small id="autoscanHiddenHelp" class="form-text text-muted">
+                      Include hidden files/directories
+                    </small>
+                </div>
               </div>
-              <div class="col-md-4">
-                <input type="text" id="autoscanInterval" class="form-control"/>
+            </div>
+            <div class="form-group row no-gutters">
+              <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
+              <div class="col-4">
+                <input type="number" id="autoscanInterval" class="form-control"/>
               </div>
             </div>
           </form>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer bg-light">
         <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
       </div>
@@ -317,7 +322,7 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Add Directory Tweak</h4>
+        <h5 class="modal-title">Add Directory Tweak</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -421,7 +426,7 @@
           </form>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer bg-light">
         <button id="dirTweakCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="dirTweakDelete" type="submit" class="btn btn-primary" data-dismiss="modal" hidden>Delete Directory Tweak</button>
         <button id="dirTweakSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Directory Tweak</button>
