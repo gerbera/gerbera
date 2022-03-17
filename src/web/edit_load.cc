@@ -47,6 +47,38 @@ Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::sha
 {
 }
 
+static constexpr auto upnpFlags = std::array {
+    std::pair("Restricted", OBJECT_FLAG_RESTRICTED),
+    std::pair("Searchable", OBJECT_FLAG_SEARCHABLE),
+    std::pair("UseResourceRef", OBJECT_FLAG_USE_RESOURCE_REF),
+    std::pair("PersistentContainer", OBJECT_FLAG_PERSISTENT_CONTAINER),
+    std::pair("PlaylistRef", OBJECT_FLAG_PLAYLIST_REF),
+    std::pair("ProxyUrl", OBJECT_FLAG_PROXY_URL),
+    std::pair("OnlineService", OBJECT_FLAG_ONLINE_SERVICE),
+    std::pair("OggTheora", OBJECT_FLAG_OGG_THEORA),
+};
+
+static std::string mapFlags(int flags)
+{
+    if (!flags)
+        return "None";
+
+    std::vector<std::string> myFlags;
+
+    for (auto [uLabel, uFlag] : upnpFlags) {
+        if (flags & uFlag) {
+            myFlags.emplace_back(uLabel);
+            flags &= ~uFlag;
+        }
+    }
+
+    if (flags) {
+        myFlags.push_back(fmt::format("{:#04x}", flags));
+    }
+
+    return fmt::format("{}", fmt::join(myFlags, " | "));
+}
+
 /// \brief: process request 'edit_load' to list contents of a folder
 void Web::EditLoad::process()
 {
@@ -75,6 +107,10 @@ void Web::EditLoad::process()
     auto classEl = item.append_child("class");
     classEl.append_attribute("value") = obj->getClass().c_str();
     classEl.append_attribute("editable") = true;
+
+    auto flagsEl = item.append_child("flags");
+    flagsEl.append_attribute("value") = mapFlags(obj->getFlags()).c_str();
+    flagsEl.append_attribute("editable") = false;
 
     if (obj->getMTime() > std::chrono::seconds::zero()) {
         auto lmtEl = item.append_child("last_modified");

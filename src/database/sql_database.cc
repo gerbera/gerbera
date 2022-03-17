@@ -391,8 +391,8 @@ void SQLDatabase::init()
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
-        auto join1 = fmt::format("INNER JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        auto join2 = fmt::format("INNER JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join1 = fmt::format("LEFT JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
     }
     // Statement for metadata

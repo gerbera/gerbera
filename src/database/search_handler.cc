@@ -689,7 +689,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
                 log_debug("Sort by meta data '{}'", sortSql);
                 auto metaAlias = fmt::format("meta_prop{}", cnt);
                 colBuf.push_back(fmt::format("{}.{}", metaMapper->quote(metaAlias), metaMapper->mapQuoted(META_VALUE, true)));
-                joinBuf.push_back(fmt::format("INNER JOIN {0} {1} ON {2} = {1}.{3} AND {1}.{4} = '{5}'",
+                joinBuf.push_back(fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3} AND {1}.{4} = '{5}'",
                     metaMapper->getTableName(), metaMapper->quote(metaAlias),
                     colMapper->mapQuoted(UPNP_SEARCH_ID),
                     metaMapper->mapQuoted(UPNP_SEARCH_ID, true),

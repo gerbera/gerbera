@@ -27,6 +27,10 @@
       "editable": true,
       "value": "video/mp4"
     },
+    "flags": {
+      "editable": false,
+      "value": "Restricted"
+    },
     "metadata": {
       "metadata": [ {
 	"metaname":"dc:date",
@@ -48,6 +52,14 @@
 	},{
 	"metaname":"upnp:genre",
 	"metavalue":"Genre",
+	"editable":false
+	},{
+	"metaname":"upnp:playbackCount@group[default]",
+	"metavalue":"2",
+	"editable":false
+	},{
+	"metaname":"upnp:lastPlaybackTime@group[default]",
+	"metavalue":"2022-03-16 T 20:31:46",
 	"editable":false
 	}]},
     "auxdata":{"auxdata":[]},
