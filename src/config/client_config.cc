@@ -124,27 +124,24 @@ void ClientConfigList::remove(std::size_t id, bool edit)
     }
 }
 
+static constexpr auto clientTypes = std::array {
+    std::pair("None", ClientType::Unknown),
+    std::pair("BubbleUPnP", ClientType::BubbleUPnP),
+    std::pair("SamsungAllShare", ClientType::SamsungAllShare),
+    std::pair("SamsungSeriesQ", ClientType::SamsungSeriesQ),
+    std::pair("SamsungBDP", ClientType::SamsungBDP),
+    std::pair("SamsungSeriesCDE", ClientType::SamsungSeriesCDE),
+    std::pair("SamsungBDJ5500", ClientType::SamsungBDJ5500),
+    std::pair("EC-IRadio", ClientType::IRadio),
+    std::pair("StandardUPnP", ClientType::StandardUPnP),
+};
+
 std::string_view ClientConfig::mapClientType(ClientType clientType)
 {
-    switch (clientType) {
-    case ClientType::Unknown:
-        return "None";
-    case ClientType::BubbleUPnP:
-        return "BubbleUPnP";
-    case ClientType::SamsungAllShare:
-        return "SamsungAllShare";
-    case ClientType::SamsungSeriesQ:
-        return "SamsungSeriesQ";
-    case ClientType::SamsungBDP:
-        return "SamsungBDP";
-    case ClientType::SamsungSeriesCDE:
-        return "SamsungSeriesCDE";
-    case ClientType::SamsungBDJ5500:
-        return "SamsungBDJ5500";
-    case ClientType::IRadio:
-        return "EC-IRadio";
-    case ClientType::StandardUPnP:
-        return "StandardUPnP";
+    for (auto [cLabel, cType] : clientTypes) {
+        if (clientType == cType) {
+            return cLabel;
+        }
     }
     throw_std_runtime_error("illegal clientType given to mapClientType()");
 }
@@ -162,30 +159,23 @@ std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
     throw_std_runtime_error("illegal matchType given to mapMatchType()");
 }
 
+static constexpr auto quirkFlags = std::array {
+    std::pair("SAMSUNG", QUIRK_FLAG_SAMSUNG),
+    std::pair("SAMSUNG_BOOKMARK_SEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC),
+    std::pair("SAMSUNG_BOOKMARK_MSEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC),
+    std::pair("SAMSUNG_FEATURES", QUIRK_FLAG_SAMSUNG_FEATURES),
+    std::pair("SAMSUNG_HIDE_DYNAMIC", QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC),
+    std::pair("IRADIO", QUIRK_FLAG_IRADIO),
+    std::pair("PV_SUBTITLES", QUIRK_FLAG_PV_SUBTITLES),
+};
+
 int ClientConfig::remapFlag(const std::string& flag)
 {
-    if (flag == "SAMSUNG") {
-        return QUIRK_FLAG_SAMSUNG;
+    for (auto [qLabel, qFlag] : quirkFlags) {
+        if (flag == qLabel) {
+            return qFlag;
+        }
     }
-    if (flag == "SAMSUNG_BOOKMARK_SEC") {
-        return QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC;
-    }
-    if (flag == "SAMSUNG_BOOKMARK_MSEC") {
-        return QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
-    }
-    if (flag == "SAMSUNG_FEATURES") {
-        return QUIRK_FLAG_SAMSUNG_FEATURES;
-    }
-    if (flag == "SAMSUNG_HIDE_DYNAMIC") {
-        return QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC;
-    }
-    if (flag == "IRADIO") {
-        return QUIRK_FLAG_IRADIO;
-    }
-    if (flag == "PV_SUBTITLES") {
-        return QUIRK_FLAG_PV_SUBTITLES;
-    }
-
     return stoiString(flag, 0, 0);
 }
 
@@ -202,38 +192,16 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
 
     std::vector<std::string> myFlags;
 
-    if (flags & QUIRK_FLAG_SAMSUNG) {
-        myFlags.emplace_back("SAMSUNG");
-        flags &= ~QUIRK_FLAG_SAMSUNG;
-    }
-    if (flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) {
-        myFlags.emplace_back("SAMSUNG_BOOKMARK_SEC");
-        flags &= ~QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC;
-    }
-    if (flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) {
-        myFlags.emplace_back("SAMSUNG_BOOKMARK_MSEC");
-        flags &= ~QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC;
-    }
-    if (flags & QUIRK_FLAG_SAMSUNG_FEATURES) {
-        myFlags.emplace_back("SAMSUNG_FEATURES");
-        flags &= ~QUIRK_FLAG_SAMSUNG_FEATURES;
-    }
-    if (flags & QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC) {
-        myFlags.emplace_back("SAMSUNG_HIDE_DYNAMIC");
-        flags &= ~QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC;
-    }
-    if (flags & QUIRK_FLAG_IRADIO) {
-        myFlags.emplace_back("IRADIO");
-        flags &= ~QUIRK_FLAG_IRADIO;
-    }
-    if (flags & QUIRK_FLAG_PV_SUBTITLES) {
-        myFlags.emplace_back("PV_SUBTITLES");
-        flags &= ~QUIRK_FLAG_PV_SUBTITLES;
+    for (auto [qLabel, qFlag] : quirkFlags) {
+        if (flags & qFlag) {
+            myFlags.emplace_back(qLabel);
+            flags &= ~qFlag;
+        }
     }
 
     if (flags) {
         myFlags.push_back(fmt::format("{:#04x}", flags));
     }
 
-    return fmt::format("{}", fmt::join(myFlags, "|"));
+    return fmt::format("{}", fmt::join(myFlags, " | "));
 }

@@ -167,6 +167,12 @@
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
       let tbody;
+      if (item.flags && item.flags.value) {
+        $('<thead><tr><th colspan="2">Extras</th></tr></thead>').appendTo(metatable);
+        tbody = $('<tbody></tbody>');
+        appendMetaItem(tbody, "flags", item.flags.value);
+        metatable.append(tbody);
+      }
       if (item.metadata && item.metadata.metadata.length) {
         detailButton.show();
         $('<thead><tr><th colspan="2">Metadata</th></tr></thead>').appendTo(metatable);
@@ -180,17 +186,21 @@
       const auxtable = modal.find('#auxdata');
       if (item.auxdata && item.auxdata.auxdata.length) {
         detailButton.show();
+        auxtable.show();
         $('<thead><tr><th colspan="2">Aux Data</th></tr></thead>').appendTo(auxtable);
         tbody = $('<tbody></tbody>');
         for (let i = 0; i < item.auxdata.auxdata.length; i++) {
           appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue);
         }
         auxtable.append(tbody);
+      } else {
+        auxtable.hide();
       }
 
       const restable = modal.find('#resdata');
       if (item.resources && item.resources.resources.length) {
         detailButton.show();
+        restable.show();
         for (let i = 0; i < item.resources.resources.length; i++) {
           if (item.resources.resources[i].resname === '----RESOURCE----') {
             $(`<thead><tr><th>Resource</th><th>${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
@@ -204,6 +214,8 @@
             appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue);
           }
         }
+      } else {
+        restable.hide();
       }
 
       switch (item.obj_type) {
