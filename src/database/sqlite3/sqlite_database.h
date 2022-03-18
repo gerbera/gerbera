@@ -35,9 +35,9 @@
 
 #include <queue>
 #include <sqlite3.h>
-#include <unistd.h>
 
 #include "database/sql_database.h"
+#include "util/grb_fs.h"
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
@@ -152,6 +152,8 @@ public:
 protected:
     std::shared_ptr<Config> config;
     bool restore;
+    GrbFile dbFile;
+    GrbFile dbBackupFile;
 };
 
 /// \brief The Database class for using SQLite3

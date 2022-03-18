@@ -148,10 +148,7 @@ std::string GrbFile::readTextFile()
 void GrbFile::writeTextFile(std::string_view contents)
 {
     open("wt");
-    auto err = chmod(path.c_str(), S_IWUSR | S_IRUSR);
-    if (err != 0) {
-        log_error("Failed to change location {} permissions: {}", path.c_str(), std::strerror(errno));
-    }
+    setPermissions();
 
     std::size_t bytesWritten = std::fwrite(contents.data(), 1, contents.length(), fd);
     if (bytesWritten < contents.length()) {
@@ -197,10 +194,41 @@ void GrbFile::writeBinaryFile(const std::byte* data, std::size_t size)
     if (!file)
         throw_std_runtime_error("Failed to open {}", path.c_str());
 
+    setPermissions();
+
     file.rdbuf()->sputn(reinterpret_cast<const char*>(data), size);
 
     if (!file)
         throw_std_runtime_error("Failed to write to file {}", path.c_str());
+}
+
+void GrbFile::setPermissions()
+{
+    auto err = chmod(path.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH);
+    if (err != 0) {
+        log_error("Failed to change location {} permissions: {}", path.c_str(), std::strerror(errno));
+    }
+}
+
+bool GrbFile::isWritable()
+{
+    auto err = access(path.c_str(), R_OK | W_OK);
+    if (err != 0 && errno != ENOENT) {
+        log_error("Failed to check file {} write permissions: {}", path.c_str(), std::strerror(errno));
+        return false;
+    }
+    return true;
+}
+
+bool GrbFile::isReadable(bool warn)
+{
+    auto err = access(path.c_str(), R_OK);
+    if (err != 0) {
+        if (warn)
+            log_error("Failed to check file {} read permissions: {}", path.c_str(), std::strerror(errno));
+        return false;
+    }
+    return true;
 }
 
 bool isTheora(const fs::path& oggFilename)

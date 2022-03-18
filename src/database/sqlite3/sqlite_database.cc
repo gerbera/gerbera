@@ -66,10 +66,11 @@ void Sqlite3Database::init()
     SQLDatabase::init();
 
     fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    auto dbFile = GrbFile(dbFilePath);
     log_debug("SQLite path: {}", dbFilePath.c_str());
 
     // check for db-file
-    if (access(dbFilePath.c_str(), R_OK | W_OK) != 0 && errno != ENOENT)
+    if (!dbFile.isWritable())
         throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
 
     taskQueueOpen = true;
@@ -97,6 +98,7 @@ void Sqlite3Database::init()
 
     std::string dbVersion;
     fs::path dbFilePathbackup = fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str());
+    auto dbBackupFile = GrbFile(dbFilePathbackup);
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error&) {
@@ -106,7 +108,7 @@ void Sqlite3Database::init()
             // try to restore database
 
             // checking for backup file
-            if (access(dbFilePathbackup.c_str(), R_OK) == 0) {
+            if (dbBackupFile.isReadable()) {
                 try {
                     // trying to copy backup file
                     auto btask = std::make_shared<SLBackupTask>(config, true);
@@ -124,13 +126,14 @@ void Sqlite3Database::init()
         }
     }
 
-    if (dbVersion.empty() && access(dbFilePathbackup.c_str(), R_OK) != 0) {
+    if (dbVersion.empty() && !dbBackupFile.isReadable()) {
         log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
         auto itask = std::make_shared<SLInitTask>(config, hashies[0]);
         addTask(itask);
         try {
             itask->waitForTask();
             prepare();
+            dbFile.setPermissions();
             dbVersion = getInternalSetting("db_version");
         } catch (const std::runtime_error& e) {
             shutdown();
@@ -520,21 +523,23 @@ void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl)
 SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
     : config(std::move(config))
     , restore(restore)
+    , dbFile(this->config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE))
+    , dbBackupFile(fmt::format(DB_BACKUP_FORMAT, this->config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE)))
 {
 }
 
 void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
 {
     log_debug("Running: backup");
-    fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     if (!restore) {
         try {
             fs::copy(
-                dbFilePath,
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
+                dbFile.getPath(),
+                dbBackupFile.getPath(),
                 fs::copy_options::overwrite_existing);
             log_debug("sqlite3 backup successful");
+            dbBackupFile.setPermissions();
             decontamination = true;
         } catch (const std::runtime_error& e) {
             log_error("error while making sqlite3 backup: {}", e.what());
@@ -544,13 +549,14 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl)
         sqlite3_close(db);
         try {
             fs::copy(
-                fmt::format(DB_BACKUP_FORMAT, dbFilePath.c_str()),
-                dbFilePath,
+                dbBackupFile.getPath(),
+                dbFile.getPath(),
                 fs::copy_options::overwrite_existing);
+            dbFile.setPermissions();
         } catch (const std::runtime_error& e) {
             throw DatabaseException(fmt::format("Error while restoring sqlite3 backup: {}", e.what()), fmt::format("Error while restoring sqlite3 backup: {}", e.what()));
         }
-        int res = sqlite3_open(dbFilePath.c_str(), &db);
+        int res = sqlite3_open(dbFile.getPath().c_str(), &db);
         if (res != SQLITE_OK) {
             throw DatabaseException("", "error while restoring sqlite3 backup: could not reopen sqlite3 database after restore");
         }

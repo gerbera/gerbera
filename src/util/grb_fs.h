@@ -33,6 +33,11 @@ public:
     std::optional<std::vector<std::byte>> readBinaryFile();
     /// \brief Writes data into a file. Throws if file can't be open or if write fails.
     void writeBinaryFile(const std::byte* data, std::size_t size);
+    /// \brief Ensure that a file has permissions 644 (-rw-r--r--)
+    void setPermissions();
+    bool isReadable(bool warn = false);
+    bool isWritable();
+    const fs::path& getPath() { return path; }
 };
 
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
