@@ -176,8 +176,16 @@ operations
    :target: _static/item-operations.png
 
 - Downloading the item retrieves the media directly from the Gerbera server.
+- Deleting the item removes it from the virtual Database View.
 - Editing the item updates the UPNP meta-data for the item.
-- Deleting the item removes it from the virtual Database View
+
+.. image:: _static/edit-item.png
+   :alt: Edit Item dialog
+   :target: _static/edit-item.png
+
+.. image:: _static/edit-item-details.png
+   :alt: Edit Item dialog with details
+   :target: _static/edit-item-details.png
 
 Item operations act upon existing database items.  You can create new custom items using the Gerbera Trail.
 
@@ -195,6 +203,14 @@ virtual items referencing this item are deleted.
 
 After deleting an entry in the "PC Directory", Gerbera does not know about
 the file anymore. It can be re-added in the "File System" view.
+
+.. image:: _static/edit-autoscan-details.png
+   :alt: Edit Autoscan dialog
+   :target: _static/edit-autoscan-details.png
+
+.. image:: _static/edit-tweak-details.png
+   :alt: Edit Directory Tweaks dialog
+   :target: _static/edit-tweak-details.png
 
 
 Trail Operations
