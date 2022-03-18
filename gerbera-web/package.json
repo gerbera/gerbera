@@ -8,7 +8,7 @@
     "test": "karma start karma.conf.js",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
     "e2e": "SELENIUM_BROWSER=chrome mocha --timeout 15000 \"test/e2e/**.spec.js\"",
-    "screenshot": "rimraf _build && mkdirp _build/doc && mocha \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
+    "screenshot": "rimraf _build && mkdirp _build/doc && mocha --timeout 15000 \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
     "doc:screenshot": "concurrently --success first --kill-others \"npm start\" \"npm run screenshot\"",
     "lint": "eslint -c .eslintrc ../web/js/*gerbera*.js"
   },

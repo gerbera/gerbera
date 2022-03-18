@@ -182,7 +182,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(400, 0, 636, 900).write(fileName);
+      image.crop(450, 40, 540, 890).write(fileName);
     });
 
     it('for [edit item] from item list with details', async () => {
@@ -200,7 +200,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(195, 0, 1060, 900).write(fileName);
+      image.crop(130, 30, 1190, 920).write(fileName);
     });
 
     it('for [trail operations]', async () => {
@@ -247,7 +247,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(290, 0, 860, 360).write(fileName);
+      image.crop(290, 20, 860, 500).write(fileName);
     });
 
     it('for [edit tweak] from filesystem list', async () => {
