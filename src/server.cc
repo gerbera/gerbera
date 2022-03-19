@@ -49,6 +49,7 @@
 #include "file_request_handler.h"
 #include "util/mime.h"
 #include "util/upnp_clients.h"
+#include "util/url_utils.h"
 #include "web/pages.h"
 #include "web/session_manager.h"
 
@@ -513,7 +514,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
-        auto&& [path, parameters] = RequestHandler::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
+        auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
         auto params = dictDecode(parameters);
 

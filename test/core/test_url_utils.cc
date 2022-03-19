@@ -20,51 +20,51 @@
   $Id$
 */
 
-#include "request_handler.h"
+#include "util/url_utils.h"
 
 #include <gtest/gtest.h>
 
-class RequestHandlerTest : public ::testing::Test {
+class URLUtilsTest : public ::testing::Test {
 
 public:
-    RequestHandlerTest() = default;
-    ~RequestHandlerTest() override = default;
+    URLUtilsTest() = default;
+    ~URLUtilsTest() override = default;
 };
 
-TEST_F(RequestHandlerTest, SplitUrlTest)
+TEST_F(URLUtilsTest, SplitUrlTest)
 {
-    EXPECT_THROW(RequestHandler::splitUrl("123X456", 'X'), std::runtime_error);
+    EXPECT_THROW(URLUtils::splitUrl("123X456", 'X'), std::runtime_error);
 
-    auto&& [path, parameters] = RequestHandler::splitUrl("content/media?object_id=12345&transcode=wav", '?');
+    auto&& [path, parameters] = URLUtils::splitUrl("content/media?object_id=12345&transcode=wav", '?');
     EXPECT_EQ(path, "content/media");
     EXPECT_EQ(parameters, "object_id=12345&transcode=wav");
 
-    std::tie(path, parameters) = RequestHandler::splitUrl("a/very/long/path", '/');
+    std::tie(path, parameters) = URLUtils::splitUrl("a/very/long/path", '/');
     EXPECT_EQ(path, "a/very/long");
     EXPECT_EQ(parameters, "path");
 }
 
-TEST_F(RequestHandlerTest, JoinUrlTest)
+TEST_F(URLUtilsTest, JoinUrlTest)
 {
     auto components = std::vector<std::string> {
         "A", "B", "C", "D"
     };
-    auto url = RequestHandler::joinUrl(components, false);
+    auto url = URLUtils::joinUrl(components, false);
     EXPECT_EQ(url, "/A/B/C/D");
 
-    url = RequestHandler::joinUrl(components, false, "&");
+    url = URLUtils::joinUrl(components, false, "&");
     EXPECT_EQ(url, "&A&B&C&D");
 
-    url = RequestHandler::joinUrl(components, true);
+    url = URLUtils::joinUrl(components, true);
     EXPECT_EQ(url, "/A/B/C/D/");
 
-    url = RequestHandler::joinUrl({}, true);
+    url = URLUtils::joinUrl({}, true);
     EXPECT_EQ(url, "/");
 }
 
-TEST_F(RequestHandlerTest, ParseParametersTest)
+TEST_F(URLUtilsTest, ParseParametersTest)
 {
-    auto m = RequestHandler::parseParameters("url/paramA/value%201/paramB/2", "url/");
+    auto m = URLUtils::parseParameters("url/paramA/value%201/paramB/2", "url/");
     ASSERT_EQ(m.size(), 2);
     EXPECT_EQ(m["paramA"], "value 1");
     EXPECT_EQ(m["paramB"], "2");
