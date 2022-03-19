@@ -747,8 +747,7 @@ std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort)
 #define M_SOCK_ADDR_IN6_ADDR(sa) M_SOCK_ADDR_IN6_PTR(sa)->sin6_addr
 struct sockaddr_storage readAddr(std::string addr, int af)
 {
-    struct sockaddr_storage sa;
-    bzero(&sa, sizeof(struct sockaddr_storage));
+    struct sockaddr_storage sa = {};
     reinterpret_cast<struct sockaddr*>(&sa)->sa_family = af;
     int err = 0;
     if (af == AF_INET) {
