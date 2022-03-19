@@ -942,7 +942,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
-            orderBy = fmt::format(" ORDER BY {} DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), orderByCode());
+            // ORDER BY (object_type = OBJECT_TYPE_CONTAINER) ensures that containers are returned before items
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER, orderByCode());
         }
         if (doLimit)
             limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());
