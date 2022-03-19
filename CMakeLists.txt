@@ -223,6 +223,8 @@ add_library(libgerbera STATIC
         src/util/upnp_quirks.cc
         src/util/url.cc
         src/util/url.h
+        src/util/url_utils.h
+        src/util/url_utils.cc
         src/util/xml_to_json.cc
         src/util/xml_to_json.h
         src/web/action.cc
@@ -248,7 +250,7 @@ add_library(libgerbera STATIC
         src/web/tasks.cc
         src/web/web_autoscan.cc
         src/web/web_update.cc
-)
+        )
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 
 add_executable(gerbera src/main.cc)

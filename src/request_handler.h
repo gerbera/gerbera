@@ -65,21 +65,6 @@ public:
     /// \return IOHandler
     virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) = 0;
 
-    /// \brief Splits the url into a path and parameters string.
-    /// Only '?' and '/' separators are allowed, otherwise an exception will
-    /// be thrown.
-    /// \param url URL that has to be processed
-    /// \return pair of path and parameters which reference the input-view of url
-    ///
-    /// This function splits the url into its path and parameter components.
-    /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
-    /// path = "content/media"
-    /// parameters = "object_id=12345&transcode=wav"
-    static std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
-
-    static std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = _URL_PARAM_SEPARATOR);
-
-    static std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
     std::shared_ptr<CdsObject> loadObject(const std::map<std::string, std::string>& params) const;
 
 protected:

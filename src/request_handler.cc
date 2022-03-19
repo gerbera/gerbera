@@ -47,39 +47,6 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
 {
 }
 
-std::pair<std::string_view, std::string_view> RequestHandler::splitUrl(std::string_view url, char separator)
-{
-    std::size_t splitPos;
-    switch (separator) {
-    case '/':
-        splitPos = url.rfind('/');
-        break;
-    case '?':
-        splitPos = url.find('?');
-        break;
-    default:
-        throw_std_runtime_error("Forbidden separator: {}", separator);
-    }
-
-    if (splitPos == std::string_view::npos)
-        return { url, std::string_view() };
-
-    return { url.substr(0, splitPos), url.substr(splitPos + 1) };
-}
-
-std::string RequestHandler::joinUrl(const std::vector<std::string>& components, bool addToEnd, std::string_view separator)
-{
-    if (components.empty())
-        return std::string(separator);
-    return fmt::format("{}{}{}", separator, fmt::join(components, separator), (addToEnd ? separator : ""));
-}
-
-std::map<std::string, std::string> RequestHandler::parseParameters(std::string_view filename, std::string_view baseLink)
-{
-    const auto parameters = filename.substr(baseLink.size());
-    return pathToMap(parameters);
-}
-
 std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string, std::string>& params) const
 {
     auto it = params.find("object_id");

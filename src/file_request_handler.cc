@@ -43,6 +43,7 @@
 #include "util/tools.h"
 #include "util/upnp_headers.h"
 #include "util/upnp_quirks.h"
+#include "util/url_utils.h"
 #include "web/session_manager.h"
 
 FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
@@ -57,7 +58,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto quirks = getQuirks(info);
 
-    auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
+    auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
 
     auto resourceId = parseResourceInfo(params);
@@ -200,7 +201,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         throw_std_runtime_error("UPNP_WRITE unsupported");
     }
 
-    auto params = parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
+    auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
     auto resourceId = parseResourceInfo(params);
 

@@ -39,6 +39,7 @@
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
 #include "util/url.h"
+#include "util/url_utils.h"
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service_helper.h"
@@ -48,7 +49,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
-    auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
+    auto params = URLUtils::parseParameters(filename, LINK_URL_REQUEST_HANDLER);
     auto obj = loadObject(params);
     if (!obj->isExternalItem()) {
         throw_std_runtime_error("getInfo: object is not an external url item");
@@ -110,7 +111,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
     if (mode != UPNP_READ)
         throw_std_runtime_error("UPNP_WRITE unsupported");
 
-    auto params = parseParameters(filename, LINK_URL_REQUEST_HANDLER);
+    auto params = URLUtils::parseParameters(filename, LINK_URL_REQUEST_HANDLER);
     auto obj = loadObject(params);
     if (!obj->isExternalItem()) {
         throw_std_runtime_error("object is not an external url item");

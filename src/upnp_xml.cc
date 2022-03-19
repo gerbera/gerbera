@@ -40,6 +40,7 @@
 #include "request_handler.h"
 #include "transcoding/transcoding.h"
 #include "util/upnp_clients.h"
+#include "util/url_utils.h"
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
@@ -374,11 +375,11 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
         }
 
         if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            auto path = RequestHandler::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
+            auto path = URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
             return std::make_unique<PathBase>(path, true);
         }
     }
-    auto path = RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
+    auto path = URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
     return std::make_unique<PathBase>(path, true);
 }
 
@@ -415,7 +416,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
             dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
 
             auto resParams = res->getParameters();
-            auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
+            auto url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, fmt::to_string(res->getResId()), dictEncodeSimple(resParams) });
             return { url, true };
         }
 
@@ -424,7 +425,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
             dict[URL_OBJECT_ID] = resObj;
 
             auto resParams = res->getParameters();
-            auto url = virtualURL + RequestHandler::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(resParams) });
+            auto url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, res->getAttribute(R_FANART_RES_ID), dictEncodeSimple(resParams) });
             return { url, true };
         }
     }
@@ -477,7 +478,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& v
 
 std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
 {
-    auto urlExt = RequestHandler::joinUrl({ URL_FILE_EXTENSION, "file." });
+    auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file." });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
         return fmt::format("{}{}", urlExt, contentType);

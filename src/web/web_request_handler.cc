@@ -36,6 +36,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "util/tools.h"
 #include "util/upnp_headers.h"
+#include "util/url_utils.h"
 #include "util/xml_to_json.h"
 #include "web/pages.h"
 
@@ -84,7 +85,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     this->filename = filename;
 
-    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
+    auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
     auto decodedParams = dictDecode(parameters);
     if (params.empty()) {
@@ -115,7 +116,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
     this->filename = filename;
-    auto&& [path, parameters] = splitUrl(filename, URL_UI_PARAM_SEPARATOR);
+    auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
     auto decodedParams = dictDecode(parameters);
     if (params.empty()) {
         params = std::move(decodedParams);
