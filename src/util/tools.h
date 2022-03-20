@@ -36,8 +36,6 @@
 #include <optional>
 #include <vector>
 
-#include <netinet/in.h>
-
 #include "common.h"
 
 // forward declaration
@@ -260,11 +258,6 @@ std::chrono::milliseconds currentTimeMS();
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
-/// \brief Finds the Interface with the specified IP address.
-/// \param ip i.e. 192.168.4.56.
-/// \return Interface name or nullptr if IP was not found.
-std::string ipToInterface(std::string_view ip);
-
 /// \brief Parses a command line, splitting the arguments into an array and
 /// substitutes %in and %out tokens with given strings.
 ///
@@ -285,16 +278,5 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
 std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
 std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, const std::string& mimeType);
-
-/// \brief Compare sockaddr
-/// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
-#define SOCK_ADDR_IN_PTR(sa) reinterpret_cast<const struct sockaddr_in*>(sa)
-#define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
-#define SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<const struct sockaddr_in6*>(sa)
-#define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
-std::string getHostName(const struct sockaddr* addr);
-int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb);
-std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort = true);
-struct sockaddr_storage readAddr(std::string_view addr, int af);
 
 #endif // __TOOLS_H__

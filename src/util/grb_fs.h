@@ -1,9 +1,25 @@
-/* SPDX-License-Identifier: GPL-2.0-or-later */
-/*
- * std::filesystem and fs namespace header
- *
- * Copyright (C) 2021-2022 Gerbera Contributors
- */
+/*GRB*
+Gerbera - https://gerbera.io/
+
+    grb_fs.h - this file is part of Gerbera.
+
+    Copyright (C) 2022 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/// \file grb_fs.h
+/// \brief std::filesystem and fs namespace header
 
 #ifndef __GRB_FS_H__
 #define __GRB_FS_H__

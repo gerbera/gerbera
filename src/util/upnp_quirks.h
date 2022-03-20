@@ -47,12 +47,13 @@ class ContentManager;
 class Context;
 class CdsItem;
 class CdsObject;
+class GrbNet;
 class Headers;
 struct ClientInfo;
 
 class Quirks {
 public:
-    Quirks(std::shared_ptr<Context> context, const struct sockaddr_storage* addr, const std::string& userAgent);
+    Quirks(std::shared_ptr<Context> context, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.

@@ -40,6 +40,7 @@
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcode_dispatcher.h"
+#include "util/grb_net.h"
 #include "util/tools.h"
 #include "util/upnp_headers.h"
 #include "util/upnp_quirks.h"
@@ -257,7 +258,7 @@ std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::str
 
 std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
 {
-    const struct sockaddr_storage* ctrlPtIPAddr = UpnpFileInfo_get_CtrlPtIPAddr(info);
+    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
     return std::make_unique<Quirks>(context, ctrlPtIPAddr, std::move(userAgent));

@@ -47,6 +47,7 @@
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "file_request_handler.h"
+#include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/upnp_clients.h"
 #include "util/url_utils.h"
@@ -108,7 +109,7 @@ void Server::run()
         throw_std_runtime_error("You cannot specify interface {} and IP {} at the same time", iface, ip);
 
     if (iface.empty())
-        iface = ipToInterface(ip);
+        iface = GrbNet::ipToInterface(ip);
 
     if (!ip.empty() && iface.empty())
         throw_std_runtime_error("Could not find IP: {}", ip);
@@ -430,7 +431,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     case UPNP_DISCOVERY_SEARCH_RESULT: {
         auto dEvent = static_cast<const UpnpDiscovery*>(event);
         const char* userAgent = UpnpDiscovery_get_Os_cstr(dEvent);
-        const struct sockaddr_storage* destAddr = UpnpDiscovery_get_DestAddr(dEvent);
+        auto destAddr = std::make_shared<GrbNet>(UpnpDiscovery_get_DestAddr(dEvent));
         const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
         clients->addClientByDiscovery(destAddr, userAgent, location);
