@@ -198,6 +198,8 @@ add_library(libgerbera STATIC
         src/util/generic_task.h
         src/util/grb_fs.cc
         src/util/grb_fs.h
+        src/util/grb_net.cc
+        src/util/grb_net.h
         src/util/jpeg_resolution.cc
         src/util/logger.h
         src/util/mime.cc

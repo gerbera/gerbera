@@ -28,7 +28,7 @@
 #include "config/client_config.h"
 #include "config/config.h"
 #include "database/database.h"
-#include "util/tools.h"
+#include "util/grb_net.h"
 
 #include <array>
 
@@ -47,7 +47,7 @@ ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_
     if (this->database) {
         auto dbCache = this->database->getClients();
         for (auto&& entry : dbCache) {
-            auto info = getInfoByAddr(&entry.addr);
+            auto info = getInfoByAddr(entry.addr);
             if (!info) {
                 info = getInfoByType(entry.userAgent, ClientMatchType::UserAgent);
             }
@@ -171,7 +171,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
-void ClientManager::addClientByDiscovery(const struct sockaddr_storage* addr, const std::string& userAgent, const std::string& descLocation)
+void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
@@ -184,7 +184,7 @@ void ClientManager::addClientByDiscovery(const struct sockaddr_storage* addr, co
 #endif
 }
 
-const ClientInfo* ClientManager::getInfo(const struct sockaddr_storage* addr, const std::string& userAgent)
+const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -211,37 +211,20 @@ const ClientInfo* ClientManager::getInfo(const struct sockaddr_storage* addr, co
         updateCache(addr, userAgent, info);
     }
 
-    log_debug("client info: {} '{}' -> '{}' as {}", sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(addr)), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    log_debug("client info: {} '{}' -> '{}' as {}", addr->getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type));
     return info;
 }
 
-const ClientInfo* ClientManager::getInfoByAddr(const struct sockaddr_storage* addr) const
+const ClientInfo* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
             return false;
-
-        if (c.match.find(':') != std::string::npos) {
-            // IPv6
-            struct sockaddr_in6 clientAddr = {};
-            clientAddr.sin6_family = AF_INET6;
-            if ((inet_pton(AF_INET6, c.match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0))
-                return true;
-        } else if (c.match.find('.') != std::string::npos) {
-            // IPv4
-            struct sockaddr_in clientAddr = {};
-            clientAddr.sin_family = AF_INET;
-            clientAddr.sin_addr.s_addr = inet_addr(c.match.c_str());
-            if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(addr)) == 0)
-                return true;
-        }
-
-        return false;
+        return addr->equals(c.match);
     });
 
     if (it != clientInfo.end()) {
-        auto ip = getHostName(reinterpret_cast<const struct sockaddr*>(addr));
-        log_debug("found client by IP (ip='{}')", ip);
+        log_debug("found client by IP (ip='{}')", addr->getHostName());
         return &(*it);
     }
 
@@ -261,23 +244,22 @@ const ClientInfo* ClientManager::getInfoByType(const std::string& match, ClientM
     return nullptr;
 }
 
-const ClientInfo* ClientManager::getInfoByCache(const struct sockaddr_storage* addr) const
+const ClientInfo* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& addr) const
 {
     AutoLock lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+        { return entry.addr->equals(addr); });
 
     if (it != cache.end()) {
-        auto hostName = getHostName(reinterpret_cast<const struct sockaddr*>(&it->addr));
-        log_debug("found client by cache (hostname='{}')", hostName);
+        log_debug("found client by cache (hostname='{}')", it->addr->getHostName());
         return it->pInfo;
     }
 
     return nullptr;
 }
 
-void ClientManager::updateCache(const struct sockaddr_storage* addr, const std::string& userAgent, const ClientInfo* pInfo)
+void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo)
 {
     AutoLock lock(mutex);
 
@@ -288,7 +270,7 @@ void ClientManager::updateCache(const struct sockaddr_storage* addr, const std::
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&entry.addr), reinterpret_cast<const struct sockaddr*>(addr)) == 0; });
+        { return entry.addr->equals(addr); });
 
     if (it != cache.end()) {
         it->last = now;
@@ -300,7 +282,7 @@ void ClientManager::updateCache(const struct sockaddr_storage* addr, const std::
         }
     } else {
         // add new client
-        cache.emplace_back(*addr, userAgent, now, now, pInfo);
+        cache.emplace_back(addr, userAgent, now, now, pInfo);
     }
     if (this->database)
         this->database->saveClients(cache);

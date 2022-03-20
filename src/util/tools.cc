@@ -31,28 +31,18 @@
 
 #include "tools.h" // API
 
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
 #include <numeric>
 #include <queue>
 #include <sstream>
-#include <sys/socket.h>
 
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
 #endif
 
-#include <ifaddrs.h>
-
 #ifdef BSD_NATIVE_UUID
 #include <uuid.h>
 #else
 #include <uuid/uuid.h>
-#endif
-
-#ifdef SOLARIS
-#include <sys/sockio.h>
 #endif
 
 #include "config/config_manager.h"
@@ -560,52 +550,6 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::c
     return second - first;
 }
 
-std::string ipToInterface(std::string_view ip)
-{
-    if (ip.empty()) {
-        return {};
-    }
-
-    log_warning("Please provide an interface name instead! LibUPnP does not support specifying an IP in current versions.");
-    log_info("Attempting to map {} to an interface", ip);
-
-    struct ifaddrs* ifaddr;
-    int family, s;
-    char host[NI_MAXHOST];
-
-    if (getifaddrs(&ifaddr) == -1) {
-        log_error("Could not getifaddrs: {}", std::strerror(errno));
-    }
-
-    for (auto ifa = ifaddr; ifa; ifa = ifa->ifa_next) {
-        if (!ifa->ifa_addr)
-            continue;
-
-        family = ifa->ifa_addr->sa_family;
-        std::string name = ifa->ifa_name;
-
-        if (family == AF_INET || family == AF_INET6) {
-            s = getnameinfo(ifa->ifa_addr,
-                (family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-                host, NI_MAXHOST, nullptr, 0, NI_NUMERICHOST);
-            if (s != 0) {
-                log_error("getnameinfo() failed: {}", gai_strerror(s));
-                return {};
-            }
-
-            std::string ipaddr = host;
-            // IPv6 link locals come back as fe80::351d:d7f4:6b17:3396%eth0
-            if (startswith(ipaddr, ip)) {
-                return name;
-            }
-        }
-    }
-
-    freeifaddrs(ifaddr);
-    log_warning("Failed to find interface for IP: {}", ip);
-    return {};
-}
-
 std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& in,
     const std::string& out,
@@ -697,65 +641,4 @@ std::string getDLNATransferHeader(const std::shared_ptr<Config>& config, const s
 {
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
     return getPropertyMapValue(mappings, mimeType);
-}
-
-std::string getHostName(const struct sockaddr* addr)
-{
-    char hoststr[NI_MAXHOST];
-    char portstr[NI_MAXSERV];
-    int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
-    int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NOFQDN);
-    if (ret != 0) {
-        log_debug("could not determine getnameinfo: {}", std::strerror(errno));
-    }
-
-    return hoststr;
-}
-
-int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
-{
-    if (sa->sa_family != sb->sa_family)
-        return sa->sa_family - sb->sa_family;
-
-    if (sa->sa_family == AF_INET) {
-        return SOCK_ADDR_IN_ADDR(sa).s_addr - SOCK_ADDR_IN_ADDR(sb).s_addr;
-    }
-
-    if (sa->sa_family == AF_INET6) {
-        return std::memcmp(&(SOCK_ADDR_IN6_ADDR(sa)), &(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
-    }
-
-    throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);
-}
-
-std::string sockAddrGetNameInfo(const struct sockaddr* sa, bool withPort)
-{
-    char hoststr[NI_MAXHOST];
-    char portstr[NI_MAXSERV];
-    int len = sa->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
-    int ret = getnameinfo(sa, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
-    if (ret != 0) {
-        throw_std_runtime_error("could not determine getnameinfo: {}", std::strerror(errno));
-    }
-
-    return withPort ? fmt::format("{}:{}", hoststr, portstr) : hoststr;
-}
-
-#define M_SOCK_ADDR_IN_PTR(sa) reinterpret_cast<struct sockaddr_in*>(sa)
-#define M_SOCK_ADDR_IN_ADDR(sa) M_SOCK_ADDR_IN_PTR(sa)->sin_addr
-#define M_SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<struct sockaddr_in6*>(sa)
-#define M_SOCK_ADDR_IN6_ADDR(sa) M_SOCK_ADDR_IN6_PTR(sa)->sin6_addr
-struct sockaddr_storage readAddr(std::string_view addr, int af)
-{
-    struct sockaddr_storage sa = {};
-    reinterpret_cast<struct sockaddr*>(&sa)->sa_family = af;
-    int err = 0;
-    if (af == AF_INET) {
-        err = inet_pton(af, addr.data(), &(M_SOCK_ADDR_IN_ADDR(&sa)));
-    } else if (af == AF_INET6) {
-        err = inet_pton(af, addr.data(), &(M_SOCK_ADDR_IN6_ADDR(&sa)));
-    }
-    if (err != 1)
-        log_error("Could not parse address {}", addr);
-    return sa;
 }

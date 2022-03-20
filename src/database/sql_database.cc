@@ -43,6 +43,7 @@
 #include "metadata/metadata_handler.h"
 #include "search_handler.h"
 #include "upnp_xml.h"
+#include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -2074,9 +2075,9 @@ std::vector<ClientCacheEntry> SQLDatabase::getClients()
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        struct sockaddr_storage sa = readAddr(row->col(0), row->col_int(2, AF_INET));
-        reinterpret_cast<struct sockaddr_in*>(&sa)->sin_port = row->col_int(1, 0);
-        result.emplace_back(sa,
+        auto net = std::make_shared<GrbNet>(row->col(0), row->col_int(2, AF_INET));
+        net->setPort(row->col_int(1, 0));
+        result.emplace_back(net,
             row->col(3),
             std::chrono::seconds(row->col_int(4, 0)),
             std::chrono::seconds(row->col_int(5, 0)),
@@ -2100,9 +2101,9 @@ void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
     };
     for (auto& client : cache) {
         auto values = std::vector {
-            quote(sockAddrGetNameInfo(reinterpret_cast<const struct sockaddr*>(&client.addr), false)),
-            quote(reinterpret_cast<const struct sockaddr_in*>(&client.addr)->sin_port),
-            quote(reinterpret_cast<const struct sockaddr*>(&client.addr)->sa_family),
+            quote(client.addr->getNameInfo(false)),
+            quote(client.addr->getPort()),
+            quote(client.addr->getAdressFamily()),
             quote(client.userAgent),
             quote(client.last.count()),
             quote(client.age.count()),
