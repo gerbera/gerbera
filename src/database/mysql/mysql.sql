@@ -102,10 +102,10 @@ CREATE TABLE `grb_client` (
 CREATE TABLE `grb_playstatus` (
     `group` varchar(255) NOT NULL,
     `item_id` int(11) NOT NULL,
-    `playCount` int(11) NOT NULL default(0),
-    `lastPlayed` int(11) NOT NULL default(0),
-    `lastPlayedPosition` int(11) NOT NULL default(0),
-    `bookMarkPos` int(11) NOT NULL default(0),
+    `playCount` int(11) NOT NULL default '0',
+    `lastPlayed` int(11) NOT NULL default '0',
+    `lastPlayedPosition` int(11) NOT NULL default '0',
+    `bookMarkPos` int(11) NOT NULL default '0',
     PRIMARY KEY (`group`, `item_id`),
     CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
