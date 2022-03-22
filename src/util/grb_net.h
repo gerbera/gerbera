@@ -33,7 +33,7 @@ private:
     struct sockaddr_storage sockAddr = {};
 
 public:
-    explicit GrbNet(const std::string& addr, int addrFamily = AF_INET);
+    explicit GrbNet(const std::string& addr, int af = AF_INET);
     explicit GrbNet(const struct sockaddr_storage* addr);
 
     void setPort(in_port_t port);
