@@ -46,6 +46,6 @@ namespace URLUtils {
 std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = _URL_PARAM_SEPARATOR);
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
-};
+} // namespace URLUtils
 
 #endif // GERBERA_URL_UTILS_H

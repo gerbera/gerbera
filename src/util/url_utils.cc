@@ -73,4 +73,4 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
     return pathToMap(parameters);
 }
 
-};
+} // namespace URLUtils
