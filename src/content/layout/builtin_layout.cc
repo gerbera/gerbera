@@ -168,7 +168,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
     auto meta = obj->getMetaData();
 
-    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_CREATION_DATE));
+    std::string date = getValueOrDefault(meta, std::string { MetadataHandler::getMetaFieldName(M_CREATION_DATE) });
     if (!date.empty()) {
         std::string year, month;
         auto m = std::numeric_limits<std::size_t>::max();
@@ -218,7 +218,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
 
     auto meta = obj->getMetaData();
 
-    std::string date = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
+    std::string date = getValueOrDefault(meta, std::string { MetadataHandler::getMetaFieldName(M_DATE) });
     if (!date.empty()) {
         std::string year, month;
         auto m = std::numeric_limits<std::size_t>::max();

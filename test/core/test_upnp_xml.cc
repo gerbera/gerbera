@@ -60,8 +60,8 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
 
     // albumArtURI
     auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
-    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
-    resource->addAttribute(R_RESOURCE_FILE, "/home/resource/cover.jpg");
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
     obj->addResource(resource);
 
@@ -150,25 +150,25 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addMetaData(M_TRACKNUMBER, "7");
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-    resource->addAttribute(R_PROTOCOLINFO, "http-get:*:audio/mpeg:*");
-    resource->addAttribute(R_BITRATE, "16044");
-    resource->addAttribute(R_DURATION, "123456");
-    resource->addAttribute(R_NRAUDIOCHANNELS, "2");
-    resource->addAttribute(R_SIZE, "4711");
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
+    resource->addAttribute(CdsResource::Attribute::BITRATE, "16044");
+    resource->addAttribute(CdsResource::Attribute::DURATION, "123456");
+    resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, "2");
+    resource->addAttribute(CdsResource::Attribute::SIZE, "4711");
     obj->addResource(resource);
 
     resource = std::make_shared<CdsResource>(CH_SUBTITLE);
     std::string type = "srt";
-    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(type));
-    resource->addAttribute(R_RESOURCE_FILE, "/home/resource/subtitle.srt");
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(type));
+    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
     resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
     resource->addParameter("type", type);
     obj->addResource(resource);
 
     resource = std::make_shared<CdsResource>(CH_FANART);
-    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo("jpg"));
-    resource->addAttribute(R_RESOURCE_FILE, "/home/resource/cover.jpg");
-    resource->addAttribute(R_RESOLUTION, "200x200");
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
+    resource->addAttribute(CdsResource::Attribute::RESOLUTION, "200x200");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
     obj->addResource(resource);
 
@@ -182,7 +182,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
     expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2/rct/aa</upnp:albumArtURI>\n";
     expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
-    expectedXml << "<res bitrate=\"16044\" duration=\"123456\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\" size=\"4711\">http://server/content/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
+    expectedXml << "<res size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/content/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
     expectedXml << "<res protocolInfo=\"http-get:*:srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/content/media/object_id/42/res_id/1/group/default/rct/vs/type/srt/ext/file.subtitle.srt</res>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
@@ -199,6 +199,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     std::ostringstream buf;
     didlLite.print(buf, "", 0);
     std::string didlLiteXml = buf.str();
+
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 

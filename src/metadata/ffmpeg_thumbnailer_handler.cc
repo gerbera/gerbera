@@ -109,7 +109,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     if (!item)
         return;
 
-    std::string videoResolution = item->getResource(0)->getAttribute(R_RESOLUTION);
+    std::string videoResolution = item->getResource(0)->getAttribute(CdsResource::Attribute::RESOLUTION);
     auto [x, y] = checkResolution(videoResolution);
 
     if (!videoResolution.empty() && x && y) {
@@ -120,12 +120,12 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
 
         auto ffres = std::make_shared<CdsResource>(CH_FFTH);
         ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
-        ffres->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
+        ffres->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
         y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
         x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
         std::string resolution = fmt::format("{}x{}", x, y);
-        ffres->addAttribute(R_RESOLUTION, resolution);
+        ffres->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
         item->addResource(ffres);
         log_debug("Adding resource for video thumbnail");
     }

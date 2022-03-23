@@ -50,7 +50,7 @@ static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std:
         if (resNum >= item->getResourceCount())
             throw_std_runtime_error("Invalid resource index");
 
-        item->getResource(resNum)->addAttribute(R_RESOLUTION, resolution);
+        item->getResource(resNum)->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
     } catch (const std::runtime_error& e) {
         log_error("Exception! {}", e.what());
     }
@@ -270,7 +270,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     // we got the image resolution so we can add our resource
     if (!imageX.empty() && !imageY.empty()) {
-        item->getResource(0)->addAttribute(R_RESOLUTION, fmt::format("{}x{}", imageX, imageY));
+        item->getResource(0)->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", imageX, imageY));
     } else {
         setJpegResolutionResource(item, 0);
     }
@@ -283,8 +283,8 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             log_debug("RESOLUTION: {}", thResolution);
 
             auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
-            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
-            resource->addAttribute(R_RESOLUTION, thResolution);
+            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
+            resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const std::runtime_error& e) {

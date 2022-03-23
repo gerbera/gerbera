@@ -33,6 +33,7 @@
 #define __METADATA_HANDLER_H__
 
 #include <array>
+#include <set>
 
 #include "common.h"
 #include "context.h"
@@ -122,7 +123,7 @@ enum metadata_fields_t {
     M_MAX
 };
 
-static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const char*>, M_MAX> {
+const static auto mt_keys = std::map<metadata_fields_t, const std::string> {
     std::pair(M_TITLE, "dc:title"),
     std::pair(M_ARTIST, "upnp:artist"),
     std::pair(M_ALBUM, "upnp:album"),
@@ -150,48 +151,6 @@ static constexpr auto mt_keys = std::array<std::pair<metadata_fields_t, const ch
     std::pair(M_CONTENT_CLASS, "upnp:contentClass"),
 };
 
-// res tag attributes
-enum resource_attributes_t {
-    R_SIZE = 0,
-    R_DURATION,
-    R_BITRATE,
-    R_SAMPLEFREQUENCY,
-    R_NRAUDIOCHANNELS,
-    R_RESOLUTION,
-    R_COLORDEPTH,
-    R_PROTOCOLINFO,
-    R_RESOURCE_FILE,
-    R_TYPE,
-    R_FANART_OBJ_ID,
-    R_FANART_RES_ID,
-    R_BITS_PER_SAMPLE,
-    R_LANGUAGE,
-    R_AUDIOCODEC,
-    R_VIDEOCODEC,
-    R_MAX
-};
-
-static constexpr auto res_keys = std::array<std::pair<resource_attributes_t, const char*>, R_MAX> {
-    std::pair(R_SIZE, "size"),
-    std::pair(R_DURATION, "duration"),
-    std::pair(R_BITRATE, "bitrate"),
-    std::pair(R_SAMPLEFREQUENCY, "sampleFrequency"),
-    std::pair(R_NRAUDIOCHANNELS, "nrAudioChannels"),
-    std::pair(R_RESOLUTION, "resolution"),
-    std::pair(R_COLORDEPTH, "colorDepth"),
-    std::pair(R_PROTOCOLINFO, "protocolInfo"),
-    std::pair(R_RESOURCE_FILE, "resFile"),
-    std::pair(R_FANART_OBJ_ID, "fanArtObject"),
-    std::pair(R_FANART_RES_ID, "fanArtResource"),
-    std::pair(R_BITS_PER_SAMPLE, "bitsPerSample"),
-    std::pair(R_LANGUAGE, "dc:language"),
-    std::pair(R_AUDIOCODEC, "sec:acodec"),
-    std::pair(R_VIDEOCODEC, "sec:vcodec"),
-    std::pair(R_TYPE, "type"),
-};
-static constexpr auto privateAttributes = std::array { R_RESOURCE_FILE, R_FANART_OBJ_ID, R_FANART_RES_ID, R_BITS_PER_SAMPLE, R_TYPE };
-
-using ResourceAttributeIterator = EnumIterator<resource_attributes_t, resource_attributes_t::R_SIZE, resource_attributes_t::R_MAX>;
 using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;
 
 /// \brief This class is responsible for providing access to metadata information
@@ -209,7 +168,6 @@ public:
 
     static void extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
     static std::string getMetaFieldName(metadata_fields_t field);
-    static std::string getResAttrName(resource_attributes_t attr);
     static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
 
     /// \brief read metadata from file and add to object

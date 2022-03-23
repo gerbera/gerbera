@@ -45,7 +45,7 @@ CdsResource::CdsResource(int handlerType, std::string_view options, std::string_
 }
 
 CdsResource::CdsResource(int handlerType,
-    std::map<std::string, std::string> attributes,
+    std::map<Attribute, std::string> attributes,
     std::map<std::string, std::string> parameters,
     std::map<std::string, std::string> options)
     : handlerType(handlerType)
@@ -55,12 +55,12 @@ CdsResource::CdsResource(int handlerType,
 {
 }
 
-void CdsResource::addAttribute(resource_attributes_t res, const std::string& value)
+void CdsResource::addAttribute(Attribute res, std::string value)
 {
-    attributes[MetadataHandler::getResAttrName(res)] = value;
+    attributes[res] = std::move(value);
 }
 
-void CdsResource::mergeAttributes(const std::map<std::string, std::string>& additional)
+void CdsResource::mergeAttributes(const std::map<Attribute, std::string>& additional)
 {
     for (auto&& [key, val] : additional) {
         attributes[key] = val;
@@ -82,7 +82,8 @@ int CdsResource::getHandlerType() const
     return handlerType;
 }
 
-const std::map<std::string, std::string>& CdsResource::getAttributes() const
+// deprecated
+const std::map<CdsResource::Attribute, std::string>& CdsResource::getAttributes() const
 {
     return attributes;
 }
@@ -97,9 +98,9 @@ const std::map<std::string, std::string>& CdsResource::getOptions() const
     return options;
 }
 
-std::string CdsResource::getAttribute(resource_attributes_t res) const
+std::string CdsResource::getAttribute(CdsResource::Attribute attr) const
 {
-    return getValueOrDefault(attributes, MetadataHandler::getResAttrName(res));
+    return getValueOrDefault(attributes, attr, { "" });
 }
 
 std::string CdsResource::getParameter(const std::string& name) const
@@ -140,6 +141,10 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     std::map<std::string, std::string> opt;
 
     attr = dictDecode(parts[1]);
+    std::map<CdsResource::Attribute, std::string> attrParsed;
+    for (auto [k, v] : attr) {
+        attrParsed[CdsResource::mapAttributeName(k)] = v;
+    }
 
     if (size >= 3)
         par = dictDecode(parts[2]);
@@ -147,5 +152,20 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size >= 4)
         opt = dictDecode(parts[3]);
 
-    return std::make_shared<CdsResource>(handlerType, std::move(attr), std::move(par), std::move(opt));
+    return std::make_shared<CdsResource>(handlerType, std::move(attrParsed), std::move(par), std::move(opt));
+}
+
+std::string CdsResource::getAttributeName(Attribute attr)
+{
+    return attrToName.at(attr);
+}
+
+CdsResource::Attribute CdsResource::mapAttributeName(std::string name)
+{
+    for (auto&& [attr, n] : attrToName) {
+        if (n == name) {
+            return attr;
+        }
+    }
+    throw std::out_of_range { fmt::format("Could not map {}", name) };
 }

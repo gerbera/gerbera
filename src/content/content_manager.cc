@@ -976,16 +976,16 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
     if (!mimetype.empty() && !protocol.empty()) {
         clonedItem->setMimeType(mimetype);
         auto resource = clonedItem->getResource(0);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
     } else if (mimetype.empty() && !protocol.empty()) {
         auto resource = clonedItem->getResource(0);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(clonedItem->getMimeType(), protocol));
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(clonedItem->getMimeType(), protocol));
     } else if (!mimetype.empty()) {
         clonedItem->setMimeType(mimetype);
         auto resource = clonedItem->getResource(0);
-        std::vector<std::string> parts = splitString(resource->getAttribute(R_PROTOCOLINFO), ':');
+        std::vector<std::string> parts = splitString(resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO), ':');
         protocol = parts[0];
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
     }
 
     clonedItem->removeMetaData(M_DESCRIPTION);
@@ -1121,7 +1121,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
     auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
     if (fanart != resources.end() && (*fanart)->getHandlerType() != CH_CONTAINERART) {
         // remove stale references
-        auto fanartObjId = stoiString((*fanart)->getAttribute(R_FANART_OBJ_ID));
+        auto fanartObjId = stoiString((*fanart)->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
         try {
             if (fanartObjId > 0) {
                 database->loadObject(fanartObjId);
@@ -1143,9 +1143,9 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
             const auto& origResources = origObj->getResources();
             fanart = std::find_if(origResources.begin(), origResources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
             if (fanart != origResources.end()) {
-                if ((*fanart)->getAttribute(R_RESOURCE_FILE).empty()) {
-                    (*fanart)->addAttribute(R_FANART_OBJ_ID, fmt::to_string(origObj->getID() != INVALID_OBJECT_ID ? origObj->getID() : origObj->getRefID()));
-                    (*fanart)->addAttribute(R_FANART_RES_ID, fmt::to_string(fanart - origResources.begin()));
+                if ((*fanart)->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+                    (*fanart)->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(origObj->getID() != INVALID_OBJECT_ID ? origObj->getID() : origObj->getRefID()));
+                    (*fanart)->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart - origResources.begin()));
                 }
                 container->addResource(*fanart);
             }

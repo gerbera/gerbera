@@ -196,7 +196,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     /* initialize contstants */
     for (auto&& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 #ifdef ONLINE_SERVICES
     duk_push_int(ctx, int(OS_None));
@@ -228,27 +228,25 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 #endif // ONLINE_SERVICES
 
+    // M_TITLE = "dc:title"
     for (auto&& [field, sym] : mt_keys) {
-        duk_push_string(ctx, sym);
-        for (auto [f, s] : mt_names) {
-            if (f == field) {
-                duk_put_global_string(ctx, s.data());
-            }
+        auto s = getValueOrDefault(mt_names, field, { "" });
+        if (!s.empty()) {
+            duk_push_lstring(ctx, sym.data(), sym.size());
+            duk_put_global_lstring(ctx, s.data(), s.length());
         }
     }
 
-    for (auto&& [field, sym] : res_keys) {
-        duk_push_string(ctx, sym);
-        for (auto&& [f, s] : res_names) {
-            if (f == field) {
-                duk_put_global_string(ctx, s);
-            }
-        }
+    // R_SIZE = "size"
+    for (auto&& [field, sym] : res_names) {
+        duk_push_string(ctx, CdsResource::getAttributeName(field).c_str());
+        duk_put_global_lstring(ctx, sym.data(), sym.length());
     }
 
+    // UPNP_CLASS_MUSIC_ALBUM = "object.container.album.musicAlbum"
     for (auto&& [field, sym] : upnp_classes) {
-        duk_push_string(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_push_lstring(ctx, field.data(), field.length());
+        duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
     duk_push_object(ctx); // config
@@ -562,8 +560,8 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             resCount = 0;
             for (auto&& res : obj->getResources()) {
                 // only attribute enumerated in res_keys is allowed
-                for (auto&& [key, upnp] : res_keys) {
-                    val = getProperty(resCount == 0 ? upnp : fmt::format("{}-{}", resCount, upnp));
+                for (auto&& [key, upnp] : res_names) {
+                    val = getProperty(resCount == 0 ? upnp.data() : fmt::format("{}-{}", resCount, upnp));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
@@ -666,12 +664,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
             if (item->getResourceCount() == 0) {
                 auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-                resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
+                resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
 
                 item->addResource(resource);
             } else {
                 auto resource = item->getResource(CH_DEFAULT);
-                resource->addAttribute(R_PROTOCOLINFO, protocolInfo);
+                resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
             }
         }
     }
@@ -822,7 +820,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
                 setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(res->getHandlerType()));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, attr] : attributes) {
-                    setProperty(resCount == 0 ? key : fmt::format("{}-{}", resCount, key), attr);
+                    setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, key), attr);
                 }
                 auto parameters = res->getParameters();
                 for (auto&& [key, param] : parameters) {

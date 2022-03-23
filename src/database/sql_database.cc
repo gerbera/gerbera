@@ -353,9 +353,9 @@ void SQLDatabase::init()
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto attrName = MetadataHandler::getResAttrName(resAttrId);
-        resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + resAttrId);
-        resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + resAttrId, std::pair(RES_ALIAS, attrName));
+        auto attrName = CdsResource::getAttributeName(resAttrId);
+        resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId));
+        resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), std::pair(RES_ALIAS, attrName));
         tableColumnOrder[RESOURCE_TABLE].push_back(std::move(attrName));
     }
 
@@ -471,6 +471,7 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
         { "resources", &SQLDatabase::doResourceMigration },
     };
     this->addResourceColumnCmd = addResourceColumnCmd;
+
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == version) {
@@ -508,7 +509,7 @@ std::string SQLDatabase::getSortCapabilities()
             sortKeys.push_back(key);
         }
     }
-    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(R_MAX));
+    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
     for (auto&& [field, meta] : mt_keys) {
         if (std::find(sortKeys.begin(), sortKeys.end(), meta) == sortKeys.end()) {
             sortKeys.emplace_back(meta);
@@ -522,13 +523,13 @@ std::string SQLDatabase::getSearchCapabilities()
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
     };
-    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(R_MAX));
+    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
     for (auto&& [field, meta] : mt_keys) {
         searchKeys.emplace_back(meta);
     }
     searchKeys.emplace_back("res");
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto attrName = MetadataHandler::getResAttrName(resAttrId);
+        auto attrName = CdsResource::getAttributeName(resAttrId);
         searchKeys.push_back(fmt::format("res@{}", attrName));
     }
     return fmt::format("{}", fmt::join(searchKeys, ","));
@@ -1009,8 +1010,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                             auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
-                            resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimeType));
-                            resource->addAttribute(R_RESOURCE_FILE, image);
+                            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+                            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, image);
                             resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
                             dynFolder->addResource(resource);
                         }
@@ -2627,7 +2628,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql["parameters"] = quote(dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[key] = quote(val);
+                resourceSql[CdsResource::getAttributeName(key)] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
             resId++;
@@ -2650,7 +2651,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql["parameters"] = quote(dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[key] = quote(val);
+                resourceSql[CdsResource::getAttributeName(key)] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
             resId++;
@@ -2813,7 +2814,7 @@ void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto&& resAttrib = MetadataHandler::getResAttrName(resAttrId);
+        auto&& resAttrib = CdsResource::getAttributeName(resAttrId);
         if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
             _exec(fmt::format(addColumnCmd, resAttrib));
             resourceAttributes.push_back(resAttrib);
@@ -2873,7 +2874,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             std::map<std::string, std::string> resourceSQLVals;
             auto&& resource = CdsResource::decode(resString);
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSQLVals[key] = quote(val);
+                resourceSQLVals[CdsResource::getAttributeName(key)] = quote(val);
             }
             auto fields = std::vector {
                 identifier("item_id"),
