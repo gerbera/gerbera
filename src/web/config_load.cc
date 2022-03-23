@@ -367,7 +367,7 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
-        setValue(item, entry->getAttribute(MetadataHandler::getResAttrName(R_RESOLUTION)));
+        setValue(item, entry->getAttributeOverride(CdsResource::Attribute::RESOLUTION));
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);

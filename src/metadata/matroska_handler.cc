@@ -278,7 +278,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
             auto fDuration = millisecondsToHMSF(double(*static_cast<EbmlFloat*>(durationEl)));
             log_debug("KaxDuration = {}", fDuration);
             if (item->getResourceCount() > 0) {
-                item->getResource(0)->addAttribute(R_DURATION, sc->convert(fDuration));
+                item->getResource(0)->addAttribute(CdsResource::Attribute::DURATION, sc->convert(fDuration));
             }
             activeFlag &= ~GRB_MATROSKA_DURATION;
         }
@@ -340,7 +340,7 @@ void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, c
 
     if (artMimetype != MIMETYPE_DEFAULT) {
         auto resource = std::make_shared<CdsResource>(CH_MATROSKA);
-        resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(artMimetype));
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
         resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }

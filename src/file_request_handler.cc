@@ -78,7 +78,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // Check if the resource is actually another external file, and if it exists
     bool isResourceFile = false;
 
-    auto resPath = resource->getAttribute(R_RESOURCE_FILE);
+    auto resPath = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
     isResourceFile = !resPath.empty() && resPath != obj->getLocation();
     if (isResourceFile) {
         log_debug("Resource is file: {}", path.string());
@@ -111,7 +111,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (resource->getHandlerType() != CH_DEFAULT) {
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
 
-        std::string protocolInfo = getValueOrDefault(resource->getAttributes(), "protocolInfo");
+        std::string protocolInfo = resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
         if (!protocolInfo.empty()) {
             mimeType = getMTFromProtocolInfo(protocolInfo);
         }
@@ -139,8 +139,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         // TODO: this WAV specific logic should be more generic
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            std::string freq = obj->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
-            std::string nrch = obj->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
+            std::string freq = obj->getResource(0)->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY);
+            std::string nrch = obj->getResource(0)->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS);
             if (!freq.empty())
                 mimeType += fmt::format(";rate={}", freq);
             if (!nrch.empty())

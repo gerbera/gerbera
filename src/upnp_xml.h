@@ -79,8 +79,10 @@ public:
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
-    /// \param attributes Dictionary containing the <res> tag attributes (like resolution, etc.)
-    static void renderResource(const std::string& url, const std::map<std::string, std::string>& attributes, pugi::xml_node& parent);
+    /// \param resource The CDSResource itself
+    /// \param parent Parent node to render the result into
+    /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
+    static void renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs);
 
     std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
     std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);

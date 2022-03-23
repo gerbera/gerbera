@@ -75,8 +75,8 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     std::string mimetype = item->getMimeType();
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
-    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(mimetype));
-    resource->addAttribute(R_SIZE, fmt::to_string(filesize));
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
+    resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(filesize));
 
     item->addResource(resource);
     item->clearMetaData();
@@ -147,22 +147,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
 std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
 {
-    for (auto&& [f, s] : mt_keys) {
-        if (f == field) {
-            return s;
-        }
-    }
-    return "unknown";
-}
-
-std::string MetadataHandler::getResAttrName(resource_attributes_t attr)
-{
-    for (auto&& [f, s] : res_keys) {
-        if (f == attr) {
-            return s;
-        }
-    }
-    return "unknown";
+    return getValueOrDefault(mt_keys, field, { "unknown" });
 }
 
 std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, int handlerType)
