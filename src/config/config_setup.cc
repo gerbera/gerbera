@@ -1035,21 +1035,32 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     const pugi::xml_node& root = element.root();
 
     // initialize mapping dictionary
-    std::map<std::string, std::string> mtMappings;
-    {
-        auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
-        if (cs->hasXmlElement(root)) {
-            mtMappings = cs->getXmlContent(cs->getXmlElement(root));
-        }
-    }
+    std::vector<std::shared_ptr<TranscodingFilter>> trFilters;
+    auto fcs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_MIMETYPE_FILTER);
+    const auto filterNodes = fcs->getXmlTree(element);
+    if (filterNodes.empty())
+        return true;
 
     auto pcs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE);
     const auto profileNodes = pcs->getXmlTree(element);
     if (profileNodes.empty())
         return true;
 
+    // go through filters
+    for (auto&& it : filterNodes) {
+        const pugi::xml_node child = it.node();
+
+        auto filter = std::make_shared<TranscodingFilter>(
+            ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE)->getXmlContent(child),
+            ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING)->getXmlContent(child));
+        filter->setSourceProfile(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA)->getXmlContent(child));
+        filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
+        trFilters.push_back(filter);
+        result->add(filter);
+    }
+
     bool allowUnusedProfiles = !ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
-    if (!allowUnusedProfiles && mtMappings.empty()) {
+    if (!allowUnusedProfiles && trFilters.empty()) {
         log_error("error in configuration: transcoding "
                   "profiles exist, but no mimetype to profile mappings specified");
         return false;
@@ -1058,10 +1069,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     // go through profiles
     for (auto&& it : profileNodes) {
         const pugi::xml_node child = it.node();
-        if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child))
-            continue;
 
         auto prof = std::make_shared<TranscodingProfile>(
+            ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
         prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
@@ -1091,7 +1101,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
         // read profile options
         {
-            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNA);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
             if (cs->hasXmlElement(child))
                 prof->setDlnaProfile(cs->getXmlContent(child));
         }
@@ -1159,9 +1169,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         prof->setBufferOptions(buffer, chunk, fill);
 
         bool set = false;
-        for (auto&& [key, val] : mtMappings) {
-            if (val == prof->getName()) {
-                result->add(key, prof);
+        for (auto&& filter : trFilters) {
+            if (filter->getTranscoderName() == prof->getName()) {
+                filter->setTranscodingProfile(prof);
                 set = true;
             }
         }
@@ -1175,10 +1185,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
     }
 
     // validate profiles
-    auto&& tpl = result->getList();
-    for (auto&& [key, val] : mtMappings) {
-        if (tpl.find(key) == tpl.end()) {
-            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", val, key);
+    for (auto&& filter : trFilters) {
+        if (!filter->getTranscodingProfile()) {
+            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", filter->getTranscoderName(), filter->getMimeType());
             if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
                 return false;
             }
@@ -1206,7 +1215,7 @@ std::string ConfigTranscodingSetup::getItemPath(int index, config_option_t propO
     auto opt3 = ConfigDefinition::ensureAttribute(propOption3, propOption4 == CFG_MAX);
     auto opt4 = ConfigDefinition::ensureAttribute(propOption4, propOption4 != CFG_MAX);
 
-    if (propOption == ATTR_TRANSCODING_PROFILES_PROFLE) {
+    if (propOption == ATTR_TRANSCODING_PROFILES_PROFLE || propOption == ATTR_TRANSCODING_MIMETYPE_FILTER) {
         if (propOption3 == CFG_MAX) {
             return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), index, opt2);
         }
@@ -1229,45 +1238,58 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);
         log_debug("Updating Transcoding Detail {} {} {}", xpath, optItem, optValue);
-        std::map<std::string, int> profiles;
+        std::map<std::string, std::shared_ptr<TranscodingProfile>> profiles;
         int i = 0;
 
         // update properties in profile part
-        for (auto&& [key, val] : value->getTranscodingProfileListOption()->getList()) {
-            for (auto&& [a, name] : *val) {
-                profiles[name->getName()] = i;
-                auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
-                if (optItem == index) {
-                    config->setOrigValue(index, key);
-                    value->setKey(key, optValue);
-                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
-                    return true;
-                }
-                index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
-                if (optItem == index) {
-                    log_error("Cannot change profile name in Transcoding Detail {} {}", index, val->begin()->first);
-                    // value->setKey(key, optValue);
-                    // log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->get(optValue)->begin()->first);
-                    return false;
-                }
-                i++;
+        for (auto&& filter : value->getTranscodingProfileListOption()->getFilterList()) {
+            auto index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
+            if (optItem == index) {
+                config->setOrigValue(index, filter->getMimeType());
+                filter->setMimeType(optValue);
+                log_debug("New Transcoding Detail {} {}", index, filter->getMimeType());
+                return true;
             }
-        }
-        i = 0;
+            index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING);
+            if (optItem == index) {
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getTranscoderName());
+                filter->setTranscoderName(optValue);
+                log_debug("New Transcoding Detail {} {}", index, filter->getTranscoderName());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+            if (optItem == index) {
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getClientFlags());
+                filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
+                log_debug("New Transcoding Detail {} {}", index, filter->getClientFlags());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA);
+            if (optItem == index) {
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getSourceProfile());
+                filter->setSourceProfile(optValue);
+                log_debug("New Transcoding Detail {} {}", index, filter->getSourceProfile());
+                return true;
+            }
 
+            if (filter->getTranscodingProfile())
+                profiles[filter->getTranscodingProfile()->getName()] = filter->getTranscodingProfile();
+            i++;
+        }
+
+        i = 0;
         // update properties in transcoding part
-        for (auto&& [key, val] : profiles) {
-            auto entry = value->getTranscodingProfileListOption()->getByName(key, true);
+        for (auto&& [name, entry] : profiles) {
             auto index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
             if (optItem == index) {
-                log_error("Cannot change profile name in Transcoding Detail {} {}", index, entry->getName());
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, name);
                 return false;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
             if (optItem == index) {
-                config->setOrigValue(index, entry->getEnabled());
+                config->setOrigValue(index, entry->isEnabled());
                 entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
-                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getEnabled());
+                log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isEnabled());
                 return true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
@@ -1314,12 +1336,12 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->acceptURL());
                 return true;
             }
-            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_DLNA);
+            index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
             if (optItem == index) {
-                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNA)->checkValue(optValue)) {
-                    config->setOrigValue(index, entry->dlnaProfile());
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF)->checkValue(optValue)) {
+                    config->setOrigValue(index, entry->getDlnaProfile());
                     entry->setDlnaProfile(optValue);
-                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->dlnaProfile());
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getDlnaProfile());
                     return true;
                 }
             }

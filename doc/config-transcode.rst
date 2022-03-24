@@ -92,6 +92,22 @@ profile which is defined below.
 
     Selects the mime type of the source media that should be transcoded.
 
+    .. code-block:: xml
+
+        source-profile=...
+
+    * Optional
+
+    Defines the DLNA profile string of the transcoding source. If set, only files with the DLNA profile are transcoded. See `Import section <https://docs.gerbera.io/en/stable/config-import.html?#contenttype-dlnaprofile>`_ how to determine the profile.
+
+    ::
+
+        client-flags=...
+
+    * Optional
+
+    If the flags match the ones defined in :ref:`clients <client>`, the profile is selected for that client. Choose an unused flag, e.g. "0x100", to avoid collisions with other features.
+
     ::
 
         using=...

@@ -56,7 +56,7 @@ enum avi_fourcc_listmode_t {
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile {
 public:
-    TranscodingProfile(transcoding_type_t trType, std::string name);
+    TranscodingProfile(bool enabled, transcoding_type_t trType, std::string name);
 
     int getClientFlags() const { return clientFlags; }
     void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
@@ -149,7 +149,7 @@ public:
     bool acceptURL() const { return accept_url; }
 
     void setDlnaProfile(const std::string& dlna) { dlnaProf = dlna; }
-    std::string dlnaProfile() const { return dlnaProf; }
+    std::string getDlnaProfile() const { return dlnaProf; }
 
     /// \brief Specifies if the output of the profile is a thumbnail,
     /// this will add appropriate DLNA tags to the XML.
@@ -179,7 +179,7 @@ public:
 
     /// \brief Send out the data in chunked encoding
     void setEnabled(bool new_enabled) { enabled = new_enabled; }
-    bool getEnabled() const { return enabled; }
+    bool isEnabled() const { return enabled; }
 
     /// \brief Sample frequency handling
     void setSampleFreq(int freq) { sample_frequency = freq; }
@@ -192,11 +192,11 @@ public:
     static std::string mapFourCcMode(avi_fourcc_listmode_t mode);
 
 protected:
+    bool enabled { true };
     std::string name;
     std::string tm;
     fs::path command;
     std::string args;
-    bool enabled { true };
     bool first_resource {};
     bool theora {};
     bool accept_url { true };
@@ -217,28 +217,49 @@ protected:
     std::string dlnaProf;
 };
 
-/// \brief this class allows access to available transcoding profiles.
-using TranscodingProfileMap = std::map<std::string, std::shared_ptr<TranscodingProfile>>;
-class TranscodingProfileList {
+class TranscodingFilter {
 public:
-    void add(const std::string& sourceMimeType, const std::shared_ptr<TranscodingProfile>& prof);
+    TranscodingFilter(std::string mimeType, std::string transcoder);
 
-    std::shared_ptr<TranscodingProfileMap> get(const std::string& sourceMimeType) const;
-    const std::map<std::string, std::shared_ptr<TranscodingProfileMap>>& getList() const { return list; }
-    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
-    std::size_t size() const { return list.size(); }
-    void setKey(const std::string& oldKey, const std::string& newKey)
-    {
-        auto oldValue = std::move(list.at(oldKey));
-        list.erase(oldKey);
-        list[newKey] = std::move(oldValue);
-    }
+    /// \brief mimetype
+    std::string getMimeType() const { return mimeType; }
+    void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+
+    /// \brief transcoding profile name
+    std::string getTranscoderName() const { return transcoder; }
+    void setTranscoderName(const std::string& transcoder) { this->transcoder = transcoder; }
+
+    /// \brief client flags
+    int getClientFlags() const { return clientFlags; }
+    void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
+
+    /// \brief source dlna profile
+    std::string getSourceProfile() const { return sourceProf; }
+    void setSourceProfile(const std::string& dlna) { this->sourceProf = dlna; }
+
+    /// \brief transcoder
+    void setTranscodingProfile(const std::shared_ptr<TranscodingProfile>& profile) { this->transcodingProfile = profile; }
+    std::shared_ptr<TranscodingProfile> getTranscodingProfile() const { return transcodingProfile; }
 
 protected:
-    // outer dictionary is keyed by the source mimetype, inner dictionary by
-    // profile name; this whole construction is necessary to allow to transcode
-    // to the same output format but vary things like resolution, bitrate, etc.
-    std::map<std::string, std::shared_ptr<TranscodingProfileMap>> list;
+    std::string mimeType;
+    std::string transcoder;
+    std::string sourceProf;
+    int clientFlags { 0 };
+    std::shared_ptr<TranscodingProfile> transcodingProfile;
+};
+
+/// \brief this class allows access to available transcoding profiles.
+class TranscodingProfileList {
+public:
+    void add(const std::shared_ptr<TranscodingFilter>& filter) { filterList.push_back(filter); }
+
+    const std::vector<std::shared_ptr<TranscodingFilter>>& getFilterList() const { return filterList; }
+    std::shared_ptr<TranscodingProfile> getByName(const std::string& name, bool getAll = false) const;
+    std::size_t size() const { return filterList.size(); }
+
+protected:
+    std::vector<std::shared_ptr<TranscodingFilter>> filterList;
 };
 
 #endif //__TRANSCODING_H__

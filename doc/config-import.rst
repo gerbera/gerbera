@@ -962,7 +962,7 @@ This section holds the content type to dlnaprofile mappings.
 * Optional
 
 Specifies a mapping from a certain content type to a dlna profile in the Content Directory. The values of **from** and **to**
-attributes are case sensitive. There are profiles for special codecs which can be access by the pattern _<content-type>-<video-codec>-<audio-codec>_.
+attributes are case sensitive. There are profiles for special codecs which can be access by the pattern ``<content-type>-<video-codec>-<audio-codec>``.
 Video and audio codecs can be seen in the resources properties the web UI.
 
 

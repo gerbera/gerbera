@@ -1164,13 +1164,23 @@
 				},
 				{
 					"item": "/transcoding/mimetype-profile-mappings/transcode",
-					"caption": "Mimetype to Profile",
+					"caption": "Transcoding Filters",
 					"type": "List",
 					"editable": false,
 					"children": [
 						{
 							"item": "/transcoding/mimetype-profile-mappings/transcode/attribute::mimetype",
 							"caption": "Mimetype",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/mimetype-profile-mappings/transcode/attribute::source-profile",
+							"caption": "Source Profile",
+							"editable": true
+						},
+						{
+							"item": "/transcoding/mimetype-profile-mappings/transcode/attribute::client-flags",
+							"caption": "Client Flags",
 							"editable": true
 						},
 						{

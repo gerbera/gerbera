@@ -96,6 +96,9 @@ public:
     /// \brief convert xml tree to string
     static std::string printXml(const pugi::xml_node& entry, const char* indent = PUGIXML_TEXT("\t"), int flags = pugi::format_default);
 
+    std::string getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res);
+    std::string getDLNATransferHeader(const std::string& mimeType);
+
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
@@ -107,6 +110,8 @@ protected:
     std::string entrySeparator;
     bool multiValue {};
     std::map<std::string, std::string> ctMappings;
+    std::map<std::string, std::string> profMappings;
+    std::map<std::string, std::string> transferMappings;
 
     /// \brief Holds a part of path and bool which says if we need to append the resource
     struct PathBase {
@@ -125,6 +130,6 @@ protected:
     static std::string renderExtension(const std::string& contentType, const fs::path& location);
     static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
     void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
-    std::string dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType);
+    std::string dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted = true);
 };
 #endif // __UPNP_XML_H__
