@@ -275,8 +275,4 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
-std::string getDLNAprofileString(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
-std::string getDLNAContentHeader(const std::shared_ptr<Config>& config, const std::string& contentType, const std::string& vCodec, const std::string& aCodec);
-std::string getDLNATransferHeader([[maybe_unused]] const std::shared_ptr<Config>& config, const std::string& mimeType);
-
 #endif // __TOOLS_H__

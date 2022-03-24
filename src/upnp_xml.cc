@@ -58,6 +58,8 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     multiValue = config->getBoolOption(CFG_UPNP_MULTI_VALUES_ENABLED);
     ctMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    profMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    transferMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
@@ -494,10 +496,24 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     return {};
 }
 
-std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType)
+std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res)
 {
-    std::string dlnaProfile = res->getOption("dlnaProfile");
-    if (contentType == CONTENT_TYPE_JPG) {
+    std::string contentParameter = dlnaProfileString(res, contentType);
+    return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
+        UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
+        UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
+        UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
+}
+
+std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType)
+{
+    return getPropertyMapValue(transferMappings, mimeType);
+}
+
+std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted)
+{
+    std::string dlnaProfile = res ? res->getOption("dlnaProfile") : "";
+    if (contentType == CONTENT_TYPE_JPG && res) {
         auto resAttrs = res->getAttributes();
         std::string resolution = getValueOrDefault(resAttrs, MetadataHandler::getResAttrName(R_RESOLUTION));
         auto [x, y] = checkResolution(resolution);
@@ -512,8 +528,15 @@ std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>
                 return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_LRG);
         }
     }
+    if (dlnaProfile.empty() && res) {
+        dlnaProfile = getValueOrDefault(profMappings, fmt::format("{}-{}-{}", contentType, res->getAttribute(R_VIDEOCODEC), res->getAttribute(R_AUDIOCODEC)), "");
+    }
+    if (dlnaProfile.empty())
+        dlnaProfile = getValueOrDefault(profMappings, contentType, "");
     /* handle audio/video content */
-    return dlnaProfile.empty() ? getDLNAprofileString(config, contentType, res->getAttribute(R_VIDEOCODEC), res->getAttribute(R_AUDIOCODEC)) : fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
+    if (formatted && !dlnaProfile.empty())
+        return fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
+    return dlnaProfile;
 }
 
 std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
@@ -546,17 +569,36 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     // TODO: allow transcoding for URLs
     // now get the profile
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
-    auto tpMt = tlist->get(item->getMimeType());
-    if (tpMt) {
-        for (auto&& [key, tp] : *tpMt) {
-            if (!tp)
+    auto filterList = tlist->getFilterList();
+    if (!filterList.empty()) {
+        auto mainResource = item->getResource(0);
+        std::string ct = getValueOrDefault(ctMappings, item->getMimeType());
+        auto sourceProfile = dlnaProfileString(mainResource, ct, false);
+        for (auto&& filter : filterList) {
+            if (!filter)
                 throw_std_runtime_error("Invalid profile encountered");
             // check for client profile prop and filter if no match
-            if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0)
+            if (!filter->getSourceProfile().empty() && filter->getSourceProfile() != sourceProfile) {
                 continue;
-            std::string ct = getValueOrDefault(ctMappings, item->getMimeType());
+            }
+            // check for client profile prop and filter if no match
+            if (quirks && filter->getClientFlags() > 0 && quirks->checkFlags(filter->getClientFlags()) == 0) {
+                continue;
+            }
+            // check for transcoding profile
+            if (filter && !filter->getTranscodingProfile())
+                continue;
+
+            auto tp = filter->getTranscodingProfile();
+            // check for transcoding profile
+            if (!tp->isEnabled())
+                continue;
+            // check for client profile prop and filter if no match
+            if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0) {
+                continue;
+            }
             if (ct == CONTENT_TYPE_OGG) {
-                if (((item->getFlag(OBJECT_FLAG_OGG_THEORA)) && (!tp->isTheora())) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && (tp->isTheora()))) {
+                if ((item->getFlag(OBJECT_FLAG_OGG_THEORA) && !tp->isTheora()) || !item->getFlag(OBJECT_FLAG_OGG_THEORA && tp->isTheora())) {
                     continue;
                 }
             } else if (ct == CONTENT_TYPE_AVI) {
@@ -567,7 +609,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
                 if (fccMode != FCC_None) {
-                    std::string currentFcc = item->getResource(0)->getOption(RESOURCE_OPTION_FOURCC);
+                    std::string currentFcc = mainResource->getOption(RESOURCE_OPTION_FOURCC);
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
                     if (currentFcc.empty()) {
@@ -594,21 +636,23 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             tRes->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
             // after transcoding resource was added we can not rely on
             // index 0, so we will make sure the ogg option is there
-            tRes->addOption(CONTENT_TYPE_OGG, item->getResource(0)->getOption(CONTENT_TYPE_OGG));
+            tRes->addOption(CONTENT_TYPE_OGG, mainResource->getOption(CONTENT_TYPE_OGG));
             tRes->addParameter(URL_PARAM_TRANSCODE, URL_VALUE_TRANSCODE);
 
             std::string targetMimeType = tp->getTargetMimeType();
 
-            if (!tp->isThumbnail()) {
+            if (tp->isThumbnail()) {
+                tRes->addOption(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
+            } else {
                 // duration should be the same for transcoded media, so we can
                 // take the value from the original resource
-                std::string duration = item->getResource(0)->getAttribute(R_DURATION);
+                std::string duration = mainResource->getAttribute(R_DURATION);
                 if (!duration.empty())
                     tRes->addAttribute(R_DURATION, duration);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
-                    std::string frequency = item->getResource(0)->getAttribute(R_SAMPLEFREQUENCY);
+                    std::string frequency = mainResource->getAttribute(R_SAMPLEFREQUENCY);
                     if (!frequency.empty()) {
                         tRes->addAttribute(R_SAMPLEFREQUENCY, frequency);
                         targetMimeType.append(fmt::format(";rate={}", frequency));
@@ -620,7 +664,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
 
                 int chan = tp->getNumChannels();
                 if (chan == SOURCE) {
-                    std::string nchannels = item->getResource(0)->getAttribute(R_NRAUDIOCHANNELS);
+                    std::string nchannels = mainResource->getAttribute(R_NRAUDIOCHANNELS);
                     if (!nchannels.empty()) {
                         tRes->addAttribute(R_NRAUDIOCHANNELS, nchannels);
                         targetMimeType.append(fmt::format(";channels={}", nchannels));
@@ -633,13 +677,10 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
 
             tRes->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(targetMimeType));
 
-            if (tp->isThumbnail())
-                tRes->addOption(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
-
             tRes->mergeAttributes(tp->getAttributes());
 
-            if (!tp->dlnaProfile().empty())
-                tRes->addOption("dlnaProfile", tp->dlnaProfile());
+            if (!tp->getDlnaProfile().empty())
+                tRes->addOption("dlnaProfile", tp->getDlnaProfile());
 
             if (tp->hideOriginalResource())
                 hideOriginalResource = true;

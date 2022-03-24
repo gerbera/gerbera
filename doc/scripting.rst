@@ -83,7 +83,7 @@ Then the script is invoked.
 .. Note::
 
     In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
-    ffect.
+    effect.
 
 The script is only triggered when new objects are added to the database, also note that the script
 does not modify any objects that already exist in the database - it only processes new objects that are being added.

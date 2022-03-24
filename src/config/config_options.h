@@ -247,11 +247,6 @@ public:
         return option;
     }
 
-    void setKey(const std::string& oldKey, const std::string& newKey)
-    {
-        option->setKey(oldKey, newKey);
-    }
-
 protected:
     std::shared_ptr<TranscodingProfileList> option;
 };

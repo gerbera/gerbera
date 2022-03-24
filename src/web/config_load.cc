@@ -315,28 +315,35 @@ void Web::ConfigLoad::process()
     cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
-    std::map<std::string, int> profiles;
-    for (auto&& [key, val] : transcoding->getList()) {
-        for (auto&& [a, name] : *val) {
-            auto item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
-            setValue(item, key);
+    std::map<std::string, std::shared_ptr<TranscodingProfile>> profiles;
+    for (auto&& filter : transcoding->getFilterList()) {
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
+        setValue(item, filter->getMimeType());
 
-            item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_PROF_MAP, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
-            setValue(item, name->getName());
-            profiles.emplace(name->getName(), pr);
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
+        setValue(item, filter->getTranscoderName());
 
-            pr++;
-        }
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA, cs);
+        setValue(item, filter->getSourceProfile());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, cs);
+        setValue(item, ClientConfig::mapFlags(filter->getClientFlags()));
+
+        if (filter->getTranscodingProfile())
+            profiles[filter->getTranscodingProfile()->getName()] = filter->getTranscodingProfile();
+
+        pr++;
     }
 
     pr = 0;
-    for (auto&& [key, val] : profiles) {
-        auto entry = transcoding->getByName(key, true);
+    for (auto&& [name, entry] : profiles) {
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
-        setValue(item, entry->getName());
+        setValue(item, name);
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
@@ -344,11 +351,15 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED);
-        setValue(item, entry->getEnabled());
+        setValue(item, entry->isEnabled());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
         setValue(item, (entry->getType() == TR_External ? "external" : "none"));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
+        setValue(item, entry->getDlnaProfile());
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE);

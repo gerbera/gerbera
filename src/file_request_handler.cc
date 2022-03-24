@@ -159,7 +159,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         // Generate DNLA Headers
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        std::string dlnaContentHeader = getDLNAContentHeader(config, getValueOrDefault(mappings, mimeType), resource ? resource->getAttribute(R_VIDEOCODEC) : "", resource ? resource->getAttribute(R_AUDIOCODEC) : "");
+        std::string dlnaContentHeader = xmlBuilder->getDLNAContentHeader(getValueOrDefault(mappings, mimeType), resource);
         if (!dlnaContentHeader.empty()) {
             headers.addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
         }
@@ -168,7 +168,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (mimeType.empty() && item)
         mimeType = item->getMimeType();
 
-    std::string dlnaTransferHeader = getDLNATransferHeader(config, mimeType);
+    std::string dlnaTransferHeader = xmlBuilder->getDLNATransferHeader(mimeType);
     if (!dlnaTransferHeader.empty()) {
         headers.addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }

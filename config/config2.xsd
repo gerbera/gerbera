@@ -971,6 +971,8 @@
     <xs:element name="transcode">
         <xs:complexType>
             <xs:attribute name="mimetype" type="xs:string" use="required"/>
+            <xs:attribute name="source-profile" type="xs:string"/>
+            <xs:attribute name="client-flags" type="xs:string"/>
             <xs:attribute name="using" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
@@ -1012,15 +1014,10 @@
     </xs:element>
 
     <xs:element name="dlna-profile" type="xs:string"/>
-
     <xs:element name="mimetype" type="xs:string"/>
-
     <xs:element name="accept-url" type="boolean" default="yes"/>
-
     <xs:element name="first-resource" type="boolean" default="no"/>
-
     <xs:element name="hide-original-resource" type="boolean" default="no"/>
-
     <xs:element name="accept-ogg-theora" type="boolean" default="no"/>
 
     <xs:element name="agent">
@@ -1042,7 +1039,6 @@
     </xs:element>
 
     <xs:element name="resolution" type="xs:string"/>
-
     <xs:element name="thumbnail" type="boolean"/>
 
     <xs:element name="environ">
