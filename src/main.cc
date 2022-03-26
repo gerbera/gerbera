@@ -186,6 +186,7 @@ int main(int argc, char** argv, char** envp)
         ("v,version", "Print version info and exit") //
         ("h,help", "Print this help and exit") //
         ("create-config", "Print a default config.xml file and exit") //
+        ("check-config", "Check config.xml file and exit") //
         ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
         ;
 
@@ -478,6 +479,9 @@ int main(int argc, char** argv, char** envp)
                 ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
+            if (opts.count("check-config") > 0) {
+                std::exit(EXIT_SUCCESS);
+            }
             portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());

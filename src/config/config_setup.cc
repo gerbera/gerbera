@@ -173,31 +173,42 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
     return !notEmpty || !pathValue.empty();
 }
 
-bool ConfigPathSetup::checkAgentPath(std::string& optValue)
+bool ConfigPathSetup::checkExecutable(std::string& optValue)
 {
     fs::path tmpPath;
     if (fs::path(optValue).is_absolute()) {
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
         if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
-            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\"", optValue);
-            return false;
+            log_warning("Error in configuration, could not find command \"{}\"", optValue);
+            return !mustExist;
         }
         tmpPath = optValue;
     } else {
         tmpPath = findInPath(optValue);
         if (tmpPath.empty()) {
-            log_error("Error in configuration, transcoding profile: could not find transcoding command \"{}\" in $PATH", optValue);
-            return false;
+            log_warning("Error in configuration, could not find  command \"{}\" in $PATH", optValue);
+            return !mustExist;
         }
     }
 
     int err = 0;
     if (!isExecutable(tmpPath, &err)) {
-        log_error("Error in configuration, transcoding profile: transcoder {} is not executable: {}", optValue, std::strerror(err));
-        return false;
+        log_warning("Error in configuration, file {} is not executable: {}", optValue, std::strerror(err));
+        return !mustExist;
     }
     return true;
+}
+
+std::string ConfigPathSetup::getXmlContent(const pugi::xml_node& root)
+{
+    auto optValue = ConfigSetup::getXmlContent(root, true);
+    if (isExe) {
+        if (!checkExecutable(optValue)) {
+            throw_std_runtime_error("Invalid {} file is not an executable '{}'", xpath, optValue);
+        }
+    }
+    return optValue;
 }
 
 /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
@@ -256,13 +267,16 @@ void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* ar
         if (arguments->find("resolveEmpty") != arguments->end()) {
             resolveEmpty = arguments->at("resolveEmpty") == "true";
         }
+        if (arguments->find("isExe") != arguments->end()) {
+            isExe = arguments->at("isExe") == "true";
+        }
     }
 }
 
 void ConfigPathSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     loadArguments(arguments);
-    auto optValue = getXmlContent(root, true);
+    auto optValue = ConfigSetup::getXmlContent(root, true);
     newOption(optValue);
     setOption(config);
 }
@@ -277,7 +291,11 @@ void ConfigPathSetup::makeOption(std::string optValue, const std::shared_ptr<Con
 std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
-    if (!checkPathValue(optValue, pathValue)) {
+    if (isExe) {
+        if (!checkExecutable(optValue)) {
+            throw_std_runtime_error("Invalid {} file is not an executable '{}'", xpath, optValue);
+        }
+    } else if (!checkPathValue(optValue, pathValue)) {
         throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue);
     }
     optionValue = std::make_shared<Option>(pathValue);
@@ -1143,7 +1161,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
 
         // read agent options
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
-        prof->setCommand(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->getXmlContent(sub));
+        {
+            auto cs = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+            cs->setMustExist(prof->isEnabled());
+            prof->setCommand(cs->getXmlContent(sub));
+        }
         prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON);

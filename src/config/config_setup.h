@@ -271,6 +271,7 @@ protected:
     bool isFile = false;
     bool mustExist = false;
     bool notEmpty = false;
+    bool isExe = false;
     bool resolveEmpty = true;
 
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
@@ -280,15 +281,17 @@ protected:
     fs::path resolvePath(fs::path path) const;
 
     void loadArguments(const std::map<std::string, std::string>* arguments = nullptr);
+    bool checkExecutable(std::string& optValue);
 
 public:
     static fs::path Home;
 
-    ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false)
+    ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false, bool isExe = false)
         : ConfigSetup(option, xpath, help, false, defaultValue)
         , isFile(isFile)
         , mustExist(mustExist)
         , notEmpty(notEmpty)
+        , isExe(isExe)
     {
     }
 
@@ -299,10 +302,11 @@ public:
     void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(std::string& optValue);
+    std::string getXmlContent(const pugi::xml_node& root);
 
     bool checkPathValue(std::string& optValue, std::string& pathValue) const;
 
-    static bool checkAgentPath(std::string& optValue);
+    void setMustExist(bool mustExist) { this->mustExist = mustExist; }
 };
 
 class ConfigIntSetup : public ConfigSetup {
