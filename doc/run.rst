@@ -298,6 +298,16 @@ Debug Output
 
 Enable debug log output.
 
+Check Config
+------------
+
+::
+
+    --check-config
+
+Check the current configuration and exit. Useful to check new settings before running gerbera as a service.
+Best use with --debug in case of problems.
+
 Compile Info
 ------------
 

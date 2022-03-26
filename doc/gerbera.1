@@ -44,6 +44,8 @@ gerbera \- UPnP MediaServer
 ] [
 \fB--create-config\fR
 ] [
+\fB--check-config\fR
+] [
 \fB-v|--version\fR
 ] [
 \fB-h|--help\fR
@@ -116,8 +118,14 @@ Enable debug log output.
 Daemonize after startup.
 .TP 
 \*(T<\fB\-\-compile\-info\fR\*(T> 
-Print the core configuration (defaults for used libraries and enabled features) and exit.
-Copy the output to your config file.
+Print the compilation configuration (defaults for used libraries and enabled features) and exit.
+.TP 
+\*(T<\fB\-\-create\-config\fR\*(T> 
+Output the default configuration to stdout and exit.
+Copy the output to your config.xml and adjust to your needs.
+.TP 
+\*(T<\fB\-\-check\-config\fR\*(T> 
+Check the current configuration before running the service and exit. Helpful in conjunction with --debug.
 .TP 
 \*(T<\fB\-\-version\fR\*(T> 
 Print version information and exit.
