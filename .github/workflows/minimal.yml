@@ -46,6 +46,7 @@ jobs:
             -DWITH_LASTFM=NO \
             -DWITH_MAGIC=NO \
             -DWITH_MATROSKA=NO \
+            -DWITH_WAVPACK=NO \
             -DWITH_MYSQL=NO \
             -DWITH_SYSTEMD=NO \
             -DWITH_TAGLIB=NO \

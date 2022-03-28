@@ -47,6 +47,8 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | taglib_             | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| wavpack_            | Optional      | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libmagic            | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libmatroska_        | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
@@ -65,7 +67,7 @@ In order to compile Gerbera you will have to install the following packages:
 | inotify             | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 
-.. _duktape: http://duktape.org
+.. _duktape: https://duktape.org
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
@@ -75,7 +77,8 @@ In order to compile Gerbera you will have to install the following packages:
 .. _pugixml: https://github.com/zeux/pugixml
 .. _libpupnp: https://github.com/pupnp/pupnp
 .. _spdlog: https://github.com/gabime/spdlog
-.. _taglib: http://taglib.org/
+.. _taglib: https://taglib.org/
+.. _wavpack: https://www.wavpack.com/
 
 Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version of the package.
 Make sure no other version of the development package is installed.

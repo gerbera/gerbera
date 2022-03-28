@@ -58,6 +58,7 @@ class IOHandler;
 #define CH_MATROSKA 9
 #define CH_SUBTITLE 10
 #define CH_CONTAINERART 11
+#define CH_WAVPACK 12
 #define CH_RESOURCE 20
 
 #define CONTENT_TYPE_AIFF "aiff"

@@ -117,7 +117,7 @@ public:
     std::string getOption(const std::string& name) const;
     bool isMetaResource(const char* rct, int ht = -1) const
     {
-        return ((handlerType == CH_ID3 || handlerType == CH_MP4 || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_CONTAINERART || handlerType == ht) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == CH_EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
+        return ((handlerType == CH_ID3 || handlerType == CH_MP4 || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_CONTAINERART || handlerType == CH_WAVPACK || handlerType == ht) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == CH_EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
     }
 
     bool equals(const std::shared_ptr<CdsResource>& other) const;
