@@ -16,6 +16,7 @@ RUN apk add --no-cache  \
     libebml-dev \
     libexif-dev \
     libmatroska-dev \
+    wavpack wavpack-dev \
     make \
     mariadb-connector-c-dev \
     pkgconf \
@@ -49,6 +50,7 @@ RUN cmake -S . -B build \
         -DWITH_TAGLIB=YES \
         -DWITH_AVCODEC=YES \
         -DWITH_FFMPEGTHUMBNAILER=YES \
+        -DWITH_WAVPACK=YES \
         -DWITH_EXIF=YES \
         -DWITH_LASTFM=NO \
         -DWITH_SYSTEMD=NO \
@@ -67,6 +69,7 @@ RUN apk add --no-cache \
     libebml \
     libexif \
     libmatroska \
+    wavpack \
     mariadb-connector-c \
     pugixml \
     spdlog \
