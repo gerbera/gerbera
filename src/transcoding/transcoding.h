@@ -36,6 +36,7 @@
 #include <map>
 #include <vector>
 
+#include "cds_resource.h"
 #include "util/grb_fs.h"
 
 #define SOURCE (-1)
@@ -128,11 +129,10 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void setAttribute(const std::string& name, const std::string& value);
+    void setAttributeOverride(CdsResource::Attribute, const std::string& value);
+    std::string getAttributeOverride(CdsResource::Attribute attribute) const;
 
-    const std::map<std::string, std::string>& getAttributes() const;
-
-    std::string getAttribute(const std::string& name) const;
+    std::map<CdsResource::Attribute, std::string> getAttributeOverrides() const;
 
     /// \brief Override for theora content.
     ///
@@ -209,7 +209,7 @@ protected:
     transcoding_type_t tr_type;
     int number_of_channels { SOURCE };
     int sample_frequency { SOURCE };
-    std::map<std::string, std::string> attributes;
+    std::map<CdsResource::Attribute, std::string> attributeOverrides;
     std::map<std::string, std::string> environment;
     std::vector<std::string> fourcc_list;
     avi_fourcc_listmode_t fourcc_mode { FCC_None };

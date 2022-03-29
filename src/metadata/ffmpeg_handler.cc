@@ -161,7 +161,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     if (pFormatCtx->duration > 0) {
         auto duration = millisecondsToHMSF(pFormatCtx->duration / (AV_TIME_BASE / 1000));
         log_debug("Added duration: {}", duration);
-        resource->addAttribute(R_DURATION, duration);
+        resource->addAttribute(CdsResource::Attribute::DURATION, duration);
     }
 
     // bitrate
@@ -170,7 +170,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         auto bitrate = pFormatCtx->bit_rate / 8;
         log_debug("Added bitrate: {} kb/s", bitrate);
-        resource->addAttribute(R_BITRATE, fmt::to_string(bitrate));
+        resource->addAttribute(CdsResource::Attribute::BITRATE, fmt::to_string(bitrate));
     }
 
     // video resolution, audio sampling rate, nr of audio channels
@@ -181,7 +181,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 
         if (st && !videoSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO) {
             auto codecId = as_codecpar(st)->codec_id;
-            resource2->addAttribute(R_VIDEOCODEC, avcodec_get_name(codecId));
+            resource2->addAttribute(CdsResource::Attribute::VIDEOCODEC, avcodec_get_name(codecId));
 
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
@@ -201,13 +201,13 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
-                resource2->addAttribute(R_RESOLUTION, resolution);
+                resource2->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
                 videoSet = true;
             }
         }
         if (st && !audioSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO) {
             auto codecId = as_codecpar(st)->codec_id;
-            resource->addAttribute(R_AUDIOCODEC, avcodec_get_name(codecId));
+            resource->addAttribute(CdsResource::Attribute::AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
 
             if (as_codecpar(st)->sample_rate > 0) {
@@ -221,13 +221,13 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 
                 sampleFreq *= bitsPerSample > 0 ? bitsPerSample : 1;
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
-                resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
+                resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioSet = true;
 
                 int audioCh = as_codecpar(st)->channels;
                 if (audioCh > 0) {
                     log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
-                    resource->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(audioCh));
+                    resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
                 }
             }
         }

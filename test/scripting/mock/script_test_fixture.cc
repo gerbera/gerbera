@@ -152,28 +152,28 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string
 
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
 {
-    for (auto&& entry : mt_keys) {
-        duk_push_string(ctx, entry.second);
-        auto sym = std::find_if(mt_names.begin(), mt_names.end(), [=](auto&& n) { return n.first == entry.first; });
-        if (sym != mt_names.end())
-            duk_put_global_string(ctx, sym->second.data());
+
+    for (auto&&[meta,str]: mt_keys) {
+        duk_push_lstring(ctx, str.data(), str.size());
+        auto sym = mt_names.at(meta);
+        duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
-    for (auto&& entry : res_keys) {
-        duk_push_string(ctx, entry.second);
+    for (auto&& entry : res_names) {
+        duk_push_string(ctx, entry.second.data());
         auto sym = std::find_if(res_names.begin(), res_names.end(), [=](auto&& n) { return n.first == entry.first; });
         if (sym != res_names.end())
-            duk_put_global_string(ctx, sym->second);
+            duk_put_global_string(ctx, sym->second.data());
     }
 
     for (auto&& [field, sym] : ot_names) {
         duk_push_int(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
     for (auto&& [field, sym] : upnp_classes) {
-        duk_push_string(ctx, field);
-        duk_put_global_string(ctx, sym);
+        duk_push_lstring(ctx, field.data(), field.size());
+        duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
     if (config.empty()) {

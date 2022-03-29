@@ -31,26 +31,26 @@
 #include "cds_objects.h"
 #include "metadata/metadata_handler.h"
 
-static constexpr auto res_names = std::array<std::pair<resource_attributes_t, const char*>, R_MAX> {
-    std::pair(R_SIZE, "R_SIZE"),
-    std::pair(R_DURATION, "R_DURATION"),
-    std::pair(R_BITRATE, "R_BITRATE"),
-    std::pair(R_SAMPLEFREQUENCY, "R_SAMPLEFREQUENCY"),
-    std::pair(R_NRAUDIOCHANNELS, "R_NRAUDIOCHANNELS"),
-    std::pair(R_RESOLUTION, "R_RESOLUTION"),
-    std::pair(R_COLORDEPTH, "R_COLORDEPTH"),
-    std::pair(R_PROTOCOLINFO, "R_PROTOCOLINFO"),
-    std::pair(R_RESOURCE_FILE, "R_RESOURCE_FILE"),
-    std::pair(R_BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE"),
-    std::pair(R_TYPE, "R_TYPE"),
-    std::pair(R_FANART_OBJ_ID, "R_FANART_OBJ_ID"),
-    std::pair(R_FANART_RES_ID, "R_FANART_RES_ID"),
-    std::pair(R_LANGUAGE, "R_LANGUAGE"),
-    std::pair(R_AUDIOCODEC, "R_AUDIOCODEC"),
-    std::pair(R_VIDEOCODEC, "R_VIDEOCODEC"),
+const static auto res_names = std::map<CdsResource::Attribute, std::string_view> {
+    std::pair(CdsResource::Attribute::SIZE, "R_SIZE"),
+    std::pair(CdsResource::Attribute::DURATION, "R_DURATION"),
+    std::pair(CdsResource::Attribute::BITRATE, "R_BITRATE"),
+    std::pair(CdsResource::Attribute::SAMPLEFREQUENCY, "R_SAMPLEFREQUENCY"),
+    std::pair(CdsResource::Attribute::NRAUDIOCHANNELS, "R_NRAUDIOCHANNELS"),
+    std::pair(CdsResource::Attribute::RESOLUTION, "R_RESOLUTION"),
+    std::pair(CdsResource::Attribute::COLORDEPTH, "R_COLORDEPTH"),
+    std::pair(CdsResource::Attribute::PROTOCOLINFO, "R_PROTOCOLINFO"),
+    std::pair(CdsResource::Attribute::RESOURCE_FILE, "R_RESOURCE_FILE"),
+    std::pair(CdsResource::Attribute::BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE"),
+    std::pair(CdsResource::Attribute::TYPE, "R_TYPE"),
+    std::pair(CdsResource::Attribute::FANART_OBJ_ID, "R_FANART_OBJ_ID"),
+    std::pair(CdsResource::Attribute::FANART_RES_ID, "R_FANART_RES_ID"),
+    std::pair(CdsResource::Attribute::LANGUAGE, "R_LANGUAGE"),
+    std::pair(CdsResource::Attribute::AUDIOCODEC, "R_AUDIOCODEC"),
+    std::pair(CdsResource::Attribute::VIDEOCODEC, "R_VIDEOCODEC"),
 };
 
-static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, std::string_view>, M_MAX> {
+const static auto mt_names = std::map<metadata_fields_t, std::string_view> {
     std::pair(M_TITLE, "M_TITLE"),
     std::pair(M_ARTIST, "M_ARTIST"),
     std::pair(M_ALBUM, "M_ALBUM"),
@@ -78,29 +78,29 @@ static constexpr auto mt_names = std::array<std::pair<metadata_fields_t, std::st
     std::pair(M_CONTENT_CLASS, "M_CONTENT_CLASS"),
 };
 
-static constexpr auto ot_names = std::array {
-    std::pair(OBJECT_TYPE_CONTAINER, "OBJECT_TYPE_CONTAINER"),
-    std::pair(OBJECT_TYPE_ITEM, "OBJECT_TYPE_ITEM"),
-    std::pair(OBJECT_TYPE_ITEM_EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL"),
+const static auto ot_names = std::map<int, std::string_view> {
+    { OBJECT_TYPE_CONTAINER, "OBJECT_TYPE_CONTAINER" },
+    { OBJECT_TYPE_ITEM, "OBJECT_TYPE_ITEM" },
+    { OBJECT_TYPE_ITEM_EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL" },
 };
 
-static constexpr auto upnp_classes = std::array {
-    std::pair(UPNP_CLASS_MUSIC_ALBUM, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM"),
-    std::pair(UPNP_CLASS_MUSIC_ARTIST, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST"),
-    std::pair(UPNP_CLASS_MUSIC_GENRE, "UPNP_CLASS_CONTAINER_MUSIC_GENRE"),
-    std::pair(UPNP_CLASS_MUSIC_COMPOSER, "UPNP_CLASS_CONTAINER_MUSIC_COMPOSER"),
-    std::pair(UPNP_CLASS_MUSIC_CONDUCTOR, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR"),
-    std::pair(UPNP_CLASS_MUSIC_ORCHESTRA, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA"),
-    std::pair(UPNP_CLASS_CONTAINER, "UPNP_CLASS_CONTAINER"),
-    std::pair(UPNP_CLASS_ITEM, "UPNP_CLASS_ITEM"),
-    std::pair(UPNP_CLASS_AUDIO_ITEM, "UPNP_CLASS_AUDIO_ITEM"),
-    std::pair(UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_VIDEO_ITEM"),
-    std::pair(UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_IMAGE_ITEM"),
-    std::pair(UPNP_CLASS_PLAYLIST_ITEM, "UPNP_CLASS_PLAYLIST_ITEM"),
-    std::pair(UPNP_CLASS_MUSIC_TRACK, "UPNP_CLASS_ITEM_MUSIC_TRACK"),
-    std::pair(UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_CONTAINER_ITEM_VIDEO"),
-    std::pair(UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE"),
-    std::pair(UPNP_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER"),
+const static auto upnp_classes = std::map<const std::string_view, const std::string_view> {
+    { UPNP_CLASS_MUSIC_ALBUM, "UPNP_CLASS_CONTAINER_MUSIC_ALBUM" },
+    { UPNP_CLASS_MUSIC_ARTIST, "UPNP_CLASS_CONTAINER_MUSIC_ARTIST" },
+    { UPNP_CLASS_MUSIC_GENRE, "UPNP_CLASS_CONTAINER_MUSIC_GENRE" },
+    { UPNP_CLASS_MUSIC_COMPOSER, "UPNP_CLASS_CONTAINER_MUSIC_COMPOSER" },
+    { UPNP_CLASS_MUSIC_CONDUCTOR, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR" },
+    { UPNP_CLASS_MUSIC_ORCHESTRA, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA" },
+    { UPNP_CLASS_CONTAINER, "UPNP_CLASS_CONTAINER" },
+    { UPNP_CLASS_ITEM, "UPNP_CLASS_ITEM" },
+    { UPNP_CLASS_AUDIO_ITEM, "UPNP_CLASS_AUDIO_ITEM" },
+    { UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_VIDEO_ITEM" },
+    { UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_IMAGE_ITEM" },
+    { UPNP_CLASS_PLAYLIST_ITEM, "UPNP_CLASS_PLAYLIST_ITEM" },
+    { UPNP_CLASS_MUSIC_TRACK, "UPNP_CLASS_ITEM_MUSIC_TRACK" },
+    { UPNP_CLASS_VIDEO_ITEM, "UPNP_CLASS_CONTAINER_ITEM_VIDEO" },
+    { UPNP_CLASS_IMAGE_ITEM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE" },
+    { UPNP_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER" },
 };
 
 #endif

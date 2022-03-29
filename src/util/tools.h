@@ -247,6 +247,7 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
     auto it = m.find(key);
     return (it == m.end()) ? defval : it->second;
 }
+
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 

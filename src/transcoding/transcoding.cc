@@ -53,23 +53,23 @@ void TranscodingProfile::setBufferOptions(std::size_t bs, std::size_t cs, std::s
     initial_fill_size = ifs;
 }
 
-void TranscodingProfile::setAttribute(const std::string& name, const std::string& value)
+void TranscodingProfile::setAttributeOverride(CdsResource::Attribute attribute, const std::string& value)
 {
-    attributes[name] = value;
+    attributeOverrides[attribute] = value;
 }
 
-const std::map<std::string, std::string>& TranscodingProfile::getAttributes() const
+std::string TranscodingProfile::getAttributeOverride(CdsResource::Attribute attribute) const
 {
-    return attributes;
-}
-
-std::string TranscodingProfile::getAttribute(const std::string& name) const
-{
-    auto it = attributes.find(name);
-    if (it != attributes.end()) {
+    auto it = attributeOverrides.find(attribute);
+    if (it != attributeOverrides.end()) {
         return it->second;
     }
     return {};
+}
+
+std::map<CdsResource::Attribute, std::string> TranscodingProfile::getAttributeOverrides() const
+{
+    return attributeOverrides;
 }
 
 void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, avi_fourcc_listmode_t mode)

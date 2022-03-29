@@ -266,7 +266,7 @@ void Web::EditLoad::process()
 
         if (obj->isExternalItem()) {
             auto protocol = item.append_child("protocol");
-            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(R_PROTOCOLINFO)).data();
+            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(CdsResource::Attribute::PROTOCOLINFO)).data();
             protocol.append_attribute("editable") = true;
         }
     }
