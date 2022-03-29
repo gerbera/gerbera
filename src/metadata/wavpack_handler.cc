@@ -30,7 +30,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
 
-static auto fileFormats = std::map<int, std::string_view> {
+static const auto fileFormats = std::map<int, std::string_view> {
     { WP_FORMAT_WAV, "WAV" },
     { WP_FORMAT_W64, "Wave64" },
     { WP_FORMAT_CAF, "CAF" },
@@ -38,7 +38,7 @@ static auto fileFormats = std::map<int, std::string_view> {
     { WP_FORMAT_DSF, "DSD" },
 };
 
-static auto metaTags = std::map<std::string_view, metadata_fields_t> {
+static const auto metaTags = std::map<std::string_view, metadata_fields_t> {
     { "Title", M_TITLE },
     { "Artist", M_ARTIST },
     { "AlbumArtist", M_ALBUMARTIST },
@@ -141,11 +141,11 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
 {
     auto resource = item->getResource(0);
     auto nrChannels = WavpackGetNumChannels(context);
-    resource->addAttribute(R_NRAUDIOCHANNELS, fmt::to_string(nrChannels));
+    resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(nrChannels));
     auto sampleRate = WavpackGetSampleRate(context);
-    resource->addAttribute(R_SAMPLEFREQUENCY, fmt::to_string(sampleRate));
+    resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleRate));
     auto bitsPerSample = WavpackGetBitsPerSample(context);
-    resource->addAttribute(R_BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
+    resource->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
     /*
     int WavpackGetFileFormat (WavpackContext *wpc);
         Return the file format specified in the call to WavpackSetFileInformation() when the file
@@ -158,9 +158,10 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
         - WP_FORMAT_DSF: Sony DSD format
     */
     auto fileFormat = WavpackGetFileFormat(context);
-    resource->addAttribute(R_VIDEOCODEC, fileFormats[fileFormat].data());
+    resource->addAttribute(CdsResource::Attribute::VIDEOCODEC, fileFormats.at(fileFormat).data()); // FixMe: Remove after config update for dlnaprofile
+    resource->addAttribute(CdsResource::Attribute::FORMAT, fileFormats.at(fileFormat).data());
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
-    resource->addAttribute(R_BITRATE, fmt::to_string(avgBitrate));
+    resource->addAttribute(CdsResource::Attribute::BITRATE, fmt::to_string(avgBitrate));
 }
 
 std::string WavPackHandler::getContentTypeFromByteVector(const char* data, int size) const
@@ -200,7 +201,7 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
                 if (artMimetype != MIMETYPE_DEFAULT) {
                     log_debug("Adding resource '{}'", renderProtocolInfo(artMimetype));
                     auto resource = std::make_shared<CdsResource>(CH_WAVPACK);
-                    resource->addAttribute(R_PROTOCOLINFO, renderProtocolInfo(artMimetype));
+                    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     resource->addOption(ALBUMART_OPTION, tag);
                     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
                     item->addResource(resource);
@@ -241,8 +242,8 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
                 }
             } else {
                 log_debug("Identified metadata '{}': {}", tag, value);
-                item->removeMetaData(metaTags[tag]); // wavpack tags overwrite existing values
-                item->addMetaData(metaTags[tag], value);
+                item->removeMetaData(metaTags.at(tag)); // wavpack tags overwrite existing values
+                item->addMetaData(metaTags.at(tag), value);
             }
         }
     }
@@ -275,9 +276,8 @@ std::unique_ptr<IOHandler> WavPackHandler::serveContent(const std::shared_ptr<Cd
     if (startswith(artTag, "Cover Art")) {
         log_debug("Found image '{}': {}", artTag, value);
         return std::make_unique<MemIOHandler>(value + strlen(value) + 1, size - strlen(value) - 1);
-    } else {
-        log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), artTag);
     }
+    log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), artTag);
 
     return {};
 }

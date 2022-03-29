@@ -2817,6 +2817,7 @@ void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
         auto&& resAttrib = CdsResource::getAttributeName(resAttrId);
         if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
             _exec(fmt::format(addColumnCmd, resAttrib));
+            log_info("'{}': Adding column '{}'", RESOURCE_TABLE, resAttrib);
             resourceAttributes.push_back(resAttrib);
             addedAttribute = true;
         }

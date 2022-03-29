@@ -62,6 +62,7 @@ public:
         LANGUAGE,
         AUDIOCODEC,
         VIDEOCODEC,
+        FORMAT,
         MAX
     };
 
@@ -134,6 +135,7 @@ public:
         case Attribute::FANART_RES_ID:
         case Attribute::BITS_PER_SAMPLE:
         case Attribute::TYPE:
+        case Attribute::FORMAT:
             return true;
         default:
             return false;
@@ -166,6 +168,7 @@ protected:
         { CdsResource::Attribute::LANGUAGE, "dc:language" },
         { CdsResource::Attribute::AUDIOCODEC, "sec:acodec" },
         { CdsResource::Attribute::VIDEOCODEC, "sec:vcodec" },
+        { CdsResource::Attribute::FORMAT, "format" },
         { CdsResource::Attribute::TYPE, "type" },
     };
 };
