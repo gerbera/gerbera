@@ -54,6 +54,9 @@ const initialize = () => {
     allLinks.click(Menu.click);
     allLinks.removeClass('disabled');
     $('#nav-home').click();
+    if(GerberaApp.serverConfig.friendlyName && GerberaApp.serverConfig.friendlyName !== "Gerbera") {
+      $('#server-name').text(GerberaApp.serverConfig.friendlyName);
+    }
     const version = $('#gerbera-version');
     if(GerberaApp.serverConfig.version) {
       version.children('span').text(GerberaApp.serverConfig.version);
