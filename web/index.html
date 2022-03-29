@@ -18,7 +18,10 @@
               aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <a id="nav-home" class="navbar-brand" data-gerbera-menu-cmd="HOME" title="Gerbera"><img src="assets/theme/gerbera-logo-white.png" class="d-inline-block align-top" alt="Gerbera Logo"></a>
+      <a id="nav-home" class="navbar-brand" data-gerbera-menu-cmd="HOME" title="Gerbera" href="#">
+        <img src="assets/theme/gerbera-logo-white.png" class="d-inline-block align-top" alt="Gerbera Logo">
+        <span class="d-inline-block align-middle pl-2 text-light" id="server-name"></span>
+      </a>
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul id="navbar" class="navbar-nav mr-auto">
           <li class="nav-item" style="display: none">
@@ -62,7 +65,7 @@
       <div class="row mx-2">
         <div class="col offset-md-2">
           <h2>Welcome to Gerbera</h2>
-          <p><a href="https://github.com/gerbera/gerbera">Gerbera</a> is an open source UPnP-AV media server.</p>
+          <p><a class="text-body" href="https://github.com/gerbera/gerbera">Gerbera</a> is an open source UPnP-AV media server.</p>
         </div>
       </div>
     </div>
@@ -73,7 +76,6 @@
           <p>Browse and import your multimedia files into Gerbera.</p>
         </a>
 
-
         <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
           <h4><i class="fa fa-files-o"></i> View indexed files</h4>
           <span>View, update and remove files from Gerbera.</span>
@@ -81,13 +83,14 @@
 
         <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
           <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
-          <span>Show clients detected by Gerbera and their profile details</span>
+          <span>Show clients detected by Gerbera and their profile details.</span>
         </a>
 
         <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
           <h4><i class="fa fa-sliders"></i> Edit Configuration</h4>
-          <span>Change settings for Gerbera</span>
+          <span>Change settings for Gerbera.</span>
         </a>
+
       </div>
       <div id="server-status" class="col-md-3">
         <h4>Server Status</h4>
