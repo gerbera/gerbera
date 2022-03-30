@@ -35,9 +35,6 @@
 #include "util/tools.h"
 #include "util/upnp_clients.h"
 
-static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
-static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
-
 void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
 {
     obj->setID(id);
@@ -101,28 +98,23 @@ void CdsObject::validate() const
         throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
-std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
+std::shared_ptr<CdsObject> CdsObject::createObject(CdsObject::Type type)
 {
-    if (IS_CDS_CONTAINER(objectType)) {
+    switch (type) {
+    case Type::CONTAINER:
         return std::make_shared<CdsContainer>();
-    }
-
-    if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
+    case Type::ITEM:
+        return std::make_shared<CdsItem>();
+    case Type::EXTERNAL_URL:
         return std::make_shared<CdsItemExternalURL>();
     }
-
-    if (isCdsItem(objectType)) {
-        return std::make_shared<CdsItem>();
-    }
-
-    throw_std_runtime_error("invalid object type: {}", objectType);
+    throw_std_runtime_error("invalid object type: {}", type);
 }
 
 /* CdsItem */
-
 CdsItem::CdsItem()
 {
-    objectType = OBJECT_TYPE_ITEM;
+    objectType = Type::ITEM;
     upnpClass = "object.item";
 }
 
@@ -171,7 +163,7 @@ void CdsItem::validate() const
 
 CdsItemExternalURL::CdsItemExternalURL()
 {
-    objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
+    objectType = Type::EXTERNAL_URL;
 
     upnpClass = UPNP_CLASS_ITEM;
 }
@@ -189,7 +181,7 @@ void CdsItemExternalURL::validate() const
 
 CdsContainer::CdsContainer()
 {
-    objectType = OBJECT_TYPE_CONTAINER;
+    objectType = Type::CONTAINER;
     upnpClass = UPNP_CLASS_CONTAINER;
 }
 
@@ -217,13 +209,15 @@ void CdsContainer::validate() const
 }
 */
 
-std::string_view CdsObject::mapObjectType(unsigned int type)
+std::string_view CdsObject::mapObjectType(Type type)
 {
-    if (IS_CDS_CONTAINER(type))
-        return STRING_OBJECT_TYPE_CONTAINER;
-    if (isCdsPureItem(type))
-        return STRING_OBJECT_TYPE_ITEM;
-    if (IS_CDS_ITEM_EXTERNAL_URL(type))
-        return STRING_OBJECT_TYPE_EXTERNAL_URL;
-    throw_std_runtime_error("illegal objectType: {}", type);
+    switch (type) {
+    case Type::CONTAINER:
+        return "container";
+    case Type::ITEM:
+        return "item";
+    case Type::EXTERNAL_URL:
+        return "external_url";
+    }
+    throw_std_runtime_error("Invalid object type: {}", type);
 }

@@ -195,7 +195,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
 
     /* initialize contstants */
     for (auto&& [field, sym] : ot_names) {
-        duk_push_int(ctx, field);
+        duk_push_int(ctx, static_cast<typename std::underlying_type<CdsObject::Type>::type>(field));
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 #ifdef ONLINE_SERVICES
@@ -446,7 +446,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         return nullptr;
     }
 
-    auto obj = CdsObject::createObject(objType);
+    auto obj = CdsObject::createObject(static_cast<CdsObject::Type>(objType));
 
     // CdsObject
     obj->setVirtual(true); // JS creates only virtual objects
@@ -700,7 +700,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     duk_push_object(ctx);
 
     // CdsObject
-    setIntProperty("objectType", obj->getObjectType());
+    setIntProperty("objectType", static_cast<typename std::underlying_type<CdsObject::Type>::type>(obj->getObjectType()));
 
     int id = obj->getID();
 

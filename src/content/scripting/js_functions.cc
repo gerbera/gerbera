@@ -160,8 +160,9 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
                 log_error("missing objectType property");
                 return 0;
             }
+            auto objType = static_cast<CdsObject::Type>(otype);
 
-            if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
+            if (objType != CdsObject::Type::EXTERNAL_URL) {
                 fs::path loc = self->getProperty("location");
                 std::error_code ec;
                 auto dirEnt = fs::directory_entry(loc, ec);

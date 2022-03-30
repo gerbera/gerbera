@@ -122,16 +122,18 @@ void Web::AddObject::process()
     bool allowFifo = false;
     std::error_code ec;
 
-    if (objType == STRING_OBJECT_TYPE_CONTAINER) {
-        this->addContainer(parentID);
-    } else if (objType == STRING_OBJECT_TYPE_ITEM) {
+    auto type = CdsObject::parseType(objType);
+
+    if (type == CdsObject::Type::CONTAINER) {
+        addContainer(parentID);
+    } else if (type == CdsObject::Type::ITEM) {
         if (location.empty())
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found {}", ec.message());
         obj = this->addItem(parentID, std::make_shared<CdsItem>());
         allowFifo = true;
-    } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
+    } else if (type == CdsObject::Type::EXTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
         obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(), true);
@@ -141,7 +143,7 @@ void Web::AddObject::process()
 
     if (obj) {
         obj->setVirtual(true);
-        if (objType == STRING_OBJECT_TYPE_ITEM) {
+        if (type == CdsObject::Type::ITEM) {
             content->addVirtualItem(obj, allowFifo);
         } else {
             content->addObject(obj, true);

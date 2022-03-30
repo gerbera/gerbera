@@ -42,7 +42,6 @@
 #define log_error SPDLOG_ERROR
 #define log_js SPDLOG_INFO
 
-#if FMT_VERSION >= 80100
 template <typename T>
 struct fmt::formatter<T, std::enable_if_t<std::is_enum_v<T>, char>>
     : formatter<std::underlying_type_t<T>> {
@@ -53,6 +52,5 @@ struct fmt::formatter<T, std::enable_if_t<std::is_enum_v<T>, char>>
             static_cast<std::underlying_type_t<T>>(value), ctx);
     }
 };
-#endif
 
 #endif // __LOGGER_H__

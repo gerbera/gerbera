@@ -167,7 +167,7 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
     }
 
     for (auto&& [field, sym] : ot_names) {
-        duk_push_int(ctx, field);
+        duk_push_int(ctx, static_cast<int>(field));
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 

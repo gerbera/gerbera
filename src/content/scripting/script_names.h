@@ -78,10 +78,10 @@ const static auto mt_names = std::map<metadata_fields_t, std::string_view> {
     std::pair(M_CONTENT_CLASS, "M_CONTENT_CLASS"),
 };
 
-const static auto ot_names = std::map<int, std::string_view> {
-    { OBJECT_TYPE_CONTAINER, "OBJECT_TYPE_CONTAINER" },
-    { OBJECT_TYPE_ITEM, "OBJECT_TYPE_ITEM" },
-    { OBJECT_TYPE_ITEM_EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL" },
+const static auto ot_names = std::map<CdsObject::Type, std::string_view> {
+    { CdsObject::Type::CONTAINER, "OBJECT_TYPE_CONTAINER" },
+    { CdsObject::Type::ITEM, "OBJECT_TYPE_ITEM" },
+    { CdsObject::Type::EXTERNAL_URL, "OBJECT_TYPE_ITEM_EXTERNAL_URL" },
 };
 
 const static auto upnp_classes = std::map<const std::string_view, const std::string_view> {

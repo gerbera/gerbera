@@ -595,7 +595,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     }
 
     std::map<std::string, std::string> cdsObjectSql;
-    cdsObjectSql.emplace("object_type", quote(obj->getObjectType()));
+    cdsObjectSql.emplace("object_type", quote(static_cast<int>(obj->getObjectType())));
 
     if (hasReference || playlistRef)
         cdsObjectSql.emplace("ref_id", quote(refObj->getID()));
@@ -938,14 +938,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             auto zero = std::string("0 = 1");
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
-            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER));
+            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), CdsObject::Type::CONTAINER));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else if (!getContainers && getItems) {
-            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM));
+            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), CdsObject::Type::ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
             // ORDER BY (object_type = OBJECT_TYPE_CONTAINER) ensures that containers are returned before items
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER, orderByCode());
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), CdsObject::Type::CONTAINER, orderByCode());
         }
         if (doLimit)
             limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());
@@ -1043,7 +1043,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         throw_std_runtime_error("failed to generate SQL for search");
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
-            searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
+            searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), CdsObject::Type::CONTAINER));
     }
 
     beginTransaction("search");
@@ -1108,9 +1108,9 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
         fmt::format("{} = {}", identifier("parent_id"), contId)
     };
     if (containers && !items)
-        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+        where.push_back(fmt::format("{} = {}", identifier("object_type"), CdsObject::Type::CONTAINER));
     else if (items && !containers)
-        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), CdsObject::Type::ITEM));
     if (contId == CDS_ID_ROOT && hideFsRoot) {
         where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
     }
@@ -1141,9 +1141,9 @@ std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, b
         fmt::format("{} IN ({})", identifier("parent_id"), fmt::join(contId, ","))
     };
     if (containers && !items)
-        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+        where.push_back(fmt::format("{} = {}", identifier("object_type"), CdsObject::Type::CONTAINER));
     else if (items && !containers)
-        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), CdsObject::Type::ITEM));
     if (hideFsRoot && std::find(contId.begin(), contId.end(), CDS_ID_ROOT) != contId.end()) {
         where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
     }
@@ -1267,7 +1267,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     };
     auto values = std::vector {
         fmt::to_string(parentID),
-        fmt::to_string(OBJECT_TYPE_CONTAINER),
+        fmt::to_string(CdsObject::Type::CONTAINER),
         fmt::to_string(flags),
         !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
         quote(name),
@@ -1407,7 +1407,7 @@ std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLo
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(getCol(row, BrowseCol::ObjectType));
-    auto obj = CdsObject::createObject(objectType);
+    auto obj = CdsObject::createObject(static_cast<CdsObject::Type>(objectType));
 
     /* set common properties */
     obj->setID(std::stoi(getCol(row, BrowseCol::Id)));
@@ -1511,7 +1511,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
     int objectType = std::stoi(getCol(row, SearchCol::ObjectType));
-    auto obj = CdsObject::createObject(objectType);
+    auto obj = CdsObject::createObject(static_cast<CdsObject::Type>(objectType));
 
     /* set common properties */
     obj->setID(std::stoi(getCol(row, SearchCol::Id)));
@@ -1585,7 +1585,7 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
 int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
 {
     auto where = std::vector {
-        fmt::format("{} != {:d}", identifier("object_type"), OBJECT_TYPE_CONTAINER),
+        fmt::format("{} != {:d}", identifier("object_type"), CdsObject::Type::CONTAINER),
     };
     if (!mimeType.empty()) {
         where.push_back(fmt::format("{} LIKE {}", identifier("mime_type"), quote(fmt::format("{}%", mimeType))));
@@ -1644,7 +1644,7 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     auto colParentId = identifier("parent_id");
 
     auto getSql = withoutContainer //
-        ? fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} != {}", colId, table, colParentId, parentID, identifier("object_type"), OBJECT_TYPE_CONTAINER)
+        ? fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} != {}", colId, table, colParentId, parentID, identifier("object_type"), CdsObject::Type::CONTAINER)
         : fmt::format("SELECT {} FROM {} WHERE {} = {}", colId, table, colParentId, parentID);
     auto res = select(getSql);
     if (!res)
@@ -1682,8 +1682,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         const std::int32_t objectID = row->col_int(0, INVALID_OBJECT_ID);
-        const int objectType = row->col_int(1, 0);
-        if (IS_CDS_CONTAINER(objectType))
+        const auto objectType = static_cast<CdsObject::Type>(row->col_int(1, -1));
+        if (objectType == CdsObject::Type::CONTAINER)
             containers.push_back(objectID);
         else
             items.push_back(objectID);
@@ -1744,8 +1744,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     if (!row)
         return nullptr;
 
-    const int objectType = row->col_int(0, 0);
-    bool isContainer = IS_CDS_CONTAINER(objectType);
+    const auto objectType = static_cast<CdsObject::Type>(row->col_int(0, 0));
+    bool isContainer = (objectType == CdsObject::Type::CONTAINER);
     if (all && !isContainer) {
         if (!row->isNullOrEmpty(1)) {
             const int refId = row->col_int(1, INVALID_OBJECT_ID);
@@ -1840,8 +1840,8 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
             containerIds.clear();
             while ((row = res->nextRow())) {
                 const int objId = row->col_int(0, INVALID_OBJECT_ID);
-                const int objType = row->col_int(1, 0);
-                if (IS_CDS_CONTAINER(objType)) {
+                const auto objType = static_cast<CdsObject::Type>(row->col_int(1, 0));
+                if (objType == CdsObject::Type::CONTAINER) {
                     containerIds.push_back(objId);
                     removeIds.push_back(objId);
                 } else {
@@ -1896,7 +1896,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         fmt::format("{}.{}", tabAlias, identifier("flags")),
     };
     std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {3}.{0}id{1} = {4}.{0}parent_id{1} WHERE {3}.{0}object_type{1} = {6} AND {3}.{0}id{1}",
-        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, identifier(CDS_OBJECT_TABLE), OBJECT_TYPE_CONTAINER);
+        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, identifier(CDS_OBJECT_TABLE), CdsObject::Type::CONTAINER);
 
     std::vector<std::int32_t> del;
 

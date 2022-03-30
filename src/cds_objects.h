@@ -41,21 +41,6 @@
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
-// ATTENTION: These values need to be changed in web/js/items.js too.
-#define OBJECT_TYPE_CONTAINER 0x00000001u
-#define OBJECT_TYPE_ITEM 0x00000002u
-#define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008u
-
-#define STRING_OBJECT_TYPE_CONTAINER "container"
-#define STRING_OBJECT_TYPE_ITEM "item"
-#define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
-
-static constexpr bool IS_CDS_CONTAINER(unsigned int type)
-{
-    return type & OBJECT_TYPE_CONTAINER;
-}
-static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; }
-
 #define OBJECT_FLAG_RESTRICTED 0x00000001u
 #define OBJECT_FLAG_SEARCHABLE 0x00000002u
 #define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004u
@@ -73,56 +58,26 @@ class ClientStatusDetail;
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {
-protected:
-    /// \brief ID of the object in the content directory
-    int id { INVALID_OBJECT_ID };
-
-    /// \brief ID of the referenced object
-    int refID { INVALID_OBJECT_ID };
-
-    /// \brief ID of the object's parent
-    int parentID { INVALID_OBJECT_ID };
-
-    /// \brief dc:title
-    std::string title;
-
-    /// \brief upnp:class
-    std::string upnpClass;
-
-    /// \brief Physical location of the media.
-    fs::path location;
-
-    /// \brief Last modification time in the file system.
-    /// In seconds since UNIX epoch.
-    std::chrono::seconds mtime {};
-
-    /// \brief Last update time in database
-    /// In seconds since UNIX epoch.
-    std::chrono::seconds utime {};
-
-    /// \brief File size on disk (in bytes).
-    std::uintmax_t sizeOnDisk {};
-
-    /// \brief virtual object flag
-    bool virt {};
-
-    /// \brief type of the object: item, container, etc.
-    unsigned int objectType {};
-
-    /// \brief field which can hold various flags for the object
-    unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
-
-    /// \brief flag that allows to sort objects within a container
-    int sortPriority {};
-
-    std::vector<std::pair<std::string, std::string>> metaData;
-    std::map<std::string, std::string> auxdata;
-    std::vector<std::shared_ptr<CdsResource>> resources;
-
-    /// \brief reference to parent, transporting details from import script
-    std::shared_ptr<CdsObject> parent;
-
 public:
+    // ATTENTION: These values need to be changed in web/js/items.js too.
+    enum class Type : std::uint64_t {
+        CONTAINER = 0x00000001u,
+        ITEM = 0x00000002u,
+        EXTERNAL_URL = 0x00000008u,
+    };
+
+    static Type parseType(std::string name)
+    {
+        if (name == "container")
+            return Type::CONTAINER;
+        if (name == "item")
+            return Type::ITEM;
+        if (name == "external_url")
+            return Type::EXTERNAL_URL;
+
+        throw_std_runtime_error("Failed to parse type: {}", name);
+    }
+
     virtual ~CdsObject() = default;
 
     /// \brief Set the object ID.
@@ -195,7 +150,7 @@ public:
     bool isVirtual() const { return virt; }
 
     /// \brief Query information on object type: item, container, etc.
-    unsigned int getObjectType() const { return objectType; }
+    CdsObject::Type getObjectType() const { return objectType; }
     virtual bool isItem() const { return false; }
     virtual bool isPureItem() const { return false; }
     virtual bool isExternalItem() const { return false; }
@@ -369,9 +324,58 @@ public:
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate() const;
 
-    static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(CdsObject::Type objectType);
 
-    static std::string_view mapObjectType(unsigned int type);
+    static std::string_view mapObjectType(Type type);
+
+protected:
+    /// \brief ID of the object in the content directory
+    int id { INVALID_OBJECT_ID };
+
+    /// \brief ID of the referenced object
+    int refID { INVALID_OBJECT_ID };
+
+    /// \brief ID of the object's parent
+    int parentID { INVALID_OBJECT_ID };
+
+    /// \brief dc:title
+    std::string title;
+
+    /// \brief upnp:class
+    std::string upnpClass;
+
+    /// \brief Physical location of the media.
+    fs::path location;
+
+    /// \brief Last modification time in the file system.
+    /// In seconds since UNIX epoch.
+    std::chrono::seconds mtime {};
+
+    /// \brief Last update time in database
+    /// In seconds since UNIX epoch.
+    std::chrono::seconds utime {};
+
+    /// \brief File size on disk (in bytes).
+    std::uintmax_t sizeOnDisk {};
+
+    /// \brief virtual object flag
+    bool virt {};
+
+    /// \brief type of the object: item, container, etc.
+    CdsObject::Type objectType {};
+
+    /// \brief field which can hold various flags for the object
+    unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
+
+    /// \brief flag that allows to sort objects within a container
+    int sortPriority {};
+
+    std::vector<std::pair<std::string, std::string>> metaData;
+    std::map<std::string, std::string> auxdata;
+    std::vector<std::shared_ptr<CdsResource>> resources;
+
+    /// \brief reference to parent, transporting details from import script
+    std::shared_ptr<CdsObject> parent;
 };
 
 /// \brief An Item in the content directory.
