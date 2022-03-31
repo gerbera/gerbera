@@ -68,6 +68,11 @@ public:
         throw std::runtime_error("Wrong option type dictionary");
     }
 
+    virtual std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(bool forEdit = false) const
+    {
+        throw std::runtime_error("Wrong option type array");
+    }
+
     virtual std::shared_ptr<AutoscanList> getAutoscanListOption() const
     {
         throw std::runtime_error("Wrong option type autoscan list");
@@ -168,6 +173,34 @@ private:
     std::map<std::string, std::string> option;
     std::size_t origSize;
     std::map<std::size_t, std::string> indexMap;
+};
+
+class VectorOption : public ConfigOption {
+public:
+    explicit VectorOption(std::vector<std::vector<std::pair<std::string, std::string>>> option)
+        : option(std::move(option))
+    {
+        this->origSize = this->option.size();
+        for (std::size_t i = 0; i < this->origSize; i++) {
+            this->indexMap[i] = i;
+        }
+    }
+
+    std::size_t getIndex(std::size_t index)
+    {
+        return index < indexMap.size() ? indexMap[index] : indexMap.size();
+    }
+
+    void setValue(std::size_t optionIndex, std::size_t entryIndex, const std::string& value);
+
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(bool forEdit = false) const override;
+
+    std::size_t getEditSize() const;
+
+private:
+    std::vector<std::vector<std::pair<std::string, std::string>>> option;
+    std::size_t origSize;
+    std::map<std::size_t, std::size_t> indexMap;
 };
 
 class ArrayOption : public ConfigOption {

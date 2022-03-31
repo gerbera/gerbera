@@ -56,6 +56,7 @@ public:
         return false;
     }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override { return {}; }
     std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
     std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }

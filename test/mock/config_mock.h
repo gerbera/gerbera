@@ -51,23 +51,6 @@ public:
                 { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
                 { "video/x-msvideo", CONTENT_TYPE_AVI },
             };
-        case CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST:
-            return {
-                { CONTENT_TYPE_ASF, "VC_ASF_AP_L2_WMA" },
-                { CONTENT_TYPE_AVI, "AVI" },
-                { CONTENT_TYPE_DSD, "DSF" },
-                { CONTENT_TYPE_FLAC, "FLAC" },
-                { CONTENT_TYPE_JPG, "JPEG_LRG" },
-                { CONTENT_TYPE_MKA, "MKV" },
-                { CONTENT_TYPE_MKV, "MKV" },
-                { CONTENT_TYPE_MP3, "MP3" },
-                { CONTENT_TYPE_MP4, "AVC_MP4_EU" },
-                { CONTENT_TYPE_MPEG, "MPEG_PS_PAL" },
-                { CONTENT_TYPE_OGG, "OGG" },
-                { CONTENT_TYPE_PCM, "LPCM" },
-                { CONTENT_TYPE_PNG, "PNG_LRG" },
-                { CONTENT_TYPE_WMA, "WMAFULL" },
-            };
         case CFG_UPNP_ALBUM_PROPERTIES:
             return {
                 { "dc:creator", "M_ALBUMARTIST" },
@@ -81,6 +64,31 @@ public:
                 { "upnp:producer", "M_PRODUCER" },
                 { "dc:publisher", "M_PUBLISHER" },
                 { "upnp:genre", "M_GENRE" },
+            };
+        default:
+            return {};
+        }
+    }
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override
+    {
+        switch (option) {
+
+        case CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST:
+            return {
+                { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
+                { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
+                { { "from", CONTENT_TYPE_DSD }, { "to", "DSF" } },
+                { { "from", CONTENT_TYPE_FLAC }, { "to", "FLAC" } },
+                { { "from", CONTENT_TYPE_JPG }, { "to", "JPEG_LRG" } },
+                { { "from", CONTENT_TYPE_MKA }, { "to", "MKV" } },
+                { { "from", CONTENT_TYPE_MKV }, { "to", "MKV" } },
+                { { "from", CONTENT_TYPE_MP3 }, { "to", "MP3" } },
+                { { "from", CONTENT_TYPE_MP4 }, { "to", "AVC_MP4_EU" } },
+                { { "from", CONTENT_TYPE_MPEG }, { "to", "MPEG_PS_PAL" } },
+                { { "from", CONTENT_TYPE_OGG }, { "to", "OGG" } },
+                { { "from", CONTENT_TYPE_PCM }, { "to", "LPCM" } },
+                { { "from", CONTENT_TYPE_PNG }, { "to", "PNG_LRG" } },
+                { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
             };
         default:
             return {};

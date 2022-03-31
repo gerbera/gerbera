@@ -142,6 +142,24 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(config_option_t o
     return generated[cs->xpath];
 }
 
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(config_option_t option)
+{
+    auto cs = std::dynamic_pointer_cast<ConfigVectorSetup>(ConfigDefinition::findConfigSetup(option));
+    if (!cs)
+        return nullptr;
+
+    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    for (auto&& value : cs->getXmlContent({})) {
+        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
+        std::size_t index = 0;
+        for (auto&& [key, val] : value) {
+            setValue(fmt::format("{}/{}/attribute::{}", cs->xpath, nodeKey, key), val);
+            ++index;
+        }
+    }
+    return generated[cs->xpath];
+}
+
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value)
 {
     auto cs = ConfigDefinition::findConfigSetup(option);
@@ -324,7 +342,7 @@ void ConfigGenerator::generateMappings()
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
-    setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    setVector(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
 }
 
 void ConfigGenerator::generateOnlineContent()
