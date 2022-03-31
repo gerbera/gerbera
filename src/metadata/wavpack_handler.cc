@@ -158,7 +158,6 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
         - WP_FORMAT_DSF: Sony DSD format
     */
     auto fileFormat = WavpackGetFileFormat(context);
-    resource->addAttribute(CdsResource::Attribute::VIDEOCODEC, fileFormats.at(fileFormat).data()); // FixMe: Remove after config update for dlnaprofile
     resource->addAttribute(CdsResource::Attribute::FORMAT, fileFormats.at(fileFormat).data());
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
     resource->addAttribute(CdsResource::Attribute::BITRATE, fmt::to_string(avgBitrate));

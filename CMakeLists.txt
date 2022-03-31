@@ -71,6 +71,18 @@ add_library(libgerbera STATIC
         src/config/config_manager.h
         src/config/config_options.cc
         src/config/config_options.h
+        src/config/setup/config_setup_array.cc
+        src/config/setup/config_setup_autoscan.cc
+        src/config/setup/config_setup_bool.cc
+        src/config/setup/config_setup_client.cc
+        src/config/setup/config_setup_dictionary.cc
+        src/config/setup/config_setup_dynamic.cc
+        src/config/setup/config_setup_int.cc
+        src/config/setup/config_setup_path.cc
+        src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_transcoding.cc
+        src/config/setup/config_setup_tweak.cc
+        src/config/setup/config_setup_vector.cc
         src/config/config_setup.cc
         src/config/config_setup.h
         src/config/directory_tweak.cc

@@ -55,6 +55,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
 
     std::shared_ptr<pugi::xml_node> setDictionary(config_option_t option);
+    std::shared_ptr<pugi::xml_node> setVector(config_option_t option);
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& value = "");
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t attr, const std::string& value);
     std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& key, const std::string& value);

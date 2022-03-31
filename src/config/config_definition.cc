@@ -212,21 +212,21 @@ static const std::map<std::string, std::string> mtCtDefaults {
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
-static const std::map<std::string, std::string> ctDlnaDefaults {
-    { CONTENT_TYPE_ASF, "VC_ASF_AP_L2_WMA" },
-    { CONTENT_TYPE_AVI, "AVI" },
-    { CONTENT_TYPE_DSD, "DSF" },
-    { CONTENT_TYPE_FLAC, "FLAC" },
-    { CONTENT_TYPE_JPG, "JPEG_LRG" },
-    { CONTENT_TYPE_MKA, "MKV" },
-    { CONTENT_TYPE_MKV, "MKV" },
-    { CONTENT_TYPE_MP3, "MP3" },
-    { CONTENT_TYPE_MP4, "AVC_MP4_EU" },
-    { CONTENT_TYPE_MPEG, "MPEG_PS_PAL" },
-    { CONTENT_TYPE_OGG, "OGG" },
-    { CONTENT_TYPE_PCM, "LPCM" },
-    { CONTENT_TYPE_PNG, "PNG_LRG" },
-    { CONTENT_TYPE_WMA, "WMAFULL" },
+static const std::vector<std::vector<std::pair<std::string, std::string>>> ctDlnaDefaults {
+    { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
+    { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
+    { { "from", CONTENT_TYPE_DSD }, { "to", "DSF" } },
+    { { "from", CONTENT_TYPE_FLAC }, { "to", "FLAC" } },
+    { { "from", CONTENT_TYPE_JPG }, { "to", "JPEG_LRG" } },
+    { { "from", CONTENT_TYPE_MKA }, { "to", "MKV" } },
+    { { "from", CONTENT_TYPE_MKV }, { "to", "MKV" } },
+    { { "from", CONTENT_TYPE_MP3 }, { "to", "MP3" } },
+    { { "from", CONTENT_TYPE_MP4 }, { "to", "AVC_MP4_EU" } },
+    { { "from", CONTENT_TYPE_MPEG }, { "to", "MPEG_PS_PAL" } },
+    { { "from", CONTENT_TYPE_OGG }, { "to", "OGG" } },
+    { { "from", CONTENT_TYPE_PCM }, { "to", "LPCM" } },
+    { { "from", CONTENT_TYPE_PNG }, { "to", "PNG_LRG" } },
+    { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
 };
 
 /// \brief default values for CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
@@ -579,9 +579,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/mappings/mimetype-contenttype", "config-import.html#mimetype-contenttype",
         ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, ATTR_IMPORT_MAPPINGS_M2CTYPE_LIST_AS,
         false, false, true, mtCtDefaults),
-    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+    std::make_shared<ConfigVectorSetup>(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
         "/import/mappings/contenttype-dlnaprofile", "config-import.html#contenttype-dlnaprofile",
-        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, std::vector<config_option_t> { ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO },
         false, false, true, ctDlnaDefaults),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS,
         "/import/mappings/ignore-extensions", "config-import.html#ignore-extensions",

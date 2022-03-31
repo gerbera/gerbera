@@ -513,6 +513,19 @@ void Web::ConfigLoad::process()
             i++;
         }
     }
+    // write content of all vectors
+    for (auto&& vcs : ConfigDefinition::getConfigSetupList<ConfigVectorSetup>()) {
+        int i = 0;
+        auto vector = vcs->getValue()->getVectorOption(true);
+        for (auto&& value : vector) {
+            for (auto&& [key, val] : value) {
+                auto item = values.append_child("item");
+                createItem(item, vcs->getItemPath(i, vcs->option) + key, vcs->option, vcs->optionList[0], vcs); // FIxME
+                setValue(item, val);
+                i++;
+            }
+        }
+    }
 
     // write content of all arrays
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {

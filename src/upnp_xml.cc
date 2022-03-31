@@ -34,6 +34,7 @@
 #include <fmt/chrono.h>
 #include <sstream>
 
+#include "config/config_definition.h"
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
@@ -58,7 +59,7 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     multiValue = config->getBoolOption(CFG_UPNP_MULTI_VALUES_ENABLED);
     ctMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    profMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    profMappings = config->getVectorOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
     transferMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
 }
 
@@ -523,23 +524,54 @@ std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>
         auto [x, y] = checkResolution(resolution);
         if ((res->getResId() > 0) && !resolution.empty() && x && y) {
             if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_TN);
+                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
             if ((x <= 640) && (y <= 420))
-                return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_SM);
+                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_SM;
             if ((x <= 1024) && (y <= 768))
-                return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_MED);
+                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_MED;
             if ((x <= 4096) && (y <= 4096))
-                return fmt::format("{}={};", UPNP_DLNA_PROFILE, UPNP_DLNA_PROFILE_JPEG_LRG);
+                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_LRG;
         }
     }
-    if (dlnaProfile.empty() && res) {
-        dlnaProfile = getValueOrDefault(profMappings, fmt::format("{}-{}-{}", contentType, res->getAttribute(CdsResource::Attribute::VIDEOCODEC), res->getAttribute(CdsResource::Attribute::AUDIOCODEC)), "");
+    if (dlnaProfile.empty()) {
+        /* handle audio/video content */
+        dlnaProfile = findDlnaProfile(res, contentType);
     }
-    if (dlnaProfile.empty())
-        dlnaProfile = getValueOrDefault(profMappings, contentType, "");
-    /* handle audio/video content */
+
     if (formatted && !dlnaProfile.empty())
         return fmt::format("{}={};", UPNP_DLNA_PROFILE, dlnaProfile);
+    return dlnaProfile;
+}
+
+std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType)
+{
+    std::string dlnaProfile;
+    static auto fromKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);
+    static auto toKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO);
+    auto legacyKey = fmt::format("{}-{}-{}", contentType, res->getAttribute(CdsResource::Attribute::VIDEOCODEC), res->getAttribute(CdsResource::Attribute::AUDIOCODEC));
+    std::size_t matchLength = 0;
+    for (auto&& map : profMappings) {
+        std::string profCand;
+        bool match = true;
+        for (auto&& [key, val] : map) {
+            if (key == fromKey && (val.empty() || (val != contentType && val != legacyKey))) {
+                match = false;
+            }
+            if (key == toKey && !val.empty()) {
+                profCand = val;
+            }
+            for (auto&& attr : ResourceAttributeIterator()) {
+                auto attrName = CdsResource::getAttributeName(attr);
+                if (key == attrName && (val.empty() || val != res->getAttribute(attr))) {
+                    match = false;
+                }
+            }
+        }
+        if (match && matchLength < map.size() && !profCand.empty()) {
+            matchLength = map.size();
+            dlnaProfile = profCand;
+        }
+    }
     return dlnaProfile;
 }
 

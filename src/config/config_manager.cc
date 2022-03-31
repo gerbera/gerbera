@@ -550,6 +550,15 @@ std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_opt
     return optionValue->getDictionaryOption();
 }
 
+std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::getVectorOption(config_option_t option) const
+{
+    auto optionValue = options.at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getVectorOption();
+}
+
 std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) const
 {
     auto optionValue = options.at(option);
