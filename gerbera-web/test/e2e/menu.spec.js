@@ -70,7 +70,7 @@ describe('Menu Suite', () => {
 
     it('shows the friendly name in the document title', async () => {
       const title = await homePage.getTitle();
-      expect(title).to.equal('Gerbera Media Server | Gerbera Media Server')
+      expect(title).to.equal('Wombat | Gerbera Media Server')
     });
 
     it('shows the version in the menu', async () => {

@@ -957,13 +957,19 @@ This section holds the content type to dlnaprofile mappings.
 
 ::
 
-     <map from="mp4" to="AVC_MP4_BL_CIF30_AAC_MULT5"/>
+    <map from="mp4" to="AVC_MP4_BL_CIF30_AAC_MULT5"/>
 
 * Optional
 
 Specifies a mapping from a certain content type to a dlna profile in the Content Directory. The values of **from** and **to**
-attributes are case sensitive. There are profiles for special codecs which can be access by the pattern ``<content-type>-<video-codec>-<audio-codec>``.
-Video and audio codecs can be seen in the resources properties the web UI.
+attributes are case sensitive.
+In order to access special profiles you can specify a resource attribute with its required value. Mappings with more details 
+are preferred to simple from-to mappings. Resource attributes can be seen in the details page for an item on the web UI.
+
+* Example:
+::
+
+    <map from="mp4" sec:vcodec="h264" sec:acodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
 
 
 ``library-options``

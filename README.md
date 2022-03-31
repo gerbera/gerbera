@@ -14,7 +14,7 @@ View our documentation online at [https://docs.gerbera.io](https://docs.gerbera.
 ## Features
 * Browse and playback your media via your network on all kinds of devices.
 * Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
-* Metadata extraction from MP3, OGG, AAC, M4A, FLAC, JPG (and many more!) files.
+* Metadata extraction from MP3, OGG, AAC, M4A, FLAC, wavpack, JPG (and many more!) files.
 * Media thumbnail support
 * Highly flexible media format transcoding via plugins / scripts
 * Automatic directory rescans (timed, inotify)
@@ -60,6 +60,7 @@ sudo make install
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |
 | [taglib]            | 1.12        | 1.12        | 1.12          | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |               | Optional      | File type detection        | Enabled  |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.4.0         | Optional      | WavPack metadata support   | Disabled |
 | [libmatroska]       |             | 1.6.3       | 1.6.3         | Optional      | MKV metadata               | Enabled  |
 | [libebml]           |             | 1.4.2       | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
@@ -68,7 +69,6 @@ sudo make install
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.0       | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |               | Optional      | Efficient file monitoring  | Enabled  |
-
 
 ## License
 
@@ -87,7 +87,7 @@ sudo make install
         Gerbera Contributors
 
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
-[duktape]: http://duktape.org
+[duktape]: https://duktape.org
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
@@ -98,4 +98,5 @@ sudo make install
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp
 [spdlog]: https://github.com/gabime/spdlog
-[taglib]: http://taglib.org/
+[taglib]: https://taglib.org/
+[wavpack]: https://www.wavpack.com/

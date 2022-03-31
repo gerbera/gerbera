@@ -78,8 +78,37 @@ void DictionaryOption::setKey(std::size_t keyIndex, const std::string& newKey)
 
 void DictionaryOption::setValue(std::size_t keyIndex, const std::string& value)
 {
-    if (!indexMap[keyIndex].empty()) {
-        option[indexMap[keyIndex]] = value;
+    if (!indexMap.at(keyIndex).empty()) {
+        option[indexMap.at(keyIndex)] = value;
+    }
+}
+
+std::vector<std::vector<std::pair<std::string, std::string>>> VectorOption::getVectorOption(bool forEdit) const
+{
+    if (!forEdit)
+        return option;
+
+    std::vector<std::vector<std::pair<std::string, std::string>>> editOption;
+    auto editSize = getEditSize();
+    editOption.reserve(editSize);
+    for (std::size_t i = 0; i < editSize; i++) {
+        editOption.push_back((indexMap.find(i) != indexMap.end() && indexMap.at(i) < std::numeric_limits<std::size_t>::max()) ? option.at(indexMap.at(i)) : std::vector<std::pair<std::string, std::string>>());
+    }
+    return editOption;
+}
+
+std::size_t VectorOption::getEditSize() const
+{
+    if (indexMap.empty()) {
+        return 0;
+    }
+    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
+}
+
+void VectorOption::setValue(std::size_t optionIndex, std::size_t entryIndex, const std::string& value)
+{
+    if (optionIndex < indexMap.size() && entryIndex < option[indexMap.at(optionIndex)].size()) {
+        option[indexMap.at(optionIndex)][entryIndex].second = value;
     }
 }
 

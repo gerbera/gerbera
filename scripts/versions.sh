@@ -11,6 +11,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     PUGIXML="1.10"
     PUPNP="1.14.6"
     SPDLOG="1.8.1"
+    WAVPACK="5.1.0"
     TAGLIB="1.12"
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
@@ -26,6 +27,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     PUGIXML="1.10"
     PUPNP="1.14.6"
     SPDLOG="1.8.5"
+    WAVPACK="5.4.0"
     TAGLIB="1.12"
 
 else
@@ -41,6 +43,7 @@ else
     PUGIXML="1.11.4"
     PUPNP="1.14.12"
     SPDLOG="1.9.2"
+    WAVPACK="5.4.0"
     TAGLIB="1.12"
 
 fi

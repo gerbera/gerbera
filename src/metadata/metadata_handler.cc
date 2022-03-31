@@ -56,6 +56,10 @@
 #include "metadata/matroska_handler.h"
 #endif
 
+#ifdef HAVE_WAVPACK
+#include "metadata/wavpack_handler.h"
+#endif
+
 #include "ffmpeg_thumbnailer_handler.h"
 #include "metadata/metacontent_handler.h"
 
@@ -113,6 +117,12 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     }
 #endif
 
+#ifdef HAVE_WAVPACK
+    if (contentType == CONTENT_TYPE_WAVPACK) {
+        WavPackHandler(context).fillMetadata(item);
+    }
+#endif
+
 #ifdef HAVE_FFMPEG
     if (contentType != CONTENT_TYPE_PLAYLIST && (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)) {
         FfmpegHandler(context).fillMetadata(item);
@@ -165,6 +175,10 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case CH_MATROSKA:
         return std::make_unique<MatroskaHandler>(context);
 #endif
+#ifdef HAVE_WAVPACK
+    case CH_WAVPACK:
+        return std::make_unique<WavPackHandler>(context);
+#endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
     case CH_FFTH:
         return std::make_unique<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
@@ -205,6 +219,9 @@ static constexpr std::array chKeys = {
     std::pair(CH_CONTAINERART, "ContainerArt"),
 #ifdef HAVE_MATROSKA
     std::pair(CH_MATROSKA, "Matroska"),
+#endif
+#ifdef HAVE_WAVPACK
+    std::pair(CH_WAVPACK, "WavPack"),
 #endif
     std::pair(CH_SUBTITLE, "Subtitle"),
     std::pair(CH_RESOURCE, "Resource"),

@@ -381,6 +381,10 @@ public:
     /// \param option option to retrieve.
     virtual std::map<std::string, std::string> getDictionaryOption(config_option_t option) const = 0;
 
+    /// \brief returns a config option of type vector
+    /// \param option option to retrieve.
+    virtual std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const = 0;
+
     /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
     virtual std::vector<std::string> getArrayOption(config_option_t option) const = 0;

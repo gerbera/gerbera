@@ -28,6 +28,7 @@ set(WITH_INOTIFY           YES CACHE BOOL "Enable Inotify file monitoring suppor
 set(WITH_JS                YES CACHE BOOL "Enable JavaScript for scripting")
 set(WITH_TAGLIB            YES CACHE BOOL "Use TagLib to extract audio file metadata")
 set(WITH_AVCODEC           NO  CACHE BOOL "Use ffmpeg/libav to extract file metadata")
+set(WITH_WAVPACK           NO  CACHE BOOL "Use wavpack to extract audio file metadata")
 set(WITH_FFMPEGTHUMBNAILER NO  CACHE BOOL "Enable Thumbnail generation")
 set(WITH_EXIF              YES CACHE BOOL "Use libexif to extract image metadata")
 set(WITH_EXIV2             NO  CACHE BOOL "Use libexiv2 to extract image metadata")
@@ -70,6 +71,18 @@ add_library(libgerbera STATIC
         src/config/config_manager.h
         src/config/config_options.cc
         src/config/config_options.h
+        src/config/setup/config_setup_array.cc
+        src/config/setup/config_setup_autoscan.cc
+        src/config/setup/config_setup_bool.cc
+        src/config/setup/config_setup_client.cc
+        src/config/setup/config_setup_dictionary.cc
+        src/config/setup/config_setup_dynamic.cc
+        src/config/setup/config_setup_int.cc
+        src/config/setup/config_setup_path.cc
+        src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_transcoding.cc
+        src/config/setup/config_setup_tweak.cc
+        src/config/setup/config_setup_vector.cc
         src/config/config_setup.cc
         src/config/config_setup.h
         src/config/directory_tweak.cc
@@ -148,16 +161,18 @@ add_library(libgerbera STATIC
         src/metadata/ffmpeg_handler.h
         src/metadata/ffmpeg_thumbnailer_handler.cc
         src/metadata/ffmpeg_thumbnailer_handler.h
-        src/metadata/metadata_handler.cc
-        src/metadata/metadata_handler.h
         src/metadata/libexif_handler.cc
         src/metadata/libexif_handler.h
-        src/metadata/taglib_handler.cc
-        src/metadata/taglib_handler.h
-        src/metadata/metacontent_handler.cc
-        src/metadata/metacontent_handler.h
         src/metadata/matroska_handler.cc
         src/metadata/matroska_handler.h
+        src/metadata/metacontent_handler.cc
+        src/metadata/metacontent_handler.h
+        src/metadata/metadata_handler.cc
+        src/metadata/metadata_handler.h
+        src/metadata/taglib_handler.cc
+        src/metadata/taglib_handler.h
+        src/metadata/wavpack_handler.cc
+        src/metadata/wavpack_handler.h
         src/request_handler.cc
         src/request_handler.h
         src/server.cc
@@ -462,6 +477,12 @@ if(WITH_TAGLIB)
     find_package(Taglib 1.12 REQUIRED)
     target_link_libraries(libgerbera PUBLIC Taglib::Taglib)
     target_compile_definitions(libgerbera PUBLIC HAVE_TAGLIB)
+endif()
+
+if(WITH_WAVPACK)
+    find_package(wavpack 5.1.0 REQUIRED)
+    target_link_libraries(libgerbera PUBLIC wavpack::wavpack)
+    target_compile_definitions(libgerbera PUBLIC HAVE_WAVPACK)
 endif()
 
 if(WITH_MAGIC)

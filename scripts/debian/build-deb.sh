@@ -177,6 +177,7 @@ if [[ ! -d build-deb ]]; then
       ${libexiv2} \
       libexif-dev \
       ${ffmpegthumbnailer} \
+      libwavpack1 libwavpack-dev \
       libmagic-dev \
       "${libmysqlclient}" \
       "${libpugixml}" \
@@ -233,6 +234,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     -DWITH_FFMPEGTHUMBNAILER=ON \
     -DWITH_EXIF=ON \
     -DWITH_EXIV2=ON \
+    -DWITH_WAVPACK=ON \
     -DWITH_LASTFM=OFF \
     -DWITH_SYSTEMD=ON \
     -DWITH_DEBUG=ON \
