@@ -621,7 +621,7 @@ public:
         , itemNotEmpty(itemNotEmpty)
         , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
-        , optionList(optionList)
+        , optionList(std::move(optionList))
     {
     }
 
