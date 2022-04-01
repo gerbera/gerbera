@@ -139,7 +139,7 @@ void TaskProcessor::invalidateTask(unsigned int taskID)
     }
 }
 
-std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist()
+std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist() const
 {
     std::deque<std::shared_ptr<GenericTask>> taskList;
 

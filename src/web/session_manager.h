@@ -149,7 +149,7 @@ public:
     /// \brief Returns the instance to a Session with a given sessionID
     /// \param ID of the Session.
     /// \return instance of the Session with a given ID or nullptr if no session with that ID was found.
-    std::shared_ptr<Session> getSession(const std::string& sessionID, bool doLock = true);
+    std::shared_ptr<Session> getSession(const std::string& sessionID, bool doLock = true) const;
 
     /// \brief Removes a session
     void removeSession(const std::string& sessionID);
