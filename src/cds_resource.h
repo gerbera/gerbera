@@ -113,7 +113,7 @@ public:
     const std::map<Attribute, std::string>& getAttributes() const;
     const std::map<std::string, std::string>& getParameters() const;
     const std::map<std::string, std::string>& getOptions() const;
-    std::string getAttribute(Attribute res) const;
+    std::string getAttribute(Attribute attr) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
     bool isMetaResource(const char* rct, int ht = -1) const
