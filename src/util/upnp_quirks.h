@@ -82,8 +82,8 @@ public:
      * \return void
      *
      */
-    void getSamsungFeatureList(ActionRequest& request);
-    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId);
+    void getSamsungFeatureList(ActionRequest& request) const;
+    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId) const;
 
     /** \brief get Samsung ObjectID from Index
      *
@@ -91,7 +91,7 @@ public:
      * \return void
      *
      */
-    void getSamsungObjectIDfromIndex(ActionRequest& request);
+    void getSamsungObjectIDfromIndex(ActionRequest& request) const;
 
     /** \brief get Samsung Index from RID
      *
@@ -99,7 +99,7 @@ public:
      * \return void
      *
      */
-    void getSamsungIndexfromRID(ActionRequest& request);
+    void getSamsungIndexfromRID(ActionRequest& request) const;
 
     /** \brief block XML header in response for broken clients
      *

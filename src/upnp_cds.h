@@ -89,7 +89,7 @@ private:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSystemUpdateID(ui4 Id)
-    void doGetSystemUpdateID(ActionRequest& request);
+    void doGetSystemUpdateID(ActionRequest& request) const;
 
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
