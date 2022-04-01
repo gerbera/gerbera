@@ -154,7 +154,7 @@ std::shared_ptr<Session> SessionManager::createSession(std::chrono::seconds time
     return newSession;
 }
 
-std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock)
+std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionID, bool doLock) const
 {
     if (sessions.empty()) {
         return nullptr;

@@ -575,7 +575,7 @@ std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& 
     return dlnaProfile;
 }
 
-std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object)
+std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object) const
 {
     // Order resources according to index defined by orderedHandler
     std::deque<std::shared_ptr<CdsResource>> orderedResources;
