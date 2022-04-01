@@ -143,7 +143,7 @@ public:
     }
 
     static std::string getAttributeName(Attribute attr);
-    static Attribute mapAttributeName(std::string name);
+    static Attribute mapAttributeName(const std::string& name);
 
 protected:
     int handlerType;

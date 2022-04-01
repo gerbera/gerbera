@@ -160,7 +160,7 @@ std::string CdsResource::getAttributeName(Attribute attr)
     return attrToName.at(attr);
 }
 
-CdsResource::Attribute CdsResource::mapAttributeName(std::string name)
+CdsResource::Attribute CdsResource::mapAttributeName(const std::string& name)
 {
     for (auto&& [attr, n] : attrToName) {
         if (n == name) {

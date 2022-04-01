@@ -165,7 +165,7 @@ std::string ConfigVectorSetup::getItemPath(int index, config_option_t propOption
     return fmt::format("{}", xpath);
 }
 
-std::string ConfigVectorSetup::getItemPath(int index, const std::string propOption) const
+std::string ConfigVectorSetup::getItemPath(int index, const std::string& propOption) const
 {
     if (index > ITEM_PATH_ROOT)
         return fmt::format("{}/{}[{}]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, ConfigDefinition::ATTRIBUTE, propOption);
