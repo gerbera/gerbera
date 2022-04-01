@@ -67,7 +67,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
     }
 }
 
-void Quirks::getSamsungFeatureList(ActionRequest& request)
+void Quirks::getSamsungFeatureList(ActionRequest& request) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
@@ -101,7 +101,7 @@ void Quirks::getSamsungFeatureList(ActionRequest& request)
     request.setResponse(std::move(response));
 }
 
-std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId)
+std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::string& objId) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return {};
@@ -121,7 +121,7 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
     return {};
 }
 
-void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request)
+void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;
@@ -142,7 +142,7 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request)
     request.setResponse(std::move(response));
 }
 
-void Quirks::getSamsungIndexfromRID(ActionRequest& request)
+void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
         return;

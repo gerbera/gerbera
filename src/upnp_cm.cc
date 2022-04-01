@@ -69,7 +69,7 @@ void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request
     log_debug("doGetCurrentConnectionInfo: end");
 }
 
-void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request)
+void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
 {
     log_debug("start");
 

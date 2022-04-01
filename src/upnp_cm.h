@@ -66,7 +66,7 @@ protected:
     /// \param request Incoming ActionRequest.
     ///
     /// GetProtocolInfo(string Source, string Sink)
-    void doGetProtocolInfo(ActionRequest& request);
+    void doGetProtocolInfo(ActionRequest& request) const;
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;

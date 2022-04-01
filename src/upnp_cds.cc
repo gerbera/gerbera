@@ -279,7 +279,7 @@ void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request)
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request)
+void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request) const
 {
     log_debug("start");
 

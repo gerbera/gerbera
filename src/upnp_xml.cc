@@ -501,7 +501,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     return {};
 }
 
-std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res)
+std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res) const
 {
     std::string contentParameter = dlnaProfileString(res, contentType);
     return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
@@ -510,12 +510,12 @@ std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType,
         UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
 }
 
-std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType)
+std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType) const
 {
     return getPropertyMapValue(transferMappings, mimeType);
 }
 
-std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted)
+std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted) const
 {
     std::string dlnaProfile = res ? res->getOption("dlnaProfile") : "";
     if (contentType == CONTENT_TYPE_JPG && res) {
@@ -543,7 +543,7 @@ std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>
     return dlnaProfile;
 }
 
-std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType)
+std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType) const
 {
     std::string dlnaProfile;
     static auto fromKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);

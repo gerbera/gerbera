@@ -39,7 +39,7 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
     return !notEmpty || !pathValue.empty();
 }
 
-bool ConfigPathSetup::checkExecutable(std::string& optValue)
+bool ConfigPathSetup::checkExecutable(std::string& optValue) const
 {
     fs::path tmpPath;
     if (fs::path(optValue).is_absolute()) {

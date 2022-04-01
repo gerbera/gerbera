@@ -281,7 +281,7 @@ protected:
     fs::path resolvePath(fs::path path) const;
 
     void loadArguments(const std::map<std::string, std::string>* arguments = nullptr);
-    bool checkExecutable(std::string& optValue);
+    bool checkExecutable(std::string& optValue) const;
 
 public:
     static fs::path Home;
