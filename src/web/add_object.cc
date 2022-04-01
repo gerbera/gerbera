@@ -41,8 +41,9 @@ void Web::AddObject::addContainer(int parentID)
     content->addContainer(parentID, param("title"), param("class"));
 }
 
-std::shared_ptr<CdsObject> Web::AddObject::addItem(int parentID, const std::shared_ptr<CdsItem>& item)
+std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
 {
+    auto item = std::make_shared<CdsItem>();
     item->setParentID(parentID);
 
     item->setTitle(param("title"));
@@ -65,8 +66,9 @@ std::shared_ptr<CdsObject> Web::AddObject::addItem(int parentID, const std::shar
     return item;
 }
 
-std::shared_ptr<CdsObject> Web::AddObject::addUrl(int parentID, const std::shared_ptr<CdsItemExternalURL>& item, bool addProtocol)
+std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool addProtocol)
 {
+    auto item = std::make_shared<CdsItemExternalURL>();
     std::string protocolInfo;
 
     item->setParentID(parentID);
@@ -129,12 +131,12 @@ void Web::AddObject::process()
             throw_std_runtime_error("no location given");
         if (!isRegularFile(location, ec))
             throw_std_runtime_error("file not found {}", ec.message());
-        obj = this->addItem(parentID, std::make_shared<CdsItem>());
+        obj = this->addItem(parentID);
         allowFifo = true;
     } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
         if (location.empty())
             throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, std::make_shared<CdsItemExternalURL>(), true);
+        obj = this->addUrl(parentID, true);
     } else {
         throw_std_runtime_error("Unknown object type: {}", objType.c_str());
     }
