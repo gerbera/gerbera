@@ -5,4 +5,4 @@ queries:
 
 # Ignore vendored JS
 paths-ignore:
-  - web/vendor/**
+  - web/vendor/
