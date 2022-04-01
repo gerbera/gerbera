@@ -66,6 +66,7 @@ li.nav-item > a {
     color: #bbb;
 }
 
+.navbar-brand,
 .nav-link {
     cursor: pointer;
 }

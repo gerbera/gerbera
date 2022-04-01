@@ -114,6 +114,7 @@ public:
     const std::map<std::string, std::string>& getParameters() const;
     const std::map<std::string, std::string>& getOptions() const;
     std::string getAttribute(Attribute attr) const;
+    std::string getAttributeValue(Attribute res) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
     bool isMetaResource(const char* rct, int ht = -1) const
@@ -143,6 +144,8 @@ public:
     }
 
     static std::string getAttributeName(Attribute attr);
+    static std::string getAttributeDisplay(Attribute attr);
+
     static Attribute mapAttributeName(const std::string& name);
 
 protected:
@@ -168,6 +171,25 @@ protected:
         { CdsResource::Attribute::LANGUAGE, "dc:language" },
         { CdsResource::Attribute::AUDIOCODEC, "sec:acodec" },
         { CdsResource::Attribute::VIDEOCODEC, "sec:vcodec" },
+        { CdsResource::Attribute::FORMAT, "format" },
+        { CdsResource::Attribute::TYPE, "type" },
+    };
+    inline static const std::map<Attribute, std::string> attrToDisplay {
+        { CdsResource::Attribute::SIZE, "size" },
+        { CdsResource::Attribute::DURATION, "duration" },
+        { CdsResource::Attribute::BITRATE, "bitrate" },
+        { CdsResource::Attribute::SAMPLEFREQUENCY, "sampleFrequency" },
+        { CdsResource::Attribute::NRAUDIOCHANNELS, "nrAudioChannels" },
+        { CdsResource::Attribute::RESOLUTION, "resolution" },
+        { CdsResource::Attribute::COLORDEPTH, "colorDepth" },
+        { CdsResource::Attribute::PROTOCOLINFO, "protocolInfo" },
+        { CdsResource::Attribute::RESOURCE_FILE, "resFile" },
+        { CdsResource::Attribute::FANART_OBJ_ID, "fanArtObject" },
+        { CdsResource::Attribute::FANART_RES_ID, "fanArtResource" },
+        { CdsResource::Attribute::BITS_PER_SAMPLE, "bitsPerSample" },
+        { CdsResource::Attribute::LANGUAGE, "language" },
+        { CdsResource::Attribute::AUDIOCODEC, "audioCodec" },
+        { CdsResource::Attribute::VIDEOCODEC, "videoCodec" },
         { CdsResource::Attribute::FORMAT, "format" },
         { CdsResource::Attribute::TYPE, "type" },
     };

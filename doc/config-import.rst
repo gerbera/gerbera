@@ -963,13 +963,14 @@ This section holds the content type to dlnaprofile mappings.
 
 Specifies a mapping from a certain content type to a dlna profile in the Content Directory. The values of **from** and **to**
 attributes are case sensitive.
-In order to access special profiles you can specify a resource attribute with its required value. Mappings with more details 
-are preferred to simple from-to mappings. Resource attributes can be seen in the details page for an item on the web UI.
+In order to access special profiles you can specify a resource attribute with its required value. If multiple entries for the same
+mimetype exist, mappings with more details are preferred to simple from-to mappings.
+Resource attributes can be seen in the details page for an item on the web UI. The value must either match exactly the transformed value (incl. unit) or the raw value.
 
 * Example:
 ::
 
-    <map from="mp4" sec:vcodec="h264" sec:acodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
+    <map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
 
 
 ``library-options``

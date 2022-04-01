@@ -103,6 +103,66 @@ std::string CdsResource::getAttribute(CdsResource::Attribute attr) const
     return getValueOrDefault(attributes, attr, { "" });
 }
 
+struct profMapping {
+    std::string_view val;
+    unsigned int mx;
+    unsigned int my;
+};
+
+static const std::vector<struct profMapping> resSteps {
+    { "ICO", 48, 48 },
+    { "LICO", 120, 120 },
+    { "TN", 160, 160 },
+    { "SD", 640, 480 },
+    { "HD", 1024, 768 },
+    { "UHD", 4096, 4096 },
+};
+static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
+static const std::vector<std::string_view> bitrateUnits { "kHz", "MHz", "GHz" };
+
+std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
+{
+    auto result = getValueOrDefault(attributes, attr, { "" });
+    if (result.empty())
+        return result;
+    switch (attr) {
+    case Attribute::BITRATE:
+    case Attribute::SAMPLEFREQUENCY: {
+        double size = stoulString(result);
+        result = fmt::format("{} Hz", size);
+        for (auto&& unit : bitrateUnits) {
+            size /= 1000;
+            if (size < 1)
+                return result;
+            result = fmt::format("{:3.1f} {}", size, unit);
+        }
+        break;
+    }
+    case Attribute::SIZE: {
+        double size = stoulString(result);
+        result = fmt::format("{} B", size);
+        for (auto&& unit : sizeUnits) {
+            size /= 1024;
+            if (size < 1)
+                return result;
+            result = fmt::format("{:3.2f} {}", size, unit);
+        }
+        break;
+    }
+    case Attribute::RESOLUTION: {
+        auto [x, y] = checkResolution(result);
+        for (auto&& [val, mx, my] : resSteps) {
+            if (x <= mx && y <= my)
+                return val.data();
+        }
+        break;
+    }
+    default:
+        return result;
+    }
+    return result;
+}
+
 std::string CdsResource::getParameter(const std::string& name) const
 {
     return getValueOrDefault(parameters, name);
@@ -158,6 +218,11 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 std::string CdsResource::getAttributeName(Attribute attr)
 {
     return attrToName.at(attr);
+}
+
+std::string CdsResource::getAttributeDisplay(Attribute attr)
+{
+    return attrToDisplay.at(attr);
 }
 
 CdsResource::Attribute CdsResource::mapAttributeName(const std::string& name)

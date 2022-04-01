@@ -73,28 +73,36 @@
 	"resvalue":"Default",
 	"editable":false
 	},{
-	"resname":" bitrate",
-	"resvalue":"32197",
+	"resname":"bitrate",
+	"resvalue":"748.2 kHz",
+	"rawvalue":"748197",
 	"editable":false
 	},{
-	"resname":" duration",
+	"resname":"duration",
 	"resvalue":"00:08:15.0",
 	"editable":false
 	},{
-	"resname":" nrAudioChannels",
+	"resname":"nrAudioChannels",
 	"resvalue":"2",
 	"editable":false
 	},{
-	"resname":" protocolInfo",
+	"resname":"protocolInfo",
 	"resvalue":"http-get:*:video/mp4:*",
 	"editable":false
 	},{
-	"resname":" sampleFrequency",
-	"resvalue":"44100",
+	"resname":"sampleFrequency",
+	"resvalue":"44.1 kHz",
+	"rawvalue":"44100",
 	"editable":false
 	},{
-	"resname":" size",
-	"resvalue":"7417561",
+	"resname":"resolution",
+	"resvalue":"HD",
+	"rawvalue":"720x576",
+	"editable":false
+	},{
+	"resname":"size",
+	"resvalue":"7.07 MB",
+	"rawvalue":"7417561",
 	"editable":false
 	}]}
   },
