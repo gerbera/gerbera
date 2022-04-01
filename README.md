@@ -44,32 +44,31 @@ sudo make install
 
 ## Dependencies
 
-| Library       | Min Version   | Recommended   | Latest tested | Required?     | Note                       | Default  |
-|---------------|---------------|---------------|---------------|---------------|----------------------------|----------|
-| libupnp       | 1.14.6        | 1.14.12       | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp     | 4.1.2         | 4.1.5         | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
-| libuuid       |               |               |               | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]     |               | 1.10          | 1.11.4        | Required      | XML file and data support  |          |
-| libiconv      |               |               |               | Required      | Charset conversion         |          |
-| sqlite3       | 3.7.0         | 3.35.5        | 3.36.0        | Required      | Database storage           |          |
-| zlib          |               |               |               | Required      | Data compression           |          |
-| [fmtlib]      | 7.1.3         | 7.1.3         | 8.1.1         | Required      | Fast string formatting     |          |
-| [spdlog]      | 1.8.1         | 1.8.5         | 1.9.2         | Required      | Runtime logging            |          |
-| [duktape]     | 2.1.0         | 2.6.0         | 2.7.0         | Optional      | Scripting Support          | Enabled  |
-| mysql         |               |               |               | Optional      | Alternate database storage | Disabled |
-| curl          |               |               |               | Optional      | Enables web services       | Enabled  |
-| [taglib]      | 1.12          | 1.12          | 1.12          | Optional      | Audio tag support          | Enabled  |
-| [wavpack]     | 5.1.0         | 5.4.0         | 5.4.0         | Optional      | WavPack metadata support   | Disabled |
-| libmagic      |               |               |               | Optional      | File type detection        | Enabled  |
-| [libmatroska] |               | 1.6.3         | 1.6.3         | Optional      | MKV metadata               | Enabled  |
-| [libebml]     |               | 1.4.2         | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
-| ffmpeg/libav  |               |               |               | Optional      | File metadata              | Disabled |
-| libexif       |               |               |               | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]    |               | v0.26         | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
-| [lastfmlib]   | 0.4.0         | 0.4.0         | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
-| [ffmpegthumbnailer] |         | 2.2.0         | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
-| inotify       |               |               |               | Optional      | Efficient file monitoring  | Enabled  |
-
+| Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
+|---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
+| libupnp             | 1.14.6      | 1.14.12     | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
+| libnpupnp           | 4.2.1       | 4.2.1       | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
+| libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
+| [pugixml]           |             | 1.10        | 1.11.4        | Required      | XML file and data support  |          |
+| libiconv            |             |             |               | Required      | Charset conversion         |          |
+| sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
+| zlib                |             |             |               | Required      | Data compression           |          |
+| [fmtlib]            | 7.1.3       | 7.1.3       | 8.1.1         | Required      | Fast string formatting     |          |
+| [spdlog]            | 1.8.1       | 1.8.5       | 1.9.2         | Required      | Runtime logging            |          |
+| [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
+| mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
+| curl                |             |             |               | Optional      | Enables web services       | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 1.12          | Optional      | Audio tag support          | Enabled  |
+| libmagic            |             |             |               | Optional      | File type detection        | Enabled  |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.4.0         | Optional      | WavPack metadata support   | Disabled |
+| [libmatroska]       |             | 1.6.3       | 1.6.3         | Optional      | MKV metadata               | Enabled  |
+| [libebml]           |             | 1.4.2       | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
+| ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
+| libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
+| [libexiv2]          |             | v0.26       | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
+| [ffmpegthumbnailer] |             | 2.2.0       | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
+| inotify             |             |             |               | Optional      | Efficient file monitoring  | Enabled  |
 
 ## License
 
