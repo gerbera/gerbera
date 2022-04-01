@@ -127,7 +127,6 @@ void Web::Items::process()
     // ouput objects of container
     int cnt = start + 1;
     auto cls = container->getClass();
-    auto trackFmt = (param.getTotalMatches() >= 100) ? "{:03}" : "{:02}";
     for (auto&& arrayObj : arr) {
         auto item = items.append_child("item");
         item.append_attribute("id") = arrayObj->getID();
@@ -136,10 +135,17 @@ void Web::Items::process()
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
         if (objItem->getPartNumber() > 0 && startswith(cls, UPNP_CLASS_MUSIC_ALBUM))
             item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
-        if (objItem->getTrackNumber() > 0 && !startswith(cls, UPNP_CLASS_CONTAINER))
-            item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, objItem->getTrackNumber()).c_str());
-        else
-            item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
+        if (objItem->getTrackNumber() > 0 && !startswith(cls, UPNP_CLASS_CONTAINER)) {
+            if (param.getTotalMatches() >= 100)
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format("{:03}", objItem->getTrackNumber()).c_str());
+            else
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getTrackNumber()).c_str());
+        } else {
+            if (param.getTotalMatches() >= 100)
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format("{:03}", cnt).c_str());
+            else
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", cnt).c_str());
+        }
         item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
         item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objItem->getClass().c_str());
         std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);

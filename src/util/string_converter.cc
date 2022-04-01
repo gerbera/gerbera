@@ -141,7 +141,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
                 log_error("iconv: Incomplete multibyte sequence");
             }
             if (validate) {
-                throw_std_runtime_error(err);
+                throw_std_runtime_error("{}", err);
             }
 
             if (stoppedAt)
@@ -165,7 +165,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         //        log_debug("iconv: converted part:  {}", output);
         dirty = true;
         delete[] output;
-        throw_std_runtime_error(err);
+        throw_std_runtime_error("{}", err);
     }
 
     // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",

@@ -93,7 +93,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
         log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(errorBuffer);
+        throw_std_runtime_error("{}", errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_RESPONSE_CODE, httpRetcode);
@@ -101,7 +101,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
         log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(errorBuffer);
+        throw_std_runtime_error("{}", errorBuffer);
     }
 
     if (cleanup)
@@ -138,7 +138,7 @@ URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
         log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(errorBuffer);
+        throw_std_runtime_error("{}", errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_TYPE, &ct);
@@ -146,7 +146,7 @@ URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
         log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(errorBuffer);
+        throw_std_runtime_error("{}", errorBuffer);
     }
 
     std::string mt = ct ? ct : MIMETYPE_DEFAULT;
@@ -157,7 +157,7 @@ URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
         log_error("{}", errorBuffer);
         if (cleanup)
             curl_easy_cleanup(curlHandle);
-        throw_std_runtime_error(errorBuffer);
+        throw_std_runtime_error("{}", errorBuffer);
     }
 
     std::string usedUrl = cUrl ? cUrl : url;

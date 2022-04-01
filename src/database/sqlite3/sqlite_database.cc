@@ -164,7 +164,7 @@ void Sqlite3Database::init()
     } catch (const std::runtime_error& e) {
         log_error("prematurely shutting down.");
         shutdown();
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", e.what());
     }
 }
 
@@ -245,7 +245,7 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
             rollback("");
             shutdown();
         }
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", e.what());
     }
 }
 
@@ -263,7 +263,7 @@ int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
             rollback("");
             shutdown();
         }
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", e.what());
     }
 }
 
@@ -404,7 +404,7 @@ void SLTask::waitForTask()
 
     if (!getError().empty()) {
         log_debug("{}", getError());
-        throw_std_runtime_error(getError());
+        throw_std_runtime_error("{}", getError());
     }
 }
 
