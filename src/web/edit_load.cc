@@ -161,6 +161,7 @@ void Web::EditLoad::process()
     auto resources = item.append_child("resources");
     xml2JsonHints->setArrayName(resources, "resources");
     xml2JsonHints->setFieldType("resvalue", "string");
+    xml2JsonHints->setFieldType("rawvalue", "string");
 
     auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
 
@@ -202,11 +203,17 @@ void Web::EditLoad::process()
             resEntry.append_attribute("editable") = false;
         }
         // write resource attributes
-        for (auto&& [key, val] : resItem->getAttributes()) {
-            auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format(" {}", key).c_str();
-            resEntry.append_attribute("resvalue") = val.c_str();
-            resEntry.append_attribute("editable") = false;
+        for (auto&& attr : ResourceAttributeIterator()) {
+            auto val = resItem->getAttribute(attr);
+            if (!val.empty()) {
+                auto resEntry = resources.append_child("resources");
+                resEntry.append_attribute("resname") = CdsResource::getAttributeDisplay(attr).c_str();
+                auto aVal = resItem->getAttributeValue(attr);
+                if (aVal != val)
+                    resEntry.append_attribute("rawvalue") = val.c_str();
+                resEntry.append_attribute("resvalue") = aVal.c_str();
+                resEntry.append_attribute("editable") = false;
+            }
         }
         // write resource options
         for (auto&& [key, val] : resItem->getOptions()) {

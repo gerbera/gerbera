@@ -110,17 +110,22 @@
     modal.find('#hidebutton').hide();
   }
 
-  function appendMetaItem(tbody, name, value, special = null) {
-    let row, content, text;
-    row = $('<tr></tr>');
+  function appendMetaItem(tbody, name, value, special = null, rawvalue = null) {
+    let content, text;
+    const nl = '\n';
+
+    const row = $('<tr></tr>');
     content = $('<td></td>');
     content.addClass('detail-column');
     text = $('<span></span>');
     text.text(name).appendTo(content);
     row.append(content);
-    content = $('<td></td>');
+    if (rawvalue !== null)
+      content = $('<td></td>');
+    else
+      content = $('<td colspan="2"></td>');
+
     if (value !== null) {
-      const nl = '\n';
       text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
       text.appendTo(content);
     }
@@ -128,6 +133,13 @@
         special.appendTo(content);
     }
     row.append(content);
+
+    if (rawvalue !== null) {
+      content = $('<td></td>');
+      text = $('<span>' + rawvalue.replace(RegExp(nl, 'g'), '<br>') + '</span>');
+      text.appendTo(content);
+      row.append(content);
+    }
     tbody.append(row);
   }
 
@@ -168,14 +180,14 @@
       const detailButton = modal.find('#detailbutton');
       let tbody;
       if (item.flags && item.flags.value) {
-        $('<thead><tr><th colspan="2">Extras</th></tr></thead>').appendTo(metatable);
+        $('<thead><tr><th colspan="3">Extras</th></tr></thead>').appendTo(metatable);
         tbody = $('<tbody></tbody>');
         appendMetaItem(tbody, "flags", item.flags.value);
         metatable.append(tbody);
       }
       if (item.metadata && item.metadata.metadata.length) {
         detailButton.show();
-        $('<thead><tr><th colspan="2">Metadata</th></tr></thead>').appendTo(metatable);
+        $('<thead><tr><th colspan="3">Metadata</th></tr></thead>').appendTo(metatable);
         tbody = $('<tbody></tbody>');
         for (let i = 0; i < item.metadata.metadata.length; i++) {
           appendMetaItem(tbody, item.metadata.metadata[i].metaname, item.metadata.metadata[i].metavalue);
@@ -187,7 +199,7 @@
       if (item.auxdata && item.auxdata.auxdata.length) {
         detailButton.show();
         auxtable.show();
-        $('<thead><tr><th colspan="2">Aux Data</th></tr></thead>').appendTo(auxtable);
+        $('<thead><tr><th colspan="3">Aux Data</th></tr></thead>').appendTo(auxtable);
         tbody = $('<tbody></tbody>');
         for (let i = 0; i < item.auxdata.auxdata.length; i++) {
           appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue);
@@ -203,7 +215,7 @@
         restable.show();
         for (let i = 0; i < item.resources.resources.length; i++) {
           if (item.resources.resources[i].resname === '----RESOURCE----') {
-            $(`<thead><tr><th>Resource</th><th>${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
+            $(`<thead><tr><th>Resource</th><th colspan="2">${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
             tbody = $('<tbody></tbody>');
             restable.append(tbody);
           } else if (item.resources.resources[i].resname === 'image') {
@@ -211,7 +223,7 @@
           } else if (item.resources.resources[i].resname === 'link') {
             appendMetaItem(tbody, 'content', null, $('<a href=' +  item.resources.resources[i].resvalue + '>Open</span>'));
           } else {
-            appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue);
+            appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue, null, item.resources.resources[i].rawvalue);
           }
         }
       } else {

@@ -519,18 +519,16 @@ std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>
 {
     std::string dlnaProfile = res ? res->getOption("dlnaProfile") : "";
     if (contentType == CONTENT_TYPE_JPG && res) {
-        auto resAttrs = res->getAttributes();
-        std::string resolution = res->getAttribute(CdsResource::Attribute::RESOLUTION);
-        auto [x, y] = checkResolution(resolution);
-        if ((res->getResId() > 0) && !resolution.empty() && x && y) {
-            if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) && (x <= 160) && (y <= 160))
-                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
-            if ((x <= 640) && (y <= 420))
+        std::string resValue = res->getAttributeValue(CdsResource::Attribute::RESOLUTION);
+        if (res->getResId() > 0 && !resValue.empty()) {
+            if (resValue == "SD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_SM;
-            if ((x <= 1024) && (y <= 768))
+            else if (resValue == "HD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_MED;
-            if ((x <= 4096) && (y <= 4096))
+            else if (resValue == "UHD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_LRG;
+            else if ((((res->getHandlerType() == CH_LIBEXIF) && (res->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL)) || (res->getOption(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) || (res->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)))
+                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
         }
     }
     if (dlnaProfile.empty()) {
@@ -561,8 +559,8 @@ std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& 
                 profCand = val;
             }
             for (auto&& attr : ResourceAttributeIterator()) {
-                auto attrName = CdsResource::getAttributeName(attr);
-                if (key == attrName && (val.empty() || val != res->getAttribute(attr))) {
+                auto attrName = CdsResource::getAttributeDisplay(attr);
+                if (key == attrName && val != res->getAttributeValue(attr) && val != res->getAttribute(attr)) {
                     match = false;
                 }
             }
