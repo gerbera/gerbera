@@ -616,3 +616,31 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 
     return pos;
 }
+
+
+std::string to_dcDate(std::filesystem::file_time_type tp)
+{
+  std::chrono::time_point sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>
+    (tp.time_since_epoch()
+      + std::chrono::time_point_cast<std::chrono::system_clock::duration>(std::chrono::system_clock::now()
+                                     - std::filesystem::file_time_type::clock::now().time_since_epoch()));
+
+  const std::time_t t = std::chrono::system_clock::to_time_t(sctp);
+  const std::tm* lt = std::localtime(&t);
+  std::stringstream dcDate;
+  dcDate << std::put_time(lt, "%FT%T%z");
+
+  return dcDate.str();
+}
+
+std::string to_dcDate()
+{
+  std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+  const std::time_t t = std::chrono::system_clock::to_time_t(now);
+  const std::tm* lt = std::localtime(&t);
+  std::stringstream dcDate;
+  dcDate << std::put_time(lt, "%FT%T%z");
+
+  return dcDate.str();
+}
