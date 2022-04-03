@@ -277,10 +277,4 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 /// \return Caclulated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
-/// \brief fs::last_write_time to dc:data
-std::string to_dcDate(std::filesystem::file_time_type tp);
-
-/// \brief Now to dc:data
-std::string to_dcDate();
-
 #endif // __TOOLS_H__

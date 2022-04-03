@@ -1227,7 +1227,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
 
         MetadataHandler::extractMetaData(context, item, dirEnt);
         if (item->getMetaData(M_DATE).empty())
-            item->addMetaData(M_DATE, to_dcDate(dirEnt.last_write_time(ec)));
+            item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
 
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();

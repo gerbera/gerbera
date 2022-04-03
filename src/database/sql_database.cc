@@ -1242,7 +1242,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(std::make_pair(MetadataHandler::getMetaFieldName(M_DATE), to_dcDate(fs::last_write_time(path))));
+    itemMetadata.emplace_back(std::make_pair(MetadataHandler::getMetaFieldName(M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(to_seconds(fs::last_write_time(path)).count()))));
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
@@ -1390,7 +1390,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     commit("addContainer");
 
     if (cont->getMetaData(M_DATE).empty())
-        cont->addMetaData(M_DATE, to_dcDate());
+        cont->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
 
     *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
     return true;
@@ -1735,7 +1735,6 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     }
 
     deleteRows(CDS_OBJECT_TABLE, "id", objectIDs);
-    deleteRows(METADATA_TABLE, "item_id", objectIDs);
     commit("_removeObjects");
 }
 
