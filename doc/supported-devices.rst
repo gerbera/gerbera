@@ -23,6 +23,7 @@ The automatic detection supports the following devices and software:
 - SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
+- PanasonicTV, setting device flags to ``PANASONIC``
 
 Device Flags
 ~~~~~~~~~~~~
@@ -36,6 +37,7 @@ The device flags have the following meaning
 -  ``SAMSUNG_HIDE_DYNAMIC``: 0x20, some Samsung devices do not work with dynamic folders on top level, so this flag hides them for those devices
 -  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
 -  ``PV_SUBTITLES``: 0x40, add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri`` to video files if subtitles exist
+-  ``PANASONIC``: 0x80, avoid adding part of the filename in item uri. Filename in item uri is used by other players, e.g. VLC to detect the language of a subtitle file.
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~
@@ -164,6 +166,11 @@ Kodak
 ~~~~~
 
 -  EasyShare EX-1011
+
+LG
+~~
+
+-  All TV based on WebOS 6
 
 Linn
 ~~~~

@@ -38,7 +38,8 @@ Quirks::Quirks(std::shared_ptr<Context> context, const std::shared_ptr<GrbNet>& 
     : context(std::move(context))
     , content(this->context->getServer()->getContent())
 {
-    pClientInfo = this->context->getClients()->getInfo(addr, userAgent);
+    if (addr || !userAgent.empty())
+        pClientInfo = this->context->getClients()->getInfo(addr, userAgent);
 }
 
 int Quirks::checkFlags(int flags) const
@@ -59,7 +60,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
     if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
-    auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item);
+    auto [url, subAdded] = UpnpXMLBuilder::renderSubtitle(context->getServer()->getVirtualUrl(), item, this);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", url);
         headers.addHeader("CaptionInfo.sec", url);
@@ -207,6 +208,11 @@ void Quirks::saveSamsungBookMarkedPosition(ActionRequest& request)
 bool Quirks::blockXmlDeclaration() const
 {
     return (pClientInfo && (pClientInfo->flags & QUIRK_FLAG_IRADIO) == QUIRK_FLAG_IRADIO);
+}
+
+bool Quirks::needsFileNameUri() const
+{
+    return !pClientInfo || (pClientInfo->flags & QUIRK_FLAG_PANASONIC) != QUIRK_FLAG_PANASONIC;
 }
 
 int Quirks::getCaptionInfoCount() const

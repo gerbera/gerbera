@@ -471,31 +471,31 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& 
     return {};
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item)
+std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const Quirks* quirks)
 {
     const auto& resources = item->getResources();
     auto resFound = std::find_if(resources.begin(), resources.end(),
         [](auto&& res) { return res->isMetaResource(VIDEO_SUB, CH_SUBTITLE); });
     if (resFound != resources.end()) {
-        auto url = renderOneResource(virtualURL, item, *resFound) + renderExtension("", (*resFound)->getAttribute(CdsResource::Attribute::RESOURCE_FILE));
+        auto url = renderOneResource(virtualURL, item, *resFound) + renderExtension("", (*resFound)->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks);
         return { url, true };
     }
     return {};
 }
 
-std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location)
+std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks)
 {
-    auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file." });
+    auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
-        return fmt::format("{}{}", urlExt, contentType);
+        return fmt::format("{}.{}", urlExt, contentType);
     }
 
     if (!location.empty() && location.has_extension()) {
         // make sure that the filename does not contain the separator character
-        std::string filename = urlEscape(location.filename().stem().string());
+        std::string filename = (!quirks || quirks->needsFileNameUri()) ? urlEscape(location.filename().stem().string()) : "";
         std::string extension = location.filename().extension();
-        return fmt::format("{}{}{}", urlExt, filename, extension);
+        return fmt::format("{}.{}{}", urlExt, filename, extension);
     }
 
     return {};
@@ -789,7 +789,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         if (res->isMetaResource(VIDEO_SUB, CH_SUBTITLE)) {
             auto captionInfo = std::map<std::string, std::string>();
             auto subUrl = url;
-            subUrl.append(renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE)));
+            subUrl.append(renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks ? &(*quirks) : nullptr));
             captionInfo[""] = virtualURL + subUrl;
             captionInfo["sec:type"] = res->getAttribute(CdsResource::Attribute::TYPE).empty() ? res->getParameter("type") : res->getAttribute(CdsResource::Attribute::TYPE);
             if (!res->getAttribute(CdsResource::Attribute::LANGUAGE).empty()) {
@@ -893,9 +893,9 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             // content type here and that we will not limit ourselves to the
             // first resource
             if (!skipURL) {
-                auto ext = renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE)); // try extension from resource file
+                auto ext = renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks ? &(*quirks) : nullptr); // try extension from resource file
                 if (ext.empty())
-                    ext = renderExtension(contentType, transcoded ? "" : item->getLocation());
+                    ext = renderExtension(contentType, transcoded ? "" : item->getLocation(), quirks ? &(*quirks) : nullptr);
                 url.append(ext);
             }
         }

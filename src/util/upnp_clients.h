@@ -54,6 +54,7 @@ enum class ClientType {
     SamsungSeriesCDE,
     SamsungBDJ5500,
     IRadio,
+    PanasonicTV,
     StandardUPnP
 };
 

@@ -150,8 +150,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     std::string xml = buf.str();
 
 #if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, xml);
+    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -160,9 +159,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle,
-        config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, event);
+    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 #endif

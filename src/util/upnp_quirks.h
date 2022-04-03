@@ -40,6 +40,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_SAMSUNG_FEATURES 0x00000010
 #define QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC 0x00000020
 #define QUIRK_FLAG_PV_SUBTITLES 0x00000040
+#define QUIRK_FLAG_PANASONIC 0x00000080
 
 // forward declaration
 class ActionRequest;
@@ -103,11 +104,17 @@ public:
 
     /** \brief block XML header in response for broken clients
      *
-     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * \return void
+     * \return bool
      *
      */
     bool blockXmlDeclaration() const;
+
+    /** \brief client need the filename in the uri to determine language or other detailes
+     *
+     * \return bool
+     *
+     */
+    bool needsFileNameUri() const;
 
     /** \brief Check whether the supplied flags are set
      *

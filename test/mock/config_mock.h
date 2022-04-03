@@ -60,7 +60,7 @@ public:
                 { "upnp:conductor", "M_CONDUCTOR" },
                 { "upnp:orchestra", "M_ORCHESTRA" },
                 { "upnp:date", "M_UPNP_DATE" },
-                { "dc:date", "M_UPNP_DATE" },
+                { "dc:date", "M_DATE" },
                 { "upnp:producer", "M_PRODUCER" },
                 { "dc:publisher", "M_PUBLISHER" },
                 { "upnp:genre", "M_GENRE" },

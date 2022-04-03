@@ -86,7 +86,7 @@ public:
 
     std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
     std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
-    static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
+    static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const Quirks* quirks);
     static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks);
@@ -129,7 +129,7 @@ protected:
     std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL);
 
     static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
-    static std::string renderExtension(const std::string& contentType, const fs::path& location);
+    static std::string renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks);
     static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
     void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
     std::string findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType) const;
