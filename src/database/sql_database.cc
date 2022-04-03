@@ -1241,7 +1241,9 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (changedContainer && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
-    return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, std::vector<std::pair<std::string, std::string>>());
+    std::vector<std::pair<std::string, std::string>> itemMetadata;
+    itemMetadata.emplace_back(std::make_pair("dc:date", to_dcDate(fs::last_write_time(path))));
+    return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
 int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata)
@@ -1386,6 +1388,8 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
         }
     }
     commit("addContainer");
+
+    if(cont->getMetaData(M_DATE).empty()) cont->addMetaData(M_DATE, to_dcDate());
 
     *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
     return true;

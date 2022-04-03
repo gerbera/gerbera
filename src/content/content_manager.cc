@@ -1225,6 +1225,8 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         obj->setTitle(f2i->convert(title));
 
         MetadataHandler::extractMetaData(context, item, dirEnt);
+	if(item->getMetaData(M_DATE).empty()) item->addMetaData(M_DATE, to_dcDate(dirEnt.last_write_time(ec)));
+
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
