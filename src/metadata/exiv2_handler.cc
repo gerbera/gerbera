@@ -72,10 +72,14 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
 
             /// \todo convert date to ISO 8601 as required in the UPnP spec
             // from YYYY:MM:DD to YYYY-MM-DD
-            if (value.length() >= 11) {
-                value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
+            if (value.length() >= 19) {
+                value = fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8));
                 log_debug("date: {}", value);
                 item->addMetaData(M_DATE, value);
+            } else if (value.length() >= 11) {
+               value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
+               log_debug("date: {}", value);
+               item->addMetaData(M_DATE, value);
             }
         }
 
