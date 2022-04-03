@@ -124,6 +124,7 @@ CdsItem::CdsItem()
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = "object.item";
+    mtime = currentTime();
 }
 
 void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
@@ -191,6 +192,7 @@ CdsContainer::CdsContainer()
 {
     objectType = OBJECT_TYPE_CONTAINER;
     upnpClass = UPNP_CLASS_CONTAINER;
+    mtime = currentTime();
 }
 
 void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)

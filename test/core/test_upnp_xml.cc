@@ -57,6 +57,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->addMetaData(M_CONDUCTOR, "Conductor");
     obj->addMetaData(M_ORCHESTRA, "Orchestra");
     obj->addMetaData(M_UPNP_DATE, "2001-01-01");
+    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     // albumArtURI
     auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
@@ -71,7 +72,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<dc:title>Title</dc:title>\n";
     expectedXml << "<upnp:class>object.container.album.musicAlbum</upnp:class>\n";
     expectedXml << "<dc:creator>Creator</dc:creator>\n";
-    expectedXml << "<dc:date>2001-01-01</dc:date>\n";
+    expectedXml << "<dc:date>2022-04-01T00:00:00</dc:date>\n";
     expectedXml << "<upnp:albumArtist>Creator</upnp:albumArtist>\n";
     expectedXml << "<upnp:artist>Creator</upnp:artist>\n";
     expectedXml << "<upnp:composer>Composer</upnp:composer>\n";
@@ -106,12 +107,14 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     obj->addMetaData(M_DESCRIPTION, "Description");
     obj->addMetaData(M_ALBUM, "Album");
     obj->addMetaData(M_TRACKNUMBER, "10");
+    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
     expectedXml << "<item id=\"1\" parentID=\"2\" restricted=\"0\">\n";
     expectedXml << "<dc:title>Title</dc:title>\n";
     expectedXml << "<upnp:class>object.item.audioItem.musicTrack</upnp:class>\n";
+    expectedXml << "<dc:date>2022-04-01T00:00:00</dc:date>\n";
     expectedXml << "<dc:description>Description</dc:description>\n";
     expectedXml << "<upnp:album>Album</upnp:album>\n";
     expectedXml << "<upnp:originalTrackNumber>10</upnp:originalTrackNumber>\n";
@@ -148,6 +151,8 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addMetaData(M_DESCRIPTION, "Description");
     obj->addMetaData(M_ALBUM, "Album");
     obj->addMetaData(M_TRACKNUMBER, "7");
+    obj->addMetaData(M_UPNP_DATE, "2002-01-01");
+    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
@@ -177,8 +182,10 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<item id=\"42\" parentID=\"2\" restricted=\"0\">\n";
     expectedXml << "<dc:title>Title</dc:title>\n";
     expectedXml << "<upnp:class>object.item.audioItem.musicTrack</upnp:class>\n";
+    expectedXml << "<dc:date>2022-04-01T00:00:00</dc:date>\n";
     expectedXml << "<dc:description>Description</dc:description>\n";
     expectedXml << "<upnp:album>Album</upnp:album>\n";
+    expectedXml << "<upnp:date>2002-01-01</upnp:date>\n";
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
     expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2/rct/aa</upnp:albumArtURI>\n";
     expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";

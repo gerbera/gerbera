@@ -162,6 +162,16 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
             ClientMatchType::UserAgent,
             "EC-IRADIO/1.0",
         },
+
+        // User-Agent(actionReq): Panasonic MIL DLNA CP UPnP/1.0 DLNADOC/1.50
+        {
+            "Panasonic TV",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::PanasonicTV,
+            QUIRK_FLAG_PANASONIC,
+            ClientMatchType::UserAgent,
+            "Panasonic MIL DLNA CP",
+        },
     };
 
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
