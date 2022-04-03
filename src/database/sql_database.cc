@@ -1242,7 +1242,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(std::make_pair("dc:date", to_dcDate(fs::last_write_time(path))));
+    itemMetadata.emplace_back(std::make_pair(MetadataHandler::getMetaFieldName(M_DATE), to_dcDate(fs::last_write_time(path))));
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
