@@ -1389,7 +1389,8 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     }
     commit("addContainer");
 
-    if(cont->getMetaData(M_DATE).empty()) cont->addMetaData(M_DATE, to_dcDate());
+    if (cont->getMetaData(M_DATE).empty())
+        cont->addMetaData(M_DATE, to_dcDate());
 
     *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
     return true;
