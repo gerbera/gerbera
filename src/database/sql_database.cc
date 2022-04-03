@@ -1730,6 +1730,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     }
 
     deleteRows(CDS_OBJECT_TABLE, "id", objectIDs);
+    deleteRows(METADATA_TABLE, "item_id", objectIDs);
     commit("_removeObjects");
 }
 
