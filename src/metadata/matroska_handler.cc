@@ -262,7 +262,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
                 continue;
             }
-            auto fDate = fmt::format("{:%Y-%m-%d}", fmt::gmtime(dateEl->GetEpochDate()));
+            auto fDate = fmt::format("{:%FT%T%z}", fmt::gmtime(dateEl->GetEpochDate()));
             if (!fDate.empty()) {
                 log_debug("KaxDateUTC = {}", fDate);
                 item->addMetaData(M_DATE, sc->convert(fDate));
