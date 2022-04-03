@@ -226,6 +226,12 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             }
         }
     }
+    auto dateNode = result.child("dc:date");
+    if (!dateNode) {
+        auto fDate = fmt::format("{:%FT%T%z}", fmt::localtime(obj->getMTime().count()));
+        result.append_child("dc:date").append_child(pugi::node_pcdata).set_value(fDate.c_str());
+    }
+
     log_debug("Rendered DIDL: {}", printXml(result, "  "));
 }
 
@@ -493,9 +499,9 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 
     if (!location.empty() && location.has_extension()) {
         // make sure that the filename does not contain the separator character
-        // std::string filename = (!quirks || quirks->needsFileNameUri()) ? urlEscape(location.filename().stem().string()) : "";
+        std::string filename = (!quirks || quirks->needsFileNameUri()) ? urlEscape(location.filename().stem().string()) : "";
         std::string extension = location.filename().extension();
-        return fmt::format("{}{}", urlExt, extension);
+        return fmt::format("{}.{}{}", urlExt, filename, extension);
     }
 
     return {};
