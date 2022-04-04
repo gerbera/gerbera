@@ -9,8 +9,8 @@
 #include "../mock/config_mock.h"
 #include "../mock/database_mock.h"
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 class UpnpXmlTest : public ::testing::Test {
 

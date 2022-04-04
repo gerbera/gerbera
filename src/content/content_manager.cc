@@ -31,6 +31,7 @@
 
 #include "content_manager.h" // API
 
+#include <fmt/chrono.h>
 #include <regex>
 
 #include "config/directory_tweak.h"
@@ -1225,6 +1226,9 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         obj->setTitle(f2i->convert(title));
 
         MetadataHandler::extractMetaData(context, item, dirEnt);
+        if (item->getMetaData(M_DATE).empty())
+            item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
+
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now

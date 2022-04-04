@@ -75,6 +75,9 @@ CREATE TABLE `mt_metadata` (
   KEY `metadata_item_id` (`item_id`),
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
+INSERT INTO `mt_metadata` (
+  `id`, `item_id`, `property_name`, `property_value`
+) VALUES (NULL, '1', 'dc:date', '1900-01-01T00:00:00Z');
 CREATE TABLE `grb_config_value` (
   `item` varchar(255) primary key,
   `key` varchar(255) NOT NULL,
