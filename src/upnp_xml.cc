@@ -501,7 +501,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
         // make sure that the filename does not contain the separator character
         std::string filename = (!quirks || quirks->needsFileNameUri()) ? urlEscape(location.filename().stem().string()) : "";
         std::string extension = location.filename().extension();
-        return fmt::format("{}.i{}{}", urlExt, filename, extension);
+        return fmt::format("{}.{}{}", urlExt, filename, extension);
     }
 
     return {};
