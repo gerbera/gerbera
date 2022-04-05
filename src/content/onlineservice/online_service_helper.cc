@@ -33,7 +33,6 @@
 #include "online_service_helper.h" // API
 
 #include "cds_objects.h"
-#include "config/config_manager.h"
 #include "online_service.h"
 
 std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExternalURL>& item)

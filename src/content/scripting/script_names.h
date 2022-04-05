@@ -26,8 +26,6 @@
 #ifndef __SCRIPTING_SCRIPT_NAMES_H__
 #define __SCRIPTING_SCRIPT_NAMES_H__
 
-#include <array>
-
 #include "cds_objects.h"
 #include "metadata/metadata_handler.h"
 

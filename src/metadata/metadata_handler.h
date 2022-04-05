@@ -32,7 +32,6 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
-#include <array>
 #include <set>
 
 #include "common.h"

@@ -25,6 +25,8 @@
 
 #include "upnp_quirks.h" // API
 
+#include <array>
+
 #include "cds_objects.h"
 #include "content/content_manager.h"
 #include "database/database.h"
