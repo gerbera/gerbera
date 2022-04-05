@@ -167,7 +167,7 @@ public:
 
     void setKey(std::size_t keyIndex, const std::string& newKey);
 
-    void setValue(std::size_t keyIndex, const std::string& value);
+    void setValue(std::size_t keyIndex, std::string value);
 
 private:
     std::map<std::string, std::string> option;
@@ -191,7 +191,7 @@ public:
         return index < indexMap.size() ? indexMap[index] : indexMap.size();
     }
 
-    void setValue(std::size_t optionIndex, std::size_t entryIndex, const std::string& value);
+    void setValue(std::size_t optionIndex, std::size_t entryIndex, std::string value);
 
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(bool forEdit = false) const override;
 

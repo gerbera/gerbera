@@ -76,10 +76,10 @@ void DictionaryOption::setKey(std::size_t keyIndex, const std::string& newKey)
     }
 }
 
-void DictionaryOption::setValue(std::size_t keyIndex, const std::string& value)
+void DictionaryOption::setValue(std::size_t keyIndex, std::string value)
 {
     if (!indexMap.at(keyIndex).empty()) {
-        option[indexMap.at(keyIndex)] = value;
+        option[indexMap.at(keyIndex)] = std::move(value);
     }
 }
 
@@ -105,10 +105,10 @@ std::size_t VectorOption::getEditSize() const
     return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
-void VectorOption::setValue(std::size_t optionIndex, std::size_t entryIndex, const std::string& value)
+void VectorOption::setValue(std::size_t optionIndex, std::size_t entryIndex, std::string value)
 {
     if (optionIndex < indexMap.size() && entryIndex < option[indexMap.at(optionIndex)].size()) {
-        option[indexMap.at(optionIndex)][entryIndex].second = value;
+        option[indexMap.at(optionIndex)][entryIndex].second = std::move(value);
     }
 }
 

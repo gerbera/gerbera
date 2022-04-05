@@ -43,7 +43,7 @@ class CdsObject;
 
 class BuiltinLayout : public Layout {
 public:
-    explicit BuiltinLayout(const std::shared_ptr<ContentManager>& content);
+    explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType) override;
 
