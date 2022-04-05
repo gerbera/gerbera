@@ -127,9 +127,9 @@ public:
     {
     }
 
-    void setDefaultValue(const std::string& defaultValue)
+    void setDefaultValue(std::string defaultValue)
     {
-        this->defaultValue.assign(defaultValue);
+        this->defaultValue = std::move(defaultValue);
     }
     std::string getDefaultValue() const
     {

@@ -91,16 +91,16 @@ public:
     void setOrig(bool orig) { this->isOrig = orig; }
     bool getOrig() const { return isOrig; }
 
-    void setFilter(const std::string& filter) { this->filter = filter; }
+    void setFilter(std::string filter) { this->filter = std::move(filter); }
     std::string getFilter() const { return filter; }
 
-    void setSort(const std::string& sort) { this->sort = sort; }
+    void setSort(std::string sort) { this->sort = std::move(sort); }
     std::string getSort() const { return sort; }
 
-    void setImage(const fs::path& image) { this->image = image; }
+    void setImage(fs::path image) { this->image = std::move(image); }
     fs::path getImage() const { return image; }
 
-    void setTitle(const std::string& title) { this->title = title; }
+    void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
 
 private:
