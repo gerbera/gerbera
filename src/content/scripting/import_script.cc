@@ -32,7 +32,6 @@
 #ifdef HAVE_JS
 #include "import_script.h" // API
 
-#include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "js_functions.h"
 #include "util/string_converter.h"

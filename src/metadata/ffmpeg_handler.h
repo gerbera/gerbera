@@ -39,6 +39,7 @@
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
 
+#include <array>
 #include <optional>
 
 #include "iohandler/io_handler.h"

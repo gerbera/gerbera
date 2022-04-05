@@ -32,6 +32,8 @@
 #ifdef ATRAILERS
 #include "atrailers_content_handler.h" // API
 
+#include <array>
+
 #include "cds_objects.h"
 #include "config/config.h"
 #include "metadata/metadata_handler.h"

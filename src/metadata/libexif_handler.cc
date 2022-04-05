@@ -32,9 +32,10 @@
 #ifdef HAVE_LIBEXIF
 #include "libexif_handler.h" // API
 
-#include <iohandler/file_io_handler.h>
+#include <array>
 
 #include "cds_objects.h"
+#include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

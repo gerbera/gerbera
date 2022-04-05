@@ -25,6 +25,7 @@
 
 #include "metacontent_handler.h" // API
 
+#include <array>
 #include <regex>
 #include <sys/stat.h>
 

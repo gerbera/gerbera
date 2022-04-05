@@ -31,8 +31,6 @@
 
 #include "sqlite_database.h" // API
 
-#include <array>
-
 #include "config/config_manager.h"
 
 #define DB_BACKUP_FORMAT "{}.backup"

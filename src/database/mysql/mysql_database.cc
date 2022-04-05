@@ -32,8 +32,6 @@
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"
 
-#include <array>
-
 #include <netinet/in.h>
 
 #include "util/thread_runner.h"

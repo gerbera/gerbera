@@ -30,8 +30,6 @@
 #include "database/database.h"
 #include "util/grb_net.h"
 
-#include <array>
-
 #include <upnp.h>
 
 std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const

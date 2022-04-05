@@ -31,6 +31,8 @@
 
 #include "pages.h" // API
 
+#include <array>
+
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/string_converter.h"
