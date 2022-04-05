@@ -41,8 +41,8 @@ class ContentManager;
 
 class Layout {
 public:
-    explicit Layout(const std::shared_ptr<ContentManager>& content)
-        : content(content)
+    explicit Layout(std::shared_ptr<ContentManager> content)
+        : content(std::move(content))
     {
     }
 

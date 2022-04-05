@@ -98,7 +98,7 @@ public:
     {
     }
 
-    void setLocation(const fs::path& location) { this->location = location; }
+    void setLocation(fs::path location) { this->location = std::move(location); }
     fs::path getLocation() const { return location; }
 
     void setInherit(bool inherit) { this->inherit = inherit; }
@@ -123,19 +123,19 @@ public:
     bool hasFollowSymlinks() const { return flags.find("FollowSymlinks") != flags.end(); }
     bool getFollowSymlinks() const { return flags.at("FollowSymlinks"); }
 
-    void setMetaCharset(const std::string& metaCharset) { this->resourceFiles["MetaCharset"] = metaCharset; }
+    void setMetaCharset(std::string metaCharset) { this->resourceFiles["MetaCharset"] = std::move(metaCharset); }
     bool hasMetaCharset() const { return resourceFiles.find("MetaCharset") != resourceFiles.end(); }
     std::string getMetaCharset() const { return resourceFiles.at("MetaCharset"); }
 
-    void setFanArtFile(const std::string& fanArtFile) { this->resourceFiles[SETTING_FANART] = fanArtFile; }
+    void setFanArtFile(std::string fanArtFile) { this->resourceFiles[SETTING_FANART] = std::move(fanArtFile); }
     bool hasFanArtFile() const { return resourceFiles.find(SETTING_FANART) != resourceFiles.end(); }
     std::string getFanArtFile() const { return resourceFiles.at(SETTING_FANART); }
 
-    void setSubTitleFile(const std::string& subTitleFile) { this->resourceFiles[SETTING_SUBTITLE] = subTitleFile; }
+    void setSubTitleFile(std::string subTitleFile) { this->resourceFiles[SETTING_SUBTITLE] = std::move(subTitleFile); }
     bool hasSubTitleFile() const { return resourceFiles.find(SETTING_SUBTITLE) != resourceFiles.end(); }
     std::string getSubTitleFile() const { return resourceFiles.at(SETTING_SUBTITLE); }
 
-    void setResourceFile(const std::string& resourceFile) { this->resourceFiles[SETTING_RESOURCE] = resourceFile; }
+    void setResourceFile(std::string resourceFile) { this->resourceFiles[SETTING_RESOURCE] = std::move(resourceFile); }
     bool hasResourceFile() const { return resourceFiles.find(SETTING_RESOURCE) != resourceFiles.end(); }
     std::string getResourceFile() const { return resourceFiles.at(SETTING_RESOURCE); }
 
