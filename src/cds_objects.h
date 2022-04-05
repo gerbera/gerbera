@@ -149,7 +149,7 @@ public:
 
     /// \brief Set the parent ID of the object.
     void setParentID(int parentID) { this->parentID = parentID; }
-    void setParent(const std::shared_ptr<CdsObject>& parent) { this->parent = parent; }
+    void setParent(std::shared_ptr<CdsObject> parent) { this->parent = std::move(parent); }
 
     /// \brief Retrieve the objects parent ID.
     int getParentID() const { return parentID; }
@@ -160,17 +160,17 @@ public:
     bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    void setTitle(const std::string& title) { this->title = title; }
+    void setTitle(std::string title) { this->title = std::move(title); }
     /// \brief Retrieve the title.
     std::string getTitle() const { return title; }
 
     /// \brief set the upnp:class
-    void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
+    void setClass(std::string upnpClass) { this->upnpClass = std::move(upnpClass); }
     /// \brief Retrieve class
     std::string getClass() const { return upnpClass; }
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(const fs::path& location) { this->location = location; }
+    void setLocation(fs::path location) { this->location = std::move(location); }
     /// \brief Retrieve media location.
     const fs::path& getLocation() const { return location; }
 
@@ -295,15 +295,15 @@ public:
     const std::map<std::string, std::string>& getAuxData() const { return auxdata; }
 
     /// \brief Set a single auxdata value.
-    void setAuxData(const std::string& key, const std::string& value)
+    void setAuxData(const std::string& key, std::string value)
     {
-        auxdata[key] = value;
+        auxdata[key] = std::move(value);
     }
 
     /// \brief Set entire auxdata dictionary.
-    void setAuxData(const std::map<std::string, std::string>& auxdata)
+    void setAuxData(std::map<std::string, std::string> auxdata)
     {
-        this->auxdata = auxdata;
+        this->auxdata = std::move(auxdata);
     }
 
     /// \brief Get number of resource tags
@@ -416,7 +416,7 @@ public:
     CdsItem();
 
     /// \brief Set mime-type information of the media.
-    void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+    void setMimeType(std::string mimeType) { this->mimeType = std::move(mimeType); }
 
     bool isItem() const override { return true; }
     bool isPureItem() const override { return true; }
@@ -451,13 +451,13 @@ public:
     void validate() const override;
 
     /// \brief Set the unique service ID.
-    void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
+    void setServiceID(std::string serviceID) { this->serviceID = std::move(serviceID); }
 
     /// \brief Retrieve the unique service ID.
     std::string getServiceID() const { return serviceID; }
 
     /// \brief Retrieve Play Status details
-    void setPlayStatus(const std::shared_ptr<ClientStatusDetail>& playStatus) { this->playStatus = playStatus; }
+    void setPlayStatus(std::shared_ptr<ClientStatusDetail> playStatus) { this->playStatus = std::move(playStatus); }
 
     /// \brief Set Play Status details
     std::shared_ptr<ClientStatusDetail> getPlayStatus() const { return playStatus; }
@@ -473,7 +473,7 @@ public:
 
     /// \brief Sets the URL for the item.
     /// \param URL full url to the item: http://somewhere.com/something.mpg
-    void setURL(const std::string& URL) { this->location = URL; }
+    void setURL(std::string URL) { this->location = std::move(URL); }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
@@ -503,10 +503,10 @@ protected:
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
     CdsContainer();
-    explicit CdsContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
+    explicit CdsContainer(std::string title, std::string upnpClass = UPNP_CLASS_CONTAINER)
     {
-        this->title = title;
-        this->upnpClass = upnpClass;
+        this->title = std::move(title);
+        this->upnpClass = std::move(upnpClass);
     }
 
     bool isContainer() const override { return true; }

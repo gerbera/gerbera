@@ -69,7 +69,7 @@ public:
     void setType(transcoding_type_t type) { this->tr_type = type; }
 
     /// \brief set name of the transcoding profile
-    void setName(const std::string& name) { this->name = name; }
+    void setName(std::string name) { this->name = std::move(name); }
 
     /// \brief get name of the transcoding profile
     std::string getName() const { return name; }
@@ -78,14 +78,14 @@ public:
     ///
     /// The so called "target mimetype" is the mimetype of the media that will
     /// be produced by the transcoder and identifies the target format.
-    void setTargetMimeType(const std::string& tm) { this->tm = tm; }
+    void setTargetMimeType(std::string tm) { this->tm = std::move(tm); }
 
     /// \brief get target mimetype
     std::string getTargetMimeType() const { return tm; }
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
-    void setCommand(const fs::path& command) { this->command = command; }
+    void setCommand(fs::path command) { this->command = std::move(command); }
 
     /// \brief gets the transcoders program name
     fs::path getCommand() const { return command; }
@@ -111,11 +111,11 @@ public:
     /// %out token is replaced by the fifo name that is generated when the
     /// transcoding process is launched. Transcoded data will be read by
     /// the server from the fifo and served via HTTP to the renderer.
-    void setArguments(const std::string& args) { this->args = args; }
+    void setArguments(std::string args) { this->args = std::move(args); }
 
     /// \brief retrieves the argument string
     std::string getArguments() const { return args; }
-    void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
+    void setEnviron(std::map<std::string, std::string> environ) { this->environment = std::move(environ); }
 
     const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
@@ -148,7 +148,7 @@ public:
     void setAcceptURL(bool accept) { accept_url = accept; }
     bool acceptURL() const { return accept_url; }
 
-    void setDlnaProfile(const std::string& dlna) { dlnaProf = dlna; }
+    void setDlnaProfile(std::string dlna) { dlnaProf = std::move(dlna); }
     std::string getDlnaProfile() const { return dlnaProf; }
 
     /// \brief Specifies if the output of the profile is a thumbnail,
@@ -223,11 +223,11 @@ public:
 
     /// \brief mimetype
     std::string getMimeType() const { return mimeType; }
-    void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+    void setMimeType(std::string mimeType) { this->mimeType = std::move(mimeType); }
 
     /// \brief transcoding profile name
     std::string getTranscoderName() const { return transcoder; }
-    void setTranscoderName(const std::string& transcoder) { this->transcoder = transcoder; }
+    void setTranscoderName(std::string transcoder) { this->transcoder = std::move(transcoder); }
 
     /// \brief client flags
     int getClientFlags() const { return clientFlags; }
@@ -235,10 +235,10 @@ public:
 
     /// \brief source dlna profile
     std::string getSourceProfile() const { return sourceProf; }
-    void setSourceProfile(const std::string& dlna) { this->sourceProf = dlna; }
+    void setSourceProfile(std::string dlna) { this->sourceProf = std::move(dlna); }
 
     /// \brief transcoder
-    void setTranscodingProfile(const std::shared_ptr<TranscodingProfile>& profile) { this->transcodingProfile = profile; }
+    void setTranscodingProfile(std::shared_ptr<TranscodingProfile> profile) { this->transcodingProfile = std::move(profile); }
     std::shared_ptr<TranscodingProfile> getTranscodingProfile() const { return transcodingProfile; }
 
 protected:
