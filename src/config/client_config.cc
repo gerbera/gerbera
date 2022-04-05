@@ -25,9 +25,9 @@
 
 #include "client_config.h" // API
 
+#include <array>
 #include <numeric>
 
-#include "content/content_manager.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 

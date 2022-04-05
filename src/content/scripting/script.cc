@@ -32,6 +32,7 @@
 #ifdef HAVE_JS
 #include "script.h" // API
 
+#include <array>
 #include <fmt/chrono.h>
 
 #include "cds_objects.h"
