@@ -53,7 +53,6 @@ class DirectoryConfigList;
 class DynamicContentList;
 class TranscodingProfileList;
 enum class ClientType;
-enum class ScanMode;
 
 class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
 public:

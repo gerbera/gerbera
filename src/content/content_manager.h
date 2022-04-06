@@ -236,7 +236,7 @@ public:
     void updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates = true);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, ScanMode scanMode) const;
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, AutoscanDirectory::ScanMode scanMode) const;
 
     /// \brief Gets an AutoscanDirectory (by objectID) from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) const;

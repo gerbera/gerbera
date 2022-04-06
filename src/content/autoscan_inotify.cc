@@ -268,7 +268,7 @@ void AutoscanInotify::threadProc()
 
 void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir)
 {
-    assert(dir->getScanMode() == ScanMode::INotify);
+    assert(dir->getScanMode() == AutoscanDirectory::ScanMode::INotify);
     log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
     monitorQueue.push(dir);

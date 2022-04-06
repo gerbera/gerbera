@@ -86,7 +86,7 @@ void Web::Containers::process()
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 auto adir = database->getAutoscanDirectory(cont->getID());
-                if (adir && (adir->getScanMode() == ScanMode::INotify))
+                if (adir && (adir->getScanMode() == AutoscanDirectory::ScanMode::INotify))
                     autoscanMode = "inotify";
             }
 #endif

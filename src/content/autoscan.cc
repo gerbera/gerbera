@@ -34,15 +34,14 @@
 #include "content_manager.h"
 #include "database/database.h"
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
-    int id, unsigned int interval, bool hidden)
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
     , hidden(hidden)
     , persistent_flag(persistent)
     , interval(interval)
-    , scanID(id)
+    , scanID(INVALID_SCAN_ID)
 {
 }
 
@@ -124,7 +123,7 @@ const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
     throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
 }
 
-ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
+AutoscanDirectory::ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
 {
     if (scanmode == "timed")
         return ScanMode::Timed;

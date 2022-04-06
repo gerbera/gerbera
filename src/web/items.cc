@@ -110,7 +110,7 @@ void Web::Items::process()
 
         if (startpointId != INVALID_OBJECT_ID) {
             auto startPtDir = database->getAutoscanDirectory(startpointId);
-            if (startPtDir && startPtDir->getScanMode() == ScanMode::INotify) {
+            if (startPtDir && startPtDir->getScanMode() == AutoscanDirectory::ScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || startPtDir->persistent())
                     protectContainer = true;

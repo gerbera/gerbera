@@ -84,9 +84,9 @@ void Web::Autoscan::process()
             bool hidden = boolParam("hidden");
             // bool persistent = boolParam("persistent");
 
-            ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
+            AutoscanDirectory::ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
             int interval = intParam("interval", 0);
-            if (scanMode == ScanMode::Timed && interval <= 0)
+            if (scanMode == AutoscanDirectory::ScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
@@ -100,7 +100,6 @@ void Web::Autoscan::process()
                 scanMode,
                 recursive,
                 false, // persistent
-                INVALID_SCAN_ID, // autoscan id - used only internally by CM
                 interval,
                 hidden);
             autoscan->setObjectID(objectID);
