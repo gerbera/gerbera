@@ -36,10 +36,10 @@
 #include <unordered_set>
 #include <vector>
 
+#include "content/autoscan.h"
 #include "util/grb_fs.h"
 
 // forward declaration
-class AutoscanDirectory;
 class AutoscanList;
 class CdsContainer;
 class CdsObject;
@@ -48,7 +48,6 @@ class ClientStatusDetail;
 class Config;
 class ConfigValue;
 class Mime;
-enum class ScanMode;
 class Timer;
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
@@ -277,8 +276,8 @@ public:
     virtual void storeInternalSetting(const std::string& key, const std::string& value) = 0;
 
     /* autoscan methods */
-    virtual std::shared_ptr<AutoscanList> getAutoscanList(ScanMode scanode) = 0;
-    virtual void updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanList(AutoscanDirectory::ScanMode scanode) = 0;
+    virtual void updateAutoscanList(AutoscanDirectory::ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) = 0;
 
     /* config methods */
     virtual std::vector<ConfigValue> getConfigValues() = 0;

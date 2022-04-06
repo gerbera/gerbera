@@ -40,7 +40,6 @@
 class ConfigOption;
 class DirectoryTweak;
 class DynamicContent;
-enum class ScanMode;
 
 #define ITEM_PATH_ROOT (-1)
 #define ITEM_PATH_NEW (-2)
@@ -643,7 +642,7 @@ public:
 
 class ConfigAutoscanSetup : public ConfigSetup {
 protected:
-    ScanMode scanMode;
+    AutoscanDirectory::ScanMode scanMode;
     bool hiddenFiles = false;
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -654,7 +653,7 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, ScanMode scanmode)
+    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, AutoscanDirectory::ScanMode scanmode)
         : ConfigSetup(option, xpath, help)
         , scanMode(scanmode)
     {

@@ -67,14 +67,14 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             continue;
         }
 
-        ScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
+        AutoscanDirectory::ScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AutoscanDirectory::ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
 
         if (mode != scanMode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
         }
 
         unsigned int interval = 0;
-        if (mode == ScanMode::Timed) {
+        if (mode == AutoscanDirectory::ScanMode::Timed) {
             interval = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }
 
@@ -82,7 +82,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
 
-        auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, INVALID_SCAN_ID, interval, hidden);
+        auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden);
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {

@@ -2214,9 +2214,9 @@ std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats
     return result;
 }
 
-void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
+void SQLDatabase::updateAutoscanList(AutoscanDirectory::ScanMode scanmode, const std::shared_ptr<AutoscanList>& list)
 {
-    log_debug("setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
+    log_debug("Setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
 
     beginTransaction("updateAutoscanList");
     exec(fmt::format("UPDATE {0} SET {1} = {2} WHERE {3} = {4} AND {5} = {6}",
@@ -2265,7 +2265,7 @@ void SQLDatabase::updateAutoscanList(ScanMode scanmode, const std::shared_ptr<Au
     commit("updateAutoscanList delete");
 }
 
-std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(ScanMode scanmode)
+std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(AutoscanDirectory::ScanMode scanmode)
 {
     std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, AUS_ALIAS, quote(AutoscanDirectory::mapScanmode(scanmode)));
 
@@ -2319,18 +2319,18 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
             return nullptr;
     }
 
-    ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
+    AutoscanDirectory::ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
     int interval = 0;
-    if (mode == ScanMode::Timed)
+    if (mode == AutoscanDirectory::ScanMode::Timed)
         interval = std::stoi(getCol(row, AutoscanColumn::Interval));
     auto lastModified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::LastModified)));
 
     log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, INVALID_SCAN_ID, interval, hidden);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", lastModified);

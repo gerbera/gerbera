@@ -132,7 +132,7 @@ void AutoscanList::remove(std::size_t id, bool edit)
             return;
         }
         auto dir = list[id];
-        dir->setScanID(INVALID_SCAN_ID);
+        dir->invalidate();
 
         list.erase(list.begin() + id);
         log_debug("ID {} removed!", id);
@@ -143,7 +143,7 @@ void AutoscanList::remove(std::size_t id, bool edit)
         }
         auto&& dir = indexMap[id];
         auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getScanID()](auto&& item) { return loc == item->getScanID(); });
-        dir->setScanID(INVALID_SCAN_ID);
+        dir->invalidate();
         list.erase(entry);
 
         if (id >= origSize) {
@@ -173,7 +173,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
             copy->setScanID(dir->getScanID());
             rmIdList->add(copy);
 
-            dir->setScanID(INVALID_SCAN_ID);
+            dir->invalidate();
             it = list.erase(it);
             continue;
         }

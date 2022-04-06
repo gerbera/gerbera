@@ -42,17 +42,15 @@ class AutoscanDirectory;
 class CdsContainer;
 class Database;
 
-#define INVALID_SCAN_ID (-1)
-
-///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
-enum class ScanMode {
-    Timed,
-    INotify
-};
-
 /// \brief Provides information about one autoscan directory.
 class AutoscanDirectory {
 public:
+    ///\brief Scan mode - type of scan (timed, inotify, fam, etc.)
+    enum class ScanMode {
+        Timed,
+        INotify
+    };
+
     AutoscanDirectory() = default;
 
     /// \brief Creates a new AutoscanDirectory object.
@@ -62,8 +60,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent,
-        int id = INVALID_SCAN_ID, unsigned int interval = 0, bool hidden = false);
+    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
@@ -142,7 +139,17 @@ public:
 
     /* helpers for autoscan stuff */
     static const char* mapScanmode(ScanMode scanmode);
-    static ScanMode remapScanmode(const std::string& scanmode);
+    static AutoscanDirectory::ScanMode remapScanmode(const std::string& scanmode);
+
+    /* Do do need these? */
+    void invalidate()
+    {
+        scanID = INVALID_SCAN_ID;
+    }
+    bool isValid() const
+    {
+        return scanID == INVALID_SCAN_ID;
+    }
 
 protected:
     fs::path location;
@@ -161,6 +168,8 @@ protected:
     std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
+
+    constexpr const static int INVALID_SCAN_ID = -1;
 };
 
 #endif
