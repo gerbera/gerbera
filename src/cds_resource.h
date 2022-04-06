@@ -134,7 +134,6 @@ public:
         case Attribute::RESOURCE_FILE:
         case Attribute::FANART_OBJ_ID:
         case Attribute::FANART_RES_ID:
-        case Attribute::BITS_PER_SAMPLE:
         case Attribute::TYPE:
         case Attribute::FORMAT:
             return true;
