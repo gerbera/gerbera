@@ -118,7 +118,7 @@ static const std::vector<struct profMapping> resSteps {
     { "UHD", 4096, 4096 },
 };
 static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
-static const std::vector<std::string_view> bitrateUnits { "kHz", "MHz", "GHz" };
+static const std::vector<std::string_view> freqUnits { "kHz", "MHz", "GHz" };
 
 std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
 {
@@ -127,10 +127,13 @@ std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
         return result;
     switch (attr) {
     case Attribute::BITRATE:
+        // UPNP is silly and Bitrate is actually Bytes/Sec
+        result = fmt::format("{} Kbps", stoulString(result) * 8 / 1000);
+        break;
     case Attribute::SAMPLEFREQUENCY: {
         double size = stoulString(result);
         result = fmt::format("{} Hz", size);
-        for (auto&& unit : bitrateUnits) {
+        for (auto&& unit : freqUnits) {
             size /= 1000;
             if (size < 1)
                 return result;
