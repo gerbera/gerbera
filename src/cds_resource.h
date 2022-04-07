@@ -120,7 +120,7 @@ public:
     const std::map<std::string, std::string>& getParameters() const;
     const std::map<std::string, std::string>& getOptions() const;
     std::string getAttribute(Attribute attr) const;
-    std::string getAttributeValue(Attribute res) const;
+    std::string getAttributeValue(Attribute attr) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
 
