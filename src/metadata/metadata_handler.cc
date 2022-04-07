@@ -248,10 +248,7 @@ static constexpr std::array chKeys = {
 bool MetadataHandler::checkContentHandler(const std::string& contHandler)
 {
     auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    if (chEntry != chKeys.end()) {
-        return true;
-    }
-    return false;
+    return chEntry != chKeys.end();
 }
 
 ContentHandler MetadataHandler::remapContentHandler(const std::string& contHandler)
