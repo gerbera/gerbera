@@ -2263,8 +2263,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(AutoscanDirectory::Sc
     if (!res)
         throw DatabaseException("", "query error while fetching autoscan list");
 
-    auto self = getSelf();
-    auto ret = std::make_shared<AutoscanList>(self);
+    auto ret = std::make_shared<AutoscanList>();
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto adir = _fillAutoscanDirectory(row);
