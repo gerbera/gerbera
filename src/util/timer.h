@@ -86,17 +86,17 @@ public:
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
-    void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, const std::shared_ptr<Parameter>& parameter, bool once = false);
-    void removeTimerSubscriber(Subscriber* timerSubscriber, const std::shared_ptr<Parameter>& parameter, bool dontFail = false);
+    void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false);
+    void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail = false);
     void triggerWait();
 
 protected:
     class TimerSubscriberElement {
     public:
-        TimerSubscriberElement(Subscriber* subscriber, std::chrono::seconds notifyInterval, const std::shared_ptr<Parameter>& parameter, bool once = false)
+        TimerSubscriberElement(Subscriber* subscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false)
             : subscriber(subscriber)
             , notifyInterval(notifyInterval)
-            , parameter(parameter)
+            , parameter(std::move(parameter))
             , once(once)
         {
             updateNextNotify();
