@@ -105,9 +105,9 @@ public:
     int getTaskCount() const { return taskCount; }
 
     /// Parameter that can be used by timerNotify
-    void setTimerParameter(const std::shared_ptr<Timer::Parameter>& param)
+    void setTimerParameter(std::shared_ptr<Timer::Parameter> param)
     {
-        timer_parameter = param;
+        timer_parameter = std::move(param);
     }
 
     std::shared_ptr<Timer::Parameter> getTimerParameter() const { return timer_parameter; }
