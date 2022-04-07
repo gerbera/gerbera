@@ -175,7 +175,7 @@ void ContentManager::run()
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
             auto atParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, OS_ATrailers);
-            at->setTimerParameter(atParam);
+            at->setTimerParameter(std::move(atParam));
             online_services->registerService(at);
             if (i > std::chrono::seconds::zero()) {
                 timer->addTimerSubscriber(this, i, at->getTimerParameter(), true);
@@ -209,7 +209,7 @@ void ContentManager::run()
             inotify->monitor(adir);
             auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
             log_debug("Adding one-shot inotify scan");
-            timer->addTimerSubscriber(this, std::chrono::minutes(1), param, true);
+            timer->addTimerSubscriber(this, std::chrono::minutes(1), std::move(param), true);
         }
     }
 #endif
@@ -218,7 +218,7 @@ void ContentManager::run()
         auto adir = autoscan_timed->get(i);
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
         log_debug("Adding timed scan with interval {}", adir->getInterval().count());
-        timer->addTimerSubscriber(this, adir->getInterval(), param, false);
+        timer->addTimerSubscriber(this, adir->getInterval(), std::move(param), false);
     }
 }
 
