@@ -47,6 +47,7 @@ class DynamicContent;
 
 using StringCheckFunction = std::function<bool(std::string& value)>;
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
+using ArrayItemCheckFunction = std::function<bool(const std::string& value)>;
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 using IntCheckFunction = std::function<bool(int value)>;
 using IntParseFunction = std::function<int(const std::string& value)>;
@@ -450,6 +451,7 @@ protected:
     bool notEmpty = false;
     bool itemNotEmpty = false;
     ArrayInitFunction initArray = nullptr;
+    ArrayItemCheckFunction itemCheck = nullptr;
     std::vector<std::string> defaultEntries;
 
     /// \brief Creates an array of strings from an XML nodeset.
@@ -484,10 +486,22 @@ public:
     }
 
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
-        bool notEmpty = false, bool itemNotEmpty = false, std::vector<std::string> defaultEntries = {})
+        bool notEmpty, bool itemNotEmpty, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
+        , defaultEntries(std::move(defaultEntries))
+        , nodeOption(nodeOption)
+        , attrOption(attrOption)
+    {
+    }
+
+    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
+        ArrayItemCheckFunction itemCheck, std::vector<std::string> defaultEntries = {})
+        : ConfigSetup(option, xpath, help)
+        , notEmpty(false)
+        , itemNotEmpty(false)
+        , itemCheck(itemCheck)
         , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
         , attrOption(attrOption)

@@ -553,7 +553,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 if (sym.find("handlerType") != std::string::npos) {
                     int resNr = getIntProperty(sym, -1);
                     if (resNr >= 0) {
-                        obj->addResource(std::make_shared<CdsResource>(resNr));
+                        obj->addResource(std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(resNr)));
                     }
                 }
             }
@@ -633,7 +633,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             val = sc->convert(val);
             item->removeMetaData(M_DESCRIPTION);
             item->addMetaData(M_DESCRIPTION, val);
-        } else if (pcd && item->getMetaData(M_DESCRIPTION).empty()) {
+        } else if (pcd && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
             item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
@@ -663,12 +663,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             }
 
             if (item->getResourceCount() == 0) {
-                auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
+                auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
                 resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
 
                 item->addResource(resource);
             } else {
-                auto resource = item->getResource(CH_DEFAULT);
+                auto resource = item->getResource(ContentHandler::DEFAULT);
                 resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
             }
         }
@@ -817,7 +817,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         if (obj->getResourceCount() > 0) {
             int resCount = 0;
             for (auto&& res : obj->getResources()) {
-                setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(res->getHandlerType()));
+                setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(to_underlying(res->getHandlerType())));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, attr] : attributes) {
                     setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, key), attr);

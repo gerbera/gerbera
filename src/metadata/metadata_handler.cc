@@ -78,7 +78,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
     std::string mimetype = item->getMimeType();
 
-    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
     resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(filesize));
 
@@ -131,7 +131,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     if (contentType == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(dirEnt.path());
         if (!fourcc.empty()) {
-            item->getResource(0)->addOption(RESOURCE_OPTION_FOURCC, fourcc);
+            resource->addOption(RESOURCE_OPTION_FOURCC, fourcc);
         }
     }
 #endif // HAVE_FFMPEG
@@ -160,37 +160,53 @@ std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
     return getValueOrDefault(mt_keys, field, { "unknown" });
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, int handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, ContentHandler handlerType)
 {
     switch (handlerType) {
+    case ContentHandler::LIBEXIF:
 #ifdef HAVE_LIBEXIF
-    case CH_LIBEXIF:
         return std::make_unique<LibExifHandler>(context);
+#else
+        break;
 #endif
+    case ContentHandler::ID3:
 #ifdef HAVE_TAGLIB
-    case CH_ID3:
         return std::make_unique<TagLibHandler>(context);
+#else
+        break;
 #endif
+    case ContentHandler::MATROSKA:
 #ifdef HAVE_MATROSKA
-    case CH_MATROSKA:
         return std::make_unique<MatroskaHandler>(context);
+#else
+        break;
 #endif
+    case ContentHandler::WAVPACK:
 #ifdef HAVE_WAVPACK
-    case CH_WAVPACK:
         return std::make_unique<WavPackHandler>(context);
+#else
+        break;
 #endif
+    case ContentHandler::FFTH:
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    case CH_FFTH:
         return std::make_unique<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
+#else
+        break;
 #endif
-    case CH_FANART:
+    case ContentHandler::FANART:
         return std::make_unique<FanArtHandler>(context);
-    case CH_CONTAINERART:
+    case ContentHandler::CONTAINERART:
         return std::make_unique<ContainerArtHandler>(context);
-    case CH_SUBTITLE:
+    case ContentHandler::SUBTITLE:
         return std::make_unique<SubtitleHandler>(context);
-    case CH_RESOURCE:
+    case ContentHandler::RESOURCE:
         return std::make_unique<ResourceHandler>(context);
+    case ContentHandler::DEFAULT:
+    case ContentHandler::TRANSCODE:
+    case ContentHandler::EXTURL:
+    case ContentHandler::MP4:
+    case ContentHandler::FLAC:
+        break;
     }
     throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
 }
@@ -201,48 +217,62 @@ std::string MetadataHandler::getMimeType() const
 }
 
 static constexpr std::array chKeys = {
-    std::pair(CH_DEFAULT, "Default"),
+    std::pair(ContentHandler::DEFAULT, "Default"),
 #ifdef HAVE_LIBEXIF
-    std::pair(CH_LIBEXIF, "LibExif"),
+    std::pair(ContentHandler::LIBEXIF, "LibExif"),
 #endif
 #ifdef HAVE_TAGLIB
-    std::pair(CH_ID3, "TagLib"),
+    std::pair(ContentHandler::ID3, "TagLib"),
 #endif
-    std::pair(CH_TRANSCODE, "Transcode"),
-    std::pair(CH_EXTURL, "Exturl"),
-    std::pair(CH_MP4, "MP4"),
+    std::pair(ContentHandler::TRANSCODE, "Transcode"),
+    std::pair(ContentHandler::EXTURL, "Exturl"),
+    std::pair(ContentHandler::MP4, "MP4"),
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    std::pair(CH_FFTH, "FFmpegThumbnailer"),
+    std::pair(ContentHandler::FFTH, "FFmpegThumbnailer"),
 #endif
-    std::pair(CH_FLAC, "Flac"),
-    std::pair(CH_FANART, "Fanart"),
-    std::pair(CH_CONTAINERART, "ContainerArt"),
+    std::pair(ContentHandler::FLAC, "Flac"),
+    std::pair(ContentHandler::FANART, "Fanart"),
+    std::pair(ContentHandler::CONTAINERART, "ContainerArt"),
 #ifdef HAVE_MATROSKA
-    std::pair(CH_MATROSKA, "Matroska"),
+    std::pair(ContentHandler::MATROSKA, "Matroska"),
 #endif
 #ifdef HAVE_WAVPACK
-    std::pair(CH_WAVPACK, "WavPack"),
+    std::pair(ContentHandler::WAVPACK, "WavPack"),
 #endif
-    std::pair(CH_SUBTITLE, "Subtitle"),
-    std::pair(CH_RESOURCE, "Resource"),
+    std::pair(ContentHandler::SUBTITLE, "Subtitle"),
+    std::pair(ContentHandler::RESOURCE, "Resource"),
 };
 
-int MetadataHandler::remapContentHandler(const std::string& contHandler)
+bool MetadataHandler::checkContentHandler(const std::string& contHandler)
+{
+    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
+    if (chEntry != chKeys.end()) {
+        return true;
+    }
+    return false;
+}
+
+ContentHandler MetadataHandler::remapContentHandler(const std::string& contHandler)
 {
     auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
     if (chEntry != chKeys.end()) {
         return chEntry->first;
     }
-    return -1;
+    throw_std_runtime_error("Invalid content handler value {}", contHandler);
 }
 
-std::string MetadataHandler::mapContentHandler2String(int ch)
+ContentHandler MetadataHandler::remapContentHandler(int ch)
+{
+    return static_cast<ContentHandler>(ch);
+}
+
+std::string MetadataHandler::mapContentHandler2String(ContentHandler ch)
 {
     auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
     if (chEntry != chKeys.end()) {
         return chEntry->second;
     }
-    return "Unknown";
+    throw_std_runtime_error("Invalid content handler value {}", ch);
 }
 
 metadata_fields_t MetadataHandler::remapMetaDataField(std::string_view fieldName)

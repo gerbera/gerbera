@@ -60,7 +60,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     // albumArtURI
-    auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
@@ -154,7 +154,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addMetaData(M_UPNP_DATE, "2002-01-01");
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
-    auto resource = std::make_shared<CdsResource>(CH_DEFAULT);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
     resource->addAttribute(CdsResource::Attribute::BITRATE, "16044");
     resource->addAttribute(CdsResource::Attribute::DURATION, "123456");
@@ -162,7 +162,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     resource->addAttribute(CdsResource::Attribute::SIZE, "4711");
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(CH_SUBTITLE);
+    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE);
     std::string type = "srt";
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(type));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
@@ -170,7 +170,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     resource->addParameter("type", type);
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(CH_FANART);
+    resource = std::make_shared<CdsResource>(ContentHandler::FANART);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addAttribute(CdsResource::Attribute::RESOLUTION, "200x200");

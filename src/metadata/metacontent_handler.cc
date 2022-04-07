@@ -176,11 +176,11 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     auto pathList = setup->getContentPath(obj, SETTING_FANART);
 
     if (pathList.empty() || pathList[0].empty())
-        obj->removeResource(CH_FANART);
+        obj->removeResource(ContentHandler::FANART);
 
     for (auto&& path : pathList) {
         if (!path.empty()) {
-            auto resource = std::make_shared<CdsResource>(CH_FANART);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::FANART);
             std::string type = path.extension().string().substr(1);
             std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
@@ -226,12 +226,12 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 
     if (pathList.empty() || pathList[0].empty())
-        obj->removeResource(CH_CONTAINERART);
+        obj->removeResource(ContentHandler::CONTAINERART);
 
     for (auto&& path : pathList) {
         log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
         if (!path.empty()) {
-            auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART);
             std::string type = path.extension().string().substr(1);
             std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
@@ -278,12 +278,12 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     auto objFilename = obj->getLocation().filename().string() + ".";
 
     if (pathList.empty() || pathList[0].empty())
-        obj->removeResource(CH_SUBTITLE);
+        obj->removeResource(ContentHandler::SUBTITLE);
 
     for (auto&& path : pathList) {
         log_debug("Running subtitle handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
         if (!path.empty()) {
-            auto resource = std::make_shared<CdsResource>(CH_SUBTITLE);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE);
             std::string type = path.extension().string().substr(1);
 
             std::string mimeType = mime->getMimeType(path, fmt::format("text/{}", type));
@@ -339,13 +339,13 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     auto pathList = setup->getContentPath(obj, SETTING_RESOURCE);
 
     if (pathList.empty() || pathList[0].empty())
-        obj->removeResource(CH_RESOURCE);
+        obj->removeResource(ContentHandler::RESOURCE);
 
     for (auto&& path : pathList) {
         log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
 
         if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
-            auto resource = std::make_shared<CdsResource>(CH_RESOURCE);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE);
             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("res"));
             resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());
             obj->addResource(resource);

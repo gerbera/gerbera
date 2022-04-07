@@ -49,7 +49,10 @@ bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::
         for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
             const pugi::xml_node& child = it.node();
             std::string attrValue = attrOption != CFG_MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
-            if (itemNotEmpty && attrValue.empty()) {
+            if (itemCheck) {
+                if (!itemCheck(attrValue))
+                    throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
+            } else if (itemNotEmpty && attrValue.empty()) {
                 throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
             }
             if (!attrValue.empty())
@@ -77,6 +80,9 @@ bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, con
                 config->setOrigValue(optItem, array.size() > realIndex ? array[realIndex] : "");
             }
         }
+        if (itemCheck && !itemCheck(optValue))
+            return false;
+
         value->setItem(i, optValue);
         return true;
     }
@@ -152,7 +158,10 @@ bool ConfigArraySetup::checkArrayValue(const std::string& value, std::vector<std
 {
     for (auto&& attrValue : splitString(value, ',')) {
         trimStringInPlace(attrValue);
-        if (itemNotEmpty && attrValue.empty()) {
+        if (itemCheck) {
+            if (!itemCheck(attrValue))
+                return false;
+        } else if (itemNotEmpty && attrValue.empty()) {
             return false;
         }
         if (!attrValue.empty())

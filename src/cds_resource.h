@@ -71,8 +71,8 @@ public:
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
     /// \param handler_type id of the associated handler
-    explicit CdsResource(int handlerType, std::string_view options = {}, std::string_view parameters = {});
-    CdsResource(int handlerType,
+    explicit CdsResource(ContentHandler handlerType, std::string_view options = {}, std::string_view parameters = {});
+    CdsResource(ContentHandler handlerType,
         std::map<Attribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);
@@ -107,8 +107,8 @@ public:
     /// XML but can be used for any purpose.
     void addOption(std::string name, std::string value);
 
-    // TODO Handler type shuld be typed
-    int getHandlerType() const;
+    /// \brief Type of resource handler
+    ContentHandler getHandlerType() const { return handlerType; }
 
     const std::map<Attribute, std::string>& getAttributes() const;
     const std::map<std::string, std::string>& getParameters() const;
@@ -117,9 +117,14 @@ public:
     std::string getAttributeValue(Attribute res) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
-    bool isMetaResource(const char* rct, int ht = -1) const
+
+    bool isMetaResource(const char* rct, ContentHandler ht) const
     {
-        return ((handlerType == CH_ID3 || handlerType == CH_MP4 || handlerType == CH_FLAC || handlerType == CH_FANART || handlerType == CH_CONTAINERART || handlerType == CH_WAVPACK || handlerType == ht) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == CH_EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
+        return (handlerType == ht && getParameter(RESOURCE_CONTENT_TYPE) == rct) || isMetaResource(rct);
+    }
+    bool isMetaResource(const char* rct) const
+    {
+        return ((handlerType == ContentHandler::ID3 || handlerType == ContentHandler::MP4 || handlerType == ContentHandler::FLAC || handlerType == ContentHandler::FANART || handlerType == ContentHandler::CONTAINERART || handlerType == ContentHandler::WAVPACK) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == ContentHandler::EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
     }
 
     bool equals(const std::shared_ptr<CdsResource>& other) const;
@@ -148,7 +153,7 @@ public:
     static Attribute mapAttributeName(const std::string& name);
 
 protected:
-    int handlerType;
+    ContentHandler handlerType;
     int resId { -1 };
     std::map<Attribute, std::string> attributes;
     std::map<std::string, std::string> parameters;

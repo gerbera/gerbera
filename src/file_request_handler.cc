@@ -108,7 +108,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     std::string mimeType = item ? item->getMimeType() : "";
 
-    if (resource->getHandlerType() != CH_DEFAULT) {
+    if (resource->getHandlerType() != ContentHandler::DEFAULT) {
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
 
         std::string protocolInfo = resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
@@ -139,8 +139,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         // TODO: this WAV specific logic should be more generic
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            std::string freq = obj->getResource(0)->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY);
-            std::string nrch = obj->getResource(0)->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS);
+            auto res = obj->getResource(ContentHandler::DEFAULT);
+            std::string freq = res->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY);
+            std::string nrch = res->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS);
             if (!freq.empty())
                 mimeType += fmt::format(";rate={}", freq);
             if (!nrch.empty())
@@ -189,7 +190,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const
 {
-    int resHandler = resource->getHandlerType();
+    auto resHandler = resource->getHandlerType();
     return MetadataHandler::createHandler(context, resHandler);
 }
 
@@ -207,7 +208,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     auto resourceId = parseResourceInfo(params);
 
     // Serve metadata resources
-    if (obj->getResource(resourceId)->getHandlerType() != CH_DEFAULT) {
+    if (obj->getResource(resourceId)->getHandlerType() != ContentHandler::DEFAULT) {
         auto resource = obj->getResource(resourceId);
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
         return metadataHandler->serveContent(obj, resourceId);
