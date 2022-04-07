@@ -1865,7 +1865,7 @@ void CMFetchOnlineContentTask::run()
     }
     try {
         auto t = std::make_shared<TPFetchOnlineContentTask>(content, task_processor, timer, service, layout, cancellable, unscheduled_refresh);
-        task_processor->addTask(t);
+        task_processor->addTask(std::move(t));
     } catch (const std::runtime_error& ex) {
         log_error("{}", ex.what());
     }
