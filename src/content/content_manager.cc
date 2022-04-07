@@ -147,7 +147,7 @@ void ContentManager::run()
         autoscan_inotify = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
     } else {
         // make an empty list so that we do not have to do extra checks on shutdown
-        autoscan_inotify = std::make_shared<AutoscanList>(database);
+        autoscan_inotify = std::make_shared<AutoscanList>();
     }
 
     // Start INotify thread
@@ -270,7 +270,7 @@ void ContentManager::shutdown()
     log_debug("start");
     auto lock = threadRunner->uniqueLock();
     log_debug("updating last_modified data for autoscan in database...");
-    autoscan_timed->updateLMinDB();
+    autoscan_timed->updateLMinDB(*database);
 
 #ifdef HAVE_JS
     destroyJS();
@@ -292,7 +292,7 @@ void ContentManager::shutdown()
                 dir->updateLMT();
             }
         }
-        autoscan_inotify->updateLMinDB();
+        autoscan_inotify->updateLMinDB(*database);
 
         autoscan_inotify = nullptr;
         inotify = nullptr;

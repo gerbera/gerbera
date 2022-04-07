@@ -34,8 +34,6 @@ class AutoscanDirectory;
 
 class AutoscanList {
 public:
-    explicit AutoscanList(std::shared_ptr<Database> database);
-
     /// \brief Adds a new AutoscanDirectory to the list.
     ///
     /// The scanID of the directory is invalidated and set to
@@ -44,8 +42,6 @@ public:
     /// \param dir AutoscanDirectory to add to the list.
     /// \return scanID of the newly added AutoscanDirectory
     int add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
-
-    [[maybe_unused]] void addList(const std::shared_ptr<AutoscanList>& list);
 
     std::shared_ptr<AutoscanDirectory> get(std::size_t id, bool edit = false) const;
 
@@ -72,7 +68,7 @@ public:
     void notifyAll(Timer::Subscriber* sub);
 
     /// \brief updates the last_modified data for all AutoscanDirectories.
-    void updateLMinDB();
+    void updateLMinDB(Database& database);
 
     /// \brief returns a copy of the autoscan list in the form of an array
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy() const;
@@ -80,8 +76,6 @@ public:
 protected:
     std::size_t origSize {};
     std::map<std::size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
-
-    std::shared_ptr<Database> database;
 
     mutable std::recursive_mutex mutex;
     using AutoLock = std::scoped_lock<std::recursive_mutex>;

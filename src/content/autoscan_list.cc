@@ -27,18 +27,13 @@
 #include "autoscan.h"
 #include "database/database.h"
 
-AutoscanList::AutoscanList(std::shared_ptr<Database> database)
-    : database(std::move(database))
-{
-}
-
-void AutoscanList::updateLMinDB()
+void AutoscanList::updateLMinDB(Database& database)
 {
     AutoLock lock(mutex);
     for (std::size_t i = 0; i < list.size(); i++) {
         log_debug("i: {}", i);
         auto ad = list[i];
-        database->updateAutoscanDirectory(ad);
+        database.updateAutoscanDirectory(ad);
     }
 }
 
@@ -65,15 +60,6 @@ int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_
     indexMap[dir->getScanID()] = dir;
 
     return dir->getScanID();
-}
-
-void AutoscanList::addList(const std::shared_ptr<AutoscanList>& list)
-{
-    AutoLock lock(mutex);
-
-    for (auto&& dir : list->list) {
-        _add(dir, std::numeric_limits<std::size_t>::max());
-    }
 }
 
 std::size_t AutoscanList::getEditSize() const
@@ -157,7 +143,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
 {
     AutoLock lock(mutex);
 
-    auto rmIdList = std::make_shared<AutoscanList>(database);
+    auto rmIdList = std::make_shared<AutoscanList>();
 
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
         auto dir = *it;
