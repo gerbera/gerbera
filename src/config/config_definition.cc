@@ -722,7 +722,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_ORDER,
         "/import/resources/order", "config-import.html#resources-order",
-        ATTR_IMPORT_RESOURCES_HANDLER, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_RESOURCES_HANDLER, ATTR_IMPORT_RESOURCES_NAME,
+        MetadataHandler::checkContentHandler),
 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",
@@ -730,7 +731,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         excludesFullpath),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_VISIBLE_DIRECTORIES,
         "/import/visible-directories", "config-import.html#visible-directories",
-        ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME),
+        ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, false, false),
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
@@ -856,7 +857,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_LIBEXIF
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
         "/import/library-options/libexif/auxdata", "config-import.html#libexif",
-        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, false, false),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST,
         "/import/library-options/libexif/metadata", "config-import.html#libexif",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
@@ -868,7 +869,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_EXIV2
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
         "/import/library-options/exiv2/auxdata", "config-import.html#exiv2",
-        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, false, false),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST,
         "/import/library-options/exiv2/metadata", "config-import.html#exiv2",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
@@ -880,7 +881,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_TAGLIB
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
         "/import/library-options/id3/auxdata", "config-import.html#id3",
-        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, false, false),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST,
         "/import/library-options/id3/metadata", "config-import.html#id3",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,
@@ -892,7 +893,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_FFMPEG
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
         "/import/library-options/ffmpeg/auxdata", "config-import.html#ffmpeg",
-        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG),
+        ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, false, false),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST,
         "/import/library-options/ffmpeg/metadata", "config-import.html#ffmpeg",
         ATTR_IMPORT_LIBOPTS_AUXDATA_DATA, ATTR_IMPORT_LIBOPTS_AUXDATA_TAG, ATTR_IMPORT_LIBOPTS_AUXDATA_KEY,

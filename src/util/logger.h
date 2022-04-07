@@ -42,6 +42,16 @@
 #define log_error SPDLOG_ERROR
 #define log_js SPDLOG_INFO
 
+#ifndef __cpp_lib_to_underlying
+template <typename E>
+constexpr auto to_underlying(E e) noexcept
+{
+    return std::underlying_type_t<E>(e);
+}
+#else
+using std::to_underlying;
+#endif
+
 #if FMT_VERSION >= 80100
 template <typename T>
 struct fmt::formatter<T, std::enable_if_t<std::is_enum_v<T>, char>>

@@ -37,14 +37,14 @@
 
 #define RESOURCE_PART_SEP '~'
 
-CdsResource::CdsResource(int handlerType, std::string_view options, std::string_view parameters)
+CdsResource::CdsResource(ContentHandler handlerType, std::string_view options, std::string_view parameters)
     : handlerType(handlerType)
 {
     this->options = dictDecode(options);
     this->parameters = dictDecode(parameters);
 }
 
-CdsResource::CdsResource(int handlerType,
+CdsResource::CdsResource(ContentHandler handlerType,
     std::map<Attribute, std::string> attributes,
     std::map<std::string, std::string> parameters,
     std::map<std::string, std::string> options)
@@ -75,11 +75,6 @@ void CdsResource::addParameter(std::string name, std::string value)
 void CdsResource::addOption(std::string name, std::string value)
 {
     options.insert_or_assign(std::move(name), std::move(value));
-}
-
-int CdsResource::getHandlerType() const
-{
-    return handlerType;
 }
 
 // deprecated
@@ -197,7 +192,7 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size < 2 || size > 4)
         throw_std_runtime_error("Could not parse resources");
 
-    int handlerType = std::stoi(parts[0]);
+    auto handlerType = MetadataHandler::remapContentHandler(std::stoi(parts[0]));
 
     std::map<std::string, std::string> attr;
     std::map<std::string, std::string> par;

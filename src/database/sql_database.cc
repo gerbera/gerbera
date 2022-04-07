@@ -298,16 +298,6 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "obj_location", AutoscanColumn::ObjLocation },
 };
 
-#ifndef __cpp_lib_to_underlying
-template <typename E>
-constexpr auto to_underlying(E e) noexcept
-{
-    return std::underlying_type_t<E>(e);
-}
-#else
-using std::to_underlying;
-#endif
-
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
@@ -1007,7 +997,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         auto image = dynConfig->getImage();
                         std::error_code ec;
                         if (!image.empty() && isRegularFile(image, ec)) {
-                            auto resource = std::make_shared<CdsResource>(CH_CONTAINERART);
+                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART);
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
                             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
@@ -2596,7 +2586,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(
-            std::stoi(getCol(row, ResourceCol::HandlerType)),
+            MetadataHandler::remapContentHandler(std::stoi(getCol(row, ResourceCol::HandlerType))),
             getCol(row, ResourceCol::Options),
             getCol(row, ResourceCol::Parameters));
         resource->setResId(resources.size());
@@ -2623,7 +2613,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
         for (auto&& resource : resources) {
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(resId);
-            resourceSql["handlerType"] = quote(resource->getHandlerType());
+            resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
@@ -2646,7 +2636,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             Operation operation = resId < dbResources.size() ? Operation::Update : Operation::Insert;
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(resId);
-            resourceSql["handlerType"] = quote(resource->getHandlerType());
+            resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
@@ -2890,7 +2880,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             auto values = std::vector {
                 fmt::to_string(objectId),
                 fmt::to_string(resId),
-                fmt::to_string(resource->getHandlerType()),
+                fmt::to_string(to_underlying(resource->getHandlerType())),
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {

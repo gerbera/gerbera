@@ -181,8 +181,8 @@ void Web::EditLoad::process()
         if (objItem) {
             std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem);
             if (resItem->isMetaResource(ID3_ALBUM_ART) //
-                || (resItem->getHandlerType() == CH_LIBEXIF && resItem->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
-                || (resItem->getHandlerType() == CH_FFTH && resItem->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) {
+                || (resItem->getHandlerType() == ContentHandler::LIBEXIF && resItem->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
+                || (resItem->getHandlerType() == ContentHandler::FFTH && resItem->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) {
                 auto image = resources.append_child("resources");
                 image.append_attribute("resname") = "image";
                 image.append_attribute("resvalue") = url.c_str();
@@ -273,7 +273,7 @@ void Web::EditLoad::process()
 
         if (obj->isExternalItem()) {
             auto protocol = item.append_child("protocol");
-            protocol.append_attribute("value") = getProtocol(objItem->getResource(0)->getAttribute(CdsResource::Attribute::PROTOCOLINFO)).data();
+            protocol.append_attribute("value") = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::PROTOCOLINFO)).data();
             protocol.append_attribute("editable") = true;
         }
     }

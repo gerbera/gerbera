@@ -272,7 +272,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     // we got the image resolution so we can add our resource
     if (!imageX.empty() && !imageY.empty()) {
-        item->getResource(0)->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", imageX, imageY));
+        item->getResource(ContentHandler::DEFAULT)->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", imageX, imageY));
     } else {
         setJpegResolutionResource(item, 0);
     }
@@ -284,7 +284,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             const std::string thResolution = get_jpeg_resolution(std::move(ioH));
             log_debug("RESOLUTION: {}", thResolution);
 
-            auto resource = std::make_shared<CdsResource>(CH_LIBEXIF);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF);
             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution);
             resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);

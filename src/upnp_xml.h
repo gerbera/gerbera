@@ -105,7 +105,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    std::vector<int> orderedHandler;
+    std::vector<ContentHandler> orderedHandler;
 
     const std::string virtualURL;
     const std::string presentationURL;

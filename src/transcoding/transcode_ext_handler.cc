@@ -66,8 +66,9 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
             CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            std::string freq = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_SAMPLEFREQUENCY));
-            std::string nrch = item->getResource(0)->getAttribute(MetadataHandler::getResAttrName(R_NRAUDIOCHANNELS));
+            auto res = obj->getResource(ContentHandler::DEFAULT);
+            std::string freq = res->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY));
+            std::string nrch = res->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS));
 
             if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;

@@ -109,7 +109,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     if (!item)
         return;
 
-    std::string videoResolution = item->getResource(0)->getAttribute(CdsResource::Attribute::RESOLUTION);
+    std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::RESOLUTION);
     auto [x, y] = checkResolution(videoResolution);
 
     if (!videoResolution.empty() && x && y) {
@@ -118,7 +118,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto it = mappings.find(CONTENT_TYPE_JPG);
         std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
-        auto ffres = std::make_shared<CdsResource>(CH_FFTH);
+        auto ffres = std::make_shared<CdsResource>(ContentHandler::FFTH);
         ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
         ffres->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 

@@ -454,7 +454,7 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
         addRecursive(asSetting.adir, dirEnt, asSetting.followSymlinks, asSetting.hidden, task);
     }
 
-    if (asSetting.rescanResource && obj->hasResource(CH_RESOURCE)) {
+    if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
         std::string parentPath = dirEnt.path().parent_path();
         updateAttachedResources(asSetting.adir, obj, parentPath, true);
     }
@@ -504,7 +504,7 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
     bool parentRemoved = false;
     if (rescanResource) {
         auto obj = database->loadObject(objectID);
-        if (obj && obj->hasResource(CH_RESOURCE)) {
+        if (obj && obj->hasResource(ContentHandler::RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
         }
@@ -974,16 +974,14 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
 
     auto clonedItem = std::static_pointer_cast<CdsItem>(clone);
 
+    auto resource = clonedItem->getResource(ContentHandler::DEFAULT);
     if (!mimetype.empty() && !protocol.empty()) {
         clonedItem->setMimeType(mimetype);
-        auto resource = clonedItem->getResource(0);
         resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
     } else if (mimetype.empty() && !protocol.empty()) {
-        auto resource = clonedItem->getResource(0);
         resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(clonedItem->getMimeType(), protocol));
     } else if (!mimetype.empty()) {
         clonedItem->setMimeType(mimetype);
-        auto resource = clonedItem->getResource(0);
         std::vector<std::string> parts = splitString(resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO), ':');
         protocol = parts[0];
         resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
@@ -1120,7 +1118,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
 
     const auto& resources = container->getResources();
     auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
-    if (fanart != resources.end() && (*fanart)->getHandlerType() != CH_CONTAINERART) {
+    if (fanart != resources.end() && (*fanart)->getHandlerType() != ContentHandler::CONTAINERART) {
         // remove stale references
         auto fanartObjId = stoiString((*fanart)->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
         try {
@@ -1133,7 +1131,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
         }
     }
     if (fanart == resources.end()) {
-        MetadataHandler::createHandler(context, CH_CONTAINERART)->fillMetadata(container);
+        MetadataHandler::createHandler(context, ContentHandler::CONTAINERART)->fillMetadata(container);
         database->updateObject(container, nullptr);
         fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
     }

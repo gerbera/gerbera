@@ -322,13 +322,13 @@ public:
     }
 
     /// \brief Search resources for given handler id
-    bool hasResource(int id) const
+    bool hasResource(ContentHandler id) const
     {
         return std::any_of(resources.begin(), resources.end(), [=](auto&& res) { return id == res->getHandlerType(); });
     }
 
     /// \brief Remove resource with given handler id
-    void removeResource(int id)
+    void removeResource(ContentHandler id)
     {
         auto index = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return id == res->getHandlerType(); });
         if (index != resources.end()) {
@@ -340,6 +340,16 @@ public:
     std::shared_ptr<CdsResource> getResource(std::size_t index) const
     {
         return resources.at(index);
+    }
+
+    /// \brief Query resource tag with the given handler id
+    std::shared_ptr<CdsResource> getResource(ContentHandler id) const
+    {
+        auto it = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return id == res->getHandlerType(); });
+        if (it != resources.end()) {
+            return *it;
+        }
+        return {};
     }
 
     /// \brief Add resource tag

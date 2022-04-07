@@ -46,20 +46,22 @@ class CdsObject;
 class IOHandler;
 
 // content handler Id's
-#define CH_DEFAULT 0
-#define CH_LIBEXIF 1
-#define CH_ID3 2
-#define CH_TRANSCODE 3
-#define CH_EXTURL 4
-#define CH_MP4 5
-#define CH_FFTH 6
-#define CH_FLAC 7
-#define CH_FANART 8
-#define CH_MATROSKA 9
-#define CH_SUBTITLE 10
-#define CH_CONTAINERART 11
-#define CH_WAVPACK 12
-#define CH_RESOURCE 20
+enum class ContentHandler {
+    DEFAULT = 0,
+    LIBEXIF = 1,
+    ID3 = 2,
+    TRANSCODE = 3,
+    EXTURL = 4,
+    MP4 = 5,
+    FFTH = 6,
+    FLAC = 7,
+    FANART = 8,
+    MATROSKA = 9,
+    SUBTITLE = 10,
+    CONTAINERART = 11,
+    WAVPACK = 12,
+    RESOURCE = 20,
+};
 
 #define CONTENT_TYPE_AIFF "aiff"
 #define CONTENT_TYPE_APE "ape"
@@ -169,7 +171,7 @@ public:
 
     static void extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
     static std::string getMetaFieldName(metadata_fields_t field);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, int handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, ContentHandler handlerType);
 
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle
@@ -182,8 +184,10 @@ public:
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) = 0;
     virtual std::string getMimeType() const;
 
-    static std::string mapContentHandler2String(int ch);
-    static int remapContentHandler(const std::string& contHandler);
+    static std::string mapContentHandler2String(ContentHandler ch);
+    static bool checkContentHandler(const std::string& contHandler);
+    static ContentHandler remapContentHandler(const std::string& contHandler);
+    static ContentHandler remapContentHandler(int ch);
 
     static metadata_fields_t remapMetaDataField(std::string_view fieldName);
 };

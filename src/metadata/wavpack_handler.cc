@@ -139,7 +139,7 @@ void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
 {
-    auto resource = item->getResource(0);
+    auto resource = item->getResource(ContentHandler::DEFAULT);
     auto nrChannels = WavpackGetNumChannels(context);
     resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(nrChannels));
     auto sampleRate = WavpackGetSampleRate(context);
@@ -199,7 +199,7 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
                 auto artMimetype = getContentTypeFromByteVector(value + strlen(value) + 1, size - strlen(value) - 1);
                 if (artMimetype != MIMETYPE_DEFAULT) {
                     log_debug("Adding resource '{}'", renderProtocolInfo(artMimetype));
-                    auto resource = std::make_shared<CdsResource>(CH_WAVPACK);
+                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK);
                     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     resource->addOption(ALBUMART_OPTION, tag);
                     resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
