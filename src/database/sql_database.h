@@ -210,7 +210,7 @@ protected:
     void migrateResources(int objectId, const std::string& resourcesStr);
 
     /// \brief returns a fmt-printable identifier name
-    SQLIdentifier identifier(std::string_view name) const { return SQLIdentifier(name, table_quote_begin, table_quote_end); }
+    SQLIdentifier identifier(std::string_view name) const { return { name, table_quote_begin, table_quote_end }; }
 
     std::shared_ptr<Mime> mime;
 
