@@ -501,7 +501,7 @@ public:
         : ConfigSetup(option, xpath, help)
         , notEmpty(false)
         , itemNotEmpty(false)
-        , itemCheck(itemCheck)
+        , itemCheck(std::move(itemCheck))
         , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
         , attrOption(attrOption)

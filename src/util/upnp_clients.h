@@ -80,8 +80,8 @@ struct ClientInfo {
 };
 
 struct ClientCacheEntry {
-    ClientCacheEntry(const std::shared_ptr<GrbNet>& addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
-        : addr(addr)
+    ClientCacheEntry(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+        : addr(std::move(addr))
         , userAgent(std::move(userAgent))
         , last(last)
         , age(age)
@@ -98,8 +98,8 @@ struct ClientCacheEntry {
 
 class ClientStatusDetail {
 public:
-    ClientStatusDetail(const std::string& group, int itemId, int playCount, int lastPlayed, int lastPlayedPosition, int bookMarkPos)
-        : group(group)
+    ClientStatusDetail(std::string group, int itemId, int playCount, int lastPlayed, int lastPlayedPosition, int bookMarkPos)
+        : group(std::move(group))
         , itemId(itemId)
         , playCount(playCount)
         , lastPlayed(lastPlayed)
