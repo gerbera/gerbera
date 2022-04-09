@@ -258,6 +258,7 @@ private:
             , operation(operation)
         {
         }
+        ~AddUpdateTable() = default;
         AddUpdateTable(AddUpdateTable&&) = default;
         AddUpdateTable& operator=(AddUpdateTable&&) = default;
         [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
