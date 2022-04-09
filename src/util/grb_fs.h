@@ -39,6 +39,9 @@ public:
     explicit GrbFile(fs::path path);
     ~GrbFile();
 
+    GrbFile(const GrbFile&) = delete;
+    GrbFile& operator=(const GrbFile&) = delete;
+
     std::FILE* open(const char* mode, bool fail = true);
     /// \brief Reads the entire contents of a text file and returns it as a string.
     std::string readTextFile();
