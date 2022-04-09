@@ -72,9 +72,9 @@ protected:
     int totalMatches {};
 
 public:
-    BrowseParam(const std::shared_ptr<CdsObject>& object, unsigned int flags)
+    BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
         : flags(flags)
-        , object(object)
+        , object(std::move(object))
     {
     }
 
@@ -139,14 +139,14 @@ protected:
 
 public:
     SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
-        int requestedCount, bool searchableContainers, const std::string& group)
+        int requestedCount, bool searchableContainers, std::string group)
         : containerID(std::move(containerID))
         , searchCrit(std::move(searchCriteria))
         , sortCrit(std::move(sortCriteria))
         , startingIndex(startingIndex)
         , requestedCount(requestedCount)
         , searchableContainers(searchableContainers)
-        , group(group)
+        , group(std::move(group))
     {
     }
     const std::string& searchCriteria() const { return searchCrit; }
