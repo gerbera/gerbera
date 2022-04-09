@@ -499,8 +499,6 @@ public:
     ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
         ArrayItemCheckFunction itemCheck, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
-        , notEmpty(false)
-        , itemNotEmpty(false)
         , itemCheck(std::move(itemCheck))
         , defaultEntries(std::move(defaultEntries))
         , nodeOption(nodeOption)
