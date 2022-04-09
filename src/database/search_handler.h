@@ -362,13 +362,13 @@ template <class En>
 class EnumColumnMapper : public ColumnMapper {
 public:
     explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, std::string tableAlias, std::string tableName,
-        const std::vector<std::pair<std::string, En>>& keyMap, const std::map<En, std::pair<std::string, std::string>>& colMap)
+        std::vector<std::pair<std::string, En>> keyMap, std::map<En, std::pair<std::string, std::string>> colMap)
         : table_quote_begin(tabQuoteBegin)
         , table_quote_end(tabQuoteEnd)
         , tableAlias(std::move(tableAlias))
         , tableName(std::move(tableName))
-        , keyMap(keyMap)
-        , colMap(colMap)
+        , keyMap(std::move(keyMap))
+        , colMap(std::move(colMap))
     {
     }
     bool hasEntry(const std::string& tag) const override
