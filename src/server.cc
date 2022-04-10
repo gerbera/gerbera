@@ -399,7 +399,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST");
         try {
-            auto request = std::make_unique<SubscriptionRequest>(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
+            auto request = SubscriptionRequest(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnpE) {
             log_warning("Subscription exception: {}", upnpE.what());
@@ -472,25 +472,25 @@ void Server::routeActionRequest(ActionRequest& request)
     }
 }
 
-void Server::routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const
+void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
 {
     // make sure that the request is for our device
-    if (request->getUDN() != serverUDN) {
+    if (request.getUDN() != serverUDN) {
         // not for us
-        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request->getUDN(), serverUDN);
+        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request.getUDN(), serverUDN);
         throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
-    if (request->getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
+    if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         // log_debug("routeSubscriptionRequest: request for content directory service");
         cds->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
+    } else if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         // log_debug("routeSubscriptionRequest: request for connection manager service");
         cmgr->processSubscriptionRequest(request);
-    } else if (request->getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+    } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processSubscriptionRequest(request);
     } else {
         // cp asks for a nonexistent service or for a service that

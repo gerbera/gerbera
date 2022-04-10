@@ -103,7 +103,7 @@ void MRRegistrarService::processActionRequest(ActionRequest& request)
     log_debug("end");
 }
 
-void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto propset = UpnpXMLBuilder::createEventPropertySet();
     auto property = propset->document_element().first_child();
@@ -129,7 +129,7 @@ void MRRegistrarService::processSubscriptionRequest(const std::unique_ptr<Subscr
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_MRREG_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_MRREG_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif
