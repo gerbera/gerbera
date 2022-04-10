@@ -358,7 +358,7 @@ void ContentDirectoryService::processActionRequest(ActionRequest& request)
     log_debug("ContentDirectoryService::processActionRequest: end");
 }
 
-void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     log_debug("start");
 
@@ -386,7 +386,7 @@ void ContentDirectoryService::processSubscriptionRequest(const std::unique_ptr<S
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CDS_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_CDS_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif

@@ -174,7 +174,7 @@ protected:
     /// and ConnectionManagerService), this function looks at the service id
     /// of the request and calls the process_subscription_request() for the
     /// appropriate service.
-    void routeSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request) const;
+    void routeSubscriptionRequest(const SubscriptionRequest& request) const;
 
     /// \brief Registers callback functions for the internal web server.
     /// \param filename Incoming filename.

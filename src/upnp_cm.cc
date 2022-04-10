@@ -106,7 +106,7 @@ void ConnectionManagerService::processActionRequest(ActionRequest& request)
     log_debug("end");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<SubscriptionRequest>& request)
+void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = UpnpXMLBuilder::createEventPropertySet();
@@ -133,7 +133,7 @@ void ConnectionManagerService::processSubscriptionRequest(const std::unique_ptr<
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, event, request->getSubscriptionID().c_str());
+        UPNP_DESC_CM_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif
