@@ -38,7 +38,6 @@
 #include "util/timer.h"
 
 // forward declarations
-class AutoscanDirectory;
 class CdsContainer;
 class Database;
 

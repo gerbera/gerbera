@@ -436,9 +436,9 @@ void Web::ConfigLoad::process()
     // write autoscan configuration
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
-        for (std::size_t i = 0; i < autoscan->size(); i++) {
-            auto&& entry = autoscan->get(i);
-            auto&& adir = content->getAutoscanDirectory(entry->getLocation());
+        for (std::size_t i = 0; i < autoscan.size(); i++) {
+            auto&& entry = autoscan.at(i);
+            auto&& adir = content->getAutoscanDirectory(entry.getLocation());
             auto item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());
@@ -471,7 +471,7 @@ void Web::ConfigLoad::process()
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
         }
-        if (autoscan->size() == 0) {
+        if (autoscan.size() == 0) {
             auto item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_LOCATION));
 

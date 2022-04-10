@@ -284,10 +284,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     std::string autoscanItemPath;
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
-        for (std::size_t i = 0; i < autoscan->size(); i++) {
-            auto&& entry = autoscan->get(i);
-            auto&& adir = this->content->getAutoscanDirectory(entry->getLocation());
-
+        for (const auto& adir : content->getAutoscanDirectories()) {
             duk_push_object(ctx);
             setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
             setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));

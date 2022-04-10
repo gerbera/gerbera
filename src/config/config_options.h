@@ -36,6 +36,7 @@
 #include <map>
 #include <vector>
 
+#include "content/autoscan.h"
 #include "transcoding/transcoding.h"
 
 // forward declaration
@@ -73,7 +74,7 @@ public:
         throw std::runtime_error("Wrong option type array");
     }
 
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption() const
+    virtual std::vector<AutoscanDirectory> getAutoscanListOption() const
     {
         throw std::runtime_error("Wrong option type autoscan list");
     }
@@ -233,15 +234,15 @@ private:
 
 class AutoscanListOption : public ConfigOption {
 public:
-    explicit AutoscanListOption(std::shared_ptr<AutoscanList> option)
-        : option(std::move(option))
+    explicit AutoscanListOption(std::vector<AutoscanDirectory> autoscans_)
+        : autoscans(std::move(autoscans_))
     {
     }
 
-    std::shared_ptr<AutoscanList> getAutoscanListOption() const override { return option; }
+    [[nodiscard]] std::vector<AutoscanDirectory> getAutoscanListOption() const override { return autoscans; }
 
 private:
-    std::shared_ptr<AutoscanList> option;
+    std::vector<AutoscanDirectory> autoscans;
 };
 
 class ClientConfigListOption : public ConfigOption {
