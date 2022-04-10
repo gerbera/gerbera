@@ -66,16 +66,16 @@ static int get16m(const std::byte* shrt)
     return std::to_integer<int>((shrt[0] << 8) | shrt[1]);
 }
 
-static int iohFgetc(const std::unique_ptr<IOHandler>& ioh)
+static int iohFgetc(IOHandler& ioh)
 {
     std::byte c[1] {};
-    int ret = ioh->read(reinterpret_cast<char*>(c), sizeof(char));
+    int ret = ioh.read(reinterpret_cast<char*>(c), sizeof(char));
     if (ret < 0)
         return ret;
     return std::to_integer<int>(c[0]);
 }
 
-static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& ioh)
+static std::pair<int, int> getJpegResolution(IOHandler& ioh)
 {
     int a = iohFgetc(ioh);
 
@@ -117,11 +117,11 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
         data[0] = std::byte(lh);
         data[1] = std::byte(ll);
 
-        int got = ioh->read(reinterpret_cast<char*>(data + 2), itemlen - 2);
+        int got = ioh.read(reinterpret_cast<char*>(data + 2), itemlen - 2);
         if (got != itemlen - 2)
             throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
 
-        ioh->seek(skip, SEEK_CUR);
+        ioh.seek(skip, SEEK_CUR);
 
         switch (marker) {
         case M_EOI: // in case it's a tables-only JPEG stream
@@ -146,16 +146,16 @@ static std::pair<int, int> getJpegResolution(const std::unique_ptr<IOHandler>& i
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(std::unique_ptr<IOHandler> ioh)
+std::string get_jpeg_resolution(IOHandler& ioh)
 {
     auto wh = std::pair<int, int>();
     try {
         wh = getJpegResolution(ioh);
     } catch (const std::runtime_error&) {
-        ioh->close();
+        ioh.close();
         throw;
     }
-    ioh->close();
+    ioh.close();
 
     return fmt::format("{}x{}", wh.first, wh.second);
 }

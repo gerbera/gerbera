@@ -43,9 +43,9 @@
 static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t resNum)
 {
     try {
-        auto fioH = std::make_unique<FileIOHandler>(item->getLocation());
-        fioH->open(UPNP_READ);
-        const std::string resolution = get_jpeg_resolution(std::move(fioH));
+        auto fioH = FileIOHandler(item->getLocation());
+        fioH.open(UPNP_READ);
+        const std::string resolution = get_jpeg_resolution(fioH);
 
         if (resNum >= item->getResourceCount())
             throw_std_runtime_error("Invalid resource index");
@@ -279,9 +279,9 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     if (ed->size) {
         try {
-            auto ioH = std::make_unique<MemIOHandler>(ed->data, ed->size);
-            ioH->open(UPNP_READ);
-            const std::string thResolution = get_jpeg_resolution(std::move(ioH));
+            auto ioH = MemIOHandler(ed->data, ed->size);
+            ioH.open(UPNP_READ);
+            const std::string thResolution = get_jpeg_resolution(ioH);
             log_debug("RESOLUTION: {}", thResolution);
 
             auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, CdsResource::Purpose::Thumbnail);
