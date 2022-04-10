@@ -1233,7 +1233,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(std::make_pair(MetadataHandler::getMetaFieldName(M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(to_seconds(fs::last_write_time(path)).count()))));
+    itemMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(to_seconds(fs::last_write_time(path)).count())));
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
