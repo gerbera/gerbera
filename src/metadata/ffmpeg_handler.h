@@ -39,7 +39,6 @@
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
 
-#include <array>
 #include <optional>
 
 #include "iohandler/io_handler.h"
@@ -62,18 +61,6 @@ private:
     void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
-
-    static constexpr auto propertyMap = std::array {
-        std::pair(M_TITLE, "title"),
-        std::pair(M_ARTIST, "artist"),
-        std::pair(M_ALBUM, "album"),
-        std::pair(M_GENRE, "genre"),
-        std::pair(M_DESCRIPTION, "description"),
-        std::pair(M_TRACKNUMBER, "track"),
-        std::pair(M_PARTNUMBER, "discnumber"),
-        std::pair(M_ALBUMARTIST, "album_artist"),
-        std::pair(M_COMPOSER, "composer"),
-    };
 };
 
 #endif //__FFMPEG_HANDLER_H__

@@ -42,6 +42,7 @@
 #ifdef HAVE_FFMPEG
 #include "ffmpeg_handler.h"
 
+#include <array>
 #include <fmt/chrono.h>
 
 extern "C" {
@@ -60,6 +61,18 @@ extern "C" {
 #else
 #define as_codecpar(s) s->codec
 #endif
+
+static constexpr auto propertyMap = std::array {
+    std::pair(M_TITLE, "title"),
+    std::pair(M_ARTIST, "artist"),
+    std::pair(M_ALBUM, "album"),
+    std::pair(M_GENRE, "genre"),
+    std::pair(M_DESCRIPTION, "description"),
+    std::pair(M_TRACKNUMBER, "track"),
+    std::pair(M_PARTNUMBER, "discnumber"),
+    std::pair(M_ALBUMARTIST, "album_artist"),
+    std::pair(M_COMPOSER, "composer"),
+};
 
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
