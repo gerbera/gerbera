@@ -146,12 +146,12 @@ private:
 
 class DictionaryOption : public ConfigOption {
 public:
-    explicit DictionaryOption(std::map<std::string, std::string> option)
-        : option(std::move(option))
+    explicit DictionaryOption(const std::map<std::string, std::string>& option)
+        : option(option)
+        , origSize(option.size())
     {
-        this->origSize = this->option.size();
         std::size_t i = 0;
-        for (auto&& [key, val] : this->option) {
+        for (auto&& [key, val] : option) {
             this->indexMap[i] = key;
             i++;
         }
@@ -178,11 +178,11 @@ private:
 
 class VectorOption : public ConfigOption {
 public:
-    explicit VectorOption(std::vector<std::vector<std::pair<std::string, std::string>>> option)
-        : option(std::move(option))
+    explicit VectorOption(const std::vector<std::vector<std::pair<std::string, std::string>>>& option)
+        : option(option)
+        , origSize(option.size())
     {
-        this->origSize = this->option.size();
-        for (std::size_t i = 0; i < this->origSize; i++) {
+        for (std::size_t i = 0; i < origSize; i++) {
             this->indexMap[i] = i;
         }
     }
@@ -206,11 +206,11 @@ private:
 
 class ArrayOption : public ConfigOption {
 public:
-    explicit ArrayOption(std::vector<std::string> option)
-        : option(std::move(option))
+    explicit ArrayOption(const std::vector<std::string>& option)
+        : option(option)
+        , origSize(option.size())
     {
-        this->origSize = this->option.size();
-        for (std::size_t i = 0; i < this->origSize; i++) {
+        for (std::size_t i = 0; i < origSize; i++) {
             this->indexMap[i] = i;
         }
     }
