@@ -278,7 +278,7 @@ std::string Server::getPresentationUrl() const
     } else {
         std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == "ip") {
-            presentationURL = fmt::format("http://{}/{}", ip, presentationURL);
+            presentationURL = fmt::format("http://{}:{}", ip, presentationURL);
         } else if (appendto == "port") {
             presentationURL = fmt::format("http://{}:{}/{}", ip, port, presentationURL);
         } // else appendto is none and we take the URL as it entered by user
