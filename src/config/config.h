@@ -30,8 +30,8 @@
 #include "util/grb_fs.h"
 
 // forward declarations
-class AutoscanDirectory;
 class AutoscanList;
+class AutoscanDirectory;
 class ClientConfigList;
 class ConfigOption;
 class Database;
@@ -391,7 +391,7 @@ public:
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    virtual std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const = 0;
+    virtual std::vector<AutoscanDirectory> getAutoscanListOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve

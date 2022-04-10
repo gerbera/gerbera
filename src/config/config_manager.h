@@ -99,7 +99,7 @@ public:
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override;
+    std::vector<AutoscanDirectory> getAutoscanListOption(config_option_t option) const override;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve

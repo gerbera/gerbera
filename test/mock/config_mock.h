@@ -6,6 +6,7 @@
 
 #include "config/config.h"
 #include "metadata/metadata_handler.h"
+#include "content/autoscan.h"
 
 class ConfigMock : public Config {
 public:
@@ -95,7 +96,7 @@ public:
         }
     }
     std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
-    std::shared_ptr<AutoscanList> getAutoscanListOption(config_option_t option) const override { return nullptr; }
+    std::vector<AutoscanDirectory> getAutoscanListOption(config_option_t option) const override { return {}; }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override { }

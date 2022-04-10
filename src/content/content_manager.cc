@@ -114,37 +114,34 @@ void ContentManager::run()
     }
 
     auto configTimedList = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    for (std::size_t i = 0; i < configTimedList->size(); i++) {
-        auto dir = configTimedList->get(i);
-        if (dir) {
-            fs::path path = dir->getLocation();
-            if (fs::is_directory(path)) {
-                dir->setObjectID(ensurePathExistence(path));
-            }
+    for (auto& dir : configTimedList) {
+        fs::path path = dir.getLocation();
+        if (fs::is_directory(path)) {
+            dir.setObjectID(ensurePathExistence(path));
         }
     }
 
-    database->updateAutoscanList(AutoscanDirectory::ScanMode::Timed, configTimedList);
     autoscan_timed = database->getAutoscanList(AutoscanDirectory::ScanMode::Timed);
+    for (auto adir : configTimedList) {
+        autoscan_timed->add(std::make_shared<AutoscanDirectory>(adir));
+    }
 
     auto self = shared_from_this();
 #ifdef HAVE_INOTIFY
     inotify = std::make_unique<AutoscanInotify>(self);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        autoscan_inotify = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
+
         auto configInotifyList = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-        for (std::size_t i = 0; i < configInotifyList->size(); i++) {
-            auto dir = configInotifyList->get(i);
-            if (dir) {
-                fs::path path = dir->getLocation();
-                if (fs::is_directory(path)) {
-                    dir->setObjectID(ensurePathExistence(path));
-                }
+        for (auto dir : configInotifyList) {
+            fs::path path = dir.getLocation();
+            if (fs::is_directory(path)) {
+                dir.setObjectID(ensurePathExistence(path));
             }
+            autoscan_inotify->add(std::make_shared<AutoscanDirectory>(dir));
         }
 
-        database->updateAutoscanList(AutoscanDirectory::ScanMode::INotify, configInotifyList);
-        autoscan_inotify = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
     } else {
         // make an empty list so that we do not have to do extra checks on shutdown
         autoscan_inotify = std::make_shared<AutoscanList>();
