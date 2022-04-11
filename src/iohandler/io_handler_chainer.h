@@ -69,7 +69,7 @@ protected:
 
 private:
     int status;
-    char* buf;
+    std::byte* buf;
     int chunkSize;
     std::unique_ptr<IOHandler> readFrom;
     std::unique_ptr<IOHandler> writeTo;

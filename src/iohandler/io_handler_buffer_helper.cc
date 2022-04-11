@@ -50,7 +50,7 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
     if (isOpen)
         throw_std_runtime_error("tried to reopen an open IOHandlerBufferHelper");
 
-    buffer = new char[bufSize];
+    buffer = new std::byte[bufSize];
     startBufferThread();
     isOpen = true;
 }
@@ -61,7 +61,7 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
         close();
 }
 
-std::size_t IOHandlerBufferHelper::read(char* buf, std::size_t length)
+std::size_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);

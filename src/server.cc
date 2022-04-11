@@ -588,7 +588,7 @@ int Server::registerVirtualDirCallbacks()
             return -1;
 
         auto handler = static_cast<IOHandler*>(f);
-        return handler->read(buf, length);
+        return handler->read(reinterpret_cast<std::byte*>(buf), length);
     });
     if (ret != UPNP_E_SUCCESS)
         return ret;

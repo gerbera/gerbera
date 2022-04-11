@@ -69,7 +69,7 @@ static int get16m(const std::byte* shrt)
 static int iohFgetc(IOHandler& ioh)
 {
     std::byte c[1] {};
-    int ret = ioh.read(reinterpret_cast<char*>(c), sizeof(char));
+    int ret = ioh.read(c, sizeof(std::byte));
     if (ret < 0)
         return ret;
     return std::to_integer<int>(c[0]);
@@ -117,7 +117,7 @@ static std::pair<int, int> getJpegResolution(IOHandler& ioh)
         data[0] = std::byte(lh);
         data[1] = std::byte(ll);
 
-        int got = ioh.read(reinterpret_cast<char*>(data + 2), itemlen - 2);
+        int got = ioh.read(data + 2, itemlen - 2);
         if (got != itemlen - 2)
             throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
 
