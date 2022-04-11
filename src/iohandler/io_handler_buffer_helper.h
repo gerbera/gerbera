@@ -59,7 +59,7 @@ public:
 
     // inherited from IOHandler
     void open(enum UpnpOpenFileMode mode) override;
-    std::size_t read(char* buf, std::size_t length) override;
+    std::size_t read(std::byte* buf, std::size_t length) override;
     void seek(off_t offset, int whence) override;
     void close() override;
 
@@ -67,7 +67,7 @@ protected:
     std::shared_ptr<Config> config;
     std::size_t bufSize;
     std::size_t initialFillSize;
-    char* buffer {};
+    std::byte* buffer {};
     bool isOpen {};
     bool eof {};
     bool readError {};

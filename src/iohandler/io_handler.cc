@@ -58,7 +58,7 @@ void IOHandler::open(enum UpnpOpenFileMode mode)
 ///
 /// \retval 0   EOF encountered.
 /// \retval -1  Error.
-std::size_t IOHandler::read(char* buf, std::size_t length)
+std::size_t IOHandler::read(std::byte* buf, std::size_t length)
 {
     return -1;
 }
@@ -79,7 +79,7 @@ std::size_t IOHandler::read(char* buf, std::size_t length)
 /// \retval Actual number of bytes written.
 ///
 /// \warning Currently this function is not supported.
-std::size_t IOHandler::write(char* buf, std::size_t length)
+std::size_t IOHandler::write(std::byte* buf, std::size_t length)
 {
     return 0;
 }

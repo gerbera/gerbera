@@ -145,7 +145,7 @@ void BufferedIOHandler::threadProc()
         } else {
             lock.unlock();
             std::size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
-            readBytes = underlyingHandler->read(buffer + b, chunkSize);
+            readBytes = underlyingHandler->read(buffer + int(b), chunkSize);
             lock.lock();
             if (readBytes > 0) {
                 b += readBytes;

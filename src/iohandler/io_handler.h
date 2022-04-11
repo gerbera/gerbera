@@ -50,12 +50,12 @@ public:
     /// \brief Reads previously opened/initialized data sequentially.
     /// \param buf This buffer will be filled by our read functions.
     /// \param length Number of bytes to read.
-    virtual std::size_t read(char* buf, std::size_t length);
+    virtual std::size_t read(std::byte* buf, std::size_t length);
 
     /// \brief Writes to previously opened/initialized data sequentially.
     /// \param buf Data to be written.
     /// \param length Number of bytes to write.
-    virtual std::size_t write(char* buf, std::size_t length);
+    virtual std::size_t write(std::byte* buf, std::size_t length);
 
     /// \brief Performs a seek on an open/initialized data.
     /// \param offset Number of bytes to move in the buffer.

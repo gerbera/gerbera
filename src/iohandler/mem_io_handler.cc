@@ -55,7 +55,7 @@ void MemIOHandler::open(enum UpnpOpenFileMode mode)
     pos = 0;
 }
 
-std::size_t MemIOHandler::read(char* buf, std::size_t length)
+std::size_t MemIOHandler::read(std::byte* buf, std::size_t length)
 {
     std::size_t ret;
 

@@ -154,13 +154,13 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
     }
 }
 
-std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
+std::size_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
     fd_set readSet;
     struct timespec timeout = { FIFO_READ_TIMEOUT, 0 };
     ssize_t bytesRead;
     std::size_t numBytes = 0;
-    char* pBuffer = buf;
+    auto pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
     int ret;
     int timeoutCount = 0;
@@ -241,13 +241,13 @@ std::size_t ProcessIOHandler::read(char* buf, std::size_t length)
     return numBytes;
 }
 
-std::size_t ProcessIOHandler::write(char* buf, std::size_t length)
+std::size_t ProcessIOHandler::write(std::byte* buf, std::size_t length)
 {
     fd_set writeSet;
     struct timespec timeout = { FIFO_WRITE_TIMEOUT, 0 };
     ssize_t bytesWritten;
     std::size_t numBytes = 0;
-    char* pBuffer = buf;
+    auto pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
     int ret;
 
