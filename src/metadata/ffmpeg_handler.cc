@@ -146,6 +146,8 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                 item->addMetaData(field, mDate);
             }
+        } else {
+            log_debug("Unhandled metadata {} = '{}'", key, value);
         }
     }
 }
@@ -154,8 +156,8 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx)
 {
     auto resource = item->getResource(ContentHandler::DEFAULT);
-    bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResourceCount() > 1 && item->getResource(1)->isMetaResource(ID3_ALBUM_ART);
-    auto resource2 = isAudioFile ? item->getResource(1) : item->getResource(ContentHandler::DEFAULT);
+    bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResource(CdsResource::Purpose::Thumbnail);
+    auto resource2 = isAudioFile ? item->getResource(CdsResource::Purpose::Thumbnail) : item->getResource(ContentHandler::DEFAULT);
 
     // duration
     if (pFormatCtx->duration > 0) {

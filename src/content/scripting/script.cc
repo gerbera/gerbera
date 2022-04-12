@@ -551,10 +551,13 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             int resCount = 0;
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
-                    int resNr = getIntProperty(sym, -1);
-                    if (resNr >= 0) {
-                        obj->addResource(std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(resNr)));
+                    int ht = getIntProperty(sym, -1);
+                    auto purpSym = fmt::format("{}:purpose", resCount);
+                    int purpose = getIntProperty(purpSym, -1);
+                    if (ht >= 0 && purpose >= 0) {
+                        obj->addResource(std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(ht), CdsResource::remapPurpose(purpose)));
                     }
+                    resCount++;
                 }
             }
             resCount = 0;
@@ -663,7 +666,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             }
 
             if (item->getResourceCount() == 0) {
-                auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
+                auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
                 resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
 
                 item->addResource(resource);
@@ -818,6 +821,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             int resCount = 0;
             for (auto&& res : obj->getResources()) {
                 setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(to_underlying(res->getHandlerType())));
+                setProperty(fmt::format("{}:purpose", resCount), fmt::to_string(to_underlying(res->getPurpose())));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, attr] : attributes) {
                     setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, key), attr);

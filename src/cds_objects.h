@@ -352,6 +352,16 @@ public:
         return {};
     }
 
+    /// \brief Query resource tag with the given purpose
+    std::shared_ptr<CdsResource> getResource(CdsResource::Purpose purpose) const
+    {
+        auto it = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return purpose == res->getPurpose(); });
+        if (it != resources.end()) {
+            return *it;
+        }
+        return {};
+    }
+
     /// \brief Add resource tag
     void addResource(const std::shared_ptr<CdsResource>& resource)
     {

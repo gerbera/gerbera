@@ -1116,37 +1116,35 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
         database->updateObject(container, nullptr);
     }
 
-    const auto& resources = container->getResources();
-    auto fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
-    if (fanart != resources.end() && (*fanart)->getHandlerType() != ContentHandler::CONTAINERART) {
+    auto fanart = container->getResource(CdsResource::Purpose::Thumbnail);
+    if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         // remove stale references
-        auto fanartObjId = stoiString((*fanart)->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
+        auto fanartObjId = stoiString(fanart->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
         try {
             if (fanartObjId > 0) {
                 database->loadObject(fanartObjId);
             }
         } catch (const ObjectNotFoundException&) {
-            container->removeResource((*fanart)->getHandlerType());
-            fanart = resources.end();
+            container->removeResource(fanart->getHandlerType());
+            fanart = nullptr;
         }
     }
-    if (fanart == resources.end()) {
+    if (!fanart) {
         MetadataHandler::createHandler(context, ContentHandler::CONTAINERART)->fillMetadata(container);
         database->updateObject(container, nullptr);
-        fanart = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
+        fanart = container->getResource(CdsResource::Purpose::Thumbnail);
     }
     auto location = container->getLocation();
 
     if (origObj) {
-        if (fanart == resources.end() && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
-            const auto& origResources = origObj->getResources();
-            fanart = std::find_if(origResources.begin(), origResources.end(), [=](auto&& res) { return res->isMetaResource(ID3_ALBUM_ART); });
-            if (fanart != origResources.end()) {
-                if ((*fanart)->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
-                    (*fanart)->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(origObj->getID() != INVALID_OBJECT_ID ? origObj->getID() : origObj->getRefID()));
-                    (*fanart)->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart - origResources.begin()));
+        if (!fanart && (origObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
+            fanart = origObj->getResource(CdsResource::Purpose::Thumbnail);
+            if (fanart) {
+                if (fanart->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+                    fanart->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(origObj->getID() != INVALID_OBJECT_ID ? origObj->getID() : origObj->getRefID()));
+                    fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart->getResId()));
                 }
-                container->addResource(*fanart);
+                container->addResource(fanart);
             }
             database->updateObject(container, nullptr);
         }

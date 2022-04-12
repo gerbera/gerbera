@@ -68,6 +68,7 @@ CREATE TABLE "grb_cds_resource" (
     "item_id" integer NOT NULL,
     "res_id" integer NOT NULL,
     "handlerType" integer NOT NULL,
+    "purpose" integer NOT NULL,
     "options" text default NULL,
     "parameters" text default NULL,
     PRIMARY KEY ("item_id", "res_id"),

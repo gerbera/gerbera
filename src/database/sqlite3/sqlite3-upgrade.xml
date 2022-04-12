@@ -274,4 +274,10 @@
         VACUUM;
         </script>
     </version>
+    <version number="18" remark="add resource purpose">
+        <script>ALTER TABLE "grb_cds_resource" ADD "purpose" integer NOT NULL default (0)</script>
+        <script>UPDATE "grb_cds_resource" SET "purpose"=1 WHERE ("parameters" like '%rct=aa%') OR ("parameters" LIKE '%rct=EX_TH%') OR ("parameters" LIKE '%rct=th%') OR ("options" like '%rct=aa%') OR ("options" LIKE '%rct=EX_TH%') OR ("options" LIKE '%rct=th%')</script>
+        <script>UPDATE "grb_cds_resource" SET "purpose"=2 WHERE ("parameters" like '%rct=vs%')</script>
+        <script>UPDATE "grb_cds_resource" SET "purpose"=0 WHERE "purpose" is null</script>
+    </version>
 </upgrade>

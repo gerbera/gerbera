@@ -339,9 +339,8 @@ void MatroskaHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, c
     log_debug("Found artwork of type {} in file {}", artMimetype, item->getLocation().c_str());
 
     if (artMimetype != MIMETYPE_DEFAULT) {
-        auto resource = std::make_shared<CdsResource>(ContentHandler::MATROSKA);
+        auto resource = std::make_shared<CdsResource>(ContentHandler::MATROSKA, CdsResource::Purpose::Thumbnail);
         resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
-        resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }

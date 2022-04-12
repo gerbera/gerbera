@@ -84,14 +84,6 @@ enum class ContentHandler {
 
 #define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
 
-#define RESOURCE_CONTENT_TYPE "rct"
-
-#define ID3_ALBUM_ART "aa"
-#define VIDEO_SUB "vs"
-
-#define EXIF_THUMBNAIL "EX_TH"
-#define THUMBNAIL "th" // thumbnail without need for special handling
-
 enum metadata_fields_t {
     M_TITLE = 0,
     M_ARTIST,
