@@ -1,4 +1,4 @@
-image: freebsd/12.x
+image: freebsd/13.x
 packages:
   - cmake
   - sudo
