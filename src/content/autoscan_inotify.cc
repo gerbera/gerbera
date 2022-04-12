@@ -547,23 +547,23 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
         return;
     }
 
-    auto wdObj = watches.at(wd);
-    if (!wdObj) {
+    auto wdObj = watches.find(wd);
+    if (wdObj == watches.end()) {
         log_error("wd not found in watches!? ({}, {})", wd, path.c_str());
         return;
     }
 
-    auto watchAs = getAppropriateAutoscan(wdObj, adir);
+    auto watchAs = getAppropriateAutoscan(wdObj->second, adir);
     if (!watchAs) {
         log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
     } else {
-        if (wdObj->getWdWatches()->size() == 1) {
+        if (wdObj->second->getWdWatches()->size() == 1) {
             // should be done automatically, because removeWatch triggers an IGNORED event
             // watches.remove(wd);
 
             inotify->removeWatch(wd);
         } else {
-            removeFromWdObj(wdObj, watchAs);
+            removeFromWdObj(wdObj->second, watchAs);
         }
     }
 }
