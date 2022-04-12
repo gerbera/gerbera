@@ -60,10 +60,9 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     // albumArtURI
-    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
-    resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
     obj->addResource(resource);
 
     std::ostringstream expectedXml;
@@ -79,7 +78,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<upnp:conductor>Conductor</upnp:conductor>\n";
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
-    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0/rct/aa</upnp:albumArtURI>\n";
+    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0</upnp:albumArtURI>\n";
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
 
@@ -154,7 +153,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addMetaData(M_UPNP_DATE, "2002-01-01");
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
     resource->addAttribute(CdsResource::Attribute::BITRATE, "16044");
     resource->addAttribute(CdsResource::Attribute::DURATION, "123456");
@@ -162,19 +161,17 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     resource->addAttribute(CdsResource::Attribute::SIZE, "4711");
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE);
+    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
     std::string type = "srt";
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(type));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
-    resource->addParameter(RESOURCE_CONTENT_TYPE, VIDEO_SUB);
     resource->addParameter("type", type);
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(ContentHandler::FANART);
+    resource = std::make_shared<CdsResource>(ContentHandler::FANART, CdsResource::Purpose::Thumbnail);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addAttribute(CdsResource::Attribute::RESOLUTION, "200x200");
-    resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
     obj->addResource(resource);
 
     std::ostringstream expectedXml;
@@ -187,10 +184,10 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<upnp:album>Album</upnp:album>\n";
     expectedXml << "<upnp:date>2002-01-01</upnp:date>\n";
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
-    expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2/rct/aa</upnp:albumArtURI>\n";
-    expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/rct/vs/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
+    expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2</upnp:albumArtURI>\n";
+    expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
     expectedXml << "<res size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/content/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
-    expectedXml << "<res protocolInfo=\"http-get:*:srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/content/media/object_id/42/res_id/1/group/default/rct/vs/type/srt/ext/file.subtitle.srt</res>\n";
+    expectedXml << "<res protocolInfo=\"http-get:*:srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/content/media/object_id/42/res_id/1/group/default/type/srt/ext/file.subtitle.srt</res>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 

@@ -37,8 +37,9 @@
 
 #define RESOURCE_PART_SEP '~'
 
-CdsResource::CdsResource(ContentHandler handlerType, std::string_view options, std::string_view parameters)
-    : handlerType(handlerType)
+CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose, std::string_view options, std::string_view parameters)
+    : purpose(purpose)
+    , handlerType(handlerType)
 {
     this->options = dictDecode(options);
     this->parameters = dictDecode(parameters);
@@ -231,4 +232,9 @@ CdsResource::Attribute CdsResource::mapAttributeName(const std::string& name)
         }
     }
     throw std::out_of_range { fmt::format("Could not map {}", name) };
+}
+
+std::string CdsResource::getPurposeDisplay(CdsResource::Purpose purpose)
+{
+    return purposeToDisplay.at(purpose);
 }

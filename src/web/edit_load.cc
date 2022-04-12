@@ -177,12 +177,15 @@ void Web::EditLoad::process()
         resEntry.append_attribute("resvalue") = MetadataHandler::mapContentHandler2String(resItem->getHandlerType()).c_str();
         resEntry.append_attribute("editable") = false;
 
+        resEntry = resources.append_child("resources");
+        resEntry.append_attribute("resname") = "purpose";
+        resEntry.append_attribute("resvalue") = CdsResource::getPurposeDisplay(resItem->getPurpose()).c_str();
+        resEntry.append_attribute("editable") = false;
+
         // write resource content
         if (objItem) {
             std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem);
-            if (resItem->isMetaResource(ID3_ALBUM_ART) //
-                || (resItem->getHandlerType() == ContentHandler::LIBEXIF && resItem->getParameter(RESOURCE_CONTENT_TYPE) == EXIF_THUMBNAIL) //
-                || (resItem->getHandlerType() == ContentHandler::FFTH && resItem->getOption(RESOURCE_CONTENT_TYPE) == THUMBNAIL)) {
+            if (resItem->getPurpose() == CdsResource::Purpose::Thumbnail) {
                 auto image = resources.append_child("resources");
                 image.append_attribute("resname") = "image";
                 image.append_attribute("resvalue") = url.c_str();

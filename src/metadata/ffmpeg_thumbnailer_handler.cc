@@ -118,8 +118,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto it = mappings.find(CONTENT_TYPE_JPG);
         std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
-        auto ffres = std::make_shared<CdsResource>(ContentHandler::FFTH);
-        ffres->addOption(RESOURCE_CONTENT_TYPE, THUMBNAIL);
+        auto ffres = std::make_shared<CdsResource>(ContentHandler::FFTH, CdsResource::Purpose::Thumbnail);
         ffres->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
         y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;

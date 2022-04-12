@@ -78,7 +78,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
     std::string mimetype = item->getMimeType();
 
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
     resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(filesize));
 

@@ -284,10 +284,9 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             const std::string thResolution = get_jpeg_resolution(std::move(ioH));
             log_debug("RESOLUTION: {}", thResolution);
 
-            auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, CdsResource::Purpose::Thumbnail);
             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution);
-            resource->addParameter(RESOURCE_CONTENT_TYPE, EXIF_THUMBNAIL);
             item->addResource(resource);
         } catch (const std::runtime_error& e) {
             log_error("Something bad happened! {}", e.what());
@@ -304,9 +303,8 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<Cd
 
     auto res = item->getResource(resNum);
 
-    std::string ctype = getValueOrDefault(res->getParameters(), RESOURCE_CONTENT_TYPE);
-    if (ctype != EXIF_THUMBNAIL)
-        throw_std_runtime_error("Got unknown content type: {}", ctype);
+    if (res->getPurpose() != CdsResource::Purpose::Thumbnail)
+        throw_std_runtime_error("Resource {} is not a Thumbnail", resNum);
 
     ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)

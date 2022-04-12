@@ -45,6 +45,12 @@
 
 class CdsResource {
 public:
+    enum class Purpose {
+        Content,
+        Thumbnail,
+        Subtitle,
+        Transcode
+    };
     enum class Attribute {
         SIZE = 0,
         DURATION,
@@ -71,7 +77,7 @@ public:
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
     /// \param handler_type id of the associated handler
-    explicit CdsResource(ContentHandler handlerType, std::string_view options = {}, std::string_view parameters = {});
+    explicit CdsResource(ContentHandler handlerType, Purpose purpose, std::string_view options = {}, std::string_view parameters = {});
     CdsResource(ContentHandler handlerType,
         std::map<Attribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
@@ -118,14 +124,10 @@ public:
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
 
-    bool isMetaResource(const char* rct, ContentHandler ht) const
-    {
-        return (handlerType == ht && getParameter(RESOURCE_CONTENT_TYPE) == rct) || isMetaResource(rct);
-    }
-    bool isMetaResource(const char* rct) const
-    {
-        return ((handlerType == ContentHandler::ID3 || handlerType == ContentHandler::MP4 || handlerType == ContentHandler::FLAC || handlerType == ContentHandler::FANART || handlerType == ContentHandler::CONTAINERART || handlerType == ContentHandler::WAVPACK) && getParameter(RESOURCE_CONTENT_TYPE) == rct) || (handlerType == ContentHandler::EXTURL && getOption(RESOURCE_CONTENT_TYPE) == rct);
-    }
+    static Purpose remapPurpose(int ip) { return static_cast<Purpose>(ip); }
+    static std::string getPurposeDisplay(Purpose purpose);
+    Purpose getPurpose() const { return purpose; }
+    void setPurpose(Purpose purpose) { this->purpose = purpose; }
 
     bool equals(const std::shared_ptr<CdsResource>& other) const;
     std::shared_ptr<CdsResource> clone();
@@ -153,6 +155,7 @@ public:
     static Attribute mapAttributeName(const std::string& name);
 
 protected:
+    Purpose purpose { Purpose::Content };
     ContentHandler handlerType;
     int resId { -1 };
     std::map<Attribute, std::string> attributes;
@@ -196,6 +199,12 @@ protected:
         { CdsResource::Attribute::VIDEOCODEC, "videoCodec" },
         { CdsResource::Attribute::FORMAT, "format" },
         { CdsResource::Attribute::TYPE, "type" },
+    };
+    inline static const std::map<Purpose, std::string> purposeToDisplay {
+        { CdsResource::Purpose::Content, "Content" },
+        { CdsResource::Purpose::Thumbnail, "Thumbnail" },
+        { CdsResource::Purpose::Subtitle, "Subtitle" },
+        { CdsResource::Purpose::Transcode, "Transcode" },
     };
 };
 

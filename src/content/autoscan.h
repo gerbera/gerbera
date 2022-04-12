@@ -148,7 +148,7 @@ public:
     }
     bool isValid() const
     {
-        return scanID == INVALID_SCAN_ID;
+        return scanID != INVALID_SCAN_ID;
     }
 
 protected:

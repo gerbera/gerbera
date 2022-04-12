@@ -47,7 +47,7 @@ class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 17
+#define DBVERSION 18
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"

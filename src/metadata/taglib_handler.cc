@@ -295,9 +295,8 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
     log_debug("Found artwork of type {} in file {}", artMimetype.c_str(), item->getLocation().c_str());
 
     if (artMimetype != MIMETYPE_DEFAULT) {
-        auto resource = std::make_shared<CdsResource>(ContentHandler::ID3);
+        auto resource = std::make_shared<CdsResource>(ContentHandler::ID3, CdsResource::Purpose::Thumbnail);
         resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
-        resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
         item->addResource(resource);
     }
 }

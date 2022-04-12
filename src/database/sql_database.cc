@@ -126,6 +126,7 @@ enum class ResourceCol {
     ItemId = 0,
     ResId,
     HandlerType,
+    Purpose,
     Options,
     Parameters,
     Attributes, // index of first attribute
@@ -331,6 +332,7 @@ void SQLDatabase::init()
         { to_underlying(ResourceCol::ItemId), { RES_ALIAS, "item_id" } },
         { to_underlying(ResourceCol::ResId), { RES_ALIAS, "res_id" } },
         { to_underlying(ResourceCol::HandlerType), { RES_ALIAS, "handlerType" } },
+        { to_underlying(ResourceCol::Purpose), { RES_ALIAS, "purpose" } },
         { to_underlying(ResourceCol::Options), { RES_ALIAS, "options" } },
         { to_underlying(ResourceCol::Parameters), { RES_ALIAS, "parameters" } },
     };
@@ -340,7 +342,7 @@ void SQLDatabase::init()
     tableColumnOrder = {
         { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "last_modified", "last_updated" } },
         { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
-        { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "options", "parameters" } },
+        { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "purpose", "options", "parameters" } },
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = CdsResource::getAttributeName(resAttrId);
@@ -997,12 +999,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         auto image = dynConfig->getImage();
                         std::error_code ec;
                         if (!image.empty() && isRegularFile(image, ec)) {
-                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART);
+                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
                             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
                             resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, image);
-                            resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
                             dynFolder->addResource(resource);
                         }
                         dynamicContainers.emplace(dynId, std::move(dynFolder));
@@ -2586,6 +2587,7 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(
             MetadataHandler::remapContentHandler(std::stoi(getCol(row, ResourceCol::HandlerType))),
+            CdsResource::remapPurpose(std::stoi(getCol(row, ResourceCol::Purpose))),
             getCol(row, ResourceCol::Options),
             getCol(row, ResourceCol::Parameters));
         resource->setResId(resources.size());
@@ -2613,6 +2615,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(resId);
             resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
@@ -2636,6 +2639,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             std::map<std::string, std::string> resourceSql;
             resourceSql["res_id"] = quote(resId);
             resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
                 resourceSql["options"] = quote(dictEncode(options));
@@ -2875,11 +2879,13 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 identifier("item_id"),
                 identifier("res_id"),
                 identifier("handlerType"),
+                identifier("purpose"),
             };
             auto values = std::vector {
                 fmt::to_string(objectId),
                 fmt::to_string(resId),
                 fmt::to_string(to_underlying(resource->getHandlerType())),
+                fmt::to_string(to_underlying(resource->getPurpose())),
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {

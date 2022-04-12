@@ -199,10 +199,9 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
                 auto artMimetype = getContentTypeFromByteVector(value + strlen(value) + 1, size - strlen(value) - 1);
                 if (artMimetype != MIMETYPE_DEFAULT) {
                     log_debug("Adding resource '{}'", renderProtocolInfo(artMimetype));
-                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK);
+                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, CdsResource::Purpose::Thumbnail);
                     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     resource->addOption(ALBUMART_OPTION, tag);
-                    resource->addParameter(RESOURCE_CONTENT_TYPE, ID3_ALBUM_ART);
                     item->addResource(resource);
                 }
             } else {
