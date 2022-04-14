@@ -69,8 +69,7 @@ void Web::Items::process()
     auto param = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     param.setRange(start, count);
 
-    auto c = container->getClass();
-    if (c == UPNP_CLASS_MUSIC_ALBUM || c == UPNP_CLASS_PLAYLIST_CONTAINER)
+    if (container->isSubClass(UPNP_CLASS_MUSIC_ALBUM) || container->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER))
         param.setFlag(BROWSE_TRACK_SORT);
 
     // get contents of request
@@ -127,6 +126,7 @@ void Web::Items::process()
 
     // ouput objects of container
     int cnt = start + 1;
+    auto cls = container->getClass();
     auto trackFmt = (param.getTotalMatches() >= 100) ? "{:03}" : "{:02}";
     for (auto&& arrayObj : arr) {
         auto item = items.append_child("item");
@@ -134,9 +134,9 @@ void Web::Items::process()
         item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
 
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
-        if (objItem->getPartNumber() > 0 && c == UPNP_CLASS_MUSIC_ALBUM)
+        if (objItem->getPartNumber() > 0 && startswith(cls, UPNP_CLASS_MUSIC_ALBUM))
             item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
-        if (objItem->getTrackNumber() > 0 && c != UPNP_CLASS_CONTAINER)
+        if (objItem->getTrackNumber() > 0 && !startswith(cls, UPNP_CLASS_CONTAINER))
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, objItem->getTrackNumber()).c_str());
         else
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());

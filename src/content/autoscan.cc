@@ -34,7 +34,9 @@
 #include "content_manager.h"
 #include "database/database.h"
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden)
+#include <numeric>
+
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
@@ -43,6 +45,101 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     , interval(interval)
     , scanID(INVALID_SCAN_ID)
 {
+    setMediaType(mediaType);
+}
+
+using MediaTypeIterator = EnumIterator<AutoscanDirectory::MediaType, AutoscanDirectory::MediaType::Audio, AutoscanDirectory::MediaType::MAX>;
+
+std::map<AutoscanDirectory::MediaType, std::string_view> mediaTypes = {
+    { AutoscanDirectory::MediaType::Audio, "Audio" },
+    { AutoscanDirectory::MediaType::Music, "Music" },
+    { AutoscanDirectory::MediaType::AudioBook, "AudioBook" },
+    { AutoscanDirectory::MediaType::AudioBroadcast, "AudioBroadcast" },
+
+    { AutoscanDirectory::MediaType::Image, "Image" },
+    { AutoscanDirectory::MediaType::Photo, "Photo" },
+
+    { AutoscanDirectory::MediaType::Video, "Video" },
+    { AutoscanDirectory::MediaType::Movie, "Movie" },
+    { AutoscanDirectory::MediaType::TV, "TV" },
+    { AutoscanDirectory::MediaType::MusicVideo, "MusicVideo" },
+
+    { AutoscanDirectory::MediaType::Any, "Any" },
+    { AutoscanDirectory::MediaType::MAX, "MAX" },
+};
+
+std::map<AutoscanDirectory::MediaType, std::string> upnpClasses = {
+    { AutoscanDirectory::MediaType::Audio, UPNP_CLASS_AUDIO_ITEM },
+    { AutoscanDirectory::MediaType::Music, UPNP_CLASS_MUSIC_TRACK },
+    { AutoscanDirectory::MediaType::AudioBook, UPNP_CLASS_AUDIO_BOOK },
+    { AutoscanDirectory::MediaType::AudioBroadcast, UPNP_CLASS_AUDIO_BROADCAST },
+
+    { AutoscanDirectory::MediaType::Image, UPNP_CLASS_IMAGE_ITEM },
+    { AutoscanDirectory::MediaType::Photo, UPNP_CLASS_IMAGE_PHOTO },
+
+    { AutoscanDirectory::MediaType::Video, UPNP_CLASS_VIDEO_ITEM },
+    { AutoscanDirectory::MediaType::Movie, UPNP_CLASS_VIDEO_MOVIE },
+    { AutoscanDirectory::MediaType::TV, UPNP_CLASS_VIDEO_BROADCAST },
+    { AutoscanDirectory::MediaType::MusicVideo, UPNP_CLASS_VIDEO_MUSICVIDEOCLIP },
+
+    { AutoscanDirectory::MediaType::Any, UPNP_CLASS_ITEM },
+    { AutoscanDirectory::MediaType::MAX, UPNP_CLASS_ITEM },
+};
+
+int AutoscanDirectory::makeMediaType(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | AutoscanDirectory::remapMediaType(trimString(i)); });
+}
+
+std::string_view AutoscanDirectory::mapMediaType(AutoscanDirectory::MediaType mt)
+{
+    return mediaTypes[mt];
+}
+
+std::string AutoscanDirectory::mapMediaType(int mt)
+{
+    if (mt < 0)
+        return mediaTypes.at(AutoscanDirectory::MediaType::Any).data();
+
+    std::vector<std::string> myFlags;
+
+    for (auto [mFlag, mLabel] : mediaTypes) {
+        if (mt & (1 << to_underlying(mFlag))) {
+            myFlags.emplace_back(mLabel);
+            mt &= ~(1 << to_underlying(mFlag));
+        }
+    }
+
+    if (mt) {
+        myFlags.push_back(fmt::format("{:#04x}", mt));
+    }
+
+    return fmt::format("{}", fmt::join(myFlags, " | "));
+}
+
+int AutoscanDirectory::remapMediaType(const std::string& flag)
+{
+    for (auto&& bit : MediaTypeIterator()) {
+        if (toLower(mediaTypes[bit].data()) == toLower(flag)) {
+            return 1 << to_underlying(bit);
+        }
+    }
+
+    if (toLower(mediaTypes[MediaType::Any].data()) == toLower(flag)) {
+        return -1;
+    }
+    return stoiString(flag, 0, 0);
+}
+
+void AutoscanDirectory::setMediaType(int mt)
+{
+    mediaType = mt;
+    if (mt == -1)
+        mt = ~0;
+    for (auto&& mFlag : MediaTypeIterator()) {
+        scanContent[upnpClasses[mFlag]] = (mt & (1 << to_underlying(mFlag)));
+    }
 }
 
 void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds lmt)
@@ -112,6 +209,21 @@ void AutoscanDirectory::setScanID(int id)
     timer_parameter->setID(id);
 }
 
+bool AutoscanDirectory::hasContent(const std::string& upnpClass) const
+{
+    bool result = true;
+
+    for (auto&& [cls, active] : scanContent) {
+        if (cls == upnpClass)
+            return active;
+        else if (startswith(upnpClass, cls))
+            result = active;
+        else if (startswith(cls, upnpClass)) // looking for base class with sub class
+            result = false;
+    }
+    return result;
+}
+
 const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
 {
     switch (scanmode) {
@@ -148,6 +260,8 @@ void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) c
     copy->last_mod_previous_scan = last_mod_previous_scan;
     copy->last_mod_current_scan = last_mod_current_scan;
     copy->timer_parameter = timer_parameter;
+    copy->scanContent = scanContent;
+    copy->mediaType = mediaType;
 }
 
 std::shared_ptr<Timer::Parameter> AutoscanDirectory::getTimerParameter() const

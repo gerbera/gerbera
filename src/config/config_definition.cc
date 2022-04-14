@@ -833,6 +833,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE,
         "attribute::recursive", "config-import.html#autoscan",
         false, true),
+    std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE,
+        "attribute::media-type", "config-import.html#autoscan",
+        to_underlying(AutoscanDirectory::MediaType::Any), AutoscanDirectory::makeMediaType),
     std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES,
         "attribute::hidden-files", "config-import.html#autoscan"),
     std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT,
@@ -1241,6 +1244,11 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
 #endif
                                     } },
     { ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
+#ifdef HAVE_INOTIFY
+                                             CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
+#endif
+                                         } },
+    { ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
                                              CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif

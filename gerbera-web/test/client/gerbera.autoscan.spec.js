@@ -25,6 +25,17 @@ describe('Gerbera Autoscan', () => {
     let autoscanPersistentMsg;
     let autoscanSave;
 
+    let autoscanAudio;
+    let autoscanAudioMusic;
+    let autoscanAudioBook;
+    let autoscanAudioBroadcast;
+    let autoscanImage;
+    let autoscanImagePhoto;
+    let autoscanVideo;
+    let autoscanVideoMovie;
+    let autoscanVideoTV;
+    let autoscanVideoMusicVideo;
+
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('index.html');
@@ -37,6 +48,17 @@ describe('Gerbera Autoscan', () => {
       autoscanInterval = $('#autoscanInterval');
       autoscanPersistentMsg = $('#autoscan-persistent-msg');
       autoscanSave = $('#autoscanSave');
+
+      autoscanAudio = $('#autoscanAudio');
+      autoscanAudioMusic = $('#autoscanAudioMusic');
+      autoscanAudioBook = $('#autoscanAudioBook');
+      autoscanAudioBroadcast = $('#autoscanAudioBroadcast');
+      autoscanImage = $('#autoscanImage');
+      autoscanImagePhoto = $('#autoscanImagePhoto');
+      autoscanVideo = $('#autoscanVideo');
+      autoscanVideoMovie = $('#autoscanVideoMovie');
+      autoscanVideoTV = $('#autoscanVideoTV');
+      autoscanVideoMusicVideo = $('#autoscanVideoMusicVideo');
     });
     afterEach(() => {
       fixture.cleanup();
@@ -56,6 +78,17 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanInterval.val()).toBe('');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
+
+      expect(autoscanAudio.is(':checked')).toBeFalsy();
+      expect(autoscanAudioMusic.is(':checked')).toBeFalsy();
+      expect(autoscanAudioBook.is(':checked')).toBeFalsy();
+      expect(autoscanAudioBroadcast.is(':checked')).toBeFalsy();
+      expect(autoscanImage.is(':checked')).toBeFalsy();
+      expect(autoscanImagePhoto.is(':checked')).toBeFalsy();
+      expect(autoscanVideo.is(':checked')).toBeFalsy();
+      expect(autoscanVideoMovie.is(':checked')).toBeFalsy();
+      expect(autoscanVideoTV.is(':checked')).toBeFalsy();
+      expect(autoscanVideoMusicVideo.is(':checked')).toBeFalsy();
     });
   });
   describe('addAutoscan()', () => {
@@ -68,7 +101,19 @@ describe('Gerbera Autoscan', () => {
         return $.Deferred().resolve({}).promise();
       });
       event = {
-        data: { id: '26fd6' }
+        data: {
+          id: '26fd6',
+          audio: true,
+          audioMusic: true,
+          audioBook: true,
+          audioBroadcast: true,
+          image: true,
+          imagePhoto: true,
+          video: true,
+          videoMovie: true,
+          videoTV: true,
+          videoMusicVideo: true
+        }
       };
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
     });
@@ -84,6 +129,16 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
         from_fs: true
       };
       data[Auth.SID] = 'SESSION_ID';
@@ -101,6 +156,16 @@ describe('Gerbera Autoscan', () => {
         action: 'as_edit_load',
         object_id: '26fd6',
         from_fs: false,
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
         updates: 'check'
       };
       data[Auth.SID] = 'SESSION_ID';
@@ -122,6 +187,17 @@ describe('Gerbera Autoscan', () => {
     let autoscanPersistentMsg;
     let autoscanSave;
 
+    let autoscanAudio;
+    let autoscanAudioMusic;
+    let autoscanAudioBook;
+    let autoscanAudioBroadcast;
+    let autoscanImage;
+    let autoscanImagePhoto;
+    let autoscanVideo;
+    let autoscanVideoMovie;
+    let autoscanVideoTV;
+    let autoscanVideoMusicVideo;
+
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('index.html');
@@ -134,6 +210,17 @@ describe('Gerbera Autoscan', () => {
       autoscanInterval = $('#autoscanInterval');
       autoscanPersistentMsg = $('#autoscan-persistent-msg');
       autoscanSave = $('#autoscanSave');
+
+      autoscanAudio = $('#autoscanAudio');
+      autoscanAudioMusic = $('#autoscanAudioMusic');
+      autoscanAudioBook = $('#autoscanAudioBook');
+      autoscanAudioBroadcast = $('#autoscanAudioBroadcast');
+      autoscanImage = $('#autoscanImage');
+      autoscanImagePhoto = $('#autoscanImagePhoto');
+      autoscanVideo = $('#autoscanVideo');
+      autoscanVideoMovie = $('#autoscanVideoMovie');
+      autoscanVideoTV = $('#autoscanVideoTV');
+      autoscanVideoMusicVideo = $('#autoscanVideoMusicVideo');
     });
     afterEach(() => {
       fixture.cleanup();
@@ -155,6 +242,17 @@ describe('Gerbera Autoscan', () => {
       expect(autoscanInterval.val()).toBe('1800');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
+
+      expect(autoscanAudio.is(':checked')).toBeTruthy();
+      expect(autoscanAudioMusic.is(':checked')).toBeTruthy();
+      expect(autoscanAudioBook.is(':checked')).toBeTruthy();
+      expect(autoscanAudioBroadcast.is(':checked')).toBeTruthy();
+      expect(autoscanImage.is(':checked')).toBeTruthy();
+      expect(autoscanImagePhoto.is(':checked')).toBeTruthy();
+      expect(autoscanVideo.is(':checked')).toBeTruthy();
+      expect(autoscanVideoMovie.is(':checked')).toBeTruthy();
+      expect(autoscanVideoTV.is(':checked')).toBeTruthy();
+      expect(autoscanVideoMusicVideo.is(':checked')).toBeTruthy();
 
       expect(Updates.updateTreeByIds).toHaveBeenCalled();
     });
@@ -193,6 +291,16 @@ describe('Gerbera Autoscan', () => {
         from_fs: true,
         scan_mode: 'timed',
         recursive: true,
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
         hidden: false,
         interval: '1800'
       };

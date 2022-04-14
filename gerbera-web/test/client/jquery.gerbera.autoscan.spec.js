@@ -14,6 +14,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
   let autoscanSave;
   let autoScanModal;
 
+  let autoscanAudio;
+  let autoscanAudioMusic;
+  let autoscanAudioBook;
+  let autoscanAudioBroadcast;
+  let autoscanImage;
+  let autoscanImagePhoto;
+  let autoscanVideo;
+  let autoscanVideoMovie;
+  let autoscanVideoTV;
+  let autoscanVideoMusicVideo;
+
   beforeEach(() => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
@@ -28,6 +39,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     autoscanPersistentMsg = $('#autoscan-persistent-msg');
     autoscanSave = $('#autoscanSave');
     autoScanModal = $('#autoscanModal');
+
+    autoscanAudio = $('#autoscanAudio');
+    autoscanAudioMusic = $('#autoscanAudioMusic');
+    autoscanAudioBook = $('#autoscanAudioBook');
+    autoscanAudioBroadcast = $('#autoscanAudioBroadcast');
+    autoscanImage = $('#autoscanImage');
+    autoscanImagePhoto = $('#autoscanImagePhoto');
+    autoscanVideo = $('#autoscanVideo');
+    autoscanVideoMovie = $('#autoscanVideoMovie');
+    autoscanVideoTV = $('#autoscanVideoTV');
+    autoscanVideoMusicVideo = $('#autoscanVideoMusicVideo');
   });
 
   afterEach(() => {
@@ -48,6 +70,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanInterval.val()).toBe('1800');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
+
+      expect(autoscanAudio.is(':checked')).toBeTruthy();
+      expect(autoscanAudioMusic.is(':checked')).toBeTruthy();
+      expect(autoscanAudioBook.is(':checked')).toBeTruthy();
+      expect(autoscanAudioBroadcast.is(':checked')).toBeTruthy();
+      expect(autoscanImage.is(':checked')).toBeTruthy();
+      expect(autoscanImagePhoto.is(':checked')).toBeTruthy();
+      expect(autoscanVideo.is(':checked')).toBeTruthy();
+      expect(autoscanVideoMovie.is(':checked')).toBeTruthy();
+      expect(autoscanVideoTV.is(':checked')).toBeTruthy();
+      expect(autoscanVideoMusicVideo.is(':checked')).toBeTruthy();
     });
 
     it('marks fields read-only if autoscan is peristent', () => {
@@ -61,6 +94,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
       expect(autoscanPersistentMsg.css('display')).toBe('block');
       expect(autoscanSave.is(':disabled')).toBeTruthy();
+
+      expect(autoscanAudio.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioMusic.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioBook.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioBroadcast.is(':disabled')).toBeTruthy();
+      expect(autoscanImage.is(':disabled')).toBeTruthy();
+      expect(autoscanImagePhoto.is(':disabled')).toBeTruthy();
+      expect(autoscanVideo.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoMovie.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoTV.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoMusicVideo.is(':disabled')).toBeTruthy();
       item.persistent = false;
     });
 
@@ -82,6 +126,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeFalsy();
+
+      expect(autoscanAudio.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioMusic.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBook.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBroadcast.is(':disabled')).toBeFalsy();
+      expect(autoscanImage.is(':disabled')).toBeFalsy();
+      expect(autoscanImagePhoto.is(':disabled')).toBeFalsy();
+      expect(autoscanVideo.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMovie.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoTV.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMusicVideo.is(':disabled')).toBeFalsy();
       item.scan_mode = previousMode;
     });
 
@@ -94,6 +149,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
       expect(autoscanHidden.is(':disabled')).toBeTruthy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
+
+      expect(autoscanAudio.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioMusic.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioBook.is(':disabled')).toBeTruthy();
+      expect(autoscanAudioBroadcast.is(':disabled')).toBeTruthy();
+      expect(autoscanImage.is(':disabled')).toBeTruthy();
+      expect(autoscanImagePhoto.is(':disabled')).toBeTruthy();
+      expect(autoscanVideo.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoMovie.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoTV.is(':disabled')).toBeTruthy();
+      expect(autoscanVideoMusicVideo.is(':disabled')).toBeTruthy();
       item.scan_mode = previousMode;
     });
 
@@ -106,6 +172,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
+
+      expect(autoscanAudio.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioMusic.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBook.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBroadcast.is(':disabled')).toBeFalsy();
+      expect(autoscanImage.is(':disabled')).toBeFalsy();
+      expect(autoscanImagePhoto.is(':disabled')).toBeFalsy();
+      expect(autoscanVideo.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMovie.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoTV.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMusicVideo.is(':disabled')).toBeFalsy();
       item.scan_mode = previousMode;
     });
   });
@@ -126,6 +203,17 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanInterval.val()).toBe('');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
+
+      expect(autoscanAudio.is(':checked')).toBeFalsy();
+      expect(autoscanAudioMusic.is(':checked')).toBeFalsy();
+      expect(autoscanAudioBook.is(':checked')).toBeFalsy();
+      expect(autoscanAudioBroadcast.is(':checked')).toBeFalsy();
+      expect(autoscanImage.is(':checked')).toBeFalsy();
+      expect(autoscanImagePhoto.is(':checked')).toBeFalsy();
+      expect(autoscanVideo.is(':checked')).toBeFalsy();
+      expect(autoscanVideoMovie.is(':checked')).toBeFalsy();
+      expect(autoscanVideoTV.is(':checked')).toBeFalsy();
+      expect(autoscanVideoMusicVideo.is(':checked')).toBeFalsy();
     });
   });
 
@@ -142,6 +230,16 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         from_fs: true,
         scan_mode: 'timed',
         recursive: true,
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
         hidden: true,
         interval: '1800'
       });
@@ -160,6 +258,16 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         from_fs: true,
         scan_mode: 'inotify',
         recursive: true,
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
         hidden: true
       });
 

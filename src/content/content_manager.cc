@@ -66,6 +66,51 @@
 #include "scripting/scripting_runtime.h"
 #endif
 
+bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual)
+{
+    if (op == "=" && actual.find(expect) != std::string::npos)
+        return true;
+    else if (op == "!=" && actual.find(expect) == std::string::npos)
+        return true;
+    else if (op == "<" && actual < expect)
+        return true;
+    else if (op == ">" && actual > expect)
+        return true;
+    return false;
+}
+
+bool UpnpMap::checkValue(const std::string& op, int expect, int actual)
+{
+    if (op == "=" && actual != expect)
+        return true;
+    else if (op == "!=" && actual == expect)
+        return true;
+    else if (op == "<" && actual < expect)
+        return true;
+    else if (op == ">" && actual > expect)
+        return true;
+    return false;
+}
+
+bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt)
+{
+    bool match = false;
+    if (startswith(mt, mimeType)) {
+        for (auto&& filter : filters) {
+            if (std::get<0>(filter) == "location") {
+                match = checkValue(std::get<1>(filter), std::get<2>(filter), item->getLocation().string());
+            } else if (std::get<0>(filter) == "tracknumber") {
+                match = checkValue(std::get<1>(filter), stoiString(std::get<2>(filter)), item->getTrackNumber());
+            } else if (std::get<0>(filter) == "partnumber") {
+                match = checkValue(std::get<1>(filter), stoiString(std::get<2>(filter)), item->getPartNumber());
+            } else if (std::find_if(mt_keys.begin(), mt_keys.end(), [val = std::get<0>(filter)](auto&& kvp) { return kvp.second == val; }) != mt_keys.end()) {
+                match = checkValue(std::get<1>(filter), std::get<2>(filter), item->getMetaData(std::get<0>(filter)));
+            }
+        }
+    }
+    return match;
+}
+
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer)
     : config(context->getConfig())
@@ -87,6 +132,33 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #endif
 
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    initUpnpMap(upnpMap, mimetypeUpnpclassMap);
+}
+
+void ContentManager::initUpnpMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source)
+{
+    auto re = std::regex("^([A-Za-z0-9_:]+)(<|>|=|!=)([A-Za-z0-9_]+)$");
+    for (auto&& [key, cls] : source) {
+        auto filterList = splitString(key, ';');
+        auto filters = std::vector<std::tuple<std::string, std::string, std::string>>();
+        auto mt = filterList.front();
+        std::vector<std::string> parts = splitString(mt, '/');
+
+        if (parts.size() == 2 && parts.at(1) == "*")
+            mt = fmt::format("{}/", parts.at(0));
+        filterList.erase(filterList.begin());
+
+        for (auto&& filter : filterList) {
+            std::smatch match;
+            std::regex_match(filter, match, re);
+            if (match.size() == 4) {
+                filters.emplace_back(match[1], match[2], match[3]);
+            }
+        }
+
+        target.push_back(UpnpMap(mt, cls, filters));
+    }
 }
 
 void ContentManager::run()
@@ -409,7 +481,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<CMAddFileTask> task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -425,14 +497,16 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             isNew = true;
         }
     } else if (obj->isItem() && processExisting) {
-        MetadataHandler::extractMetaData(context, std::static_pointer_cast<CdsItem>(obj), dirEnt);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
+        MetadataHandler::extractMetaData(context, item, dirEnt);
+        updateItemData(item, item->getMimeType());
     }
     if (obj->isItem() && layout && (processExisting || isNew)) {
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
-
-            { // only lock mutex while processing item layout
+            if (!adir || adir->hasContent(obj->getClass())) {
+                // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
                 layout->processCdsObject(obj, rootPath, contentType);
             }
@@ -467,7 +541,7 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
     if (rootPath.empty() && task)
         rootPath = task->getRootPath();
     // checkDatabase, don't process existing
-    auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, task);
+    auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
     if (!obj) // object ignored
         return INVALID_OBJECT_ID;
 
@@ -731,7 +805,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             }
             if (!firstObject && objectID > 0) {
                 firstObject = database->loadObject(objectID);
-                if (firstObject->getClass() != UPNP_CLASS_MUSIC_TRACK) {
+                if (!firstObject->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                     firstObject = nullptr;
                 }
             }
@@ -864,7 +938,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         try {
             fs::path rootPath = task ? task->getRootPath() : "";
             // check database if parent, process existing
-            auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, task);
+            auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, adir, task);
 
             if (obj) {
                 firstChild = false;
@@ -874,7 +948,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
                 }
                 if (obj->isItem()) {
                     parentID = obj->getParentID();
-                    if (!firstObject && obj->getClass() == UPNP_CLASS_MUSIC_TRACK) {
+                    if (!firstObject && obj->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                         firstObject = obj;
                     }
                 }
@@ -1178,6 +1252,25 @@ void ContentManager::updateObject(const std::shared_ptr<CdsObject>& obj, bool se
     }
 }
 
+std::string ContentManager::mimeTypeToUpnpClass(const std::string& mimeType)
+{
+    auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
+    if (it != upnpMap.end())
+        return it->upnpClass;
+
+    // try direct search
+    auto itm = mimetypeUpnpclassMap.find(mimeType);
+    if (itm != mimetypeUpnpclassMap.end())
+        return itm->second;
+
+    // try pattern search
+    std::vector<std::string> parts = splitString(mimeType, '/');
+    if (parts.size() != 2)
+        return {};
+
+    return getValueOrDefault(mimetypeUpnpclassMap, parts[0] + "/*");
+}
+
 std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo)
 {
     std::error_code ec;
@@ -1199,7 +1292,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         }
         log_debug("Mime '{}' for file {}", mimetype, dirEnt.path().c_str());
 
-        std::string upnpClass = mime->mimeTypeToUpnpClass(mimetype);
+        std::string upnpClass = mimeTypeToUpnpClass(mimetype);
         if (upnpClass.empty()) {
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
             if (contentType == CONTENT_TYPE_OGG) {
@@ -1232,9 +1325,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         obj->setTitle(f2i->convert(title));
 
         MetadataHandler::extractMetaData(context, item, dirEnt);
-        if (item->getMetaData(M_DATE).empty())
-            item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
-
+        updateItemData(item, mimetype);
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
@@ -1255,6 +1346,17 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         log_error("File or directory cannot be read: {} ({})", dirEnt.path().c_str(), ec.message());
     }
     return obj;
+}
+
+void ContentManager::updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
+{
+    if (item->getMetaData(M_DATE).empty())
+        item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
+    for (auto&& upnpPattern : upnpMap) {
+        if (upnpPattern.isMatch(item, mimetype)) {
+            item->setClass(upnpPattern.upnpClass);
+        }
+    }
 }
 
 void ContentManager::initLayout()
@@ -1690,6 +1792,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     copy->setHidden(dir->getHidden());
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
+    copy->setScanContent(dir->getScanContent());
 
     autoscanList->remove(copy->getScanID());
 
@@ -1730,7 +1833,7 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
         updateObject(obj, true);
 
 #ifdef HAVE_LASTFMLIB
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && item->getClass() == UPNP_CLASS_MUSIC_TRACK) {
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && item->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
         last_fm->startedPlaying(item);
     }
 #endif

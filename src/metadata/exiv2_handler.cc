@@ -154,11 +154,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                 if (startswith(metatag, "Exif")) {
                     md = exifData.findKey(Exiv2::ExifKey(metatag));
                     if (md != exifData.end())
-                        metaval = md->toString();
+                        metaval = trimString(md->toString());
                 } else if (startswith(metatag, "Xmp")) {
                     auto xmpMd = xmpData.findKey(Exiv2::XmpKey(metatag));
                     if (xmpMd != xmpData.end())
-                        metaval = xmpMd->toString();
+                        metaval = trimString(xmpMd->toString());
                 } else {
                     log_debug("Invalid meta Tag {}", metatag.c_str());
                     break;
@@ -182,11 +182,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                 if (startswith(auxtag, "Exif")) {
                     md = exifData.findKey(Exiv2::ExifKey(auxtag));
                     if (md != exifData.end())
-                        auxval = md->toString();
+                        auxval = trimString(md->toString());
                 } else if (startswith(auxtag, "Xmp")) {
                     auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
                     if (xmpMd != xmpData.end())
-                        auxval = xmpMd->toString();
+                        auxval = trimString(xmpMd->toString());
                 } else {
                     log_debug("Invalid Aux Tag {}", auxtag.c_str());
                     break;

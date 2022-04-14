@@ -280,4 +280,7 @@
         <script>UPDATE "grb_cds_resource" SET "purpose"=2 WHERE ("parameters" like '%rct=vs%')</script>
         <script>UPDATE "grb_cds_resource" SET "purpose"=0 WHERE "purpose" is null</script>
     </version>
+    <version number="19" remark="add autoscan content">
+        <script>ALTER TABLE "mt_autoscan" ADD "media_type" integer NOT NULL default(-1)</script>
+    </version>
 </upgrade>

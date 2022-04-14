@@ -106,7 +106,7 @@
 			"status": "unchanged",
 			"origValue": "",
 			"source": "config.xml",
-			"value": "1.7.0"
+			"value": "1.11.0"
 		},
 		{
 			"item": "/server/modelURL",

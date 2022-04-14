@@ -143,9 +143,9 @@ enum class AutoscanCol {
 enum class AutoscanColumn {
     Id = 0,
     ObjId,
-    ScanLevel,
     ScanMode,
     Recursive,
+    MedaType,
     Hidden,
     Interval,
     LastModified,
@@ -221,9 +221,9 @@ static const std::map<AutoscanCol, std::pair<std::string, std::string>> asColMap
 static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autoscanColMap {
     { AutoscanColumn::Id, { AUS_ALIAS, "id" } },
     { AutoscanColumn::ObjId, { AUS_ALIAS, "obj_id" } },
-    { AutoscanColumn::ScanLevel, { AUS_ALIAS, "scan_level" } },
     { AutoscanColumn::ScanMode, { AUS_ALIAS, "scan_mode" } },
     { AutoscanColumn::Recursive, { AUS_ALIAS, "recursive" } },
+    { AutoscanColumn::MedaType, { AUS_ALIAS, "media_type" } },
     { AutoscanColumn::Hidden, { AUS_ALIAS, "hidden" } },
     { AutoscanColumn::Interval, { AUS_ALIAS, "interval" } },
     { AutoscanColumn::LastModified, { AUS_ALIAS, "last_modified" } },
@@ -288,7 +288,6 @@ static const std::vector<std::pair<std::string, AutoscanCol>> asTagMap {
 static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap {
     { "id", AutoscanColumn::Id },
     { "obj_id", AutoscanColumn::ObjId },
-    { "scan_level", AutoscanColumn::ScanLevel },
     { "scan_mode", AutoscanColumn::ScanMode },
     { "recursive", AutoscanColumn::Recursive },
     { "hidden", AutoscanColumn::Hidden },
@@ -300,6 +299,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
 };
 
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
+#define getColInt(rw, idx, def) (rw)->col_int(to_underlying((idx)), (def))
 
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
@@ -2311,6 +2311,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 
     AutoscanDirectory::ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
+    int mt = getColInt(row, AutoscanColumn::MedaType, 0);
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
     int interval = 0;
@@ -2318,9 +2319,9 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         interval = std::stoi(getCol(row, AutoscanColumn::Interval));
     auto lastModified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::LastModified)));
 
-    log_info("Loading autoscan location: {}; recursive: {}, last_modified: {}", location.c_str(), recursive, lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
+    log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, mt);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", lastModified);
@@ -2347,9 +2348,9 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
 
     auto fields = std::vector {
         identifier("obj_id"),
-        identifier("scan_level"),
         identifier("scan_mode"),
         identifier("recursive"),
+        identifier("media_type"),
         identifier("hidden"),
         identifier("interval"),
         identifier("last_modified"),
@@ -2359,9 +2360,9 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
     };
     auto values = std::vector {
         objectID >= 0 ? quote(objectID) : SQL_NULL,
-        quote("full"),
         quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
         quote(adir->getRecursive()),
+        quote(adir->getMediaType()),
         quote(adir->getHidden()),
         quote(adir->getInterval().count()),
         quote(adir->getPreviousLMT().count()),
@@ -2389,9 +2390,9 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     }
     auto fields = std::vector {
         ColumnUpdate(identifier("obj_id"), objectID >= 0 ? quote(objectID) : SQL_NULL),
-        ColumnUpdate(identifier("scan_level"), quote("full")),
         ColumnUpdate(identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
         ColumnUpdate(identifier("recursive"), quote(adir->getRecursive())),
+        ColumnUpdate(identifier("media_type"), quote(adir->getMediaType())),
         ColumnUpdate(identifier("hidden"), quote(adir->getHidden())),
         ColumnUpdate(identifier("interval"), quote(adir->getInterval().count())),
         ColumnUpdate(identifier("persistent"), quote(adir->persistent())),
@@ -2562,11 +2563,13 @@ void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>&
     } else {
         // delete current metadata from DB
         operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string>(), Operation::Delete);
-        for (auto&& [key, val] : dict) {
-            std::map<std::string, std::string> metadataSql;
-            metadataSql.emplace("property_name", quote(key));
-            metadataSql.emplace("property_value", quote(val));
-            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
+        if (op != Operation::Delete) {
+            for (auto&& [key, val] : dict) {
+                std::map<std::string, std::string> metadataSql;
+                metadataSql.emplace("property_name", quote(key));
+                metadataSql.emplace("property_value", quote(val));
+                operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
+            }
         }
     }
 }

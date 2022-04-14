@@ -32,7 +32,6 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     : extension_map_case_sensitive(config->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE))
     , ignore_unknown_extensions(config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS))
     , extension_mimetype_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
-    , mimetype_upnpclass_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST))
     , ignoredExtensions(config->getArrayOption(CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS))
 {
     if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
@@ -109,9 +108,4 @@ std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
 #endif
     }
     return mimeType;
-}
-
-std::string Mime::mimeTypeToUpnpClass(const std::string& mimeType)
-{
-    return getPropertyMapValue(mimetype_upnpclass_map, mimeType);
 }
