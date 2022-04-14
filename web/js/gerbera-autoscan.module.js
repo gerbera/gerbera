@@ -36,6 +36,16 @@ const addAutoscan = (event) => {
       req_type: 'autoscan',
       object_id: item.id,
       action: 'as_edit_load',
+      audio: item.audio,
+      audioMusic: item.audioMusic,
+      audioBook: item.audioBook,
+      audioBroadcast: item.audioBroadcast,
+      image: item.image,
+      imagePhoto: item.imagePhoto,
+      video: item.video,
+      videoMovie: item.videoMovie,
+      videoTV: item.videoTV,
+      videoMusicVideo: item.videoMusicVideo,
       from_fs: fromFs
     };
     requestData[Auth.SID] = Auth.getSessionId();

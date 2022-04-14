@@ -52,9 +52,9 @@ CREATE TABLE `mt_internal_setting` (
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
-  `scan_level` enum('basic','full') NOT NULL,
   `scan_mode` enum('timed','inotify') NOT NULL,
   `recursive` tinyint(4) unsigned NOT NULL,
+  `media_type` int(11) NOT NULL,
   `hidden` tinyint(4) unsigned NOT NULL,
   `interval` int(11) unsigned default NULL,
   `last_modified` bigint(20) unsigned default NULL,

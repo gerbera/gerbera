@@ -31,17 +31,16 @@ if (getPlaylistType(orig.mimetype) === '') {
     var obj = orig; 
     obj.refID = orig.id;
 
-    if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
-        mime = 'trailer';
-    } else if (orig.mimetype === 'application/ogg') {
-        mime = (orig.theora === 1) ? 'video' : 'audio';
-    }
+    const upnpClass = orig.upnpclass;
     var audioLayout = config['/import/scripting/virtual-layout/attribute::audio-layout'];
     if (!audioLayout) {
         audioLayout = 'Default';
     }
-    switch (mime) {
-        case "audio":
+    switch (upnpClass) {
+        case "object.item.audioItem":
+        case "object.item.audioItem.musicTrack":
+        case "object.item.audioItem.audioBook":
+        case "object.item.audioItem.audioBroadcast":
             switch (audioLayout) {
             case 'Structured':
                 addAudioStructured(obj);
@@ -51,17 +50,54 @@ if (getPlaylistType(orig.mimetype) === '') {
                 break;
             }
             break;
-        case "video":
+        case "object.item.videoItem":
+        case "object.item.videoItem.movie":
             addVideo(obj);
             break;
-        case "trailer":
+        case "object.item.videoItem.musicVideoClip":
+        case "object.item.videoItem.videoBroadcast":
             addTrailer(obj);
             break;
-        case "image":
+        case "object.item.imageItem":
+        case "object.item.imageItem.photo":
             addImage(obj);
             break;
+        case "object.item.textItem":
+        case "object.item.bookmarkItem":
+        case "object.item.playlistItem":
+            print("Unable to handle upnp class " + orig.upnpclass + " for " + obj.location);
+            break;
         default:
-            print("Unable to handle mime type " + orig.mimetype + " for " + obj.location);
+            print("Unable to handle upnp class " + orig.upnpclass + " for " + obj.location);
+            if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
+                mime = 'trailer';
+            } else if (orig.mimetype === 'application/ogg') {
+                mime = (orig.theora === 1) ? 'video' : 'audio';
+            }
+            switch (mime) {
+                case "audio":
+                    switch (audioLayout) {
+                    case 'Structured':
+                        addAudioStructured(obj);
+                        break;
+                    default:
+                        addAudio(obj);
+                        break;
+                    }
+                    break;
+                case "video":
+                    addVideo(obj);
+                    break;
+                case "trailer":
+                    addTrailer(obj);
+                    break;
+                case "image":
+                    addImage(obj);
+                    break;
+                default:
+                    print("Unable to handle mime type " + orig.mimetype + " for " + obj.location);
+                    break;
+            }
             break;
     }
 }

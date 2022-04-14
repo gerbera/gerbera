@@ -53,7 +53,6 @@ public:
     std::string bufferToMimeType(const void* buffer, std::size_t length);
 #endif // HAVE_MAGIC
 
-    std::string mimeTypeToUpnpClass(const std::string& mimeType);
     std::string getMimeType(const fs::path& path, const std::string& defval = "");
 
 private:
@@ -61,7 +60,6 @@ private:
     bool ignore_unknown_extensions;
 
     std::map<std::string, std::string> extension_mimetype_map;
-    std::map<std::string, std::string> mimetype_upnpclass_map;
     std::vector<std::string> ignoredExtensions;
 
 #ifdef HAVE_MAGIC

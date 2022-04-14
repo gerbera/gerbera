@@ -344,6 +344,11 @@
 							"editable": true
 						},
 						{
+							"item": "/import/autoscan/timed/directory/attribute::media-type",
+							"caption": "Mediatype",
+							"editable": false
+						},
+						{
 							"item": "/import/autoscan/timed/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
 							"editable": true
@@ -371,6 +376,11 @@
 							"item": "/import/autoscan/inotify/directory/attribute::recursive",
 							"caption": "Recursive",
 							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::media-type",
+							"caption": "Mediatype",
+							"editable": false
 						},
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",

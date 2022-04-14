@@ -82,6 +82,29 @@ void Web::Autoscan::process()
             // add or update
             bool recursive = boolParam("recursive");
             bool hidden = boolParam("hidden");
+
+            std::vector<std::string> mediaType;
+            if (boolParam("audio"))
+                mediaType.emplace_back("Audio");
+            if (boolParam("audioMusic"))
+                mediaType.emplace_back("Music");
+            if (boolParam("audioBook"))
+                mediaType.emplace_back("AudioBook");
+            if (boolParam("audioBroadcast"))
+                mediaType.emplace_back("AudioBroadcast");
+            if (boolParam("image"))
+                mediaType.emplace_back("Image");
+            if (boolParam("imagePhoto"))
+                mediaType.emplace_back("Photo");
+            if (boolParam("video"))
+                mediaType.emplace_back("Video");
+            if (boolParam("videoMovie"))
+                mediaType.emplace_back("Movie");
+            if (boolParam("videoTV"))
+                mediaType.emplace_back("TV");
+            if (boolParam("videoMusicVideo"))
+                mediaType.emplace_back("MusicVideo");
+            int mt = AutoscanDirectory::makeMediaType(fmt::format("{}", fmt::join(mediaType, "|")));
             // bool persistent = boolParam("persistent");
 
             AutoscanDirectory::ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
@@ -91,9 +114,9 @@ void Web::Autoscan::process()
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
-            // log_debug("adding autoscan: location={}, scan_mode={}, recursive={}, interval={}, hidden={}",
-            //     location.c_str(), AutoscanDirectory::mapScanmode(scan_mode).c_str(),
-            //     recursive, interval, hidden);
+            // log_info("adding autoscan {}: location={}, scan_mode={}, recursive={}, audio={}, image={}, video={}, interval={}, hidden={}",
+            //     objectID, "", AutoscanDirectory::mapScanmode(scanMode),
+            //     recursive, audio, image, video, interval, hidden);
 
             auto autoscan = std::make_shared<AutoscanDirectory>(
                 "", // location
@@ -101,7 +124,8 @@ void Web::Autoscan::process()
                 recursive,
                 false, // persistent
                 interval,
-                hidden);
+                hidden,
+                mt);
             autoscan->setObjectID(objectID);
             content->setAutoscanDirectory(autoscan);
         }
@@ -138,11 +162,33 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("mediaType").append_child(pugi::node_pcdata).set_value("-1");
+        element.append_child("audio").append_child(pugi::node_pcdata).set_value("1");
+        element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("audioBook").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("audioBroadcast").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("image").append_child(pugi::node_pcdata).set_value("1");
+        element.append_child("imagePhoto").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("video").append_child(pugi::node_pcdata).set_value("1");
+        element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("videoTV").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value("0");
     } else {
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
         element.append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
         element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
+        element.append_child("mediaType").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getMediaType()).c_str());
+        element.append_child("audio").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_ITEM) ? "1" : "0");
+        element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_MUSIC_TRACK) ? "1" : "0");
+        element.append_child("audioBook").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_BOOK) ? "1" : "0");
+        element.append_child("audioBroadcast").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_BROADCAST) ? "1" : "0");
+        element.append_child("image").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_IMAGE_ITEM) ? "1" : "0");
+        element.append_child("imagePhoto").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_IMAGE_PHOTO) ? "1" : "0");
+        element.append_child("video").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_ITEM) ? "1" : "0");
+        element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MOVIE) ? "1" : "0");
+        element.append_child("videoTV").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_BROADCAST) ? "1" : "0");
+        element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MUSICVIDEOCLIP) ? "1" : "0");
     }
 }

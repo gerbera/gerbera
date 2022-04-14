@@ -151,7 +151,8 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 750).write(fileName);
     });
 
     it('for [items view]', async () => {
@@ -247,7 +248,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(290, 20, 860, 500).write(fileName);
+      image.crop(310, 20, 820, 685).write(fileName);
     });
 
     it('for [edit tweak] from filesystem list', async () => {

@@ -79,11 +79,12 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         }
 
         bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
+        int mt = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
+        log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
-
         try {
-            result.emplace_back(location, mode, recursive, true, interval, hidden);
+            result.emplace_back(location, mode, recursive, true, interval, hidden, mt);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
             return false;

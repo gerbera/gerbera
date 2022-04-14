@@ -138,6 +138,27 @@ public:
 };
 #endif
 
+class UpnpMap {
+private:
+    std::vector<std::tuple<std::string, std::string, std::string>> filters;
+
+    bool checkValue(const std::string& op, const std::string& expect, const std::string& actual);
+    bool checkValue(const std::string& op, int expect, int actual);
+
+public:
+    std::string mimeType;
+    std::string upnpClass;
+
+    UpnpMap(const std::string& mt, const std::string& cls, const std::vector<std::tuple<std::string, std::string, std::string>>& f)
+        : filters(f)
+        , mimeType(mt)
+        , upnpClass(cls)
+    {
+    }
+
+    bool isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt);
+};
+
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
 public:
     ContentManager(const std::shared_ptr<Context>& context,
@@ -313,6 +334,8 @@ protected:
     std::shared_ptr<LastFm> last_fm;
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
+    std::map<std::string, std::string> mimetypeUpnpclassMap;
+    std::vector<UpnpMap> upnpMap {};
 
     std::shared_ptr<AutoscanList> autoscanList;
 #ifdef HAVE_INOTIFY
@@ -335,15 +358,19 @@ protected:
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<CMAddFileTask> task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
     void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr) const;
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
+    static void initUpnpMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
+    std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const;
 
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
+
+    void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
 
     std::shared_ptr<Layout> layout;
 

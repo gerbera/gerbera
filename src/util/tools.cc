@@ -498,19 +498,6 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::string getPropertyMapValue(const std::map<std::string, std::string>& propMap, const std::string& search)
-{
-    auto it = propMap.find(search);
-    if (it != propMap.end())
-        return it->second;
-
-    // try to match foo
-    std::vector<std::string> parts = splitString(search, '/');
-    if (parts.size() != 2)
-        return {};
-    return getValueOrDefault(propMap, parts[0] + "/*");
-}
-
 std::chrono::seconds currentTime()
 {
     return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());

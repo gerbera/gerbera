@@ -102,7 +102,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
-    if (contentType == CONTENT_TYPE_JPG) {
+    if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM)) {
         Exiv2Handler(context).fillMetadata(item);
     }
 #endif
@@ -126,7 +126,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (contentType != CONTENT_TYPE_PLAYLIST && (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)) {
+    if (contentType != CONTENT_TYPE_PLAYLIST && (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))) {
         FfmpegHandler(context).fillMetadata(item);
     }
 #else
@@ -140,18 +140,18 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
     // Thumbnails for videos
-    if (itemCls == UPNP_CLASS_VIDEO_ITEM)
+    if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
         FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED).fillMetadata(item);
-    else if (itemCls == UPNP_CLASS_IMAGE_ITEM)
+    else if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM))
         FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED).fillMetadata(item);
 #endif
 
     // Fanart for audio and video
-    if (itemCls == UPNP_CLASS_MUSIC_TRACK || itemCls == UPNP_CLASS_VIDEO_ITEM)
+    if (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
         FanArtHandler(context).fillMetadata(item);
 
     // Subtitles for videos
-    if (itemCls == UPNP_CLASS_VIDEO_ITEM)
+    if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
         SubtitleHandler(context).fillMetadata(item);
 
     ResourceHandler(context).fillMetadata(item);

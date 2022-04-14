@@ -163,7 +163,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                     auto str = limitString(val);
                     if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                    else if (upnpClass == UPNP_CLASS_MUSIC_TRACK && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                    else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                         addField(result, key, limitString(str));
@@ -173,7 +173,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                 auto str = limitString(fmt::format("{}", fmt::join(group, entrySeparator)));
                 if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                else if (upnpClass == UPNP_CLASS_MUSIC_TRACK && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                 else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                     addField(result, key, limitString(str));
@@ -208,16 +208,16 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
 
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
-        if (upnpClass == UPNP_CLASS_MUSIC_ALBUM) {
+        if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
             addPropertyList(result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
-        } else if (upnpClass == UPNP_CLASS_MUSIC_ARTIST) {
+        } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
             addPropertyList(result, meta, auxData, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_ARTIST_NAMESPACES);
-        } else if (upnpClass == UPNP_CLASS_MUSIC_GENRE) {
+        } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
             addPropertyList(result, meta, auxData, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_GENRE_NAMESPACES);
-        } else if (upnpClass == UPNP_CLASS_PLAYLIST_CONTAINER) {
+        } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             addPropertyList(result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
         }
-        if (upnpClass == UPNP_CLASS_MUSIC_ALBUM || upnpClass == UPNP_CLASS_MUSIC_ARTIST || upnpClass == UPNP_CLASS_CONTAINER || upnpClass == UPNP_CLASS_PLAYLIST_CONTAINER) {
+        if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto [url, artAdded] = renderContainerImage(virtualURL, cont);
             if (artAdded) {
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.c_str());
@@ -515,7 +515,7 @@ std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType,
 
 std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType) const
 {
-    return getPropertyMapValue(transferMappings, mimeType);
+    return getValueOrDefault(transferMappings, mimeType);
 }
 
 std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted) const

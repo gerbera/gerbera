@@ -511,11 +511,11 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
                 addVideo(clone, rootpath);
             else
                 addAudio(clone, rootpath);
-        } else if (objCls == UPNP_CLASS_VIDEO_ITEM) {
+        } else if (startswith(objCls, UPNP_CLASS_VIDEO_ITEM)) {
             addVideo(clone, rootpath);
-        } else if (objCls == UPNP_CLASS_IMAGE_ITEM) {
+        } else if (startswith(objCls, UPNP_CLASS_IMAGE_ITEM)) {
             addImage(clone, rootpath);
-        } else if (objCls == UPNP_CLASS_MUSIC_TRACK && contentType != CONTENT_TYPE_PLAYLIST) {
+        } else if (startswith(objCls, UPNP_CLASS_AUDIO_ITEM) && contentType != CONTENT_TYPE_PLAYLIST) {
             addAudio(clone, rootpath);
         }
 

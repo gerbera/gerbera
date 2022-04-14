@@ -156,7 +156,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
 void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx)
 {
     auto resource = item->getResource(ContentHandler::DEFAULT);
-    bool isAudioFile = item->getClass() == UPNP_CLASS_MUSIC_TRACK && item->getResource(CdsResource::Purpose::Thumbnail);
+    bool isAudioFile = item->isSubClass(UPNP_CLASS_AUDIO_ITEM) && item->getResource(CdsResource::Purpose::Thumbnail);
     auto resource2 = isAudioFile ? item->getResource(CdsResource::Purpose::Thumbnail) : item->getResource(ContentHandler::DEFAULT);
 
     // duration

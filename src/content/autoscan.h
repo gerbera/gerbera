@@ -50,6 +50,30 @@ public:
         INotify
     };
 
+    enum class MediaType {
+        Any = -1,
+
+        Audio,
+        Music,
+        AudioBook,
+        AudioBroadcast,
+
+        Image,
+        Photo,
+
+        Video,
+        Movie,
+        TV,
+        MusicVideo,
+
+        MAX,
+    };
+
+    static int makeMediaType(const std::string& optValue);
+    static std::string_view mapMediaType(MediaType mt);
+    static std::string mapMediaType(int mt);
+    static int remapMediaType(const std::string& optValue);
+
     AutoscanDirectory() = default;
 
     /// \brief Creates a new AutoscanDirectory object.
@@ -59,7 +83,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false);
+    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, int mediaType = -1);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
@@ -79,6 +103,12 @@ public:
 
     void setHidden(bool hidden) { this->hidden = hidden; }
     bool getHidden() const { return hidden; }
+
+    void setScanContent(const std::map<std::string, bool>& scanContent) { this->scanContent = scanContent; }
+    std::map<std::string, bool> getScanContent() const { return scanContent; }
+    void setMediaType(int mt);
+    int getMediaType() const { return mediaType; }
+    bool hasContent(const std::string& upnpClass) const;
 
     void setInterval(std::chrono::seconds interval) { this->interval = interval; }
     std::chrono::seconds getInterval() const { return interval; }
@@ -167,6 +197,8 @@ protected:
     std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
+    std::map<std::string, bool> scanContent { { UPNP_CLASS_AUDIO_ITEM, true }, { UPNP_CLASS_IMAGE_ITEM, true }, { UPNP_CLASS_VIDEO_ITEM, true } };
+    int mediaType { -1 };
 
     constexpr const static int INVALID_SCAN_ID = -1;
 };

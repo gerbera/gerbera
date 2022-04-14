@@ -34,21 +34,34 @@
 #define UPNP_E_NOT_EXIST 706
 
 // UPnP default classes
-#define UPNP_CLASS_CONTAINER "object.container"
 #define UPNP_CLASS_ITEM "object.item"
-#define UPNP_CLASS_AUDIO_ITEM "object.item.audioItem"
-#define UPNP_CLASS_VIDEO_ITEM "object.item.videoItem"
-#define UPNP_CLASS_IMAGE_ITEM "object.item.imageItem"
 #define UPNP_CLASS_PLAYLIST_ITEM "object.item.playlistItem"
-#define UPNP_CLASS_MUSIC_ALBUM "object.container.album.musicAlbum"
+
+#define UPNP_CLASS_AUDIO_ITEM "object.item.audioItem"
 #define UPNP_CLASS_MUSIC_TRACK "object.item.audioItem.musicTrack"
+#define UPNP_CLASS_AUDIO_BOOK "object.item.audioItem.audioBook"
+#define UPNP_CLASS_AUDIO_BROADCAST "object.item.audioItem.audioBroadcast"
+
+#define UPNP_CLASS_IMAGE_ITEM "object.item.imageItem"
+#define UPNP_CLASS_IMAGE_PHOTO "object.item.imageItem.photo"
+
+#define UPNP_CLASS_VIDEO_ITEM "object.item.videoItem"
+#define UPNP_CLASS_VIDEO_MOVIE "object.item.videoItem.movie"
+#define UPNP_CLASS_VIDEO_MUSICVIDEOCLIP "object.item.videoItem.musicVideoClip"
+#define UPNP_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
+
+#define UPNP_CLASS_TEXT_ITEM "object.item.textItem"
+#define UPNP_CLASS_BOOKMARK_ITEM "object.item.bookmarkItem"
+
+#define UPNP_CLASS_CONTAINER "object.container"
+#define UPNP_CLASS_PHOTO_ALBUM "object.container.album.photoAlbum"
+#define UPNP_CLASS_MUSIC_ALBUM "object.container.album.musicAlbum"
 #define UPNP_CLASS_MUSIC_GENRE "object.container.genre.musicGenre"
 #define UPNP_CLASS_MUSIC_ARTIST "object.container.person.musicArtist"
 #define UPNP_CLASS_MUSIC_COMPOSER "object.container.person.musicComposer"
 #define UPNP_CLASS_MUSIC_CONDUCTOR "object.container.person.musicConductor"
 #define UPNP_CLASS_MUSIC_ORCHESTRA "object.container.person.musicOrchestra"
 #define UPNP_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
-#define UPNP_CLASS_VIDEO_BROADCAST "object.item.videoItem.videoBroadcast"
 
 // transferMode
 #define UPNP_DLNA_TRANSFER_MODE_HEADER "transferMode.dlna.org"

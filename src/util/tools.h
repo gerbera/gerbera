@@ -39,7 +39,6 @@
 #include "common.h"
 
 // forward declaration
-class Config;
 class IOHandler;
 
 /// \brief splits the given string into array of strings using a separator character.
@@ -169,15 +168,6 @@ int HMSFToMilliseconds(std::string_view time);
 
 std::string escape(std::string_view string, char escapeChar, char toEscape);
 
-/*
-/// \brief Unescape &amp; &quot; and similar XML sequences.
-///
-/// This function will silently ignore and pass on any invalid combinations.
-/// \param string that should be unescaped
-/// \return the unescaped string
-std::string xml_unescape(std::string string);
-*/
-
 /// \brief Returns the first string if it isn't "nullptr", otherwise the fallback string.
 /// \param first the string to return if it isn't nullptr
 /// \param fallback fallback string to return if first is nullptr
@@ -245,8 +235,6 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
-
-std::string getPropertyMapValue(const std::map<std::string, std::string>& propMap, const std::string& search);
 
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();

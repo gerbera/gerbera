@@ -418,6 +418,42 @@ the removed directory if it becomes available/gets created again.
 
         Allowed values: ``yes`` or ``no``, process hidden files, overrides the hidden-files value in the ``<import/>`` tag.
 
+        ::
+
+            mediatype="Music|AudioBook"
+
+        * Optional
+        * Default: **Any**
+
+        Only import audio/image/video from directory to virtual layout if upnp class is subclass.
+        Values can be concatenated by ``|``. Allowed values are :
+
+        +------------------+--------------------------------------+
+        | Value            | Upnp Class                           |
+        +==================+======================================+
+        | Any              | object.item                          |
+        +------------------+--------------------------------------+
+        | Audio            | object.item.audioItem                |
+        +------------------+--------------------------------------+
+        | Music            | object.item.audioItem.musicTrack     |
+        +------------------+--------------------------------------+
+        | AudioBook        | object.item.audioItem.audioBook      |
+        +------------------+--------------------------------------+
+        | AudioBroadcast   | object.item.audioItem.audioBroadcast |
+        +------------------+--------------------------------------+
+        | Image            | object.item.imageItem                |
+        +------------------+--------------------------------------+
+        | Photo            | object.item.imageItem.photo          |
+        +------------------+--------------------------------------+
+        | Video            | object.item.videoItem                |
+        +------------------+--------------------------------------+
+        | Movie            | object.item.videoItem.movie          |
+        +------------------+--------------------------------------+
+        | MusicVideo       | object.item.videoItem.musicVideoClip |
+        +------------------+--------------------------------------+
+        | TV               | object.item.videoItem.videoBroadcast |
+        +------------------+--------------------------------------+
+
 
 ``system-directories``
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -827,13 +863,30 @@ This section holds the mime type to upnp:class mappings.
 
 ::
 
-     <map from="audio/*" to="object.item.audioItem.musicTrack"/>
+    <map from="audio/*" to="object.item.audioItem.musicTrack"/>
 
 * Optional
 
 Specifies a mapping from a certain mime type to upnp:class in the Content Directory. The mime type can either be
 entered explicitly "audio/mpeg" or using a wildcard after the slash ``audio/\*``. The values of **from** and **to**
 attributes are case sensitive.
+
+For detailled mapping the **from** attribute can specify further filtering criteria like ``upnp:genre=Book`` which is 
+expanded to `if genre contains Book`.
+
+* Example
+
+::
+
+    <mimetype-upnpclass>
+      <map from="application/ogg" to="object.item.audioItem.musicTrack"/>
+      <map from="audio/*" to="object.item.audioItem"/>
+      <map from="audio/*;tracknumber>0" to="object.item.audioItem.musicTrack"/>
+      <map from="audio/*;upnp:genre=Book" to="object.item.audioItem.audioBook"/>
+      <map from="image/*" to="object.item.imageItem"/>
+      <map from="image/*;location=Camera" to="object.item.imageItem.photo"/>
+      <map from="video/*" to="object.item.videoItem"/>
+    </mimetype-upnpclass>
 
 
 ``mimetype-dlnatransfermode``

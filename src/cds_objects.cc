@@ -101,6 +101,11 @@ void CdsObject::validate() const
         throw_std_runtime_error("Object validation failed: missing upnp class");
 }
 
+bool CdsObject::isSubClass(const std::string& cls) const
+{
+    return startswith(upnpClass, cls);
+}
+
 std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     if (IS_CDS_CONTAINER(objectType)) {

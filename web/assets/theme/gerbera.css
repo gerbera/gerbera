@@ -283,6 +283,7 @@ body,
     display: flex;
     flex-direction: column;
     vertical-align: middle;
+    max-height: calc( 100% - 115px );
 }
 
 #clientgrid table {
@@ -451,6 +452,10 @@ body,
 
 .grb-item-url {
     display: inline-block;
+}
+
+.grb-media-type {
+    width: 120px;
 }
 
 .grb-item > td {

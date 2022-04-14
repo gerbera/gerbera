@@ -168,6 +168,7 @@ public:
     void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
     /// \brief Retrieve class
     std::string getClass() const { return upnpClass; }
+    bool isSubClass(const std::string& cls) const;
 
     /// \brief Set the physical location of the media (usually an absolute path)
     void setLocation(const fs::path& location) { this->location = location; }

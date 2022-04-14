@@ -34,6 +34,17 @@
     const autoscanSave = modal.find('#autoscanSave');
     const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
 
+    const autoscanAudio = modal.find('#autoscanAudio');
+    const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
+    const autoscanAudioBook = modal.find('#autoscanAudioBook');
+    const autoscanAudioBroadcast = modal.find('#autoscanAudioBroadcast');
+    const autoscanImage = modal.find('#autoscanImage');
+    const autoscanImagePhoto = modal.find('#autoscanImagePhoto');
+    const autoscanVideo = modal.find('#autoscanVideo');
+    const autoscanVideoMovie = modal.find('#autoscanVideoMovie');
+    const autoscanVideoTV = modal.find('#autoscanVideoTV');
+    const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
+
     reset(modal);
     if (item) {
       if (item.persistent) {
@@ -53,6 +64,16 @@
       autoscanMode.val([item.scan_mode]);
       autoscanPersistent.prop('checked', item.persistent);
       autoscanRecursive.prop('checked', item.recursive);
+      autoscanAudio.prop('checked', item.audio);
+      autoscanAudioMusic.prop('checked', item.audioMusic);
+      autoscanAudioBook.prop('checked', item.audioBook);
+      autoscanAudioBroadcast.prop('checked', item.audioBroadcast);
+      autoscanImage.prop('checked', item.image);
+      autoscanImagePhoto.prop('checked', item.imagePhoto);
+      autoscanVideo.prop('checked', item.video);
+      autoscanVideoMovie.prop('checked', item.videoMovie);
+      autoscanVideoTV.prop('checked', item.videoTV);
+      autoscanVideoMusicVideo.prop('checked', item.videoMusicVideo);
       autoscanHidden.prop('checked', item.hidden);
       autoscanInterval.val(item.interval);
 
@@ -71,6 +92,18 @@
     const autoscanInterval = modal.find('#autoscanInterval');
     const autoscanPersistent = modal.find('#autoscanPersistent');
 
+    const autoscanAudio = modal.find('#autoscanAudio');
+    const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
+    const autoscanAudioBook = modal.find('#autoscanAudioBook');
+    const autoscanAudioBroadcast = modal.find('#autoscanAudioBroadcast');
+    const autoscanImage = modal.find('#autoscanImage');
+    const autoscanImagePhoto = modal.find('#autoscanImagePhoto');
+    const autoscanVideo = modal.find('#autoscanVideo');
+    const autoscanVideoMovie = modal.find('#autoscanVideoMovie');
+    const autoscanVideoTV = modal.find('#autoscanVideoTV');
+    const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
+    const mediaTypeItems = [autoscanAudio, autoscanAudioMusic, autoscanAudioBook, autoscanAudioBroadcast, autoscanImage, autoscanImagePhoto, autoscanVideo, autoscanVideoMovie, autoscanVideoTV, autoscanVideoMusicVideo];
+
     if (autoscanPersistent.is(':checked')) {
       modal.find('form :input').each(function () {
         $(this).prop('disabled', true);
@@ -84,6 +117,10 @@
           autoscanHidden.prop('disabled', false);
           autoscanInterval.closest('.form-group').removeClass('disabled').show();
           autoscanInterval.prop('disabled', false);
+          mediaTypeItems.forEach((m) => {
+            m.closest('.form-check').removeClass('disabled').show();
+            m.prop('disabled', false);
+          });
           break;
         case 'inotify':
           autoscanRecursive.closest('.form-check').removeClass('disabled').show();
@@ -92,6 +129,10 @@
           autoscanHidden.prop('disabled', false);
           autoscanInterval.closest('.form-group').hide();
           autoscanInterval.prop('disabled', true);
+          mediaTypeItems.forEach((m) => {
+            m.closest('.form-check').removeClass('disabled').show();
+            m.prop('disabled', false);
+          });
           break;
         case 'none':
           autoscanRecursive.closest('.form-check').addClass('disabled').show();
@@ -100,6 +141,10 @@
           autoscanHidden.prop('disabled', true);
           autoscanInterval.closest('.form-group').addClass('disabled').show();
           autoscanInterval.prop('disabled', true);
+          mediaTypeItems.forEach((m) => {
+            m.closest('.form-check').removeClass('disabled').show();
+            m.prop('disabled', true);
+          });
           break;
       }
     }
@@ -114,6 +159,19 @@
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanInterval = modal.find('#autoscanInterval');
+
+    const autoscanAudio = modal.find('#autoscanAudio');
+    const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
+    const autoscanAudioBook = modal.find('#autoscanAudioBook');
+    const autoscanAudioBroadcast = modal.find('#autoscanAudioBroadcast');
+    const autoscanImage = modal.find('#autoscanImage');
+    const autoscanImagePhoto = modal.find('#autoscanImagePhoto');
+    const autoscanVideo = modal.find('#autoscanVideo');
+    const autoscanVideoMovie = modal.find('#autoscanVideoMovie');
+    const autoscanVideoTV = modal.find('#autoscanVideoTV');
+    const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
+    const mediaTypeItems = [autoscanAudio, autoscanAudioMusic, autoscanAudioBook, autoscanAudioBroadcast, autoscanImage, autoscanImagePhoto, autoscanVideo, autoscanVideoMovie, autoscanVideoTV, autoscanVideoMusicVideo];
+
     const autoscanSave = modal.find('#autoscanSave');
     const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
 
@@ -127,6 +185,9 @@
     autoscanMode.val(['']);
     autoscanPersistent.prop('checked', false);
     autoscanRecursive.prop('checked', false);
+    mediaTypeItems.forEach((m) => {
+      m.prop('checked', false);
+    });
     autoscanHidden.prop('checked', false);
     autoscanInterval.val('');
     autoscanSave.prop('disabled', false);
@@ -141,6 +202,17 @@
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanInterval = modal.find('#autoscanInterval');
 
+    const autoscanAudio = modal.find('#autoscanAudio');
+    const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
+    const autoscanAudioBook = modal.find('#autoscanAudioBook');
+    const autoscanAudioBroadcast = modal.find('#autoscanAudioBroadcast');
+    const autoscanImage = modal.find('#autoscanImage');
+    const autoscanImagePhoto = modal.find('#autoscanImagePhoto');
+    const autoscanVideo = modal.find('#autoscanVideo');
+    const autoscanVideoMovie = modal.find('#autoscanVideoMovie');
+    const autoscanVideoTV = modal.find('#autoscanVideoTV');
+    const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
+
     let item = {
       object_id: objectId.val(),
       from_fs: fromFs.is(':checked'),
@@ -152,13 +224,35 @@
         item = $.extend({}, item, {
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
-          interval: autoscanInterval.val()
+          interval: autoscanInterval.val(),
+
+          audio: autoscanAudio.is(':checked'),
+          audioMusic: autoscanAudioMusic.is(':checked'),
+          audioBook: autoscanAudioBook.is(':checked'),
+          audioBroadcast: autoscanAudioBroadcast.is(':checked'),
+          image: autoscanImage.is(':checked'),
+          imagePhoto: autoscanImagePhoto.is(':checked'),
+          video: autoscanVideo.is(':checked'),
+          videoMovie: autoscanVideoMovie.is(':checked'),
+          videoTV: autoscanVideoTV.is(':checked'),
+          videoMusicVideo: autoscanVideoMusicVideo.is(':checked')
         });
         break;
       case 'inotify':
         item = $.extend({}, item, {
           recursive: autoscanRecursive.is(':checked'),
-          hidden: autoscanHidden.is(':checked')
+          hidden: autoscanHidden.is(':checked'),
+
+          audio: autoscanAudio.is(':checked'),
+          audioMusic: autoscanAudioMusic.is(':checked'),
+          audioBook: autoscanAudioBook.is(':checked'),
+          audioBroadcast: autoscanAudioBroadcast.is(':checked'),
+          image: autoscanImage.is(':checked'),
+          imagePhoto: autoscanImagePhoto.is(':checked'),
+          video: autoscanVideo.is(':checked'),
+          videoMovie: autoscanVideoMovie.is(':checked'),
+          videoTV: autoscanVideoTV.is(':checked'),
+          videoMusicVideo: autoscanVideoMusicVideo.is(':checked')
         });
         break;
       case 'none':

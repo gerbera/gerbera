@@ -456,6 +456,10 @@ void Web::ConfigLoad::process()
             setValue(item, adir->getRecursive());
 
             item = values.append_child("item");
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE);
+            setValue(item, adir->getMediaType());
+
+            item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
             setValue(item, adir->getHidden());
 
@@ -483,6 +487,9 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES));

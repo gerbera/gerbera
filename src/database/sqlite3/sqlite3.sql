@@ -36,9 +36,9 @@ CREATE TABLE "mt_internal_setting" (
 CREATE TABLE "mt_autoscan" (
   "id" integer primary key,
   "obj_id" integer default NULL,
-  "scan_level" varchar(10) NOT NULL,
   "scan_mode" varchar(10) NOT NULL,
   "recursive" tinyint unsigned NOT NULL,
+  "media_type" integer NOT NULL,
   "hidden" tinyint unsigned NOT NULL,
   "interval" integer unsigned default NULL,
   "last_modified" integer unsigned default NULL,
@@ -55,8 +55,8 @@ CREATE TABLE "mt_metadata" (
   "property_value" text NOT NULL,
   CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO `mt_metadata` (
-  `id`, `item_id`, `property_name`, `property_value`
+INSERT INTO "mt_metadata" (
+  "id", "item_id", "property_name", "property_value"
 ) VALUES (NULL, '1', 'dc:date', '1900-01-01T00:00:00Z');
 CREATE TABLE "grb_config_value" (
   "item" varchar(255) primary key,
