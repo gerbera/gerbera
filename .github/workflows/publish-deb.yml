@@ -39,6 +39,7 @@ jobs:
             -v "$(pwd):/build" \
             -w /build \
           ${{ matrix.os-ver }} \
+          git config --global --add safe.directory /build \
           bash /build/scripts/debian/build-deb.sh ${{ matrix.os-ver }} ${{ matrix.arch }}
 
       - uses: frabert/replace-string-action@v1.2
