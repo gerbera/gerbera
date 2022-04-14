@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-ROOT_DIR=`dirname $0`/../../
-ROOT_DIR=`realpath ${ROOT_DIR}`/
+ROOT_DIR=$(dirname "$0")/../../
+ROOT_DIR=$(realpath "${ROOT_DIR}")/
 
 function install-gcc {
   echo "::group::Installing GCC"
@@ -31,62 +31,62 @@ function install-cmake() {
 
 function install-fmt {
   echo "::group::Installing fmt"
-  sudo bash ${ROOT_DIR}scripts/install-fmt.sh static
+  sudo bash "${ROOT_DIR}"scripts/install-fmt.sh static
   echo "::endgroup::"
 }
 
 function install-spdlog() {
   echo "::group::Installing spdlog"
-  sudo bash ${ROOT_DIR}scripts/install-spdlog.sh static
+  sudo bash "${ROOT_DIR}"scripts/install-spdlog.sh static
   echo "::endgroup::"
 }
 
 function install-googletest() {
   echo "::group::Installing googletest"
-  sudo bash ${ROOT_DIR}scripts/install-googletest.sh
+  sudo bash "${ROOT_DIR}"scripts/install-googletest.sh
   echo "::endgroup::"
 }
 
 function install-pupnp() {
   echo "::group::Installing libupnp"
-  sudo bash ${ROOT_DIR}scripts/install-pupnp.sh
+  sudo bash "${ROOT_DIR}"scripts/install-pupnp.sh
   echo "::endgroup::"
 }
 
 function install-taglib() {
   echo "::group::Installing taglib"
-  sudo bash ${ROOT_DIR}scripts/install-taglib.sh
+  sudo bash "${ROOT_DIR}"scripts/install-taglib.sh
   echo "::endgroup::"
 }
 
 function install-ffmpegthumbnailer() {
   echo "::group::Installing ffmpegthumbnailer"
-  sudo bash ${ROOT_DIR}scripts/install-ffmpegthumbnailer.sh
+  sudo bash "${ROOT_DIR}"scripts/install-ffmpegthumbnailer.sh
   echo "::endgroup::"
 }
 
 function install-pugixml() {
   echo "::group::Installing pugixml"
-  sudo bash ${ROOT_DIR}scripts/install-pugixml.sh
+  sudo bash "${ROOT_DIR}"scripts/install-pugixml.sh
   echo "::endgroup::"
 }
 
 function install-duktape() {
   echo "::group::Installing duktape"
-  sudo bash ${ROOT_DIR}scripts/install-duktape.sh
+  sudo bash "${ROOT_DIR}"scripts/install-duktape.sh
   echo "::endgroup::"
 }
 
 function install-libexiv2() {
   echo "::group::Installing libexiv2"
-  sudo bash ${ROOT_DIR}scripts/install-libexiv2.sh static
+  sudo bash "${ROOT_DIR}"scripts/install-libexiv2.sh static
   echo "::endgroup::"
 }
 
 function install-matroska() {
   echo "::group::Installing matroska"
-  sudo bash ${ROOT_DIR}scripts/install-ebml.sh
-  sudo bash ${ROOT_DIR}scripts/install-matroska.sh
+  sudo bash "${ROOT_DIR}"scripts/install-ebml.sh
+  sudo bash "${ROOT_DIR}"scripts/install-matroska.sh
   echo "::endgroup::"
 }
 
@@ -101,16 +101,20 @@ function upload_to_artifactory() {
 }
 
 # Fix time issues
-ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
 
 # Pre reqs
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y lsb-release sudo wget curl git ca-certificates
 
+# Work around https://github.com/actions/checkout/issues/760
+if ${GITHUB_ACTIONS}; then
+  git config --global --add safe.directory "$(pwd)"
+fi
+
 lsb_codename=$(lsb_release -c --short)
 lsb_distro=$(lsb_release -i --short)
-lsb_rel=$(lsb_release -r --short)
 
 install-gcc
 install-cmake
@@ -139,11 +143,11 @@ else
   DoTests="OFF"
   if [[ "$lsb_codename" == "bionic" ]]; then
     libduktape="libduktape202"
-  elif [ "$lsb_codename" == "buster" ]; then
+  elif [[ "$lsb_codename" == "buster" ]]; then
     libduktape="libduktape203"
-  elif [ "$lsb_codename" == "bookworm" -o "${my_sys}" == "debian:testing" ]; then
+  elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:testing" ]]; then
     libduktape="libduktape207"
-  elif [ "$lsb_codename" == "sid" -o "${my_sys}" == "debian:unstable" ]; then
+  elif [[ "$lsb_codename" == "sid" || "${my_sys}" == "debian:unstable" ]]; then
     libduktape="libduktape207"
   fi
   libduktape="duktape-dev ${libduktape}"
@@ -151,7 +155,7 @@ else
 fi
 
 libmysqlclient="libmysqlclient-dev"
-if [ "$lsb_distro" == "Debian" -o "$lsb_distro" == "Raspbian" ]; then
+if [[ "$lsb_distro" == "Debian" || "$lsb_distro" == "Raspbian" ]]; then
   libmysqlclient="libmariadb-dev-compat"
 fi
 if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" ]]; then
@@ -179,8 +183,8 @@ if [[ ! -d build-deb ]]; then
       ${ffmpegthumbnailer} \
       libwavpack1 libwavpack-dev \
       libmagic-dev \
-      "${libmysqlclient}" \
-      "${libpugixml}" \
+      ${libmysqlclient} \
+      ${libpugixml} \
       libsqlite3-dev \
       uuid-dev
   sudo apt-get clean
@@ -224,7 +228,7 @@ deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
-  cmake ${ROOT_DIR} -DWITH_TESTS=${DoTests} \
+  cmake "${ROOT_DIR}" -DWITH_TESTS=${DoTests} \
     -DWITH_MAGIC=ON \
     -DWITH_MYSQL=ON \
     -DWITH_CURL=ON \
