@@ -281,9 +281,7 @@ public:
     /// \brief Removes metadata with the given key
     void removeMetaData(const metadata_fields_t key)
     {
-        auto&& field = MetadataHandler::getMetaFieldName(key);
-        while (std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }) != metaData.end())
-            metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; }));
+        metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = MetadataHandler::getMetaFieldName(key)](auto&& md) { return md.first == field; }), metaData.end());
     }
 
     /// \brief Query single auxdata value.
