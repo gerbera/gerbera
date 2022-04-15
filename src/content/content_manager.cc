@@ -113,14 +113,14 @@ void ContentManager::run()
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
 
-    autoscan_timed = database->getAutoscanList(AutoscanDirectory::ScanMode::Timed);
+    autoscanList = database->getAutoscanList(AutoscanDirectory::ScanMode::Timed);
     for (auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST)) {
         fs::path path = dir.getLocation();
         if (fs::is_directory(path)) {
             dir.setObjectID(ensurePathExistence(path));
         }
         try {
-            autoscan_timed->add(std::make_shared<AutoscanDirectory>(dir));
+            autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
         } catch (std::runtime_error& e) {
             // Work around existing config sourced autoscans that were stored to the DB for reasons
             log_warning(e.what());
@@ -133,23 +133,34 @@ void ContentManager::run()
     inotify = std::make_unique<AutoscanInotify>(self);
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        autoscan_inotify = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
-        for (auto dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
-            fs::path path = dir.getLocation();
+        auto db = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
+        for (std::size_t i = 0; i < db->size(); i++) {
+            auto dir = db->get(i);
+            auto path = dir->getLocation();
             if (fs::is_directory(path)) {
-                dir.setObjectID(ensurePathExistence(path));
+                dir->setObjectID(ensurePathExistence(path));
             }
             try {
-                autoscan_inotify->add(std::make_shared<AutoscanDirectory>(dir));
+                autoscanList->add(dir);
             } catch (std::runtime_error& e) {
                 // Work around existing config sourced autoscans that were stored to the DB for reasons
                 log_warning(e.what());
                 continue;
             }
         }
-    } else {
-        // make an empty list so that we do not have to do extra checks on shutdown
-        autoscan_inotify = std::make_shared<AutoscanList>();
+        for (auto dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
+            fs::path path = dir.getLocation();
+            if (fs::is_directory(path)) {
+                dir.setObjectID(ensurePathExistence(path));
+            }
+            try {
+                autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
+            } catch (std::runtime_error& e) {
+                // Work around existing config sourced autoscans that were stored to the DB for reasons
+                log_warning(e.what());
+                continue;
+            }
+        }
     }
 
     // Start INotify thread
@@ -197,17 +208,19 @@ void ContentManager::run()
     initJS();
 #endif
 
-    autoscan_timed->notifyAll(this);
+    autoscanList->notifyAll(this);
 
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         /// \todo change this (we need a new autoscan architecture)
-        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
-            auto adir = autoscan_inotify->get(i);
+        for (std::size_t i = 0; i < autoscanList->size(); i++) {
+            auto adir = autoscanList->get(i);
             if (!adir) {
                 continue;
             }
-
+            if (adir->getScanMode() != AutoscanDirectory::ScanMode::INotify) {
+                continue;
+            }
             inotify->monitor(adir);
             auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
             log_debug("Adding one-shot inotify scan");
@@ -216,8 +229,14 @@ void ContentManager::run()
     }
 #endif
 
-    for (std::size_t i = 0; i < autoscan_timed->size(); i++) {
-        auto adir = autoscan_timed->get(i);
+    for (std::size_t i = 0; i < autoscanList->size(); i++) {
+        auto adir = autoscanList->get(i);
+        if (!adir) {
+            continue;
+        }
+        if (adir->getScanMode() != AutoscanDirectory::ScanMode::Timed) {
+            continue;
+        }
         auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, adir->getScanID());
         log_debug("Adding timed scan with interval {}", adir->getInterval().count());
         timer->addTimerSubscriber(this, adir->getInterval(), std::move(param), false);
@@ -252,7 +271,7 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
         return;
 
     if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
-        auto adir = autoscan_timed->get(parameter->getID());
+        auto adir = autoscanList->get(parameter->getID());
 
         // do not rescan while other scans are still active
         if (!adir || adir->getActiveScanCount() > 0 || adir->getTaskCount() > 0)
@@ -272,19 +291,18 @@ void ContentManager::shutdown()
     log_debug("start");
     auto lock = threadRunner->uniqueLock();
     log_debug("updating last_modified data for autoscan in database...");
-    autoscan_timed->updateLMinDB(*database);
+    autoscanList->updateLMinDB(*database);
 
 #ifdef HAVE_JS
     destroyJS();
 #endif
     destroyLayout();
 
-#ifdef HAVE_INOTIFY
-    if (autoscan_inotify) {
+    if (autoscanList) {
         // update modification time for database
-        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
+        for (std::size_t i = 0; i < autoscanList->size(); i++) {
             log_debug("AutoScanDir {}", i);
-            auto dir = autoscan_inotify->get(i);
+            auto dir = autoscanList->get(i);
             if (dir) {
                 auto dirEnt = fs::directory_entry(dir->getLocation());
                 if (dirEnt.is_directory()) {
@@ -294,12 +312,13 @@ void ContentManager::shutdown()
                 dir->updateLMT();
             }
         }
-        autoscan_inotify->updateLMinDB(*database);
+        autoscanList->updateLMinDB(*database);
 
-        autoscan_inotify = nullptr;
+        autoscanList = nullptr;
+#ifdef HAVE_INOTIFY
         inotify = nullptr;
-    }
 #endif
+    }
 
     shutdownFlag = true;
 
@@ -798,23 +817,12 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     // abort loop if either:
     // no valid directory returned, server is about to shut down, the task is there and was invalidated
     if (task) {
-        log_debug("IS TASK VALID? [{}], task path: [{}]", task->isValid(), subDir.path().c_str());
+        log_debug("Task valid? [{}], task path: [{}]", task->isValid(), subDir.path().c_str());
     }
-#ifdef HAVE_INOTIFY
     if (!adir) {
-        for (std::size_t i = 0; i < autoscan_inotify->size(); i++) {
-            log_debug("AutoDir {}", i);
-            auto dir = autoscan_inotify->get(i);
-            if (dir && (subDir.path() <= dir->getLocation()) && fs::is_directory(dir->getLocation())) {
-                adir = std::move(dir);
-            }
-        }
-    }
-#endif
-    if (!adir) {
-        for (std::size_t i = 0; i < autoscan_timed->size(); i++) {
-            log_debug("Timed AutoscanDir {}", i);
-            auto dir = autoscan_timed->get(i);
+        for (std::size_t i = 0; i < autoscanList->size(); i++) {
+            auto dir = autoscanList->get(i);
+            log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
             if (dir && (subDir.path() <= dir->getLocation()) && fs::is_directory(dir->getLocation())) {
                 adir = std::move(dir);
             }
@@ -1513,19 +1521,20 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
 
         if (obj->isContainer()) {
             // make sure to remove possible child autoscan directories from the scanlist
-            std::shared_ptr<AutoscanList> rmList = autoscan_timed->removeIfSubdir(path);
+            std::shared_ptr<AutoscanList> rmList = autoscanList->removeIfSubdir(path);
             for (std::size_t i = 0; i < rmList->size(); i++) {
-                timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
-            }
-#ifdef HAVE_INOTIFY
-            if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-                rmList = autoscan_inotify->removeIfSubdir(path);
-                for (std::size_t i = 0; i < rmList->size(); i++) {
-                    auto dir = rmList->get(i);
-                    inotify->unmonitor(dir);
+                auto dir = rmList->get(i);
+                if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
+                    timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
                 }
-            }
+#ifdef HAVE_INOTIFY
+                else {
+                    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+                        inotify->unmonitor(dir);
+                    }
+                }
 #endif
+            }
 
             auto lock = threadRunner->lockGuard("removeObject " + path.string());
 
@@ -1568,16 +1577,7 @@ void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& a
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int scanID, AutoscanDirectory::ScanMode scanMode) const
 {
-    if (scanMode == AutoscanDirectory::ScanMode::Timed) {
-        return autoscan_timed->get(scanID);
-    }
-
-#if HAVE_INOTIFY
-    if (scanMode == AutoscanDirectory::ScanMode::INotify) {
-        return autoscan_inotify->get(scanID);
-    }
-#endif
-    return nullptr;
+    return autoscanList->get(scanID);
 }
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int objectID) const
@@ -1587,26 +1587,12 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int obje
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
 {
-    // \todo change this when more scanmodes become available
-    auto adir = autoscan_timed->get(location);
-#if HAVE_INOTIFY
-    if (!adir)
-        adir = autoscan_inotify->get(location);
-#endif
-    return adir;
+    return autoscanList->get(location);
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const
 {
-#if HAVE_INOTIFY
-    auto all = autoscan_timed->getArrayCopy();
-
-    auto ino = autoscan_inotify->getArrayCopy();
-    std::move(ino.begin(), ino.end(), std::back_inserter(all));
-    return all;
-#else
-    return autoscan_timed->getArrayCopy();
-#endif
+    return autoscanList->getArrayCopy();
 }
 
 void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -1615,20 +1601,16 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
         throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
     adir->setTaskCount(-1);
+    autoscanList->remove(adir->getScanID());
+    database->removeAutoscanDirectory(adir);
+    session_manager->containerChangedUI(adir->getObjectID());
 
     if (adir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-        autoscan_timed->remove(adir->getScanID());
-        database->removeAutoscanDirectory(adir);
-        session_manager->containerChangedUI(adir->getObjectID());
-
         // if 3rd parameter is true: won't fail if scanID doesn't exist
         timer->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (adir->getScanMode() == AutoscanDirectory::ScanMode::INotify)) {
-        autoscan_inotify->remove(adir->getScanID());
-        database->removeAutoscanDirectory(adir);
-        session_manager->containerChangedUI(adir->getObjectID());
+    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (adir->getScanMode() == AutoscanDirectory::ScanMode::INotify)) {
         inotify->unmonitor(adir);
     }
 #endif
@@ -1654,11 +1636,7 @@ void ContentManager::handlePersistentAutoscanRecreate(const std::shared_ptr<Auto
 void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir)
 {
     // We will have to change this for other scan modes
-    auto original = autoscan_timed->getByObjectID(dir->getObjectID());
-#ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && !original)
-        original = autoscan_inotify->getByObjectID(dir->getObjectID());
-#endif
+    auto original = autoscanList->getByObjectID(dir->getObjectID());
 
     if (original)
         dir->setDatabaseID(original->getDatabaseID());
@@ -1684,15 +1662,14 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         }
         dir->resetLMT();
         database->addAutoscanDirectory(dir);
+        autoscanList->add(dir);
+        reloadLayout();
+
         if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-            autoscan_timed->add(dir);
-            reloadLayout();
             timerNotify(dir->getTimerParameter());
         }
 #ifdef HAVE_INOTIFY
         if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanDirectory::ScanMode::INotify)) {
-            autoscan_inotify->add(dir);
-            reloadLayout();
             inotify->monitor(dir);
         }
 #endif
@@ -1714,24 +1691,16 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
 
-    if (copy->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-        autoscan_timed->remove(copy->getScanID());
-    }
-#ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && copy->getScanMode() == AutoscanDirectory::ScanMode::INotify) {
-        autoscan_inotify->remove(copy->getScanID());
-    }
-#endif
+    autoscanList->remove(copy->getScanID());
 
     copy->setScanMode(dir->getScanMode());
 
+    autoscanList->add(copy);
     if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-        autoscan_timed->add(copy);
         timerNotify(copy->getTimerParameter());
     }
 #ifdef HAVE_INOTIFY
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && dir->getScanMode() == AutoscanDirectory::ScanMode::INotify) {
-        autoscan_inotify->add(copy);
         inotify->monitor(copy);
     }
 #endif
