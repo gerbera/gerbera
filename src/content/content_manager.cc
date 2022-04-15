@@ -113,17 +113,19 @@ void ContentManager::run()
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
 
-    auto configTimedList = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    for (auto& dir : configTimedList) {
+    autoscan_timed = database->getAutoscanList(AutoscanDirectory::ScanMode::Timed);
+    for (auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST)) {
         fs::path path = dir.getLocation();
         if (fs::is_directory(path)) {
             dir.setObjectID(ensurePathExistence(path));
         }
-    }
-
-    autoscan_timed = database->getAutoscanList(AutoscanDirectory::ScanMode::Timed);
-    for (auto adir : configTimedList) {
-        autoscan_timed->add(std::make_shared<AutoscanDirectory>(adir));
+        try {
+            autoscan_timed->add(std::make_shared<AutoscanDirectory>(dir));
+        } catch (std::runtime_error& e) {
+            // Work around existing config sourced autoscans that were stored to the DB for reasons
+            log_warning(e.what());
+            continue;
+        }
     }
 
     auto self = shared_from_this();
@@ -132,16 +134,19 @@ void ContentManager::run()
 
     if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
         autoscan_inotify = database->getAutoscanList(AutoscanDirectory::ScanMode::INotify);
-
-        auto configInotifyList = config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-        for (auto dir : configInotifyList) {
+        for (auto dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
             fs::path path = dir.getLocation();
             if (fs::is_directory(path)) {
                 dir.setObjectID(ensurePathExistence(path));
             }
-            autoscan_inotify->add(std::make_shared<AutoscanDirectory>(dir));
+            try {
+                autoscan_inotify->add(std::make_shared<AutoscanDirectory>(dir));
+            } catch (std::runtime_error& e) {
+                // Work around existing config sourced autoscans that were stored to the DB for reasons
+                log_warning(e.what());
+                continue;
+            }
         }
-
     } else {
         // make an empty list so that we do not have to do extra checks on shutdown
         autoscan_inotify = std::make_shared<AutoscanList>();
