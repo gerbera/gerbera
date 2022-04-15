@@ -237,6 +237,7 @@ public:
 template <typename K, typename V>
 V getValueOrDefault(const std::vector<std::pair<K, V>>& m, const K& key, const V& defval)
 {
+    static_assert(!std::is_const_v<V>);
     auto it = std::find_if(m.begin(), m.end(), [&](auto&& v) { return v.first == key; });
     return (it == m.end()) ? defval : it->second;
 }
@@ -244,6 +245,7 @@ V getValueOrDefault(const std::vector<std::pair<K, V>>& m, const K& key, const V
 template <typename K, typename V>
 V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 {
+    static_assert(!std::is_const_v<V>);
     auto it = m.find(key);
     return (it == m.end()) ? defval : it->second;
 }
