@@ -117,7 +117,7 @@ enum metadata_fields_t {
     M_MAX
 };
 
-const static auto mt_keys = std::map<metadata_fields_t, const std::string> {
+static const auto mt_keys = std::map<metadata_fields_t, std::string> {
     std::pair(M_TITLE, "dc:title"),
     std::pair(M_ARTIST, "upnp:artist"),
     std::pair(M_ALBUM, "upnp:album"),
