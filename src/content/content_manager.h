@@ -71,6 +71,7 @@ class ScriptingRuntime;
 #include "util/executor.h"
 
 // forward declarations
+class AutoScanSetting;
 class ContentManager;
 class LastFm;
 class Server;
@@ -313,10 +314,9 @@ protected:
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
 
-    std::shared_ptr<AutoscanList> autoscan_timed;
+    std::shared_ptr<AutoscanList> autoscanList;
 #ifdef HAVE_INOTIFY
     std::unique_ptr<AutoscanInotify> inotify;
-    std::shared_ptr<AutoscanList> autoscan_inotify;
 #endif
 
     std::vector<std::shared_ptr<Executor>> process_list;
