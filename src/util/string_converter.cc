@@ -122,7 +122,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
     //        input_bytes, output_bytes));
 #if defined(ICONV_CONST) || defined(SOLARIS)
-    int ret = iconv(cd, input_ptr, &input_bytes,
+    int ret = iconv(cd, inputPtr, &input_bytes,
         output_ptr, &output_bytes);
 #else
     int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
