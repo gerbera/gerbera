@@ -183,7 +183,7 @@ public:
     static std::string getSortCapabilities();
     static std::string getSearchCapabilities();
 
-    unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies[index] : 0; }
+    unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
     int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
     void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);

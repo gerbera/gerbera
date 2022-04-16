@@ -47,15 +47,15 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
 #define MAX_ARGS 255
     std::array<const char*, MAX_ARGS> argv;
 
-    argv[0] = command.c_str();
+    argv.front() = command.c_str();
     int apos = 0;
 
     for (auto&& i : arglist) {
-        argv[++apos] = i.c_str();
+        argv.at(++apos) = i.c_str();
         if (apos >= MAX_ARGS - 2)
             break;
     }
-    argv[++apos] = nullptr;
+    argv.at(++apos) = nullptr;
 
     pid = fork();
     switch (pid) {
