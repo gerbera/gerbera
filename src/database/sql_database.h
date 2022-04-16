@@ -259,8 +259,6 @@ private:
         {
         }
         ~AddUpdateTable() = default;
-        AddUpdateTable(AddUpdateTable&&) = default;
-        AddUpdateTable& operator=(AddUpdateTable&&) = default;
         [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
         [[nodiscard]] const std::map<std::string, std::string>& getDict() const noexcept { return dict; }
         [[nodiscard]] Operation getOperation() const noexcept { return operation; }
