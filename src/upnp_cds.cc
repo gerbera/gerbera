@@ -238,21 +238,25 @@ static const auto markContentMap = std::map<std::string, std::string> {
 
 void ContentDirectoryService::markPlayedItem(const std::shared_ptr<CdsObject>& cdsObject, std::string title) const
 {
-    if (cdsObject->isItem()) {
-        auto item = std::static_pointer_cast<CdsItem>(cdsObject);
-        auto playStatus = item->getPlayStatus();
-        if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && playStatus && playStatus->getPlayCount() > 0) {
-            std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
-            bool mark = std::any_of(markList.begin(), markList.end(), [&](auto&& i) { return startswith(item->getClass(), markContentMap.at(i)); });
-            if (mark) {
-                if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                    title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
-                else
-                    title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
-                item->setTitle(title);
-            }
+    // Return early if object is not an item
+    if (!cdsObject->isItem())
+        return;
+
+    auto item = std::static_pointer_cast<CdsItem>(cdsObject);
+    auto playStatus = item->getPlayStatus();
+    if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && playStatus && playStatus->getPlayCount() > 0) {
+        std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+        bool mark = std::any_of(markList.begin(), markList.end(), [&](auto&& i) { return startswith(item->getClass(), markContentMap.at(i)); });
+        if (mark) {
+            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+            else
+                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
         }
     }
+
+    // Always update title
+    item->setTitle(title);
 }
 
 void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
