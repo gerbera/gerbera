@@ -110,7 +110,7 @@ static const std::vector<struct profMapping> resSteps {
     { "LICO", 120, 120 },
     { "TN", 160, 160 },
     { "SD", 640, 480 },
-    { "HD", 1024, 768 },
+    { "HD", 1280, 1280 },
     { "UHD", 4096, 4096 },
 };
 static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
