@@ -78,10 +78,10 @@ ones offered by the ffmpegthumbnailer command line application). All tags below 
 
     ::
 
-        <thumbnail-size>128</thumbnail-size>
+        <thumbnail-size>160</thumbnail-size>
 
     * Optional
-    * Default: **128**
+    * Default: **160**
 
     The thumbnail size should not exceed 160x160 pixels, higher values can be used but will mostprobably not be
     supported by DLNA devices. The value of zero or less is not allowed.
@@ -97,7 +97,7 @@ ones offered by the ffmpegthumbnailer command line application). All tags below 
 
     ::
 
-        <filmstrip-overlay>yes</filmstrip-overlay>
+        <filmstrip-overlay>no</filmstrip-overlay>
 
     * Optional
     * Default: **yes**
@@ -112,16 +112,6 @@ ones offered by the ffmpegthumbnailer command line application). All tags below 
     * Default: **8**
 
     Sets the image quality of the generated thumbnails.
-
-    ::
-
-        <workaround-bugs>no</workaround-bugs>
-
-    * Optional
-    * Default: **no**
-
-    According to ffmpegthumbnailer documentation, this option will enable workarounds for bugs in older ffmpeg versions.
-    You can try enabling it if you experience unexpected behaviour, like hangups during thumbnail generation, crashes and alike.
 
 .. index:: LastFM
 
