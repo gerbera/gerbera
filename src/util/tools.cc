@@ -433,24 +433,6 @@ int HMSFToMilliseconds(std::string_view time)
     return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 }
 
-std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolution)
-{
-    std::vector<std::string> parts = splitString(resolution, 'x');
-    if (parts.size() != 2)
-        return {};
-
-    if (!parts[0].empty() && !parts[1].empty()) {
-        unsigned int x = std::stoul(parts[0]);
-        unsigned int y = std::stoul(parts[1]);
-
-        if ((x != std::numeric_limits<unsigned int>::max()) && (y != std::numeric_limits<unsigned int>::max())) {
-            return { x, y };
-        }
-    }
-
-    return {};
-}
-
 std::string escape(std::string_view string, char escapeChar, char toEscape)
 {
     std::ostringstream buf;

@@ -29,13 +29,11 @@
 
 /// \file jpeg_resolution.cc
 
-#include "tools.h" // API
-
 #include <cstddef>
 
 #include "iohandler/io_handler.h"
-
-using uchar = unsigned char;
+#include "jpeg_resolution.h"
+#include "metadata/resolution.h"
 
 #define M_SOF0 0xC0 // Start Of Frame N
 #define M_SOF1 0xC1 // N indicates which compression process
@@ -60,72 +58,79 @@ using uchar = unsigned char;
 #define M_DHT 0xC4
 #define M_DRI 0xDD
 
-#define ITEM_BUF_SIZE 16
-static int get16m(const std::byte* shrt)
+constexpr unsigned int ITEM_BUF_SIZE = 16;
+
+uint16_t getuint16(const std::byte* shrt)
 {
-    return std::to_integer<int>((shrt[0] << 8) | shrt[1]);
+    return std::to_integer<uint16_t>(shrt[0]) << CHAR_BIT | std::to_integer<uint8_t>(shrt[1]);
 }
 
-static int iohFgetc(IOHandler& ioh)
+std::uint8_t getUint8(IOHandler& ioh)
 {
-    std::byte c[1] {};
-    int ret = ioh.read(c, sizeof(std::byte));
-    if (ret < 0)
-        return ret;
-    return std::to_integer<int>(c[0]);
+    std::byte byte {};
+    auto ret = ioh.read(&byte, 1);
+    if (ret != 1) {
+        throw_std_runtime_error("getJpegResolution: failed to read byte");
+    }
+    return std::to_integer<uint8_t>(byte);
 }
 
-static std::pair<int, int> getJpegResolution(IOHandler& ioh)
+Resolution getJpegResolution_(IOHandler& ioh)
 {
-    int a = iohFgetc(ioh);
-
-    if (a != 0xff || iohFgetc(ioh) != M_SOI)
-        throw_std_runtime_error("get_jpeg_resolution: could not read jpeg specs");
+    int a = getUint8(ioh);
+    if (a != 0xff || getUint8(ioh) != M_SOI) {
+        throw_std_runtime_error("getJpegResolution: could not read jpeg specs");
+    }
 
     while (true) {
         int marker = 0;
         std::byte data[ITEM_BUF_SIZE];
 
         for (a = 0; a < 7; a++) {
-            marker = iohFgetc(ioh);
-            if (marker != 0xff)
+            marker = getUint8(ioh);
+            if (marker != 0xff) {
                 break;
-
-            if (a >= 6)
-                throw_std_runtime_error("get_jpeg_resolution: too many padding bytes");
+            }
+            if (a >= 6) {
+                throw_std_runtime_error("getJpegResolution: too many padding bytes");
+            }
         }
 
         // 0xff is legal padding, but if we get that many, something's wrong.
-        if (marker == 0xff)
-            throw_std_runtime_error("get_jpeg_resolution: too many padding bytes");
+        if (marker == 0xff) {
+            throw_std_runtime_error("getJpegResolution: too many padding bytes");
+        }
 
         // Read the length of the section.
-        int lh = iohFgetc(ioh);
-        int ll = iohFgetc(ioh);
+        int lh = getUint8(ioh);
+        int ll = getUint8(ioh);
 
-        int itemlen = (lh << 8) | ll;
-        if (itemlen < 2)
-            throw_std_runtime_error("get_jpeg_resolution: invalid marker");
+        uint16_t itemLen = (lh << CHAR_BIT) | ll;
+        if (itemLen < 2) {
+            throw_std_runtime_error("getJpegResolution: invalid marker");
+        }
 
         off_t skip = 0;
-        if (itemlen > ITEM_BUF_SIZE) {
-            skip = itemlen - ITEM_BUF_SIZE;
-            itemlen = ITEM_BUF_SIZE;
+        if (itemLen > ITEM_BUF_SIZE) {
+            skip = itemLen - ITEM_BUF_SIZE;
+            itemLen = ITEM_BUF_SIZE;
         }
 
         // Store first two pre-read bytes.
         data[0] = std::byte(lh);
         data[1] = std::byte(ll);
 
-        int got = ioh.read(data + 2, itemlen - 2);
-        if (got != itemlen - 2)
-            throw_std_runtime_error("get_jpeg_resolution: Premature end of file?");
+        auto got = ioh.read(data + 2, itemLen - 2);
+        if (got != itemLen - 2) {
+            throw_std_runtime_error("getJpegResolution: Premature end of file?");
+        }
 
+        // Skip the rest
         ioh.seek(skip, SEEK_CUR);
 
         switch (marker) {
         case M_EOI: // in case it's a tables-only JPEG stream
-            throw_std_runtime_error("get_jpeg_resolution: No image in jpeg");
+            throw_std_runtime_error("getJpegResolution: No image in jpeg");
         case M_SOF0:
         case M_SOF1:
         case M_SOF2:
@@ -139,23 +144,24 @@ static std::pair<int, int> getJpegResolution(IOHandler& ioh)
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            return { get16m(data + 5), get16m(data + 3) };
+            // auto bitsPerColorComponent = std::to_integer<std::uint8_t>(data[2]);
+            auto resX = getuint16(data + 5);
+            auto resY = getuint16(data + 3);
+            return { static_cast<uint64_t>(resX), static_cast<uint64_t>(resY) };
         }
     }
-    throw_std_runtime_error("get_jpeg_resolution: resolution not found");
+    throw_std_runtime_error("getJpegResolution: resolution not found");
 }
 
 // IOHandler must be opened
-std::string get_jpeg_resolution(IOHandler& ioh)
+Resolution getJpegResolution(IOHandler& ioh)
 {
-    auto wh = std::pair<int, int>();
     try {
-        wh = getJpegResolution(ioh);
-    } catch (const std::runtime_error&) {
+        auto res = getJpegResolution_(ioh);
+        ioh.close();
+        return res;
+    } catch (const std::runtime_error& ex) {
         ioh.close();
         throw;
     }
-    ioh.close();
-
-    return fmt::format("{}x{}", wh.first, wh.second);
 }

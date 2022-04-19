@@ -1,6 +1,7 @@
 add_executable(testcontent
     main.cc
-        test_autoscan_list.cc
+    test_autoscan_list.cc
+    test_resolution.cc
 )
 
 target_link_libraries(testcontent PRIVATE

@@ -37,6 +37,7 @@
 #include "cds_objects.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
+#include "util/jpeg_resolution.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -46,12 +47,14 @@ static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std:
     try {
         auto fioH = FileIOHandler(item->getLocation());
         fioH.open(UPNP_READ);
-        const std::string resolution = get_jpeg_resolution(fioH);
+        auto resolution = getJpegResolution(fioH);
 
-        if (resNum >= item->getResourceCount())
-            throw_std_runtime_error("Invalid resource index");
+        if (resNum >= item->getResourceCount()) {
+            log_warning("Invalid resource index");
+            return;
+        }
+        item->getResource(resNum)->addAttribute(CdsResource::Attribute::RESOLUTION, resolution.string());
 
-        item->getResource(resNum)->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
     } catch (const std::runtime_error& e) {
         log_error("Exception! {}", e.what());
     }
@@ -180,13 +183,12 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
 #define exif_egv(arg) exif_entry_get_value(arg, exif_entry_buffer.data(), BUFLEN)
 
     for (std::size_t i = 0; i < content->count; i++) {
-        ExifEntry* e = content->entries[i];
+        ExifEntry* entry = content->entries[i];
 
-        // log_debug("Processing entry: {}", i);
-
-        switch (e->tag) {
+        switch (entry->tag) {
         case EXIF_TAG_DATE_TIME_ORIGINAL: {
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
+            log_debug("Found exif date: {}", value);
             if (!value.empty()) {
                 value = sc->convert(value);
                 // convert date to ISO 8601 as required in the UPnP spec
@@ -200,21 +202,24 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             break;
         }
         case EXIF_TAG_USER_COMMENT: {
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
+            log_debug("Found exif comment: {}", value);
             if (!value.empty()) {
                 item->addMetaData(M_DESCRIPTION, sc->convert(value));
             }
             break;
         }
         case EXIF_TAG_PIXEL_X_DIMENSION: {
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
+            log_debug("Found exif X dimension: {}", value);
             if (!value.empty()) {
                 imageX = sc->convert(value);
             }
             break;
         }
         case EXIF_TAG_PIXEL_Y_DIMENSION: {
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
+            log_debug("Found exif Y dimension: {}", value);
             if (!value.empty()) {
                 imageY = sc->convert(value);
             }
@@ -226,10 +231,10 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
 
         // if there are any metadata tags that the user wants - add them
         for (auto&& [tag, key] : metatags) {
-            if (tag.empty() || e->tag != getTagFromString(tag))
+            if (tag.empty() || entry->tag != getTagFromString(tag))
                 continue;
 
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
             if (!value.empty()) {
                 item->addMetaData(key, sc->convert(value));
                 log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
@@ -237,13 +242,13 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
         }
         // if there are any auxilary tags that the user wants - add them
         for (auto&& aux : auxtags) {
-            if (aux.empty() || e->tag != getTagFromString(aux))
+            if (aux.empty() || entry->tag != getTagFromString(aux))
                 continue;
 
-            auto value = trimString(exif_egv(e));
+            auto value = trimString(exif_egv(entry));
             if (!value.empty()) {
                 item->setAuxData(aux, sc->convert(value));
-                // log_debug("Adding tag: {} with value {}", aux, value);
+                log_debug("Adding aux: {} with value {}", aux, value);
             }
         }
     }
@@ -256,9 +261,9 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         return;
 
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
-    ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
+    ExifData* exifData = exif_data_new_from_file(item->getLocation().c_str());
 
-    if (!ed) {
+    if (exifData == nullptr) {
         log_debug("Exif data not found, attempting to set resolution internally...");
         setJpegResolutionResource(item, 0);
         return;
@@ -266,34 +271,36 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
     auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST);
-    for (auto&& i : ed->ifd) {
-        if (i)
-            process_ifd(i, item, sc, aux, meta);
+    for (auto* exifContent : exifData->ifd) {
+        if (exifContent != nullptr) {
+            process_ifd(exifContent, item, sc, aux, meta);
+        }
     }
 
     // we got the image resolution so we can add our resource
     if (!imageX.empty() && !imageY.empty()) {
         item->getResource(ContentHandler::DEFAULT)->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", imageX, imageY));
     } else {
+        log_debug("EXIF resolution not found, falling back to parsing directly: {}", item->getLocation().c_str());
         setJpegResolutionResource(item, 0);
     }
 
-    if (ed->size) {
+    if (exifData->size != 0U) {
         try {
-            auto ioH = MemIOHandler(ed->data, ed->size);
+            auto ioH = MemIOHandler(exifData->data, exifData->size);
             ioH.open(UPNP_READ);
-            const std::string thResolution = get_jpeg_resolution(ioH);
-            log_debug("RESOLUTION: {}", thResolution);
-
+            auto thResolution = getJpegResolution(ioH);
+            log_debug("EXIF Thumb Resolution: {}", thResolution.string());
             auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, CdsResource::Purpose::Thumbnail);
             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
-            resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution);
+            resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution.string());
             item->addResource(resource);
+
         } catch (const std::runtime_error& e) {
-            log_error("Something bad happened! {}", e.what());
+            log_error("Failed to parse EXIF Thumbnail details: {}", e.what());
         }
     } // (ed->size)
-    exif_data_unref(ed);
+    exif_data_unref(exifData);
 }
 
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
