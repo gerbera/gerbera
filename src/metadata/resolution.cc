@@ -24,7 +24,7 @@ Gerbera - https://gerbera.io/
 #include "resolution.h"
 #include "util/tools.h"
 
-Resolution::Resolution(std::string string)
+Resolution::Resolution(const std::string& string)
 {
     std::vector<std::string> parts = splitString(string, 'x');
     if (parts.size() != 2) {

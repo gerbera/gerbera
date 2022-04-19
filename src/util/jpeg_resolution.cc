@@ -121,7 +121,7 @@ Resolution getJpegResolution_(IOHandler& ioh)
         data[1] = std::byte(ll);
 
         auto got = ioh.read(data + 2, itemLen - 2);
-        if (got != itemLen - 2) {
+        if (got < 0 && got != int(itemLen - 2)) {
             throw_std_runtime_error("getJpegResolution: Premature end of file?");
         }
 

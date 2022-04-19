@@ -86,7 +86,7 @@ $.widget('grb.tree', {
         }
       }
       if (data[i].gerbera.image) {
-        title.prepend($('<img class="rounded" style="margin-right: 10px" width="36" src="' + data[i].gerbera.image + '"/>'));
+        title.prepend($('<img class="rounded" style="margin-right: 10px" width="36" src="//' + data[i].gerbera.image + '"/>'));
       }
 
       item.append(icon);

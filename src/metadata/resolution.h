@@ -29,7 +29,7 @@ Gerbera - https://gerbera.io/
 
 class Resolution {
 public:
-    explicit Resolution(std::string string);
+    explicit Resolution(const std::string& string);
     Resolution(std::uint64_t x, std::uint64_t y);
     [[nodiscard]] std::uint64_t x() const;
     [[nodiscard]] std::uint64_t y() const;
