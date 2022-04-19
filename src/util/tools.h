@@ -167,13 +167,6 @@ std::string millisecondsToHMSF(int milliseconds);
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
 int HMSFToMilliseconds(std::string_view time);
 
-/// \brief Extracts resolution from a JPEG image
-/// \param ioh the IOHandler must be opened. The function will read data and close the handler.
-std::string get_jpeg_resolution(IOHandler& ioh);
-
-/// \brief checks if the given string has the format xr x yr (i.e. 320x200 etc.)
-std::pair<unsigned int, unsigned int> checkResolution(std::string_view resolution);
-
 std::string escape(std::string_view string, char escapeChar, char toEscape);
 
 /*

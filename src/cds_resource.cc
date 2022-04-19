@@ -33,6 +33,7 @@
 
 #include <sstream>
 
+#include "metadata/resolution.h"
 #include "util/tools.h"
 
 #define RESOURCE_PART_SEP '~'
@@ -149,10 +150,11 @@ std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
         break;
     }
     case Attribute::RESOLUTION: {
-        auto [x, y] = checkResolution(result);
+        auto res = Resolution(result);
         for (auto&& [val, mx, my] : resSteps) {
-            if (x <= mx && y <= my)
+            if (res.x() <= mx && res.y() <= my) {
                 return val.data();
+            }
         }
         break;
     }

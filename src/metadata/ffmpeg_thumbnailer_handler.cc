@@ -24,6 +24,7 @@ Gerbera - https://gerbera.io/
 #ifdef HAVE_FFMPEGTHUMBNAILER
 
 #include "ffmpeg_thumbnailer_handler.h"
+#include "resolution.h"
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
@@ -114,10 +115,11 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     if (!item)
         return;
 
-    std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::RESOLUTION);
-    auto [x, y] = checkResolution(videoResolution);
-
-    if (!videoResolution.empty() && x && y) {
+    try {
+        std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::RESOLUTION);
+        if (videoResolution.empty())
+            return;
+        auto resolution = Resolution(videoResolution);
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
         auto it = mappings.find(CONTENT_TYPE_JPG);
@@ -126,12 +128,14 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto thumbResource = std::make_shared<CdsResource>(ContentHandler::FFTH, CdsResource::Purpose::Thumbnail);
         thumbResource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
-        y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * y / x;
-        x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-        std::string resolution = fmt::format("{}x{}", x, y);
-        thumbResource->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
+        auto y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * resolution.y() / resolution.x();
+        auto x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+        thumbResource->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", x, y));
         item->addResource(thumbResource);
         log_debug("Adding resource for video thumbnail");
+
+    } catch (const std::runtime_error& e) {
+        log_warning("Failed to generate resource for thumbnail: {} {}", item->getLocation().c_str(), e.what());
     }
 }
 

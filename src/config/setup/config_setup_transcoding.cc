@@ -30,6 +30,7 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "metadata/metadata_handler.h"
+#include "metadata/resolution.h"
 #include "transcoding/transcoding.h"
 
 /// \brief Creates an array of TranscodingProfile objects from an XML
@@ -90,9 +91,8 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         if (sub) {
             std::string param = sub.text().as_string();
             if (!param.empty()) {
-                auto [x, y] = checkResolution(param);
-                if (x && y)
-                    prof->setAttributeOverride(CdsResource::Attribute::RESOLUTION, param);
+                auto res = Resolution(param);
+                prof->setAttributeOverride(CdsResource::Attribute::RESOLUTION, res.string());
             }
         }
 
