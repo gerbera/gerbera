@@ -30,7 +30,9 @@
 /// \file jpeg_resolution.cc
 
 #include <cstddef>
+#include <fmt/core.h>
 
+#include "exceptions.h"
 #include "iohandler/io_handler.h"
 #include "jpeg_resolution.h"
 #include "metadata/resolution.h"
