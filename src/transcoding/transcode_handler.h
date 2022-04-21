@@ -34,8 +34,6 @@
 
 #include <memory>
 
-#include <upnp.h>
-
 #include "common.h"
 #include "util/grb_fs.h"
 

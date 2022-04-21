@@ -32,8 +32,6 @@
 #ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 
-#include <upnp.h>
-
 #include "common.h"
 #include "transcode_handler.h"
 #include "util/grb_fs.h"
