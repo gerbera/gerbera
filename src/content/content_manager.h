@@ -204,7 +204,7 @@ public:
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(const fs::path& path) const;
-    void removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
+    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -353,7 +353,7 @@ protected:
     int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
-    void _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
+    std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
 
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */

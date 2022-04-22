@@ -587,7 +587,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
     return parentRemoved;
 }
 
-void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all)
+std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all)
 {
     if (objectID == CDS_ID_ROOT)
         throw_std_runtime_error("cannot remove root container");
@@ -597,8 +597,9 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
         throw_std_runtime_error("tried to remove illegal object id");
 
     bool parentRemoved = false;
+    std::shared_ptr<CdsObject> obj;
     if (rescanResource) {
-        auto obj = database->loadObject(objectID);
+        obj = database->loadObject(objectID);
         if (obj && obj->hasResource(ContentHandler::RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
@@ -614,7 +615,12 @@ void ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adi
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
         }
+        return changedContainers->upnp;
     }
+
+    if (obj)
+        return { obj->getParentID() };
+    return {};
     // reload accounting
     // loadAccounting();
 }
@@ -787,7 +793,11 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 if (lastModifiedCurrentMax < lwt) {
                     // re-add object - we have to do this in order to trigger
                     // layout
-                    removeObject(adir, objectID, false, false);
+                    auto removedParents = removeObject(adir, objectID, false, false);
+                    if (std::find_if(removedParents.begin(), removedParents.end(), [=](auto&& pId) { return containerID == pId; }) != removedParents.end()) {
+                        // parent purged
+                        parentContainer = nullptr;
+                    }
                     asSetting.recursive = false;
                     asSetting.rescanResource = false;
                     objectID = addFileInternal(dirEnt, rootpath, asSetting, false);
@@ -842,6 +852,15 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
                 addFileInternal(dirEnt, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
                 log_debug("addSubDirectory {} done", newPath.c_str());
+            }
+        }
+        if (!parentContainer && !location.empty()) {
+            std::shared_ptr<CdsObject> obj = database->findObjectByPath(location, false);
+            if (!obj || !obj->isContainer()) {
+                log_error("Updated parent {} is not available or no container", location.string());
+            } else {
+                parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
+                containerID = parentContainer->getID();
             }
         }
         if (ec) {
@@ -1596,7 +1615,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 #endif
 }
 
-void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async, bool all)
+std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async, bool all)
 {
     if (async) {
         /*
@@ -1618,7 +1637,7 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
             path = obj->getLocation();
         } catch (const std::runtime_error&) {
             log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
-            return;
+            return {};
         }
 
         if (obj->isContainer()) {
@@ -1657,8 +1676,9 @@ void ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir
         }
 
         addTask(std::move(task));
+        return {};
     } else {
-        _removeObject(adir, objectID, rescanResource, all);
+        return _removeObject(adir, objectID, rescanResource, all);
     }
 }
 
