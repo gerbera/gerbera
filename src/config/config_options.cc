@@ -45,7 +45,7 @@ std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool fo
     auto editSize = getEditSize();
     for (std::size_t i = 0; i < editSize; i++) {
         // add index in front of key to get items correct sorting in map
-        if (indexMap.find(i) != indexMap.end() && !indexMap.at(i).empty()) {
+        if (indexMap.find(i) != indexMap.end() && !indexMap.at(i).empty() && option.find(indexMap.at(i)) != option.end()) {
             editOption[fmt::format("{:05d}{}", i, indexMap.at(i))] = option.at(indexMap.at(i));
         } else {
             editOption[fmt::format("{:05d}", i)] = "";

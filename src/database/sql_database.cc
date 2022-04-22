@@ -1177,7 +1177,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
 {
     std::string dbLocation = [&fullpath, wasRegularFile] {
         std::error_code ec;
-        if (isRegularFile(fullpath, ec) || wasRegularFile)
+        if (wasRegularFile || isRegularFile(fullpath, ec))
             return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
         return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     }();
