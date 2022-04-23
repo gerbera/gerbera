@@ -732,7 +732,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (tp->hideOriginalResource())
                 hideOriginalResource = true;
 
-            if (tp->firstResource()) {
+            if (tp->getFirstResource()) {
                 orderedResources.push_front(std::move(tRes));
                 originalResource = 0;
             } else

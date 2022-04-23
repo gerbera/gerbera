@@ -36,7 +36,7 @@
 TranscodingProfile::TranscodingProfile(bool enabled, transcoding_type_t trType, std::string name)
     : enabled(enabled)
     , name(std::move(name))
-    , tr_type(trType)
+    , trType(trType)
 {
 }
 
@@ -48,9 +48,9 @@ TranscodingFilter::TranscodingFilter(std::string mimeType, std::string transcode
 
 void TranscodingProfile::setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs)
 {
-    buffer_size = bs;
-    chunk_size = cs;
-    initial_fill_size = ifs;
+    bufferSize = bs;
+    chunkSize = cs;
+    initialFillSize = ifs;
 }
 
 void TranscodingProfile::setAttributeOverride(CdsResource::Attribute attribute, const std::string& value)
@@ -74,13 +74,13 @@ std::map<CdsResource::Attribute, std::string> TranscodingProfile::getAttributeOv
 
 void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, avi_fourcc_listmode_t mode)
 {
-    fourcc_list = list;
-    fourcc_mode = mode;
+    fourccList = list;
+    fourccMode = mode;
 }
 
 const std::vector<std::string>& TranscodingProfile::getAVIFourCCList() const
 {
-    return fourcc_list;
+    return fourccList;
 }
 
 std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std::string& name, bool getAll) const
