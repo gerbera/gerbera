@@ -100,13 +100,13 @@ std::string CdsResource::getAttribute(CdsResource::Attribute attr) const
     return getValueOrDefault(attributes, attr, { "" });
 }
 
-struct profMapping {
+struct ProfMapping {
     std::string_view val;
     unsigned int mx;
     unsigned int my;
 };
 
-static const std::vector<struct profMapping> resSteps {
+static const std::vector<struct ProfMapping> resSteps {
     { "ICO", 48, 48 },
     { "LICO", 120, 120 },
     { "TN", 160, 160 },
