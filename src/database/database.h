@@ -150,6 +150,7 @@ public:
     {
     }
     const std::string& searchCriteria() const { return searchCrit; }
+    const std::string& getContainerID() const { return containerID; }
     bool getSearchableContainers() const { return searchableContainers; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
