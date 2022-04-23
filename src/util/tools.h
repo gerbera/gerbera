@@ -153,7 +153,7 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 std::string_view getProtocol(std::string_view protocolInfo);
 
 template <typename TP>
-std::chrono::seconds to_seconds(TP tp)
+std::chrono::seconds toSeconds(TP tp)
 {
     auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
         + std::chrono::system_clock::now());
