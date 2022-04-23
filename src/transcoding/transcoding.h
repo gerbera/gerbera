@@ -129,7 +129,7 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void setAttributeOverride(CdsResource::Attribute, const std::string& value);
+    void setAttributeOverride(CdsResource::Attribute attribute, const std::string& value);
     std::string getAttributeOverride(CdsResource::Attribute attribute) const;
 
     std::map<CdsResource::Attribute, std::string> getAttributeOverrides() const;
