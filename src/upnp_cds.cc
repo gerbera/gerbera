@@ -160,8 +160,8 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] RequestedCount [{}] RequestedCount [{}]",
-        containerID, searchCriteria, sortCriteria, startingIndex, requestedCount, requestedCount);
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
+        containerID, searchCriteria, sortCriteria, startingIndex, requestedCount);
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
