@@ -63,10 +63,10 @@ public:
     void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
 
     /// \brief returns the transcoding type.
-    transcoding_type_t getType() const { return tr_type; }
+    transcoding_type_t getType() const { return trType; }
 
     /// \brief set type of the transcoding profile
-    void setType(transcoding_type_t type) { this->tr_type = type; }
+    void setType(transcoding_type_t type) { this->trType = type; }
 
     /// \brief set name of the transcoding profile
     void setName(const std::string& name) { this->name = name; }
@@ -98,9 +98,9 @@ public:
     /// 0 disables the delay
     void setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs);
 
-    std::size_t getBufferSize() const { return buffer_size; }
-    std::size_t getBufferChunkSize() const { return chunk_size; }
-    std::size_t getBufferInitialFillSize() const { return initial_fill_size; }
+    std::size_t getBufferSize() const { return bufferSize; }
+    std::size_t getBufferChunkSize() const { return chunkSize; }
+    std::size_t getBufferInitialFillSize() const { return initialFillSize; }
 
     /// \brief sets the arguments that will be fed to the transcoder,
     /// this is the string that comes right after the command.
@@ -120,8 +120,8 @@ public:
     const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
     /// \brief identifies if the profile should be set as the first resource
-    void setFirstResource(bool fr) { first_resource = fr; }
-    bool firstResource() const { return first_resource; }
+    void setFirstResource(bool fr) { firstResource = fr; }
+    bool getFirstResource() const { return firstResource; }
 
     /// \brief Adds or overwrites a resource attribute.
     ///
@@ -145,8 +145,8 @@ public:
 
     /// \brief Specifies if the transcoding profile directly accepts an URL
     /// or if we should proxy the data.
-    void setAcceptURL(bool accept) { accept_url = accept; }
-    bool acceptURL() const { return accept_url; }
+    void setAcceptURL(bool accept) { acceptUrl = accept; }
+    bool getAcceptURL() const { return acceptUrl; }
 
     void setDlnaProfile(const std::string& dlna) { dlnaProf = dlna; }
     std::string getDlnaProfile() const { return dlnaProf; }
@@ -158,8 +158,8 @@ public:
 
     /// \brief Specifies if the availability of this transcoding profile
     /// should enforce hiding of all original resources in the browse XML
-    void setHideOriginalResource(bool hide) { hide_orig_res = hide; }
-    bool hideOriginalResource() const { return hide_orig_res; }
+    void setHideOriginalResource(bool hide) { hideOrigRes = hide; }
+    bool hideOriginalResource() const { return hideOrigRes; }
 
     /// \brief If the profile handles source content in the AVI container,
     /// we can specify a list of fourcc's; the list can be either processed
@@ -175,19 +175,19 @@ public:
     /// \brief Retrieves the FourCC list
     const std::vector<std::string>& getAVIFourCCList() const;
     /// \brief Provides information on the mode of the list
-    avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourcc_mode; }
+    avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourccMode; }
 
     /// \brief Send out the data in chunked encoding
-    void setEnabled(bool new_enabled) { enabled = new_enabled; }
+    void setEnabled(bool newEnabled) { enabled = newEnabled; }
     bool isEnabled() const { return enabled; }
 
     /// \brief Sample frequency handling
-    void setSampleFreq(int freq) { sample_frequency = freq; }
-    int getSampleFreq() const { return sample_frequency; }
+    void setSampleFreq(int freq) { sampleFrequency = freq; }
+    int getSampleFreq() const { return sampleFrequency; }
 
     /// \brief Number of channels
-    void setNumChannels(int chans) { number_of_channels = chans; }
-    int getNumChannels() const { return number_of_channels; }
+    void setNumChannels(int chans) { numberOfChannels = chans; }
+    int getNumChannels() const { return numberOfChannels; }
 
     static std::string mapFourCcMode(avi_fourcc_listmode_t mode);
 
@@ -197,22 +197,22 @@ protected:
     std::string tm;
     fs::path command;
     std::string args;
-    bool first_resource {};
+    bool firstResource {};
     bool theora {};
-    bool accept_url { true };
-    bool hide_orig_res {};
+    bool acceptUrl { true };
+    bool hideOrigRes {};
     bool thumbnail {};
-    bool force_chunked { true };
-    std::size_t buffer_size {};
-    std::size_t chunk_size {};
-    std::size_t initial_fill_size {};
-    transcoding_type_t tr_type;
-    int number_of_channels { SOURCE };
-    int sample_frequency { SOURCE };
+    bool forceChunked { true };
+    std::size_t bufferSize {};
+    std::size_t chunkSize {};
+    std::size_t initialFillSize {};
+    transcoding_type_t trType;
+    int numberOfChannels { SOURCE };
+    int sampleFrequency { SOURCE };
     std::map<CdsResource::Attribute, std::string> attributeOverrides;
     std::map<std::string, std::string> environment;
-    std::vector<std::string> fourcc_list;
-    avi_fourcc_listmode_t fourcc_mode { FCC_None };
+    std::vector<std::string> fourccList;
+    avi_fourcc_listmode_t fourccMode { FCC_None };
     int clientFlags { 0 };
     std::string dlnaProf;
 };

@@ -82,7 +82,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     fs::path inLocation = location;
 
     bool isURL = obj->isExternalItem();
-    if (isURL && !profile->acceptURL()) {
+    if (isURL && !profile->getAcceptURL()) {
 #ifdef HAVE_CURL
         inLocation = openCurlFifo(location, procList);
 #else
@@ -99,7 +99,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 
     std::vector<fs::path> tempFiles;
     tempFiles.push_back(fifoName);
-    if (isURL && !profile->acceptURL()) {
+    if (isURL && !profile->getAcceptURL()) {
         tempFiles.push_back(std::move(inLocation));
     }
     auto mainProc = std::make_shared<ProcessExecutor>(profile->getCommand(), arglist, profile->getEnviron(), tempFiles);
