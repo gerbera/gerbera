@@ -386,7 +386,10 @@ void SQLDatabase::init()
 
         auto join1 = fmt::format("LEFT JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
+
+        // Build container query and final search query
+        auto sql_container_query = fmt::format(container_query_raw, searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
+        this->sql_search_query_format = fmt::format("{} {} {}", sql_container_query, join1, join2);
     }
     // Statement for metadata
     {
@@ -1038,7 +1041,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     }
 
     beginTransaction("search");
-    auto countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
+    const std::string countSelect = fmt::format("COUNT(DISTINCT {})", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+    auto countSQL = fmt::format(this->sql_search_query_format, param.getContainerID(), countSelect);
+    countSQL += fmt::format(" WHERE {}", searchSQL);
     log_debug("Search count resolves to SQL [{}]", countSQL);
     auto sqlResult = select(countSQL);
     commit("search");
@@ -1069,7 +1074,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }
 
-    auto retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, sql_search_query, addJoin, searchSQL, orderBy, limit);
+    const std::string retrievalSelect = fmt::format("DISTINCT {} {}", sql_search_columns, addColumns);
+    auto retrievalSQL = fmt::format(this->sql_search_query_format, param.getContainerID(), retrievalSelect);
+    retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
 
     log_debug("Search resolves to SQL [{}]", retrievalSQL);
     beginTransaction("search 2");
