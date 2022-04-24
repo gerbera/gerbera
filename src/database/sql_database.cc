@@ -386,10 +386,11 @@ void SQLDatabase::init()
 
         auto join1 = fmt::format("LEFT JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
 
-        // Build container query and final search query
-        auto sql_container_query = fmt::format(container_query_raw, searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
-        this->sql_search_query_format = fmt::format("{} {} {}", sql_container_query, join1, join2);
+        // Build container query format string
+        auto sql_container_query = fmt::format(sql_search_container_query_raw, searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
+        this->sql_search_container_query_format = fmt::format("{} {} {}", sql_container_query, join1, join2);
     }
     // Statement for metadata
     {
@@ -1040,11 +1041,21 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
     }
 
-    beginTransaction("search");
-    const std::string countSelect = fmt::format("COUNT(DISTINCT {})", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-    auto countSQL = fmt::format(this->sql_search_query_format, param.getContainerID(), countSelect);
-    countSQL += fmt::format(" WHERE {}", searchSQL);
+    bool rootContainer = param.getContainerID() == "0";
+
+    std::string countSQL;
+    if (rootContainer) {
+        // Use fater, non-recursive search for root container
+        countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
+    } else {
+        // Use recursive container search
+        const std::string countSelect = fmt::format("COUNT(DISTINCT {})", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        countSQL = fmt::format(this->sql_search_container_query_format, param.getContainerID(), countSelect);
+        countSQL += fmt::format(" WHERE {}", searchSQL);
+    }
+
     log_debug("Search count resolves to SQL [{}]", countSQL);
+    beginTransaction("search");
     auto sqlResult = select(countSQL);
     commit("search");
 
@@ -1074,9 +1085,16 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
     }
 
-    const std::string retrievalSelect = fmt::format("DISTINCT {} {}", sql_search_columns, addColumns);
-    auto retrievalSQL = fmt::format(this->sql_search_query_format, param.getContainerID(), retrievalSelect);
-    retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
+    std::string retrievalSQL;
+    if (rootContainer) {
+        // Use fater, non-recursive search for root container
+        retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, sql_search_query, addJoin, searchSQL, orderBy, limit);
+    } else {
+        // Use recursive container search
+        const std::string retrievalSelect = fmt::format("DISTINCT {} {}", sql_search_columns, addColumns);
+        retrievalSQL = fmt::format(this->sql_search_container_query_format, param.getContainerID(), retrievalSelect);
+        retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
+    }
 
     log_debug("Search resolves to SQL [{}]", retrievalSQL);
     beginTransaction("search 2");

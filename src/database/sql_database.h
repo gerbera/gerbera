@@ -227,7 +227,7 @@ protected:
 
 private:
     // Format string for a recursive query of a parent container
-    static constexpr auto container_query_raw = R"(
+    static constexpr auto sql_search_container_query_raw = R"(
 -- Find all children of parent_id
 WITH containers AS (SELECT * FROM {0} WHERE {2} = {{}}
 UNION
@@ -244,7 +244,8 @@ SELECT {{}} FROM items AS {1})";
     std::string sql_browse_columns;
     std::string sql_browse_query;
     std::string sql_search_columns;
-    std::string sql_search_query_format;
+    std::string sql_search_container_query_format;
+    std::string sql_search_query;
     std::string sql_meta_query;
     std::string sql_autoscan_query;
     std::string sql_resource_query;
