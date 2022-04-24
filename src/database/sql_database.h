@@ -226,7 +226,6 @@ protected:
     virtual void _exec(const std::string& query) = 0;
 
 private:
-
     // Format string for a recursive query of a parent container
     static constexpr auto container_query_raw = R"(
 -- Find all children of parent_id
