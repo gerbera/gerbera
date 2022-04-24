@@ -379,6 +379,12 @@ public:
     {
         return fmt::format("{}{}{}", table_quote_begin, tableName, table_quote_end);
     }
+
+    std::string getAlias() const
+    {
+        return fmt::format("{}{}{}", table_quote_begin, tableAlias, table_quote_end);
+    }
+
     std::string mapQuoted(En tag) const
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
