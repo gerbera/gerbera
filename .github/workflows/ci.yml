@@ -12,9 +12,6 @@ concurrency:
 
 jobs:
   cpp:
-    # ubuntu-latest is not latest....
-    # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
-    # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -22,13 +19,17 @@ jobs:
           - name: gcc 9
             cc: gcc-9
             cxx: g++-9
+            libcpp: libstdc++11
           - name: clang 11
             cc: clang-11
             cxx: clang++-11
+            libcpp: libc++
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
+      CONAN_SYSREQUIRES_MODE: enabled # Conan can install stuff
+      CLANG_CXX_LIBRARY: ${{ matrix.compiler.libcpp }}
     steps:
       - uses: actions/checkout@v1
       # Alternatively: uses: docker://conanio/gcc9:latest
@@ -43,7 +44,7 @@ jobs:
         run: |
           pip install -U --no-cache-dir conan
           conan profile new default --detect
-          conan profile update settings.compiler.libcxx=libstdc++11 default
+          conan profile update settings.compiler.libcxx=${{ matrix.compiler.libcpp }} default
       - name: Cache conan dependencies
         uses: actions/cache@v2
         with:
@@ -60,7 +61,7 @@ jobs:
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |
-          conan remove '*' --force --builds --system-reqs
+          conan remove 'gerbera/*' --force --builds --system-reqs
 
   head-check:
     runs-on: ubuntu-latest

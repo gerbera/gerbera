@@ -39,15 +39,14 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "fmt/7.1.3",
-        "spdlog/1.8.5",
-        "pugixml/1.10",
-        "libiconv/1.16",
+        "fmt/8.1.1",
+        "spdlog/1.10.0",
+        "pugixml/1.12.1",
+        "libiconv/[>=1.16]",
         "sqlite3/[>=3.35.5]",
-        "zlib/1.2.11",
+        "zlib/[>=1.2.12]",
         "pupnp/[>=1.14.6]",
-        "taglib/1.12",
-        "openssl/1.1.1k", # Needed to fix conflicts
+        "taglib/1.12"
     ]
 
     def configure(self):
@@ -58,28 +57,31 @@ class GerberaConan(ConanFile):
             self.options["gtest"].build_gmock = True
 
     @property
-    def _needs_system_uuid(self):
-        if self.options.ffmpeg:
-            os_info = tools.OSInfo()
-            # ffmpeg on Ubuntu has libuuid as a deep transitive dependency
-            # and fails to link otherwise.
-            return os_info.with_apt
+    def _needs_uuid(self):
+        os_info = tools.OSInfo()
+        return os_info.is_linux or os_info.is_macos
 
     def requirements(self):
         if self.options.tests:
             self.requires("gtest/1.11.0")
 
         if self.options.js:
-            self.requires("duktape/2.7.0")
+            self.requires("duktape/[>=2.7.0]")
 
         if self.options.curl:
             self.requires("libcurl/[>=7.74.0]")
 
         if self.options.mysql:
-            self.requires("mariadb-connector-c/3.1.11")
+            self.requires("mariadb-connector-c/[>=3.1.11]")
 
-        if not self._needs_system_uuid:
-            self.requires("libuuid/1.0.3")
+        if self.options.ffmpeg:
+            self.requires("ffmpeg/[>=4.2.1]")
+
+        if self.options.exif:
+            self.requires("libexif/[>=0.6.23]")
+
+        if not self._needs_uuid:
+            self.requires("libuuid/[>=1.0.3]")
 
     def system_requirements(self):
         if tools.cross_building(self):
@@ -110,16 +112,6 @@ class GerberaConan(ConanFile):
                 }[pm]
             )
 
-        if self.options.exif:
-            installer.install(
-                {
-                    "apt": "libexif-dev",
-                    "pacman": "libexif",
-                    "yum": "libexif-devel",
-                    "freebsd": "libexif",
-                }[pm]
-            )
-
         if self.options.matroska:
             installer.install(
                 {
@@ -128,21 +120,6 @@ class GerberaConan(ConanFile):
                     "yum": "libmatroska-devel",
                     "freebsd": "libmatroska",
                 }[pm]
-            )
-
-        if self.options.ffmpeg:
-            installer.install(
-                {
-                    "apt": "libavformat-dev",
-                    "pacman": "ffmpeg",
-                    "yum": "ffmpeg-devel",
-                    "freebsd": "ffmpeg",
-                }[pm]
-            )
-
-        if self._needs_system_uuid:
-            installer.install(
-                {"apt": "uuid-dev", "pacman": [], "yum": [], "freebsd": []}[pm]
             )
 
         if self.options.ffmpegthumbnailer:

@@ -6,10 +6,13 @@ include(./common)
 build_type=Debug
 
 [options]
-# Use shared libraries for faster link time
-*:shared=True
+*:shared=False
 gerbera:debug_logging=True
 gerbera:tests=True
+# Work around ffmpeg package bugs
+# https://github.com/conan-io/conan-center-index/issues/10442
+ffmpeg:with_libx265=False
+ffmpeg:with_openjpeg=False
 
 [env]
 gerbera:CXXFLAGS=-Og -Werror -Wall
