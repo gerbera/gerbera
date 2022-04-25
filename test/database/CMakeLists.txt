@@ -1,5 +1,4 @@
 add_executable(testdb
-    main.cc
     test_database.cc
     test_sql_generators.cc
     mysql_config_fake.h
@@ -15,7 +14,7 @@ add_custom_command(TARGET testdb POST_BUILD
 
 target_link_libraries(testdb PUBLIC
     libgerbera
-    GTest::GTest
+    GTest::gtest_main
 )
 
 include(GoogleTest)

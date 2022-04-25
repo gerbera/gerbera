@@ -1,12 +1,11 @@
 add_executable(testconfig
-    main.cc
     test_configgenerator.cc
     test_configmanager.cc
 )
 
 target_link_libraries(testconfig PRIVATE
     libgerbera
-    GTest::GTest
+    GTest::gmock_main
 )
 
 add_custom_command(TARGET testconfig POST_BUILD

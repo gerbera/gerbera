@@ -53,9 +53,9 @@ class GerberaConan(ConanFile):
     def configure(self):
         tools.check_min_cppstd(self, "17")
         if self.options.tests:
-            # We have our own main function,
-            # Moreover, if "shared" is True then main is an .so...
-            self.options["gtest"].no_main = True
+            self.options["gtest"].no_main = False
+            self.options["gtest"].shared = False
+            self.options["gtest"].build_gmock = True
 
     @property
     def _needs_system_uuid(self):
@@ -67,10 +67,10 @@ class GerberaConan(ConanFile):
 
     def requirements(self):
         if self.options.tests:
-            self.requires("gtest/1.10.0")
+            self.requires("gtest/1.11.0")
 
         if self.options.js:
-            self.requires("duktape/2.5.0")
+            self.requires("duktape/2.7.0")
 
         if self.options.curl:
             self.requires("libcurl/[>=7.74.0]")

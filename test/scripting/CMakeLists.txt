@@ -1,5 +1,4 @@
 add_executable(testscripting
-    main.cc
     mock/duk_helper.h
     mock/duk_helper.cc
     mock/common_script_mock.h
@@ -19,7 +18,7 @@ add_executable(testscripting
 
 target_link_libraries(testscripting PRIVATE
     libgerbera
-    GTest::GTest
+    GTest::gmock_main
 )
 add_custom_command(TARGET testscripting POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
