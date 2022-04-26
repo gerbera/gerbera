@@ -209,7 +209,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
 
 TEST_F(UpnpXmlTest, CreatesEventPropertySet)
 {
-    auto result = UpnpXMLBuilder::createEventPropertySet();
+    auto result = subject->createEventPropertySet();
     auto root = result->document_element();
 
     EXPECT_NE(root, nullptr);
@@ -223,7 +223,7 @@ TEST_F(UpnpXmlTest, CreateResponse)
     std::string actionName = "action";
     std::string serviceType = "urn:schemas-upnp-org:service:ContentDirectory:1";
 
-    auto result = UpnpXMLBuilder::createResponse(actionName, serviceType);
+    auto result = subject->createResponse(actionName, serviceType);
     EXPECT_NE(result, nullptr);
 
     auto root = result->document_element();
@@ -238,7 +238,7 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
-    std::string result = UpnpXMLBuilder::getFirstResourcePath(item);
+    std::string result = subject->getFirstResourcePath(item);
 
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "http://localhost/external/url");
@@ -254,7 +254,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
-    std::string result = UpnpXMLBuilder::getFirstResourcePath(item);
+    std::string result = subject->getFirstResourcePath(item);
 
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "content/online/object_id/12345/res_id/0");
@@ -268,7 +268,21 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
-    std::string result = UpnpXMLBuilder::getFirstResourcePath(item);
+    std::string result = subject->getFirstResourcePath(item);
+
+    EXPECT_NE(result, "");
+    EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
+}
+
+TEST_F(UpnpXmlTest, RenderContainerImage)
+{
+    auto obj = std::make_shared<CdsContainer>();
+    obj->setLocation("local/content");
+    obj->setID(12345);
+
+    auto result = subject->renderContainerImage(obj);
+
+    EXPECT_TRUE(result.has_value());
 
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");

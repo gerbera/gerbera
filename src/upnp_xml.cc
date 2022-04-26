@@ -180,9 +180,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             }
         }
         auto meta = obj->getMetaData();
-        auto [url, artAdded] = renderItemImage(item);
+        auto artAdded = renderItemImageURL(item);
         if (artAdded) {
-            meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), url);
+            meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), artAdded.value());
         }
         auto playStatus = item->getPlayStatus();
         if (playStatus) {
@@ -218,9 +218,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             addPropertyList(result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
         }
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            auto [url, artAdded] = renderContainerImage(cont);
-            if (artAdded) {
-                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.c_str());
+            auto url = renderContainerImageURL(cont);
+            if (url) {
+                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.value().c_str());
             }
         }
     }
@@ -353,9 +353,12 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs) const
+void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup) const
 {
     auto res = parent.append_child("res");
+
+    auto url = renderResourceURL(object, resource, clientGroup);
+
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
     for (auto&& [attr, val] : resource.getAttributes()) {
@@ -370,123 +373,124 @@ void UpnpXMLBuilder::renderResource(const std::string& url, const CdsResource& r
     }
 }
 
-std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal) const
+std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsResource& res, const std::string& clientGroup) const
 {
-    /// \todo resource options must be read from configuration files
+    std::string url;
 
-    std::map<std::string, std::string> dict;
-    dict[URL_OBJECT_ID] = fmt::to_string(item->getID());
-
-    /// \todo move this down into the "for" loop and create different urls
-    /// for each resource once the io handlers are ready    int objectType = ;
-    if (item->isExternalItem()) {
-        if (!item->getFlag(OBJECT_FLAG_PROXY_URL) && (!forceLocal)) {
-            return std::make_unique<PathBase>(item->getLocation(), false);
+    if (IS_CDS_CONTAINER(item.getObjectType())) {
+        auto resFile = res.getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+        if (!resFile.empty()) {
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
         }
 
-        if ((item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item->getFlag(OBJECT_FLAG_PROXY_URL)) || forceLocal) {
-            auto path = URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-            return std::make_unique<PathBase>(path, true);
+        auto resObj = res.getAttribute(CdsResource::Attribute::FANART_OBJ_ID);
+        if (!resObj.empty()) {
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(resObj), URL_RESOURCE_ID, res.getAttribute(CdsResource::Attribute::FANART_RES_ID) });
         }
     }
-    auto path = URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID }, true);
-    return std::make_unique<PathBase>(path, true);
+
+    if (IS_CDS_ITEM_EXTERNAL_URL(item.getObjectType())) {
+        // Remote URL is just passed straight out
+        // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
+        if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            return item.getLocation();
+        }
+
+        // Proxied remote URL
+        if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+        }
+    }
+
+    // Externally hosted thumnbnails?
+    if (res.getPurpose() == CdsResource::Purpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL) {
+        url = res.getOption(RESOURCE_OPTION_URL);
+        if (url.empty())
+            throw_std_runtime_error("missing thumbnail URL");
+    }
+
+    // Standard Resource
+    if (url.empty()) {
+        if (res.getPurpose() == CdsResource::Purpose::Transcode) {
+            // Transcoded resources dont set a resId, uses pr_name from params instead.
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+        } else {
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+        }
+    }
+
+    // Add Params
+    auto&& resParams = res.getParameters();
+    if (!resParams.empty()) {
+        url.append(_URL_PARAM_SEPARATOR);
+        url.append(dictEncodeSimple(resParams));
+    }
+
+    // Inject client group for content
+    if (!clientGroup.empty() && (res.getPurpose() == CdsResource::Purpose::Content || res.getPurpose() == CdsResource::Purpose::Transcode)) {
+        url.append(URLUtils::joinUrl({ CLIENT_GROUP_TAG, clientGroup }));
+    }
+
+    // Add the filename.ext part
+    // We don't use this for anything, but it makes various clients happy
+    auto mimeType = getMimeType(res);
+    auto contentType = getValueOrDefault(ctMappings, mimeType);
+    auto lang = res.getAttribute(CdsResource::Attribute::LANGUAGE);
+    auto ext = renderExtension("", res.getAttribute(CdsResource::Attribute::RESOURCE_FILE), lang); // try extension from resource file
+    if (ext.empty())
+        ext = renderExtension(contentType, res.getPurpose() == CdsResource::Purpose::Transcode ? "" : item.getLocation(), lang);
+    url.append(ext);
+
+    return url;
 }
 
 /// \brief build path for first resource from item
 /// depending on the item type it returns the url to the media
 std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item) const
 {
-    auto urlBase = getPathBase(item);
-
-    if (item->isExternalItem() && !urlBase->addResID) { // a remote resource
-        return urlBase->pathBase;
+    auto res = item->getResource(CdsResource::Purpose::Content);
+    if (res)
+        return renderResourceURL(*item, *res);
+    else {
+        // Fabricate a fake resource for URL based items
+        // FIXME: This should be done at object creation
+        auto temp = CdsResource { ContentHandler::DEFAULT, CdsResource::Purpose::Content };
+        temp.setResId(0);
+        return renderResourceURL(*item, temp);
     }
-
-    if (urlBase->addResID) { // a proxy, remote, resource
-        return fmt::format(SERVER_VIRTUAL_DIR "{}0", urlBase->pathBase);
-    }
-
-    // a local resource
-    return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase);
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::shared_ptr<CdsContainer>& cont) const
+std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const
 {
-    auto orderedResources = getOrderedResources(cont);
+    auto orderedResources = getOrderedResources(*cont);
     for (auto&& res : orderedResources) {
         if (res->getPurpose() != CdsResource::Purpose::Thumbnail)
             continue;
-
-        auto resFile = res->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
-        auto resObj = res->getAttribute(CdsResource::Attribute::FANART_OBJ_ID);
-        bool result = false;
-        std::map<std::string, std::string> dict;
-        std::string resId;
-        if (!resFile.empty()) {
-            // found, FanArtHandler deals already with file
-            dict[URL_OBJECT_ID] = fmt::to_string(cont->getID());
-            resId = fmt::to_string(res->getResId());
-            result = true;
-        }
-        if (!resObj.empty()) {
-            dict[URL_OBJECT_ID] = resObj;
-            resId = res->getAttribute(CdsResource::Attribute::FANART_RES_ID);
-            result = true;
-        }
-        if (result) {
-            auto pathVector = std::vector<std::string> { SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, resId };
-            auto resParams = res->getParameters();
-            if (!resParams.empty()) {
-                pathVector.push_back(dictEncodeSimple(resParams));
-            }
-            return { virtualURL + URLUtils::joinUrl(pathVector), true };
-        }
+        return renderResourceURL(*cont, *res);
     }
     return {};
 }
 
-std::string UpnpXMLBuilder::renderOneResource(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res) const
+std::optional<std::string> UpnpXMLBuilder::renderItemImageURL(const std::shared_ptr<CdsItem>& item) const
 {
-    auto resParams = res->getParameters();
-    auto urlBase = getPathBase(item);
-    if (item->isExternalItem() && res->getHandlerType() == ContentHandler::DEFAULT)
-        return item->getLocation();
-    std::string url;
-    if (urlBase->addResID) {
-        url = fmt::format("{}/{}{}{}{}", virtualURL, SERVER_VIRTUAL_DIR, urlBase->pathBase, res->getResId(), _URL_PARAM_SEPARATOR);
-    } else
-        url = virtualURL + urlBase->pathBase;
-
-    if (!resParams.empty()) {
-        url.append(dictEncodeSimple(resParams));
-    }
-    return url;
-}
-
-std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::shared_ptr<CdsItem>& item) const
-{
-    auto orderedResources = getOrderedResources(item);
-    auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(),
-        [](auto&& res) { return res->getPurpose() == CdsResource::Purpose::Thumbnail; });
+    auto orderedResources = getOrderedResources(*item);
+    auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(), [](auto&& res) { return res->getPurpose() == CdsResource::Purpose::Thumbnail; });
     if (resFound != orderedResources.end()) {
-        return { renderOneResource(item, *resFound), true };
+        return renderResourceURL(*item, **resFound);
     }
-
     return {};
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::shared_ptr<CdsItem>& item, const Quirks* quirks) const
+std::optional<std::string> UpnpXMLBuilder::renderSubtitleURL(const std::shared_ptr<CdsItem>& item) const
 {
     auto resFound = item->getResource(CdsResource::Purpose::Subtitle);
     if (resFound) {
-        auto url = renderOneResource(item, resFound) + renderExtension("", resFound->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks);
-        return { url, true };
+        return renderResourceURL(*item, *resFound);
     }
     return {};
 }
 
-std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks) const
+std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const std::string& language) const
 {
     auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file" });
 
@@ -495,10 +499,10 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     }
 
     if (!location.empty() && location.has_extension()) {
-        // make sure that the filename does not contain the separator character
-        std::string filename = (!quirks || quirks->needsFileNameUri()) ? urlEscape(location.filename().stem().string()) : "";
         std::string extension = location.filename().extension();
-        return fmt::format("{}.{}{}", urlExt, filename, extension);
+        if (!language.empty())
+            return fmt::format("{}.{}{}", urlExt, language, extension);
+        return fmt::format("{}{}", urlExt, extension);
     }
 
     return {};
@@ -506,7 +510,7 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
 
 std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res) const
 {
-    std::string contentParameter = dlnaProfileString(res, contentType);
+    std::string contentParameter = dlnaProfileString(*res, contentType);
     return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
         UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
         UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
@@ -518,20 +522,21 @@ std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType) c
     return getValueOrDefault(transferMappings, mimeType);
 }
 
-std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted) const
+std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted) const
 {
-    std::string dlnaProfile = res ? res->getOption("dlnaProfile") : "";
-    if (contentType == CONTENT_TYPE_JPG && res) {
-        std::string resValue = res->getAttributeValue(CdsResource::Attribute::RESOLUTION);
-        if (res->getResId() > 0 && !resValue.empty()) {
+    std::string dlnaProfile = res.getOption("dlnaProfile");
+    if (contentType == CONTENT_TYPE_JPG) {
+        std::string resValue = res.getAttributeValue(CdsResource::Attribute::RESOLUTION);
+        if (res.getPurpose() == CdsResource::Purpose::Thumbnail) {
+            dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
+        }
+        if (res.getPurpose() == CdsResource::Purpose::Content && !resValue.empty()) {
             if (resValue == "SD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_SM;
             else if (resValue == "HD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_MED;
             else if (resValue == "UHD")
                 dlnaProfile = UPNP_DLNA_PROFILE_JPEG_LRG;
-            else if (res->getPurpose() == CdsResource::Purpose::Thumbnail)
-                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
         }
     }
     if (dlnaProfile.empty()) {
@@ -544,12 +549,12 @@ std::string UpnpXMLBuilder::dlnaProfileString(const std::shared_ptr<CdsResource>
     return dlnaProfile;
 }
 
-std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType) const
+std::string UpnpXMLBuilder::findDlnaProfile(const CdsResource& res, const std::string& contentType) const
 {
     std::string dlnaProfile;
     static auto fromKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);
     static auto toKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO);
-    auto legacyKey = fmt::format("{}-{}-{}", contentType, res->getAttribute(CdsResource::Attribute::VIDEOCODEC), res->getAttribute(CdsResource::Attribute::AUDIOCODEC));
+    auto legacyKey = fmt::format("{}-{}-{}", contentType, res.getAttribute(CdsResource::Attribute::VIDEOCODEC), res.getAttribute(CdsResource::Attribute::AUDIOCODEC));
     std::size_t matchLength = 0;
     for (auto&& map : profMappings) {
         std::string profCand;
@@ -563,7 +568,7 @@ std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& 
             }
             for (auto&& attr : ResourceAttributeIterator()) {
                 auto attrName = CdsResource::getAttributeDisplay(attr);
-                if (key == attrName && val != res->getAttributeValue(attr) && val != res->getAttribute(attr)) {
+                if (key == attrName && val != res.getAttributeValue(attr) && val != res.getAttribute(attr)) {
                     match = false;
                 }
             }
@@ -576,11 +581,11 @@ std::string UpnpXMLBuilder::findDlnaProfile(const std::shared_ptr<CdsResource>& 
     return dlnaProfile;
 }
 
-std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const std::shared_ptr<CdsObject>& object) const
+std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(const CdsObject& object) const
 {
     // Order resources according to index defined by orderedHandler
     std::deque<std::shared_ptr<CdsResource>> orderedResources;
-    auto&& resources = object->getResources();
+    auto&& resources = object.getResources();
     for (ContentHandler oh : orderedHandler) {
         std::copy_if(resources.begin(), resources.end(), std::back_inserter(orderedResources), [oh](auto&& res) { return oh == res->getHandlerType(); });
     }
@@ -608,9 +613,9 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
     auto filterList = tlist->getFilterList();
     if (!filterList.empty()) {
-        auto mainResource = item->getResource(ContentHandler::DEFAULT);
+        auto mainResource = item->getResource(CdsResource::Purpose::Content);
         std::string ct = getValueOrDefault(ctMappings, item->getMimeType());
-        auto sourceProfile = dlnaProfileString(mainResource, ct, false);
+        auto sourceProfile = dlnaProfileString(*mainResource, ct, false);
         for (auto&& filter : filterList) {
             if (!filter)
                 throw_std_runtime_error("Invalid profile encountered");
@@ -727,13 +732,6 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (tp->hideOriginalResource())
                 hideOriginalResource = true;
 
-            auto urlBase = [&] {
-                if (skipURL)
-                    return getPathBase(item, true);
-                return getPathBase(item);
-            }();
-            tRes->addOption("urlBase", fmt::format("{}{}", urlBase->pathBase, URL_VALUE_TRANSCODE_NO_RES_ID));
-
             if (tp->firstResource()) {
                 orderedResources.push_front(std::move(tRes));
                 originalResource = 0;
@@ -747,59 +745,48 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
 
 void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
 {
-    auto urlBase = getPathBase(item);
-    bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
+    bool isExternalURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
-    auto orderedResources = getOrderedResources(item);
+    auto orderedResources = getOrderedResources(*item);
 
+    // This loop we are looking for resources that contain information to populate item level info
+    // Thumbnails are used to populate items AlbumArtUri
+    // Subtitles are used to build CaptionInfoEx tags
+    // Real resources are rendered lower down
     std::vector<std::map<std::string, std::string>> captionInfoEx;
     for (auto&& res : orderedResources) {
-        auto&& resParams = res->getParameters();
-        std::string protocolInfo = res->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
-        std::string url;
-
-        if (urlBase->addResID) {
-            url = fmt::format("{}{}", urlBase->pathBase, res->getResId());
-        } else
-            url = urlBase->pathBase;
-
-        if (!resParams.empty()) {
-            url.append(_URL_PARAM_SEPARATOR);
-            url.append(dictEncodeSimple(resParams));
-        }
-
-        auto handlerType = res->getHandlerType();
         auto purpose = res->getPurpose();
-        if (purpose == CdsResource::Purpose::Thumbnail && handlerType == ContentHandler::EXTURL) {
-            url = res->getOption(RESOURCE_OPTION_URL);
-            if (url.empty())
-                throw_std_runtime_error("missing thumbnail URL");
-        }
+        if (purpose == CdsResource::Purpose::Content)
+            continue;
 
-        // resource is used to point to album art
-        // only add upnp:AlbumArtURI if we have an AA, skip the resource
+        auto url = renderResourceURL(*item, *res);
+        // Set Album art if we have a thumbnail
+        // Note we dont actually add these as res tags.
         if (purpose == CdsResource::Purpose::Thumbnail) {
             auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data());
-            aa.append_child(pugi::node_pcdata).set_value((virtualURL + url).c_str());
+            aa.append_child(pugi::node_pcdata).set_value((url).c_str());
 
             /// \todo clean this up, make sure to check the mimetype and
             /// provide the profile correctly
             aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
             aa.append_attribute("dlna:profileID") = "JPEG_TN";
+            continue;
         }
+
         if (purpose == CdsResource::Purpose::Subtitle) {
             auto captionInfo = std::map<std::string, std::string>();
-            auto subUrl = url;
-            subUrl.append(renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks ? &(*quirks) : nullptr));
-            captionInfo[""] = virtualURL + subUrl;
+            captionInfo[""] = url;
             captionInfo["sec:type"] = res->getAttribute(CdsResource::Attribute::TYPE).empty() ? res->getParameter("type") : res->getAttribute(CdsResource::Attribute::TYPE);
             if (!res->getAttribute(CdsResource::Attribute::LANGUAGE).empty()) {
                 captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::LANGUAGE)] = res->getAttribute(CdsResource::Attribute::LANGUAGE);
             }
-            captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::PROTOCOLINFO)] = protocolInfo;
+            captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::PROTOCOLINFO)] = res->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+            ;
             captionInfoEx.push_back(std::move(captionInfo));
+            continue;
         }
     }
+
     if (!captionInfoEx.empty()) {
         auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
         for (auto&& captionInfo : captionInfoEx) {
@@ -817,121 +804,72 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
     }
 
-    auto [hideOriginalResource, originalResource] = insertTempTranscodingResource(item, quirks, orderedResources, skipURL);
+    auto [hideOriginalResource, originalResource] = insertTempTranscodingResource(item, quirks, orderedResources, isExternalURL);
 
-    bool isExtThumbnail = false;
     for (auto&& res : orderedResources) {
-        auto resAttrs = res->getAttributes();
-        auto resParams = res->getParameters();
-        std::string protocolInfo = res->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
-        std::string mimeType = getMTFromProtocolInfo(protocolInfo);
-
-        auto pos = mimeType.find(';');
-        if (pos != std::string::npos) {
-            mimeType = mimeType.substr(0, pos);
-        }
-
-        assert(!mimeType.empty());
-        std::string contentType = getValueOrDefault(ctMappings, mimeType);
-        std::string url;
-
-        /// \todo who will sync mimetype that is part of the protocol info and
-        /// that is lying in the resources with the information that is in the
-        /// resource tags?
-
-        // ok, here is the tricky part:
-        // we add transcoded resources dynamically, that means that when
-        // the object is loaded from database those resources are not there;
-        // this again means, that we have to add the res_id parameter
-        // accounting for those dynamic resources: i.e. the parameter should
-        // still only count the "real" resources, because that's what the
-        // file request handler will be getting.
-        // for transcoded resources the res_id can be safely ignored,
-        // because a transcoded resource is identified by the profile name
-        // flag if we are dealing with the transcoded resource
-        bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
-        if (!transcoded) {
-            if (urlBase->addResID) {
-                url = fmt::format("{}{}", urlBase->pathBase, res->getResId());
-            } else
-                url = urlBase->pathBase;
-        } else {
-            url = res->getOption("urlBase");
-        }
-        resParams[CLIENT_GROUP_TAG] = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
-        if (!resParams.empty()) {
-            url.append(_URL_PARAM_SEPARATOR);
-            url.append(dictEncodeSimple(resParams));
-        }
-
-        auto handlerType = res->getHandlerType();
-        auto purpose = res->getPurpose();
-        if (purpose == CdsResource::Purpose::Thumbnail && handlerType == ContentHandler::EXTURL) {
-            url = res->getOption(RESOURCE_OPTION_URL);
-            if (url.empty())
-                throw_std_runtime_error("missing thumbnail URL");
-
-            isExtThumbnail = true;
-        }
-
-        // resource is used to point to album art
-        // only add upnp:AlbumArtURI if we have an AA, skip the resource
-        if (purpose == CdsResource::Purpose::Thumbnail && handlerType != ContentHandler::EXTURL) {
-            continue;
-        }
-
         std::map<std::string, std::string> clientSpecficAttrs;
-        if (handlerType == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
+        if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
             auto captionInfo = captionInfoEx[0];
             clientSpecficAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]);
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];
         }
 
-        if (!isExtThumbnail) {
-            // when transcoding is enabled the first (zero) resource can be the
-            // transcoded stream, that means that we can only go with the
-            // content type here and that we will not limit ourselves to the
-            // first resource
-            if (!skipURL) {
-                auto ext = renderExtension("", res->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks ? &(*quirks) : nullptr); // try extension from resource file
-                if (ext.empty())
-                    ext = renderExtension(contentType, transcoded ? "" : item->getLocation(), quirks ? &(*quirks) : nullptr);
-                url.append(ext);
-            }
-        }
+        // bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
+        bool transcoded = res->getPurpose() == CdsResource::Purpose::Transcode;
+        auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
 
-        std::string extend = dlnaProfileString(res, contentType);
-
-        // we do not support seeking at all, so 00
-        // and the media is converted, so set CI to 1
-        if (!isExtThumbnail && transcoded) {
-            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
-        } else {
-            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
-        }
-        std::string dlnaFlags;
-        if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;
-        else if (startswith(mimeType, "image"))
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_IMAGE;
-        if (purpose == CdsResource::Purpose::Subtitle) {
-            dlnaFlags = UPNP_DLNA_ORG_FLAGS_SUB;
-        }
-        if (!dlnaFlags.empty())
-            extend.append(fmt::format(";{}={}", UPNP_DLNA_FLAGS, dlnaFlags));
-
-        protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
-        // FIXME: Should we be working protocol info out here?
-        res->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
-
-        log_debug("protocolInfo: {}", protocolInfo.c_str());
-
-        // URL is path until now
-        if (!item->isExternalItem() || (hideOriginalResource && item->isExternalItem())) {
-            url = fmt::format("{}{}", virtualURL, url);
-        }
+        buildProtocolInfo(*res);
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
-            renderResource(url, *res, parent, clientSpecficAttrs);
+            renderResource(*item, *res, parent, clientSpecficAttrs, clientGroup);
     }
+}
+
+std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource) const
+{
+    std::string protocolInfo = resource.getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+    std::string mimeType = getMTFromProtocolInfo(protocolInfo);
+
+    auto pos = mimeType.find(';');
+    if (pos != std::string::npos) {
+        mimeType = mimeType.substr(0, pos);
+    }
+
+    return mimeType;
+}
+
+std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource) const
+{
+    // Why is this here? Just for transcoding maybe?
+
+    auto mimeType = getMimeType(resource);
+    auto contentType = getValueOrDefault(ctMappings, mimeType);
+    auto extend = dlnaProfileString(resource, contentType);
+    // we do not support seeking at all, so 00
+    // and the media is converted, so set CI to 1
+    if (resource.getPurpose() == CdsResource::Purpose::Transcode) {
+        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
+    } else {
+        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
+    }
+    std::string dlnaFlags;
+    if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
+        dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;
+    else if (startswith(mimeType, "image"))
+        dlnaFlags = UPNP_DLNA_ORG_FLAGS_IMAGE;
+    if (resource.getPurpose() == CdsResource::Purpose::Subtitle) {
+        dlnaFlags = UPNP_DLNA_ORG_FLAGS_SUB;
+    }
+    if (!dlnaFlags.empty())
+        extend.append(fmt::format(";{}={}", UPNP_DLNA_FLAGS, dlnaFlags));
+
+    auto protocolInfo = resource.getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+
+    protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
+    // FIXME: Should we be working protocol info out here?
+    resource.addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+
+    log_debug("protocolInfo: {}", protocolInfo.c_str());
+
+    return protocolInfo;
 }
