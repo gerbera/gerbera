@@ -106,7 +106,7 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          text.prepend($('<img class="pull-left rounded grb-thumbnail" src="//' + item.image + '"/>'));
+          text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
         } else {
           let icon = "fa-file-o";
           if (item.upnp_class) {

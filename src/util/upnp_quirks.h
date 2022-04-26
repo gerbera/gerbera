@@ -26,6 +26,7 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include "upnp_xml.h"
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
@@ -50,11 +51,12 @@ class CdsItem;
 class CdsObject;
 class GrbNet;
 class Headers;
+class UpnpXMLBuilder;
 struct ClientInfo;
 
 class Quirks {
 public:
-    Quirks(std::shared_ptr<Context> context, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
+    Quirks(const UpnpXMLBuilder& builder, const ClientManager& clients, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
@@ -75,7 +77,7 @@ public:
      * \return void
      *
      */
-    void saveSamsungBookMarkedPosition(ActionRequest& request);
+    void saveSamsungBookMarkedPosition(Database& database, ActionRequest& request) const;
 
     /** \brief get Samsung Feature List
      *
@@ -84,7 +86,7 @@ public:
      *
      */
     void getSamsungFeatureList(ActionRequest& request) const;
-    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::string& objId) const;
+    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(Database& database, const std::string& objId) const;
 
     /** \brief get Samsung ObjectID from Index
      *
@@ -139,8 +141,7 @@ public:
     std::string getGroup() const;
 
 private:
-    std::shared_ptr<Context> context;
-    std::shared_ptr<ContentManager> content;
+    const UpnpXMLBuilder& xmlBuilder;
     const ClientInfo* pClientInfo;
 };
 

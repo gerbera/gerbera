@@ -142,10 +142,10 @@ void Web::Items::process()
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
         item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
         item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objItem->getClass().c_str());
-        std::string res = UpnpXMLBuilder::getFirstResourcePath(objItem);
+        std::string res = xmlBuilder->getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 
-        auto [url, artAdded] = xmlBuilder->renderItemImage(server->getVirtualUrl(), objItem);
+        auto [url, artAdded] = xmlBuilder->renderItemImage(objItem);
         if (artAdded) {
             item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
         }

@@ -25,7 +25,7 @@ public:
         database = std::make_shared<DatabaseMock>(config);
         context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr, nullptr);
 
-        std::string virtualDir = "http://server/content";
+        std::string virtualDir = "http://server/";
         std::string presentationURl = "http://someurl/";
         subject = new UpnpXMLBuilder(context, virtualDir, presentationURl);
     }

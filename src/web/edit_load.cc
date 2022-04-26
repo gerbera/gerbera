@@ -185,7 +185,7 @@ void Web::EditLoad::process()
 
         // write resource content
         if (objItem) {
-            std::string url = UpnpXMLBuilder::renderOneResource(server->getVirtualUrl(), objItem, resItem);
+            std::string url = xmlBuilder->renderOneResource(objItem, resItem);
             if (resItem->getPurpose() == CdsResource::Purpose::Thumbnail) {
                 auto image = resources.append_child("resources");
                 image.append_attribute("resname") = "image";
@@ -242,7 +242,7 @@ void Web::EditLoad::process()
         mimeType.append_attribute("value") = objItem->getMimeType().c_str();
         mimeType.append_attribute("editable") = true;
 
-        auto [url, artAdded] = xmlBuilder->renderItemImage(server->getVirtualUrl(), objItem);
+        auto [url, artAdded] = xmlBuilder->renderItemImage(objItem);
         if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();
@@ -285,7 +285,7 @@ void Web::EditLoad::process()
     // write container meta info
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto [url, artAdded] = xmlBuilder->renderContainerImage(server->getVirtualUrl(), cont);
+        auto [url, artAdded] = xmlBuilder->renderContainerImage(cont);
         if (artAdded) {
             auto image = item.append_child("image");
             image.append_attribute("value") = url.c_str();

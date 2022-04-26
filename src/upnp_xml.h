@@ -43,6 +43,8 @@
 #include "context.h"
 #include "util/upnp_quirks.h"
 
+class Quirks;
+
 class UpnpXMLBuilder {
 public:
     explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context,
@@ -57,43 +59,43 @@ public:
     /// <u:actionNameResponse xmlns:u="serviceType"/>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
-    static std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType);
+    std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType) const;
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item
-    void renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks = nullptr);
+    void renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks = nullptr) const;
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
-    static std::unique_ptr<pugi::xml_document> createEventPropertySet();
+    std::unique_ptr<pugi::xml_document> createEventPropertySet() const;
 
     /// \brief Renders the device description XML.
     /// \return pugi::xml_document representing the newly created device description.
     ///
     /// Some elements are statically defined in common.h, others are loaded
     /// from the config with the help of the ConfigManager.
-    std::unique_ptr<pugi::xml_document> renderDeviceDescription();
+    std::unique_ptr<pugi::xml_document> renderDeviceDescription() const;
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param URL download location of the item (will be child element of the <res> tag)
     /// \param resource The CDSResource itself
     /// \param parent Parent node to render the result into
     /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
-    static void renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs);
+    void renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs) const;
 
-    std::pair<std::string, bool> renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont);
-    std::pair<std::string, bool> renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item);
-    static std::pair<std::string, bool> renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const Quirks* quirks);
-    static std::string renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res);
+    std::pair<std::string, bool> renderContainerImage(const std::shared_ptr<CdsContainer>& cont) const;
+    std::pair<std::string, bool> renderItemImage(const std::shared_ptr<CdsItem>& item) const;
+    std::pair<std::string, bool> renderSubtitle(const std::shared_ptr<CdsItem>& item, const Quirks* quirks) const;
+    std::string renderOneResource(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res) const;
 
-    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks);
+    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const;
 
     /// \brief build path for first resource from item
     /// depending on the item type it returns the url to the media
-    static std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item);
+    std::string getFirstResourcePath(const std::shared_ptr<CdsItem>& item) const;
 
     /// \brief convert xml tree to string
     static std::string printXml(const pugi::xml_node& entry, const char* indent = PUGIXML_TEXT("\t"), int flags = pugi::format_default);
@@ -126,12 +128,12 @@ protected:
         bool addResID;
     };
     std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object) const;
-    std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL);
+    std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const;
 
-    static std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false);
-    static std::string renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks);
-    static void addField(pugi::xml_node& entry, const std::string& key, const std::string& val);
-    void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp);
+    std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false) const;
+    std::string renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks) const;
+    void addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const;
+    void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp) const;
     std::string findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType) const;
     std::string dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted = true) const;
 };

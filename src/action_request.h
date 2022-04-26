@@ -40,8 +40,9 @@
 #include "common.h"
 
 // forward declaration
-class Context;
+class UpnpXMLBuilder;
 class Quirks;
+class ClientManager;
 
 /// \brief This class represents the Upnp_Action_Request type from the SDK.
 ///
@@ -83,7 +84,7 @@ protected:
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
     /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
-    explicit ActionRequest(const std::shared_ptr<Context>& context, UpnpActionRequest* upnpRequest);
+    explicit ActionRequest(const UpnpXMLBuilder& xmlBuilder, const ClientManager& clients, UpnpActionRequest* upnpRequest);
     ~ActionRequest() = default;
 
     /// \brief Returns the name of the action.
