@@ -298,6 +298,21 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "obj_location", AutoscanColumn::ObjLocation },
 };
 
+// Format string for a recursive query of a parent container
+static constexpr auto sql_search_container_query_raw = R"(
+-- Find all children of parent_id
+WITH {0} AS (SELECT * FROM {2} WHERE {4} = {{}}
+UNION
+SELECT {3}.* FROM {2} JOIN {0} AS {1} ON {3}.{4} = {1}.{5}
+),
+-- Find all physical items and de-reference any virtual item (i.e. follow ref-id)
+items AS (SELECT * from {0} AS {1} WHERE {6} IS NULL
+UNION
+SELECT {3}.* FROM {0} AS {1} JOIN {2} ON {1}.{6} = {3}.{5}
+)
+-- Select desired cols from items
+SELECT {{}} FROM items AS {3})";
+
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 #define getColInt(rw, idx, def) (rw)->col_int(to_underlying((idx)), (def))
 
@@ -389,7 +404,7 @@ void SQLDatabase::init()
         this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
 
         // Build container query format string
-        auto sql_container_query = fmt::format(sql_search_container_query_raw, searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
+        auto sql_container_query = fmt::format(sql_search_container_query_raw, identifier("containers"), identifier("cont"), searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
         this->sql_search_container_query_format = fmt::format("{} {} {}", sql_container_query, join1, join2);
     }
     // Statement for metadata

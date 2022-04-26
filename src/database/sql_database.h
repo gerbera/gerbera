@@ -226,21 +226,6 @@ protected:
     virtual void _exec(const std::string& query) = 0;
 
 private:
-    // Format string for a recursive query of a parent container
-    static constexpr auto sql_search_container_query_raw = R"(
--- Find all children of parent_id
-WITH containers AS (SELECT * FROM {0} WHERE {2} = {{}}
-UNION
-SELECT {1}.* FROM {0} JOIN containers AS cont ON {1}.{2} = cont.{3}
-),
--- Find all physical items and de-reference any virtual item (i.e. follow ref-id)
-items AS (SELECT * from containers AS cont WHERE {4} IS NULL
-UNION
-SELECT {1}.* FROM containers AS cont JOIN {0} ON cont.{4} = {1}.{3}
-)
--- Select desired cols from items
-SELECT {{}} FROM items AS {1})";
-
     std::string sql_browse_columns;
     std::string sql_browse_query;
     std::string sql_search_columns;
