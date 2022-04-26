@@ -1045,12 +1045,12 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
 
     std::string countSQL;
     if (rootContainer) {
-        // Use fater, non-recursive search for root container
+        // Use faster, non-recursive search for root container
         countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
     } else {
         // Use recursive container search
         const std::string countSelect = fmt::format("COUNT(DISTINCT {})", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        countSQL = fmt::format(this->sql_search_container_query_format, param.getContainerID(), countSelect);
+        countSQL = fmt::format(sql_search_container_query_format, param.getContainerID(), countSelect);
         countSQL += fmt::format(" WHERE {}", searchSQL);
     }
 
@@ -1087,12 +1087,12 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
 
     std::string retrievalSQL;
     if (rootContainer) {
-        // Use fater, non-recursive search for root container
+        // Use faster, non-recursive search for root container
         retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, sql_search_query, addJoin, searchSQL, orderBy, limit);
     } else {
         // Use recursive container search
         const std::string retrievalSelect = fmt::format("DISTINCT {} {}", sql_search_columns, addColumns);
-        retrievalSQL = fmt::format(this->sql_search_container_query_format, param.getContainerID(), retrievalSelect);
+        retrievalSQL = fmt::format(sql_search_container_query_format, param.getContainerID(), retrievalSelect);
         retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
     }
 
