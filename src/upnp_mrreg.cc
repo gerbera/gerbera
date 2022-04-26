@@ -50,7 +50,7 @@ void MRRegistrarService::doIsAuthorized(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
@@ -73,7 +73,7 @@ void MRRegistrarService::doIsValidated(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
@@ -105,7 +105,7 @@ void MRRegistrarService::processActionRequest(ActionRequest& request)
 
 void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
-    auto propset = UpnpXMLBuilder::createEventPropertySet();
+    auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");

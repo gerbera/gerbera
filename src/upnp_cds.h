@@ -77,13 +77,13 @@ private:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    static void doGetSearchCapabilities(ActionRequest& request);
+    void doGetSearchCapabilities(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    static void doGetSortCapabilities(ActionRequest& request);
+    void doGetSortCapabilities(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.
@@ -94,20 +94,20 @@ private:
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungBookmark(ActionRequest& request);
+    void doSamsungBookmark(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetFeatureListResponse
     /// \param request Incoming ActionRequest.
     ///
-    static void doSamsungFeatureList(ActionRequest& request);
+    void doSamsungFeatureList(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetObjectIDfromIndex
     /// \param request Incoming ActionRequest.
-    static void doSamsungGetObjectIDfromIndex(ActionRequest& request);
+    void doSamsungGetObjectIDfromIndex(ActionRequest& request);
 
     /// \brief Samsung Extension X_GetIndexfromRID
     /// \param request Incoming ActionRequest.
-    static void doSamsungGetIndexfromRID(ActionRequest& request);
+    void doSamsungGetIndexfromRID(ActionRequest& request);
 
     /// \brief mark played item if activated
     /// \param cdsObject item to mark

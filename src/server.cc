@@ -152,7 +152,7 @@ void Server::run()
     std::string presentationURL = getPresentationUrl();
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_shared<UpnpXMLBuilder>(context, virtualUrl, presentationURL);
+    xmlbuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
 
     // register root device with the library
     auto desc = xmlbuilder->renderDeviceDescription();
@@ -222,13 +222,7 @@ void Server::run()
         },
         this);
 
-    std::string url = config->getOption(CFG_VIRTUAL_URL);
-    if (url.empty()) {
-        url = renderWebUri(ip, port);
-    }
-    if (!startswith(url, "http")) { // url does not start with http
-        url = fmt::format("http://{}", url);
-    }
+    std::string url = getVirtualUrl();
     writeBookmark(url);
     log_info("The Web UI can be reached by following this link: {}", url);
 }
@@ -264,8 +258,6 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     log_info("IPv4: Server bound to: {}:{}", ip, port);
     log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(), UpnpGetServerPort6());
     log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
-
-    virtualUrl = fmt::format("http://{}:{}/{}", ip, port, virtual_directory);
 
     return ret;
 }
@@ -308,8 +300,14 @@ void Server::emptyBookmark()
 
 std::string Server::getVirtualUrl() const
 {
-    auto cfgVirt = config->getOption(CFG_VIRTUAL_URL);
-    return cfgVirt.empty() ? virtualUrl : fmt::format("{}/{}", cfgVirt, virtual_directory);
+    auto virtUrl = config->getOption(CFG_VIRTUAL_URL);
+    if (virtUrl.empty()) {
+        virtUrl = renderWebUri(ip, port);
+    }
+    if (!startswith(virtUrl, "http")) { // url does not start with http
+        virtUrl = fmt::format("http://{}", virtUrl);
+    }
+    return virtUrl;
 }
 
 bool Server::getShutdownStatus() const
@@ -385,7 +383,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(context, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(*xmlbuilder, *clients, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {

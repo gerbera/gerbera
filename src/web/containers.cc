@@ -75,7 +75,7 @@ void Web::Containers::process()
         int autoscanType = cont->getAutoscanType();
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
-        auto [url, artAdded] = xmlBuilder->renderContainerImage(server->getVirtualUrl(), cont);
+        auto [url, artAdded] = xmlBuilder->renderContainerImage(cont);
         if (artAdded) {
             ce.append_attribute("image") = url.c_str();
         }

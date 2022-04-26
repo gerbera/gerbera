@@ -140,7 +140,7 @@ public:
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
-    const ClientInfo* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
+    const ClientInfo* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const;
 
     void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
@@ -150,13 +150,13 @@ private:
     const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
     const ClientInfo* getInfoByCache(const std::shared_ptr<GrbNet>& addr) const;
-    void updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo);
+    void updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const;
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 
     mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<std::mutex>;
-    std::vector<ClientCacheEntry> cache;
+    mutable std::vector<ClientCacheEntry> cache;
 
     std::vector<ClientInfo> clientInfo;
     std::shared_ptr<Database> database;

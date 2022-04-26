@@ -123,13 +123,6 @@ protected:
     /// should be sufficient here.
     std::string virtual_directory;
 
-    /// \brief Full virtual web server url.
-    ///
-    /// The URL is constructed upon server initialization, since
-    /// the real port is not known before. The value of this variable
-    /// is returned by the getVirtualURL() function.
-    std::string virtualUrl;
-
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.

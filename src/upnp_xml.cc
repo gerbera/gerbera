@@ -61,7 +61,7 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     transferMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType)
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
 {
     auto response = std::make_unique<pugi::xml_document>();
     auto root = response->append_child(fmt::format("u:{}Response", actionName).c_str());
@@ -71,7 +71,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
 }
 
 void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
-    config_option_t itemProps, config_option_t nsProp)
+    config_option_t itemProps, config_option_t nsProp) const
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {
@@ -103,7 +103,7 @@ std::string UpnpXMLBuilder::printXml(const pugi::xml_node& entry, const char* in
     return buf.str();
 }
 
-void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val)
+void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const
 {
     // e.g. used for M_ALBUMARTIST
     // name@attr[val] => <name attr="val">
@@ -123,7 +123,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
 {
     auto result = parent.append_child("");
 
@@ -180,7 +180,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             }
         }
         auto meta = obj->getMetaData();
-        auto [url, artAdded] = renderItemImage(virtualURL, item);
+        auto [url, artAdded] = renderItemImage(item);
         if (artAdded) {
             meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), url);
         }
@@ -218,7 +218,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             addPropertyList(result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
         }
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            auto [url, artAdded] = renderContainerImage(virtualURL, cont);
+            auto [url, artAdded] = renderContainerImage(cont);
             if (artAdded) {
                 result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.c_str());
             }
@@ -232,7 +232,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     log_debug("Rendered DIDL: {}", printXml(result, "  "));
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() const
 {
     auto doc = std::make_unique<pugi::xml_document>();
 
@@ -244,7 +244,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet()
     return doc;
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
+std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() const
 {
     auto doc = std::make_unique<pugi::xml_document>();
 
@@ -353,7 +353,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription()
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs)
+void UpnpXMLBuilder::renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs) const
 {
     auto res = parent.append_child("res");
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
@@ -370,7 +370,7 @@ void UpnpXMLBuilder::renderResource(const std::string& url, const CdsResource& r
     }
 }
 
-std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal)
+std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal) const
 {
     /// \todo resource options must be read from configuration files
 
@@ -395,7 +395,7 @@ std::unique_ptr<UpnpXMLBuilder::PathBase> UpnpXMLBuilder::getPathBase(const std:
 
 /// \brief build path for first resource from item
 /// depending on the item type it returns the url to the media
-std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item)
+std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item) const
 {
     auto urlBase = getPathBase(item);
 
@@ -411,7 +411,7 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     return fmt::format(SERVER_VIRTUAL_DIR "{}", urlBase->pathBase);
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::string& virtualURL, const std::shared_ptr<CdsContainer>& cont)
+std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::shared_ptr<CdsContainer>& cont) const
 {
     auto orderedResources = getOrderedResources(cont);
     for (auto&& res : orderedResources) {
@@ -435,7 +435,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
             result = true;
         }
         if (result) {
-            auto pathVector = std::vector<std::string> { CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, resId };
+            auto pathVector = std::vector<std::string> { SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, dictEncodeSimple(dict), URL_RESOURCE_ID, resId };
             auto resParams = res->getParameters();
             if (!resParams.empty()) {
                 pathVector.push_back(dictEncodeSimple(resParams));
@@ -446,7 +446,7 @@ std::pair<std::string, bool> UpnpXMLBuilder::renderContainerImage(const std::str
     return {};
 }
 
-std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res)
+std::string UpnpXMLBuilder::renderOneResource(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res) const
 {
     auto resParams = res->getParameters();
     auto urlBase = getPathBase(item);
@@ -454,7 +454,7 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
         return item->getLocation();
     std::string url;
     if (urlBase->addResID) {
-        url = fmt::format("{}{}{}{}", virtualURL, urlBase->pathBase, res->getResId(), _URL_PARAM_SEPARATOR);
+        url = fmt::format("{}/{}{}{}{}", virtualURL, SERVER_VIRTUAL_DIR, urlBase->pathBase, res->getResId(), _URL_PARAM_SEPARATOR);
     } else
         url = virtualURL + urlBase->pathBase;
 
@@ -464,29 +464,29 @@ std::string UpnpXMLBuilder::renderOneResource(const std::string& virtualURL, con
     return url;
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item)
+std::pair<std::string, bool> UpnpXMLBuilder::renderItemImage(const std::shared_ptr<CdsItem>& item) const
 {
     auto orderedResources = getOrderedResources(item);
     auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(),
         [](auto&& res) { return res->getPurpose() == CdsResource::Purpose::Thumbnail; });
     if (resFound != orderedResources.end()) {
-        return { renderOneResource(virtualURL, item, *resFound), true };
+        return { renderOneResource(item, *resFound), true };
     }
 
     return {};
 }
 
-std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::string& virtualURL, const std::shared_ptr<CdsItem>& item, const Quirks* quirks)
+std::pair<std::string, bool> UpnpXMLBuilder::renderSubtitle(const std::shared_ptr<CdsItem>& item, const Quirks* quirks) const
 {
     auto resFound = item->getResource(CdsResource::Purpose::Subtitle);
     if (resFound) {
-        auto url = renderOneResource(virtualURL, item, resFound) + renderExtension("", resFound->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks);
+        auto url = renderOneResource(item, resFound) + renderExtension("", resFound->getAttribute(CdsResource::Attribute::RESOURCE_FILE), quirks);
         return { url, true };
     }
     return {};
 }
 
-std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks)
+std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks) const
 {
     auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file" });
 
@@ -595,7 +595,7 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     return orderedResources;
 }
 
-std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL)
+std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const
 {
     bool hideOriginalResource = false;
     int originalResource = -1;
@@ -745,7 +745,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     return { hideOriginalResource, originalResource };
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks)
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
 {
     auto urlBase = getPathBase(item);
     bool skipURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));

@@ -162,7 +162,7 @@
     if (item) {
       reset(modal);
       if (item.image) {
-        modal.find('#mediaimage').prop('src', '//' + item.image.value);
+        modal.find('#mediaimage').prop('src', item.image.value);
         modal.find('#mediaimage').show();
       }
       modal.find('#editObjectType').val(item.obj_type);
@@ -219,7 +219,7 @@
             tbody = $('<tbody></tbody>');
             restable.append(tbody);
           } else if (item.resources.resources[i].resname === 'image') {
-            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="//' +  item.resources.resources[i].resvalue + '"/>'));
+            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="' +  item.resources.resources[i].resvalue + '"/>'));
           } else if (item.resources.resources[i].resname === 'link') {
             appendMetaItem(tbody, 'content', null, $('<a href=' +  item.resources.resources[i].resvalue + '>Open</span>'));
           } else {

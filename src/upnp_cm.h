@@ -51,7 +51,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    static void doGetCurrentConnectionIDs(ActionRequest& request);
+    void doGetCurrentConnectionIDs(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -60,7 +60,7 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    static void doGetCurrentConnectionInfo(ActionRequest& request);
+    void doGetCurrentConnectionInfo(ActionRequest& request);
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.

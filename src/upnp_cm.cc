@@ -50,7 +50,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
@@ -73,7 +73,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto root = response->document_element();
 
@@ -109,7 +109,7 @@ void ConnectionManagerService::processActionRequest(ActionRequest& request)
 void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
-    auto propset = UpnpXMLBuilder::createEventPropertySet();
+    auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
 
     property.append_child("CurrentConnectionIDs").append_child(pugi::node_pcdata).set_value("0");
@@ -141,7 +141,7 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
 void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
-    auto propset = UpnpXMLBuilder::createEventPropertySet();
+    auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 

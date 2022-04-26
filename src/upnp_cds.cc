@@ -78,7 +78,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
     auto&& quirks = request.getQuirks();
-    auto arr = quirks->getSamsungFeatureRoot(objID);
+    auto arr = quirks->getSamsungFeatureRoot(*database, objID);
     int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
@@ -132,7 +132,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
     log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto respRoot = response->document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
@@ -219,7 +219,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
     log_debug("didl {}", didlLiteXml);
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto respRoot = response->document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
@@ -263,7 +263,7 @@ void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
     request.setResponse(std::move(response));
@@ -275,7 +275,7 @@ void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request)
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
     request.setResponse(std::move(response));
@@ -287,7 +287,7 @@ void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request) const
 {
     log_debug("start");
 
-    auto response = UpnpXMLBuilder::createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request.setResponse(std::move(response));
@@ -299,7 +299,7 @@ void ContentDirectoryService::doSamsungBookmark(ActionRequest& request)
 {
     log_debug("start");
 
-    request.getQuirks()->saveSamsungBookMarkedPosition(request);
+    request.getQuirks()->saveSamsungBookMarkedPosition(*database, request);
 
     log_debug("end");
 }
@@ -366,7 +366,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 {
     log_debug("start");
 
-    auto propset = UpnpXMLBuilder::createEventPropertySet();
+    auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     auto obj = database->loadObject(DEFAULT_CLIENT_GROUP, 0);
@@ -403,7 +403,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
 
     systemUpdateID++;
 
-    auto propset = UpnpXMLBuilder::createEventPropertySet();
+    auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDsCsv.c_str());
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());

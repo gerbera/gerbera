@@ -192,7 +192,7 @@ void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, co
 #endif
 }
 
-const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
+const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -267,7 +267,7 @@ const ClientInfo* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& a
     return nullptr;
 }
 
-void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo)
+void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const
 {
     AutoLock lock(mutex);
 
