@@ -62,11 +62,11 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
     if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
-    auto [url, subAdded] = xmlBuilder.renderSubtitle(item, this);
+    auto subAdded = xmlBuilder.renderSubtitleURL(item);
     if (subAdded) {
-        log_debug("Call for Samsung CaptionInfo.sec: {}", url);
-        headers.addHeader("CaptionInfo.sec", url);
-        headers.addHeader("getCaptionInfo.sec", url);
+        log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
+        headers.addHeader("CaptionInfo.sec", subAdded.value());
+        headers.addHeader("getCaptionInfo.sec", subAdded.value());
     }
 }
 

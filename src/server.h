@@ -70,14 +70,6 @@ public:
     /// web callbacks. Starts the update manager task.
     void run();
 
-    /// \brief Returns the content url of the server.
-    ///
-    /// Returns a string representation of the server url. Although
-    /// the port is also specified in the config, we can never be sure
-    /// that we actually get that port after startup. This function
-    /// contains the port on which the server is actually running.
-    std::string getVirtualUrl() const;
-
     /// \brief Tells if the server is about to be terminated.
     ///
     /// This function returns true if the server is about to be
@@ -214,6 +206,14 @@ protected:
 
     std::string getPresentationUrl() const;
     int startupInterface(const std::string& iface, in_port_t inPort);
+
+    /// \brief Returns the content url of the server.
+    ///
+    /// Returns a string representation of the server url. Although
+    /// the port is also specified in the config, we can never be sure
+    /// that we actually get that port after startup. This function
+    /// contains the port on which the server is actually running.
+    std::string getVirtualUrl() const;
 };
 
 #endif // __SERVER_H__

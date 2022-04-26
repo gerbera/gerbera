@@ -80,16 +80,18 @@ public:
     std::unique_ptr<pugi::xml_document> renderDeviceDescription() const;
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
-    /// \param URL download location of the item (will be child element of the <res> tag)
+    /// \param obj Object containing this resource
     /// \param resource The CDSResource itself
     /// \param parent Parent node to render the result into
     /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
-    void renderResource(const std::string& url, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs) const;
+    /// \param clientGroup The clients group for play tracking
+    void renderResource(const CdsObject& obj, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup) const;
 
-    std::pair<std::string, bool> renderContainerImage(const std::shared_ptr<CdsContainer>& cont) const;
-    std::pair<std::string, bool> renderItemImage(const std::shared_ptr<CdsItem>& item) const;
-    std::pair<std::string, bool> renderSubtitle(const std::shared_ptr<CdsItem>& item, const Quirks* quirks) const;
-    std::string renderOneResource(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<CdsResource>& res) const;
+    std::optional<std::string> renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const;
+    std::optional<std::string> renderItemImageURL(const std::shared_ptr<CdsItem>& item) const;
+    std::optional<std::string> renderSubtitleURL(const std::shared_ptr<CdsItem>& item) const;
+
+    std::string renderResourceURL(const CdsObject& item, const CdsResource& res, const std::string& clientGroup = "") const;
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const;
 
@@ -117,24 +119,16 @@ protected:
     std::vector<std::vector<std::pair<std::string, std::string>>> profMappings;
     std::map<std::string, std::string> transferMappings;
 
-    /// \brief Holds a part of path and bool which says if we need to append the resource
-    struct PathBase {
-        PathBase(std::string pathBase, bool addResID)
-            : pathBase(std::move(pathBase))
-            , addResID(addResID)
-        {
-        }
-        std::string pathBase;
-        bool addResID;
-    };
-    std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const std::shared_ptr<CdsObject>& object) const;
+    std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const CdsObject& object) const;
     std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const;
 
-    std::unique_ptr<PathBase> getPathBase(const std::shared_ptr<CdsItem>& item, bool forceLocal = false) const;
-    std::string renderExtension(const std::string& contentType, const fs::path& location, const Quirks* quirks) const;
+    std::string renderExtension(const std::string& contentType, const fs::path& location, const std::string& language) const;
     void addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const;
     void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp) const;
-    std::string findDlnaProfile(const std::shared_ptr<CdsResource>& res, const std::string& contentType) const;
-    std::string dlnaProfileString(const std::shared_ptr<CdsResource>& res, const std::string& contentType, bool formatted = true) const;
+    std::string findDlnaProfile(const CdsResource& res, const std::string& contentType) const;
+    std::string dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted = true) const;
+
+    std::string buildProtocolInfo(CdsResource& res) const;
+    std::string getMimeType(const CdsResource& resource) const;
 };
 #endif // __UPNP_XML_H__

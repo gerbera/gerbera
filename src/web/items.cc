@@ -145,9 +145,9 @@ void Web::Items::process()
         std::string res = xmlBuilder->getFirstResourcePath(objItem);
         item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
 
-        auto [url, artAdded] = xmlBuilder->renderItemImage(objItem);
-        if (artAdded) {
-            item.append_child("image").append_child(pugi::node_pcdata).set_value(url.c_str());
+        auto url = xmlBuilder->renderItemImageURL(objItem);
+        if (url) {
+            item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
         }
         cnt++;
     }
