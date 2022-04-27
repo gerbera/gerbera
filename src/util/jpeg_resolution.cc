@@ -29,6 +29,7 @@
 
 /// \file jpeg_resolution.cc
 
+#include <climits>
 #include <cstddef>
 #include <fmt/core.h>
 
