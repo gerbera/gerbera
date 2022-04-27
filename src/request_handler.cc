@@ -43,7 +43,6 @@ RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
     , config(this->context->getConfig())
     , mime(this->context->getMime())
     , database(this->context->getDatabase())
-    , server(this->context->getServer())
 {
 }
 

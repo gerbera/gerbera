@@ -15,17 +15,14 @@ using ::testing::Return;
 class UpnpXmlTest : public ::testing::Test {
 
 public:
-    UpnpXmlTest() = default;
-    ~UpnpXmlTest() override = default;
-
     void SetUp() override
     {
         config = std::make_shared<ConfigMock>();
 
         database = std::make_shared<DatabaseMock>(config);
-        context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr, nullptr);
+        context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr);
 
-        std::string virtualDir = "http://server/";
+        std::string virtualDir = "http://server";
         std::string presentationURl = "http://someurl/";
         subject = new UpnpXMLBuilder(context, virtualDir, presentationURl);
     }
@@ -78,7 +75,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<upnp:conductor>Conductor</upnp:conductor>\n";
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
-    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0</upnp:albumArtURI>\n";
+    expectedXml << "<upnp:albumArtURI>http://server/content/media/object_id/1/res_id/0/ext/file.jpg</upnp:albumArtURI>\n";
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
 
@@ -163,8 +160,15 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
 
     resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
     std::string type = "srt";
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(type));
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
     resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
+    resource->addParameter("type", type);
+    obj->addResource(resource);
+
+    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
+    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
+    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
+    resource->addAttribute(CdsResource::Attribute::LANGUAGE, "fr");
     resource->addParameter("type", type);
     obj->addResource(resource);
 
@@ -184,10 +188,12 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<upnp:album>Album</upnp:album>\n";
     expectedXml << "<upnp:date>2002-01-01</upnp:date>\n";
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
-    expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/2</upnp:albumArtURI>\n";
-    expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/type/srt/ext/file.subtitle.srt</sec:CaptionInfoEx>\n";
+    expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/content/media/object_id/42/res_id/3/ext/file.jpg</upnp:albumArtURI>\n";
+    expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:text/srt:*\" sec:type=\"srt\">http://server/content/media/object_id/42/res_id/1/type/srt/ext/file.srt</sec:CaptionInfoEx>\n";
     expectedXml << "<res size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/content/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
-    expectedXml << "<res protocolInfo=\"http-get:*:srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/content/media/object_id/42/res_id/1/group/default/type/srt/ext/file.subtitle.srt</res>\n";
+    expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/content/media/object_id/42/res_id/1/type/srt/ext/file.srt</res>\n";
+    expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\" dc:language=\"fr\">http://server/content/media/object_id/42/res_id/2/type/srt/ext/file.fr.srt</res>\n";
+    expectedXml << "<res resolution=\"200x200\" protocolInfo=\"http-get:*:jpg:DLNA.ORG_OP=01;DLNA.ORG_CI=0\">http://server/content/media/object_id/42/res_id/3/ext/file.jpg</res>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
@@ -257,7 +263,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
     std::string result = subject->getFirstResourcePath(item);
 
     EXPECT_NE(result, "");
-    EXPECT_STREQ(result.c_str(), "content/online/object_id/12345/res_id/0");
+    EXPECT_STREQ(result.c_str(), "http://server/content/online/object_id/12345/res_id/0");
 }
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
@@ -271,19 +277,5 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
     std::string result = subject->getFirstResourcePath(item);
 
     EXPECT_NE(result, "");
-    EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
-}
-
-TEST_F(UpnpXmlTest, RenderContainerImage)
-{
-    auto obj = std::make_shared<CdsContainer>();
-    obj->setLocation("local/content");
-    obj->setID(12345);
-
-    auto result = subject->renderContainerImage(obj);
-
-    EXPECT_TRUE(result.has_value());
-
-    EXPECT_NE(result, "");
-    EXPECT_STREQ(result.c_str(), "content/media/object_id/12345/res_id/0");
+    EXPECT_STREQ(result.c_str(), "http://server/content/media/object_id/12345/res_id/0");
 }

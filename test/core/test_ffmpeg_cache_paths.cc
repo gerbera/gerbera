@@ -10,7 +10,7 @@ using ::testing::Return;
 
 TEST(Thumbnailer_Cache, BaseDirFromConfig)
 {
-    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
+    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
     EXPECT_CALL(*cfg, getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return("/var/lib/cache"));
@@ -19,7 +19,7 @@ TEST(Thumbnailer_Cache, BaseDirFromConfig)
 
 TEST(Thumbnailer_Cache, BaseDirDefaultFromUserHome)
 {
-    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
+    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
     EXPECT_CALL(*cfg, getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return(""));
