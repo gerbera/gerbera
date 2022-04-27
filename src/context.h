@@ -45,7 +45,6 @@ public:
         std::shared_ptr<ClientManager> clients,
         std::shared_ptr<Mime> mime,
         std::shared_ptr<Database> database,
-        std::shared_ptr<Server> server,
         std::shared_ptr<Web::SessionManager> sessionManager);
 
     std::shared_ptr<Config> getConfig() const
@@ -68,11 +67,6 @@ public:
         return database;
     }
 
-    std::shared_ptr<Server> getServer() const
-    {
-        return server;
-    }
-
     std::shared_ptr<Web::SessionManager> getSessionManager() const
     {
         return session_manager;
@@ -83,7 +77,6 @@ private:
     std::shared_ptr<ClientManager> clients;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
-    std::shared_ptr<Server> server;
     std::shared_ptr<Web::SessionManager> session_manager;
 };
 

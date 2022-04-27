@@ -85,7 +85,7 @@ void Server::init()
 
     clients = std::make_shared<ClientManager>(config, database);
     session_manager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clients, mime, database, self, session_manager);
+    context = std::make_shared<Context>(config, clients, mime, database, session_manager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
 }
