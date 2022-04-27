@@ -746,6 +746,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     }
 
     auto lastModifiedCurrentMax = adir->getPreviousLMT(location, parentContainer);
+    auto currentTme = currentTime();
     auto lastModifiedNewMax = lastModifiedCurrentMax;
     adir->setCurrentLMT(location, std::chrono::seconds::zero());
 
@@ -802,7 +803,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     asSetting.rescanResource = false;
                     objectID = addFileInternal(dirEnt, rootpath, asSetting, false);
                     // update time variable
-                    if (lastModifiedNewMax < lwt)
+                    if (lastModifiedNewMax < lwt && lwt <= currentTme)
                         lastModifiedNewMax = lwt;
                 }
             } else {
@@ -810,7 +811,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 asSetting.recursive = false;
                 asSetting.rescanResource = false;
                 objectID = addFileInternal(dirEnt, rootpath, asSetting, false);
-                if (lastModifiedNewMax < lwt)
+                if (lastModifiedNewMax < lwt && lwt <= currentTme)
                     lastModifiedNewMax = lwt;
             }
             if (!firstObject && objectID > 0) {
@@ -821,7 +822,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             }
         } else if (dirEnt.is_directory(ec) && asSetting.recursive) {
             int objectID = database->findObjectIDByPath(newPath);
-            if (lastModifiedNewMax < lwt)
+            if (lastModifiedNewMax < lwt && lwt <= currentTme)
                 lastModifiedNewMax = lwt;
             if (objectID > 0) {
                 log_debug("rescanSubDirectory {}", newPath.c_str());
@@ -928,6 +929,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     auto lastModifiedCurrentMax = std::chrono::seconds::zero();
+    auto currentTme = currentTime();
     auto lastModifiedNewMax = lastModifiedCurrentMax;
     if (adir) {
         lastModifiedCurrentMax = adir->getPreviousLMT(subDir.path(), parentContainer);
@@ -962,7 +964,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             if (obj) {
                 firstChild = false;
                 auto lwt = to_seconds(subDirEnt.last_write_time(ec));
-                if (lastModifiedCurrentMax < lwt) {
+                if (lastModifiedCurrentMax < lwt && lwt <= currentTme) {
                     lastModifiedNewMax = lwt;
                 }
                 if (obj->isItem()) {

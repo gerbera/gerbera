@@ -146,6 +146,9 @@ void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds 
 {
     bool firstScan = false;
     bool activeScan = false;
+    auto current = currentTime();
+    if (lmt > current)
+        lmt = current;
     if (!loc.empty()) {
         auto lmDir = lastModified.find(loc);
         if (lmDir == lastModified.end() || lastModified.at(loc) > std::chrono::seconds::zero()) {
