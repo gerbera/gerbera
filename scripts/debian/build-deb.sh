@@ -131,6 +131,9 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libmatroska=""
   libpugixml=""
   ffmpegthumbnailer="ffmpeg libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
+  if [[ "$lsb_codename" == "jammy" ]]; then
+    ffmpegthumbnailer="libffmpegthumbnailer-dev"
+  fi
   BuildType="Debug"
   DoTests="ON"
 else
