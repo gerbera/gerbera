@@ -147,7 +147,7 @@ else
     libduktape="libduktape203"
   elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:testing" ]]; then
     libduktape="libduktape207"
-  elif [[ "$lsb_codename" == "sid" || "${my_sys}" == "debian:unstable" ]]; then
+  elif [[ "$lsb_codename" == "sid" || "$lsb_codename" == "jammy" || "${my_sys}" == "debian:unstable" ]]; then
     libduktape="libduktape207"
   fi
   libduktape="duktape-dev ${libduktape}"
@@ -158,7 +158,7 @@ libmysqlclient="libmysqlclient-dev"
 if [[ "$lsb_distro" == "Debian" || "$lsb_distro" == "Raspbian" ]]; then
   libmysqlclient="libmariadb-dev-compat"
 fi
-if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" ]]; then
+if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" || "$lsb_codename" == "jammy" ]]; then
   libmysqlclient="libmysql++-dev"
 fi
 
