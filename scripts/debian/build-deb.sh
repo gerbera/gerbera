@@ -131,6 +131,10 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libmatroska=""
   libpugixml=""
   ffmpegthumbnailer="ffmpeg libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
+  if [[ "$lsb_codename" == "jammy" ]]; then
+    libmatroska="libebml-dev libmatroska-dev"
+    ffmpegthumbnailer="libffmpegthumbnailer-dev"
+  fi
   BuildType="Debug"
   DoTests="ON"
 else
@@ -147,7 +151,7 @@ else
     libduktape="libduktape203"
   elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:testing" ]]; then
     libduktape="libduktape207"
-  elif [[ "$lsb_codename" == "sid" || "${my_sys}" == "debian:unstable" ]]; then
+  elif [[ "$lsb_codename" == "sid" || "$lsb_codename" == "jammy" || "${my_sys}" == "debian:unstable" ]]; then
     libduktape="libduktape207"
   fi
   libduktape="duktape-dev ${libduktape}"
@@ -158,7 +162,7 @@ libmysqlclient="libmysqlclient-dev"
 if [[ "$lsb_distro" == "Debian" || "$lsb_distro" == "Raspbian" ]]; then
   libmysqlclient="libmariadb-dev-compat"
 fi
-if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" ]]; then
+if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" || "$lsb_codename" == "jammy" ]]; then
   libmysqlclient="libmysql++-dev"
 fi
 
@@ -202,8 +206,10 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   install-libexiv2
   install-pugixml
   install-duktape
-  install-matroska
-  install-ffmpegthumbnailer
+  if [[ "$lsb_codename" != "jammy" ]]; then
+    install-matroska
+    install-ffmpegthumbnailer
+  fi
 fi
 
 install-fmt
