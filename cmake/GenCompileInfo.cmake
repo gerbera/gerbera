@@ -7,6 +7,7 @@
 #
 function(generate_compile_info)
     set(COMPILE_INFO_LIST
+            "WITH_NPUPNP=${WITH_NPUPNP}"
             "WITH_MAGIC=${WITH_MAGIC}"
             "WITH_MYSQL=${WITH_MYSQL}"
             "WITH_CURL=${WITH_CURL}"
@@ -17,6 +18,8 @@ function(generate_compile_info)
             "WITH_FFMPEGTHUMBNAILER=${WITH_FFMPEGTHUMBNAILER}"
             "WITH_EXIF=${WITH_EXIF}"
             "WITH_EXIV2=${WITH_EXIV2}"
+            "WITH_MATROSKA=${WITH_MATROSKA}"
+            "WITH_WAVPACK=${WITH_WAVPACK}"
             "WITH_SYSTEMD=${WITH_SYSTEMD}"
             "WITH_LASTFM=${WITH_LASTFM}"
             "WITH_DEBUG=${WITH_DEBUG}"
