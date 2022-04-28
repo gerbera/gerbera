@@ -206,7 +206,7 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   install-libexiv2
   install-pugixml
   install-duktape
-  if [[ "$lsb_codename" == "jammy" ]]; then
+  if [[ "$lsb_codename" != "jammy" ]]; then
     install-matroska
     install-ffmpegthumbnailer
   fi
