@@ -60,7 +60,7 @@ function(_lfs_check_compiler_option var options definitions libraries)
         set(_lfs_cppflags ${_lfs_cppflags} ${definitions} PARENT_SCOPE)
         set(_lfs_cflags ${_lfs_cflags} ${options} PARENT_SCOPE)
         set(_lfs_ldflags ${_lfs_ldflags} ${libraries} PARENT_SCOPE)
-        set(LFS_FOUND TRUE PARENT_SCOPE)
+        set(_lfs_found YES)
     else()
         message(STATUS "Looking for LFS support using ${options} ${definitions} ${libraries} - not found")
     endif()
@@ -84,12 +84,12 @@ function(_lfs_check)
     check_cxx_source_compiles("${_lfs_test_source}" lfs_native)
     if (lfs_native)
         message(STATUS "Looking for native LFS support - found")
-        set(LFS_FOUND TRUE)
+        set(_lfs_found YES)
     else()
         message(STATUS "Looking for native LFS support - not found")
     endif()
 
-    if (NOT LFS_FOUND)
+    if (NOT _lfs_found)
         # Check using getconf. If getconf fails, don't worry, the check in
         # _lfs_check_compiler_option will fail as well.
         execute_process(COMMAND getconf LFS_CFLAGS
@@ -125,24 +125,30 @@ function(_lfs_check)
                                    "${_lfs_libs_tmp};${_lfs_ldflags_tmp}")
     endif()
 
-    if(NOT LFS_FOUND)  # IRIX stuff
+    if(NOT _lfs_found)  # IRIX stuff
         _lfs_check_compiler_option(lfs_need_n32 "-n32" "" "")
     endif()
-    if(NOT LFS_FOUND)  # Linux and friends
+    if(NOT _lfs_found)  # Linux and friends
         _lfs_check_compiler_option(lfs_need_file_offset_bits "" "-D_FILE_OFFSET_BITS=64" "")
     endif()
-    if(NOT LFS_FOUND)  # AIX
+    if(NOT _lfs_found)  # AIX
         _lfs_check_compiler_option(lfs_need_large_files "" "-D_LARGE_FILES=1" "")
     endif()
 
     set(LFS_DEFINITIONS ${_lfs_cppflags} CACHE STRING "Extra definitions for large file support")
     set(LFS_COMPILE_OPTIONS ${_lfs_cflags} CACHE STRING "Extra definitions for large file support")
     set(LFS_LIBRARIES ${_lfs_libs} ${_lfs_ldflags} CACHE STRING "Extra definitions for large file support")
-    set(LFS_FOUND ${LFS_FOUND} CACHE INTERNAL "Found LFS")
+    set(LFS_FOUND ${_lfs_found} PARENT_SCOPE)
 endfunction()
 
-if (NOT LFS_FOUND)
+if (NOT TARGET LFS:LFS)
     _lfs_check()
+    if (LFS_FOUND)
+        add_library(LFS::LFS INTERFACE IMPORTED)
+        target_compile_definitions(LFS::LFS PUBLIC ${LFS_DEFINITIONS})
+        target_compile_options(LFS::LFS PUBLIC ${LFS_COMPILE_OPTIONS})
+        target_link_libraries(LFS::LFS PUBLIC ${LFS_LIBRARIES})
+    endif ()
 endif()
 
 find_package_handle_standard_args(LFS "Could not find LFS. Set LFS_DEFINITIONS, LFS_COMPILE_OPTIONS, LFS_LIBRARIES." LFS_FOUND)

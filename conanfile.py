@@ -6,7 +6,9 @@ class GerberaConan(ConanFile):
     name = "gerbera"
     license = "GPLv2"
 
-    generators = ("cmake", "cmake_find_package", "virtualrunenv")
+    #generators = ("cmake", "cmake_find_package", "virtualrunenv")
+    generators = ["CMakeDeps", "CMakeToolchain"]
+
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "js": [True, False],
@@ -29,11 +31,11 @@ class GerberaConan(ConanFile):
         "curl": True,
         "taglib": True,
         "exif": True,
-        "matroska": True,
+        "matroska": False,
         # The following are false in CMakeLists.txt, but almost always turned on.
         "mysql": True,
         "ffmpeg": True,
-        "ffmpegthumbnailer": True,
+        "ffmpegthumbnailer": False,
     }
 
     scm = {"type": "git", "url": "auto", "revision": "auto"}
@@ -46,7 +48,8 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "zlib/[>=1.2.12]",
         "pupnp/[>=1.14.6]",
-        "taglib/1.12"
+        "taglib/1.12",
+        "libuuid/[>=1.0.3]"
     ]
 
     def configure(self):
@@ -79,9 +82,6 @@ class GerberaConan(ConanFile):
 
         if self.options.exif:
             self.requires("libexif/[>=0.6.23]")
-
-        if not self._needs_uuid:
-            self.requires("libuuid/[>=1.0.3]")
 
     def system_requirements(self):
         if tools.cross_building(self):

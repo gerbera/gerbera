@@ -2,10 +2,11 @@
 # is not installed (on some Joyent systems).
 include(FindPackageHandleStandardArgs)
 
-find_package(spdlog QUIET NO_MODULE)
+find_package(spdlog ${spdlog_FIND_VERSION} CONFIG)
 
 if(spdlog_FOUND)
-    find_package_handle_standard_args(spdlog CONFIG_MODE)
+    message("SPDLOG FOUND")
+    find_package_handle_standard_args(spdlog REQUIRED_VARS spdlog_FOUND CONFIG_MODE)
 
     if(NOT SPDLOG_FMT_EXTERNAL AND NOT spdlog_COMPILE_DEFINITIONS MATCHES "SPDLOG_FMT_EXTERNAL")
         message(WARNING [=[
@@ -20,6 +21,7 @@ Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
         endif()
     endif()
 else()
+    message("SPDLOG NOT FOUND")
     # See if it's just installed as a library, as not all installs have .cmake files
     find_library(spdlog_LIBRARY spdlog)
     find_path(spdlog_INCLUDE_DIR spdlog/spdlog.h)

@@ -29,7 +29,6 @@ jobs:
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
       CONAN_SYSREQUIRES_MODE: enabled # Conan can install stuff
-      CLANG_CXX_LIBRARY: ${{ matrix.compiler.libcpp }}
     steps:
       - uses: actions/checkout@v1
       # Alternatively: uses: docker://conanio/gcc9:latest
@@ -52,13 +51,22 @@ jobs:
           key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
           restore-keys: |
             - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
-      - name: build and test
+      - name: Install Dependencies from Conan
         run: |
-          # Remove existing package if it comes from the cache, otherwise
-          # Conan will skip building it (due to --build=missing policy)
-          conan remove 'gerbera/*' --force
-          conan create -pr ./conan/dev --build=missing . gerbera/dev@
-      - name: cleanup
+          mkdir build && cd build
+          conan install .. --install-folder conantmp --profile ../conan/dev --build missing
+      - name: Build and Test
+        run: |
+          cd build
+          cat conantmp/conan_toolchain.cmake
+          cat conantmp/CMakePresets.json
+          cmake .. \s
+            -DCMAKE_TOOLCHAIN_FILE=conantmp/conan_toolchain.cmake \
+            -DCMAKE_VERBOSE_MAKEFILE=1
+            -DCXXFLAGS="-I /usr/lib/llvm-11/include/c++/v1"
+          cmake --build build -j$(nproc)
+          ctest
+      - name: Cleanup
         # Remove build directories before creating a cache.
         run: |
           conan remove 'gerbera/*' --force --builds --system-reqs

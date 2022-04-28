@@ -110,6 +110,14 @@ IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
 
   MESSAGE(STATUS "MySQL Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
   MESSAGE(STATUS "MySQL client libraries: ${MYSQL_CLIENT_LIBS}")
+
+  if (NOT TARGET mariadb-connector-c::mariadb-connector-c)
+    add_library(mariadb-connector-c::mariadb-connector-c UNKNOWN IMPORTED)
+    set_target_properties(mariadb-connector-c::mariadb-connector-c PROPERTIES
+            IMPORTED_LOCATION "${MYSQL_CLIENT_LIBS}"
+            INTERFACE_INCLUDE_DIRECTORIES "${MYSQL_INCLUDE_DIRS}")
+  endif()
+
 ELSEIF (MySQL_FIND_REQUIRED)
   MESSAGE(FATAL_ERROR "Cannot find MySQL. Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
 ENDIF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)

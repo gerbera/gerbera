@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <upnp.h>
+#include <upnp/upnp.h>
 
 #include "config/client_config.h"
 #include "util/grb_net.h"
