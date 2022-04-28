@@ -1,5 +1,111 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.11.0
+
+- Add Clients to database
+- Add item class filter and mapping to autoscan directory
+- Add MetaData 'dc:data' to all Item and container
+- add missing moves
+- Add Quirk to block filename in item uri
+- add throw_fmt_system_error define
+- Allow agent to not exist if profile is disabled.
+- Autoscan: fix out of range issue
+- Autoscan: Tidy validation logic, nest enum
+- bool simplifications
+- Build Ubuntu 22.04
+- Bump minimist from 1.2.5 to 1.2.6 in /gerbera-web
+- change read/write functions to use std::byte
+- Change ResourceContentType to Resource::purpose
+- CI: build-deb: Pass API key to docker env
+- CI: build-deb: Pass API key to docker env, again
+- CI: Debian: whitelist /build
+- CI: Docker local cache, only buld AMD64 for PRs
+- clang-tidy
+- clang-tidy fixes
+- clang-tidy: add missing variable name in declaration
+- clang-tidy: add special member functions
+- clang-tidy: fix case style of class/structs
+- clang-tidy: fix wrong erase
+- clang-tidy: member function const
+- clang-tidy: pass by value
+- clang-tidy: redundant init
+- clang-tidy: remove defaulted constructors
+- clang-tidy: replace push with emplace_back
+- clang-tidy: use at() instead of []
+- clang-tidy: use braced init list
+- clang-tidy: use move
+- Config: Autoscan list to plain vector
+- ContentHandler to enum
+- ContentManager: Single autoscan list
+- convert function to static
+- doc/install.rst: add Buildroot
+- doc/install.rst: drop Entware
+- Don't store timestamps in future
+- Ensure search sort by title
+- FFMpegThumbnailer: Enable by default, improvements
+- Find DNLA profiles by resource attributes
+- fix bad URL
+- Fix Bitrate formatting, populate bitsPerSample
+- Fix built in JPEG resolution parsing.
+- fix compilation
+- Fix compilation of jpeg_resolution.cc
+- fix compilation with npupnp
+- fix declaration
+- Fix playlist parser error
+- Fix search-item-result regression.
+- Fix sorting by composed keys
+- Fix tag matches with ffmpeg_handler
+- fix wrong variable name
+- Fix: Repair broken Mysql statements
+- get rid of make_pair
+- Handle config sourced autoscans in DB more gracefully
+- Improve readability of attributes
+- Increase DukTape version
+- manual move conversions
+- manual unique_ptr removals
+- Minimal: fix test
+- move make_shared into function
+- pass shared_ptr by value
+- pass std::string by value
+- Playlist: Handle end of file properly
+- README: Bump required npupnp version
+- Refactor handling of network addresses
+- remove const from map
+- Remove DB field from autoscan list
+- remove IOHandler unique_ptrs
+- remove pointless move
+- remove pointless parentheses
+- remove reference parameter
+- remove unused includes
+- remove unused upnp header
+- rename to_seconds to toSeconds
+- replace bzero with {}
+- ResourceAttribute new style enum
+- Respect ContainerID when performing search
+- Restore friendly name in UI
+- Revert "fix bad URL"
+- Server: Clean up virtualURL handling
+- simplify bool expression
+- simplify some bools
+- Sort containers first
+- Split out URL handling methods to UrlUtils namespace
+- Store Playback Status in new table
+- string to string_view conversion
+- Support filtering transcoding profiles
+- Support parsing function for config values
+- Support searching playlists containers
+- ThreadRunner: Drop system-threads config
+- Try to fix paths-ignore
+- UI Prettier Modals, badges
+- unused parameter for throw
+- Update Duktape version for bookworm
+- use empty()
+- use to_integer
+- value to ref conversions
+- WavPack: Get metadata with original library
+- webkit style for transcoding
+- WebTests: Update node packages
+
 ### v1.10.0
 
 - Add all metadata to search capabilities

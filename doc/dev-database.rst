@@ -3,9 +3,11 @@
 Database Schema
 ===============
 
-The database contains 6 tables.
+The database contains 8 tables.
 3 tables ``mt_cds_object`` (for media items or directories), ``mt_metadata`` (like artist or track number) and ``grb_cds_resource`` (like bitrate or image size) store details of the media (audio, video and images) and associated items (like subtitles or album art images).
-Table ``mt_autoscan`` maintains data on autoscan directories.
+Table ``mt_autoscan`` contains data on autoscan directories.
+Table ``grb_playstatus`` contains statistics on played media items.
+Table ``grb_client`` stores details on connected clients.
 Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like database version) and configuration values changed via UI.
 
 .. image:: _static/gerbera-db.png
