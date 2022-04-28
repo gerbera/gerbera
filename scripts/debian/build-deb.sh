@@ -132,6 +132,7 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libpugixml=""
   ffmpegthumbnailer="ffmpeg libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
   if [[ "$lsb_codename" == "jammy" ]]; then
+    libmatroska="libebml-dev libmatroska-dev"
     ffmpegthumbnailer="libffmpegthumbnailer-dev"
   fi
   BuildType="Debug"
@@ -205,8 +206,10 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   install-libexiv2
   install-pugixml
   install-duktape
-  install-matroska
-  install-ffmpegthumbnailer
+  if [[ "$lsb_codename" == "jammy" ]]; then
+    install-matroska
+    install-ffmpegthumbnailer
+  fi
 fi
 
 install-fmt
