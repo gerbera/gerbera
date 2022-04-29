@@ -475,7 +475,7 @@ void Web::ConfigLoad::process()
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
         }
-        if (autoscan.size() == 0) {
+        if (autoscan.empty()) {
             auto item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_LOCATION));
 
