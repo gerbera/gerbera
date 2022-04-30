@@ -157,7 +157,7 @@ void ContentManager::initUpnpMap(std::vector<UpnpMap>& target, const std::map<st
             }
         }
 
-        target.push_back(UpnpMap(mt, cls, filters));
+        target.emplace_back(mt, cls, filters);
     }
 }
 

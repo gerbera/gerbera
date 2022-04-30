@@ -149,10 +149,10 @@ public:
     std::string mimeType;
     std::string upnpClass;
 
-    UpnpMap(const std::string& mt, const std::string& cls, const std::vector<std::tuple<std::string, std::string, std::string>>& f)
-        : filters(f)
-        , mimeType(mt)
-        , upnpClass(cls)
+    UpnpMap(std::string mt, std::string cls, std::vector<std::tuple<std::string, std::string, std::string>> f)
+        : filters(std::move(f))
+        , mimeType(std::move(mt))
+        , upnpClass(std::move(cls))
     {
     }
 
