@@ -70,26 +70,22 @@ bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const
 {
     if (op == "=" && actual.find(expect) != std::string::npos)
         return true;
-    else if (op == "!=" && actual.find(expect) == std::string::npos)
+    if (op == "!=" && actual.find(expect) == std::string::npos)
         return true;
-    else if (op == "<" && actual < expect)
+    if (op == "<" && actual < expect)
         return true;
-    else if (op == ">" && actual > expect)
-        return true;
-    return false;
+    return (op == ">" && actual > expect);
 }
 
 bool UpnpMap::checkValue(const std::string& op, int expect, int actual)
 {
     if (op == "=" && actual != expect)
         return true;
-    else if (op == "!=" && actual == expect)
+    if (op == "!=" && actual == expect)
         return true;
-    else if (op == "<" && actual < expect)
+    if (op == "<" && actual < expect)
         return true;
-    else if (op == ">" && actual > expect)
-        return true;
-    return false;
+    return (op == ">" && actual > expect);
 }
 
 bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt)
@@ -1679,9 +1675,8 @@ std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDire
 
         addTask(std::move(task));
         return {};
-    } else {
-        return _removeObject(adir, objectID, rescanResource, all);
     }
+    return _removeObject(adir, objectID, rescanResource, all);
 }
 
 void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
