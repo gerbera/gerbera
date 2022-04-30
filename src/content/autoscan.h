@@ -72,7 +72,7 @@ public:
     static int makeMediaType(const std::string& optValue);
     static std::string_view mapMediaType(MediaType mt);
     static std::string mapMediaType(int mt);
-    static int remapMediaType(const std::string& optValue);
+    static int remapMediaType(const std::string& flag);
 
     AutoscanDirectory() = default;
 
