@@ -232,8 +232,8 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
                     auto dateValue = std::string(value);
                     if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
                         log_debug("Identified metadata '{}': {}", tag, value);
-                        item->addMetaData(M_DATE, fmt::format("{}-01-01", value).c_str());
-                        item->addMetaData(M_UPNP_DATE, fmt::format("{}-01-01", value).c_str());
+                        item->addMetaData(M_DATE, fmt::format("{}-01-01", value));
+                        item->addMetaData(M_UPNP_DATE, fmt::format("{}-01-01", value));
                     }
                 } else {
                     log_warning("file {}: wavpack tag {} unknown", item->getLocation().c_str(), tag);
