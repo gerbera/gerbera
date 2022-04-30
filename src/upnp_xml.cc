@@ -451,13 +451,11 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     auto res = item->getResource(CdsResource::Purpose::Content);
     if (res)
         return renderResourceURL(*item, *res);
-    else {
-        // Fabricate a fake resource for URL based items
-        // FIXME: This should be done at object creation
-        auto temp = CdsResource { ContentHandler::DEFAULT, CdsResource::Purpose::Content };
-        temp.setResId(0);
-        return renderResourceURL(*item, temp);
-    }
+    // Fabricate a fake resource for URL based items
+    // FIXME: This should be done at object creation
+    auto temp = CdsResource { ContentHandler::DEFAULT, CdsResource::Purpose::Content };
+    temp.setResId(0);
+    return renderResourceURL(*item, temp);
 }
 
 std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const
