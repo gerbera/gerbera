@@ -25,9 +25,9 @@
 
 #include "upnp_headers.h" // API
 
-#include <upnp/upnp.h>
+#include <upnp.h>
 #if !defined(USING_NPUPNP)
-#include <upnp/UpnpExtraHeaders.h>
+#include <UpnpExtraHeaders.h>
 #endif
 
 #include "common.h"

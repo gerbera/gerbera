@@ -34,7 +34,7 @@
 
 #include <cstddef>
 
-#include <upnp/upnp.h>
+#include <upnp.h>
 
 #include "common.h"
 
