@@ -39,6 +39,8 @@ class WavPackHandler : public MetadataHandler {
 
 public:
     ~WavPackHandler() override;
+    WavPackHandler(const WavPackHandler&) = delete;
+    WavPackHandler& operator=(const WavPackHandler&) = delete;
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
 
