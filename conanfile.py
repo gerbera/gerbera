@@ -1,6 +1,6 @@
-from conans import CMake, ConanFile, tools
+from conans import ConanFile, tools
 from conans.errors import ConanException
-
+from conan.tools.cmake import CMakeToolchain
 
 class GerberaConan(ConanFile):
     name = "gerbera"
@@ -54,6 +54,12 @@ class GerberaConan(ConanFile):
 
     def configure(self):
         tools.check_min_cppstd(self, "17")
+
+        self.options["pupnp"].reuseaddr = True
+        self.options["pupnp"].ipv6 = True
+        self.options["pupnp"].largefile = True
+        self.options["pupnp"].tools = True
+
         if self.options.tests:
             self.options["gtest"].no_main = False
             self.options["gtest"].shared = False
@@ -132,26 +138,21 @@ class GerberaConan(ConanFile):
                 }[pm]
             )
 
-    def build(self):
-        cmake = CMake(self)
-        cmake.definitions["WITH_JS"] = self.options.js
-        cmake.definitions["WITH_DEBUG"] = self.options.debug_logging
-        cmake.definitions["WITH_TESTS"] = self.options.tests
-        cmake.definitions["WITH_MAGIC"] = self.options.magic
-        cmake.definitions["WITH_CURL"] = self.options.curl
-        cmake.definitions["WITH_TAGLIB"] = self.options.taglib
-        cmake.definitions["WITH_EXIF"] = self.options.exif
-        cmake.definitions["WITH_MATROSKA"] = self.options.matroska
-        cmake.definitions["WITH_MYSQL"] = self.options.mysql
-        cmake.definitions["WITH_AVCODEC"] = self.options.ffmpeg
-        cmake.definitions["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["WITH_JS"] = self.options.js
+        tc.variables["WITH_DEBUG"] = self.options.debug_logging
+        tc.variables["WITH_TESTS"] = self.options.tests
+        tc.variables["WITH_MAGIC"] = self.options.magic
+        tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_TAGLIB"] = self.options.taglib
+        tc.variables["WITH_EXIF"] = self.options.exif
+        tc.variables["WITH_MATROSKA"] = self.options.matroska
+        tc.variables["WITH_MYSQL"] = self.options.mysql
+        tc.variables["WITH_AVCODEC"] = self.options.ffmpeg
+        tc.variables["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
 
         if self.settings.os != "Linux" or tools.cross_building(self):
-            cmake.definitions["WITH_SYSTEMD"] = False
+            tc.variables["WITH_SYSTEMD"] = False
 
-        cmake.configure()
-        cmake.build()
-
-        if tools.get_env("CONAN_RUN_TESTS", True):
-            with tools.run_environment(self):
-                cmake.test(output_on_failure=True)
+        tc.generate()

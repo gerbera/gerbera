@@ -43,7 +43,12 @@ jobs:
         run: |
           pip install -U --no-cache-dir conan
           conan profile new default --detect
+          echo "conan profile update settings.compiler.libcxx=${{ matrix.compiler.libcpp }} default"
           conan profile update settings.compiler.libcxx=${{ matrix.compiler.libcpp }} default
+          if [[ "libc++" == "${{ matrix.compiler.libcpp }}" ]]; then
+            echo "conan config set tools.build.cxxflags=\"-I/usr/lib/llvm-11/include/c++/v1\""
+            conan config set tools.build.cxxflags="-I/usr/lib/llvm-11/include/c++/v1"
+          fi
       - name: Cache conan dependencies
         uses: actions/cache@v2
         with:
@@ -53,19 +58,18 @@ jobs:
             - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
       - name: Install Dependencies from Conan
         run: |
-          mkdir build && cd build
-          conan install .. --install-folder conantmp --profile ../conan/dev --build missing
+          conan install . --install-folder build --profile conan/dev --build missing
       - name: Build and Test
         run: |
-          cd build
-          cat conantmp/conan_toolchain.cmake
-          cat conantmp/CMakePresets.json
-          cmake .. \s
-            -DCMAKE_TOOLCHAIN_FILE=conantmp/conan_toolchain.cmake \
-            -DCMAKE_VERBOSE_MAKEFILE=1
-            -DCXXFLAGS="-I /usr/lib/llvm-11/include/c++/v1"
+          cat build/conan_toolchain.cmake
+          cat build/CMakePresets.json
+          cmake . \
+            -B build \
+            -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake \
+            -DCMAKE_VERBOSE_MAKEFILE=1 \
+            -DWITH_AVCODEC=yes
           cmake --build build -j$(nproc)
-          ctest
+          ctest --test-dir build
       - name: Cleanup
         # Remove build directories before creating a cache.
         run: |

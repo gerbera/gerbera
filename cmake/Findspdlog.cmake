@@ -5,7 +5,6 @@ include(FindPackageHandleStandardArgs)
 find_package(spdlog ${spdlog_FIND_VERSION} CONFIG)
 
 if(spdlog_FOUND)
-    message("SPDLOG FOUND")
     find_package_handle_standard_args(spdlog REQUIRED_VARS spdlog_FOUND CONFIG_MODE)
 
     if(NOT SPDLOG_FMT_EXTERNAL AND NOT spdlog_COMPILE_DEFINITIONS MATCHES "SPDLOG_FMT_EXTERNAL")

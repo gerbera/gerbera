@@ -55,12 +55,6 @@ extern "C" {
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-#ifdef HAVE_AVSTREAM_CODECPAR
-#define as_codecpar(s) s->codecpar
-#else
-#define as_codecpar(s) s->codec
-#endif
-
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
 {
@@ -181,44 +175,44 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
     for (std::size_t i = 0; i < pFormatCtx->nb_streams; i++) {
         auto st = pFormatCtx->streams[i];
 
-        if (st && !videoSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO) {
-            auto codecId = as_codecpar(st)->codec_id;
+        if (st && !videoSet && st->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            auto codecId = st->codecpar->codec_id;
             resource2->addAttribute(CdsResource::Attribute::VIDEOCODEC, avcodec_get_name(codecId));
 
-            if (as_codecpar(st)->codec_tag > 0) {
+            if (st->codecpar->codec_tag > 0) {
                 char fourcc[5];
-                fourcc[0] = as_codecpar(st)->codec_tag;
-                fourcc[1] = as_codecpar(st)->codec_tag >> 8;
-                fourcc[2] = as_codecpar(st)->codec_tag >> 16;
-                fourcc[3] = as_codecpar(st)->codec_tag >> 24;
+                fourcc[0] = st->codecpar->codec_tag;
+                fourcc[1] = st->codecpar->codec_tag >> 8;
+                fourcc[2] = st->codecpar->codec_tag >> 16;
+                fourcc[3] = st->codecpar->codec_tag >> 24;
                 fourcc[4] = '\0';
 
-                log_debug("FourCC: 0x{:x} = {} from stream {}", as_codecpar(st)->codec_tag, fourcc, i);
+                log_debug("FourCC: 0x{:x} = {} from stream {}", st->codecpar->codec_tag, fourcc, i);
                 std::string fcc = fourcc;
                 if (!fcc.empty())
                     resource->addOption(RESOURCE_OPTION_FOURCC, fcc);
             }
 
-            if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
-                auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
+            if (st->codecpar->width > 0 && st->codecpar->height > 0) {
+                auto resolution = fmt::format("{}x{}", st->codecpar->width, st->codecpar->height);
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
                 resource2->addAttribute(CdsResource::Attribute::RESOLUTION, resolution);
                 videoSet = true;
             }
         }
-        if (st && !audioSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO) {
-            auto codecId = as_codecpar(st)->codec_id;
+        if (st && !audioSet && st->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            auto codecId = st->codecpar->codec_id;
             resource->addAttribute(CdsResource::Attribute::AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
 
-            if (as_codecpar(st)->sample_rate > 0) {
-                int sampleFreq = as_codecpar(st)->sample_rate;
+            if (st->codecpar->sample_rate > 0) {
+                int sampleFreq = st->codecpar->sample_rate;
 
                 // Fix up Sample rate reporting
                 // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
-                log_debug("Bits per raw sample: {}", as_codecpar(st)->bits_per_raw_sample);
-                int bitsPerSample = as_codecpar(st)->bits_per_coded_sample;
+                log_debug("Bits per raw sample: {}", st->codecpar->bits_per_raw_sample);
+                int bitsPerSample = st->codecpar->bits_per_coded_sample;
                 log_debug("Bits per coded sample: {}", bitsPerSample);
 
                 if (bitsPerSample > 0) {
@@ -232,7 +226,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioSet = true;
 
-                int audioCh = as_codecpar(st)->channels;
+                int audioCh = st->codecpar->channels;
                 if (audioCh > 0) {
                     log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
                     resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
