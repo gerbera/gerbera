@@ -27,7 +27,7 @@ jobs:
             git \
             gtest-dev \
             libupnp-dev \
-            make \
+            ninja \
             pkgconf \
             pugixml-dev \
             spdlog-dev \
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B build --preset=minimal
+          cmake -S . -B build -G Ninja --preset=minimal
           cmake --build build -j$(nproc)
 
       - name: Test
