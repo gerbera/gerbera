@@ -434,6 +434,7 @@ Some topics require proper handling, so we explain the core steps here.
 
 * :doc:`Configuration Options </dev-configuration>`
 * :doc:`Database Schema </dev-database>`
+* :doc:`Conan </dev-conan>`
 
 .. toctree::
    :maxdepth: 1

@@ -13,7 +13,7 @@ Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like dat
 .. image:: _static/gerbera-db.png
 
 Modify Schema
-=============
+-------------
 
 - src/database/sql_database.h: Update ``DBVERSION``
 - src/database/sqlite3/sqlite3.sql and src/database/mysql/mysql.sql: Modify ``CREATE TABLE`` statements

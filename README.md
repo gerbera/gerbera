@@ -49,12 +49,12 @@ sudo make install
 | libupnp             | 1.14.6      | 1.14.12     | 1.14.12       | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp           | 4.2.1       | 4.2.1       | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]           |             | 1.10        | 1.11.4        | Required      | XML file and data support  |          |
+| [pugixml]           |             | 1.10        | 1.12.1        | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 7.1.3       | 8.1.1         | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.8.5       | 1.9.2         | Required      | Runtime logging            |          |
+| [spdlog]            | 1.8.1       | 1.8.5       | 1.10.0        | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |
