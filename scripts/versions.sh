@@ -40,9 +40,9 @@ else
     GOOGLETEST="1.11.0"
     LASTFM="0.4.0"
     MATROSKA="1.6.3"
-    PUGIXML="1.11.4"
+    PUGIXML="1.12.1"
     PUPNP="1.14.12"
-    SPDLOG="1.9.2"
+    SPDLOG="1.10.0"
     WAVPACK="5.4.0"
     TAGLIB="1.12"
 
