@@ -215,19 +215,20 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
             if (as_codecpar(st)->sample_rate > 0) {
                 int sampleFreq = as_codecpar(st)->sample_rate;
 
-                // Fix up Sample rate reporting
-                // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
                 log_debug("Bits per raw sample: {}", as_codecpar(st)->bits_per_raw_sample);
                 int bitsPerSample = as_codecpar(st)->bits_per_coded_sample;
                 log_debug("Bits per coded sample: {}", bitsPerSample);
 
                 if (bitsPerSample > 0) {
                     resource->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
-                } else {
-                    bitsPerSample = 1;
+
+                    // Fix up Sample rate reporting
+                    // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
+                    if (codecId == AV_CODEC_ID_DSD_LSBF || codecId == AV_CODEC_ID_DSD_MSBF || codecId == AV_CODEC_ID_DSD_LSBF_PLANAR || codecId == AV_CODEC_ID_DSD_MSBF_PLANAR) {
+                        sampleFreq *= bitsPerSample;
+                    }
                 }
 
-                sampleFreq *= bitsPerSample;
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
                 resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioSet = true;
