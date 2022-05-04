@@ -282,5 +282,32 @@
     </version>
     <version number="19" remark="add autoscan content">
         <script>ALTER TABLE "mt_autoscan" ADD "media_type" integer NOT NULL default(-1)</script>
+        <script>
+        PRAGMA foreign_keys = OFF;
+        CREATE TABLE "mt_autoscan_new" (
+          "id" integer primary key,
+          "obj_id" integer default NULL,
+          "scan_mode" varchar(10) NOT NULL,
+          "recursive" tinyint unsigned NOT NULL,
+          "media_type" integer NOT NULL,
+          "hidden" tinyint unsigned NOT NULL,
+          "interval" integer unsigned default NULL,
+          "last_modified" integer unsigned default NULL,
+          "persistent" tinyint unsigned NOT NULL default '0',
+          "location" text default NULL,
+          "path_ids" text default NULL,
+          "touched" tinyint unsigned NOT NULL default '1',
+          CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("obj_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO "mt_autoscan_new" (
+            id, obj_id, scan_mode, recursive, media_type, hidden, interval, last_modified, persistent, location, path_ids, touched
+        ) SELECT
+            id, obj_id, scan_mode, recursive, media_type, hidden, interval, last_modified, persistent, location, path_ids, touched
+        FROM mt_autoscan;
+        DROP TABLE mt_autoscan;
+        ALTER TABLE mt_autoscan_new RENAME TO mt_autoscan;
+        PRAGMA foreign_keys = ON;
+        VACUUM;
+        </script>
     </version>
 </upgrade>
