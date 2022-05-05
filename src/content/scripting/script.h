@@ -41,6 +41,7 @@
 
 // forward declaration
 class CdsObject;
+class CdsItem;
 class ContentManager;
 class ScriptingRuntime;
 class StringConverter;
@@ -104,9 +105,9 @@ protected:
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath);
     void cleanup();
     int gc_counter {};
+    void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string val);
 
-    // object that is currently being processed by the script (set in import
-    // script)
+    // object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
 
     duk_context* ctx;

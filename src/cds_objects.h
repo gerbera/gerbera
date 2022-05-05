@@ -284,6 +284,12 @@ public:
         metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = MetadataHandler::getMetaFieldName(key)](auto&& md) { return md.first == field; }), metaData.end());
     }
 
+    /// \brief Removes metadata with the given key
+    void removeMetaData(const std::string& key)
+    {
+        metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = key](auto&& md) { return md.first == field; }), metaData.end());
+    }
+
     /// \brief Query single auxdata value.
     std::string getAuxData(const std::string& key) const
     {

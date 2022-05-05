@@ -873,6 +873,10 @@ function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
         exturl.upnpclass = exturl.mimetype.startsWith('video') ? UPNP_CLASS_VIDEO_ITEM : UPNP_CLASS_ITEM_MUSIC_TRACK;
         exturl.description = entry.description ? entry.description : ("Entry from " + playlist_title);
 
+        exturl.extra = entry.extra;
+        exturl.size = entry.size;
+        exturl.writeThrough = entry.writeThrough;
+
         // This is a special field which ensures that your playlist files
         // will be displayed in the correct order inside a playlist
         // container. It is similar to the id3 track number that is used
@@ -896,9 +900,12 @@ function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
         var item = copyObject(cds);
 
         item.playlistOrder = (entry.order ? entry.order : playlistOrder);
-        item.title = item.metaData[M_TITLE] ? item.metaData[M_TITLE][0] : cds.title;
+        item.title = entry.writeThrough <= 0 ? (item.metaData[M_TITLE] ? item.metaData[M_TITLE][0] : cds.title) : entry.title;
         item.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
         item.description = entry.description ? entry.description : null;
+
+        item.extra = entry.extra;
+        item.writeThrough = entry.writeThrough;
         // print("Playlist " + item.title + " Adding entry: " + item.playlistOrder + " " + item.location);
 
         addCdsObject(item, playlistChain);
@@ -913,9 +920,12 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
         title: null,
         location: null,
         order: 0,
+        size: -1,
+        writeThrough: -1,
         mimetype: null,
         description: null,
         protocol: null,
+        extra: [],
     };
     var line = readln();
     var playlistOrder = 1;
@@ -962,9 +972,12 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
         title: null,
         location: null,
         order: 0,
+        size: -1,
+        writeThrough: -1,
         mimetype: null,
         description: null,
         protocol: null,
+        extra: [],
     };
     var base = null;
     var node = readXml(-2);
@@ -980,15 +993,20 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 if (base)
                     entry.location = base + '/' + entry.location;
                 var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
-                if (playlistDirChain && state)
+                if (playlistDirChain && state) {
+                    entry.writeThrough = 0;
                     state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                }
                 if (state)
                     playlistOrder++;
             }
             entry.title = null;
             entry.location = null;
+            entry.size = -1;
+            entry.writeThrough = -1;
             entry.mimetype = null;
             entry.protocol = null;
+            entry.extra = [];
             entry.description = null;
         } else if (node.NAME === "asx") {
             node = readXml(1); // read children
@@ -998,32 +1016,41 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
             level++;
         } else if (node.NAME === "ref" && node.href) {
             entry.location = node.href;
-            node = readXml(0); // read nect
+            entry.writeThrough = node.writethrough;
+            node = readXml(0); // read next
         } else if (node.NAME === "base" && node.href && level < 2) {
             base = node.href;
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
         } else if (node.NAME == "title") {
             entry.title = node.VALUE;
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
         } else if (node.NAME == "abstract") {
             entry.description = node.VALUE;
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
             // currently unused
+        } else if (node.NAME == "param" && node.name === "size") {
+            entry.size = node.value;
+            node = readXml(0); // read next
         } else if (node.NAME == "param" && node.name === "mimetype") {
             entry.mimetype = node.value;
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
         } else if (node.NAME == "param" && node.name === "protocol") {
             entry.protocol = node.value;
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
+        } else if (node.NAME == "param") {
+            entry.extra[node.name] = node.value;
+            node = readXml(0); // read next
         } else {
-            node = readXml(0); // read nect
+            node = readXml(0); // read next
         }
     }
 
     if (entry.location) {
         var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
-        if (playlistDirChain && state)
+        if (playlistDirChain && state) {
+            entry.writeThrough = 0;
             addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+        }
     }
 }
 
@@ -1032,9 +1059,12 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
         title: null,
         location: null,
         order: -1,
+        size: -1,
+        writeThrough: -1,
         mimetype: null,
         description: null,
         protocol: null,
+        extra: [],
     };
     var line = readln();
     var playlistOrder = 1;
