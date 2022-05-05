@@ -435,6 +435,27 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& s
     duk_pop(ctx);
 }
 
+void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string val)
+{
+    if (sym == MetadataHandler::getMetaFieldName(M_TRACKNUMBER) && item) {
+        int j = stoiString(val, 0);
+        if (j > 0) {
+            item->addMetaData(sym, val);
+            item->setTrackNumber(j);
+        } else
+            item->setTrackNumber(0);
+    } else if (sym == MetadataHandler::getMetaFieldName(M_PARTNUMBER) && item) {
+        int j = stoiString(val, 0);
+        if (j > 0) {
+            item->addMetaData(sym, val);
+            item->setPartNumber(j);
+        } else
+            item->setPartNumber(0);
+    } else {
+        obj->addMetaData(sym, sc->convert(val));
+    }
+}
+
 std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
     std::string val;
@@ -508,24 +529,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             auto arrayVal = getArrayProperty(sym);
             for (auto&& val : arrayVal) {
                 if (!val.empty()) {
-                    if (sym == MetadataHandler::getMetaFieldName(M_TRACKNUMBER)) {
-                        int j = stoiString(val, 0);
-                        if (j > 0) {
-                            obj->addMetaData(sym, val);
-                            item->setTrackNumber(j);
-                        } else
-                            item->setTrackNumber(0);
-                    } else if (sym == MetadataHandler::getMetaFieldName(M_PARTNUMBER)) {
-                        int j = stoiString(val, 0);
-                        if (j > 0) {
-                            obj->addMetaData(sym, val);
-                            item->setPartNumber(j);
-                        } else
-                            item->setPartNumber(0);
-                    } else {
-                        val = sc->convert(val);
-                        obj->addMetaData(sym, val);
-                    }
+                    setMetaData(obj, item, sym, val);
                 }
             }
         }
@@ -639,6 +643,31 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
         }
         if (this->whoami() == S_PLAYLIST) {
+            int writeThrough = getIntProperty("writeThrough", -1);
+            duk_get_prop_string(ctx, -1, "extra");
+            if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+                duk_to_object(ctx, -1);
+                auto keys = getPropertyNames();
+                for (auto&& sym : keys) {
+                    val = getProperty(sym);
+                    if (!val.empty()) {
+                        val = sc->convert(val);
+                        obj->addMetaData(sym, val);
+                        if (writeThrough > 0 && pcd) {
+                            pcd->removeMetaData(sym);
+                            setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), sym, val);
+                        }
+                    }
+                }
+            }
+            duk_pop(ctx); // extra
+
+            if (writeThrough > 0 && pcd) {
+                pcd->removeMetaData(M_TITLE);
+                setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), MetadataHandler::getMetaFieldName(M_TITLE), obj->getTitle());
+                content->updateObject(pcd);
+            }
+
             item->setTrackNumber(getIntProperty("playlistOrder", 0));
             item->setPartNumber(0);
         }
@@ -664,14 +693,17 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
             }
 
+            std::shared_ptr<CdsResource> resource;
             if (item->getResourceCount() == 0) {
-                auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
-                resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
-
+                resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
                 item->addResource(resource);
             } else {
-                auto resource = item->getResource(ContentHandler::DEFAULT);
-                resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+                resource = item->getResource(ContentHandler::DEFAULT);
+            }
+            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+            int size = getIntProperty("size", -1);
+            if (size > -1) {
+                resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(size));
             }
         }
     }

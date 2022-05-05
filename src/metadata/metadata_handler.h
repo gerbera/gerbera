@@ -180,7 +180,7 @@ public:
     static ContentHandler remapContentHandler(const std::string& contHandler);
     static ContentHandler remapContentHandler(int ch);
 
-    static metadata_fields_t remapMetaDataField(std::string_view fieldName);
+    static metadata_fields_t remapMetaDataField(const std::string& fieldName);
 };
 
 #endif // __METADATA_HANDLER_H__

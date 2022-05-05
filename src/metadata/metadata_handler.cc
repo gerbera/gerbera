@@ -274,9 +274,14 @@ std::string MetadataHandler::mapContentHandler2String(ContentHandler ch)
     throw_std_runtime_error("Invalid content handler value {}", ch);
 }
 
-metadata_fields_t MetadataHandler::remapMetaDataField(std::string_view fieldName)
+metadata_fields_t MetadataHandler::remapMetaDataField(const std::string& fieldName)
 {
     for (auto&& [f, s] : mt_names) {
+        if (s == fieldName) {
+            return f;
+        }
+    }
+    for (auto&& [f, s] : mt_keys) {
         if (s == fieldName) {
             return f;
         }
