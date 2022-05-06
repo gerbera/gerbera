@@ -59,6 +59,7 @@ enum class ContentHandler {
     SUBTITLE = 10,
     CONTAINERART = 11,
     WAVPACK = 12,
+    METAFILE = 13,
     RESOURCE = 20,
 };
 

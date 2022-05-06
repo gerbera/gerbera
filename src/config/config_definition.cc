@@ -167,6 +167,11 @@ static const std::vector<std::string> defaultSubtitleFile {
     // "%filename%.srt"
 };
 
+/// \brief default values for CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST
+static const std::vector<std::string> defaultMetadataFile {
+    // "%filename%.nfo"
+};
+
 /// \brief default values for CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST
 static const std::vector<std::string> defaultResourceFile {
     // "%filename%.srt",
@@ -711,6 +716,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST,
+        "/import/resources/metafile", "config-import.html#resources",
+        ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
+        false, false, defaultMetadataFile),
+    std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST,
+        "/import/resources/metafile", "config-import.html#resources",
+        ATTR_IMPORT_RESOURCES_ADD_DIR, ATTR_IMPORT_RESOURCES_NAME, ATTR_IMPORT_RESOURCES_EXT),
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST,
         "/import/resources/resource", "config-import.html#resources",
         ATTR_IMPORT_RESOURCES_ADD_FILE, ATTR_IMPORT_RESOURCES_NAME,
@@ -1031,8 +1043,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE,
         "attribute::fanart-file", "config-import.html#resources",
         ""),
-    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE,
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE,
         "attribute::subtitle-file", "config-import.html#resources",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_METAFILE_FILE,
+        "attribute::metadata-file", "config-import.html#resources",
         ""),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE,
         "attribute::resource-file", "config-import.html#resources",
@@ -1302,10 +1317,10 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
                                             CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
                                         } },
 
-    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, //
-                                      CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, //
+    { ATTR_IMPORT_RESOURCES_NAME, { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, //
+                                      CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST, //
                                       CFG_IMPORT_SYSTEM_DIRECTORIES, CFG_IMPORT_RESOURCES_ORDER } },
-    { ATTR_IMPORT_RESOURCES_EXT, { CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST } },
+    { ATTR_IMPORT_RESOURCES_EXT, { CFG_IMPORT_RESOURCES_FANART_DIR_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST } },
 
     { ATTR_IMPORT_LAYOUT_MAPPING_FROM, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
     { ATTR_IMPORT_LAYOUT_MAPPING_TO, { CFG_IMPORT_LAYOUT_MAPPING, CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },

@@ -322,6 +322,30 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
     return std::make_unique<FileIOHandler>(path);
 }
 
+std::unique_ptr<ContentPathSetup> MetafileHandler::setup {};
+
+MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context)
+    : MetacontentHandler(context)
+{
+    if (!setup) {
+        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST);
+    }
+}
+
+void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+{
+    auto pathList = setup->getContentPath(obj, SETTING_METAFILE);
+    auto objFilename = obj->getLocation().filename().string() + ".";
+
+    if (pathList.empty() || pathList[0].empty())
+        obj->removeResource(ContentHandler::METAFILE);
+}
+
+std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+{
+    return {};
+}
+
 std::unique_ptr<ContentPathSetup> ResourceHandler::setup {};
 
 ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)

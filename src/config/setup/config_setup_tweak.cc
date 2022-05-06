@@ -74,9 +74,13 @@ bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, s
             if (cs->hasXmlElement(child)) {
                 dir->setFanArtFile(cs->getXmlContent(child));
             }
-            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE);
             if (cs->hasXmlElement(child)) {
                 dir->setSubTitleFile(cs->getXmlContent(child));
+            }
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_METAFILE_FILE);
+            if (cs->hasXmlElement(child)) {
+                dir->setMetafile(cs->getXmlContent(child));
             }
             cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_RESOURCE_FILE);
             if (cs->hasXmlElement(child)) {
@@ -186,13 +190,23 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasSubTitleFile() ? entry->getSubTitleFile() : "");
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE)->checkValue(optValue)) {
             entry->setSubTitleFile(optValue);
             log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_DIRECTORIES_TWEAK_METAFILE_FILE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->hasMetafile() ? entry->getMetafile() : "");
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_METAFILE_FILE)->checkValue(optValue)) {
+            entry->setMetafile(optValue);
+            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getMetafile());
             return true;
         }
     }

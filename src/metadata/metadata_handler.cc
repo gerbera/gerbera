@@ -154,6 +154,9 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
         SubtitleHandler(context).fillMetadata(item);
 
+    // Metadata from text files
+    MetafileHandler(context).fillMetadata(item);
+
     ResourceHandler(context).fillMetadata(item);
 }
 
@@ -203,6 +206,8 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
         return std::make_unique<SubtitleHandler>(context);
     case ContentHandler::RESOURCE:
         return std::make_unique<ResourceHandler>(context);
+    case ContentHandler::METAFILE:
+        return std::make_unique<MetafileHandler>(context);
     case ContentHandler::DEFAULT:
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:
@@ -242,6 +247,7 @@ static constexpr std::array chKeys = {
     std::pair(ContentHandler::WAVPACK, "WavPack"),
 #endif
     std::pair(ContentHandler::SUBTITLE, "Subtitle"),
+    std::pair(ContentHandler::METAFILE, "MetaFile"),
     std::pair(ContentHandler::RESOURCE, "Resource"),
 };
 
