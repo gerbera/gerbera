@@ -84,6 +84,17 @@ private:
     static std::unique_ptr<ContentPathSetup> setup;
 };
 
+/// \brief This class is responsible for populating metadata from additional files
+class MetafileHandler : public MetacontentHandler {
+public:
+    explicit MetafileHandler(const std::shared_ptr<Context>& context);
+    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
+
+private:
+    static std::unique_ptr<ContentPathSetup> setup;
+};
+
 /// \brief This class is responsible for reverse mapping filesystem based resources
 class ResourceHandler : public MetacontentHandler {
 public:

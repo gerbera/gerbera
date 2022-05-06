@@ -264,8 +264,12 @@ void Web::ConfigLoad::process()
         setValue(item, dir->hasResourceFile() ? dir->getResourceFile() : "");
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_SUBTILTE_FILE);
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_SUBTITLE_FILE);
         setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_METAFILE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_METAFILE_FILE);
+        setValue(item, dir->hasMetafile() ? dir->getMetafile() : "");
     }
 
     // write dynamic content

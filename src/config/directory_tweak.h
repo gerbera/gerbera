@@ -86,6 +86,7 @@ protected:
 #define SETTING_FANART "FanArt"
 #define SETTING_CONTAINERART "ContainerArt"
 #define SETTING_SUBTITLE "SubTitle"
+#define SETTING_METAFILE "MetaFile"
 #define SETTING_RESOURCE "Resource"
 
 /// \brief Provides information about one directory.
@@ -127,15 +128,19 @@ public:
     bool hasMetaCharset() const { return resourceFiles.find("MetaCharset") != resourceFiles.end(); }
     std::string getMetaCharset() const { return resourceFiles.at("MetaCharset"); }
 
-    void setFanArtFile(std::string fanArtFile) { this->resourceFiles[SETTING_FANART] = std::move(fanArtFile); }
+    void setFanArtFile(std::string file) { this->resourceFiles[SETTING_FANART] = std::move(file); }
     bool hasFanArtFile() const { return resourceFiles.find(SETTING_FANART) != resourceFiles.end(); }
     std::string getFanArtFile() const { return resourceFiles.at(SETTING_FANART); }
 
-    void setSubTitleFile(std::string subTitleFile) { this->resourceFiles[SETTING_SUBTITLE] = std::move(subTitleFile); }
+    void setSubTitleFile(std::string file) { this->resourceFiles[SETTING_SUBTITLE] = std::move(file); }
     bool hasSubTitleFile() const { return resourceFiles.find(SETTING_SUBTITLE) != resourceFiles.end(); }
     std::string getSubTitleFile() const { return resourceFiles.at(SETTING_SUBTITLE); }
 
-    void setResourceFile(std::string resourceFile) { this->resourceFiles[SETTING_RESOURCE] = std::move(resourceFile); }
+    void setMetafile(std::string file) { this->resourceFiles[SETTING_METAFILE] = std::move(file); }
+    bool hasMetafile() const { return resourceFiles.find(SETTING_METAFILE) != resourceFiles.end(); }
+    std::string getMetafile() const { return resourceFiles.at(SETTING_METAFILE); }
+
+    void setResourceFile(std::string file) { this->resourceFiles[SETTING_RESOURCE] = std::move(file); }
     bool hasResourceFile() const { return resourceFiles.find(SETTING_RESOURCE) != resourceFiles.end(); }
     std::string getResourceFile() const { return resourceFiles.at(SETTING_RESOURCE); }
 
