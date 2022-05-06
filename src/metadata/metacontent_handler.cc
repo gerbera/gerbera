@@ -32,6 +32,7 @@
 #include "cds_objects.h"
 #include "config/config.h"
 #include "config/directory_tweak.h"
+#include "content/content_manager.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
 #include "util/tools.h"
@@ -324,8 +325,9 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
 
 std::unique_ptr<ContentPathSetup> MetafileHandler::setup {};
 
-MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context)
+MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content)
     : MetacontentHandler(context)
+    , content(content)
 {
     if (!setup) {
         setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST);
@@ -334,11 +336,19 @@ MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context)
 
 void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
+#ifdef HAVE_JS
     auto pathList = setup->getContentPath(obj, SETTING_METAFILE);
-    auto objFilename = obj->getLocation().filename().string() + ".";
 
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::METAFILE);
+
+    for (auto&& path : pathList) {
+        log_info("Running metdafile handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
+        if (!path.empty()) {
+            content->parseMetafile(obj, path);
+        }
+    }
+#endif
 }
 
 std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)

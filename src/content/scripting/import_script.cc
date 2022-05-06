@@ -41,13 +41,7 @@ ImportScript::ImportScript(const std::shared_ptr<ContentManager>& content,
     : Script(content, runtime, "import", "orig", StringConverter::i2i(content->getContext()->getConfig()))
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-
     load(scriptPath);
-}
-
-script_class_t ImportScript::whoami()
-{
-    return S_IMPORT;
 }
 
 void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath)
@@ -68,5 +62,14 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_gc(ctx, 0);
         gc_counter = 0;
     }
+}
+
+bool ImportScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)
+{
+    if (!cdsObj->isExternalItem()) {
+        cdsObj->setRefID(origObject->getID());
+        cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    }
+    return true;
 }
 #endif // HAVE_JS

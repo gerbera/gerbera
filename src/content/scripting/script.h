@@ -40,19 +40,15 @@
 #include "util/grb_fs.h"
 
 // forward declaration
-class CdsObject;
+class CdsContainer;
 class CdsItem;
+class CdsObject;
 class ContentManager;
 class ScriptingRuntime;
 class StringConverter;
 
 // perform garbage collection after script has been run for x times
 #define JS_CALL_GC_AFTER_NUM (1000)
-
-enum script_class_t {
-    S_IMPORT = 0,
-    S_PLAYLIST
-};
 
 enum charset_convert_t {
     M2I,
@@ -85,27 +81,28 @@ public:
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
 
-    virtual script_class_t whoami() = 0;
-
-    std::shared_ptr<CdsObject> getProcessedObject() const;
-
     std::string convertToCharset(const std::string& str, charset_convert_t chr);
-
+    virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) = 0;
+    virtual bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) = 0;
     static Script* getContextScript(duk_context* ctx);
 
-    std::shared_ptr<Config> getConfig() const { return config; }
     std::shared_ptr<Database> getDatabase() const { return database; }
     std::shared_ptr<ContentManager> getContent() const { return content; }
+    std::string getOrigName() const { return objectName; }
+    std::shared_ptr<CdsObject> getProcessedObject() const { return processed; }
 
 protected:
     Script(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
         std::string objName, std::unique_ptr<StringConverter> sc);
 
-    void execute(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath);
+    void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
     void cleanup();
     int gc_counter {};
     void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string val);
+
+    virtual void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) { }
+    virtual void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) { }
 
     // object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
@@ -116,6 +113,7 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<ScriptingRuntime> runtime;
+    std::unique_ptr<StringConverter> sc;
 
 private:
     std::string entrySeparator;
@@ -123,7 +121,6 @@ private:
     std::string objectName;
     void _load(const fs::path& scriptPath);
     void _execute();
-    std::unique_ptr<StringConverter> sc;
     std::unique_ptr<StringConverter> _p2i;
     std::unique_ptr<StringConverter> _j2i;
     std::unique_ptr<StringConverter> _f2i;

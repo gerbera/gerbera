@@ -117,30 +117,19 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     // stack: js_cds_obj containerId
 
     try {
-        std::unique_ptr<StringConverter> p2i;
-        std::unique_ptr<StringConverter> i2i;
-
-        auto config = self->getConfig();
-        if (self->whoami() == S_PLAYLIST) {
-            p2i = StringConverter::p2i(config);
-        } else {
-            i2i = StringConverter::i2i(config);
-        }
         duk_get_global_string(ctx, "object_script_path");
         auto rp = duk_get_string(ctx, -1);
         duk_pop(ctx);
         std::string rootPath = rp ? rp : "";
 
-        if (self->whoami() == S_PLAYLIST)
-            duk_get_global_string(ctx, "playlist");
-        else if (self->whoami() == S_IMPORT)
-            duk_get_global_string(ctx, "orig");
-        else
+        if (self->getOrigName().empty())
             duk_push_undefined(ctx);
+        else
+            duk_get_global_string(ctx, self->getOrigName().c_str());
         // stack: js_cds_obj containerId js_orig_obj
 
         if (duk_is_undefined(ctx, -1)) {
-            log_debug("Could not retrieve global 'orig'/'playlist' object");
+            log_debug("Could not retrieve global {} object", self->getOrigName());
             return 0;
         }
 
@@ -148,46 +137,9 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         if (!origObject)
             return 0;
 
-        std::shared_ptr<CdsObject> cdsObj;
-        auto cm = self->getContent();
-        int pcdId = INVALID_OBJECT_ID;
-
         duk_swap_top(ctx, 0);
         // stack: js_orig_obj containerId js_cds_obj
-        if (self->whoami() == S_PLAYLIST) {
-            int otype = self->getIntProperty("objectType", -1);
-            if (otype == -1) {
-                log_error("missing objectType property");
-                return 0;
-            }
-
-            if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
-                fs::path loc = self->getProperty("location");
-                std::error_code ec;
-                auto dirEnt = fs::directory_entry(loc, ec);
-                if (!ec) {
-                    AutoScanSetting asSetting;
-                    asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-                    asSetting.recursive = false;
-                    asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
-                    asSetting.rescanResource = false;
-                    asSetting.mergeOptions(config, loc);
-
-                    pcdId = cm->addFile(dirEnt, rootPath, asSetting, false);
-                    if (pcdId == INVALID_OBJECT_ID) {
-                        log_error("Failed to add object {}", dirEnt.path().string());
-                        return 0;
-                    }
-                    auto mainObj = self->getDatabase()->loadObject(pcdId);
-                    cdsObj = self->dukObject2cdsObject(mainObj);
-                } else {
-                    log_error("Failed to read {}: {}", loc.c_str(), ec.message());
-                }
-            } else
-                cdsObj = self->dukObject2cdsObject(origObject);
-        } else
-            cdsObj = self->dukObject2cdsObject(origObject);
-
+        auto [cdsObj, pcdId] = self->createObject2cdsObject(origObject, rootPath);
         if (!cdsObj) {
             return 0;
         }
@@ -200,31 +152,15 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cdsObj->setParentID(parentId);
-        if (!cdsObj->isExternalItem()) {
-            /// \todo get hidden file setting from config manager?
-            /// what about same stuff in content manager, why is it not used
-            /// there?
-
-            if (self->whoami() == S_PLAYLIST) {
-                if (pcdId == INVALID_OBJECT_ID) {
-                    return 0;
-                }
-                cdsObj->setRefID(pcdId);
-            } else
-                cdsObj->setRefID(origObject->getID());
-
-            cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-        } else if (cdsObj->isExternalItem() && (self->whoami() == S_PLAYLIST) && self->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)) {
-            cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-            cdsObj->setRefID(origObject->getID());
+        if (!self->setRefId(cdsObj, origObject, pcdId)) {
+            return 0;
         }
 
         cdsObj->setID(INVALID_OBJECT_ID);
-        cm->addObject(cdsObj, parentStatus);
+        self->getContent()->addObject(cdsObj, parentStatus);
 
         /* setting object ID as return value */
-        auto tmp = fmt::to_string(parentId);
-        duk_push_string(ctx, tmp.c_str());
+        duk_push_string(ctx, fmt::to_string(parentId).c_str());
         return 1;
     } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");

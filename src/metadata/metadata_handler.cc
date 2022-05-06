@@ -71,7 +71,7 @@ MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
+void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))
@@ -155,7 +155,7 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
         SubtitleHandler(context).fillMetadata(item);
 
     // Metadata from text files
-    MetafileHandler(context).fillMetadata(item);
+    MetafileHandler(context, content).fillMetadata(item);
 
     ResourceHandler(context).fillMetadata(item);
 }
@@ -165,7 +165,7 @@ std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
     return getValueOrDefault(mt_keys, field, { "unknown" });
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, ContentHandler handlerType)
+std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, ContentHandler handlerType)
 {
     switch (handlerType) {
     case ContentHandler::LIBEXIF:
@@ -207,7 +207,7 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
     case ContentHandler::RESOURCE:
         return std::make_unique<ResourceHandler>(context);
     case ContentHandler::METAFILE:
-        return std::make_unique<MetafileHandler>(context);
+        return std::make_unique<MetafileHandler>(context, content);
     case ContentHandler::DEFAULT:
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:

@@ -41,11 +41,6 @@
 
 #define ONE_TEXTLINE_BYTES 1024
 
-script_class_t PlaylistParserScript::whoami()
-{
-    return S_PLAYLIST;
-}
-
 extern "C" {
 
 static duk_ret_t jsReadXml(duk_context* ctx)
@@ -110,7 +105,7 @@ static duk_ret_t jsReadln(duk_context* ctx)
 
 static duk_ret_t jsGetCdsObject(duk_context* ctx)
 {
-    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    auto self = dynamic_cast<ParserScript*>(Script::getContextScript(ctx));
     if (!self) {
         return 0;
     }
@@ -146,7 +141,7 @@ static duk_ret_t jsGetCdsObject(duk_context* ctx)
 
 } // extern "C"
 
-PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
+ParserScript::ParserScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
     : Script(content, runtime, "playlist", "playlist", StringConverter::p2i(content->getContext()->getConfig()))
 {
@@ -154,13 +149,11 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>
     defineFunction("readln", jsReadln, 0);
     defineFunction("readXml", jsReadXml, 1);
     defineFunction("getCdsObject", jsGetCdsObject, 1);
-
-    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
-    load(scriptPath);
 }
 
 static pugi::xml_node nullNode;
-pugi::xml_node& PlaylistParserScript::readXml(int direction)
+
+pugi::xml_node& ParserScript::readXml(int direction)
 {
     if (!root)
         throw_std_runtime_error("readXml not yet setup for use");
@@ -187,7 +180,7 @@ pugi::xml_node& PlaylistParserScript::readXml(int direction)
     return nullNode;
 }
 
-std::pair<std::string, bool> PlaylistParserScript::readLine()
+std::pair<std::string, bool> ParserScript::readLine()
 {
     if (!currentHandle)
         throw_std_runtime_error("readLine not yet setup for use");
@@ -204,7 +197,107 @@ std::pair<std::string, bool> PlaylistParserScript::readLine()
     }
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptPath)
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<ScriptingRuntime>& runtime)
+    : ParserScript(content, runtime)
+{
+    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    load(scriptPath);
+}
+
+std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath)
+{
+    int otype = getIntProperty("objectType", -1);
+    if (otype == -1) {
+        log_error("missing objectType property");
+        return { {}, INVALID_OBJECT_ID };
+    }
+
+    if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
+        fs::path loc = getProperty("location");
+        std::error_code ec;
+        auto dirEnt = fs::directory_entry(loc, ec);
+        if (!ec) {
+            AutoScanSetting asSetting;
+            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+            asSetting.recursive = false;
+            asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+            asSetting.rescanResource = false;
+            asSetting.mergeOptions(config, loc);
+
+            int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
+            if (pcdId == INVALID_OBJECT_ID) {
+                log_error("Failed to add object {}", dirEnt.path().string());
+                return { {}, INVALID_OBJECT_ID };
+            }
+            auto mainObj = database->loadObject(pcdId);
+            return { dukObject2cdsObject(mainObj), pcdId };
+        } else {
+            log_error("Failed to read {}: {}", loc.c_str(), ec.message());
+        }
+    } else {
+        return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
+    }
+    return { {}, INVALID_OBJECT_ID };
+}
+
+bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)
+{
+    if (!cdsObj->isExternalItem()) {
+        /// \todo get hidden file setting from config manager?
+        /// what about same stuff in content manager, why is it not used
+        /// there?
+        if (pcdId == INVALID_OBJECT_ID) {
+            return false;
+        }
+        cdsObj->setRefID(pcdId);
+        cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    } else if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)) {
+        cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+        cdsObj->setRefID(origObject->getID());
+    }
+    return true;
+}
+
+void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont)
+{
+    if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) && cont->getRefID() > 0) {
+        cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+    }
+}
+
+void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item)
+{
+    int writeThrough = getIntProperty("writeThrough", -1);
+    duk_get_prop_string(ctx, -1, "extra");
+    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+        duk_to_object(ctx, -1);
+        auto keys = getPropertyNames();
+        for (auto&& sym : keys) {
+            auto val = getProperty(sym);
+            if (!val.empty()) {
+                val = sc->convert(val);
+                item->addMetaData(sym, val);
+                if (writeThrough > 0 && pcd) {
+                    pcd->removeMetaData(sym);
+                    setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), sym, val);
+                }
+            }
+        }
+    }
+    duk_pop(ctx); // extra
+
+    if (writeThrough > 0 && pcd) {
+        pcd->removeMetaData(M_TITLE);
+        setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), MetadataHandler::getMetaFieldName(M_TITLE), item->getTitle());
+        content->updateObject(pcd);
+    }
+
+    item->setTrackNumber(getIntProperty("playlistOrder", 0));
+    item->setPartNumber(0);
+}
+
+void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath)
 {
     if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
         throw_std_runtime_error("Recursion in playlists not allowed");
@@ -234,7 +327,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        execute(obj, scriptPath);
+        execute(obj, rootPath);
     } catch (const std::runtime_error&) {
         cleanup();
         duk_pop(ctx);
@@ -252,6 +345,8 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentHandle = nullptr;
 
+    log_debug("Done playlist {} ...", obj->getLocation().string());
+
     delete[] currentLine;
     currentLine = nullptr;
     xmlDoc->reset();
@@ -265,5 +360,120 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         duk_gc(ctx, 0);
         gc_counter = 0;
     }
+}
+
+MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<ScriptingRuntime>& runtime)
+    : ParserScript(content, runtime)
+{
+    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    load(scriptPath);
+}
+
+void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
+{
+    if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
+        throw_std_runtime_error("Recursion in playlists not allowed");
+    }
+
+    if (!obj->isPureItem()) {
+        throw_std_runtime_error("Calling processObject only allowed for pure items");
+    }
+    auto item = std::static_pointer_cast<CdsItem>(obj);
+
+    log_debug("Checking metafile {} for {}...", path.string(), obj->getLocation().string());
+    GrbFile file(path);
+    bool isXmlFile = true;
+    if (!isXmlFile) {
+        currentHandle = file.open("r");
+    } else {
+        pugi::xml_parse_result result = xmlDoc->load_file(path.c_str());
+        if (result.status != pugi::xml_parse_status::status_ok) {
+            throw ConfigParseException(result.description());
+        }
+        root = xmlDoc->document_element();
+    }
+    currentObjectID = item->getID();
+    currentLine = new char[ONE_TEXTLINE_BYTES];
+    currentLine[0] = '\0';
+
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
+    try {
+        execute(obj, path);
+    } catch (const std::runtime_error&) {
+        cleanup();
+        duk_pop(ctx);
+
+        currentHandle = nullptr;
+
+        delete[] currentLine;
+        currentLine = nullptr;
+
+        currentObjectID = INVALID_OBJECT_ID;
+
+        throw;
+    }
+
+    currentHandle = nullptr;
+
+    log_debug("Done metafile {} ...", path.string());
+
+    delete[] currentLine;
+    currentLine = nullptr;
+    xmlDoc->reset();
+    root = nullNode;
+
+    currentObjectID = INVALID_OBJECT_ID;
+
+    gc_counter++;
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
+        duk_gc(ctx, 0);
+        gc_counter = 0;
+    }
+}
+
+std::pair<std::shared_ptr<CdsObject>, int> MetafileParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath)
+{
+    int otype = getIntProperty("objectType", -1);
+    if (otype == -1) {
+        log_error("missing objectType property");
+        return { {}, INVALID_OBJECT_ID };
+    }
+
+    if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
+        fs::path loc = getProperty("location");
+        std::error_code ec;
+        auto dirEnt = fs::directory_entry(loc, ec);
+        if (!ec) {
+            AutoScanSetting asSetting;
+            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+            asSetting.recursive = false;
+            asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+            asSetting.rescanResource = false;
+            asSetting.mergeOptions(config, loc);
+
+            int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
+            if (pcdId == INVALID_OBJECT_ID) {
+                log_error("Failed to add object {}", dirEnt.path().string());
+                return { {}, INVALID_OBJECT_ID };
+            }
+            auto mainObj = database->loadObject(pcdId);
+            return { dukObject2cdsObject(mainObj), pcdId };
+        } else {
+            log_error("Failed to read {}: {}", loc.c_str(), ec.message());
+        }
+    } else {
+        return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
+    }
+    return { {}, INVALID_OBJECT_ID };
+}
+
+bool MetafileParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)
+{
+    if (!cdsObj->isExternalItem()) {
+        cdsObj->setRefID(origObject->getID());
+        cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    }
+    return true;
 }
 #endif // HAVE_JS
