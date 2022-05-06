@@ -42,6 +42,7 @@
 // forward declaration
 class CdsItem;
 class CdsObject;
+class ContentManager;
 class IOHandler;
 
 // content handler Id's
@@ -161,9 +162,9 @@ public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler() = default;
 
-    static void extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
+    static void extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
     static std::string getMetaFieldName(metadata_fields_t field);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, ContentHandler handlerType);
+    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, ContentHandler handlerType);
 
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle

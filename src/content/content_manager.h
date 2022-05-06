@@ -308,6 +308,9 @@ public:
     void initLayout();
     void destroyLayout();
 
+    /// \brief parse a file containing metadata for object
+    void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path);
+
 #ifdef HAVE_JS
     void initJS();
     void destroyJS();
@@ -380,6 +383,7 @@ protected:
 
 #ifdef HAVE_JS
     std::unique_ptr<PlaylistParserScript> playlist_parser_script;
+    std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
     std::mutex layoutMutex;

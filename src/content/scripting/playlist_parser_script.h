@@ -43,23 +43,42 @@ class CdsObject;
 class ContentManager;
 class GenericTask;
 
-class PlaylistParserScript : public Script {
+class ParserScript : public Script {
 public:
-    PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
-        const std::shared_ptr<ScriptingRuntime>& runtime);
-
     std::pair<std::string, bool> readLine();
     pugi::xml_node& readXml(int direction);
-    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& scriptPath);
-    script_class_t whoami() override;
 
-private:
+protected:
+    ParserScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
+
     std::FILE* currentHandle {};
     int currentObjectID { INVALID_OBJECT_ID };
     char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
     pugi::xml_node root;
+};
+
+class PlaylistParserScript : public ParserScript {
+public:
+    PlaylistParserScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
+    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath);
+
+    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) override;
+    bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
+
+protected:
+    void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
+    void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
+};
+
+class MetafileParserScript : public ParserScript {
+public:
+    MetafileParserScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
+    void processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path);
+
+    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) override;
+    bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

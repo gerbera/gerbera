@@ -172,9 +172,9 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
     , database(content->getContext()->getDatabase())
     , content(content)
     , runtime(runtime)
+    , sc(std::move(sc))
     , name(name)
     , objectName(std::move(objName))
-    , sc(std::move(sc))
 {
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
@@ -411,16 +411,16 @@ void Script::cleanup()
     duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
 }
 
-void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath)
+void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath)
 {
     cdsObject2dukObject(obj);
     duk_put_global_string(ctx, objectName.c_str());
 
-    duk_push_string(ctx, scriptPath.c_str());
+    duk_push_string(ctx, rootPath.c_str());
     duk_put_global_string(ctx, OBJECT_SCRIPT_PATH);
 
-    auto autoScan = content->getAutoscanDirectory(scriptPath);
-    if (autoScan && !scriptPath.empty()) {
+    auto autoScan = content->getAutoscanDirectory(rootPath);
+    if (autoScan && !rootPath.empty()) {
         duk_push_sprintf(ctx, "%d", autoScan->getScanID());
         duk_put_global_string(ctx, OBJECT_AUTOSCAN_ID);
     }
@@ -642,35 +642,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         } else if (pcd && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
             item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
         }
-        if (this->whoami() == S_PLAYLIST) {
-            int writeThrough = getIntProperty("writeThrough", -1);
-            duk_get_prop_string(ctx, -1, "extra");
-            if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-                duk_to_object(ctx, -1);
-                auto keys = getPropertyNames();
-                for (auto&& sym : keys) {
-                    val = getProperty(sym);
-                    if (!val.empty()) {
-                        val = sc->convert(val);
-                        obj->addMetaData(sym, val);
-                        if (writeThrough > 0 && pcd) {
-                            pcd->removeMetaData(sym);
-                            setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), sym, val);
-                        }
-                    }
-                }
-            }
-            duk_pop(ctx); // extra
-
-            if (writeThrough > 0 && pcd) {
-                pcd->removeMetaData(M_TITLE);
-                setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), MetadataHandler::getMetaFieldName(M_TITLE), obj->getTitle());
-                content->updateObject(pcd);
-            }
-
-            item->setTrackNumber(getIntProperty("playlistOrder", 0));
-            item->setPartNumber(0);
-        }
+        handleObject2cdsItem(ctx, pcd, item);
 
         // location must not be touched by character conversion!
         fs::path location = getProperty("location");
@@ -711,10 +683,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     // CdsDirectory
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-
-        if (this->whoami() == S_PLAYLIST && this->getConfig()->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) && cont->getRefID() > 0) {
-            cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
-        }
+        handleObject2cdsContainer(ctx, pcd, cont);
         id = getIntProperty("updateID", -1);
         if (id >= 0)
             cont->setUpdateID(id);
@@ -910,11 +879,6 @@ std::string Script::convertToCharset(const std::string& str, charset_convert_t c
         return _i2i->convert(str);
     }
     throw_std_runtime_error("Illegal charset given to convertToCharset(): {}", chr);
-}
-
-std::shared_ptr<CdsObject> Script::getProcessedObject() const
-{
-    return processed;
 }
 
 #endif // HAVE_JS

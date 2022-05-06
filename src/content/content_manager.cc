@@ -494,7 +494,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
         }
     } else if (obj->isItem() && processExisting) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        MetadataHandler::extractMetaData(context, item, dirEnt);
+        MetadataHandler::extractMetaData(context, shared_from_this(), item, dirEnt);
         updateItemData(item, item->getMimeType());
     }
     if (obj->isItem() && layout && (processExisting || isNew)) {
@@ -523,6 +523,20 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
         }
     }
     return obj;
+}
+
+void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
+{
+#ifdef HAVE_JS
+    try {
+        if (metafileParserScript)
+            metafileParserScript->processObject(obj, path);
+    } catch (const std::runtime_error& e) {
+        log_error("{}", e.what());
+    }
+#else
+    log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
+#endif // HAVE_JS
 }
 
 int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
@@ -1231,7 +1245,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
         }
     }
     if (!fanart) {
-        MetadataHandler::createHandler(context, ContentHandler::CONTAINERART)->fillMetadata(container);
+        MetadataHandler::createHandler(context, nullptr, ContentHandler::CONTAINERART)->fillMetadata(container);
         database->updateObject(container, nullptr);
         fanart = container->getResource(CdsResource::Purpose::Thumbnail);
     }
@@ -1341,7 +1355,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const fs::direct
         }
         obj->setTitle(f2i->convert(title));
 
-        MetadataHandler::extractMetaData(context, item, dirEnt);
+        MetadataHandler::extractMetaData(context, shared_from_this(), item, dirEnt);
         updateItemData(item, mimetype);
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
@@ -1406,13 +1420,20 @@ void ContentManager::initLayout()
 #ifdef HAVE_JS
 void ContentManager::initJS()
 {
+    auto self = shared_from_this();
     if (!playlist_parser_script) {
-        auto self = shared_from_this();
         playlist_parser_script = std::make_unique<PlaylistParserScript>(self, scripting_runtime);
+    }
+    if (!metafileParserScript) {
+        metafileParserScript = std::make_unique<MetafileParserScript>(self, scripting_runtime);
     }
 }
 
-void ContentManager::destroyJS() { playlist_parser_script = nullptr; }
+void ContentManager::destroyJS()
+{
+    playlist_parser_script = nullptr;
+    metafileParserScript = nullptr;
+}
 
 #endif // HAVE_JS
 

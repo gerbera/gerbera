@@ -191,7 +191,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const
 {
     auto resHandler = resource->getHandlerType();
-    return MetadataHandler::createHandler(context, resHandler);
+    return MetadataHandler::createHandler(context, content, resHandler);
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
