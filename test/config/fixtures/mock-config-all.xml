@@ -62,6 +62,7 @@
     <scripting script-charset="UTF-8">
       <common-script>/usr/local/share/gerbera/js/common.js</common-script>
       <playlist-script>/usr/local/share/gerbera/js/playlists.js</playlist-script>
+      <metafile-script>/usr/local/share/gerbera/js/metadata.js</metafile-script>
       <virtual-layout type="builtin">
         <import-script>/usr/local/share/gerbera/js/import.js</import-script>
       </virtual-layout>

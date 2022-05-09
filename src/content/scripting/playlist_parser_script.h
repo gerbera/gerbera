@@ -43,13 +43,20 @@ class CdsObject;
 class ContentManager;
 class GenericTask;
 
+extern "C" {
+duk_ret_t jsReadXml(duk_context* ctx);
+duk_ret_t jsReadln(duk_context* ctx);
+duk_ret_t jsGetCdsObject(duk_context* ctx);
+duk_ret_t jsUpdateCdsObject(duk_context* ctx);
+}
+
 class ParserScript : public Script {
 public:
     std::pair<std::string, bool> readLine();
     pugi::xml_node& readXml(int direction);
 
 protected:
-    ParserScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
+    ParserScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name, const std::string& objName);
 
     std::FILE* currentHandle {};
     int currentObjectID { INVALID_OBJECT_ID };
@@ -79,6 +86,10 @@ public:
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
+
+protected:
+    std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd) override;
+    void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
 };
 
 #endif // __SCRIPTING_PLAYLIST_PARSER_SCRIPT_H__

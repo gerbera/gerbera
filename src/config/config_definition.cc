@@ -610,6 +610,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
         "/import/scripting/playlist-script", "config-import.html#playlist-script",
         "", true),
+    std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT,
+        "/import/scripting/metafile-script", "config-import.html#metafile-script",
+        "", true),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
         "/import/scripting/playlist-script/attribute::create-link", "config-import.html#playlist-script",
         DEFAULT_PLAYLIST_CREATE_LINK),
@@ -1099,7 +1102,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_MULTI_VALUES_ENABLED,
         "/server/upnp/attribute::multi-value", "config-server.html#upnp",
-        NO),
+        YES),
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_SEARCH_CONTAINER_FLAG,
         "/server/upnp/attribute::searchable-container-flag", "config-server.html#upnp",
         NO),

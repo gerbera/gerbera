@@ -103,6 +103,7 @@ protected:
 
     virtual void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) { }
     virtual void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) { }
+    virtual std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd);
 
     // object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
