@@ -46,8 +46,9 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
         auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
         auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
+        auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
 
-        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, captionInfoCount);
+        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, captionInfoCount, stringLimit);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -116,6 +117,14 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             config->setOrigValue(index, entry->getCaptionInfoCount());
         entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
+        return true;
+    }
+    index = getItemPath(i, ATTR_CLIENTS_UPNP_STRING_LIMIT);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getStringLimit());
+        entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
+        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getStringLimit());
         return true;
     }
     return false;

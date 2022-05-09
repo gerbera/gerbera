@@ -1213,7 +1213,7 @@ function parseNfo(obj, nfo_file_name) {
             addMeta(obj, "upnp:episodeNumber", node.VALUE);
             obj.trackNumber = node.VALUE;
             node = readXml(0); // read next
-        } else if (node.NAME == "mpaa") {
+        } else if (node.NAME == "mpaa" && node.VALUE) {
             addMeta(obj, "upnp:rating", node.VALUE);
             addMeta(obj, "upnp:rating@type", "MPAA.ORG");
             addMeta(obj, "upnp:rating@equivalentAge", node.VALUE);

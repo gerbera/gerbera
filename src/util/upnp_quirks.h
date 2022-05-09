@@ -133,6 +133,13 @@ public:
      */
     int getCaptionInfoCount() const;
 
+    /** \brief Get max length of Upnp string
+     *
+     * \return string limit for client
+     *
+     */
+    int getStringLimit() const;
+
     /** \brief Get group for ClientStatusDetail
      *
      * \return group for ClientStatusDetail

@@ -105,19 +105,27 @@ std::string UpnpXMLBuilder::printXml(const pugi::xml_node& entry, const char* in
 
 void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const
 {
-    // e.g. used for M_ALBUMARTIST
-    // name@attr[val] => <name attr="val">
     auto i = key.find('@');
     auto j = key.find('[', i + 1);
-    if (i != std::string::npos
-        && j != std::string::npos
-        && key[key.length() - 1] == ']') {
+    if (i != std::string::npos && j != std::string::npos && key[key.length() - 1] == ']') {
+        // e.g. used for M_ALBUMARTIST
+        // name@attr[val] => <name attr="val">
         std::string attrName = key.substr(i + 1, j - i - 1);
         std::string attrValue = key.substr(j + 1, key.length() - j - 2);
         std::string name = key.substr(0, i);
         auto node = entry.append_child(name.c_str());
         node.append_attribute(attrName.c_str()) = attrValue.c_str();
         node.append_child(pugi::node_pcdata).set_value(val.c_str());
+    } else if (i != std::string::npos) {
+        // name@attr val => <name attr="val">
+        std::string name = key.substr(0, i);
+        std::string attrName = key.substr(i + 1);
+        auto child = entry.child(name.c_str());
+        if (child) {
+            child.append_attribute(attrName.c_str()) = val.c_str();
+        } else {
+            entry.append_child(key.c_str()).append_attribute(attrName.c_str()) = val.c_str();
+        }
     } else {
         entry.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
     }
