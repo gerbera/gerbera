@@ -439,7 +439,11 @@ public:
     int getTrackNumber() const { return trackNumber; }
 
     /// \brief Sets the part number property
-    void setPartNumber(int partNumber) { this->partNumber = partNumber; }
+    void setPartNumber(int partNumber)
+    {
+        if (partNumber >= 0)
+            this->partNumber = partNumber;
+    }
 
     int getPartNumber() const { return partNumber; }
 

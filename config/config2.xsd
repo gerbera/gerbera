@@ -496,6 +496,7 @@
             <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
             <xs:attribute name="flags" type="xs:string" use="required"/>
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
+            <xs:attribute name="upnp-string-limit" default="-1"/>
         </xs:complexType>
     </xs:element>
 
@@ -531,6 +532,7 @@
                 <xs:element ref="common-script" minOccurs="0"/>
                 <xs:element ref="custom-script" minOccurs="0"/>
                 <xs:element ref="playlist-script" minOccurs="0"/>
+                <xs:element ref="metafile-script" minOccurs="0"/>
                 <xs:element ref="virtual-layout" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="script-charset" type="xs:string" default="UTF-8"/>
@@ -539,6 +541,7 @@
 
     <xs:element name="common-script" type="xs:string"/>
     <xs:element name="custom-script" type="xs:string"/>
+    <xs:element name="metafile-script" type="xs:string"/>
 
     <xs:element name="playlist-script">
         <xs:complexType>
@@ -799,6 +802,7 @@
                 <xs:element ref="container" minOccurs="0"/>
                 <xs:element ref="fanart" minOccurs="0"/>
                 <xs:element ref="subtitle" minOccurs="0"/>
+                <xs:element ref="metafile" minOccurs="0"/>
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
@@ -834,6 +838,15 @@
     </xs:element>
 
     <xs:element name="subtitle">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-file" minOccurs="0"/>
+                <xs:element ref="add-dir" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="metafile">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0"/>

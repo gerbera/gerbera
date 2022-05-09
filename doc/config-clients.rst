@@ -102,3 +102,13 @@ This section defines the client behaviour for one client.
     * Default: set by option server/upnp/caption-info-count
 
     Number of ``sec::CaptionInfoEx`` entries to write to UPnP result.
+
+    ::
+
+        upnp-string-limit="80"
+
+    * Optional
+
+    * Default: -1
+
+    Override the default ``upnp-string-limit`` of server.

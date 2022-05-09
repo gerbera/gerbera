@@ -1192,6 +1192,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT,
         "attribute::caption-info-count", "config-clients.html#caption-info-count",
         1, 0, ConfigIntSetup::CheckMinValue),
+    std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT,
+        "attribute::upnp-string-limit", "config-clients.html#upnp-string-limit",
+        DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
 
     // simpleOptions
 

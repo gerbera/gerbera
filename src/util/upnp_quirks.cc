@@ -220,3 +220,8 @@ int Quirks::getCaptionInfoCount() const
 {
     return pClientInfo ? pClientInfo->captionInfoCount : -1;
 }
+
+int Quirks::getStringLimit() const
+{
+    return pClientInfo ? pClientInfo->stringLimit : -1;
+}

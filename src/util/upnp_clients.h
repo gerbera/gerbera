@@ -77,6 +77,7 @@ struct ClientInfo {
     ClientMatchType matchType { ClientMatchType::None };
     std::string match;
     int captionInfoCount { 1 };
+    int stringLimit { -1 };
 };
 
 struct ClientCacheEntry {

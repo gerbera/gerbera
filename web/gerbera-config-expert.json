@@ -613,6 +613,11 @@
 					"editable": true
 				},
 				{
+					"item": "/import/scripting/metafile-script",
+					"caption": "Metafile Script",
+					"editable": true
+				},
+				{
 					"item": "/import/scripting/virtual-layout/import-script",
 					"caption": "Import Script",
 					"editable": true
@@ -1358,6 +1363,11 @@
 						{
 							"item": "/clients/client/attribute::caption-info-count",
 							"caption": "CaptionInfo count",
+							"editable": true
+						},
+						{
+							"item": "/clients/client/attribute::upnp-string-limit",
+							"caption": "UPnP Stringlimit",
 							"editable": true
 						}
 					]

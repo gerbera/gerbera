@@ -308,7 +308,7 @@ For more details read :ref:`scripting <scripting>`
 * Optional
 * Default: ``${prefix}/share/gerbera/js/playlists.js``, **where ${prefix} is your installation prefix directory.**
 
-Points to the script that is parsing various playlists, by default parsing of pls and m3u playlists is implemented,
+Points to the script that is parsing various playlists, by default parsing of pls, m3u and asx playlists is implemented,
 however the script can be adapted to parse almost any kind of text based playlist. For more details read :ref:`scripting <scripting>`
 
     ::
@@ -320,6 +320,22 @@ however the script can be adapted to parse almost any kind of text based playlis
 
     Links the playlist to the virtual container which contains the expanded playlist items. This means, that
     if the actual playlist file is removed from the database, the virtual container corresponding to the playlist will also be removed.
+
+
+``metafile-script``
+~~~~~~~~~~~~~~~~~
+
+::
+
+    <metafile-script>/path/to/my/metadata-script.js</metafile-script>
+
+* Optional
+* Default: ``${prefix}/share/gerbera/js/metadata.js``, **where ${prefix} is your installation prefix directory.**
+
+Points to the main metadata parsing script which is invoked during the first import phase to gather metadata from additional files.
+Currently support for nfo files is implemented. (https://kodi.wiki/view/NFO_files/Templates)
+
+The search pattern is set in resources section.
 
 
 ``magic-file``
@@ -619,13 +635,14 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         <container>...</container>
         <fanart>...</fanart>
         <subtitle>...</subtitle>
+        <metafile>...</metafile>
         <resource>...</resource>
 
     * Optional
 
     Define file patterns to search for fanart, subtitle and resources respectivly.
 
-    ``container``, ``fanart`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
+    ``container``, ``fanart``, ``metafile`` and ``subtitle`` patterns are used to identify external resources which are added to each item if the pattern matches.
 
     ``resource`` patterns are used to trigger rescan of the whole directory if such a file was changed, added or removed.
 

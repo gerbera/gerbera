@@ -90,7 +90,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
             "Invalid browse flag: " + browseFlag);
 
     auto parent = database->loadObject(quirks->getGroup(), objectID);
-    if (sortCriteria.empty() && (parent->getClass() == UPNP_CLASS_MUSIC_ALBUM || parent->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER))
+    auto upnpClass = parent->getClass();
+    if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
 
     if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
@@ -123,6 +124,10 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+
+    if (quirks->getStringLimit() > -1) {
+        stringLimit = quirks->getStringLimit();
+    }
 
     for (auto&& obj : arr) {
         markPlayedItem(obj, obj->getTitle());
@@ -191,6 +196,10 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     } catch (const std::runtime_error& e) {
         log_debug(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
+    }
+
+    if (quirks->getStringLimit() > -1) {
+        stringLimit = quirks->getStringLimit();
     }
 
     for (auto&& cdsObject : results) {
