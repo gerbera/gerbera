@@ -317,8 +317,8 @@ function addAudio(obj) {
     // in album view
 /*
     var track = '';
-    if (obj.metaData[M_TRACKNUMBER] && obj.metaData[M_TRACKNUMBER][0]) {
-        track = obj.metaData[M_TRACKNUMBER][0];
+    if (obj.trackNumber > 0) {
+        track = trackNumber;
         if (track.length == 1) {
             track = '0' + track;
         }
@@ -523,8 +523,9 @@ function addAudioStructured(obj) {
 
 /*
     var track = '';
-    if (obj.metaData[M_TRACKNUMBER] && obj.metaData[M_TRACKNUMBER][0]) {
-        if (track.length == 1)
+    if (obj.trackNumber > 0) {
+        track = '' + obj.trackNumber;
+        if (trackNumber < 10)
         {
             track = '0' + track;
         }
@@ -967,6 +968,13 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
 }
 // doc-playlist-m3u-parse-end
 
+function addMeta(obj, key, value) {
+    if (obj.metaData[key])
+        obj.metaData[key].push(value);
+    else
+        obj.metaData[key] = [ value ];
+}
+
 function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
     var entry = {
         title: null,
@@ -980,8 +988,8 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
         extra: [],
     };
     var base = null;
-    var node = readXml(-2);
     var playlistOrder = 1;
+    var node = readXml(-2);
     var level = 0;
     
     while (node || level > 0) {
@@ -1148,5 +1156,79 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
         var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
         if (playlistDirChain && state)
             addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+    }
+}
+
+function parseNfo(obj, nfo_file_name) {
+    var node = readXml(-2);
+    var level = 0;
+    var isActor = false;
+
+    while (node || level > 0) {
+        if (!node && level > 0) {
+            node = readXml(-1); // read parent
+            node = readXml(0); // read next
+            isActor = false;
+            level--;
+        } else if (node.NAME === "movie") {
+            node = readXml(1); // read children
+            obj.upnpclass = UPNP_CLASS_VIDEO_MOVIE;
+            level++;
+        } else if (node.NAME === "musicvideo") {
+            node = readXml(1); // read children
+            obj.upnpclass = UPNP_CLASS_VIDEO_MUSICVIDEOCLIP;
+            level++;
+        } else if (node.NAME === "tvshow") {
+            node = readXml(1); // read children
+            obj.upnpclass = UPNP_CLASS_VIDEO_BROADCAST;
+            level++;
+        } else if (node.NAME === "episodedetails") {
+            node = readXml(1); // read children
+            obj.upnpclass = UPNP_CLASS_VIDEO_BROADCAST;
+            level++;
+        } else if (node.NAME === "actor") {
+            node = readXml(1); // read children
+            isActor = true;
+            level++;
+        } else if (node.NAME == "title") {
+            obj.title = node.VALUE;
+            node = readXml(0); // read next
+        } else if (node.NAME == "plot") {
+            obj.description = node.VALUE;
+            node = readXml(0); // read next
+        } else if (node.NAME == "name" && isActor) {
+            addMeta(obj, M_ACTOR, node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "genre") {
+            addMeta(obj, M_GENRE, node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "premiered") {
+            addMeta(obj, M_DATE, node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "season") {
+            addMeta(obj, M_PARTNUMBER, node.VALUE);
+            obj.partNumber = node.VALUE;
+            node = readXml(0); // read next
+        } else if (node.NAME == "episode") {
+            addMeta(obj, "upnp:episodeNumber", node.VALUE);
+            obj.trackNumber = node.VALUE;
+            node = readXml(0); // read next
+        } else if (node.NAME == "mpaa") {
+            addMeta(obj, "upnp:rating", node.VALUE);
+            addMeta(obj, "upnp:rating@type", "MPAA.ORG");
+            addMeta(obj, "upnp:rating@equivalentAge", node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "country") {
+            addMeta(obj, M_REGION, node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "studio") {
+            addMeta(obj, M_PUBLISHER, node.VALUE);
+            node = readXml(0); // read next
+        } else if (node.NAME == "director") {
+            addMeta(obj, M_DIRECTOR, node.VALUE);
+            node = readXml(0); // read next
+        } else {
+            node = readXml(0); // read next
+        }
     }
 }

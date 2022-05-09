@@ -32,6 +32,7 @@
 #ifdef HAVE_JS
 #include "playlist_parser_script.h" // API
 
+#include "cds_objects.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
@@ -41,17 +42,18 @@
 
 #define ONE_TEXTLINE_BYTES 1024
 
-extern "C" {
-
-static duk_ret_t jsReadXml(duk_context* ctx)
+duk_ret_t jsReadXml(duk_context* ctx)
 {
-    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    auto self = dynamic_cast<ParserScript*>(Script::getContextScript(ctx));
     if (!self) {
+        log_error("readXml can only be called for ParserScript.");
         return 0;
     }
 
-    if (!duk_is_number(ctx, 0))
+    if (!duk_is_number(ctx, 0)) {
+        log_error("readXml must be called with integer argument.");
         return 0;
+    }
 
     int direction = duk_to_int(ctx, 0);
     duk_pop(ctx);
@@ -83,10 +85,11 @@ static duk_ret_t jsReadXml(duk_context* ctx)
     return 1;
 }
 
-static duk_ret_t jsReadln(duk_context* ctx)
+duk_ret_t jsReadln(duk_context* ctx)
 {
-    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    auto self = dynamic_cast<ParserScript*>(Script::getContextScript(ctx));
     if (!self) {
+        log_error("readln can only be called for ParserScript.");
         return 0;
     }
 
@@ -103,10 +106,11 @@ static duk_ret_t jsReadln(duk_context* ctx)
     }
 }
 
-static duk_ret_t jsGetCdsObject(duk_context* ctx)
+duk_ret_t jsGetCdsObject(duk_context* ctx)
 {
     auto self = dynamic_cast<ParserScript*>(Script::getContextScript(ctx));
     if (!self) {
+        log_error("getCdsObject can only be called for ParserScript.");
         return 0;
     }
 
@@ -139,13 +143,37 @@ static duk_ret_t jsGetCdsObject(duk_context* ctx)
     return 1;
 }
 
-} // extern "C"
+duk_ret_t jsUpdateCdsObject(duk_context* ctx)
+{
+    auto self = dynamic_cast<MetafileParserScript*>(Script::getContextScript(ctx));
+    if (!self) {
+        log_error("updateCdsObject can only be called for MetafileParserScript.");
+        return 0;
+    }
+
+    if (self->getOrigName().empty())
+        duk_push_undefined(ctx);
+    else
+        duk_get_global_string(ctx, self->getOrigName().c_str());
+    // stack: js_cds_obj
+
+    if (duk_is_undefined(ctx, -1)) {
+        log_debug("Could not retrieve global {} object", self->getOrigName());
+        return 0;
+    }
+    auto origObject = self->dukObject2cdsObject(self->getProcessedObject());
+    if (!origObject) {
+        log_debug("Could not load global {} object", self->getOrigName());
+        return 0;
+    }
+    return 1;
+}
 
 ParserScript::ParserScript(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime)
-    : Script(content, runtime, "playlist", "playlist", StringConverter::p2i(content->getContext()->getConfig()))
+    const std::shared_ptr<ScriptingRuntime>& runtime,
+    const std::string& name, const std::string& objName)
+    : Script(content, runtime, name, objName, StringConverter::p2i(content->getContext()->getConfig()))
 {
-    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     defineFunction("readln", jsReadln, 0);
     defineFunction("readXml", jsReadXml, 1);
     defineFunction("getCdsObject", jsGetCdsObject, 1);
@@ -199,9 +227,10 @@ std::pair<std::string, bool> ParserScript::readLine()
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : ParserScript(content, runtime)
+    : ParserScript(content, runtime, "playlist", "playlist")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     load(scriptPath);
 }
 
@@ -364,9 +393,11 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
 MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content,
     const std::shared_ptr<ScriptingRuntime>& runtime)
-    : ParserScript(content, runtime)
+    : ParserScript(content, runtime, "metafile", "obj")
 {
-    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
+    defineFunction("updateCdsObject", jsUpdateCdsObject, 0);
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     load(scriptPath);
 }
 
@@ -383,16 +414,13 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     log_debug("Checking metafile {} for {}...", path.string(), obj->getLocation().string());
     GrbFile file(path);
-    bool isXmlFile = true;
-    if (!isXmlFile) {
-        currentHandle = file.open("r");
-    } else {
-        pugi::xml_parse_result result = xmlDoc->load_file(path.c_str());
-        if (result.status != pugi::xml_parse_status::status_ok) {
-            throw ConfigParseException(result.description());
-        }
+    pugi::xml_parse_result result = xmlDoc->load_file(path.c_str());
+    if (result.status == pugi::xml_parse_status::status_ok) {
         root = xmlDoc->document_element();
     }
+    currentHandle = file.open("r");
+    processed = obj;
+
     currentObjectID = item->getID();
     currentLine = new char[ONE_TEXTLINE_BYTES];
     currentLine[0] = '\0';
@@ -434,37 +462,6 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
 std::pair<std::shared_ptr<CdsObject>, int> MetafileParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath)
 {
-    int otype = getIntProperty("objectType", -1);
-    if (otype == -1) {
-        log_error("missing objectType property");
-        return { {}, INVALID_OBJECT_ID };
-    }
-
-    if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
-        fs::path loc = getProperty("location");
-        std::error_code ec;
-        auto dirEnt = fs::directory_entry(loc, ec);
-        if (!ec) {
-            AutoScanSetting asSetting;
-            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-            asSetting.recursive = false;
-            asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
-            asSetting.rescanResource = false;
-            asSetting.mergeOptions(config, loc);
-
-            int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
-            if (pcdId == INVALID_OBJECT_ID) {
-                log_error("Failed to add object {}", dirEnt.path().string());
-                return { {}, INVALID_OBJECT_ID };
-            }
-            auto mainObj = database->loadObject(pcdId);
-            return { dukObject2cdsObject(mainObj), pcdId };
-        } else {
-            log_error("Failed to read {}: {}", loc.c_str(), ec.message());
-        }
-    } else {
-        return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
-    }
     return { {}, INVALID_OBJECT_ID };
 }
 
@@ -476,4 +473,29 @@ bool MetafileParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
     }
     return true;
 }
+
+void MetafileParserScript::handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item)
+{
+    item->setTrackNumber(getIntProperty("trackNumber", 0));
+    item->setPartNumber(getIntProperty("partNumber", 0));
+}
+
+std::shared_ptr<CdsObject> MetafileParserScript::createObject(const std::shared_ptr<CdsObject>& pcd)
+{
+    duk_get_prop_string(ctx, -1, "aux");
+    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+        duk_to_object(ctx, -1);
+        auto keys = getPropertyNames();
+        for (auto&& sym : keys) {
+            auto val = getProperty(sym);
+            if (!val.empty()) {
+                val = sc->convert(val);
+                pcd->setAuxData(sym, val);
+            }
+        }
+    }
+    duk_pop(ctx); // aux
+    return pcd;
+}
+
 #endif // HAVE_JS

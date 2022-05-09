@@ -456,10 +456,8 @@ void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::share
     }
 }
 
-std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
+std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>& pcd)
 {
-    std::string val;
-
     int objType = getIntProperty("objectType", -1);
     if (objType == -1) {
         log_error("missing objectType property");
@@ -482,11 +480,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setParentID(id);
     }
 
-    int mtime = getIntProperty("mtime", 0);
-    if (mtime > 0) {
-        obj->setMTime(std::chrono::seconds(mtime));
-    }
-
     duk_get_prop_string(ctx, -1, "parent");
     if (duk_is_object(ctx, -1)) {
         duk_to_object(ctx, -1);
@@ -497,44 +490,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
     duk_pop(ctx);
-
-    val = getProperty("title");
-    if (!val.empty()) {
-        val = sc->convert(val);
-        obj->setTitle(val);
-    } else {
-        if (pcd)
-            obj->setTitle(pcd->getTitle());
-    }
-
-    val = getProperty("upnpclass");
-    if (!val.empty()) {
-        val = sc->convert(val);
-        obj->setClass(val);
-    } else {
-        if (pcd)
-            obj->setClass(pcd->getClass());
-    }
-
-    int restricted = getBoolProperty("restricted");
-    if (restricted >= 0)
-        obj->setRestricted(restricted);
-
-    duk_get_prop_string(ctx, -1, "metaData");
-    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-        duk_to_object(ctx, -1);
-        auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto keys = getPropertyNames();
-        for (auto&& sym : keys) {
-            auto arrayVal = getArrayProperty(sym);
-            for (auto&& val : arrayVal) {
-                if (!val.empty()) {
-                    setMetaData(obj, item, sym, val);
-                }
-            }
-        }
-    }
-    duk_pop(ctx); // metaData
 
     // stuff that has not been exported to js
     if (pcd) {
@@ -567,7 +522,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             for (auto&& res : obj->getResources()) {
                 // only attribute enumerated in res_keys is allowed
                 for (auto&& [key, upnp] : res_names) {
-                    val = getProperty(resCount == 0 ? upnp.data() : fmt::format("{}-{}", resCount, upnp));
+                    auto val = getProperty(resCount == 0 ? upnp.data() : fmt::format("{}-{}", resCount, upnp));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
@@ -577,7 +532,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
-                        val = getProperty(sym);
+                        auto val = getProperty(sym);
                         res->addParameter(key, val);
                     }
                 }
@@ -585,7 +540,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
-                        val = getProperty(sym);
+                        auto val = getProperty(sym);
                         res->addOption(key, val);
                     }
                 }
@@ -599,7 +554,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             duk_to_object(ctx, -1);
             auto keys = getPropertyNames();
             for (auto&& sym : keys) {
-                val = getProperty(sym);
+                auto val = getProperty(sym);
                 if (!val.empty()) {
                     val = sc->convert(val);
                     obj->setAuxData(sym, val);
@@ -608,6 +563,57 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
         duk_pop(ctx); // aux
     }
+    return obj;
+}
+
+std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
+{
+    auto obj = createObject(pcd);
+
+    int mtime = getIntProperty("mtime", 0);
+    if (mtime > 0) {
+        obj->setMTime(std::chrono::seconds(mtime));
+    }
+
+    {
+        auto val = getProperty("title");
+        if (!val.empty()) {
+            val = sc->convert(val);
+            obj->setTitle(val);
+        } else if (pcd) {
+            obj->setTitle(pcd->getTitle());
+        }
+    }
+
+    {
+        auto val = getProperty("upnpclass");
+        if (!val.empty()) {
+            val = sc->convert(val);
+            obj->setClass(val);
+        } else if (pcd) {
+            obj->setClass(pcd->getClass());
+        }
+    }
+
+    int restricted = getBoolProperty("restricted");
+    if (restricted >= 0)
+        obj->setRestricted(restricted);
+
+    duk_get_prop_string(ctx, -1, "metaData");
+    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
+        duk_to_object(ctx, -1);
+        auto item = std::static_pointer_cast<CdsItem>(obj);
+        auto keys = getPropertyNames();
+        for (auto&& sym : keys) {
+            auto arrayVal = getArrayProperty(sym);
+            for (auto&& val : arrayVal) {
+                if (!val.empty()) {
+                    setMetaData(obj, item, sym, val);
+                }
+            }
+        }
+    }
+    duk_pop(ctx); // metaData
 
     // CdsItem
     if (obj->isItem()) {
@@ -617,30 +623,33 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (pcd)
             pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
-        val = getProperty("mimetype");
-        if (!val.empty()) {
-            val = sc->convert(val);
-            item->setMimeType(val);
-        } else {
-            if (pcd)
+        {
+            auto val = getProperty("mimetype");
+            if (!val.empty()) {
+                val = sc->convert(val);
+                item->setMimeType(val);
+            } else if (pcdItem) {
                 item->setMimeType(pcdItem->getMimeType());
+            }
         }
 
-        val = getProperty("serviceID");
-        if (!val.empty()) {
-            val = sc->convert(val);
-            item->setServiceID(val);
+        {
+            auto val = getProperty("serviceID");
+            if (!val.empty()) {
+                val = sc->convert(val);
+                item->setServiceID(val);
+            }
         }
 
-        /// copy value from extra description property
-        /// in the mt_keys loop?
-        val = getProperty("description");
-        if (!val.empty()) {
-            val = sc->convert(val);
-            item->removeMetaData(M_DESCRIPTION);
-            item->addMetaData(M_DESCRIPTION, val);
-        } else if (pcd && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
-            item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
+        {
+            auto val = getProperty("description");
+            if (!val.empty()) {
+                val = sc->convert(val);
+                item->removeMetaData(M_DESCRIPTION);
+                item->addMetaData(M_DESCRIPTION, val);
+            } else if (pcdItem && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
+                item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
+            }
         }
         handleObject2cdsItem(ctx, pcd, item);
 
@@ -657,12 +666,14 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             std::string protocolInfo;
 
             obj->setRestricted(true);
-            val = getProperty("protocol");
-            if (!val.empty()) {
-                val = sc->convert(val);
-                protocolInfo = renderProtocolInfo(item->getMimeType(), val);
-            } else {
-                protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
+            {
+                auto val = getProperty("protocol");
+                if (!val.empty()) {
+                    val = sc->convert(val);
+                    protocolInfo = renderProtocolInfo(item->getMimeType(), val);
+                } else {
+                    protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
+                }
             }
 
             std::shared_ptr<CdsResource> resource;
@@ -684,7 +695,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         handleObject2cdsContainer(ctx, pcd, cont);
-        id = getIntProperty("updateID", -1);
+        auto id = getIntProperty("updateID", -1);
         if (id >= 0)
             cont->setUpdateID(id);
 
@@ -844,6 +855,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
     // CdsItem
     if (obj->isItem() && item) {
+        setIntProperty("trackNumber", int(item->getTrackNumber()));
+        setIntProperty("partNumber", int(item->getPartNumber()));
         val = item->getMimeType();
         if (!val.empty())
             setProperty("mimetype", val);

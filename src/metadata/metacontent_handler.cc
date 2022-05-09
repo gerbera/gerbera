@@ -230,8 +230,8 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         obj->removeResource(ContentHandler::CONTAINERART);
 
     for (auto&& path : pathList) {
-        log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
         if (!path.empty()) {
+            log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
             auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
             std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
@@ -281,8 +281,8 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         obj->removeResource(ContentHandler::SUBTITLE);
 
     for (auto&& path : pathList) {
-        log_debug("Running subtitle handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
         if (!path.empty()) {
+            log_debug("Running subtitle handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
             auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
             std::string type = path.extension().string().substr(1);
 
@@ -343,8 +343,8 @@ void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         obj->removeResource(ContentHandler::METAFILE);
 
     for (auto&& path : pathList) {
-        log_info("Running metdafile handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
         if (!path.empty()) {
+            log_debug("Running metafile handler on {} -> '{}'", obj->getLocation().c_str(), path.c_str());
             content->parseMetafile(obj, path);
         }
     }
@@ -374,9 +374,8 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         obj->removeResource(ContentHandler::RESOURCE);
 
     for (auto&& path : pathList) {
-        log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
-
         if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
+            log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
             auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, CdsResource::Purpose::Thumbnail);
             resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("res"));
             resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());

@@ -34,6 +34,7 @@ public:
             grbJs / "common.js",
             grbJs / "import.js",
             grbJs / "playlists.js",
+            grbJs / "metadata.js",
             gerberaDir / "sqlite3.sql",
             gerberaDir / "sqlite3-upgrade.xml",
             gerberaDir / "mysql.sql",

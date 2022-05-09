@@ -311,6 +311,10 @@ void ConfigManager::load(const fs::path& userHome)
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
     co->makeOption(root, self);
 
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
+    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_METAFILE_SCRIPT);
+    co->makeOption(root, self);
+
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     co->makeOption(root, self);
