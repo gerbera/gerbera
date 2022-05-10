@@ -77,7 +77,7 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit);
+    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit, bool multiValue);
 
     const ClientInfo& getClientInfo() const { return clientInfo; }
 
@@ -94,6 +94,12 @@ public:
     void setStringLimit(int stringLimit)
     {
         this->clientInfo.stringLimit = stringLimit;
+    }
+
+    bool getMultiValue() const { return this->clientInfo.multiValue; }
+    void setMultiValue(bool multiValue)
+    {
+        this->clientInfo.multiValue = multiValue;
     }
 
     std::string getIp() const { return (this->clientInfo.matchType == ClientMatchType::IP) ? this->clientInfo.match : ""; }

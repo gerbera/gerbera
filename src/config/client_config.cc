@@ -31,7 +31,7 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
-ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit)
+ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit, bool multiValue)
 {
     clientInfo.type = ClientType::Unknown;
     if (!ip.empty()) {
@@ -47,6 +47,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientInfo.flags = flags;
     clientInfo.captionInfoCount = captionInfoCount;
     clientInfo.stringLimit = stringLimit;
+    clientInfo.multiValue = multiValue;
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
     clientInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);

@@ -155,17 +155,20 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(upnpClass.c_str());
 
     auto auxData = obj->getAuxData();
+    auto mvMeta = multiValue;
 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
-        if (quirks)
+        if (quirks) {
             quirks->restoreSamsungBookMarkedPosition(item, result);
+            mvMeta = quirks->getMultiValue();
+        }
 
         auto metaGroups = obj->getMetaGroups();
 
         for (auto&& [key, group] : metaGroups) {
-            if (multiValue) {
+            if (mvMeta) {
                 for (auto&& val : group) {
                     // Trim metadata value as needed
                     auto str = limitString(val);

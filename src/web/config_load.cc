@@ -203,6 +203,14 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ATTR_CLIENTS_UPNP_CAPTION_COUNT, cs);
         setValue(item, client->getCaptionInfoCount());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_STRING_LIMIT), cs->option, ATTR_CLIENTS_UPNP_STRING_LIMIT, cs);
+        setValue(item, client->getStringLimit());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_MULTI_VALUE), cs->option, ATTR_CLIENTS_UPNP_MULTI_VALUE, cs);
+        setValue(item, client->getMultiValue());
     }
     if (clientConfig->size() == 0) {
         auto item = values.append_child("item");
@@ -219,6 +227,12 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ATTR_CLIENTS_UPNP_CAPTION_COUNT, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_CAPTION_COUNT));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_UPNP_STRING_LIMIT), cs->option, ATTR_CLIENTS_UPNP_STRING_LIMIT, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_STRING_LIMIT));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_UPNP_MULTI_VALUE), cs->option, ATTR_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_MULTI_VALUE));
     }
 
     // write import tweaks

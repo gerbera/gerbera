@@ -225,6 +225,10 @@ void ConfigManager::load(const fs::path& userHome)
                                 "under <items-per-page> must match the "
                                 "<items-per-page default=\"\" /> attribute");
 
+    bool multiValue = setOption(root, CFG_UPNP_MULTI_VALUES_ENABLED)->getBoolOption();
+    co = ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_MULTI_VALUE);
+    co->setDefaultValue(multiValue ? YES : NO);
+
     bool clEn = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
     args["isEnabled"] = clEn ? "true" : "false";
     setOption(root, CFG_CLIENTS_LIST, &args);

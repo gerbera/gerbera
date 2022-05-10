@@ -1195,6 +1195,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT,
         "attribute::upnp-string-limit", "config-clients.html#upnp-string-limit",
         DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
+    std::make_shared<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE,
+        "attribute::multi-value", "config-clients.html#multi-value",
+        YES),
 
     // simpleOptions
 

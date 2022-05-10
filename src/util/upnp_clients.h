@@ -78,6 +78,7 @@ struct ClientInfo {
     std::string match;
     int captionInfoCount { 1 };
     int stringLimit { -1 };
+    bool multiValue { true };
 };
 
 struct ClientCacheEntry {

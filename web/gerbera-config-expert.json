@@ -583,6 +583,11 @@
 							"editable": true
 						},
 						{
+							"item": "/import/directories/tweak/attribute::metadata-file",
+							"caption": "Metadata Resource Pattern",
+							"editable": true
+						},
+						{
 							"item": "/import/directories/tweak/attribute::resource-file",
 							"caption": "Directory Resource Pattern",
 							"editable": true
@@ -845,6 +850,37 @@
 						},
 						{
 							"item": "/import/resources/subtitle/add-dir/attribute::ext",
+							"caption": "File Extension",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/resources/metafile/add-file",
+					"caption": "Metadata Files",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/metafile/add-file/attribute::name",
+							"caption": "File Name",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/resources/metafile/add-dir",
+					"caption": "Metadata Directory Patterns",
+					"type": "List",
+					"editable": true,
+					"children": [
+						{
+							"item": "/import/resources/metafile/add-dir/attribute::name",
+							"caption": "Directory Name",
+							"editable": true
+						},
+						{
+							"item": "/import/resources/metafile/add-dir/attribute::ext",
 							"caption": "File Extension",
 							"editable": true
 						}
@@ -1368,6 +1404,11 @@
 						{
 							"item": "/clients/client/attribute::upnp-string-limit",
 							"caption": "UPnP Stringlimit",
+							"editable": true
+						},
+						{
+							"item": "/clients/client/attribute::multi-value",
+							"caption": "Multi-Value Metadata",
 							"editable": true
 						}
 					]
