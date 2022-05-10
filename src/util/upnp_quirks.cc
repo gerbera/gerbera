@@ -225,3 +225,8 @@ int Quirks::getStringLimit() const
 {
     return pClientInfo ? pClientInfo->stringLimit : -1;
 }
+
+bool Quirks::getMultiValue() const
+{
+    return pClientInfo ? pClientInfo->multiValue : true;
+}

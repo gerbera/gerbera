@@ -459,6 +459,11 @@
 							"editable": true
 						},
 						{
+							"item": "/import/directories/tweak/attribute::metadata-file",
+							"caption": "Metadata Resource Pattern",
+							"editable": true
+						},
+						{
 							"item": "/import/directories/tweak/attribute::resource-file",
 							"caption": "Directory Resource Pattern",
 							"editable": true
@@ -573,6 +578,19 @@
 					"children": [
 						{
 							"item": "/import/resources/subtitle/add-file/attribute::name",
+							"caption": "File Name",
+							"editable": true
+						}
+					]
+				},
+				{
+					"item": "/import/resources/metafile/add-file",
+					"caption": "Metadata Files",
+					"type": "List",
+					"editable": false,
+					"children": [
+						{
+							"item": "/import/resources/metafile/add-file/attribute::name",
 							"caption": "File Name",
 							"editable": true
 						}

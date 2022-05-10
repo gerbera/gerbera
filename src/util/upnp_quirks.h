@@ -140,6 +140,13 @@ public:
      */
     int getStringLimit() const;
 
+    /** \brief Get multi value upnp properties
+     *
+     * \return true if multi-value is enabled for client
+     *
+     */
+    bool getMultiValue() const;
+
     /** \brief Get group for ClientStatusDetail
      *
      * \return group for ClientStatusDetail

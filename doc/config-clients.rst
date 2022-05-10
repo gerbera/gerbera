@@ -112,3 +112,13 @@ This section defines the client behaviour for one client.
     * Default: -1
 
     Override the default ``upnp-string-limit`` of server.
+
+    ::
+
+        multi-value="no"
+
+    * Optional
+
+    * Default: the same as the current value of ``server/upnp/multi-value`` (defaults to **yes**)
+
+    Override the default ``server/upnp/multi-value`` of server.

@@ -15,7 +15,7 @@
 #include "mock/script_test_fixture.h"
 
 // Extends ScriptTestFixture to allow
-// for unique testing of the External URL Playlist
+// for unique testing of the External Metafile
 // processing
 class MetafileNfoTest : public ScriptTestFixture {
 public:
