@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<movie>
+    <title>This is Gerbera</title>
+    <originaltitle>It was MediaTomb</originaltitle>
+    <sorttitle>Gerbera</sorttitle>
+    <userrating>0</userrating>
+    <plot>UPnP Media Server for 2022</plot>
+    <mpaa>NONE</mpaa>
+    <genre>Mediaplayer</genre>
+    <country>Github</country>
+    <credits>Mediatomb team</credits>
+    <director>Gerbera Team</director>
+    <premiered>2005-01-04</premiered>
+    <year>2005</year>
+    <studio>Gerbera Home</studio>
+    <fileinfo>
+        <streamdetails>
+            <video>
+                <codec>hevc</codec>
+                <aspect>1.777778</aspect>
+                <width>1920</width>
+                <height>1080</height>
+                <durationinseconds>14528</durationinseconds>
+                <stereomode></stereomode>
+            </video>
+            <audio>
+                <codec>ac3</codec>
+                <language>eng</language>
+                <channels>6</channels>
+            </audio>
+            <audio>
+                <codec>ac3</codec>
+                <language>fre</language>
+                <channels>6</channels>
+            </audio>
+            <subtitle>
+                <language>eng</language>
+            </subtitle>
+        </streamdetails>
+    </fileinfo>
+    <actor>
+        <name>Ian Whyman</name>
+        <role>Developer</role>
+    </actor>
+    <actor>
+        <name>Karl Straussberger</name>
+        <role>Developer</role>
+    </actor>
+</movie>

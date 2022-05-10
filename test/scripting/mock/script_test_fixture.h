@@ -61,6 +61,9 @@ public:
     // Load playlist file from fixtures
     static void mockPlaylistFile(const std::string& mockFile);
 
+    // Creates a mock metafile global object in Duktape context
+    static duk_ret_t dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName);
+
     // Creates a mock playlist global object in Duktape context
     static duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
 
