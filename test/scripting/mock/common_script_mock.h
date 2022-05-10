@@ -19,6 +19,7 @@ public:
     virtual duk_ret_t readln(std::string line) = 0;
     virtual duk_ret_t readXml(std::string line) = 0;
     virtual duk_ret_t addCdsObject(std::map<std::string, std::string> item, std::string containerChain, std::string objectType) = 0;
+    virtual duk_ret_t updateCdsObject(std::map<std::string, std::string> result) = 0;
     virtual duk_ret_t copyObject(bool isObject) = 0;
     virtual duk_ret_t getCdsObject(std::string location) = 0;
     virtual duk_ret_t getYear(std::string year) = 0;
@@ -34,6 +35,7 @@ public:
     MOCK_METHOD1(createContainerChain, duk_ret_t(std::vector<std::string> chain));
     MOCK_METHOD1(getLastPath, duk_ret_t(std::string path));
     MOCK_METHOD1(readln, duk_ret_t(std::string line));
+    MOCK_METHOD1(updateCdsObject, duk_ret_t(std::map<std::string, std::string> result));
     MOCK_METHOD1(readXml, duk_ret_t(std::string line));
     MOCK_METHOD3(addCdsObject, duk_ret_t(std::map<std::string, std::string> item, std::string containerChain, std::string objectType));
     MOCK_METHOD1(copyObject, duk_ret_t(bool isObject));

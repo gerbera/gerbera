@@ -150,6 +150,40 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string
     return 0;
 }
 
+duk_ret_t ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName)
+{
+    const std::string objectName = "obj";
+    duk_push_object(ctx);
+    duk_push_string(ctx, location.c_str());
+    duk_put_prop_string(ctx, -2, "location");
+    duk_push_string(ctx, fmt::to_string(10).c_str());
+    duk_put_prop_string(ctx, -2, "trackNumber");
+    duk_push_string(ctx, fmt::to_string(0).c_str());
+    duk_put_prop_string(ctx, -2, "partNumber");
+    // setting metadata
+    {
+        duk_push_object(ctx);
+        auto dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, fmt::to_string(10).c_str());
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_TRACKNUMBER).c_str());
+        dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, fmt::to_string(0).c_str());
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_PARTNUMBER).c_str());
+        dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, "done");
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, "upnp:none");
+        duk_put_prop_string(ctx, -2, "metaData");
+    }
+    duk_put_global_string(ctx, objectName.c_str());
+
+    duk_push_string(ctx, fileName.c_str());
+    duk_put_global_string(ctx, "object_script_path");
+    return 0;
+}
+
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
 {
 

@@ -14,6 +14,7 @@ add_executable(testscripting
     test_internal_m3u_playlist.cc
     test_internal_m3u8_playlist.cc
     test_internal_pls_playlist.cc
+    test_nfo_metafile.cc
     test_runtime.cc
 )
 
@@ -24,7 +25,7 @@ target_link_libraries(testscripting PRIVATE
 add_custom_command(TARGET testscripting POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
     DEPENDS fixtures/*
-    COMMENT "Copying Playlist Fixtures"
+    COMMENT "Copying Scripting Fixtures"
 )
 target_compile_definitions(testscripting PRIVATE SCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
 

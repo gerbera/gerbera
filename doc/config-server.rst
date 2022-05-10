@@ -707,11 +707,11 @@ This section defines the properties which are send to UPnP clients as part of th
 
         ::
 
-            multi-value="yes"
+            multi-value="no"
 
         * Optional
 
-        * Default: **no**
+        * Default: **yes**
 
         Enables sending multi-valued metadata in separate items. If set to **no** all values are concatenated by CFG_IMPORT_LIBOPTS_ENTRY_SEP. Otherwise each item is added separately.
 
