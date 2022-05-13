@@ -40,7 +40,7 @@ jobs:
       - name: Build
         run: |
           cmake -S . -B build -G Ninja --preset=minimal
-          cmake --build build -j$(nproc)
+          cmake --build build -j$(nproc) --verbose
 
       - name: Test
         run: |
