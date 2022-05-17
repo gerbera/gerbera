@@ -888,8 +888,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
+            auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
-                param.getStartingIndex(), param.getRequestedCount() == 0 ? 1000 : param.getRequestedCount(), false, param.getGroup()); // get params from browse
+                param.getStartingIndex(), reqCount, false, param.getGroup()); // get params from browse
             int numMatches = 0;
             auto result = this->search(srcParam, &numMatches);
             param.setTotalMatches(numMatches);

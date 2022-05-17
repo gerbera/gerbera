@@ -103,6 +103,9 @@ public:
     void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
 
+    void setMaxCount(int maxCount) { this->maxCount = maxCount; }
+    int getMaxCount() const { return maxCount; }
+
 private:
     /// \brief virtual tree location
     fs::path location { "/Auto" };
@@ -115,6 +118,9 @@ private:
 
     /// \brief sort criteria
     std::string sort;
+
+    /// \brief maximum request count
+    int maxCount;
 
     /// \brief folder image
     fs::path image;
