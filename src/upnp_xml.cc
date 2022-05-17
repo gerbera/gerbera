@@ -508,9 +508,9 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     }
 
     if (!location.empty() && location.has_extension()) {
-        std::string extension = location.filename().extension();
+        std::string extension = urlEscape(location.filename().extension().string());
         if (!language.empty())
-            return fmt::format("{}.{}{}", urlExt, language, extension);
+            return fmt::format("{}.{}{}", urlExt, urlEscape(language), extension);
         return fmt::format("{}{}", urlExt, extension);
     }
 

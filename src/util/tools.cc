@@ -110,7 +110,13 @@ int stoiString(const std::string& str, int def, int base)
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
 
-    return std::stoi(str, nullptr, base);
+    try {
+        std::size_t pos;
+        return std::stoi(str, &pos, base);
+    } catch (const std::exception& ex) {
+        log_error("{} (input {})", ex.what(), str);
+    }
+    return def;
 }
 
 unsigned long stoulString(const std::string& str, int def, int base)
@@ -118,7 +124,13 @@ unsigned long stoulString(const std::string& str, int def, int base)
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
 
-    return std::stoul(str, nullptr, base);
+    try {
+        std::size_t pos;
+        return std::stoul(str, &pos, base);
+    } catch (const std::exception& ex) {
+        log_error("{} (input {})", ex.what(), str);
+    }
+    return def;
 }
 
 void reduceString(std::string& str, char ch)
@@ -252,7 +264,7 @@ std::string urlEscape(std::string_view str)
         if ((i + cplen) > str.length())
             cplen = 1;
 
-        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-') {
+        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.') {
             buf << char(c);
         } else {
             int hi = c >> 4;
