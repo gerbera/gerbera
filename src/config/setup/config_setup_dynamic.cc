@@ -60,6 +60,10 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
             cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_FILTER);
             cont->setFilter(cs->getXmlContent(child));
         }
+        {
+            auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_DYNAMIC_CONTAINER_MAXCOUNT);
+            cont->setMaxCount(cs->getXmlContent(child));
+        }
         try {
             result->add(cont);
         } catch (const std::runtime_error& e) {
@@ -132,6 +136,14 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getSort());
             return true;
         }
+    }
+    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_MAXCOUNT);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getMaxCount());
+        entry->setMaxCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_DYNAMIC_CONTAINER_MAXCOUNT)->checkIntValue(optValue));
+        log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getMaxCount());
+        return true;
     }
 
     return false;

@@ -1189,6 +1189,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT,
         "attribute::sort", "config-server.html#sort",
         ""),
+    std::make_shared<ConfigIntSetup>(ATTR_DYNAMIC_CONTAINER_MAXCOUNT,
+        "attribute::max-count", "config-server.html#max-count",
+        500, 0, ConfigIntSetup::CheckMinValue),
+
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT,
         "attribute::caption-info-count", "config-clients.html#caption-info-count",
         1, 0, ConfigIntSetup::CheckMinValue),

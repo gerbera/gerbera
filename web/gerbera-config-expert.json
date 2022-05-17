@@ -334,6 +334,11 @@
 							"item": "/server/containers/container/attribute::sort",
 							"caption": "Sort",
 							"editable": true
+						},
+						{
+							"item": "/server/containers/container/attribute::max-count",
+							"caption": "Maximum Result Count",
+							"editable": true
 						}
 					]
 				}]

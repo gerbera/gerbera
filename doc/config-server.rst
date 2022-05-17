@@ -970,7 +970,7 @@ This section sets the rules for additional containers which have calculated cont
     ::
 
 
-        <container location="/New" title="Recently added" sort="-last_updated">
+        <container location="/New" title="Recently added" sort="-last_updated" max-count="500">
             <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
         </container>
 
@@ -1012,6 +1012,15 @@ This section sets the rules for additional containers which have calculated cont
         * Optional
 
         UPnP sort statement to use as sorting criteria for the container.
+
+        ::
+
+            max-count="200"
+
+        * Optional
+
+        Limit the number of item in dynamic container.
+        * Default: 500
 
         ::
 

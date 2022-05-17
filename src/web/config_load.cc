@@ -311,6 +311,10 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_DYNAMIC_CONTAINER_SORT), cs->option, ATTR_DYNAMIC_CONTAINER_SORT);
         setValue(item, cont->getSort());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ATTR_DYNAMIC_CONTAINER_MAXCOUNT);
+        setValue(item, cont->getMaxCount());
     }
     if (dynContent->size() == 0) {
         auto item = values.append_child("item");
@@ -327,6 +331,9 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_SORT), cs->option, ATTR_DYNAMIC_CONTAINER_SORT, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_SORT));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ATTR_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_MAXCOUNT));
     }
 
     // write transconding configuration
