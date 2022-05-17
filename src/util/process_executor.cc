@@ -70,7 +70,8 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
             log_debug("setenv: {}='{}'", eName, eValue);
         }
         log_debug("Launching process: {} {}", command, fmt::join(arglist, " "));
-        execvp(command.c_str(), const_cast<char**>(argv.data()));
+        if (execvp(command.c_str(), const_cast<char**>(argv.data())))
+            log_error("Failed to execvp {} {}", command, fmt::join(arglist, " "));
         break;
     default:
         break;

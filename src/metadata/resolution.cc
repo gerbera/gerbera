@@ -33,7 +33,7 @@ Resolution::Resolution(const std::string& string)
 
     if (!parts[0].empty()) {
         auto x = stoulString(trimString(parts[0]));
-        if (x == 0 || x == std::numeric_limits<unsigned int>::max()) {
+        if (x == 0 || x == std::numeric_limits<uint64_t>::max()) {
             throw_std_runtime_error("Failed to parse '{}' to valid resolution", string);
         }
         _x = x;
@@ -41,7 +41,7 @@ Resolution::Resolution(const std::string& string)
 
     if (!parts[1].empty()) {
         auto y = stoulString(trimString(parts[1]));
-        if (y == 0 || y == std::numeric_limits<unsigned int>::max()) {
+        if (y == 0 || y == std::numeric_limits<uint64_t>::max()) {
             throw_std_runtime_error("Failed to parse '{}' to valid resolution", string);
         }
         _y = y;

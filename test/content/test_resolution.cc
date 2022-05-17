@@ -3,10 +3,10 @@
 #include "metadata//resolution.h"
 
 TEST(ResolutionTest, parse) {
-    auto res = Resolution("122586668x54589448448485");
+    auto res = Resolution("122586668x448448485");
 
     EXPECT_EQ(res.x(), 122586668);
-    EXPECT_EQ(res.y(), 54589448448485);
+    EXPECT_EQ(res.y(), 448448485);
 }
 
 TEST(ResolutionTest, parseWithSpace) {
