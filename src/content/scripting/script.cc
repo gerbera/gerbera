@@ -435,7 +435,7 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
     duk_pop(ctx);
 }
 
-void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string val)
+void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val)
 {
     if (sym == MetadataHandler::getMetaFieldName(M_TRACKNUMBER) && item) {
         int j = stoiString(val, 0);

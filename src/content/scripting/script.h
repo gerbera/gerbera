@@ -82,7 +82,7 @@ public:
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
 
     std::string convertToCharset(const std::string& str, charset_convert_t chr);
-    virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) = 0;
+    virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) = 0;
     virtual bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) = 0;
     static Script* getContextScript(duk_context* ctx);
 
@@ -99,7 +99,7 @@ protected:
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
     void cleanup();
     int gc_counter {};
-    void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string val);
+    void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val);
 
     virtual void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) { }
     virtual void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) { }

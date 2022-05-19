@@ -234,7 +234,7 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>
     load(scriptPath);
 }
 
-std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath)
+std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)
 {
     int otype = getIntProperty("objectType", -1);
     if (otype == -1) {
@@ -459,7 +459,7 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
     }
 }
 
-std::pair<std::shared_ptr<CdsObject>, int> MetafileParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath)
+std::pair<std::shared_ptr<CdsObject>, int> MetafileParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)
 {
     return { {}, INVALID_OBJECT_ID };
 }
