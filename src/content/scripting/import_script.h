@@ -47,7 +47,7 @@ public:
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath);
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
-    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string rootPath) override
+    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override
     {
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
     }
