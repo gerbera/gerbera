@@ -125,7 +125,7 @@ struct inotify_event* Inotify::nextEvent()
     // first_byte is index into event buffer
     if (firstByte != 0
         && firstByte <= int(bytes - sizeof(struct inotify_event))) {
-        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(&event[0]) + firstByte);
+        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(event.data()) + firstByte);
         firstByte += sizeof(struct inotify_event) + ret->len;
 
         // if the pointer to the next event exactly hits end of bytes read,
@@ -139,11 +139,11 @@ struct inotify_event* Inotify::nextEvent()
             // oh, and they BETTER NOT overlap.
             // Boy I hope this code works.
             // But I think this can never happen due to how inotify is written.
-            assert(long(reinterpret_cast<char*>(&event[0]) + sizeof(struct inotify_event) + event[0].len) <= long(ret));
+            assert(long(reinterpret_cast<char*>(event.data()) + sizeof(struct inotify_event) + event[0].len) <= long(ret));
 
             // how much of the event do we have?
-            bytes = reinterpret_cast<char*>(&event[0]) + bytes - reinterpret_cast<char*>(ret);
-            std::memcpy(&event[0], ret, bytes);
+            bytes = reinterpret_cast<char*>(event.data()) + bytes - reinterpret_cast<char*>(ret);
+            std::memcpy(event.data(), ret, bytes);
             return nextEvent();
         }
         return ret;
@@ -196,7 +196,7 @@ struct inotify_event* Inotify::nextEvent()
             return nullptr;
         }
 
-        thisBytes = read(inotify_fd, &event[0] + bytes,
+        thisBytes = read(inotify_fd, event.data() + bytes,
             sizeof(struct inotify_event) * MAX_EVENTS - bytes);
         if (thisBytes < 0) {
             return nullptr;
@@ -208,7 +208,7 @@ struct inotify_event* Inotify::nextEvent()
         }
         bytes += thisBytes;
 
-        ret = &event[0];
+        ret = event.data();
         firstByte = int(sizeof(struct inotify_event) + ret->len);
         assert(firstByte <= bytes);
 
