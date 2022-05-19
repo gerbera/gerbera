@@ -325,9 +325,9 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
 
 std::unique_ptr<ContentPathSetup> MetafileHandler::setup {};
 
-MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content)
+MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<ContentManager> content)
     : MetacontentHandler(context)
-    , content(content)
+    , content(std::move(content))
 {
     if (!setup) {
         setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST);
