@@ -51,7 +51,7 @@ ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_
             }
             if (!info) {
                 assert(clientInfo[0].type == ClientType::Unknown);
-                info = &clientInfo[0];
+                info = clientInfo.data();
             }
             entry.pInfo = info;
             cache.push_back(std::move(entry));
@@ -213,7 +213,7 @@ const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, co
     if (!info) {
         // always return something, 'Unknown' if we do not know better
         assert(clientInfo[0].type == ClientType::Unknown);
-        info = &clientInfo[0];
+        info = clientInfo.data();
 
         // also add to cache, for web-ui proposes only
         updateCache(addr, userAgent, info);
