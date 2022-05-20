@@ -77,12 +77,14 @@ public:
     /// \param flags quirks flags
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit, bool multiValue);
+    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, int captionInfoCount, int stringLimit, bool multiValue);
 
     const ClientInfo& getClientInfo() const { return clientInfo; }
 
     int getFlags() const { return clientInfo.flags; }
     void setFlags(int flags) { this->clientInfo.flags = flags; }
+
+    std::map<std::string, std::string> getMimeMapings() const { return this->clientInfo.mimeMappings; }
 
     int getCaptionInfoCount() const { return this->clientInfo.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)

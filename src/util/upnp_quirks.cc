@@ -56,13 +56,13 @@ std::string Quirks::getGroup() const
 
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+    if (!pClientInfo || (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
         return;
 
     if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
-    auto subAdded = xmlBuilder.renderSubtitleURL(item);
+    auto subAdded = xmlBuilder.renderSubtitleURL(item, pClientInfo->mimeMappings);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
@@ -229,4 +229,9 @@ int Quirks::getStringLimit() const
 bool Quirks::getMultiValue() const
 {
     return pClientInfo ? pClientInfo->multiValue : true;
+}
+
+std::map<std::string, std::string> Quirks::getMimeMappings() const
+{
+    return pClientInfo ? pClientInfo->mimeMappings : std::map<std::string, std::string>();
 }

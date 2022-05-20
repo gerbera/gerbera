@@ -185,7 +185,7 @@ void Web::EditLoad::process()
 
         // write resource content
         if (objItem) {
-            std::string url = xmlBuilder->renderResourceURL(*objItem, *resItem);
+            std::string url = xmlBuilder->renderResourceURL(*objItem, *resItem, {});
             if (resItem->getPurpose() == CdsResource::Purpose::Thumbnail) {
                 auto image = resources.append_child("resources");
                 image.append_attribute("resname") = "image";

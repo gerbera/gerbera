@@ -31,7 +31,7 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
-ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, int captionInfoCount, int stringLimit, bool multiValue)
+ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, int captionInfoCount, int stringLimit, bool multiValue)
 {
     clientInfo.type = ClientType::Unknown;
     if (!ip.empty()) {
@@ -43,6 +43,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     } else {
         clientInfo.matchType = ClientMatchType::None;
     }
+    clientInfo.mimeMappings = mimeMappings;
     clientInfo.group = group;
     clientInfo.flags = flags;
     clientInfo.captionInfoCount = captionInfoCount;
