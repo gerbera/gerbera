@@ -48,8 +48,9 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std:
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
         auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
         auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
+        auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
 
-        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, captionInfoCount, stringLimit, multiValue);
+        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, mappings, captionInfoCount, stringLimit, multiValue);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {

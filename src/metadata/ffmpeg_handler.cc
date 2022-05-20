@@ -92,18 +92,25 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     AVDictionaryEntry* e = nullptr;
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
 
+    // only use ffmpeg meta data if not found by other handler
+    auto emptyProperties = std::map<metadata_fields_t, bool>();
+    for (auto&& prop : propertyMap) {
+        emptyProperties[prop.first] = item->getMetaData(prop.first).empty();
+    }
+    auto emptySpecProperties = std::map<std::string, bool>();
+    for (auto&& prop : specialPropertyMap) {
+        emptySpecProperties[prop.second] = item->getMetaData(prop.second).empty();
+    }
+
     while ((e = av_dict_get(pFormatCtx->metadata, "", e, AV_DICT_IGNORE_SUFFIX))) {
         std::string key = toLower(e->key);
         std::string value = e->value;
         log_debug("FFMpeg tag: {}: {}", key, value);
         auto it = specialPropertyMap.find(e->key);
-        if (it != specialPropertyMap.end()) {
-            // only use ffmpeg meta data if not found by other handler
-            if (item->getMetaData(it->second).empty()) {
-                log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
-                item->addMetaData(it->second, sc->convert(trimString(value)));
-                continue; // iterate while loop
-            }
+        if (it != specialPropertyMap.end() && emptySpecProperties[it->second]) {
+            log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
+            item->addMetaData(it->second, sc->convert(trimString(value)));
+            continue; // iterate while loop
         }
         auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
             [&](auto&& p) {
@@ -112,7 +119,8 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         if (pIt != propertyMap.end()) {
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             const auto field = pIt->first;
-            item->addMetaData(field, sc->convert(trimString(value)));
+            if (emptyProperties[field])
+                item->addMetaData(field, sc->convert(trimString(value)));
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
             } else if (field == M_PARTNUMBER) {
@@ -121,15 +129,14 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         } else if (key == "date") {
             constexpr auto field = M_DATE;
             /// \todo parse possible ISO8601 timestamp
-            if (item->getMetaData(field).empty() && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
+            if (emptyProperties[field] && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
                 value.append("-01-01");
                 log_debug("Identified metadata 'date': {}", value.c_str());
-
                 item->addMetaData(field, value);
             }
         } else if (key == "creation_time") {
             constexpr auto field = M_CREATION_DATE;
-            if (item->getMetaData(field).empty()) {
+            if (emptyProperties[field]) {
                 log_debug("Identified metadata 'creation_time': {}", e->value);
                 std::tm tmWork {};
                 if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {

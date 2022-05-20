@@ -154,6 +154,13 @@ public:
      */
     std::string getGroup() const;
 
+    /** \brief Get mime type mappings for client
+     *
+     * \return mime type mappings
+     *
+     */
+    std::map<std::string, std::string> getMimeMappings() const;
+
 private:
     const UpnpXMLBuilder& xmlBuilder;
     const ClientInfo* pClientInfo;

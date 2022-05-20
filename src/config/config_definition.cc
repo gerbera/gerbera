@@ -1193,6 +1193,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::max-count", "config-server.html#max-count",
         500, 0, ConfigIntSetup::CheckMinValue),
 
+    std::make_shared<ConfigDictionarySetup>(ATTR_CLIENTS_UPNP_MAP_MIMETYPE,
+        "/clients/client", "config-import.html#map",
+        ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, false),
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT,
         "attribute::caption-info-count", "config-clients.html#caption-info-count",
         1, 0, ConfigIntSetup::CheckMinValue),

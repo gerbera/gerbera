@@ -47,8 +47,7 @@ class Quirks;
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context,
-        std::string virtualUrl, std::string presentationURL);
+    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context, std::string virtualUrl, std::string presentationURL);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -85,13 +84,13 @@ public:
     /// \param parent Parent node to render the result into
     /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
     /// \param clientGroup The clients group for play tracking
-    void renderResource(const CdsObject& obj, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup) const;
+    void renderResource(const CdsObject& obj, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const;
 
     std::optional<std::string> renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const;
     std::optional<std::string> renderItemImageURL(const std::shared_ptr<CdsItem>& item) const;
-    std::optional<std::string> renderSubtitleURL(const std::shared_ptr<CdsItem>& item) const;
+    std::optional<std::string> renderSubtitleURL(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& mimeMappings) const;
 
-    std::string renderResourceURL(const CdsObject& item, const CdsResource& res, const std::string& clientGroup = "") const;
+    std::string renderResourceURL(const CdsObject& item, const CdsResource& res, const std::map<std::string, std::string>& mimeMappings, const std::string& clientGroup = "") const;
 
     void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const;
 
@@ -128,7 +127,7 @@ protected:
     std::string findDlnaProfile(const CdsResource& res, const std::string& contentType) const;
     std::string dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted = true) const;
 
-    std::string buildProtocolInfo(CdsResource& res) const;
-    std::string getMimeType(const CdsResource& resource) const;
+    std::string buildProtocolInfo(CdsResource& res, const std::map<std::string, std::string>& mimeMappings) const;
+    std::string getMimeType(const CdsResource& resource, const std::map<std::string, std::string>& mimeMappings) const;
 };
 #endif // __UPNP_XML_H__

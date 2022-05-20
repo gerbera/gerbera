@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## MAIN
+
+### NEW Features
+
+- Support for NFO files as additional resources: Set up in `resources` and place nfo-files (https://kodi.wiki/view/NFO_files/Templates) next to your media files.
+- Tweaking mimetypes for clients
+
+### General
+If you activated nfo-metafile resources you have to reimport your media files.
+
 ## v1.11.0
 
 ### NEW Features

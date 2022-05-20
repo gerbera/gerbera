@@ -122,3 +122,14 @@ This section defines the client behaviour for one client.
     * Default: the same as the current value of ``server/upnp/multi-value`` (defaults to **yes**)
 
     Override the default ``server/upnp/multi-value`` of server.
+
+
+**Child Entries:**
+
+    ::
+
+        <map from="application/x-srt" to="text/srt"/>
+
+    * Optional
+
+    Map mimetype for client. Some clients require slightly different mimetype, e.g. for subtitles.

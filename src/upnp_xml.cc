@@ -364,11 +364,11 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     return doc;
 }
 
-void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup) const
+void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const
 {
     auto res = parent.append_child("res");
 
-    auto url = renderResourceURL(object, resource, clientGroup);
+    auto url = renderResourceURL(object, resource, mimeMappings, clientGroup);
 
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
@@ -384,7 +384,7 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& 
     }
 }
 
-std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsResource& res, const std::string& clientGroup) const
+std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsResource& res, const std::map<std::string, std::string>& mimeMappings, const std::string& clientGroup) const
 {
     std::string url;
 
@@ -444,12 +444,13 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
 
     // Add the filename.ext part
     // We don't use this for anything, but it makes various clients happy
-    auto mimeType = getMimeType(res);
-    auto contentType = getValueOrDefault(ctMappings, mimeType);
     auto lang = res.getAttribute(CdsResource::Attribute::LANGUAGE);
     auto ext = renderExtension("", res.getAttribute(CdsResource::Attribute::RESOURCE_FILE), lang); // try extension from resource file
-    if (ext.empty())
+    if (ext.empty()) {
+        auto mimeType = getMimeType(res, mimeMappings);
+        auto contentType = getValueOrDefault(ctMappings, mimeType);
         ext = renderExtension(contentType, res.getPurpose() == CdsResource::Purpose::Transcode ? "" : item.getLocation(), lang);
+    }
     url.append(ext);
 
     return url;
@@ -461,12 +462,12 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
 {
     auto res = item->getResource(CdsResource::Purpose::Content);
     if (res)
-        return renderResourceURL(*item, *res);
+        return renderResourceURL(*item, *res, {});
     // Fabricate a fake resource for URL based items
     // FIXME: This should be done at object creation
     auto temp = CdsResource { ContentHandler::DEFAULT, CdsResource::Purpose::Content };
     temp.setResId(0);
-    return renderResourceURL(*item, temp);
+    return renderResourceURL(*item, temp, {});
 }
 
 std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const
@@ -475,7 +476,7 @@ std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::sh
     for (auto&& res : orderedResources) {
         if (res->getPurpose() != CdsResource::Purpose::Thumbnail)
             continue;
-        return renderResourceURL(*cont, *res);
+        return renderResourceURL(*cont, *res, {});
     }
     return {};
 }
@@ -485,16 +486,16 @@ std::optional<std::string> UpnpXMLBuilder::renderItemImageURL(const std::shared_
     auto orderedResources = getOrderedResources(*item);
     auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(), [](auto&& res) { return res->getPurpose() == CdsResource::Purpose::Thumbnail; });
     if (resFound != orderedResources.end()) {
-        return renderResourceURL(*item, **resFound);
+        return renderResourceURL(*item, **resFound, {});
     }
     return {};
 }
 
-std::optional<std::string> UpnpXMLBuilder::renderSubtitleURL(const std::shared_ptr<CdsItem>& item) const
+std::optional<std::string> UpnpXMLBuilder::renderSubtitleURL(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& mimeMappings) const
 {
     auto resFound = item->getResource(CdsResource::Purpose::Subtitle);
     if (resFound) {
-        return renderResourceURL(*item, *resFound);
+        return renderResourceURL(*item, *resFound, mimeMappings);
     }
     return {};
 }
@@ -763,12 +764,13 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     // Subtitles are used to build CaptionInfoEx tags
     // Real resources are rendered lower down
     std::vector<std::map<std::string, std::string>> captionInfoEx;
+    auto mimeMappings = quirks ? quirks->getMimeMappings() : std::map<std::string, std::string>();
     for (auto&& res : orderedResources) {
         auto purpose = res->getPurpose();
         if (purpose == CdsResource::Purpose::Content)
             continue;
 
-        auto url = renderResourceURL(*item, *res);
+        auto url = renderResourceURL(*item, *res, mimeMappings);
         // Set Album art if we have a thumbnail
         // Note we dont actually add these as res tags.
         if (purpose == CdsResource::Purpose::Thumbnail) {
@@ -789,8 +791,12 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             if (!res->getAttribute(CdsResource::Attribute::LANGUAGE).empty()) {
                 captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::LANGUAGE)] = res->getAttribute(CdsResource::Attribute::LANGUAGE);
             }
-            captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::PROTOCOLINFO)] = res->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
-            ;
+            auto protocolInfo = res->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+            for (auto&& [from, to] : mimeMappings) {
+                replaceAllString(protocolInfo, from, to);
+            }
+            captionInfo[CdsResource::getAttributeName(CdsResource::Attribute::PROTOCOLINFO)] = protocolInfo;
+
             captionInfoEx.push_back(std::move(captionInfo));
             continue;
         }
@@ -827,14 +833,14 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         bool transcoded = res->getPurpose() == CdsResource::Purpose::Transcode;
         auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
 
-        buildProtocolInfo(*res);
+        buildProtocolInfo(*res, mimeMappings);
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
-            renderResource(*item, *res, parent, clientSpecficAttrs, clientGroup);
+            renderResource(*item, *res, parent, clientSpecficAttrs, clientGroup, mimeMappings);
     }
 }
 
-std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource) const
+std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource, const std::map<std::string, std::string>& mimeMappings) const
 {
     std::string protocolInfo = resource.getAttribute(CdsResource::Attribute::PROTOCOLINFO);
     std::string mimeType = getMTFromProtocolInfo(protocolInfo);
@@ -843,15 +849,18 @@ std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource) const
     if (pos != std::string::npos) {
         mimeType = mimeType.substr(0, pos);
     }
+    for (auto&& [from, to] : mimeMappings) {
+        replaceAllString(mimeType, from, to);
+    }
 
     return mimeType;
 }
 
-std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource) const
+std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource, const std::map<std::string, std::string>& mimeMappings) const
 {
     // Why is this here? Just for transcoding maybe?
 
-    auto mimeType = getMimeType(resource);
+    auto mimeType = getMimeType(resource, mimeMappings);
     auto contentType = getValueOrDefault(ctMappings, mimeType);
     auto extend = dlnaProfileString(resource, contentType);
     // we do not support seeking at all, so 00
@@ -873,6 +882,9 @@ std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource) const
         extend.append(fmt::format(";{}={}", UPNP_DLNA_FLAGS, dlnaFlags));
 
     auto protocolInfo = resource.getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+    for (auto&& [from, to] : mimeMappings) {
+        replaceAllString(protocolInfo, from, to);
+    }
 
     protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
     // FIXME: Should we be working protocol info out here?

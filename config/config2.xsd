@@ -493,6 +493,9 @@
 
     <xs:element name="client">
         <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
             <xs:attribute name="ip" type="xs:string" minOccurs="0"/>
             <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
             <xs:attribute name="flags" type="xs:string" use="required"/>
