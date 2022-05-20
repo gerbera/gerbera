@@ -242,31 +242,30 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
         return { {}, INVALID_OBJECT_ID };
     }
 
-    if (!IS_CDS_ITEM_EXTERNAL_URL(otype)) {
-        fs::path loc = getProperty("location");
-        std::error_code ec;
-        auto dirEnt = fs::directory_entry(loc, ec);
-        if (!ec) {
-            AutoScanSetting asSetting;
-            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-            asSetting.recursive = false;
-            asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
-            asSetting.rescanResource = false;
-            asSetting.mergeOptions(config, loc);
-
-            int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
-            if (pcdId == INVALID_OBJECT_ID) {
-                log_error("Failed to add object {}", dirEnt.path().string());
-                return { {}, INVALID_OBJECT_ID };
-            }
-            auto mainObj = database->loadObject(pcdId);
-            return { dukObject2cdsObject(mainObj), pcdId };
-        } else {
-            log_error("Failed to read {}: {}", loc.c_str(), ec.message());
-        }
-    } else {
+    if (IS_CDS_ITEM_EXTERNAL_URL(otype))
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
+
+    fs::path loc = getProperty("location");
+    std::error_code ec;
+    auto dirEnt = fs::directory_entry(loc, ec);
+    if (!ec) {
+        AutoScanSetting asSetting;
+        asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+        asSetting.recursive = false;
+        asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+        asSetting.rescanResource = false;
+        asSetting.mergeOptions(config, loc);
+
+        int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
+        if (pcdId == INVALID_OBJECT_ID) {
+            log_error("Failed to add object {}", dirEnt.path().string());
+            return { {}, INVALID_OBJECT_ID };
+        }
+        auto mainObj = database->loadObject(pcdId);
+        return { dukObject2cdsObject(mainObj), pcdId };
     }
+
+    log_error("Failed to read {}: {}", loc.c_str(), ec.message());
     return { {}, INVALID_OBJECT_ID };
 }
 
