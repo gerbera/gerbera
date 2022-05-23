@@ -190,7 +190,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
   describe('reset()', () => {
     it('resets all fields to empty', () => {
       autoScanModal.autoscanmodal('loadItem', {item: item});
-      autoscanMode = $(':radio[name=autoscanMode]');
+      autoscanMode = $(':radio[id=autoscanModeNone]');
 
       autoScanModal.autoscanmodal('reset');
 
