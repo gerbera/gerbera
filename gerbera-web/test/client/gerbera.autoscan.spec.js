@@ -121,6 +121,7 @@ describe('Gerbera Autoscan', () => {
     afterEach(() => {
       fixture.cleanup();
       ajaxSpy.and.callThrough();
+      $('#autoscanModal').remove();
     });
 
     it('calls the server to obtain autoscan edit load', () => {
