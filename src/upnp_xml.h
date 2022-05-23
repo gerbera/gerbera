@@ -110,8 +110,8 @@ protected:
 
     std::vector<ContentHandler> orderedHandler;
 
-    const std::string virtualURL;
-    const std::string presentationURL;
+    std::string virtualURL;
+    std::string presentationURL;
     std::string entrySeparator;
     bool multiValue {};
     std::map<std::string, std::string> ctMappings;
