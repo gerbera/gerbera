@@ -312,7 +312,7 @@ describe('Gerbera Tree', () => {
         return Promise.resolve(childTreeResponse);
       });
 
-      await Tree.reloadTreeItemById(0);
+      await Tree.reloadTreeItemById('0');
       expect(ajaxSpy).toHaveBeenCalled();
       expect(Items.treeItemSelected).toHaveBeenCalled();
     });

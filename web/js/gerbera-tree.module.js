@@ -92,12 +92,15 @@ const onItemExpanded = (event) => {
 
   if (item.gerbera && item.gerbera.id) {
     if (tree.tree('closed', folderName) && item.gerbera.childCount > 0) {
-      fetchChildren(item.gerbera).then(function (response) {
-        var childTree = transformContainers(response, false);
-        tree.tree('append', $(folderList), childTree);
-
-        initSelection(pendingItems);
-      })
+      fetchChildren(item.gerbera)
+        .then(function (response) {
+          if (response) {
+            var childTree = transformContainers(response, false);
+            tree.tree('append', $(folderList), childTree);
+            initSelection(pendingItems);
+          }
+        })
+        .catch((err) => GerberaApp.error(err));
     } else {
       tree.tree('collapse', $(folderList));
     }
@@ -179,7 +182,6 @@ const fetchChildren = (gerberaData) => {
     data: requestData
   })
   .catch((err) => {
-    console.log(err);
     GerberaApp.error(err);
   });
 };
@@ -254,12 +256,14 @@ const reloadTreeItem = (folderList) => {
   const tree = $('#tree');
   const item = folderList.data('grb-item');
   tree.tree('collapse', folderList);
-  return fetchChildren(item.gerbera).then(function (response) {
-    var childTree = transformContainers(response, false);
-    tree.tree('append', folderList, childTree);
-    selectTreeItem(folderList);
-    Items.treeItemSelected(item);
-  });
+  return fetchChildren(item.gerbera)
+    .then(function (response) {
+      var childTree = transformContainers(response, false);
+      tree.tree('append', folderList, childTree);
+      selectTreeItem(folderList);
+      Items.treeItemSelected(item);
+    })
+    .catch((err) => GerberaApp.error(err));
 };
 
 const reloadTreeItemById = (id) => {

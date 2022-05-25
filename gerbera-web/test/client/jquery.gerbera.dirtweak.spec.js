@@ -48,6 +48,7 @@ describe('The jQuery Gerbera DirTweak Overlay', () => {
 
   afterEach(() => {
     fixture.cleanup();
+    $('#dirTweakModal').remove();
   });
 
   describe('loadItem()', () => {

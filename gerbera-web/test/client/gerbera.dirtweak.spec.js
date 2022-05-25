@@ -16,9 +16,7 @@ describe('Gerbera DirTweaks', () => {
   });
 
   afterEach(() => {
-    $("body").on('transitionend', function(event){
-      $('#dirTweakModal').remove();
-    });
+    $('#dirTweakModal').remove();
     fixture.cleanup();
   });
 
@@ -65,6 +63,7 @@ describe('Gerbera DirTweaks', () => {
     });
     afterEach(() => {
       fixture.cleanup();
+      $('#dirTweakModal').remove();
     });
     it('clears all fields in the tweak modal', () => {
       dirTweakModal.dirtweakmodal('loadItem', dirTweakItem);
@@ -103,6 +102,7 @@ describe('Gerbera DirTweaks', () => {
     afterEach(() => {
       fixture.cleanup();
       ajaxSpy.and.callThrough();
+      $('#dirTweakModal').remove();
     });
 
     it('calls the server to obtain config including directory tweaks', () => {
@@ -164,6 +164,7 @@ describe('Gerbera DirTweaks', () => {
 
     afterEach(() => {
       fixture.cleanup();
+      $('#dirTweakModal').remove();
     });
 
     it('using the response loads the dirtweak overlay', () => {
@@ -202,6 +203,7 @@ describe('Gerbera DirTweaks', () => {
     afterEach(() => {
       fixture.cleanup();
       ajaxSpy.and.callThrough();
+      $('#dirTweakModal').remove();
     });
 
     it('collects all the form data from the dirtweak modal to call the server', () => {
@@ -243,6 +245,7 @@ describe('Gerbera DirTweaks', () => {
     afterEach(() => {
       fixture.cleanup();
       ajaxSpy.and.callThrough();
+      $('#dirTweakModal').remove();
     });
   });
 
@@ -255,6 +258,7 @@ describe('Gerbera DirTweaks', () => {
 
     afterEach(() => {
       fixture.cleanup();
+      $('#dirTweakModal').remove();
     });
 
     it('when successful reports a message to the user and starts task interval', () => {
