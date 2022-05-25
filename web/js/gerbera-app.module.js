@@ -137,7 +137,9 @@ export class App {
   setLoggedIn(isLoggedIn){
     this.loggedIn = isLoggedIn;
     if (this.loggedIn) {
-        this.getStatus(this.clientConfig).then((response) => { return this.displayStatus(response); });
+      this.getStatus(this.clientConfig)
+        .then((response) => { return this.displayStatus(response); })
+        .catch((error) => { this.error(error); });
     }
   }
 
@@ -309,7 +311,9 @@ export class App {
       Clients.initialize();
       Config.initialize();
       Tweaks.initialize();
-      this.getStatus(this.clientConfig).then((response) => {return this.displayStatus(response); });
+      this.getStatus(this.clientConfig)
+        .then((response) => {return this.displayStatus(response); })
+        .catch((error) => { this.error(error); });
     } else {
       $('#server-status').hide();
       $('.login-field').show();

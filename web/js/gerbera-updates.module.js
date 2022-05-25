@@ -49,7 +49,7 @@ const errorCheck = (event, xhr) => {
 
 const showMessage = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
-  console.log(message);
+  console.log(`${type}: ${message}`);
   if (callback) {
     toast.callback = callback;
   }
@@ -87,7 +87,7 @@ const getUpdates = (force) => {
     })
       .then((response) => Updates.updateTask(response))
       .then((response) => Updates.updateUi(response))
-      .catch((response) => Updates.clearAll(response))
+      .catch((response) => Updates.clearAll(response));
   } else {
     return Promise.resolve();
   }

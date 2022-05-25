@@ -158,7 +158,7 @@ const handleLogout = () => {
 const loadSession = (response) => {
   return new Promise((resolve) => {
     if ((!response.sid_was_valid || !getSessionId()) && response[SID] && response[SID] !== null) {
-  console.log(response);
+      console.log(response);
       Cookies.set(SID, response[SID], {SameSite: 'Lax'});
     }
     // TODO: reject what?

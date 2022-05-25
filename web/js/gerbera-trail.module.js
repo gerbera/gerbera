@@ -217,7 +217,7 @@ const deleteItem = (event) => {
       }
     })
     .catch((err) => { // eslint-disable-line
-      GerberaApp.error('Failed to remove item');
+      GerberaApp.error(`Failed to remove item ${err}`);
     });
 };
 

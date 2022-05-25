@@ -181,7 +181,7 @@ const saveConfig = () => {
         })
         .catch((err) => GerberaApp.error(err));
     } catch (e) {
-      console.log(e);
+      GerberaApp.error(e);
     }
   } else {
     console.log("Nothing to save");
@@ -209,7 +209,7 @@ const clearConfig = () => {
       })
       .catch((err) => GerberaApp.error(err));
   } catch (e) {
-    console.log(e);
+    GerberaApp.error(e);
   }
 };
 
@@ -235,10 +235,9 @@ const reScanLibrary = () => {
       })
       .catch((err) => {
         GerberaApp.error(err)
-        console.log(err);
       });
   } catch (e) {
-    console.log(e);
+    GerberaApp.error(e);
   }
 };
 

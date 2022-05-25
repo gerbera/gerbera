@@ -54,6 +54,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
 
   afterEach(() => {
     fixture.cleanup();
+    $('#autoscanModal').remove();
   });
 
   describe('loadItem()', () => {

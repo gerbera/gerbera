@@ -120,21 +120,21 @@
     text = $('<span></span>');
     text.text(name).appendTo(content);
     row.append(content);
-    if (rawvalue !== null)
+    if (rawvalue)
       content = $('<td></td>');
     else
       content = $('<td colspan="2"></td>');
 
-    if (value !== null) {
+    if (value) {
       text = $('<span>' + value.replace(RegExp(nl, 'g'), '<br>') + '</span>');
       text.appendTo(content);
     }
-    if (special !== null) {
+    if (special) {
         special.appendTo(content);
     }
     row.append(content);
 
-    if (rawvalue !== null) {
+    if (rawvalue) {
       content = $('<td></td>');
       text = $('<span>' + rawvalue.replace(RegExp(nl, 'g'), '<br>') + '</span>');
       text.appendTo(content);
