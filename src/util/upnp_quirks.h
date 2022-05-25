@@ -56,7 +56,7 @@ struct ClientInfo;
 
 class Quirks {
 public:
-    Quirks(const UpnpXMLBuilder& builder, const ClientManager& clients, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
+    Quirks(std::shared_ptr<UpnpXMLBuilder> builder, const std::shared_ptr<ClientManager>& clients, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
@@ -162,7 +162,7 @@ public:
     std::map<std::string, std::string> getMimeMappings() const;
 
 private:
-    const UpnpXMLBuilder& xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientInfo* pClientInfo;
 };
 

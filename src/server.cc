@@ -385,7 +385,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(*xmlbuilder, *clients, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(xmlbuilder, clients, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {

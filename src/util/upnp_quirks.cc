@@ -37,11 +37,11 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
 
-Quirks::Quirks(const UpnpXMLBuilder& xmlBuilder, const ClientManager& clients, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
-    : xmlBuilder(xmlBuilder)
+Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clients, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
+    : xmlBuilder(std::move(xmlBuilder))
 {
     if (addr || !userAgent.empty())
-        pClientInfo = clients.getInfo(addr, userAgent);
+        pClientInfo = clients->getInfo(addr, userAgent);
 }
 
 int Quirks::checkFlags(int flags) const
@@ -62,7 +62,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
     if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
         return;
 
-    auto subAdded = xmlBuilder.renderSubtitleURL(item, pClientInfo->mimeMappings);
+    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientInfo->mimeMappings);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
