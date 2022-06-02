@@ -331,7 +331,7 @@ protected:
     }
 
     bool use_transaction;
-    bool inTransaction {};
+    std::atomic_bool inTransaction {};
 };
 
 #endif // __SQL_STORAGE_H__
