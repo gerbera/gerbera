@@ -90,7 +90,7 @@ public:
 
     /// \brief The location can only be set once!
     void setLocation(const fs::path& location);
-    fs::path getLocation() const { return location; }
+    const fs::path& getLocation() const { return location; }
 
     void setScanMode(ScanMode mode) { this->mode = mode; }
     ScanMode getScanMode() const { return mode; }

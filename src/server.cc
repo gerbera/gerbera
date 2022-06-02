@@ -307,7 +307,7 @@ std::string Server::getVirtualUrl() const
     if (!startswith(virtUrl, "http")) { // url does not start with http
         virtUrl = fmt::format("http://{}", virtUrl);
     }
-    if (*virtUrl.end() == '/')
+    if (virtUrl.back() == '/')
         virtUrl.pop_back();
     return virtUrl;
 }

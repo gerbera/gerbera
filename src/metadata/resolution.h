@@ -36,8 +36,8 @@ public:
     [[nodiscard]] std::string string() const;
 
 private:
-    std::uint64_t _x;
-    std::uint64_t _y;
+    std::uint64_t _x {};
+    std::uint64_t _y {};
 };
 
 #endif // GERBERA_RESOLUTION_H
