@@ -662,9 +662,9 @@ SortParser::SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<
 
 std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
 {
-    if (sortCrit.empty()) {
+    if (sortCrit.empty() || !colMapper || !metaMapper)
         return {};
-    }
+
     std::vector<std::string> sort;
     std::vector<std::string> colBuf;
     std::vector<std::string> joinBuf;
@@ -677,7 +677,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        if (!colMapper || !colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
+        if (!colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
             std::string sortSql;
             for (auto&& metaId : MetadataIterator()) {
                 auto&& metaName = MetadataHandler::getMetaFieldName(metaId);

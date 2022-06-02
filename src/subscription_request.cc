@@ -39,17 +39,17 @@ SubscriptionRequest::SubscriptionRequest(UpnpSubscriptionRequest* upnpRequest)
 {
 }
 
-std::string SubscriptionRequest::getServiceID() const
+const std::string& SubscriptionRequest::getServiceID() const
 {
     return serviceID;
 }
 
-std::string SubscriptionRequest::getUDN() const
+const std::string& SubscriptionRequest::getUDN() const
 {
     return UDN;
 }
 
-std::string SubscriptionRequest::getSubscriptionID() const
+const std::string& SubscriptionRequest::getSubscriptionID() const
 {
     return sID;
 }

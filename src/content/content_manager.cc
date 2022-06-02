@@ -359,7 +359,8 @@ void ContentManager::shutdown()
     log_debug("start");
     auto lock = threadRunner->uniqueLock();
     log_debug("updating last_modified data for autoscan in database...");
-    autoscanList->updateLMinDB(*database);
+    if (autoscanList)
+        autoscanList->updateLMinDB(*database);
 
 #ifdef HAVE_JS
     destroyJS();
@@ -569,6 +570,9 @@ int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPat
 
 bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all)
 {
+    if (!adir)
+        return false;
+
     bool parentRemoved = false;
     int parentID = database->findObjectIDByPath(parentPath, false);
     if (parentID != INVALID_OBJECT_ID) {
@@ -624,8 +628,8 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
+            return changedContainers->upnp;
         }
-        return changedContainers->upnp;
     }
 
     if (obj)
@@ -926,9 +930,11 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     if (!adir) {
         for (std::size_t i = 0; i < autoscanList->size(); i++) {
             auto dir = autoscanList->get(i);
-            log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
-            if (dir && (subDir.path() <= dir->getLocation()) && fs::is_directory(dir->getLocation())) {
-                adir = std::move(dir);
+            if (dir) {
+                log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
+                if ((subDir.path() <= dir->getLocation()) && fs::is_directory(dir->getLocation())) {
+                    adir = std::move(dir);
+                }
             }
         }
     }
@@ -1226,7 +1232,10 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
 
 void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const
 {
-    if (origObj && container && origObj->getMTime() > container->getMTime()) {
+    if (!container)
+        return;
+
+    if (origObj && origObj->getMTime() > container->getMTime()) {
         container->setMTime(origObj->getMTime());
         database->updateObject(container, nullptr);
     }

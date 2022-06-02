@@ -120,7 +120,7 @@ private:
     std::string sort;
 
     /// \brief maximum request count
-    int maxCount;
+    int maxCount {};
 
     /// \brief folder image
     fs::path image;

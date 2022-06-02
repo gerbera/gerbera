@@ -99,7 +99,7 @@ void AutoscanInotify::threadProc()
 
                 lock.unlock();
 
-                fs::path location = adir->getLocation();
+                const fs::path& location = adir->getLocation();
                 if (location.empty()) {
                     lock.lock();
                     continue;
@@ -125,8 +125,13 @@ void AutoscanInotify::threadProc()
 
                 lock.unlock();
 
+                if (!adir) {
+                    lock.lock();
+                    continue;
+                }
+
                 // read dir
-                fs::path location = adir->getLocation();
+                const fs::path& location = adir->getLocation();
                 if (location.empty()) {
                     lock.lock();
                     continue;
