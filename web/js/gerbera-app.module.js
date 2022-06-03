@@ -219,7 +219,7 @@ export class App {
   getStatus (clientConfig) {
     var data = {
       req_type: 'config_load',
-      action: 'status'
+      action: 'status',
     };
     data[Auth.SID] = Auth.getSessionId();
     return $.ajax({
@@ -227,6 +227,7 @@ export class App {
       type: 'get',
       data: data,
       async: false,
+      accepts: 'application/json',
     });
   }
 
@@ -238,13 +239,32 @@ export class App {
     return "";
   }
 
+  showStatus (itemList, key) {
+      const cnt = this.getStatusValue(itemList, key + 'Count');
+      if (cnt && cnt !== '') {
+        $('#status-' + key + '-count').html(cnt);
+        $('#status-' + key + '-size').html(this.getStatusValue(itemList, key + 'Size'));
+      } else {
+        $('#status-'+key).hide();
+      }
+  }
+
   displayStatus (response) {
     if (response.success && response.values) {
       $('#server-status').show();
-      $('#status-total').html(this.getStatusValue(response.values.item, 'total'));
-      $('#status-audio').html(this.getStatusValue(response.values.item, 'audio'));
-      $('#status-video').html(this.getStatusValue(response.values.item, 'video'));
-      $('#status-image').html(this.getStatusValue(response.values.item, 'image'));
+      this.showStatus(response.values.item, 'total');
+      this.showStatus(response.values.item, 'audio');
+      this.showStatus(response.values.item, 'audioBook');
+      this.showStatus(response.values.item, 'audioMusic');
+      this.showStatus(response.values.item, 'audioBroadcast');
+      this.showStatus(response.values.item, 'video');
+      this.showStatus(response.values.item, 'videoMovie');
+      this.showStatus(response.values.item, 'videoBroadcast');
+      this.showStatus(response.values.item, 'videoMusicVideoClip');
+      this.showStatus(response.values.item, 'image');
+      this.showStatus(response.values.item, 'imagePhoto');
+      this.showStatus(response.values.item, 'text');
+      this.showStatus(response.values.item, 'item');
     }
     return Promise.resolve();
   }
@@ -312,7 +332,7 @@ export class App {
       Config.initialize();
       Tweaks.initialize();
       this.getStatus(this.clientConfig)
-        .then((response) => {return this.displayStatus(response); })
+        .then((response) => { return this.displayStatus(response); })
         .catch((error) => { this.error(error); });
     } else {
       $('#server-status').hide();

@@ -7,25 +7,25 @@
 			"editable": false,
 			"children": [
 				{
-					"item": "/status/attribute::total",
+					"item": "/status/attribute::totalCount",
 					"caption": "Total Media Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::audio",
+					"item": "/status/attribute::audioCount",
 					"caption": "Audio Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::video",
+					"item": "/status/attribute::videoCount",
 					"caption": "Video Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::image",
+					"item": "/status/attribute::imageCount",
 					"caption": "Image Files",
 					"editable": false,
 					"type": "Number"

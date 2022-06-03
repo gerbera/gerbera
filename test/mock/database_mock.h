@@ -45,7 +45,8 @@ public:
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return {}; }
     std::vector<int> getServiceObjectIDs(char servicePrefix) override { return {}; }
 
-    int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override { return 0; }
+    long long getFileStats(const StatsParam& stats) override { return 0; }
+    std::map<std::string, long long> getGroupStats(const StatsParam& stats) override { return {}; };
 
     std::string getInternalSetting(const std::string& key) override { return {}; }
     void storeInternalSetting(const std::string& key, const std::string& value) override { }

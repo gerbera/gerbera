@@ -7,28 +7,220 @@
 			"editable": false,
 			"children": [
 				{
-					"item": "/status/attribute::total",
+					"item": "/status/attribute::totalCount",
 					"caption": "Total Media Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::audio",
+					"item": "/status/attribute::totalSize",
+					"caption": "Total Media File Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::itemCount",
+					"caption": "General Items",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::itemSize",
+					"caption": "General Items Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::audioCount",
 					"caption": "Audio Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::video",
+					"item": "/status/attribute::audioSize",
+					"caption": "Audio Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::audioBytes",
+					"caption": "Audio Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioMusicCount",
+					"caption": "Music Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioMusicSize",
+					"caption": "Music Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::audioMusicBytes",
+					"caption": "Music Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioBookCount",
+					"caption": "Audio Books",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioBookSize",
+					"caption": "Audio Books Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::audioBookBytes",
+					"caption": "Audio Books Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioBroadcastCount",
+					"caption": "Audio Broadcasts",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::audioBroadcastSize",
+					"caption": "Audio Broadcast Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::audioBroadcastBytes",
+					"caption": "Audio Broadcast Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoCount",
 					"caption": "Video Files",
 					"editable": false,
 					"type": "Number"
 				},
 				{
-					"item": "/status/attribute::image",
+					"item": "/status/attribute::videoSize",
+					"caption": "Video Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::videoBytes",
+					"caption": "Video Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoMovieCount",
+					"caption": "Movie Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoMovieSize",
+					"caption": "Movie Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::videoMovieBytes",
+					"caption": "Movie Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoBroadcastCount",
+					"caption": "Video Broadcast Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoBroadcastSize",
+					"caption": "Video Broadcast Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::videoBroadcastBytes",
+					"caption": "Video Broadcast Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoMusicVideoClipCount",
+					"caption": "Music Video Clips",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::videoMusicVideoClipSize",
+					"caption": "Music Video Clips Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::videoMusicVideoClipBytes",
+					"caption": "Music Video Clips Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::imageCount",
 					"caption": "Image Files",
 					"editable": false,
 					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::imageSize",
+					"caption": "Image Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::imageBytes",
+					"caption": "Image Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::imagePhotoCount",
+					"caption": "Photo Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::imagePhotoSize",
+					"caption": "Photo Files Size",
+					"editable": false,
+					"type": "String"
+				},
+				{
+					"item": "/status/attribute::imagePhotoBytes",
+					"caption": "Photo Files Size Bytes",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::textCount",
+					"caption": "Text Files",
+					"editable": false,
+					"type": "Number"
+				},
+				{
+					"item": "/status/attribute::textSize",
+					"caption": "Text Files Size",
+					"editable": false,
+					"type": "String"
 				},
 				{
 					"item": "/status/attribute::virtual",

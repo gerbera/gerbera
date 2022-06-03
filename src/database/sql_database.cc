@@ -1047,7 +1047,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& param, int* numMatches)
 {
-    auto searchParser = SearchParser(*sqlEmitter, param.searchCriteria());
+    auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
@@ -1619,28 +1619,75 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
     return metaData;
 }
 
-int SQLDatabase::getTotalFiles(bool isVirtual, const std::string& mimeType, const std::string& upnpClass)
+long long SQLDatabase::getFileStats(const StatsParam& stats)
 {
     auto where = std::vector {
-        fmt::format("{} != {:d}", identifier("object_type"), OBJECT_TYPE_CONTAINER),
+        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER),
     };
-    if (!mimeType.empty()) {
-        where.push_back(fmt::format("{} LIKE {}", identifier("mime_type"), quote(fmt::format("{}%", mimeType))));
+    if (!stats.getMimeType().empty()) {
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
     }
-    if (!upnpClass.empty()) {
-        where.push_back(fmt::format("{} LIKE {}", identifier("upnp_class"), quote(fmt::format("{}%", upnpClass))));
+    if (!stats.getUpnpClass().empty()) {
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", identifier("location"), quote(fmt::format("{}%", isVirtual ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
-    //<< " AND is_virtual = 0";
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
 
-    auto query = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND "));
+    std::string mode;
+    std::string join;
+    switch (stats.getMode()) {
+    case StatsParam::StatsMode::Count:
+        mode = "COUNT(*)";
+        break;
+    case StatsParam::StatsMode::Size: {
+        join = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        mode = fmt::format("SUM({}.{})", resourceColumnMapper->getAlias(), identifier("size"));
+        break;
+    }
+    }
+    auto query = fmt::format("SELECT {} FROM {}{} WHERE {}", mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "));
     auto res = select(query);
-
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
-        return row->col_int(0, 0);
+        return row->col_long(0, 0);
     }
     return 0;
+}
+
+std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& stats)
+{
+    auto where = std::vector {
+        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER),
+    };
+    if (!stats.getMimeType().empty()) {
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
+    }
+    if (!stats.getUpnpClass().empty()) {
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
+    }
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+
+    std::string mode;
+    std::string join;
+    switch (stats.getMode()) {
+    case StatsParam::StatsMode::Count:
+        mode = "COUNT(*)";
+        break;
+    case StatsParam::StatsMode::Size: {
+        join = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        mode = fmt::format("SUM({}.{})", resourceColumnMapper->getAlias(), identifier("size"));
+        break;
+    }
+    }
+    auto query = fmt::format("SELECT {}, {} FROM {}{} WHERE {} GROUP BY {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "), searchColumnMapper->mapQuoted(SearchCol::UpnpClass));
+    auto res = select(query);
+    std::unique_ptr<SQLRow> row;
+    std::map<std::string, long long> result;
+    if (res) {
+        while ((row = res->nextRow())) {
+            result[row->col(0)] = row->col_long(1, 0);
+        }
+    }
+    return result;
 }
 
 std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)

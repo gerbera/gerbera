@@ -70,47 +70,109 @@
       </div>
     </div>
     <div class="row mx-2" id="homelinks" style="display: none">
-      <div class="col-md-5 offset-md-2">
+      <div class="col md-3 offset-md-1">
         <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
-          <h4><i class="fa fa-plus"></i> Add some files</h4>
-          <p>Browse and import your multimedia files into Gerbera.</p>
+          <div class="sublink">
+            <h4><i class="fa fa-plus"></i> Add some files</h4>
+            <span>Browse and import your multimedia files into Gerbera.</span>
+          </div>
         </a>
 
         <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
-          <h4><i class="fa fa-files-o"></i> View indexed files</h4>
-          <span>View, update and remove files from Gerbera.</span>
+          <div class="sublink">
+            <h4><i class="fa fa-files-o"></i> View indexed files</h4>
+            <span>View, update and remove files from Gerbera.</span>
+          </div>
         </a>
 
         <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
-          <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
-          <span>Show clients detected by Gerbera and their profile details.</span>
+          <div class="sublink">
+            <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
+            <span>Show clients detected by Gerbera and their profile details.</span>
+          </div>
         </a>
 
         <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
-          <h4><i class="fa fa-sliders"></i> Edit Configuration</h4>
-          <span>Change settings for Gerbera.</span>
+          <div class="sublink">
+            <h4><i class="fa fa-sliders"></i> Edit Configuration</h4>
+            <span>Change settings for Gerbera.</span>
+          </div>
         </a>
 
       </div>
-      <div id="server-status" class="col-md-3">
-        <h4>Server Status</h4>
+      <div id="server-status" class="col md-3">
+        <h4>Server Statistics</h4>
         <table class="table">
-          <tr>
-            <td>
-              <i class="fa fa-music"></i>&nbsp;&nbsp;Music
-            </td>
-            <td>
-              <div id="status-audio"></div>
-            </td>
+          <tr id="status-head" class="status-head">
+            <th>File Type</th>
+            <th><div class="stat-value">Count</div></th>
+            <th><div class="stat-value">Size</div></th>
           </tr>
-          <tr>
-            <td><i class="fa fa-film"></i>&nbsp;&nbsp;Videos</td><td><div id="status-video"></div></td>
+          <tr id="status-total" class="status-line">
+            <td><i class="fa fa-list"></i>&nbsp;&nbsp;Total Media Files</td>
+            <td><div class="stat-value" id="status-total-count"></div></td>
+            <td><div class="stat-value" id="status-total-size"></div></td>
           </tr>
-          <tr>
-            <td><i class="fa fa-camera"></i>&nbsp;&nbsp;Images</td><td><div id="status-image"></div></td>
+          <tr id="status-item">
+            <td><div class="stat-value text-muted">General</div></td>
+            <td><div class="stat-value text-muted" id="status-item-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-item-size"></div></td>
           </tr>
-          <tr></tr>
-          <tr><td>Total Media Files</td><td><div id="status-total"></div></td></tr>
+          <tr id="status-audio" class="status-line">
+            <td><i class="fa fa-music"></i>&nbsp;&nbsp;Audio</td>
+            <td><div class="stat-value" id="status-audio-count"></div></td>
+            <td><div class="stat-value" id="status-audio-size"></div></td>
+          </tr>
+          <tr id="status-audioMusic">
+            <td><div class="stat-value text-muted">Music Tracks</div></td>
+            <td><div class="stat-value text-muted" id="status-audioMusic-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-audioMusic-size"></div></td>
+          </tr>
+          <tr id="status-audioBook">
+            <td><div class="stat-value text-muted">Audiobooks</div></td>
+            <td><div class="stat-value text-muted" id="status-audioBook-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-audioBook-size"></div></td>
+          </tr>
+          <tr id="status-audioBroadcast">
+            <td><div class="stat-value text-muted">Audio Broadcasts</div></td>
+            <td><div class="stat-value text-muted" id="status-audioBroadcast-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-audioBroadcast-size"></div></td>
+          </tr>
+          <tr id="status-video" class="status-line">
+            <td><i class="fa fa-film"></i>&nbsp;&nbsp;Videos</td>
+            <td><div class="stat-value" id="status-video-count"></div></td>
+            <td><div class="stat-value" id="status-video-size"></div></td>
+          </tr>
+          <tr id="status-videoMovie">
+            <td><div class="stat-value text-muted">Movies</div></td>
+            <td><div class="stat-value text-muted" id="status-videoMovie-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-videoMovie-size"></div></td>
+          </tr>
+          <tr id="status-videoBroadcast">
+            <td><div class="stat-value text-muted">Video Broadcasts</div></td>
+            <td><div class="stat-value text-muted" id="status-videoBroadcast-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-videoBroadcast-size"></div></td>
+          </tr>
+          <tr id="status-videoMusicVideoClip">
+            <td><div class="stat-value text-muted">Music Video Clips</div></td>
+            <td><div class="stat-value text-muted" id="status-videoMusicVideoClip-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-videoMusicVideoClip-size"></div></td>
+          </tr>
+          <tr id="status-image" class="status-line">
+            <td><i class="fa fa-camera"></i>&nbsp;&nbsp;Images</td>
+            <td><div class="stat-value" id="status-image-count"></div></td>
+            <td><div class="stat-value" id="status-image-size"></div></td>
+          </tr>
+          <tr id="status-imagePhoto">
+            <td><div class="stat-value text-muted">Photos</div></td>
+            <td><div class="stat-value text-muted" id="status-imagePhoto-count"></div></td>
+            <td><div class="stat-value text-muted" id="status-imagePhoto-size"></div></td>
+          </tr>
+          <tr id="status-text" class="status-line">
+            <td><i class="fa fa-file-text"></i>&nbsp;&nbsp;Text</td>
+            <td><div class="stat-value" id="status-text-count"></div></td>
+            <td><div class="stat-value" id="status-text-size"></div></td>
+          </tr>
         </table>
       </div>
     </div>

@@ -120,38 +120,108 @@ void Web::ConfigLoad::process()
     xml2JsonHints->setFieldType("id", "string");
     xml2JsonHints->setFieldType("aid", "string");
     xml2JsonHints->setFieldType("value", "string");
+    xml2JsonHints->setFieldType("defaultValue", "string");
     xml2JsonHints->setFieldType("origValue", "string");
 
     log_debug("Sending Config to web!");
 
     // write database status
     {
-        auto item = values.append_child("item");
-        createItem(item, "/status/attribute::total", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles());
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::virtual", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(true));
+        {
+            StatsParam stats(StatsParam::StatsMode::Count, "", "", false);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::totalCount", CFG_MAX, CFG_MAX);
+            setValue(item, database->getFileStats(stats));
+        }
+        {
+            StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::totalSize", CFG_MAX, CFG_MAX);
+            setValue(item, CdsResource::formatSizeValue(database->getFileStats(stats)));
+        }
+        {
+            StatsParam stats(StatsParam::StatsMode::Count, "", "", true);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::virtual", CFG_MAX, CFG_MAX);
+            setValue(item, database->getFileStats(stats));
+        }
 
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::audio", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(false, "audio"));
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::video", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(false, "video"));
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::image", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(false, "image"));
+        {
+            StatsParam stats(StatsParam::StatsMode::Count, "audio", "", true);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::audioVirtual", CFG_MAX, CFG_MAX);
+            setValue(item, database->getFileStats(stats));
+        }
+        {
+            StatsParam stats(StatsParam::StatsMode::Count, "video", "", true);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::videoVirtual", CFG_MAX, CFG_MAX);
+            setValue(item, database->getFileStats(stats));
+        }
+        {
+            StatsParam stats(StatsParam::StatsMode::Count, "image", "", true);
+            auto item = values.append_child("item");
+            createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
+            setValue(item, database->getFileStats(stats));
+        }
 
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::audioVirtual", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(true, "audio"));
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::videoVirtual", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(true, "video"));
-        item = values.append_child("item");
-        createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
-        setValue(item, database->getTotalFiles(true, "image"));
+        StatsParam statc(StatsParam::StatsMode::Count, "", "", false);
+        auto cnt = database->getGroupStats(statc);
+        StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
+        auto siz = database->getGroupStats(stats);
+
+        static std::map<std::string, std::string> statMapBase {
+            { UPNP_CLASS_ITEM, "item" },
+        };
+        for (auto&& [cls, attr] : statMapBase) {
+            if (cnt[cls] > 0) {
+                auto item = values.append_child("item");
+                createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
+                setValue(item, cnt[cls]);
+                auto item2 = values.append_child("item");
+                createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
+                setValue(item2, CdsResource::formatSizeValue(siz[cls]));
+                auto item3 = values.append_child("item");
+                createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
+                setValue(item3, siz[cls]);
+            }
+        }
+        static std::map<std::string, std::string> statMap {
+            { UPNP_CLASS_AUDIO_ITEM, "audio" },
+            { UPNP_CLASS_MUSIC_TRACK, "audioMusic" },
+            { UPNP_CLASS_AUDIO_BOOK, "audioBook" },
+            { UPNP_CLASS_AUDIO_BROADCAST, "audioBroadcast" },
+            { UPNP_CLASS_VIDEO_ITEM, "video" },
+            { UPNP_CLASS_VIDEO_MOVIE, "videoMovie" },
+            { UPNP_CLASS_VIDEO_BROADCAST, "videoBroadcast" },
+            { UPNP_CLASS_VIDEO_MUSICVIDEOCLIP, "videoMusicVideoClip" },
+            { UPNP_CLASS_IMAGE_ITEM, "image" },
+            { UPNP_CLASS_IMAGE_PHOTO, "imagePhoto" },
+            { UPNP_CLASS_TEXT_ITEM, "text" },
+        };
+        for (auto&& [cls, attr] : statMap) {
+            long long totalCnt = 0;
+            for (auto&& [cls2, valu] : cnt) {
+                if (startswith(cls2, cls))
+                    totalCnt += valu;
+            }
+            if (totalCnt > 0) {
+                long long totalSize = 0;
+                for (auto&& [cls2, valu] : siz) {
+                    if (startswith(cls2, cls))
+                        totalSize += valu;
+                }
+                auto item = values.append_child("item");
+                createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
+                setValue(item, totalCnt);
+                auto item2 = values.append_child("item");
+                createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
+                setValue(item2, CdsResource::formatSizeValue(totalSize));
+                auto item3 = values.append_child("item");
+                createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
+                setValue(item3, totalSize);
+            }
+        }
     }
 
     if (action == "status")

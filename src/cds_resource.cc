@@ -116,6 +116,17 @@ static const std::vector<struct ProfMapping> resSteps {
 };
 static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
 static const std::vector<std::string_view> freqUnits { "kHz", "MHz", "GHz" };
+std::string CdsResource::formatSizeValue(double value)
+{
+    auto result = fmt::format("{} B", value);
+    for (auto&& unit : sizeUnits) {
+        value /= 1024;
+        if (value < 1)
+            return result;
+        result = fmt::format("{:3.2f} {}", value, unit);
+    }
+    return result;
+}
 
 std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
 {
@@ -139,14 +150,7 @@ std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
         break;
     }
     case Attribute::SIZE: {
-        double size = stoulString(result);
-        result = fmt::format("{} B", size);
-        for (auto&& unit : sizeUnits) {
-            size /= 1024;
-            if (size < 1)
-                return result;
-            result = fmt::format("{:3.2f} {}", size, unit);
-        }
+        result = formatSizeValue(stoulString(result));
         break;
     }
     case Attribute::RESOLUTION: {

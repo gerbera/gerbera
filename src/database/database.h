@@ -149,13 +149,40 @@ public:
         , group(std::move(group))
     {
     }
-    const std::string& searchCriteria() const { return searchCrit; }
+    const std::string& getSearchCriteria() const { return searchCrit; }
     const std::string& getContainerID() const { return containerID; }
     bool getSearchableContainers() const { return searchableContainers; }
     int getStartingIndex() const { return startingIndex; }
     int getRequestedCount() const { return requestedCount; }
     const std::string& getSortCriteria() const { return sortCrit; }
     const std::string& getGroup() const { return group; }
+};
+
+class StatsParam {
+public:
+    enum class StatsMode {
+        Count,
+        Size,
+    };
+
+protected:
+    std::string mimeType;
+    std::string upnpClass;
+    StatsMode mode { StatsMode::Count };
+    bool isVirtual { false };
+
+public:
+    StatsParam(StatsMode mode, std::string mimeType, std::string upnpClass, bool isVirtual)
+        : mimeType(std::move(mimeType))
+        , upnpClass(std::move(upnpClass))
+        , mode(mode)
+        , isVirtual(isVirtual)
+    {
+    }
+    const std::string& getMimeType() const { return mimeType; }
+    const std::string& getUpnpClass() const { return upnpClass; }
+    StatsMode getMode() const { return mode; }
+    bool getVirtual() const { return isVirtual; }
 };
 
 class Database {
@@ -270,7 +297,8 @@ public:
     virtual std::vector<int> getServiceObjectIDs(char servicePrefix) = 0;
 
     /* accounting methods */
-    virtual int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") = 0;
+    virtual long long getFileStats(const StatsParam& stats) = 0;
+    virtual std::map<std::string, long long> getGroupStats(const StatsParam& stats) = 0;
 
     /* internal setting methods */
     virtual std::string getInternalSetting(const std::string& key) = 0;
