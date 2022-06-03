@@ -37,6 +37,11 @@ module.exports = function (driver) {
     return await driver.findElement(By.css('ul.navbar-nav'));
   };
 
+  this.statsVisible = async () => {
+    const stats = await driver.findElement(By.id('server-status'));
+    return await driver.wait(until.elementIsVisible(stats), 5000);
+  };
+
   this.logout = async () => {
     const logoutBtn = driver.findElement(By.id('logout'));
     await driver.wait(until.elementIsVisible(logoutBtn), 5000);

@@ -151,7 +151,7 @@ public:
 
     static std::string getAttributeName(Attribute attr);
     static std::string getAttributeDisplay(Attribute attr);
-
+    static std::string formatSizeValue(double value);
     static Attribute mapAttributeName(const std::string& name);
 
 protected:

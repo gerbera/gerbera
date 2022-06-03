@@ -83,6 +83,14 @@ public:
             return null_value;
         return std::atoi(c);
     }
+    /// \brief Return the value of column index as an integer value
+    long long col_long(int index, long long null_value) const
+    {
+        const char* c = col_c_str(index);
+        if (!c || *c == '\0')
+            return null_value;
+        return std::atoll(c);
+    }
     virtual char* col_c_str(int index) const = 0;
 };
 
@@ -133,7 +141,8 @@ public:
     std::vector<int> getServiceObjectIDs(char servicePrefix) override;
 
     /* accounting methods */
-    int getTotalFiles(bool isVirtual = false, const std::string& mimeType = "", const std::string& upnpClass = "") override;
+    long long getFileStats(const StatsParam& stats) override;
+    std::map<std::string, long long> getGroupStats(const StatsParam& stats) override;
 
     std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) override;
     std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) override;

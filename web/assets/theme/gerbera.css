@@ -404,7 +404,11 @@ body,
 
 .page-link:focus,
 .page-link:hover {
-   color: #222;
+    color: #222;
+}
+
+.stat-value {
+    text-align: end;
 }
 
 /* Cancel top level padding */
@@ -640,13 +644,23 @@ body,
 #home {
     height: 100%;
     width: 100%;
+    overflow-y: auto;
 }
 
 #homeintro {
-    padding-top: 6rem;
-    padding-bottom: 3rem;
+    padding-top: 8vh;
+    padding-bottom: 4vh;
     background-color: rgb(248, 248, 248);
     border-bottom: rgb(231, 231, 231) 1px solid;
+}
+
+#homelinks {
+    height: calc(100% - 12vh - 4rem - 24px);
+    overflow-y: auto;
+}
+
+.sublink:hover {
+    background-color: rgb(248, 248, 248);
 }
 
 #home a {
@@ -657,6 +671,24 @@ body,
     margin-top: 2em;
 }
 
-#status-total, #status-audio, #status-video, #status-image {
-    text-align: end;
+.status-head {
+    font-style: italic;
+    text-align: center;
+    background-color: rgb(248, 248, 248);
+}
+.status-line {
+    text-align: center;
+}
+#status-total {
+    font-weight: bold;
+}
+
+@media (max-height: 600px) {
+    #homeintro {
+        padding-top: 4vh;
+        padding-bottom: 1vh;
+    }
+    #homelinks {
+        height: calc(100% - 5vh - 4rem - 24px);
+    }
 }

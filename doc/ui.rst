@@ -33,6 +33,10 @@ When the Gerbera server starts successfully it reports the location of the web b
 
     2018-01-28 17:05:28    INFO: The Web UI can be reached by following this link: http://127.0.0.1:49152/
 
+.. image:: _static/main-view.png
+   :alt: Gerbera Home Page
+   :target: _static/main-view.png
+
 
 Login/Logout
 ~~~~~~~~~~~~

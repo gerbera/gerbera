@@ -987,6 +987,141 @@
 	"values": {
 		"item": [
 			{
+				"item": "/status/attribute::totalCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "42"
+			},
+			{
+				"item": "/status/attribute::audioCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "17"
+			},
+			{
+				"item": "/status/attribute::audioCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "17"
+			},
+			{
+				"item": "/status/attribute::audioMusicCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "10"
+			},
+			{
+				"item": "/status/attribute::audioBookCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "7"
+			},
+			{
+				"item": "/status/attribute::videoCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "8"
+			},
+			{
+				"item": "/status/attribute::videoMovieCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "5"
+			},
+			{
+				"item": "/status/attribute::imageCount",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "15"
+			},
+			{
+				"item": "/status/attribute::totalSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "128 GB"
+			},
+			{
+				"item": "/status/attribute::audioSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "420 MB"
+			},
+			{
+				"item": "/status/attribute::audioMusicSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "310 MB"
+			},
+			{
+				"item": "/status/attribute::audioBookSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "110 MB"
+			},
+			{
+				"item": "/status/attribute::videoSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "120 GB"
+			},
+			{
+				"item": "/status/attribute::videoMovieSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "110 GB"
+			},
+			{
+				"item": "/status/attribute::imageSize",
+				"id": "171",
+				"status": "unchanged",
+				"source": "config.xml",
+				"origValue": "",
+				"defaultValue": "",
+				"value": "7.6 GB"
+			},
+			{
 				"item": "/server/port",
 				"id": "00",
 				"aid": "00",
