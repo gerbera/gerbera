@@ -75,7 +75,7 @@ GrbNet::GrbNet(const std::string& addr, int af)
 
 GrbNet::GrbNet(const struct sockaddr_storage* addr)
 {
-    std::memcpy(&sockAddr, addr, sizeof(sockAddr));
+    sockAddr = *addr;
 }
 
 void GrbNet::setPort(in_port_t port)

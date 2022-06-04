@@ -143,7 +143,7 @@ struct inotify_event* Inotify::nextEvent()
 
             // how much of the event do we have?
             bytes = reinterpret_cast<char*>(event.data()) + bytes - reinterpret_cast<char*>(ret);
-            std::memcpy(event.data(), ret, bytes);
+            std::copy_n(ret, bytes, event.data());
             return nextEvent();
         }
         return ret;

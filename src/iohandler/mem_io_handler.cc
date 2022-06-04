@@ -42,7 +42,7 @@ MemIOHandler::MemIOHandler(const std::string& str)
     : buffer(new char[str.length()])
     , length(str.length())
 {
-    std::memcpy(this->buffer, str.c_str(), length);
+    std::copy_n(str.c_str(), length, this->buffer);
 }
 
 MemIOHandler::~MemIOHandler()
@@ -68,7 +68,7 @@ std::size_t MemIOHandler::read(std::byte* buf, std::size_t length)
     if (length > std::size_t(rest))
         length = rest;
 
-    std::memcpy(buf, buffer + pos, length);
+    std::copy_n(reinterpret_cast<std::byte*>(buffer) + pos, length, buf);
     pos = pos + length;
     ret = int(length);
 
