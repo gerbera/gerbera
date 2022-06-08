@@ -415,7 +415,7 @@ std::string_view getProtocol(std::string_view protocolInfo)
     return (pos == std::string_view::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
-std::string millisecondsToHMSF(int milliseconds)
+std::string millisecondsToHMSF(long milliseconds)
 {
     auto ms = milliseconds % 1000;
     milliseconds /= 1000;

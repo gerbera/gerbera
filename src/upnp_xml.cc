@@ -379,7 +379,7 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& 
         res.append_attribute(CdsResource::getAttributeName(attr).c_str()) = val.c_str();
     }
 
-    for (auto [k, v] : clientSpecificAttrs) {
+    for (auto&& [k, v] : clientSpecificAttrs) {
         res.append_attribute(k.c_str()) = v.c_str();
     }
 }
@@ -775,7 +775,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // Note we dont actually add these as res tags.
         if (purpose == CdsResource::Purpose::Thumbnail) {
             auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data());
-            aa.append_child(pugi::node_pcdata).set_value((url).c_str());
+            aa.append_child(pugi::node_pcdata).set_value(url.c_str());
 
             /// \todo clean this up, make sure to check the mimetype and
             /// provide the profile correctly

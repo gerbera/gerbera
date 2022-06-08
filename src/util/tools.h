@@ -161,7 +161,7 @@ std::chrono::seconds toSeconds(TP tp)
 }
 
 /// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
-std::string millisecondsToHMSF(int milliseconds);
+std::string millisecondsToHMSF(long milliseconds);
 
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
 int HMSFToMilliseconds(std::string_view time);
