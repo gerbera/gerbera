@@ -32,7 +32,7 @@
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<ClientConfigList>& result)
+bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result)
 {
     if (!element)
         return true;

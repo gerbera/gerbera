@@ -66,10 +66,8 @@ bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root)
 
 bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathName) const
 {
-    if (rawCheck) {
-        if (!rawCheck(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue);
-        }
+    if (rawCheck && !rawCheck(optValue)) {
+        throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue);
     }
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
