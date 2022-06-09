@@ -115,13 +115,13 @@ void Web::ConfigLoad::process()
     std::string action = param("action");
 
     // set handling of json properties
-    xml2JsonHints->setArrayName(values, "item");
-    xml2JsonHints->setFieldType("item", "string");
-    xml2JsonHints->setFieldType("id", "string");
-    xml2JsonHints->setFieldType("aid", "string");
-    xml2JsonHints->setFieldType("value", "string");
-    xml2JsonHints->setFieldType("defaultValue", "string");
-    xml2JsonHints->setFieldType("origValue", "string");
+    xml2Json->setArrayName(values, "item");
+    xml2Json->setFieldType("item", "string");
+    xml2Json->setFieldType("id", "string");
+    xml2Json->setFieldType("aid", "string");
+    xml2Json->setFieldType("value", "string");
+    xml2Json->setFieldType("defaultValue", "string");
+    xml2Json->setFieldType("origValue", "string");
 
     log_debug("Sending Config to web!");
 
@@ -229,7 +229,7 @@ void Web::ConfigLoad::process()
 
     // generate meta info for ui
     auto meta = root.append_child("types");
-    xml2JsonHints->setArrayName(meta, "item");
+    xml2Json->setArrayName(meta, "item");
     for (auto&& cs : ConfigDefinition::getOptionList()) {
         addTypeMeta(meta, cs);
     }

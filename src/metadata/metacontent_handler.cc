@@ -275,7 +275,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
 void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_SUBTITLE);
-    auto objFilename = obj->getLocation().filename().string() + ".";
+    auto objFilename = obj->getLocation().filename().stem().string();
 
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::SUBTITLE);
@@ -298,6 +298,9 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             auto lang = path.stem().string();
             if (startswith(lang, objFilename)) {
                 replaceAllString(lang, objFilename, ""); // remove starting part with filename
+            }
+            while (!lang.empty() && lang[0] == '.') {
+                lang = lang.substr(1); // remove starting dot
             }
             if (!lang.empty())
                 resource->addAttribute(CdsResource::Attribute::LANGUAGE, lang); // assume file name is related to some language

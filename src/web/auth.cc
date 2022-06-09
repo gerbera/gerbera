@@ -84,7 +84,7 @@ void Web::Auth::process()
 
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         auto ipp = cfg.append_child("items-per-page");
-        xml2JsonHints->setArrayName(ipp, "option");
+        xml2Json->setArrayName(ipp, "option");
         ipp.append_attribute("default") = config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
         auto menuOpts = config->getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
@@ -99,7 +99,7 @@ void Web::Auth::process()
 #endif
 
         auto actions = cfg.append_child("actions");
-        xml2JsonHints->setArrayName(actions, "action");
+        xml2Json->setArrayName(actions, "action");
         // actions->appendTextChild("action", "fokel1");
         // actions->appendTextChild("action", "fokel2");
 

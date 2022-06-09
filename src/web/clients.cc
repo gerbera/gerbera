@@ -46,7 +46,7 @@ void Web::Clients::process()
     auto root = xmlDoc->document_element();
 
     auto clients = root.append_child("clients");
-    xml2JsonHints->setArrayName(clients, "client");
+    xml2Json->setArrayName(clients, "client");
 
     auto&& clientArr = content->getContext()->getClients()->getClientList();
     for (auto&& obj : clientArr) {
@@ -69,7 +69,7 @@ void Web::Clients::process()
     }
 
     auto groups = root.append_child("groups");
-    xml2JsonHints->setArrayName(groups, "group");
+    xml2Json->setArrayName(groups, "group");
     auto&& groupArr = content->getContext()->getDatabase()->getClientGroupStats();
     for (auto&& obj : groupArr) {
         auto item = groups.append_child("group");

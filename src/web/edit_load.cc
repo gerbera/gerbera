@@ -94,8 +94,8 @@ void Web::EditLoad::process()
 
     // set handling of json properties
     auto root = xmlDoc->document_element();
-    xml2JsonHints->setFieldType("value", "string");
-    xml2JsonHints->setFieldType("title", "string");
+    xml2Json->setFieldType("value", "string");
+    xml2Json->setFieldType("title", "string");
 
     // write object core info
     auto item = root.append_child("item");
@@ -137,8 +137,8 @@ void Web::EditLoad::process()
 
     // write metadata
     auto metaData = item.append_child("metadata");
-    xml2JsonHints->setArrayName(metaData, "metadata");
-    xml2JsonHints->setFieldType("metavalue", "string");
+    xml2Json->setArrayName(metaData, "metadata");
+    xml2Json->setFieldType("metavalue", "string");
 
     for (auto&& [key, val] : obj->getMetaData()) {
         auto metaEntry = metaData.append_child("metadata");
@@ -149,8 +149,8 @@ void Web::EditLoad::process()
 
     // write auxdata
     auto auxData = item.append_child("auxdata");
-    xml2JsonHints->setArrayName(auxData, "auxdata");
-    xml2JsonHints->setFieldType("auxvalue", "string");
+    xml2Json->setArrayName(auxData, "auxdata");
+    xml2Json->setFieldType("auxvalue", "string");
 
     for (auto&& [key, val] : obj->getAuxData()) {
         auto auxEntry = auxData.append_child("auxdata");
@@ -160,9 +160,9 @@ void Web::EditLoad::process()
     }
 
     auto resources = item.append_child("resources");
-    xml2JsonHints->setArrayName(resources, "resources");
-    xml2JsonHints->setFieldType("resvalue", "string");
-    xml2JsonHints->setFieldType("rawvalue", "string");
+    xml2Json->setArrayName(resources, "resources");
+    xml2Json->setFieldType("resvalue", "string");
+    xml2Json->setFieldType("rawvalue", "string");
 
     auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
 
