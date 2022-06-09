@@ -96,7 +96,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     UpnpFileInfo_set_FileLength(info, -1); // length is unknown
 
-    UpnpFileInfo_set_LastModified(info, 0);
+    UpnpFileInfo_set_LastModified(info, currentTime().count()); // always use current time
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_IsReadable(info, 1);
 
@@ -130,7 +130,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
     decl.append_attribute("encoding") = "UTF-8";
     auto root = xmlDoc->append_child("root");
 
-    xml2JsonHints = std::make_unique<Xml2Json::Hints>();
+    xml2Json = std::make_unique<Xml2Json>();
 
     std::string error;
     int errorCode = 0;
@@ -185,7 +185,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
     }
 
     try {
-        output = Xml2Json::getJson(root, *xml2JsonHints);
+        output = xml2Json->getJson(root);
     } catch (const std::runtime_error& e) {
         log_error("Web marshalling error: {}", e.what());
     }

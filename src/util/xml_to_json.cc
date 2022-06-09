@@ -37,73 +37,48 @@
 
 #include "util/tools.h"
 
-std::string Xml2Json::getJson(const pugi::xml_node& root, const Hints& hints)
+std::string Xml2Json::getJson(const pugi::xml_node& node)
 {
-    std::ostringstream buf;
-    buf << '{';
-    handleElement(buf, root, hints);
-    buf << '}';
-    return buf.str();
-}
-
-void Xml2Json::handleElement(std::ostringstream& buf, const pugi::xml_node& node, const Hints& hints)
-{
-    bool firstChild = true;
-
-    auto attrs = node.attributes();
-    bool haveAttribute = std::distance(attrs.begin(), attrs.end()) > 0;
-    if (haveAttribute) {
-        for (auto&& at : attrs) {
-            if (!firstChild)
-                buf << ',';
-            else
-                firstChild = false;
-            buf << getAsString(at.name()) << ':' << getValue(at.name(), at.as_string(), hints);
-        }
+    std::vector<std::string> nodeBuf;
+    nodeBuf.reserve(std::distance(node.attributes().begin(), node.attributes().end()));
+    for (auto&& at : node.attributes()) {
+        nodeBuf.push_back(fmt::format("{}:{}", getAsString(at.name()), getValue(at.name(), at.as_string())));
     }
 
-    auto [array, nodeName] = isArray(node, hints);
-
-    if (array) {
-        if (!firstChild)
-            buf << ',';
-        buf << getAsString(nodeName) << ':';
-        buf << '[';
-        firstChild = true;
-    }
+    auto [array, nodeName] = isArray(node);
+    std::vector<std::string> childBuf;
+    if (array)
+        childBuf.reserve(std::distance(node.children().begin(), node.children().end()));
+    else
+        nodeBuf.reserve(nodeBuf.size() + std::distance(node.children().begin(), node.children().end()));
 
     for (auto&& child : node.children()) {
         pugi::xml_node_type type = child.type();
 
         if (type == pugi::node_element) {
-            if (!firstChild)
-                buf << ',';
-            else
-                firstChild = false;
+            if (array && nodeName != child.name()) {
+                throw_std_runtime_error("if an element {} is of arrayType, all children have to have the same name (found: {})", nodeName, child.name());
+            }
 
             // look ahead
             bool haveChildAttribute = std::distance(child.attributes().begin(), child.attributes().end()) > 0;
             bool haveChildElement = std::any_of(child.children().begin(), child.children().end(), [](auto&& el) { return el.type() == pugi::node_element; });
-
+            auto childValue = (haveChildAttribute || haveChildElement || isArray(child).first)
+                ? getJson(child)
+                : getValue(child.name(), child.text().as_string());
             if (array) {
-                if (nodeName != child.name())
-                    throw_std_runtime_error("if an element is of arrayType, all children have to have the same name");
+                childBuf.push_back(childValue);
             } else {
-                buf << getAsString(child.name()) << ':';
-            }
-
-            if (haveChildAttribute || haveChildElement || isArray(child, hints).first) {
-                buf << '{';
-                handleElement(buf, child, hints);
-                buf << '}';
-            } else {
-                buf << getValue(child.name(), child.text().as_string(), hints);
+                nodeBuf.push_back(fmt::format("{}:{}", getAsString(child.name()), childValue));
             }
         }
     }
 
-    if (array)
-        buf << ']';
+    if (array) {
+        nodeBuf.push_back(fmt::format("{}:[{}]", getAsString(nodeName), fmt::join(childBuf, ",")));
+    }
+
+    return fmt::format("{{{}}}", fmt::join(nodeBuf, ","));
 }
 
 std::string Xml2Json::getAsString(std::string_view str)
@@ -115,14 +90,11 @@ std::string Xml2Json::getAsString(std::string_view str)
     return fmt::format(R"("{}")", escaped);
 }
 
-std::string Xml2Json::getValue(const std::string& name, const char* text, const Hints& hints)
+std::string Xml2Json::getValue(const std::string& name, const char* text)
 {
-    std::string str = text;
-    auto&& hintsType = hints.asType;
+    auto hint = asType.find(name);
 
-    auto hint = hintsType.find(name);
-
-    if (hint != hintsType.end()) {
+    if (hint != asType.end()) {
         if (hint->second == "string") {
             return getAsString(text);
         }
@@ -136,6 +108,8 @@ std::string Xml2Json::getValue(const std::string& name, const char* text, const 
         }
     }
 
+    std::string str = text;
+
     // boolean
     if (str == "true" || str == "false")
         return str;
@@ -147,12 +121,11 @@ std::string Xml2Json::getValue(const std::string& name, const char* text, const 
     return getAsString(text);
 }
 
-std::pair<bool, std::string_view> Xml2Json::isArray(const pugi::xml_node& node, const Hints& hints)
+std::pair<bool, std::string_view> Xml2Json::isArray(const pugi::xml_node& node)
 {
-    auto&& hintsArray = hints.asArray;
-    auto hint = hintsArray.find(node);
+    auto hint = asArray.find(node);
 
-    if (hint == hintsArray.end())
+    if (hint == asArray.end())
         return {};
 
     return { true, hint->second };

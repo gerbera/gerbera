@@ -40,6 +40,7 @@
 #include <upnptools.h>
 #endif
 
+#include <sstream>
 #include <thread>
 
 #include "config/config_manager.h"

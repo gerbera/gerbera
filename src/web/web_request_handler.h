@@ -76,7 +76,7 @@ protected:
     std::unique_ptr<pugi::xml_document> xmlDoc;
 
     /// \brief Hints for Xml2Json, such that we know when to create an array
-    std::unique_ptr<Xml2Json::Hints> xml2JsonHints;
+    std::unique_ptr<Xml2Json> xml2Json;
 
     /// \brief The current session, used for this request; will be filled by
     /// checkRequest()

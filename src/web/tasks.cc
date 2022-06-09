@@ -44,7 +44,7 @@ void Web::Tasks::process()
 
     if (action == "list") {
         auto tasksEl = root.append_child("tasks");
-        xml2JsonHints->setArrayName(tasksEl, "tasks");
+        xml2Json->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
         for (auto&& task : taskList) {
             appendTask(task, tasksEl);

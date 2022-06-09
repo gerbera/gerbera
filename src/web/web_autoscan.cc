@@ -139,7 +139,7 @@ void Web::Autoscan::process()
         // ---
 
         auto autoscansEl = root.append_child("autoscans");
-        xml2JsonHints->setArrayName(autoscansEl, "autoscan");
+        xml2Json->setArrayName(autoscansEl, "autoscan");
         for (auto&& autoscanDir : autoscanList) {
             auto autoscanEl = autoscansEl.append_child("autoscan");
             autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();

@@ -59,10 +59,10 @@ void Web::Items::process()
     // set result options
     auto root = xmlDoc->document_element();
     auto items = root.append_child("items");
-    xml2JsonHints->setArrayName(items, "item");
-    xml2JsonHints->setFieldType("title", "string");
-    xml2JsonHints->setFieldType("part", "string");
-    xml2JsonHints->setFieldType("track", "string");
+    xml2Json->setArrayName(items, "item");
+    xml2Json->setFieldType("title", "string");
+    xml2Json->setFieldType("part", "string");
+    xml2Json->setFieldType("track", "string");
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(DEFAULT_CLIENT_GROUP, parentID);
