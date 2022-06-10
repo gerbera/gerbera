@@ -91,8 +91,12 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         if (sub) {
             std::string param = sub.text().as_string();
             if (!param.empty()) {
-                auto res = Resolution(param);
-                prof->setAttributeOverride(CdsResource::Attribute::RESOLUTION, res.string());
+                try {
+                    auto res = Resolution(param);
+                    prof->setAttributeOverride(CdsResource::Attribute::RESOLUTION, res.string());
+                } catch (const std::runtime_error& e) {
+                    log_info("Config setup for resolution {} is invalid", param);
+                }
             }
         }
 

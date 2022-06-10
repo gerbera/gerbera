@@ -154,11 +154,16 @@ std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
         break;
     }
     case Attribute::RESOLUTION: {
-        auto res = Resolution(result);
-        for (auto&& [val, mx, my] : resSteps) {
-            if (res.x() <= mx && res.y() <= my) {
-                return val.data();
+        try {
+            auto res = Resolution(result);
+            for (auto&& [val, mx, my] : resSteps) {
+                if (res.x() <= mx && res.y() <= my) {
+                    return val.data();
+                }
             }
+        } catch (const std::runtime_error& e) {
+            log_info("Resource attribute for resolution {} is invalid", result);
+            return fmt::format("???", result);
         }
         break;
     }
