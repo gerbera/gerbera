@@ -52,6 +52,12 @@ Resolution::Resolution(std::uint64_t x, std::uint64_t y)
     : _x(x)
     , _y(y)
 {
+    if (x == 0 || x == std::numeric_limits<uint64_t>::max()) {
+        throw_std_runtime_error("Failed to set '{}x{}' as resolution", x, y);
+    }
+    if (y == 0 || y == std::numeric_limits<uint64_t>::max()) {
+        throw_std_runtime_error("Failed to set '{}x{}' as resolution", x, y);
+    }
 }
 
 std::string Resolution::string() const

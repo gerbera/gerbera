@@ -42,21 +42,21 @@
 #include "util/tools.h"
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
-static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t resNum)
+static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t resNum = 0)
 {
+    if (resNum >= item->getResourceCount()) {
+        log_warning("Invalid resource {} index {}", item->getLocation().c_str(), resNum);
+        return;
+    }
     try {
         auto fioH = FileIOHandler(item->getLocation());
         fioH.open(UPNP_READ);
         auto resolution = getJpegResolution(fioH);
 
-        if (resNum >= item->getResourceCount()) {
-            log_warning("Invalid resource index");
-            return;
-        }
         item->getResource(resNum)->addAttribute(CdsResource::Attribute::RESOLUTION, resolution.string());
 
     } catch (const std::runtime_error& e) {
-        log_error("Exception! {}", e.what());
+        log_error("Failed to parse EXIF {} resolution: {}", item->getLocation().c_str(), e.what());
     }
 }
 
@@ -265,7 +265,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     if (exifData == nullptr) {
         log_debug("Exif data not found, attempting to set resolution internally...");
-        setJpegResolutionResource(item, 0);
+        setJpegResolutionResource(item);
         return;
     }
 
@@ -282,24 +282,23 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         item->getResource(ContentHandler::DEFAULT)->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", imageX, imageY));
     } else {
         log_debug("EXIF resolution not found, falling back to parsing directly: {}", item->getLocation().c_str());
-        setJpegResolutionResource(item, 0);
+        setJpegResolutionResource(item);
     }
 
     if (exifData->size != 0U) {
+        auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, CdsResource::Purpose::Thumbnail);
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
+        item->addResource(resource);
         try {
             auto ioH = MemIOHandler(exifData->data, exifData->size);
             ioH.open(UPNP_READ);
             auto thResolution = getJpegResolution(ioH);
             log_debug("EXIF Thumb Resolution: {}", thResolution.string());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, CdsResource::Purpose::Thumbnail);
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
             resource->addAttribute(CdsResource::Attribute::RESOLUTION, thResolution.string());
-            item->addResource(resource);
-
         } catch (const std::runtime_error& e) {
-            log_error("Failed to parse EXIF Thumbnail details: {}", e.what());
+            log_error("Failed to parse EXIF Thumbnail {} details: {}", item->getLocation().c_str(), e.what());
         }
-    } // (ed->size)
+    } // (exifData->size)
     exif_data_unref(exifData);
 }
 

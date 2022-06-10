@@ -63,12 +63,12 @@
 
 constexpr unsigned int ITEM_BUF_SIZE = 16;
 
-uint16_t getuint16(const std::byte* shrt)
+static uint16_t getuint16(const std::byte* shrt)
 {
     return std::to_integer<uint16_t>(shrt[0]) << CHAR_BIT | std::to_integer<uint8_t>(shrt[1]);
 }
 
-std::uint8_t getUint8(IOHandler& ioh)
+static std::uint8_t getUint8(IOHandler& ioh)
 {
     std::byte byte {};
     auto ret = ioh.read(&byte, 1);
@@ -78,7 +78,7 @@ std::uint8_t getUint8(IOHandler& ioh)
     return std::to_integer<uint8_t>(byte);
 }
 
-Resolution getJpegResolution_(IOHandler& ioh)
+static Resolution getJpegResolutionRaw(IOHandler& ioh)
 {
     int a = getUint8(ioh);
     if (a != 0xff || getUint8(ioh) != M_SOI) {
@@ -160,7 +160,7 @@ Resolution getJpegResolution_(IOHandler& ioh)
 Resolution getJpegResolution(IOHandler& ioh)
 {
     try {
-        auto res = getJpegResolution_(ioh);
+        auto res = getJpegResolutionRaw(ioh);
         ioh.close();
         return res;
     } catch (const std::runtime_error& ex) {
