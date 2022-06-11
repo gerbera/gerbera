@@ -66,7 +66,7 @@
 #include "scripting/scripting_runtime.h"
 #endif
 
-bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual)
+bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
 {
     if (op == "=" && actual.find(expect) != std::string::npos)
         return true;
@@ -77,7 +77,7 @@ bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const
     return (op == ">" && actual > expect);
 }
 
-bool UpnpMap::checkValue(const std::string& op, int expect, int actual)
+bool UpnpMap::checkValue(const std::string& op, int expect, int actual) const
 {
     if (op == "=" && actual != expect)
         return true;
@@ -88,7 +88,7 @@ bool UpnpMap::checkValue(const std::string& op, int expect, int actual)
     return (op == ">" && actual > expect);
 }
 
-bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt)
+bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const
 {
     bool match = false;
     if (startswith(mt, mimeType)) {

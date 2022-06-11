@@ -46,7 +46,7 @@ ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context
 {
 }
 
-void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
+void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -60,7 +60,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
     log_debug("end");
 }
 
-void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request)
+void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -86,7 +86,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
     log_debug("end");
 }
 
-void ConnectionManagerService::processActionRequest(ActionRequest& request)
+void ConnectionManagerService::processActionRequest(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -106,7 +106,7 @@ void ConnectionManagerService::processActionRequest(ActionRequest& request)
     log_debug("end");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
+void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request) const
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();

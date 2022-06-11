@@ -59,7 +59,7 @@ protected:
     /// IsAuthorized(string DeviceID, i4 Result)
     ///
     /// This is currently unsupported (always returns 1)
-    void doIsAuthorized(ActionRequest& request);
+    void doIsAuthorized(ActionRequest& request) const;
 
     /// \brief Media Receiver Registrar service action: RegisterDevice()
     /// \param request Incoming ActionRequest.
@@ -67,13 +67,13 @@ protected:
     /// RegisterDevice(bin.base64 RegistrationReqMsg, bin.base64 RegistrationRespMsg)
     ///
     /// This action is currently unsupported.
-    void doRegisterDevice(ActionRequest& request);
+    void doRegisterDevice(ActionRequest& request) const;
 
     /// \brief Media Receiver Registrar service action: IsValidated()
     /// \param request Incoming ActionRequest.
     ///
     /// IsValidated(string DeviceID, i4 Result)
-    void doIsValidated(ActionRequest& request);
+    void doIsValidated(ActionRequest& request) const;
 
     std::shared_ptr<Config> config;
 
