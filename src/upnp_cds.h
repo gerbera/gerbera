@@ -77,13 +77,13 @@ private:
     /// \param request Incoming ActionRequest.
     ///
     /// GetSearchCapabilities(string SearchCaps)
-    void doGetSearchCapabilities(ActionRequest& request);
+    void doGetSearchCapabilities(ActionRequest& request) const;
 
     /// \brief UPnP standard defined action: GetSortCapabilities()
     /// \param request Incoming ActionRequest.
     ///
     /// GetSortCapabilities(string SortCaps)
-    void doGetSortCapabilities(ActionRequest& request);
+    void doGetSortCapabilities(ActionRequest& request) const;
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.
@@ -94,7 +94,7 @@ private:
     /// \brief Samsung Extension X_SetBookmark
     /// \param request Incoming ActionRequest.
     ///
-    void doSamsungBookmark(ActionRequest& request);
+    void doSamsungBookmark(ActionRequest& request) const;
 
     /// \brief Samsung Extension X_GetFeatureListResponse
     /// \param request Incoming ActionRequest.

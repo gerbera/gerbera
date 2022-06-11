@@ -51,7 +51,7 @@ protected:
     /// GetCurrentConnectionIDs(string ConnectionIDs)
     ///
     /// This is currently unsupported (returns empty string)
-    void doGetCurrentConnectionIDs(ActionRequest& request);
+    void doGetCurrentConnectionIDs(ActionRequest& request) const;
 
     /// \brief UPnP standard defined action: GetCurrentConnectionInfo()
     /// \param request Incoming ActionRequest.
@@ -60,7 +60,7 @@ protected:
     /// string PeerConnectionManager, i4 PeerConnectionID, string Direction, string Status)
     ///
     /// This action is currently unsupported.
-    void doGetCurrentConnectionInfo(ActionRequest& request);
+    void doGetCurrentConnectionInfo(ActionRequest& request) const;
 
     /// \brief UPnP standard defined action: GetProtocolInfo()
     /// \param request Incoming ActionRequest.
@@ -86,14 +86,14 @@ public:
     ///
     /// This function looks at the incoming ActionRequest and passes it on
     /// to the appropriate action for processing.
-    void processActionRequest(ActionRequest& request);
+    void processActionRequest(ActionRequest& request) const;
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request);
+    void processSubscriptionRequest(const SubscriptionRequest& request) const;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information

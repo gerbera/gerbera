@@ -46,7 +46,7 @@ MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
 {
 }
 
-void MRRegistrarService::doIsAuthorized(ActionRequest& request)
+void MRRegistrarService::doIsAuthorized(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -60,7 +60,7 @@ void MRRegistrarService::doIsAuthorized(ActionRequest& request)
     log_debug("end");
 }
 
-void MRRegistrarService::doRegisterDevice(ActionRequest& request)
+void MRRegistrarService::doRegisterDevice(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -69,7 +69,7 @@ void MRRegistrarService::doRegisterDevice(ActionRequest& request)
     log_debug("upnpActionGetCurrentConnectionInfo: end");
 }
 
-void MRRegistrarService::doIsValidated(ActionRequest& request)
+void MRRegistrarService::doIsValidated(ActionRequest& request) const
 {
     log_debug("start");
 

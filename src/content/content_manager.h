@@ -142,8 +142,8 @@ class UpnpMap {
 private:
     std::vector<std::tuple<std::string, std::string, std::string>> filters;
 
-    bool checkValue(const std::string& op, const std::string& expect, const std::string& actual);
-    bool checkValue(const std::string& op, int expect, int actual);
+    bool checkValue(const std::string& op, const std::string& expect, const std::string& actual) const;
+    bool checkValue(const std::string& op, int expect, int actual) const;
 
 public:
     std::string mimeType;
@@ -156,7 +156,7 @@ public:
     {
     }
 
-    bool isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt);
+    bool isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const;
 };
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {

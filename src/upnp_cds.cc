@@ -268,7 +268,7 @@ void ContentDirectoryService::markPlayedItem(const std::shared_ptr<CdsObject>& c
     item->setTitle(title);
 }
 
-void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
+void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -280,7 +280,7 @@ void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request)
     log_debug("end");
 }
 
-void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request)
+void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request) const
 {
     log_debug("start");
 
@@ -304,7 +304,7 @@ void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request) const
     log_debug("end");
 }
 
-void ContentDirectoryService::doSamsungBookmark(ActionRequest& request)
+void ContentDirectoryService::doSamsungBookmark(ActionRequest& request) const
 {
     log_debug("start");
 
