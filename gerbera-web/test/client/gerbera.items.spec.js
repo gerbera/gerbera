@@ -312,7 +312,7 @@ describe('Gerbera Items', () => {
 
       Items.loadEditItem(editItemResponse);
 
-      expect(editObjectType.val()).toBe('item');
+      expect(editObjectType.val()).toBe('video');
       expect(editTitle.val()).toBe('Test.mp4');
       expect(editLocation.val()).toBe('/folder/location/Test.mp4');
       expect(editClass.val()).toBe('object.item.videoItem');
@@ -372,7 +372,8 @@ describe('Gerbera Items', () => {
         object_id: '39479',
         title: 'Test.mp4',
         description: 'A%20description',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -393,7 +394,8 @@ describe('Gerbera Items', () => {
         req_type: 'edit_save',
         object_id: '1471',
         title: 'container%20title',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -418,7 +420,8 @@ describe('Gerbera Items', () => {
         description: 'description',
         'mime-type': 'video%2Fts',
         protocol: 'http-get',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -580,7 +583,8 @@ describe('Gerbera Items', () => {
         location: '',
         title: '',
         description: '',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -601,7 +605,8 @@ describe('Gerbera Items', () => {
         obj_type: 'container',
         class: 'object.container',
         title: '',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -619,7 +624,8 @@ describe('Gerbera Items', () => {
         obj_type: 'container',
         class: 'object.container',
         title: '',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -641,7 +647,8 @@ describe('Gerbera Items', () => {
         description: '',
         'mime-type': '',
         protocol: 'http-get',
-        updates: 'check'
+        updates: 'check',
+        flags: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 

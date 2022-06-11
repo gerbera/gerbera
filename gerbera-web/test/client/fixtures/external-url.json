@@ -24,5 +24,9 @@
   "protocol": {
     "editable": true,
     "value": "http-get"
+  },
+  "flags": {
+    "editable": true,
+    "value": "Restricted"
   }
 }

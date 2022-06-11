@@ -35,6 +35,25 @@
     }
   }
 
+  const defaultClasses = {
+    container: {oclass: 'object.container', type: 'container'},
+    item: {oclass: 'object.item', type: 'item'},
+    external_url: {oclass: 'object.item', type: 'external_url', protocol: 'http-get'},
+    audio: {oclass: 'object.item.audioItem', type: 'item'},
+    audioBroadcast: {oclass: 'object.item.audioItem.audioBroadcast', type: 'external_url', protocol: 'http-get'},
+    video: {oclass: 'object.item.videoItem', type: 'item'},
+    videoBroadcast: {oclass: 'object.item.videoItem.videoBroadcast', type: 'external_url', protocol: 'http-get'},
+  };
+  const objectFlags = [
+    "Restricted",
+    "Searchable",
+    "UseResourceRef",
+    "PersistentContainer",
+    "PlaylistRef",
+    "ProxyUrl",
+    "OnlineService",
+    "OggTheora",
+  ];
   function addNewItem (modal, itemData) {
     const itemType = itemData.type;
     const item = itemData.item;
@@ -45,7 +64,14 @@
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
     const editProtocol = modal.find('#editProtocol');
+    const editFlags = modal.find('#editFlags');
+    const editLut = modal.find('#editLut');
+    const editLmt = modal.find('#editLmt');
     const saveButton = modal.find('#editSave');
+    let editFlagBox = {};
+    objectFlags.forEach((flag) => {
+      editFlagBox[flag] = modal.find('#editFlag-' + flag);
+    });
 
     reset(modal);
 
@@ -68,19 +94,22 @@
     editObjectType.prop('disabled', false);
     editObjectType.prop('readonly', false);
     editObjectType.val(itemType);
+    let hiddenFields = [editLmt, editLut];
+    objectFlags.forEach((flag) => {
+      hiddenFields.push(editFlagBox[flag]);
+    });
+    hideFields(hiddenFields);
 
-    if (itemType === 'container') {
-      editClass.val('object.container');
-      showFields([editObjectType, editTitle, editClass]);
+    editClass.val(defaultClasses[itemType].oclass);
+    if (defaultClasses[itemType].type === 'container') {
+      showFields([editObjectType, editTitle, editClass, editFlags, editFlagBox['Searchable']]);
       hideFields([editLocation, editDesc, editMime, editProtocol]);
-    } else if (itemType === 'item') {
-      editClass.val('object.item');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime]);
+    } else if (defaultClasses[itemType].type === 'item') {
+      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editFlags, editFlagBox['OggTheora']]);
       hideFields([editProtocol]);
-    } else if (itemType === 'external_url') {
-      editClass.val('object.item');
-      editProtocol.val('http-get');
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol]);
+    } else if (defaultClasses[itemType].type === 'external_url') {
+      editProtocol.val(defaultClasses[itemType].protocol);
+      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol, editFlags, editFlagBox['ProxyUrl']]);
     }
   }
 
@@ -95,9 +124,14 @@
     modal.find('#editClass').val('').prop('disabled', false);
     modal.find('#editDesc').val('').prop('disabled', false);
     modal.find('#editMime').val('').prop('disabled', false);
+    modal.find('#editFlags').val('').prop('disabled', true);
     modal.find('#editLmt').val('').prop('disabled', true);
+    modal.find('#editLut').val('').prop('disabled', true);
     modal.find('#editProtocol').val('').prop('disabled', false);
     modal.find('#editSave').text('Save Item');
+    objectFlags.forEach((flag) => {
+      modal.find('#editFlag-' + flag).prop('checked', false);
+    });
 
     modal.find('#metadata').empty();
     modal.find('#auxdata').empty();
@@ -157,6 +191,17 @@
     $("#editCol").hide();
   }
 
+  function readFlags(modal) {
+    let result = [];
+    objectFlags.forEach((flag) => {
+      if (modal.find('#editFlag-' + flag).is(':checked')) {
+         result.push(flag);
+      }
+    });
+
+    return result.join('|');
+  }
+
   function loadItem (modal, itemData) {
     const item = itemData.item;
     if (item) {
@@ -165,16 +210,19 @@
         modal.find('#mediaimage').prop('src', item.image.value);
         modal.find('#mediaimage').show();
       }
-      modal.find('#editObjectType').val(item.obj_type);
+      let obj_type = item.obj_type;
+      if (item.class.value !== 'object.item') {
+        Object.getOwnPropertyNames(defaultClasses).forEach((cls) => {
+          if (item.class.value.startsWith(defaultClasses[cls].oclass)) {
+            obj_type = cls;
+          }
+        });
+      }
+      modal.find('#editObjectType').val(obj_type);
       modal.find('#editObjectType').prop('disabled', true);
       modal.find('#editObjectType').prop('readonly', true);
       modal.find('#editdObjectIdTxt').text(item.object_id).closest('.form-group').show();
       modal.find('#objectId').val(item.object_id).prop('disabled', true);
-      if ('last_modified' in item && item.last_modified !== '') {
-        modal.find('#editLmt').val(item.last_modified).prop('disabled', true);
-      } else {
-        modal.find('#editLmt').text('').closest('.form-group').hide();
-      }
 
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
@@ -230,9 +278,10 @@
         restable.hide();
       }
 
+      loadCdsObject(modal, item);
       switch (item.obj_type) {
         case 'item': {
-          loadSimpleItem(modal, item);
+          loadSimpleItem(modal, item, obj_type);
           break;
         }
         case 'container': {
@@ -253,20 +302,51 @@
     }
   }
 
-  function loadSimpleItem (modal, item) {
+  function loadCdsObject (modal, item) {
     modal.find('#editTitle')
       .val(item.title.value)
       .prop('disabled', !item.title.editable)
       .closest('.form-group').show();
 
-    modal.find('#editLocation')
-      .val(item.location.value)
-      .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
     modal.find('#editClass')
       .val(item.class.value)
       .prop('disabled', true)
+      .closest('.form-group').show();
+
+    if ('last_modified' in item && item['last_modified'].value !== '') {
+      modal.find('#editLmt')
+        .val(item['last_modified'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLmt')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+    if ('last_updated' in item && item['last_updated'].value !== '') {
+      modal.find('#editLut')
+        .val(item['last_updated'].value)
+        .prop('disabled', true)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editLut')
+        .val('')
+        .prop('disabled', true)
+        .closest('.form-group').hide();
+    }
+    if (item.flags && item.flags.value) {
+      item.flags.value.split('|').forEach((flag) => {
+        flag = flag.trim();
+        modal.find('#editFlag-' + flag).prop('checked', true);
+      });
+    }
+  }
+
+  function loadSimpleItem (modal, item, obj_type) {
+    modal.find('#editLocation')
+      .val(item.location.value)
+      .prop('disabled', !item.location.editable)
       .closest('.form-group').show();
 
     modal.find('#editDesc')
@@ -279,92 +359,57 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
-    if ('last_modified' in item && item['last_modified'].value !== '') {
-      modal.find('#editLmt')
-        .val(item['last_modified'].value)
-        .prop('disabled', true)
-        .closest('.form-group').show();
+    let visibleFields = [];
+    let hiddenFields = [
+      modal.find('#editProtocol'),
+      modal.find('#editFlag-Searchable'),
+      modal.find('#editFlag-ProxyUrl'),
+      modal.find('#editFlag-OnlineService'),
+      modal.find('#editFlag-Restricted'),
+      modal.find('#editFlag-PersistentContainer'),
+      modal.find('#editFlag-PlaylistRef'),
+      modal.find('#editFlag-UseResourceRef'),
+    ];
+    if (obj_type === 'item' || obj_type.startsWith('video')) {
+      visibleFields.push(modal.find('#editFlags'));
+      visibleFields.push(modal.find('#editFlag-OggTheora'));
     } else {
-      modal.find('#editLmt')
-        .val('')
-        .prop('disabled', true)
-        .closest('.form-group').hide();
+      hiddenFields.push(modal.find('#editFlags'));
+      hiddenFields.push(modal.find('#editFlag-OggTheora'));
     }
-
-    if ('last_updated' in item && item['last_updated'].value !== '') {
-      modal.find('#editLut')
-        .val(item['last_updated'].value)
-        .prop('disabled', true)
-        .closest('.form-group').show();
-    } else {
-      modal.find('#editLut')
-        .val('')
-        .prop('disabled', true)
-        .closest('.form-group').hide();
-    }
-
-    hideFields([
-      modal.find('#editProtocol')
-    ]);
+    showFields(visibleFields);
+    hideFields(hiddenFields);
   }
 
   function loadContainer (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
+    modal.find('#editFlags')
+      .val(item.flags.value)
       .prop('disabled', true)
       .closest('.form-group').show();
 
-    if ('last_modified' in item && item['last_modified'].value !== '') {
-      modal.find('#editLmt')
-        .val(item['last_modified'].value)
-        .prop('disabled', true)
-        .closest('.form-group').show();
-    } else {
-      modal.find('#editLmt')
-        .text('')
-        .prop('disabled', true)
-        .closest('.form-group').hide();
-    }
-
-    if ('last_updated' in item && item['last_updated'].value !== '') {
-      modal.find('#editLut')
-        .val(item['last_updated'].value)
-        .prop('disabled', true)
-        .closest('.form-group').show();
-    } else {
-      modal.find('#editLut')
-        .val('')
-        .prop('disabled', true)
-        .closest('.form-group').hide();
-    }
-
+    showFields([
+      modal.find('#editFlags'),
+      modal.find('#editFlag-Searchable'),
+      modal.find('#editFlag-PersistentContainer'),
+      modal.find('#editFlag-PlaylistRef'),
+    ]);
     hideFields([
       modal.find('#editLocation'),
       modal.find('#editMime'),
       modal.find('#editDesc'),
-      modal.find('#editProtocol')
+      modal.find('#editProtocol'),
+      modal.find('#editFlag-ProxyUrl'),
+      modal.find('#editFlag-OnlineService'),
+      modal.find('#editFlag-Restricted'),
+      modal.find('#editFlag-OggTheora'),
+      modal.find('#editFlag-UseResourceRef'),
     ]);
   }
 
   function loadExternalUrl (modal, item) {
-    modal.find('#editTitle')
-      .val(item.title.value)
-      .prop('disabled', !item.title.editable)
-      .closest('.form-group').show();
-
     modal.find('#editLocation')
       .val(item.location.value)
       .prop('disabled', !item.location.editable)
-      .closest('.form-group').show();
-
-    modal.find('#editClass')
-      .val(item.class.value)
-      .prop('disabled', true)
       .closest('.form-group').show();
 
     modal.find('#editDesc')
@@ -381,6 +426,25 @@
       .val(item.protocol.value)
       .prop('disabled', !item.protocol.editable)
       .closest('.form-group').show();
+
+    modal.find('#editFlags')
+      .val(item.flags.value)
+      .prop('disabled', true)
+      .closest('.form-group').show();
+
+    showFields([
+      modal.find('#editFlags'),
+      modal.find('#editFlag-ProxyUrl'),
+      modal.find('#editFlag-OnlineService'),
+    ]);
+    hideFields([
+      modal.find('#editFlag-Searchable'),
+      modal.find('#editFlag-Restricted'),
+      modal.find('#editFlag-PersistentContainer'),
+      modal.find('#editFlag-PlaylistRef'),
+      modal.find('#editFlag-OggTheora'),
+      modal.find('#editFlag-UseResourceRef'),
+    ]);
   }
 
   function saveItem (modal) {
@@ -393,19 +457,21 @@
     const editMime = modal.find('#editMime');
     const editProtocol = modal.find('#editProtocol');
 
-    switch (editObjectType.val()) {
+    switch (defaultClasses[editObjectType.val()].type) {
       case 'item': {
         item = {
           object_id: objectId.val(),
           title: encodeURIComponent(editTitle.val()),
-          description: encodeURIComponent(editDesc.val())
+          description: encodeURIComponent(editDesc.val()),
+          flags: readFlags(modal),
         };
         break;
       }
       case 'container': {
         item = {
           object_id: objectId.val(),
-          title: encodeURIComponent(editTitle.val())
+          title: encodeURIComponent(editTitle.val()),
+          flags: readFlags(modal),
         };
         break;
       }
@@ -416,7 +482,8 @@
           description: encodeURIComponent(editDesc.val()),
           location: encodeURIComponent(editLocation.val()),
           'mime-type': encodeURIComponent(editMime.val()),
-          protocol: editProtocol.val()
+          protocol: editProtocol.val(),
+          flags: readFlags(modal),
         };
         break;
       }
@@ -435,37 +502,40 @@
     const editMime = modal.find('#editMime');
     const editProtocol = modal.find('#editProtocol');
 
-    switch (editObjectType.val()) {
+    switch (defaultClasses[editObjectType.val()].type) {
       case 'item': {
         item = {
           parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
+          obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
           title: encodeURIComponent(editTitle.val()),
           location: encodeURIComponent(editLocation.val()),
-          description: encodeURIComponent(editDesc.val())
+          description: encodeURIComponent(editDesc.val()),
+          flags: readFlags(modal),
         };
         break;
       }
       case 'container': {
         item = {
           parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
+          obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
-          title: encodeURIComponent(editTitle.val())
+          title: encodeURIComponent(editTitle.val()),
+          flags: readFlags(modal),
         };
         break;
       }
       case 'external_url': {
         item = {
           parent_id: parentId.val(),
-          obj_type: editObjectType.val(),
+          obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
           title: encodeURIComponent(editTitle.val()),
           description: encodeURIComponent(editDesc.val()),
           location: encodeURIComponent(editLocation.val()),
           'mime-type': encodeURIComponent(editMime.val()),
-          protocol: editProtocol.val()
+          protocol: editProtocol.val(),
+          flags: readFlags(modal),
         };
         break;
       }

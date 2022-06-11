@@ -33,6 +33,7 @@
 #define __PROCESS_EXECUTOR_H__
 
 #include <map>
+#include <memory>
 #include <vector>
 
 #include <unistd.h>

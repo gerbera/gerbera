@@ -462,6 +462,18 @@ body,
     width: 120px;
 }
 
+.grb-edit-check {
+    margin-left: 1em;
+}
+.grb-edit-check > label {
+    margin-left: 1em;
+    width: 40%;
+}
+
+.grb-edit-check > input {
+    width: 40%;
+}
+
 .grb-item > td {
     vertical-align: middle;
     line-height: 36px;

@@ -24,8 +24,6 @@
 
 #include "config/config_setup.h" // API
 
-#include <numeric>
-
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"

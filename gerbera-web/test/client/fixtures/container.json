@@ -8,5 +8,9 @@
     "editable": false,
     "value": "object.container"
   },
+  "flags": {
+    "editable": true,
+    "value": "Restricted"
+  },
   "obj_type": "container"
 }

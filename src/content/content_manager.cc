@@ -1080,7 +1080,7 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
-
+    std::string flags = getValueOrDefault(parameters, "flags");
     log_debug("updateCdsObject: CdsItem {} updated", title);
 
     auto clone = CdsObject::createObject(item->getObjectType());
@@ -1092,20 +1092,35 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
         clone->setClass(upnpClass);
     if (!location.empty())
         clone->setLocation(location);
+    if (!flags.empty())
+        clone->setFlags(CdsObject::makeFlag(flags));
 
     auto clonedItem = std::static_pointer_cast<CdsItem>(clone);
 
     auto resource = clonedItem->getResource(ContentHandler::DEFAULT);
-    if (!mimetype.empty() && !protocol.empty()) {
+    std::string protocolInfo;
+    if (!protocol.empty()) {
+        std::vector<std::string> parts = splitString(protocol, ':');
+        if (parts.size() > 1) {
+            protocolInfo = protocol;
+        }
+    }
+    if (!mimetype.empty()) {
         clonedItem->setMimeType(mimetype);
-        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
-    } else if (mimetype.empty() && !protocol.empty()) {
-        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(clonedItem->getMimeType(), protocol));
-    } else if (!mimetype.empty()) {
-        clonedItem->setMimeType(mimetype);
-        std::vector<std::string> parts = splitString(resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO), ':');
-        protocol = parts[0];
-        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype, protocol));
+    }
+    if (protocolInfo.empty()) {
+        if (!mimetype.empty() && !protocol.empty()) {
+            protocolInfo = renderProtocolInfo(mimetype, protocol);
+        } else if (mimetype.empty() && !protocol.empty()) {
+            protocolInfo = renderProtocolInfo(clonedItem->getMimeType(), protocol);
+        } else if (!mimetype.empty()) {
+            std::vector<std::string> parts = splitString(resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO), ':');
+            protocol = parts[0];
+            protocolInfo = renderProtocolInfo(mimetype, protocol);
+        }
+    }
+    if (!protocolInfo.empty()) {
+        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
     }
 
     clonedItem->removeMetaData(M_DESCRIPTION);
