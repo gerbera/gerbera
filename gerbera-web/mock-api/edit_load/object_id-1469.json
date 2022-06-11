@@ -23,6 +23,10 @@
       "editable": true,
       "value": "text/plain"
     },
+    "flags": {
+      "editable": false,
+      "value": "Restricted"
+    },
     "protocol": {
       "editable": true,
       "value": "http-get"

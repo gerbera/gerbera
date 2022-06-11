@@ -25,8 +25,6 @@
 
 #include "pages.h" // API
 
-#include <numeric>
-
 #include "config/client_config.h"
 #include "config/config.h"
 #include "config/config_definition.h"

@@ -235,6 +235,10 @@
                 <div class="form-group">
                   <label for="editObjectType">Type</label>
                   <select id="editObjectType" class="form-control">
+                    <option value="audio">Audio</option>
+                    <option value="audioBroadcast">Audio Broadcast</option>
+                    <option value="video">Video</option>
+                    <option value="videoBroadcast">Video Broadcast</option>
                     <option value="container">Container</option>
                     <option value="item">Item</option>
                     <option value="external_url">External Link (URL)</option>
@@ -242,7 +246,7 @@
                 </div>
                 <div class="form-group">
                   <label for="editTitle">Title</label>
-                  <input type="text" class="form-control" id="editTitle">
+                  <input type="text" required class="form-control" id="editTitle">
                 </div>
                 <div class="form-group">
                   <label for="editTitle">Location</label>
@@ -250,7 +254,7 @@
                 </div>
                 <div class="form-group">
                   <label for="editClass">Class</label>
-                  <input type="text" class="form-control" id="editClass" value="default">
+                  <input type="text" required class="form-control" id="editClass" value="default">
                 </div>
                 <div class="form-group">
                   <label for="editDesc">Description</label>
@@ -263,6 +267,42 @@
                 <div class="form-group">
                   <label for="editProtocol">Protocol</label>
                   <input type="text" class="form-control" id="editProtocol">
+                </div>
+                <div class="form-group">
+                  <label>Flags</label>
+                  <input type="text" class="form-control" id="editFlags" hidden>
+                  <div class="row form-group grb-edit-check" hidden>
+                    <label for="editFlag-Restricted">Restricted</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Restricted">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-Searchable">Searchable</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Searchable">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-UseResourceRef">UseResourceRef</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-UseResourceRef">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-PersistentContainer">PersistentContainer</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PersistentContainer">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-PlaylistRef">PlaylistRef</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PlaylistRef">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-ProxyUrl">ProxyUrl</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-ProxyUrl">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-OnlineService">OnlineService</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OnlineService">
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-OggTheora">OggTheora</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OggTheora">
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="editLmt">Last Modified</label>

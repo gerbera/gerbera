@@ -31,6 +31,9 @@
 
 #include "cds_objects.h" // API
 
+#include <array>
+#include <numeric>
+
 #include "database/database.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
@@ -233,4 +236,52 @@ std::string_view CdsObject::mapObjectType(unsigned int type)
     if (IS_CDS_ITEM_EXTERNAL_URL(type))
         return STRING_OBJECT_TYPE_EXTERNAL_URL;
     throw_std_runtime_error("illegal objectType: {}", type);
+}
+
+static constexpr auto upnpFlags = std::array {
+    std::pair("Restricted", OBJECT_FLAG_RESTRICTED),
+    std::pair("Searchable", OBJECT_FLAG_SEARCHABLE),
+    std::pair("UseResourceRef", OBJECT_FLAG_USE_RESOURCE_REF),
+    std::pair("PersistentContainer", OBJECT_FLAG_PERSISTENT_CONTAINER),
+    std::pair("PlaylistRef", OBJECT_FLAG_PLAYLIST_REF),
+    std::pair("ProxyUrl", OBJECT_FLAG_PROXY_URL),
+    std::pair("OnlineService", OBJECT_FLAG_ONLINE_SERVICE),
+    std::pair("OggTheora", OBJECT_FLAG_OGG_THEORA),
+};
+
+std::string CdsObject::mapFlags(int flags)
+{
+    if (!flags)
+        return "None";
+
+    std::vector<std::string> myFlags;
+
+    for (auto [uLabel, uFlag] : upnpFlags) {
+        if (flags & uFlag) {
+            myFlags.emplace_back(uLabel);
+            flags &= ~uFlag;
+        }
+    }
+
+    if (flags) {
+        myFlags.push_back(fmt::format("{:#04x}", flags));
+    }
+
+    return fmt::format("{}", fmt::join(myFlags, " | "));
+}
+
+int CdsObject::remapFlags(const std::string& flag)
+{
+    for (auto [uLabel, uFlag] : upnpFlags) {
+        if (toLower(uLabel) == toLower(flag)) {
+            return uFlag;
+        }
+    }
+    return stoiString(flag, 0, 0);
+}
+
+int CdsObject::makeFlag(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | CdsObject::remapFlags(trimString(i)); });
 }

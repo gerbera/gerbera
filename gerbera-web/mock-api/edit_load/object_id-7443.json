@@ -10,6 +10,10 @@
       "editable": false,
       "value": "object.container"
     },
+    "flags": {
+      "editable": false,
+      "value": "Restricted"
+    },
     "obj_type": "container"
   }
 }

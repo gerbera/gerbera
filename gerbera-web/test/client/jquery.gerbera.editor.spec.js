@@ -173,7 +173,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       editModal.editmodal('loadItem', itemData);
 
-      expect(editObjectType.val()).toEqual('item');
+      expect(editObjectType.val()).toEqual('video');
       expect(editTitle.val()).toEqual('Test.mp4');
       expect(editLocation.val()).toEqual('/folder/location/Test.mp4');
       expect(editClass.val()).toEqual('object.item.videoItem');
@@ -238,7 +238,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '39479',
         title: 'Test.mp4',
-        description: 'A%20description'
+        description: 'A%20description',
+        flags: '',
       });
     });
 
@@ -250,7 +251,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       expect(result).toEqual({
         object_id: '1471',
-        title: 'container%20title'
+        title: 'container%20title',
+        flags: '',
       });
     });
 
@@ -266,6 +268,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         location: 'http%3A%2F%2Flocalhost',
         description: 'description',
         'mime-type': 'video%2Fts',
+        flags: '',
         protocol: 'http-get'
       });
     });
@@ -293,6 +296,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         class: 'object.item',
         location: '',
         title: '',
+        flags: '',
         description: ''
       });
     });
@@ -306,7 +310,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         parent_id: '9999',
         obj_type: 'container',
         class: 'object.container',
-        title: ''
+        flags: '',
+        title: '',
       });
     });
 
@@ -323,6 +328,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         location: '',
         description: '',
         'mime-type': '',
+        flags: '',
         protocol: 'http-get'
       });
     });

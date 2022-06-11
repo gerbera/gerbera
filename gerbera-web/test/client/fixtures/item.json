@@ -20,5 +20,9 @@
   "mime-type": {
     "editable": false,
     "value": "video/mp4"
+  },
+  "flags": {
+    "editable": true,
+    "value": "Restricted"
   }
 }

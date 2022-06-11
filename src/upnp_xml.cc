@@ -388,7 +388,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
 {
     std::string url;
 
-    if (IS_CDS_CONTAINER(item.getObjectType())) {
+    if (item.isContainer()) {
         auto resFile = res.getAttribute(CdsResource::Attribute::RESOURCE_FILE);
         if (!resFile.empty()) {
             url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
@@ -400,7 +400,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
         }
     }
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(item.getObjectType())) {
+    if (item.isExternalItem() && res.getPurpose() == CdsResource::Purpose::Content) {
         // Remote URL is just passed straight out
         // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
         if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
