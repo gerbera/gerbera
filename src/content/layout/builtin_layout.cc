@@ -362,7 +362,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     alc.push_back(container["Audio"]);
     alc.push_back(container["Artists"]);
     alc.push_back(artistContainer);
-    arc.push_back(albumContainer);
+    alc.push_back(albumContainer);
     id = content->addContainerTree(alc);
     add(obj, id);
 
