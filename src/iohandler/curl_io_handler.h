@@ -55,7 +55,7 @@ private:
     std::string URL;
     // off_t bytesCurl;
 
-    static std::size_t curlCallback(void* ptr, std::size_t size, std::size_t nmemb, void* data);
+    static std::size_t curlCallback(void* ptr, std::size_t size, std::size_t nmemb, CurlIOHandler* ego);
     void threadProc() override;
 };
 

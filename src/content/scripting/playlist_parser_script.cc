@@ -94,9 +94,9 @@ duk_ret_t jsReadln(duk_context* ctx)
     }
 
     try {
-        auto line = self->readLine();
-        duk_push_string(ctx, line.first.c_str());
-        return line.second ? 1 : 0;
+        auto [line, trimmed] = self->readLine();
+        duk_push_string(ctx, line.c_str());
+        return trimmed ? 1 : 0;
     } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");

@@ -157,9 +157,7 @@ void IOHandlerBufferHelper::seek(off_t offset, int whence)
     threadRunner->notify();
 
     // wait until the seek has been processed
-    threadRunner->wait(lock, [&]() {
-        return !doSeek || threadShutdown || eof || readError;
-    });
+    threadRunner->wait(lock, [this] { return !doSeek || threadShutdown || eof || readError; });
 }
 
 void IOHandlerBufferHelper::close()
