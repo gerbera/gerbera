@@ -92,15 +92,15 @@ bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& m
 {
     bool match = false;
     if (startswith(mt, mimeType)) {
-        for (auto&& filter : filters) {
-            if (std::get<0>(filter) == "location") {
-                match = checkValue(std::get<1>(filter), std::get<2>(filter), item->getLocation().string());
-            } else if (std::get<0>(filter) == "tracknumber") {
-                match = checkValue(std::get<1>(filter), stoiString(std::get<2>(filter)), item->getTrackNumber());
-            } else if (std::get<0>(filter) == "partnumber") {
-                match = checkValue(std::get<1>(filter), stoiString(std::get<2>(filter)), item->getPartNumber());
-            } else if (std::find_if(mt_keys.begin(), mt_keys.end(), [val = std::get<0>(filter)](auto&& kvp) { return kvp.second == val; }) != mt_keys.end()) {
-                match = checkValue(std::get<1>(filter), std::get<2>(filter), item->getMetaData(std::get<0>(filter)));
+        for (auto&& [root, op, expect] : filters) {
+            if (root == "location") {
+                match = checkValue(op, expect, item->getLocation().string());
+            } else if (root == "tracknumber") {
+                match = checkValue(op, stoiString(expect), item->getTrackNumber());
+            } else if (root == "partnumber") {
+                match = checkValue(op, stoiString(expect), item->getPartNumber());
+            } else if (std::find_if(mt_keys.begin(), mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != mt_keys.end()) {
+                match = checkValue(op, expect, item->getMetaData(root));
             }
         }
     }
@@ -189,7 +189,7 @@ void ContentManager::run()
         }
         try {
             autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
-        } catch (std::runtime_error& e) {
+        } catch (const std::runtime_error& e) {
             // Work around existing config sourced autoscans that were stored to the DB for reasons
             log_warning(e.what());
             continue;
@@ -210,7 +210,7 @@ void ContentManager::run()
             }
             try {
                 autoscanList->add(dir);
-            } catch (std::runtime_error& e) {
+            } catch (const std::runtime_error& e) {
                 // Work around existing config sourced autoscans that were stored to the DB for reasons
                 log_warning(e.what());
                 continue;
@@ -223,7 +223,7 @@ void ContentManager::run()
             }
             try {
                 autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
-            } catch (std::runtime_error& e) {
+            } catch (const std::runtime_error& e) {
                 // Work around existing config sourced autoscans that were stored to the DB for reasons
                 log_warning(e.what());
                 continue;
@@ -478,7 +478,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -526,7 +526,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
     return obj;
 }
 
-void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
+void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const
 {
 #ifdef HAVE_JS
     try {
@@ -1420,7 +1420,7 @@ void ContentManager::initLayout()
                 layout = nullptr;
                 log_error("ContentManager virtual container layout: {}", e.what());
                 if (layoutType != "disabled")
-                    throw e;
+                    throw;
             }
         }
     }

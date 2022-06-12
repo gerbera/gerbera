@@ -58,7 +58,7 @@ void IOHandlerChainer::threadProc()
             try {
                 writeTo->open(UPNP_WRITE);
                 again = false;
-            } catch (const TryAgainException& e) {
+            } catch (const TryAgainException&) {
                 again = true;
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }

@@ -141,13 +141,12 @@ void CurlIOHandler::threadProc()
     threadRunner->notify();
 }
 
-std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t nmemb, void* data)
+std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t nmemb, CurlIOHandler* ego)
 {
-    auto ego = static_cast<CurlIOHandler*>(data);
     std::size_t wantWrite = size * nmemb;
 
     assert(wantWrite <= ego->bufSize);
-    auto& threadRunner = ego->threadRunner;
+    auto&& threadRunner = ego->threadRunner;
 
     // log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
 
