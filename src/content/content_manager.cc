@@ -618,6 +618,10 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
             auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
         }
+
+        if (obj->isContainer()) {
+            cleanupTasks(obj->getLocation());
+        }
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
     // So current container cache must be invalidated
@@ -1684,44 +1688,46 @@ std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDire
         }
 
         if (obj->isContainer()) {
-            // make sure to remove possible child autoscan directories from the scanlist
-            std::shared_ptr<AutoscanList> rmList = autoscanList->removeIfSubdir(path);
-            for (std::size_t i = 0; i < rmList->size(); i++) {
-                auto dir = rmList->get(i);
-                if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-                    timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
-                }
-#ifdef HAVE_INOTIFY
-                else {
-                    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
-                        inotify->unmonitor(dir);
-                    }
-                }
-#endif
-            }
-
-            auto lock = threadRunner->lockGuard("removeObject " + path.string());
-
-            // we have to make sure that a currently running autoscan task will not
-            // launch add tasks for directories that anyway are going to be deleted
-            for (auto&& t : taskQueue1) {
-                invalidateAddTask(t, path);
-            }
-
-            for (auto&& t : taskQueue2) {
-                invalidateAddTask(t, path);
-            }
-
-            auto t = getCurrentTask();
-            if (t) {
-                invalidateAddTask(t, path);
-            }
+            cleanupTasks(path);
         }
 
         addTask(std::move(task));
         return {};
     }
     return _removeObject(adir, objectID, rescanResource, all);
+}
+
+void ContentManager::cleanupTasks(const fs::path& path)
+{
+    // make sure to remove possible child autoscan directories from the scanlist
+    std::shared_ptr<AutoscanList> rmList = autoscanList->removeIfSubdir(path);
+    for (std::size_t i = 0; i < rmList->size(); i++) {
+        auto dir = rmList->get(i);
+        if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
+            timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
+#ifdef HAVE_INOTIFY
+        } else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+            inotify->unmonitor(dir);
+#endif
+        }
+    }
+
+    auto lock = threadRunner->lockGuard("removeObject " + path.string());
+
+    // we have to make sure that a currently running autoscan task will not
+    // launch add tasks for directories that anyway are going to be deleted
+    for (auto&& t : taskQueue1) {
+        invalidateAddTask(t, path);
+    }
+
+    for (auto&& t : taskQueue2) {
+        invalidateAddTask(t, path);
+    }
+
+    auto t = getCurrentTask();
+    if (t) {
+        invalidateAddTask(t, path);
+    }
 }
 
 void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
