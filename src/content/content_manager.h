@@ -178,8 +178,6 @@ public:
     /// \brief Find a task identified by the task ID and invalidate it.
     void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
 
-    /* the functions below return true if the task has been enqueued */
-
     /// \brief Adds a file or directory to the database.
     /// \param dirEnt absolute path to the file
     /// \param recursive recursive add (process subdirecotories)
@@ -357,6 +355,7 @@ protected:
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
     std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
+    void cleanupTasks(const fs::path& path);
 
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
