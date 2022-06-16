@@ -400,16 +400,21 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
         }
     }
 
-    if (item.isExternalItem() && res.getPurpose() == CdsResource::Purpose::Content) {
-        // Remote URL is just passed straight out
-        // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
-        if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
-            return item.getLocation();
-        }
+    if (item.isExternalItem()) {
+        if (res.getPurpose() == CdsResource::Purpose::Content) {
+            // Remote URL is just passed straight out
+            // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
+            if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+                return item.getLocation();
+            }
 
-        // Proxied remote URL
-        if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            // Proxied remote URL
+            if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+                url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            }
+        } else if (res.getPurpose() == CdsResource::Purpose::Transcode) {
+            // Transcoded resources dont set a resId, uses pr_name from params instead.
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
         }
     }
 
