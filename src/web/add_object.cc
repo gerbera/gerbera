@@ -38,7 +38,11 @@
 
 void Web::AddObject::addContainer(int parentID)
 {
-    content->addContainer(parentID, param("title"), param("class"));
+    auto cont = content->addContainer(parentID, param("title"), param("class"));
+
+    std::string flags = param("flags");
+    if (!flags.empty())
+        cont->setFlags(CdsObject::makeFlag(flags));
 }
 
 std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
@@ -60,6 +64,10 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
     if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
+
+    std::string flags = param("flags");
+    if (!flags.empty())
+        item->setFlags(CdsObject::makeFlag(flags));
 
     item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
 
@@ -87,6 +95,10 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
     if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
     item->setMimeType(tmp);
+
+    std::string flags = param("flags");
+    if (!flags.empty())
+        item->setFlags(CdsObject::makeFlag(flags));
 
     if (addProtocol) {
         std::string protocol = param("protocol");

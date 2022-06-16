@@ -249,7 +249,7 @@ public:
     /// \param parentID the id of the parent.
     /// \param title the title of the container.
     /// \param upnpClass the upnp class of the container.
-    void addContainer(int parentID, const std::string& title, const std::string& upnpClass);
+    std::shared_ptr<CdsContainer> addContainer(int parentID, const std::string& title, const std::string& upnpClass);
 
     /// \brief Updates an object in the database.
     /// \param obj the object to update

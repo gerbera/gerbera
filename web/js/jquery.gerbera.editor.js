@@ -109,7 +109,7 @@
       hideFields([editProtocol]);
     } else if (defaultClasses[itemType].type === 'external_url') {
       editProtocol.val(defaultClasses[itemType].protocol);
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol, editFlags, editFlagBox['ProxyUrl']]);
+      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol, editFlags, editFlagBox['ProxyUrl'], editFlagBox['OnlineService']]);
     }
   }
 
