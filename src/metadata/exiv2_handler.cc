@@ -39,6 +39,10 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+#if EXIV2_TEST_VERSION(0, 28, 0)
+#define AnyError Error
+#endif
+
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
 {
