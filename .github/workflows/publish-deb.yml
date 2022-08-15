@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os-ver: ["ubuntu:18.04", "ubuntu:20.04", "ubuntu:21.04", "ubuntu:21.10", "ubuntu:22.04", "debian:stable", "debian:testing", "debian:unstable"]
+        os-ver: ["ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:22.10", "debian:stable", "debian:testing", "debian:unstable"]
         arch: ["linux/amd64", "linux/arm/v7", "linux/arm64/v8"]
         exclude:
           - os-ver: "ubuntu:18.04" # No Cmake backport for these versions
