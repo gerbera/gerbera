@@ -158,7 +158,6 @@ std::size_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
     fd_set readSet;
     struct timespec timeout = { FIFO_READ_TIMEOUT, 0 };
-    ssize_t bytesRead;
     std::size_t numBytes = 0;
     auto pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
@@ -202,7 +201,7 @@ std::size_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 
         if (FD_ISSET(fd, &readSet)) {
             timeoutCount = 0;
-            bytesRead = ::read(fd, pBuffer, length);
+            ssize_t bytesRead = ::read(fd, pBuffer, length);
             if (bytesRead == 0)
                 break;
 
