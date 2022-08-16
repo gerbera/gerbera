@@ -140,7 +140,6 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 
         auto trD = std::make_unique<TranscodeDispatcher>(content);
         auto ioHandler = trD->serveContent(tp, url, item, group, "");
-        ioHandler->open(mode);
 
         log_debug("end");
         return ioHandler;
@@ -148,7 +147,6 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 
     ///\todo make curl io handler configurable for url request handler
     auto ioHandler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
-    ioHandler->open(mode);
     content->triggerPlayHook(group, obj);
     return ioHandler;
 }
