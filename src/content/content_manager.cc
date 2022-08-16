@@ -1042,6 +1042,7 @@ void ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
     std::string protocol = getValueOrDefault(parameters, "protocol");
+    std::string flags = getValueOrDefault(parameters, "flags");
 
     log_error("updateCdsObject: CdsObject {} not updated", title);
 }
@@ -1051,6 +1052,7 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, 
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
+    std::string flags = getValueOrDefault(parameters, "flags");
 
     log_debug("updateCdsObject: CdsContainer {} updated", title);
 
@@ -1061,6 +1063,10 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, 
         clone->setTitle(title);
     if (!upnpClass.empty())
         clone->setClass(upnpClass);
+    if (!flags.empty())
+        clone->setFlags(CdsObject::makeFlag(flags));
+    else
+        clone->clearFlag(item->getFlags());
 
     auto clonedItem = std::static_pointer_cast<CdsContainer>(clone);
 
@@ -1098,6 +1104,8 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
         clone->setLocation(location);
     if (!flags.empty())
         clone->setFlags(CdsObject::makeFlag(flags));
+    else
+        clone->clearFlag(item->getFlags());
 
     auto clonedItem = std::static_pointer_cast<CdsItem>(clone);
 
