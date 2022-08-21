@@ -80,7 +80,7 @@ public:
 
     unsigned int getFlag(unsigned int mask) const { return flags & mask; }
     void setFlag(unsigned int mask) { flags |= mask; }
-    void clearFlag(unsigned int mask) { flags &= !mask; }
+    void clearFlag(unsigned int mask) { flags &= ~mask; }
 
     std::shared_ptr<CdsObject> getObject() const { return object; }
 
