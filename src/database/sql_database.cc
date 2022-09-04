@@ -743,7 +743,7 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
             int newId = exec(qb, true);
             obj->setID(newId);
         } else {
-            exec(qb, false);
+            exec(CDS_OBJECT_TABLE, qb, obj->getID());
         }
     }
     commit("addObject");
@@ -767,8 +767,8 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
 
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
-        auto qb = [this, &obj, &addUpdateTable]() {
-            Operation op = addUpdateTable.getOperation();
+        Operation op = addUpdateTable.getOperation();
+        auto qb = [this, &obj, op, &addUpdateTable]() {
             switch (op) {
             case Operation::Insert:
                 return sqlForInsert(obj, addUpdateTable);
@@ -781,7 +781,15 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         }();
 
         log_debug("upd_query: {}", qb);
-        exec(qb);
+        switch (op) {
+        case Operation::Insert:
+        case Operation::Update:
+            exec(CDS_OBJECT_TABLE, qb, obj->getID());
+            break;
+        case Operation::Delete:
+            del(addUpdateTable.getTableName(), qb, { obj->getID() });
+            break;
+        }
     }
     commit("updateObject");
 }
@@ -1353,18 +1361,18 @@ void SQLDatabase::insertMultipleRows(std::string_view tableName, const std::vect
             tuples.push_back(fmt::format("({})", fmt::join(values, ",")));
         }
         auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(tableName), fmt::join(fields, ","), fmt::join(tuples, ","));
-        exec(sql);
+        exec(tableName, sql, -1);
     }
 }
 
 void SQLDatabase::deleteAll(std::string_view tableName)
 {
-    exec(fmt::format("DELETE FROM {}", identifier(tableName)));
+    del(tableName, "", {});
 }
 
 void SQLDatabase::deleteRows(std::string_view tableName, std::string_view key, const std::vector<int>& values)
 {
-    exec(fmt::format("DELETE FROM {} WHERE {} IN ({})", identifier(tableName), identifier(key), fmt::join(values, ",")));
+    del(tableName, fmt::format("{} IN ({})", identifier(key), fmt::join(values, ",")), values);
 }
 
 fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
@@ -2251,7 +2259,7 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
 
 void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail)
 {
-    exec(fmt::format("DELETE FROM {} WHERE {} = {} AND {} = {}", PLAYSTATUS_TABLE, identifier("group"), quote(detail->getGroup()), identifier("item_id"), quote(detail->getItemId())));
+    del(PLAYSTATUS_TABLE, fmt::format("{} = {} AND {} = {}", identifier("group"), quote(detail->getGroup()), identifier("item_id"), quote(detail->getItemId())), { detail->getItemId() });
     auto fields = std::vector {
         identifier("group"),
         identifier("item_id"),
@@ -2340,7 +2348,7 @@ void SQLDatabase::updateAutoscanList(AutoscanDirectory::ScanMode scanmode, const
     }
 
     beginTransaction("updateAutoscanList delete");
-    exec(fmt::format("DELETE FROM {0} WHERE {1} = {2} AND {3} = {4}", identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    del(AUTOSCAN_TABLE, fmt::format("{} = {} AND {} = {}", identifier("touched"), quote(false), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))), {});
     commit("updateAutoscanList delete");
 }
 
@@ -2837,7 +2845,7 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
         where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
     }
 
-    return fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), fmt::join(where, " AND "));
+    return fmt::format("{}", fmt::join(where, " AND "));
 }
 
 // column metadata is dropped in DBVERSION 12

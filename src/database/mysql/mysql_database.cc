@@ -310,6 +310,43 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
     return std::make_shared<MysqlResult>(mysqlRes);
 }
 
+void MySQLDatabase::del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids)
+{
+    auto query = clause.empty() //
+        ? fmt::format("DELETE FROM {}", identifier(tableName)) //
+        : fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), clause);
+#ifdef MYSQL_EXEC_DEBUG
+    log_debug("{}", query);
+    print_backtrace();
+#endif
+
+    checkMysqlThreadInit();
+    SqlAutoLock lock(sqlMutex);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
+    if (res) {
+        std::string myError = getError(&db);
+        rollback("");
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
+    }
+}
+
+void MySQLDatabase::exec(std::string_view tableName, const std::string& query, int objId)
+{
+#ifdef MYSQL_EXEC_DEBUG
+    log_debug("{}", query);
+    print_backtrace();
+#endif
+
+    checkMysqlThreadInit();
+    SqlAutoLock lock(sqlMutex);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
+    if (res) {
+        std::string myError = getError(&db);
+        rollback("");
+        throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
+    }
+}
+
 int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 {
 #ifdef MYSQL_EXEC_DEBUG

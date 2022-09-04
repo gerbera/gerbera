@@ -133,6 +133,19 @@ add_library(libgerbera STATIC
         src/context.h
         src/contrib/md5.c
         src/contrib/md5.h
+        src/database/mysql/mysql_database.cc
+        src/database/mysql/mysql_database.h
+        src/database/sqlite3/sqlite_database.cc
+        src/database/sqlite3/sqlite_database.h
+        src/database/sqlite3/sl_task.cc
+        src/database/sqlite3/sl_task.h
+        src/database/sql_database.cc
+        src/database/sql_database.h
+        src/database/sql_format.h
+        src/database/database.cc
+        src/database/database.h
+        src/database/search_handler.cc
+        src/database/search_handler.h
         src/device_description_handler.cc
         src/device_description_handler.h
         src/exceptions.cc
@@ -179,17 +192,6 @@ add_library(libgerbera STATIC
         src/request_handler.h
         src/server.cc
         src/server.h
-        src/database/mysql/mysql_database.cc
-        src/database/mysql/mysql_database.h
-        src/database/sqlite3/sqlite_database.cc
-        src/database/sqlite3/sqlite_database.h
-        src/database/sql_database.cc
-        src/database/sql_database.h
-        src/database/sql_format.h
-        src/database/database.cc
-        src/database/database.h
-        src/database/search_handler.cc
-        src/database/search_handler.h
         src/subscription_request.cc
         src/subscription_request.h
         src/transcoding/transcode_dispatcher.cc

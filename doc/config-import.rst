@@ -436,7 +436,7 @@ the removed directory if it becomes available/gets created again.
 
         ::
 
-            mediatype="Music|AudioBook"
+            media-type="Music|AudioBook"
 
         * Optional
         * Default: **Any**
