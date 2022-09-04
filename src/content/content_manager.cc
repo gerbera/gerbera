@@ -611,17 +611,17 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
         throw_std_runtime_error("tried to remove illegal object id");
 
     bool parentRemoved = false;
-    std::shared_ptr<CdsObject> obj;
+    std::shared_ptr<CdsObject> obj = database->loadObject(objectID);
+
     if (rescanResource) {
-        obj = database->loadObject(objectID);
         if (obj && obj->hasResource(ContentHandler::RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
         }
+    }
 
-        if (obj->isContainer()) {
-            cleanupTasks(obj->getLocation());
-        }
+    if (obj->isContainer()) {
+        cleanupTasks(obj->getLocation());
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
     // So current container cache must be invalidated
@@ -636,11 +636,9 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
         }
     }
 
-    if (obj)
+    if (rescanResource && obj && parentRemoved)
         return { obj->getParentID() };
     return {};
-    // reload accounting
-    // loadAccounting();
 }
 
 int ContentManager::ensurePathExistence(const fs::path& path) const

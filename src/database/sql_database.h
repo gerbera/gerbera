@@ -121,6 +121,8 @@ public:
     virtual void rollback(std::string_view tName) { }
     virtual void commit(std::string_view tName) { }
 
+    virtual void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) = 0;
+    virtual void exec(std::string_view tableName, const std::string& query, int objId) = 0;
     virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 

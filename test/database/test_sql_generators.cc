@@ -51,6 +51,19 @@ public:
         return fmt::format("\"{}\"", str);
     }
 
+    void del(std::string_view tableName, const std::string& clause, const std::vector<int>& values) override
+    {
+        auto query = clause.empty() ?
+            fmt::format("DELETE FROM {}", identifier(tableName)) :
+            fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), clause);
+        lastStatement = query;
+    }
+
+    void exec(std::string_view tableName, const std::string& query, int objId) override
+    {
+        lastStatement = query;
+    }
+
     int exec(const std::string& query, bool) override
     {
         lastStatement = query;
