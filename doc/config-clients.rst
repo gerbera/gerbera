@@ -59,7 +59,7 @@ This section defines the client behaviour for one client.
     * Optional
     * Default: empty
     
-    This allows to select clients by IP address.
+    This allows to select clients by IP address. Allowed values are ip addresses (v4 or v6) which can be followed by ``/pref`` where pref is any allowed prefix length for the protocol.
 
     ::
     

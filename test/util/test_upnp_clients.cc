@@ -26,6 +26,9 @@ public:
         auto clientConfig = std::make_shared<ClientConfig>(123, "default", "192.168.1.100", "added by config", std::map<std::string, std::string>(), 1, -1, false);
         config->list->add(clientConfig, 0);
 
+        auto rangeConfig = std::make_shared<ClientConfig>(456, "range", "192.168.2.0/24", "added by config", std::map<std::string, std::string>(), 1, -1, false);
+        config->list->add(rangeConfig, 1);
+
         subject = new ClientManager(config, nullptr);
     }
 
@@ -148,4 +151,41 @@ TEST_F(UpnpClientsTest, configuredIP)
     const ClientInfo* pInfo = subject->getInfo(addr, "any unknown user-agent info");
     EXPECT_EQ(pInfo->type, ClientType::Unknown);
     EXPECT_EQ(pInfo->flags, 123);
+}
+
+TEST_F(UpnpClientsTest, configuredIPRange)
+{
+    auto addr = std::make_shared<GrbNet>("192.168.2.100");
+
+    // act
+    const ClientInfo* pInfo = subject->getInfo(addr, "any unknown user-agent info");
+    EXPECT_EQ(pInfo->type, ClientType::Unknown);
+    EXPECT_EQ(pInfo->flags, 456);
+}
+
+TEST_F(UpnpClientsTest, netmask4)
+{
+    auto addr = GrbNet("192.168.2.100");
+    EXPECT_EQ(addr.equals("192.0.0.0/8"), true);
+    EXPECT_EQ(addr.equals("192.168.0.0/16"), true);
+    EXPECT_EQ(addr.equals("192.168.2.0/24"), true);
+    EXPECT_EQ(addr.equals("192.168.2.100/32"), true);
+    EXPECT_EQ(addr.equals("192.168.2.100"), true);
+    EXPECT_EQ(addr.equals("192.168.2.101"), false);
+    EXPECT_EQ(addr.equals("192.168.3.0/24"), false);
+}
+
+TEST_F(UpnpClientsTest, netmask6)
+{
+    auto addr = GrbNet("fe80::523e:aaff:abcd:c276");
+    EXPECT_EQ(addr.equals("fe80:0:0:0:523e:aaff:abcd:c277/64"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0:0:523f:aaff:abcd:c277/64"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0:0:523e:ff:abcd:c277/64"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0:0:623e:aff:abcd:c276/32"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0001:623e:aff:abcd:c276/32"), false);
+    EXPECT_EQ(addr.equals("fe80:1:0:0:523e:aaff:abcd:c276/16"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0:0:522e:aaff:abcd:c276/40"), true);
+    EXPECT_EQ(addr.equals("fe80:0:0001:0:522e:aaff:abcd:c276/48"), false);
+    EXPECT_EQ(addr.equals("fe80:0:0:0:523e:aaff:abcd:c277"), false);
+    EXPECT_EQ(addr.equals("fe80:0:0:1:522e:aaff:abcd:c276/64"), false);
 }

@@ -44,16 +44,30 @@ Gerbera - https://gerbera.io/
 #define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
 #define SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<const struct sockaddr_in6*>(sa)
 #define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
-static int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
+static int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb, int prefix = -1)
 {
     if (sa->sa_family != sb->sa_family)
         return sa->sa_family - sb->sa_family;
 
     if (sa->sa_family == AF_INET) {
+        uint32_t netmask = 0;
+        if (prefix > 0 && prefix < 33) {
+            while (prefix) {
+                netmask <<= 1;
+                netmask++;
+                prefix--;
+            }
+        }
+        if (netmask > 0 && (SOCK_ADDR_IN_ADDR(sa).s_addr & netmask) == (SOCK_ADDR_IN_ADDR(sb).s_addr & netmask)) {
+            return 0;
+        }
         return SOCK_ADDR_IN_ADDR(sa).s_addr - SOCK_ADDR_IN_ADDR(sb).s_addr;
     }
 
     if (sa->sa_family == AF_INET6) {
+        if (prefix > 0 && prefix < 129) {
+            return std::memcmp((SOCK_ADDR_IN6_ADDR(sa)).s6_addr, (SOCK_ADDR_IN6_ADDR(sb).s6_addr), sizeof(SOCK_ADDR_IN6_ADDR(sa).s6_addr[0]) * prefix / 8);
+        }
         return std::memcmp(&(SOCK_ADDR_IN6_ADDR(sa)), &(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
     }
 
@@ -62,6 +76,8 @@ static int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb)
 
 GrbNet::GrbNet(const std::string& addr, int af)
 {
+    if (addr.find(':') != std::string::npos)
+        af = AF_INET6;
     reinterpret_cast<struct sockaddr*>(&sockAddr)->sa_family = af;
     int err = 0;
     if (af == AF_INET) {
@@ -69,8 +85,9 @@ GrbNet::GrbNet(const std::string& addr, int af)
     } else if (af == AF_INET6) {
         err = inet_pton(af, addr.c_str(), &(M_SOCK_ADDR_IN6_ADDR(&sockAddr)));
     }
-    if (err != 1)
-        log_error("Could not parse address {}", addr);
+    if (err != 1) {
+        log_error("Could not parse address {} (error = {})", addr, err);
+    }
 }
 
 GrbNet::GrbNet(const struct sockaddr_storage* addr)
@@ -95,18 +112,23 @@ int GrbNet::getAdressFamily() const
 
 bool GrbNet::equals(const std::string& match) const
 {
-    if (match.find(':') != std::string::npos) {
+    auto net = splitString(match, '/');
+    auto ip = net[0];
+    if (ip.find(':') != std::string::npos) {
+        auto prefix = stoiString(net.size() > 1 ? net[1] : "128", 128);
         // IPv6
         struct sockaddr_in6 clientAddr = {};
         clientAddr.sin6_family = AF_INET6;
-        if ((inet_pton(AF_INET6, match.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0))
+        if ((inet_pton(AF_INET6, ip.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr), prefix) == 0))
             return true;
-    } else if (match.find('.') != std::string::npos) {
+    } else if (ip.find('.') != std::string::npos) {
+
+        auto prefix = stoiString(net.size() > 1 ? net[1] : "32", 32);
         // IPv4
         struct sockaddr_in clientAddr = {};
         clientAddr.sin_family = AF_INET;
-        clientAddr.sin_addr.s_addr = inet_addr(match.c_str());
-        if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0)
+        clientAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+        if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr), prefix) == 0)
             return true;
     }
     return false;
