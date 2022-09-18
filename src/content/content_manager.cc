@@ -99,7 +99,7 @@ bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& m
                 match = checkValue(op, stoiString(expect), item->getTrackNumber());
             } else if (root == "partnumber") {
                 match = checkValue(op, stoiString(expect), item->getPartNumber());
-            } else if (std::find_if(mt_keys.begin(), mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != mt_keys.end()) {
+            } else if (std::find_if(MetadataHandler::mt_keys.begin(), MetadataHandler::mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != MetadataHandler::mt_keys.end()) {
                 match = checkValue(op, expect, item->getMetaData(root));
             }
         }
@@ -236,8 +236,8 @@ void ContentManager::run()
 #endif
 
     std::string layoutType = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-    if ((layoutType == "builtin") || (layoutType == "js"))
-        layout_enabled = true;
+    log_debug("virtual layout Type {}", layoutType);
+    layoutEnabled = (layoutType == LAYOUT_TYPE_BUILTIN || layoutType == LAYOUT_TYPE_JS);
 
 #ifdef ONLINE_SERVICES
     online_services = std::make_unique<OnlineServiceList>();
@@ -269,8 +269,7 @@ void ContentManager::run()
 
 #endif // ONLINE_SERVICES
 
-    if (layout_enabled)
-        initLayout();
+    initLayout();
 
 #ifdef HAVE_JS
     initJS();
@@ -362,10 +361,10 @@ void ContentManager::shutdown()
     if (autoscanList)
         autoscanList->updateLMinDB(*database);
 
+    destroyLayout();
 #ifdef HAVE_JS
     destroyJS();
 #endif
-    destroyLayout();
 
     if (autoscanList) {
         // update modification time for database
@@ -1222,7 +1221,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             return { INVALID_OBJECT_ID, false };
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
-        log_debug("Received chain item {}", tree);
+        log_debug("Received container chain item {}", tree);
         for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
@@ -1427,26 +1426,26 @@ void ContentManager::updateItemData(const std::shared_ptr<CdsItem>& item, const 
 
 void ContentManager::initLayout()
 {
-    if (!layout) {
+    if (layoutEnabled && !layout) {
         auto lock = threadRunner->lockGuard("initLayout");
         if (!layout) {
             std::string layoutType = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-            auto self = shared_from_this();
+            log_debug("virtual layout Type {}", layoutType);
             try {
-                if (layoutType == "js") {
+                auto self = shared_from_this();
+                if (layoutType == LAYOUT_TYPE_JS) {
 #ifdef HAVE_JS
                     layout = std::make_shared<JSLayout>(self, scripting_runtime);
 #else
-                    log_error("Cannot init layout: Gerbera compiled without JS support, but JS was requested.");
+                    log_error("Cannot init virtual layout:\nGerbera compiled without JavaScript support, but JavaScript was requested.");
 #endif
-                } else if (layoutType == "builtin") {
+                } else if (layoutType == LAYOUT_TYPE_BUILTIN) {
                     layout = std::make_shared<BuiltinLayout>(self);
                 }
             } catch (const std::runtime_error& e) {
                 layout = nullptr;
-                log_error("ContentManager virtual container layout: {}", e.what());
-                if (layoutType != "disabled")
-                    throw;
+                log_error("Init virtual container layout failed: {}", e.what());
+                throw;
             }
         }
     }
@@ -1828,36 +1827,25 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
             log_debug("objectID: {}", dir->getObjectID());
             auto obj = database->loadObject(dir->getObjectID());
             if (!obj || !obj->isContainer() || obj->isVirtual())
-                throw_std_runtime_error("tried to remove an illegal object (id) from the list of the autoscan directories");
+                throw_std_runtime_error("Tried to add an illegal object (id) to the list of the autoscan directories");
 
             log_debug("location: {}", obj->getLocation().c_str());
 
             if (obj->getLocation().empty())
-                throw_std_runtime_error("tried to add an illegal object as autoscan - no location information available");
+                throw_std_runtime_error("Tried to add an illegal object as autoscan - no location information available");
 
             dir->setLocation(obj->getLocation());
         }
         dir->resetLMT();
         database->addAutoscanDirectory(dir);
-        autoscanList->add(dir);
-        reloadLayout();
-
-        if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-            timerNotify(dir->getTimerParameter());
-        }
-#ifdef HAVE_INOTIFY
-        if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanDirectory::ScanMode::INotify)) {
-            inotify->monitor(dir);
-        }
-#endif
-        session_manager->containerChangedUI(dir->getObjectID());
+        scanDir(dir, true);
         return;
     }
 
     if (original->getScanMode() == AutoscanDirectory::ScanMode::Timed)
         timer->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (original->getScanMode() == AutoscanDirectory::ScanMode::INotify))
+    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (original->getScanMode() == AutoscanDirectory::ScanMode::INotify))
         inotify->unmonitor(original);
 #endif
 
@@ -1872,20 +1860,24 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     autoscanList->remove(copy->getScanID());
 
     copy->setScanMode(dir->getScanMode());
+    scanDir(copy, original->getScanMode() != copy->getScanMode());
+    database->updateAutoscanDirectory(copy);
+}
 
-    autoscanList->add(copy);
-    if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
-        timerNotify(copy->getTimerParameter());
-    }
+void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI)
+{
+    autoscanList->add(dir);
+    reloadLayout();
+
+    if (dir->getScanMode() == AutoscanDirectory::ScanMode::Timed)
+        timerNotify(dir->getTimerParameter());
 #ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && dir->getScanMode() == AutoscanDirectory::ScanMode::INotify) {
-        inotify->monitor(copy);
-    }
+    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanDirectory::ScanMode::INotify))
+        inotify->monitor(dir);
 #endif
 
-    database->updateAutoscanDirectory(copy);
-    if (original->getScanMode() != copy->getScanMode())
-        session_manager->containerChangedUI(copy->getObjectID());
+    if (updateUI)
+        session_manager->containerChangedUI(dir->getObjectID());
 }
 
 void ContentManager::triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj)

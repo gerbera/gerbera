@@ -66,7 +66,7 @@
 #define DEFAULT_SESSION_TIMEOUT 30
 #define DEFAULT_PRES_URL_APPENDTO_ATTR "none"
 #define DEFAULT_ITEMS_PER_PAGE 25
-#define DEFAULT_LAYOUT_TYPE "builtin"
+#define DEFAULT_LAYOUT_TYPE LAYOUT_TYPE_BUILTIN
 #define DEFAULT_HIDE_PC_DIRECTORY NO
 #define DEFAULT_CLIENTS_EN_VALUE NO
 
@@ -670,7 +670,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigEnumSetup<std::string>>(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
         "/import/scripting/virtual-layout/attribute::type", "config-import.html#scripting",
         DEFAULT_LAYOUT_TYPE,
-        std::map<std::string, std::string>({ { "js", "js" }, { "builtin", "builtin" }, { "disabled", "disabled" } })),
+        std::map<std::string, std::string>({ { LAYOUT_TYPE_JS, LAYOUT_TYPE_JS }, { LAYOUT_TYPE_BUILTIN, LAYOUT_TYPE_BUILTIN }, { LAYOUT_TYPE_DISABLED, LAYOUT_TYPE_DISABLED } })),
 
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_TRANSCODING_ENABLED,
         "/transcoding/attribute::enabled", "config-transcode.html#transcoding",

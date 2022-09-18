@@ -119,6 +119,10 @@ static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 #define MT_SQLITE_SYNC_OFF 0
 
 // misc
+#define LAYOUT_TYPE_JS "js"
+#define LAYOUT_TYPE_BUILTIN "builtin"
+#define LAYOUT_TYPE_DISABLED "disabled"
+
 #define INVALID_OBJECT_ID (-333)
 #define INVALID_OBJECT_ID_2 (-666)
 #define CHECK_SOCKET (-666)

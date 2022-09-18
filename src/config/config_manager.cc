@@ -332,14 +332,14 @@ void ConfigManager::load(const fs::path& userHome)
     auto layoutType = setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE)->getOption();
 
 #ifndef HAVE_JS
-    if (layoutType == "js")
+    if (layoutType == LAYOUT_TYPE_JS)
         throw_std_runtime_error("Gerbera was compiled without JS support, "
                                 "however you specified \"js\" to be used for the "
                                 "virtual-layout.");
 #else
     // read more javascript options
     charset = setOption(root, CFG_IMPORT_SCRIPTING_CHARSET)->getOption();
-    if (layoutType == "js") {
+    if (layoutType == LAYOUT_TYPE_JS) {
         try {
             auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
         } catch (const std::runtime_error& e) {
@@ -348,8 +348,8 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    args["mustExist"] = fmt::to_string(layoutType == "js");
-    args["notEmpty"] = fmt::to_string(layoutType == "js");
+    args["mustExist"] = fmt::to_string(layoutType == LAYOUT_TYPE_JS);
+    args["notEmpty"] = fmt::to_string(layoutType == LAYOUT_TYPE_JS);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     co->makeOption(root, self, &args);
     args.clear();
