@@ -119,7 +119,6 @@ enum metadata_fields_t {
     M_MAX
 };
 
-
 using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;
 
 /// \brief This class is responsible for providing access to metadata information
