@@ -357,6 +357,7 @@ protected:
     std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
     void cleanupTasks(const fs::path& path);
 
+    void scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI);
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
@@ -387,7 +388,7 @@ protected:
 
     std::mutex layoutMutex;
 
-    bool layout_enabled {};
+    bool layoutEnabled {};
     void threadProc();
 
     void addTask(std::shared_ptr<GenericTask> task, bool lowPriority = false);

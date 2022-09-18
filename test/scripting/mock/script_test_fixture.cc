@@ -187,7 +187,7 @@ duk_ret_t ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::string
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
 {
 
-    for (auto&&[meta,str]: mt_keys) {
+    for (auto&&[meta,str]: MetadataHandler::mt_keys) {
         duk_push_lstring(ctx, str.data(), str.size());
         auto sym = mt_names.at(meta);
         duk_put_global_lstring(ctx, sym.data(), sym.size());

@@ -235,34 +235,12 @@ static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autos
 /// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, BrowseCol>> browseSortMap {
-    { MetadataHandler::getMetaFieldName(M_PARTNUMBER), BrowseCol::PartNumber },
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::PartNumber },
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::TrackNumber },
-    { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::DcTitle },
-    { UPNP_SEARCH_CLASS, BrowseCol::UpnpClass },
-    { UPNP_SEARCH_PATH, BrowseCol::Location },
-    { UPNP_SEARCH_REFID, BrowseCol::RefId },
-    { UPNP_SEARCH_PARENTID, BrowseCol::ParentId },
-    { UPNP_SEARCH_ID, BrowseCol::Id },
-    { UPNP_SEARCH_LAST_UPDATED, BrowseCol::LastUpdated },
-    { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::LastModified },
-};
+static std::vector<std::pair<std::string, BrowseCol>> browseSortMap;
 
 /// \brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, SearchCol>> searchSortMap {
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::PartNumber },
-    { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::TrackNumber },
-    { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
-    { UPNP_SEARCH_PATH, SearchCol::Location },
-    { UPNP_SEARCH_REFID, SearchCol::RefId },
-    { UPNP_SEARCH_PARENTID, SearchCol::ParentId },
-    { UPNP_SEARCH_ID, SearchCol::Id },
-    { UPNP_SEARCH_LAST_UPDATED, SearchCol::LastUpdated },
-    { UPNP_SEARCH_LAST_MODIFIED, SearchCol::LastModified },
-};
+static std::vector<std::pair<std::string, SearchCol>> searchSortMap;
 
 /// \brief Map meta search keys to column ids
 // entries are handled sequentially,
@@ -334,6 +312,30 @@ void SQLDatabase::init()
     if (table_quote_begin == '\0' || table_quote_end == '\0')
         throw_std_runtime_error("quote vars need to be overridden");
 
+    browseSortMap = {
+        { MetadataHandler::getMetaFieldName(M_PARTNUMBER), BrowseCol::PartNumber },
+        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::PartNumber },
+        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::TrackNumber },
+        { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::DcTitle },
+        { UPNP_SEARCH_CLASS, BrowseCol::UpnpClass },
+        { UPNP_SEARCH_PATH, BrowseCol::Location },
+        { UPNP_SEARCH_REFID, BrowseCol::RefId },
+        { UPNP_SEARCH_PARENTID, BrowseCol::ParentId },
+        { UPNP_SEARCH_ID, BrowseCol::Id },
+        { UPNP_SEARCH_LAST_UPDATED, BrowseCol::LastUpdated },
+        { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::LastModified },
+    };
+    searchSortMap = {
+        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::PartNumber },
+        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::TrackNumber },
+        { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
+        { UPNP_SEARCH_PATH, SearchCol::Location },
+        { UPNP_SEARCH_REFID, SearchCol::RefId },
+        { UPNP_SEARCH_PARENTID, SearchCol::ParentId },
+        { UPNP_SEARCH_ID, SearchCol::Id },
+        { UPNP_SEARCH_LAST_UPDATED, SearchCol::LastUpdated },
+        { UPNP_SEARCH_LAST_MODIFIED, SearchCol::LastModified },
+    };
     /// \brief Map resource search keys to column ids
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
@@ -521,7 +523,7 @@ std::string SQLDatabase::getSortCapabilities()
         }
     }
     sortKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
-    for (auto&& [field, meta] : mt_keys) {
+    for (auto&& [field, meta] : MetadataHandler::mt_keys) {
         if (std::find(sortKeys.begin(), sortKeys.end(), meta) == sortKeys.end()) {
             sortKeys.emplace_back(meta);
         }
@@ -535,7 +537,7 @@ std::string SQLDatabase::getSearchCapabilities()
         std::string(UPNP_SEARCH_CLASS),
     };
     searchKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
-    for (auto&& [field, meta] : mt_keys) {
+    for (auto&& [field, meta] : MetadataHandler::mt_keys) {
         searchKeys.emplace_back(meta);
     }
     searchKeys.emplace_back("res");

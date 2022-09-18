@@ -230,7 +230,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
 #endif // ONLINE_SERVICES
 
     // M_TITLE = "dc:title"
-    for (auto&& [field, sym] : mt_keys) {
+    for (auto&& [field, sym] : MetadataHandler::mt_keys) {
         auto s = getValueOrDefault(mt_names, field, { "" });
         if (!s.empty()) {
             duk_push_lstring(ctx, sym.data(), sym.size());

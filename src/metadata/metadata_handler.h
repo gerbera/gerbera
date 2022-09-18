@@ -119,33 +119,6 @@ enum metadata_fields_t {
     M_MAX
 };
 
-static const auto mt_keys = std::map<metadata_fields_t, std::string> {
-    std::pair(M_TITLE, "dc:title"),
-    std::pair(M_ARTIST, "upnp:artist"),
-    std::pair(M_ALBUM, "upnp:album"),
-    std::pair(M_DATE, "dc:date"),
-    std::pair(M_CREATION_DATE, "dc:created"),
-    std::pair(M_UPNP_DATE, "upnp:date"),
-    std::pair(M_GENRE, "upnp:genre"),
-    std::pair(M_DESCRIPTION, "dc:description"),
-    std::pair(M_LONGDESCRIPTION, "upnp:longDescription"),
-    std::pair(M_PARTNUMBER, "upnp:episodeSeason"),
-    std::pair(M_TRACKNUMBER, "upnp:originalTrackNumber"),
-    std::pair(M_ALBUMARTURI, "upnp:albumArtURI"),
-    std::pair(M_REGION, "upnp:region"),
-    std::pair(M_CREATOR, "dc:creator"),
-    std::pair(M_AUTHOR, "upnp:author"),
-    std::pair(M_DIRECTOR, "upnp:director"),
-    std::pair(M_PUBLISHER, "dc:publisher"),
-    std::pair(M_RATING, "upnp:rating"),
-    std::pair(M_ACTOR, "upnp:actor"),
-    std::pair(M_PRODUCER, "upnp:producer"),
-    std::pair(M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]"),
-    std::pair(M_COMPOSER, "upnp:composer"),
-    std::pair(M_CONDUCTOR, "upnp:conductor"),
-    std::pair(M_ORCHESTRA, "upnp:orchestra"),
-    std::pair(M_CONTENT_CLASS, "upnp:contentClass"),
-};
 
 using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;
 
@@ -157,6 +130,7 @@ protected:
     std::shared_ptr<Mime> mime;
 
 public:
+    static std::map<metadata_fields_t, std::string> mt_keys;
     /// \brief Definition of the supported metadata fields.
 
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
