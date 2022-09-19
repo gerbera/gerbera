@@ -56,11 +56,15 @@ std::string Quirks::getGroup() const
 
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
 {
-    if (!pClientInfo || (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+    if (!pClientInfo || (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0) {
+        log_debug("addCaptionInfo called, but it is not enabled for this client");
         return;
+    }
 
-    if (item->getClass() != UPNP_CLASS_VIDEO_ITEM)
+    if (!startswith(item->getClass(), UPNP_CLASS_VIDEO_ITEM)) {
+        log_debug("addCaptionInfo only available for videos");
         return;
+    }
 
     auto subAdded = xmlBuilder.renderSubtitleURL(item, pClientInfo->mimeMappings);
     if (subAdded) {
@@ -72,8 +76,10 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
 
 void Quirks::getSamsungFeatureList(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0) {
+        log_debug("X_GetFeatureList called, but it is not enabled for this client");
         return;
+    }
 
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
@@ -106,8 +112,10 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
 
 std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(Database& database, const std::string& objId) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+        log_debug("getSamsungFeatureRoot called, but it is not enabled for this client");
         return {};
+    }
     log_debug("getSamsungFeatureRoot objId [{}]", objId);
 
     static const auto containers = std::map<std::string, std::string> {
@@ -124,22 +132,34 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(Database& 
     return {};
 }
 
+static std::string xmlChild(const pugi::xml_node& root, const char* child)
+{
+    auto childNode = root.child(child);
+    if (childNode)
+        return childNode.text().as_string();
+    return {};
+}
+
 void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+        log_debug("X_GetObjectIDfromIndex called, but it is not enabled for this client");
         return;
+    }
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
     auto reqRoot = request.getRequest()->document_element();
+    if (reqRoot) {
+        log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-    log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
+        [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
+        [[maybe_unused]] auto index = xmlChild(reqRoot, "Index");
 
-    [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
-    [[maybe_unused]] auto index = reqRoot.child("Index").text().as_string();
-
-    log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
-
+        log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
+    } else {
+        log_warning("X_GetObjectIDfromIndex called without correct content");
+    }
     auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
@@ -147,19 +167,23 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 
 void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+        log_debug("X_GetIndexfromRID called, but it is not enabled for this client");
         return;
+    }
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
     auto reqRoot = request.getRequest()->document_element();
+    if (reqRoot) {
+        log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-    log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
+        [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
+        [[maybe_unused]] auto rID = xmlChild(reqRoot, "RID");
 
-    [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
-    [[maybe_unused]] auto rID = reqRoot.child("RID").text().as_string();
-
-    log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
-
+        log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
+    } else {
+        log_warning("X_GetIndexfromRID called without correct content");
+    }
     auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
@@ -167,8 +191,10 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0)
+    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
+        log_debug("restoreSamsungBookMarkedPosition called, but it is not enabled for this client");
         return;
+    }
 
     auto positionToRestore = item->getPlayStatus() ? item->getPlayStatus()->getBookMarkPosition().count() : 0;
     if (positionToRestore > 10)
@@ -185,22 +211,26 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
 void Quirks::saveSamsungBookMarkedPosition(Database& database, ActionRequest& request) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
-        log_debug("saveSamsungBookMarkedPosition called, but it is not enabled for this client");
+        log_debug("X_SetBookmark called, but it is not enabled for this client");
     } else {
         auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
         auto reqRoot = request.getRequest()->document_element();
-        auto objectID = stoiString(reqRoot.child("ObjectID").text().as_string());
-        auto bookMarkPos = stoiString(reqRoot.child("PosSecond").text().as_string()) / divider;
-        [[maybe_unused]] auto categoryType = reqRoot.child("CategoryType").text().as_string();
-        [[maybe_unused]] auto rID = reqRoot.child("RID").text().as_string();
+        if (reqRoot) {
+            auto objectID = stoiString(xmlChild(reqRoot, "ObjectID"));
+            auto bookMarkPos = stoiString(xmlChild(reqRoot, "PosSecond")) / divider;
+            [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
+            [[maybe_unused]] auto rID = xmlChild(reqRoot, "RID");
 
-        log_debug("saveSamsungBookMarkedPosition: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
-        auto playStatus = database.getPlayStatus(pClientInfo->group, objectID);
-        if (!playStatus)
-            playStatus = std::make_shared<ClientStatusDetail>(pClientInfo->group, objectID, 1, bookMarkPos, 0, 0);
-        else
-            playStatus->setBookMarkPosition(bookMarkPos);
-        database.savePlayStatus(playStatus);
+            log_debug("X_SetBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
+            auto playStatus = database.getPlayStatus(pClientInfo->group, objectID);
+            if (!playStatus)
+                playStatus = std::make_shared<ClientStatusDetail>(pClientInfo->group, objectID, 1, bookMarkPos, 0, 0);
+            else
+                playStatus->setBookMarkPosition(bookMarkPos);
+            database.savePlayStatus(playStatus);
+        } else {
+            log_warning("X_SetBookmark called without correct content");
+        }
     }
     auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     request.setResponse(std::move(response));
