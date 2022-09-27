@@ -730,6 +730,7 @@ function addVideo(obj) {
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat({ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
         }
+        tree[tree.length-1].upnpclass = grb_container_type_video;
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = obj.res;
         tree[tree.length-1].aux = obj.aux;
@@ -774,6 +775,7 @@ function addImage(obj) {
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
         }
+        tree[tree.length-1].upnpclass = grb_container_type_image;
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = obj.res;
         tree[tree.length-1].aux = obj.aux;

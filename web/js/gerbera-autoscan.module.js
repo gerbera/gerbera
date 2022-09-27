@@ -46,6 +46,9 @@ const addAutoscan = (event) => {
       videoMovie: item.videoMovie,
       videoTV: item.videoTV,
       videoMusicVideo: item.videoMusicVideo,
+      ctAudio: item.ctAudio,
+      ctImage: item.ctImage,
+      ctVideo: item.ctVideo,
       from_fs: fromFs
     };
     requestData[Auth.SID] = Auth.getSessionId();

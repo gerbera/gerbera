@@ -470,6 +470,19 @@ the removed directory if it becomes available/gets created again.
         | TV               | object.item.videoItem.videoBroadcast |
         +------------------+--------------------------------------+
 
+        ::
+
+            container-type-audio="object.container"
+            container-type-image="object.container"
+            container-type-video="object.container"
+
+        * Optional
+        * Default: **object.container.album.musicAlbum**/ **object.container.album.photoAlbum**/ **object.container**
+
+        Set the default container type for virtual containers during import.
+        This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
+        The first object that is added to the container determines the property (audio/image/video) used. 
+
 
 ``system-directories``
 ~~~~~~~~~~~~~~~~~~~~~~

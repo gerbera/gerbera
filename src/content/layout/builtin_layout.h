@@ -45,7 +45,7 @@ class BuiltinLayout : public Layout {
 public:
     explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType) override;
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap) override;
 
 protected:
     std::shared_ptr<Config> config;
@@ -54,10 +54,10 @@ protected:
     std::map<std::string, std::shared_ptr<CdsContainer>> container;
 
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
-    void getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2);
-    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
-    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
-    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath);
+    void getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2, const std::string& upnpClass);
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap);
+    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap);
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap);
     std::string mapGenre(const std::string& genre);
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);

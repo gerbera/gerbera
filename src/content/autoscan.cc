@@ -36,7 +36,13 @@
 
 #include <numeric>
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType)
+const std::map<AutoscanDirectory::MediaMode, std::string> AutoscanDirectory::ContainerTypesDefaults = {
+    { AutoscanDirectory::MediaMode::Audio, UPNP_CLASS_MUSIC_ALBUM },
+    { AutoscanDirectory::MediaMode::Image, UPNP_CLASS_PHOTO_ALBUM },
+    { AutoscanDirectory::MediaMode::Video, UPNP_CLASS_CONTAINER },
+};
+
+AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType, const std::map<MediaMode, std::string>& containerMap)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
@@ -44,6 +50,7 @@ AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recu
     , persistent_flag(persistent)
     , interval(interval)
     , scanID(INVALID_SCAN_ID)
+    , containerMap(containerMap)
 {
     setMediaType(mediaType);
 }
@@ -265,6 +272,7 @@ void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) c
     copy->timer_parameter = timer_parameter;
     copy->scanContent = scanContent;
     copy->mediaType = mediaType;
+    copy->containerMap = containerMap;
 }
 
 std::shared_ptr<Timer::Parameter> AutoscanDirectory::getTimerParameter() const

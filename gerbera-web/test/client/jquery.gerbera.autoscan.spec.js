@@ -242,7 +242,10 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         videoTV: true,
         videoMusicVideo: true,
         hidden: true,
-        interval: '1800'
+        ctAudio: '',
+        ctImage: '',
+        ctVideo: '',
+        interval: '1800',
       });
       item.scan_mode = previousMode;
     });
@@ -269,7 +272,10 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         videoMovie: true,
         videoTV: true,
         videoMusicVideo: true,
-        hidden: true
+        hidden: true,
+          ctAudio: '',
+          ctImage: '',
+          ctVideo: '',
       });
 
       item.scan_mode = previousMode;

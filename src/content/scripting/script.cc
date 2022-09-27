@@ -400,6 +400,9 @@ void Script::_execute()
     duk_pop(ctx);
 }
 
+#define GRB_CONTAINERTYPE_AUDIO "grb_container_type_audio"
+#define GRB_CONTAINERTYPE_IMAGE "grb_container_type_image"
+#define GRB_CONTAINERTYPE_VIDEO "grb_container_type_video"
 #define OBJECT_SCRIPT_PATH "object_script_path"
 #define OBJECT_AUTOSCAN_ID "object_autoscan_id"
 
@@ -409,6 +412,9 @@ void Script::cleanup()
     duk_del_prop_string(ctx, -1, objectName.c_str());
     duk_del_prop_string(ctx, -1, OBJECT_SCRIPT_PATH);
     duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
+    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_AUDIO);
+    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_VIDEO);
+    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_IMAGE);
 }
 
 void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath)
@@ -423,6 +429,22 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
     if (autoScan && !rootPath.empty()) {
         duk_push_sprintf(ctx, "%d", autoScan->getScanID());
         duk_put_global_string(ctx, OBJECT_AUTOSCAN_ID);
+
+        auto containerMap = autoScan->getContainerTypes();
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio)).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image)).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video)).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
+
+    } else {
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
+        duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
     }
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());

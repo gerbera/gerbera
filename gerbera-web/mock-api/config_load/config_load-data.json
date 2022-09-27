@@ -1200,7 +1200,7 @@
 				"status": "unchanged",
 				"origValue": "",
 				"source": "config.xml",
-				"value": "1.11.0"
+				"value": "1.11.1"
 			},
 			{
 				"item": "/server/modelURL",

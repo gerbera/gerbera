@@ -1087,6 +1087,16 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::to", "config-import.html#layout",
         ""),
 
+    std::make_shared<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO,
+        "container-type-audio", "config-import.html#autoscan",
+        UPNP_CLASS_MUSIC_ALBUM),
+    std::make_shared<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE,
+        "container-type-image", "config-import.html#autoscan",
+        UPNP_CLASS_PHOTO_ALBUM),
+    std::make_shared<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO,
+        "container-type-video", "config-import.html#autoscan",
+        UPNP_CLASS_CONTAINER),
+
     std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LIBOPTS_AUXDATA_TAG,
         "attribute::tag", "config-import.html#auxdata",
         ""),

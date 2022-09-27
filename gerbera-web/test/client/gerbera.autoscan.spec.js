@@ -112,7 +112,10 @@ describe('Gerbera Autoscan', () => {
           video: true,
           videoMovie: true,
           videoTV: true,
-          videoMusicVideo: true
+          videoMusicVideo: true,
+          ctAudio: 'object.container.audioMusic',
+          ctImage: 'object.container.photoAlbum',
+          ctVideo: 'object.container.videoContainer',
         }
       };
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
@@ -140,7 +143,10 @@ describe('Gerbera Autoscan', () => {
         videoMovie: true,
         videoTV: true,
         videoMusicVideo: true,
-        from_fs: true
+        from_fs: true,
+        ctAudio: 'object.container.audioMusic',
+        ctImage: 'object.container.photoAlbum',
+        ctVideo: 'object.container.videoContainer',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -167,7 +173,10 @@ describe('Gerbera Autoscan', () => {
         videoMovie: true,
         videoTV: true,
         videoMusicVideo: true,
-        updates: 'check'
+        updates: 'check',
+        ctAudio: 'object.container.audioMusic',
+        ctImage: 'object.container.photoAlbum',
+        ctVideo: 'object.container.videoContainer',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -303,7 +312,10 @@ describe('Gerbera Autoscan', () => {
         videoTV: true,
         videoMusicVideo: true,
         hidden: false,
-        interval: '1800'
+        interval: '1800',
+        ctAudio: '',
+        ctImage: '',
+        ctVideo: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 

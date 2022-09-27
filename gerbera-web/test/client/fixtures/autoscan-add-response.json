@@ -16,6 +16,9 @@
     "videoTV": true,
     "videoMusicVideo": true,
     "hidden": false,
+    "ctAudio": null,
+    "ctImage": null,
+    "ctVideo": null,
     "interval": 1800,
     "persistent": false
   }

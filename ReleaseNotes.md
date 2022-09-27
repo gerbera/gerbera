@@ -6,6 +6,21 @@
 
 - Support for NFO files as additional resources: Set up in `resources` and place nfo-files (https://kodi.wiki/view/NFO_files/Templates) next to your media files.
 - Tweaking mimetypes for clients
+- Editing Flags in web UI
+- More statistics on web UI
+- Add support for ip subnets in client config
+- Defaults for virtual container upnp class
+
+### FIXES
+- Database update on autoscan table
+- Transcoding for external items
+- Sqlite errors because of deleted objects
+- Sorting by certain keys
+
+### Code Improvements
+- Xml2Json rework
+- build with latest versions of exiv2, fmt and spdlog
+- Further Cleanups
 
 ### General
 If you activated nfo-metafile resources you have to reimport your media files.

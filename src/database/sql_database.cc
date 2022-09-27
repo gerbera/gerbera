@@ -145,7 +145,10 @@ enum class AutoscanColumn {
     ObjId,
     ScanMode,
     Recursive,
-    MedaType,
+    MediaType,
+    CtAudio,
+    CtImage,
+    CtVideo,
     Hidden,
     Interval,
     LastModified,
@@ -223,7 +226,10 @@ static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autos
     { AutoscanColumn::ObjId, { AUS_ALIAS, "obj_id" } },
     { AutoscanColumn::ScanMode, { AUS_ALIAS, "scan_mode" } },
     { AutoscanColumn::Recursive, { AUS_ALIAS, "recursive" } },
-    { AutoscanColumn::MedaType, { AUS_ALIAS, "media_type" } },
+    { AutoscanColumn::MediaType, { AUS_ALIAS, "media_type" } },
+    { AutoscanColumn::CtAudio, { AUS_ALIAS, "ct_audio" } },
+    { AutoscanColumn::CtImage, { AUS_ALIAS, "ct_image" } },
+    { AutoscanColumn::CtVideo, { AUS_ALIAS, "ct_video" } },
     { AutoscanColumn::Hidden, { AUS_ALIAS, "hidden" } },
     { AutoscanColumn::Interval, { AUS_ALIAS, "interval" } },
     { AutoscanColumn::LastModified, { AUS_ALIAS, "last_modified" } },
@@ -2409,9 +2415,13 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 
     AutoscanDirectory::ScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
-    int mt = getColInt(row, AutoscanColumn::MedaType, 0);
+    int mt = getColInt(row, AutoscanColumn::MediaType, 0);
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
+    auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
+    containerMap[AutoscanDirectory::MediaMode::Audio] = getCol(row, AutoscanColumn::CtAudio);
+    containerMap[AutoscanDirectory::MediaMode::Image] = getCol(row, AutoscanColumn::CtImage);
+    containerMap[AutoscanDirectory::MediaMode::Video] = getCol(row, AutoscanColumn::CtVideo);
     int interval = 0;
     if (mode == AutoscanDirectory::ScanMode::Timed)
         interval = std::stoi(getCol(row, AutoscanColumn::Interval));
@@ -2419,7 +2429,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 
     log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, mt);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, mt, containerMap);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", lastModified);
@@ -2450,6 +2460,9 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         identifier("recursive"),
         identifier("media_type"),
         identifier("hidden"),
+        identifier("ct_audio"),
+        identifier("ct_image"),
+        identifier("ct_video"),
         identifier("interval"),
         identifier("last_modified"),
         identifier("persistent"),
@@ -2462,6 +2475,9 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         quote(adir->getRecursive()),
         quote(adir->getMediaType()),
         quote(adir->getHidden()),
+        quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio)),
+        quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image)),
+        quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video)),
         quote(adir->getInterval().count()),
         quote(adir->getPreviousLMT().count()),
         quote(adir->persistent()),
@@ -2492,6 +2508,9 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         ColumnUpdate(identifier("recursive"), quote(adir->getRecursive())),
         ColumnUpdate(identifier("media_type"), quote(adir->getMediaType())),
         ColumnUpdate(identifier("hidden"), quote(adir->getHidden())),
+        ColumnUpdate(identifier("ct_audio"), quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio))),
+        ColumnUpdate(identifier("ct_image"), quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image))),
+        ColumnUpdate(identifier("ct_video"), quote(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video))),
         ColumnUpdate(identifier("interval"), quote(adir->getInterval().count())),
         ColumnUpdate(identifier("persistent"), quote(adir->persistent())),
         ColumnUpdate(identifier("location"), objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),

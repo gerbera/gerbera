@@ -477,7 +477,15 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     addObject(obj, true);
 }
 
-std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task)
+std::shared_ptr<CdsObject> ContentManager::createSingleItem(
+    const fs::directory_entry& dirEnt,
+    const fs::path& rootPath,
+    bool followSymlinks,
+    bool checkDatabase,
+    bool processExisting,
+    bool firstChild,
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    std::shared_ptr<CMAddFileTask> task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -504,7 +512,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(const fs::directory_
             if (!adir || adir->hasContent(obj->getClass())) {
                 // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
-                layout->processCdsObject(obj, rootPath, contentType);
+                layout->processCdsObject(obj, rootPath, contentType, adir ? adir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults);
             }
 
 #ifdef HAVE_JS

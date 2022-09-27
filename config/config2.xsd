@@ -673,6 +673,9 @@
             <xs:attribute name="hidden-files" type="boolean"/>
             <xs:attribute name="recursive" type="boolean" use="required"/>
             <xs:attribute name="mediatype" type="xs:string"/>
+            <xs:attribute name="container-type-audio" type="xs:string"/>
+            <xs:attribute name="container-type-image" type="xs:string"/>
+            <xs:attribute name="container-type-video" type="xs:string"/>
             <xs:attribute name="mode" use="required">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">

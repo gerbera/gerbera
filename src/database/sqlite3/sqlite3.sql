@@ -40,6 +40,9 @@ CREATE TABLE "mt_autoscan" (
   "recursive" tinyint unsigned NOT NULL,
   "media_type" integer NOT NULL,
   "hidden" tinyint unsigned NOT NULL,
+  "ct_audio" varchar(255) NOT NULL,
+  "ct_image" varchar(255) NOT NULL,
+  "ct_video" varchar(255) NOT NULL,
   "interval" integer unsigned default NULL,
   "last_modified" integer unsigned default NULL,
   "persistent" tinyint unsigned NOT NULL default '0',
@@ -65,33 +68,33 @@ CREATE TABLE "grb_config_value" (
   "status" varchar(20) NOT NULL
 );
 CREATE TABLE "grb_cds_resource" (
-    "item_id" integer NOT NULL,
-    "res_id" integer NOT NULL,
-    "handlerType" integer NOT NULL,
-    "purpose" integer NOT NULL,
-    "options" text default NULL,
-    "parameters" text default NULL,
-    PRIMARY KEY ("item_id", "res_id"),
-    CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  "item_id" integer NOT NULL,
+  "res_id" integer NOT NULL,
+  "handlerType" integer NOT NULL,
+  "purpose" integer NOT NULL,
+  "options" text default NULL,
+  "parameters" text default NULL,
+  PRIMARY KEY ("item_id", "res_id"),
+  CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE "grb_client" (
-    "addr" varchar(32) NOT NULL,
-    "port" integer NOT NULL,
-    "addrFamily" integer NOT NULL,
-    "userAgent" varchar(255) NOT NULL,
-    "last" integer NOT NULL,
-    "age" integer NOT NULL,
-    PRIMARY KEY ("addr", "port")
+  "addr" varchar(32) NOT NULL,
+  "port" integer NOT NULL,
+  "addrFamily" integer NOT NULL,
+  "userAgent" varchar(255) NOT NULL,
+  "last" integer NOT NULL,
+  "age" integer NOT NULL,
+  PRIMARY KEY ("addr", "port")
 );
 CREATE TABLE "grb_playstatus" (
-    "group" varchar(255) NOT NULL,
-    "item_id" integer NOT NULL,
-    "playCount" integer NOT NULL default(0),
-    "lastPlayed" integer NOT NULL default(0),
-    "lastPlayedPosition" integer NOT NULL default(0),
-    "bookMarkPos" integer NOT NULL default(0),
-    PRIMARY KEY ("group", "item_id"),
-    CONSTRAINT "grb_played_item" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  "group" varchar(255) NOT NULL,
+  "item_id" integer NOT NULL,
+  "playCount" integer NOT NULL default(0),
+  "lastPlayed" integer NOT NULL default(0),
+  "lastPlayedPosition" integer NOT NULL default(0),
+  "bookMarkPos" integer NOT NULL default(0),
+  PRIMARY KEY ("group", "item_id"),
+  CONSTRAINT "grb_played_item" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
 CREATE INDEX "mt_cds_object_ref_id" ON mt_cds_object(ref_id);

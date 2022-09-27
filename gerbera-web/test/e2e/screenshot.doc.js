@@ -197,7 +197,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(450, 40, 540, 890).write(fileName);
+      image.crop(450, 40, 540, 900).write(fileName);
     });
 
     it('for [edit item] from item list with details', async () => {
@@ -262,7 +262,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(310, 20, 820, 685).write(fileName);
+      image.crop(305, 20, 820, 939).write(fileName);
     });
 
     it('for [edit tweak] from filesystem list', async () => {

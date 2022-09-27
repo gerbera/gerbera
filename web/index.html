@@ -347,7 +347,7 @@
         <div class="container-fluid p-0">
           <form>
             <div class="form-group row" id="autoscan-persistent-msg">
-              <span>This is a persistent autoscan directory (defined in config), it can not be modified via the web UI.</span>
+              <span>This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.</span>
             </div>
             <div class="form-group row no-gutters" hidden>
               <div class="col">
@@ -365,6 +365,13 @@
                 <label>Scan Mode</label>
               </div>
               <div class="col-9">
+                <div class="form-check">
+                  <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none" aria-describedby="autoscanModeNoneHelp"/>
+                  <label for="autoscanModeNone" class="form-check-label">None</label>
+                  <small id="autoscanModeNoneHelp" class="form-text text-muted">
+                    Disable autoscanning for this directory
+                  </small>
+                </div>
                 <div class="form-check">
                   <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify" aria-describedby="autoscanModeInotifyHelp"/>
                   <label for="autoscanModeInotify" class="form-check-label">INotify</label>
@@ -461,6 +468,33 @@
                     </small>
                 </div>
               </div>
+            </div>
+            <div class="form-group row no-gutters">
+              <label for="autoscanContainerTypeAudio" class="col-3 col-form-label">Audio Container</label>
+              <div class="col-9">
+                  <input type="text" name="autoscanContainerTypeAudio" id="autoscanContainerTypeAudio" class="form-control" aria-describedby="autoscanContainertypeAudioHelp"/>
+                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted">
+                       Container type for audio files
+                  </small>
+                </div>
+            </div>
+            <div class="form-group row no-gutters">
+              <label for="autoscanContainerTypeImage" class="col-3 col-form-label">Image Container</label>
+              <div class="col-9">
+                  <input type="text" name="autoscanContainerTypeImage" id="autoscanContainerTypeImage" class="form-control" aria-describedby="autoscanContainertypeImageHelp"/>
+                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted">
+                       Container type for image files
+                  </small>
+                </div>
+            </div>
+            <div class="form-group row no-gutters">
+              <label for="autoscanContainerTypeVideo" class="col-3 col-form-label">Video Container</label>
+              <div class="col-9">
+                  <input type="text" name="autoscanContainerTypeVideo" id="autoscanContainerTypeVideo" class="form-control" aria-describedby="autoscanContainertypeVideoHelp"/>
+                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted">
+                       Container type for video files
+                  </small>
+                </div>
             </div>
             <div class="form-group row no-gutters">
               <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
