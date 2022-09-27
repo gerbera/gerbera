@@ -57,6 +57,9 @@ CREATE TABLE `mt_autoscan` (
   `media_type` int(11) NOT NULL,
   `hidden` tinyint(4) unsigned NOT NULL,
   `interval` int(11) unsigned default NULL,
+  `ct_audio` varchar(255) NOT NULL,
+  `ct_image` varchar(255) NOT NULL,
+  `ct_video` varchar(255) NOT NULL,
   `last_modified` bigint(20) unsigned default NULL,
   `persistent` tinyint(4) unsigned NOT NULL default '0',
   `location` blob,
@@ -85,33 +88,33 @@ CREATE TABLE `grb_config_value` (
   `status` varchar(20) NOT NULL)
   ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `grb_cds_resource` (
-    `item_id` int(11) NOT NULL,
-    `res_id` int(11) NOT NULL,
-    `handlerType` int(11) NOT NULL,
-    `purpose` int(11) NOT NULL,
-    `options` text default NULL,
-    `parameters` text default NULL,
-    PRIMARY KEY (`item_id`, `res_id`),
-    CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `item_id` int(11) NOT NULL,
+  `res_id` int(11) NOT NULL,
+  `handlerType` int(11) NOT NULL,
+  `purpose` int(11) NOT NULL,
+  `options` text default NULL,
+  `parameters` text default NULL,
+  PRIMARY KEY (`item_id`, `res_id`),
+  CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `grb_client` (
-    `addr` varchar(32) NOT NULL,
-    `port` int(11) NOT NULL,
-    `addrFamily` int(11) NOT NULL,
-    `userAgent` varchar(255) NOT NULL,
-    `last` int(11) NOT NULL,
-    `age` int(11) NOT NULL,
-    PRIMARY KEY (`addr`, `port`)
+  `addr` varchar(32) NOT NULL,
+  `port` int(11) NOT NULL,
+  `addrFamily` int(11) NOT NULL,
+  `userAgent` varchar(255) NOT NULL,
+  `last` int(11) NOT NULL,
+  `age` int(11) NOT NULL,
+  PRIMARY KEY (`addr`, `port`)
 ) ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `grb_playstatus` (
-    `group` varchar(255) NOT NULL,
-    `item_id` int(11) NOT NULL,
-    `playCount` int(11) NOT NULL default '0',
-    `lastPlayed` int(11) NOT NULL default '0',
-    `lastPlayedPosition` int(11) NOT NULL default '0',
-    `bookMarkPos` int(11) NOT NULL default '0',
-    PRIMARY KEY (`group`, `item_id`),
-    CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  `group` varchar(255) NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `playCount` int(11) NOT NULL default '0',
+  `lastPlayed` int(11) NOT NULL default '0',
+  `lastPlayedPosition` int(11) NOT NULL default '0',
+  `bookMarkPos` int(11) NOT NULL default '0',
+  PRIMARY KEY (`group`, `item_id`),
+  CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
 INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '');
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

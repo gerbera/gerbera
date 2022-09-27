@@ -559,6 +559,18 @@ void Web::ConfigLoad::process()
             setValue(item, adir->getHidden());
 
             item = values.append_child("item");
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
+            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE);
+            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO);
+            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
+
+            item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT);
             setValue(item, adir->getActiveScanCount());
 
@@ -588,6 +600,15 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE));
+
+            item = values.append_child("item");
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT));

@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "content/autoscan.h"
 #include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"
 #include "metadata/metadata_handler.h"
@@ -55,6 +56,13 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
     const std::string& location, int onlineService)
 {
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
+    duk_put_global_string(ctx, "grb_container_type_audio");
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
+    duk_put_global_string(ctx, "grb_container_type_image");
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
+    duk_put_global_string(ctx, "grb_container_type_video");
+
     const std::string objectName = "orig";
     duk_idx_t origIdx = duk_push_object(ctx);
     duk_push_string(ctx, mimetype.c_str());

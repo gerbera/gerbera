@@ -310,4 +310,9 @@
         VACUUM;
         </script>
     </version>
+    <version number="20" remark="add autoscan container type">
+        <script>ALTER TABLE "mt_autoscan" ADD "ct_audio" varchar(255) NOT NULL default ('object.container.album.musicAlbum')</script>
+        <script>ALTER TABLE "mt_autoscan" ADD "ct_image" varchar(255) NOT NULL default ('object.container.album.photoAlbum')</script>
+        <script>ALTER TABLE "mt_autoscan" ADD "ct_video" varchar(255) NOT NULL default ('object.container')</script>
+    </version>
 </upgrade>

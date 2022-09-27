@@ -118,6 +118,10 @@ void Web::Autoscan::process()
             //     objectID, "", AutoscanDirectory::mapScanmode(scanMode),
             //     recursive, audio, image, video, interval, hidden);
 
+            auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
+            containerMap[AutoscanDirectory::MediaMode::Audio] = param("ctAudio");
+            containerMap[AutoscanDirectory::MediaMode::Image] = param("ctImage");
+            containerMap[AutoscanDirectory::MediaMode::Video] = param("ctVideo");
             auto autoscan = std::make_shared<AutoscanDirectory>(
                 "", // location
                 scanMode,
@@ -173,6 +177,10 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("videoTV").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value("0");
+
+        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
+        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
+        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
     } else {
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
@@ -190,5 +198,9 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MOVIE) ? "1" : "0");
         element.append_child("videoTV").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_BROADCAST) ? "1" : "0");
         element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MUSICVIDEOCLIP) ? "1" : "0");
+
+        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio).c_str());
+        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image).c_str());
+        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video).c_str());
     }
 }

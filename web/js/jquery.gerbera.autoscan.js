@@ -27,6 +27,9 @@
     const autoscanIdTxt = modal.find('#autoscanIdTxt');
     const autoscanFromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input[name=autoscanMode]');
+    const autoscanModeNone = modal.find('#autoscanModeNone');
+    const autoscanModeInotify = modal.find('#autoscanModeInotify');
+    const autoscanModeTimed = modal.find('#autoscanModeTimed');
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
@@ -45,6 +48,10 @@
     const autoscanVideoTV = modal.find('#autoscanVideoTV');
     const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
 
+    const autoscanCtAudio = modal.find('#autoscanContainerTypeAudio');
+    const autoscanCtImage = modal.find('#autoscanContainerTypeImage');
+    const autoscanCtVideo = modal.find('#autoscanContainerTypeVideo');
+
     reset(modal);
     if (item) {
       if (item.persistent) {
@@ -52,9 +59,20 @@
           $(this).prop('disabled', true)
         });
         autoscanSave.prop('disabled', true).off('click');
+        autoscanModeNone.closest('.form-check').hide();
+        if (item.scan_mode === 'inotify') {
+          autoscanModeTimed.closest('.form-check').hide();
+          autoscanModeInotify.closest('.form-check').show();
+        } else {
+          autoscanModeTimed.closest('.form-check').show();
+          autoscanModeInotify.closest('.form-check').hide();
+        }
         autoscanPersistentMsg.show();
       } else {
         autoscanSave.off('click').on('click', itemData.onSave);
+        autoscanModeNone.closest('.form-check').show();
+        autoscanModeTimed.closest('.form-check').show();
+        autoscanModeInotify.closest('.form-check').show();
       }
 
       autoscanId.val(item.object_id);
@@ -76,6 +94,9 @@
       autoscanVideoMusicVideo.prop('checked', item.videoMusicVideo);
       autoscanHidden.prop('checked', item.hidden);
       autoscanInterval.val(item.interval);
+      autoscanCtAudio.val(item.ctAudio);
+      autoscanCtImage.val(item.ctImage);
+      autoscanCtVideo.val(item.ctVideo);
 
       autoscanMode.off('click').on('click', function () {
         adjustFieldApplicability(modal);
@@ -104,49 +125,71 @@
     const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
     const mediaTypeItems = [autoscanAudio, autoscanAudioMusic, autoscanAudioBook, autoscanAudioBroadcast, autoscanImage, autoscanImagePhoto, autoscanVideo, autoscanVideoMovie, autoscanVideoTV, autoscanVideoMusicVideo];
 
+    const autoscanCtAudio = modal.find('#autoscanContainerTypeAudio');
+    const autoscanCtImage = modal.find('#autoscanContainerTypeImage');
+    const autoscanCtVideo = modal.find('#autoscanContainerTypeVideo');
+
+    switch (autoscanMode.val()) {
+      case 'timed':
+        autoscanRecursive.closest('.form-group').removeClass('disabled').show();
+        autoscanRecursive.prop('disabled', false);
+        autoscanHidden.closest('.form-group').removeClass('disabled').show();
+        autoscanHidden.prop('disabled', false);
+        autoscanInterval.closest('.form-group').removeClass('disabled').show();
+        autoscanInterval.prop('disabled', false);
+        mediaTypeItems.forEach((m) => {
+          m.closest('.form-group').removeClass('disabled').show();
+          m.prop('disabled', false);
+        });
+        autoscanCtAudio.closest('.form-group').removeClass('disabled').show();
+        autoscanCtAudio.prop('disabled', false);
+        autoscanCtImage.closest('.form-group').removeClass('disabled').show();
+        autoscanCtImage.prop('disabled', false);
+        autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
+        autoscanCtVideo.prop('disabled', false);
+        break;
+      case 'inotify':
+        autoscanRecursive.closest('.form-group').removeClass('disabled').show();
+        autoscanRecursive.prop('disabled', false);
+        autoscanHidden.closest('.form-group').removeClass('disabled').show();
+        autoscanHidden.prop('disabled', false);
+        autoscanInterval.closest('.form-group').hide();
+        autoscanInterval.prop('disabled', true);
+        mediaTypeItems.forEach((m) => {
+          m.closest('.form-group').removeClass('disabled').show();
+          m.prop('disabled', false);
+        });
+        autoscanCtAudio.closest('.form-group').removeClass('disabled').show();
+        autoscanCtAudio.prop('disabled', false);
+        autoscanCtImage.closest('.form-group').removeClass('disabled').show();
+        autoscanCtImage.prop('disabled', false);
+        autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
+        autoscanCtVideo.prop('disabled', false);
+        break;
+      case 'none':
+        autoscanRecursive.closest('.form-group').addClass('disabled').hide();
+        autoscanRecursive.prop('disabled', true);
+        autoscanHidden.closest('.form-group').addClass('disabled').hide();
+        autoscanHidden.prop('disabled', true);
+        autoscanInterval.closest('.form-group').addClass('disabled').hide();
+        autoscanInterval.prop('disabled', true);
+        mediaTypeItems.forEach((m) => {
+          m.closest('.form-group').addClass('disabled').hide();
+          m.prop('disabled', true);
+        });
+        autoscanCtAudio.closest('.form-group').addClass('disabled').hide();
+        autoscanCtAudio.prop('disabled', true);
+        autoscanCtImage.closest('.form-group').addClass('disabled').hide();
+        autoscanCtImage.prop('disabled', true);
+        autoscanCtVideo.closest('.form-group').addClass('disabled').hide();
+        autoscanCtVideo.prop('disabled', true);
+        break;
+    }
+
     if (autoscanPersistent.is(':checked')) {
       modal.find('form :input').each(function () {
         $(this).prop('disabled', true);
       });
-    } else {
-      switch (autoscanMode.val()) {
-        case 'timed':
-          autoscanRecursive.closest('.form-check').removeClass('disabled').show();
-          autoscanRecursive.prop('disabled', false);
-          autoscanHidden.closest('.form-check').removeClass('disabled').show();
-          autoscanHidden.prop('disabled', false);
-          autoscanInterval.closest('.form-group').removeClass('disabled').show();
-          autoscanInterval.prop('disabled', false);
-          mediaTypeItems.forEach((m) => {
-            m.closest('.form-check').removeClass('disabled').show();
-            m.prop('disabled', false);
-          });
-          break;
-        case 'inotify':
-          autoscanRecursive.closest('.form-check').removeClass('disabled').show();
-          autoscanRecursive.prop('disabled', false);
-          autoscanHidden.closest('.form-check').removeClass('disabled').show();
-          autoscanHidden.prop('disabled', false);
-          autoscanInterval.closest('.form-group').hide();
-          autoscanInterval.prop('disabled', true);
-          mediaTypeItems.forEach((m) => {
-            m.closest('.form-check').removeClass('disabled').show();
-            m.prop('disabled', false);
-          });
-          break;
-        case 'none':
-          autoscanRecursive.closest('.form-check').addClass('disabled').show();
-          autoscanRecursive.prop('disabled', true);
-          autoscanHidden.closest('.form-check').addClass('disabled').show();
-          autoscanHidden.prop('disabled', true);
-          autoscanInterval.closest('.form-group').addClass('disabled').show();
-          autoscanInterval.prop('disabled', true);
-          mediaTypeItems.forEach((m) => {
-            m.closest('.form-check').removeClass('disabled').show();
-            m.prop('disabled', true);
-          });
-          break;
-      }
     }
   };
 
@@ -172,6 +215,10 @@
     const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
     const mediaTypeItems = [autoscanAudio, autoscanAudioMusic, autoscanAudioBook, autoscanAudioBroadcast, autoscanImage, autoscanImagePhoto, autoscanVideo, autoscanVideoMovie, autoscanVideoTV, autoscanVideoMusicVideo];
 
+    const autoscanCtAudio = modal.find('#autoscanContainerTypeAudio');
+    const autoscanCtImage = modal.find('#autoscanContainerTypeImage');
+    const autoscanCtVideo = modal.find('#autoscanContainerTypeVideo');
+
     const autoscanSave = modal.find('#autoscanSave');
     const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
 
@@ -190,6 +237,9 @@
     });
     autoscanHidden.prop('checked', false);
     autoscanInterval.val('');
+    autoscanCtAudio.val('object.container.album.musicAlbum');
+    autoscanCtImage.val('object.container.album.photoAlbum');
+    autoscanCtVideo.val('object.container');
     autoscanSave.prop('disabled', false);
     autoscanPersistentMsg.hide();
   };
@@ -213,6 +263,10 @@
     const autoscanVideoTV = modal.find('#autoscanVideoTV');
     const autoscanVideoMusicVideo = modal.find('#autoscanVideoMusicVideo');
 
+    const autoscanCtAudio = modal.find('#autoscanContainerTypeAudio');
+    const autoscanCtImage = modal.find('#autoscanContainerTypeImage');
+    const autoscanCtVideo = modal.find('#autoscanContainerTypeVideo');
+
     let item = {
       object_id: objectId.val(),
       from_fs: fromFs.is(':checked'),
@@ -235,7 +289,11 @@
           video: autoscanVideo.is(':checked'),
           videoMovie: autoscanVideoMovie.is(':checked'),
           videoTV: autoscanVideoTV.is(':checked'),
-          videoMusicVideo: autoscanVideoMusicVideo.is(':checked')
+          videoMusicVideo: autoscanVideoMusicVideo.is(':checked'),
+
+          ctAudio: autoscanCtAudio.val(),
+          ctImage: autoscanCtImage.val(),
+          ctVideo: autoscanCtVideo.val()
         });
         break;
       case 'inotify':
@@ -252,7 +310,11 @@
           video: autoscanVideo.is(':checked'),
           videoMovie: autoscanVideoMovie.is(':checked'),
           videoTV: autoscanVideoTV.is(':checked'),
-          videoMusicVideo: autoscanVideoMusicVideo.is(':checked')
+          videoMusicVideo: autoscanVideoMusicVideo.is(':checked'),
+
+          ctAudio: autoscanCtAudio.val(),
+          ctImage: autoscanCtImage.val(),
+          ctVideo: autoscanCtVideo.val()
         });
         break;
       case 'none':

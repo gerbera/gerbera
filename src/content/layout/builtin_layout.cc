@@ -33,6 +33,7 @@
 
 #include <regex>
 
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
@@ -125,7 +126,7 @@ void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<i
     content->addObject(obj, parentID.second);
 }
 
-void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2)
+void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2, const std::string& upnpClass)
 {
     fs::path dir;
     auto&& objPath = obj->getLocation();
@@ -149,11 +150,12 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
                 dirVect.push_back(std::make_shared<CdsContainer>(segment.string()));
         }
         auto id = content->addContainerTree(dirVect);
+        dirVect[dirVect.size() - 1]->setClass(upnpClass);
         add(obj, id);
     }
 }
 
-void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
     auto id = chain["/Video/All Video"];
@@ -200,10 +202,10 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
         add(obj, id);
     }
 
-    getDir(obj, rootpath, "Video", "Video/Directories");
+    getDir(obj, rootpath, "Video", "Video/Directories", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video)));
 }
 
-void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
 
@@ -249,10 +251,10 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
         add(obj, id);
     }
 
-    getDir(obj, rootpath, "Photos", "Photos/Directories");
+    getDir(obj, rootpath, "Photos", "Photos/Directories", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image)));
 }
 
-void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath)
+void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
 
@@ -410,7 +412,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     add(obj, id);
 
     obj->setTitle(title);
-    getDir(obj, rootpath, "Audio", "Audio/Directories");
+    getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio)));
 }
 
 #ifdef ATRAILERS
@@ -480,7 +482,7 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
     return genre;
 }
 
-void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType)
+void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
 {
     log_debug("Process CDS Object: {}", obj->getTitle());
     auto clone = CdsObject::createObject(obj->getObjectType());
@@ -508,15 +510,15 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
         auto objCls = std::static_pointer_cast<CdsItem>(obj)->getClass();
         if (contentType == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-                addVideo(clone, rootpath);
+                addVideo(clone, rootpath, containerMap);
             else
-                addAudio(clone, rootpath);
+                addAudio(clone, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_VIDEO_ITEM)) {
-            addVideo(clone, rootpath);
+            addVideo(clone, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_IMAGE_ITEM)) {
-            addImage(clone, rootpath);
+            addImage(clone, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_AUDIO_ITEM) && contentType != CONTENT_TYPE_PLAYLIST) {
-            addAudio(clone, rootpath);
+            addAudio(clone, rootpath, containerMap);
         }
 
 #ifdef ONLINE_SERVICES

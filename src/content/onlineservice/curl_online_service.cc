@@ -136,7 +136,7 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
                 auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                 std::string contentType = getValueOrDefault(mappings, mimetype);
 
-                layout->processCdsObject(obj, "", contentType);
+                layout->processCdsObject(obj, "", contentType, AutoscanDirectory::ContainerTypesDefaults);
             }
         } else {
             log_debug("Updating existing {} object", serviceName);

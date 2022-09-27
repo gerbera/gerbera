@@ -83,8 +83,15 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
+        auto ctAudio = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child);
+        auto ctImage = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child);
+        auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
         try {
-            result.emplace_back(location, mode, recursive, true, interval, hidden, mt);
+            auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
+            containerMap[AutoscanDirectory::MediaMode::Audio] = ctAudio;
+            containerMap[AutoscanDirectory::MediaMode::Image] = ctImage;
+            containerMap[AutoscanDirectory::MediaMode::Video] = ctVideo;
+            result.emplace_back(location, mode, recursive, true, interval, hidden, mt, containerMap);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
             return false;
@@ -142,6 +149,33 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
             config->setOrigValue(index, entry.getHidden());
         entry.setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getHidden());
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
+    if (optItem == index) {
+        if (entry.getOrig())
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
+        entry.setContainerType(AutoscanDirectory::MediaMode::Audio, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE);
+    if (optItem == index) {
+        if (entry.getOrig())
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
+        entry.setContainerType(AutoscanDirectory::MediaMode::Image, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO);
+    if (optItem == index) {
+        if (entry.getOrig())
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
+        entry.setContainerType(AutoscanDirectory::MediaMode::Video, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
         return true;
     }
     return false;

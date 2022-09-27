@@ -32,6 +32,7 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
+#include "content/autoscan.h"
 #include "context.h"
 #include "util/grb_fs.h"
 
@@ -48,7 +49,7 @@ public:
 
     virtual ~Layout() = default;
 
-    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType) = 0;
+    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap) = 0;
 
 protected:
     std::shared_ptr<ContentManager> content;

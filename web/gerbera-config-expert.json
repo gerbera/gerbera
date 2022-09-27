@@ -600,6 +600,21 @@
 							"editable": true
 						},
 						{
+							"item": "/import/autoscan/timed/directory/attribute::container-type-audio",
+							"caption": "Container Type for Audio",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/timed/directory/attribute::container-type-image",
+							"caption": "Container Type for Image",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/timed/directory/attribute::container-type-video",
+							"caption": "Container Type for Video",
+							"editable": true
+						},
+						{
 							"item": "/import/autoscan/timed/directory/attribute::scan-count",
 							"caption": "Active Scan Count",
 							"editable": false
@@ -647,6 +662,21 @@
 						{
 							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",
 							"caption": "Import Hidden Files",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::container-type-audio",
+							"caption": "Container Type for Audio",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::container-type-image",
+							"caption": "Container Type for Image",
+							"editable": true
+						},
+						{
+							"item": "/import/autoscan/inotify/directory/attribute::container-type-video",
+							"caption": "Container Type for Video",
 							"editable": true
 						},
 						{
