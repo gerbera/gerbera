@@ -249,7 +249,7 @@ suite(() => {
     });
 
     it('for [edit autoscan] from filesystem list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan.png';
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -262,7 +262,25 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(305, 20, 820, 939).write(fileName);
+      image.crop(300, 205, 840, 560).write(fileName);
+    });
+
+    it('for [edit autoscan] from filesystem list with details', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-fs');
+      await homePage.clickTree('etc');
+      await homePage.clickTrail(1);
+      await driver.sleep(1000);
+      await homePage.showAutoscanDetails();
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(140, 140, 1160, 670).write(fileName);
     });
 
     it('for [edit tweak] from filesystem list', async () => {

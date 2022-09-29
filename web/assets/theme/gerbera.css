@@ -640,6 +640,12 @@ body,
     overflow: hidden;
 }
 
+#autoscan-persistent-msg {
+    background-color: #e9ecef;
+    padding: 10px;
+    margin-right: 0.15em;
+}
+
 .autoscan {
     cursor: pointer;
     background-color: darkorange;

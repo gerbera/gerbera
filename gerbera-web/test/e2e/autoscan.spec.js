@@ -32,13 +32,13 @@ describe('Autoscan Suite', () => {
       await homePage.clickMenu('nav-fs');
       driver.sleep(500); // allow for load
       await homePage.clickTree('etc');
-
       await homePage.clickTrailAddAutoscan();
 
       let result = await homePage.autoscanOverlayDisplayed();
       expect(result).to.be.true;
 
-      result = await homePage.getAutoscanModeTimed();
+      await homePage.setAutoscanMode('Timed');
+      result = await homePage.getAutoscanMode('Timed');
       expect(result).to.equal('true');
 
       result = await homePage.getAutoscanRecursive();
@@ -53,6 +53,30 @@ describe('Autoscan Suite', () => {
       await homePage.cancelAutoscan();
     });
 
+    it('a gerbera tree fs item container opens autoscan overlay when trail add autoscan is clicked and inotify is activated', async () => {
+      await homePage.clickMenu('nav-fs');
+      driver.sleep(500); // allow for load
+      await homePage.clickTree('etc');
+      await homePage.clickTrailAddAutoscan();
+
+      let result = await homePage.autoscanOverlayDisplayed();
+      expect(result).to.be.true;
+
+      await homePage.setAutoscanMode('Inotify');
+      result = await homePage.getAutoscanMode('Inotify');
+      expect(result).to.equal('true');
+      result = await homePage.getAutoscanMode('Timed');
+      expect(result).to.equal(null);
+
+      result = await homePage.getAutoscanRecursive();
+      expect(result).to.equal('true');
+
+      result = await homePage.getAutoscanHidden();
+      expect(result).to.equal('true');
+
+      await homePage.cancelAutoscan();
+    });
+
     it('autoscan displays message when properly submitted to server', async () => {
       await homePage.clickMenu('nav-fs');
       driver.sleep(500); // allow for load
@@ -62,6 +86,12 @@ describe('Autoscan Suite', () => {
       let result = await homePage.autoscanOverlayDisplayed();
       expect(result).to.be.true;
 
+      await homePage.showAutoscanDetails();
+
+      result = await homePage.getAutoscanId();
+      expect(result).to.equal('2f6d');
+      await homePage.setAutoscanMode('Inotify');
+      await homePage.setAutoscanRecursive();
       await homePage.submitAutoscan();
 
       result = await homePage.autoscanOverlayDisplayed();

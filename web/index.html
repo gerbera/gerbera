@@ -328,196 +328,207 @@
         <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
         <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
         <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="editSave" type="submit" class="btn btn-primary">Save Item</button>
+        <button id="editSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Item</button>
       </div>
     </div><!-- /.modal-dialog -->
   </div>
 </div>
 
-<div id="autoscanModal" class="modal fade" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
+<div id="autoscanModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
+    <div class="modal-content edit-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add Autoscan</h5>
+        <h5 class="modal-title">Edit Autoscan</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <div class="container-fluid p-0">
-          <form>
-            <div class="form-group row" id="autoscan-persistent-msg">
-              <span>This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.</span>
-            </div>
-            <div class="form-group row no-gutters" hidden>
-              <div class="col">
-                <label for="autoscanId">ID</label>
+      <div class="modal-body edit-body">
+        <div class="container-fluid edit-table p-0">
+          <form class="row no-gutters editor-form">
+            <div class="col" style="min-width: 250px !important">
+              <div class="form-group" id="autoscan-persistent-msg">
+                <span>This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.</span>
               </div>
-              <div class="col">
-                <span id="autoscanIdTxt" class="overflow"></span>
-                <input type="hidden" id="autoscanId"/>
-                <input type="checkbox" class="hidden" id="autoscanFromFs"/>
-                <input type="checkbox" class="hidden" id="autoscanPersistent"/>
+              <div class="form-group row " hidden>
+                  <div class="col-md-6">
+                      <label for="autoscanId">ID:</label>
+                  </div>
+                  <div class="col-md-6">
+                      <span id="autoscanIdTxt" class="overflow"></span>
+                      <input type="hidden" id="autoscanId" />
+                      <input type="checkbox" class="hidden" id="autoscanFromFs" />
+                      <input type="checkbox" class="hidden" id="autoscanPersistent" />
+                  </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <div class="col-3">
-                <label>Scan Mode</label>
-              </div>
-              <div class="col-9">
-                <div class="form-check">
-                  <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none" aria-describedby="autoscanModeNoneHelp"/>
-                  <label for="autoscanModeNone" class="form-check-label">None</label>
-                  <small id="autoscanModeNoneHelp" class="form-text text-muted">
-                    Disable autoscanning for this directory
-                  </small>
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Scan Mode</label>
                 </div>
-                <div class="form-check">
-                  <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify" aria-describedby="autoscanModeInotifyHelp"/>
-                  <label for="autoscanModeInotify" class="form-check-label">INotify</label>
-                  <small id="autoscanModeInotifyHelp" class="form-text text-muted">
-                    Efficiently and quickly update based on system filesystem events. This is the suggested method unless the underlying system does not support it.
-                  </small>
-                </div>
-                <div class="form-check">
-                  <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed" aria-describedby="autoscanModeTimedHelp"/>
-                  <label for="autoscanModeTimed" class="form-check-label">Timed</label>
-                  <small id="autoscanModeTimedHelp" class="form-text text-muted">
-                    Re-scans the directory at set intervals. Resource intensive if run too often.
-                  </small>
+                <div class="col-9">
+                  <div class="form-check">
+                    <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none" aria-describedby="autoscanModeNoneHelp"/>
+                    <label for="autoscanModeNone" class="form-check-label">None</label>
+                    <small id="autoscanModeNoneHelp" class="form-text text-muted">Disable autoscanning for this directory</small>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify" aria-describedby="autoscanModeInotifyHelp"/>
+                    <label for="autoscanModeInotify" class="form-check-label">INotify</label>
+                    <small id="autoscanModeInotifyHelp" class="form-text text-muted">Efficiently and quickly update based on system filesystem events. This is the suggested method unless the underlying system does not support it.</small>
+                  </div>
+                  <div class="form-check">
+                    <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed" aria-describedby="autoscanModeTimedHelp"/>
+                    <label for="autoscanModeTimed" class="form-check-label">Timed</label>
+                    <small id="autoscanModeTimedHelp" class="form-text text-muted">Re-scans the directory at set intervals. Resource intensive if run too often.</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <div class="col-3">
-                <label>Recursive</label>
-              </div>
-              <div class="col-9">
-                <div class="form-check">
-                  <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input" aria-describedby="autoscanRecursiveHelp"/>
-                  <label for="autoscanRecursive" class="form-check-label">Recursive</label>
-                  <small id="autoscanRecursiveHelp" class="form-text text-muted">
-                    Descend into child directories and index them.
-                  </small>
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Recursive</label>
+                </div>
+                <div class="col-9">
+                  <div class="form-check">
+                    <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input" aria-describedby="autoscanRecursiveHelp"/>
+                    <label for="autoscanRecursive" class="form-check-label">Recursive</label>
+                    <small id="autoscanRecursiveHelp" class="form-text text-muted">Descend into child directories and index them.</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <div class="col-3">
-                <label>Audio</label>
+              <div class="form-group row no-gutters">
+                <label for="autoscanHidden" class="col-3 col-form-label">Include Hidden</label>
+                <div class="col-9">
+                  <div class="form-check">
+                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input" aria-describedby="autoscanHiddenHelp"/>
+                    Include Hidden
+                    <small id="autoscanHiddenHelp" class="form-text text-muted">Include hidden files/directories</small>
+                  </div>
+                </div>
               </div>
-              <div class="col-9">
-                <div class="form-check">
-                  <input type="checkbox" name="autoscanAudio" id="autoscanAudio" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
-                  <label for="autoscanAudio" class="form-check-label grb-media-type">All Audio</label>
-                  <input type="checkbox" name="autoscanAudioMusic" id="autoscanAudioMusic" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
-                  <label for="autoscanAudioMusic" class="form-check-label grb-media-type">Music</label>
-                  <input type="checkbox" name="autoscanAudioBook" id="autoscanAudioBook" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
-                  <label for="autoscanAudioBook" class="form-check-label grb-media-type">Audio Book</label>
-                  <input type="checkbox" name="autoscanAudioBroadcast" id="autoscanAudioBroadcast" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
-                  <label for="autoscanAudioBroadcast" class="form-check-label grb-media-type">Audio Broadcast</label>
-                  <small id="autoscanAudioHelp" class="form-text text-muted">
-                    Import audio files from directory.
-                  </small>
+              <div class="form-group row no-gutters">
+                <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
+                <div class="col-4">
+                  <input type="number" id="autoscanInterval" class="form-control"/>
                 </div>
               </div>
             </div>
-            <div class="form-group row no-gutters">
-              <div class="col-3">
-                <label>Image</label>
-              </div>
-              <div class="col-9">
-                <div class="form-check">
-                  <input type="checkbox" name="autoscanImage" id="autoscanImage" class="form-check-input" aria-describedby="autoscanImageHelp"/>
-                  <label for="autoscanImage" class="form-check-label grb-media-type">All Images</label>
-                  <input type="checkbox" name="autoscanImagePhoto" id="autoscanImagePhoto" class="form-check-input" aria-describedby="autoscanImageHelp"/>
-                  <label for="autoscanImagePhoto" class="form-check-label grb-media-type">Photo</label>
-                  <small id="autoscanImageHelp" class="form-text text-muted">
-                    Import image files from directory.
-                  </small>
+            <div class="col ml-2" id="detailAutoscanCol" style="min-width: 250px !important">
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Audio</label>
+                </div>
+                <div class="col-9">
+                  <div class="form-check">
+                    <div class="row no-gutters">
+                      <div>
+                        <input type="checkbox" name="autoscanAudio" id="autoscanAudio" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <label for="autoscanAudio" class="form-check-label grb-media-type">All Audio</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanAudioMusic" id="autoscanAudioMusic" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <label for="autoscanAudioMusic" class="form-check-label grb-media-type">Music</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanAudioBook" id="autoscanAudioBook" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <label for="autoscanAudioBook" class="form-check-label grb-media-type">Audio Book</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanAudioBroadcast" id="autoscanAudioBroadcast" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <label for="autoscanAudioBroadcast" class="form-check-label grb-media-type">Audio Broadcast</label>
+                      </div>
+                    </div>
+                    <small id="autoscanAudioHelp" class="form-text text-muted">Import audio files from directory.</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <div class="col-3">
-                <label>Video</label>
-              </div>
-              <div class="col-9">
-                <div class="form-check">
-                  <input type="checkbox" name="autoscanVideo" id="autoscanVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
-                  <label for="autoscanVideo" class="form-check-label grb-media-type">All Video</label>
-                  <input type="checkbox" name="autoscanVideoMovie" id="autoscanVideoMovie" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
-                  <label for="autoscanVideoMovie" class="form-check-label grb-media-type">Movie</label>
-                  <input type="checkbox" name="autoscanVideoTV" id="autoscanVideoTV" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
-                  <label for="autoscanVideoTV" class="form-check-label grb-media-type">TV</label>
-                  <input type="checkbox" name="autoscanVideoMusicVideo" id="autoscanVideoMusicVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
-                  <label for="autoscanVideoMusicVideo" class="form-check-label grb-media-type">Music Video</label>
-                  <small id="autoscanVideoHelp" class="form-text text-muted">
-                    Import video files from directory.
-                  </small>
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Image</label>
+                </div>
+                <div class="col-9">
+                  <div class="form-check">
+                    <div class="row no-gutters">
+                      <div>
+                        <input type="checkbox" name="autoscanImage" id="autoscanImage" class="form-check-input" aria-describedby="autoscanImageHelp"/>
+                        <label for="autoscanImage" class="form-check-label grb-media-type">All Images</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanImagePhoto" id="autoscanImagePhoto" class="form-check-input" aria-describedby="autoscanImageHelp"/>
+                        <label for="autoscanImagePhoto" class="form-check-label grb-media-type">Photo</label>
+                      </div>
+                    </div>
+                    <small id="autoscanImageHelp" class="form-text text-muted">Import image files from directory.</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <label for="autoscanHidden" class="col-3 col-form-label">Include Hidden</label>
-              <div class="col-9">
-                <div class="form-check">
-                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input" aria-describedby="autoscanHiddenHelp"/> Include Hidden
-                    <small id="autoscanHiddenHelp" class="form-text text-muted">
-                      Include hidden files/directories
-                    </small>
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Video</label>
+                </div>
+                <div class="col-9">
+                  <div class="form-check">
+                    <div class="row no-gutters">
+                      <div>
+                        <input type="checkbox" name="autoscanVideo" id="autoscanVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <label for="autoscanVideo" class="form-check-label grb-media-type">All Video</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanVideoMovie" id="autoscanVideoMovie" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <label for="autoscanVideoMovie" class="form-check-label grb-media-type">Movie</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanVideoTV" id="autoscanVideoTV" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <label for="autoscanVideoTV" class="form-check-label grb-media-type">TV</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="autoscanVideoMusicVideo" id="autoscanVideoMusicVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <label for="autoscanVideoMusicVideo" class="form-check-label grb-media-type">Music Video</label>
+                      </div>
+                    </div>
+                    <small id="autoscanVideoHelp" class="form-text text-muted">Import video files from directory.</small>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <label for="autoscanContainerTypeAudio" class="col-3 col-form-label">Audio Container</label>
-              <div class="col-9">
+              <div class="form-group row no-gutters">
+                <label for="autoscanContainerTypeAudio" class="col-3 col-form-label">Audio Container</label>
+                <div class="col-9">
                   <input type="text" name="autoscanContainerTypeAudio" id="autoscanContainerTypeAudio" class="form-control" aria-describedby="autoscanContainertypeAudioHelp"/>
-                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted">
-                       Container type for audio files
-                  </small>
+                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted">Container type for audio files</small>
                 </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <label for="autoscanContainerTypeImage" class="col-3 col-form-label">Image Container</label>
-              <div class="col-9">
+              </div>
+              <div class="form-group row no-gutters">
+                <label for="autoscanContainerTypeImage" class="col-3 col-form-label">Image Container</label>
+                <div class="col-9">
                   <input type="text" name="autoscanContainerTypeImage" id="autoscanContainerTypeImage" class="form-control" aria-describedby="autoscanContainertypeImageHelp"/>
-                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted">
-                       Container type for image files
-                  </small>
+                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted">Container type for image files</small>
                 </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <label for="autoscanContainerTypeVideo" class="col-3 col-form-label">Video Container</label>
-              <div class="col-9">
+              </div>
+              <div class="form-group row no-gutters">
+                <label for="autoscanContainerTypeVideo" class="col-3 col-form-label">Video Container</label>
+                <div class="col-9">
                   <input type="text" name="autoscanContainerTypeVideo" id="autoscanContainerTypeVideo" class="form-control" aria-describedby="autoscanContainertypeVideoHelp"/>
-                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted">
-                       Container type for video files
-                  </small>
+                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted">Container type for video files</small>
                 </div>
-            </div>
-            <div class="form-group row no-gutters">
-              <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
-              <div class="col-4">
-                <input type="number" id="autoscanInterval" class="form-control"/>
               </div>
             </div>
           </form>
         </div>
       </div>
       <div class="modal-footer bg-light">
+        <button id="hideAutoscanButton" type="button" class="btn btn-default">Hide Details</button>
+        <button id="detailAutoscanButton" type="button" class="btn btn-default">Show Details</button>
         <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
       </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+    </div> <!-- /.modal-content -->
+  </div> <!-- /.modal-dialog -->
 </div>
 
 <div id="dirTweakModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add Directory Tweak</h5>
+        <h5 class="modal-title">Edit Directory Tweak</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

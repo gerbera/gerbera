@@ -19,7 +19,6 @@
     "ctAudio": "object.container.album.musicAlbum",
     "ctImage": "object.container.album.photoAlbum",
     "ctVideo": "object.container",
-
     "interval": 1800,
     "persistent": false
   }
