@@ -72,7 +72,12 @@ const addAutoscan = (event) => {
 const loadNewAutoscan = (response) => {
   const autoscanModal = $('#autoscanModal');
   if (response.success) {
-    autoscanModal.autoscanmodal('loadItem', {item: response.autoscan, onSave: submitAutoscan});
+    autoscanModal.autoscanmodal('loadItem', {
+      item: response.autoscan,
+      onSave: submitAutoscan,
+      onDetails: showDetails,
+      onHide: hideDetails
+    });
     autoscanModal.autoscanmodal('show');
     Updates.updateTreeByIds(response);
   }
@@ -99,6 +104,14 @@ const submitAutoscan = () => {
       GerberaApp.error(err);
     });
   }
+};
+
+const showDetails = () => {
+  $('#autoscanModal').editmodal('showDetails');
+};
+
+const hideDetails = () => {
+  $('#autoscanModal').editmodal('hideDetails');
 };
 
 const submitComplete = (response) => {

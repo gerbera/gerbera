@@ -102,6 +102,9 @@
         adjustFieldApplicability(modal);
       });
 
+      modal.find('#detailAutoscanButton').off('click').on('click', itemData.onDetails);
+      modal.find('#hideAutoscanButton').off('click').on('click', itemData.onHide);
+
       adjustFieldApplicability(modal);
     }
   };
@@ -226,6 +229,8 @@
       $(this).prop('disabled', false);
     });
 
+    hideDetails(modal);
+
     autoscanId.val('');
     autoscanIdTxt.text('');
     autoscanFromFs.prop('checked', false);
@@ -244,8 +249,22 @@
     autoscanPersistentMsg.hide();
   };
 
+  function showDetails(modal) {
+    modal.find('.modal-dialog').addClass('modal-xl');
+    $("#detailAutoscanCol").show();
+    modal.find('#detailAutoscanButton').hide();
+    modal.find('#hideAutoscanButton').show();
+  }
+
+  function hideDetails(modal) {
+    modal.find('.modal-dialog').removeClass('modal-xl');
+    modal.find('#detailAutoscanButton').show();
+    modal.find('#hideAutoscanButton').hide();
+    $("#detailAutoscanCol").hide();
+  }
+
   function saveItem (modal) {
-    const objectId = modal.find('#autoscanId');
+    const autoscanId = modal.find('#autoscanId');
     const fromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
     const autoscanRecursive = modal.find('#autoscanRecursive');
@@ -268,7 +287,7 @@
     const autoscanCtVideo = modal.find('#autoscanContainerTypeVideo');
 
     let item = {
-      object_id: objectId.val(),
+      object_id: autoscanId.val(),
       from_fs: fromFs.is(':checked'),
       scan_mode: autoscanMode.val()
     };
@@ -339,6 +358,12 @@
     },
     loadItem: function (itemData) {
       return loadItem($(this._element), itemData);
+    },
+    showDetails: function () {
+      return showDetails($(this._element));
+    },
+    hideDetails: function () {
+      return hideDetails($(this._element));
     },
     reset: function () {
       return reset($(this._element));

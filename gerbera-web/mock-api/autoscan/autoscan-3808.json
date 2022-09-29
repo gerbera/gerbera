@@ -15,10 +15,10 @@
     "videoMovie": true,
     "videoTV": true,
     "videoMusicVideo": true,
+    "hidden": true,
     "ctAudio": "object.container.album.musicAlbum",
     "ctImage": "object.container.album.photoAlbum",
     "ctVideo": "object.container",
-    "hidden": true,
     "interval": 1800,
     "persistent": false
   }

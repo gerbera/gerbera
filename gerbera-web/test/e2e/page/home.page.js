@@ -137,11 +137,6 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('detailbutton')).click();
   };
 
-  this.autoscanOverlayDisplayed = async () => {
-    await driver.sleep(1000); // await animation
-    return await driver.findElement(By.id('autoscanModal')).isDisplayed();
-  };
-
   this.tweaksOverlayDisplayed = async () => {
     await driver.sleep(1000); // await animation
     return await driver.findElement(By.id('dirTweakModal')).isDisplayed();
@@ -247,12 +242,33 @@ module.exports = function (driver) {
     return await driver.findElement(By.css('#editObjectType>option[value=\'' + objectType + '\']')).click();
   };
 
-  this.getAutoscanModeTimed = async () => {
-    return await driver.findElement(By.id('autoscanModeTimed')).getAttribute('checked');
+  this.showAutoscanDetails = async () => {
+    return await driver.findElement(By.id('detailAutoscanButton')).click();
+  };
+
+  this.setAutoscanMode = async (mode) => {
+    return await driver.findElement(By.id('autoscanMode'+ mode)).click();
+  };
+
+  this.autoscanOverlayDisplayed = async () => {
+    await driver.sleep(1000); // await animation
+    return await driver.findElement(By.id('autoscanModal')).isDisplayed();
+  };
+
+  this.getAutoscanMode = async (mode) => {
+    return await driver.findElement(By.id('autoscanMode' + mode)).getAttribute('checked');
   };
 
   this.getAutoscanRecursive = async () => {
     return await driver.findElement(By.id('autoscanRecursive')).getAttribute('checked');
+  };
+
+  this.getAutoscanId = async () => {
+    return await driver.findElement(By.id('autoscanId')).getAttribute('value');
+  };
+
+  this.setAutoscanRecursive = async () => {
+    return await driver.findElement(By.id('autoscanRecursive')).click();
   };
 
   this.getAutoscanHidden = async () => {
