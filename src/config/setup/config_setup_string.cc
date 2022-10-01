@@ -28,6 +28,8 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 
+#include <array>
+
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     bool trim = true;
@@ -45,4 +47,12 @@ std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& op
     }
     optionValue = std::make_shared<Option>(optValue);
     return optionValue;
+}
+
+static constexpr auto sqliteJournalModes = std::array<std::string_view, 6> { "DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF" };
+
+bool ConfigStringSetup::CheckSqlJournalMode(std::string& value)
+{
+    value.assign(toUpper(value));
+    return std::find(sqliteJournalModes.begin(), sqliteJournalModes.end(), value) != sqliteJournalModes.end();
 }

@@ -337,6 +337,7 @@
                 <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="upgrade-file" minOccurs="0"/>
                 <xs:element ref="synchronous" minOccurs="0"/>
+                <xs:element ref="journal-mode" minOccurs="0"/>
                 <xs:element ref="on-error" minOccurs="0"/>
                 <xs:element ref="backup" minOccurs="0"/>
             </xs:all>
@@ -352,6 +353,20 @@
                 <xs:enumeration value="off"/>
                 <xs:enumeration value="normal"/>
                 <xs:enumeration value="full"/>
+                <xs:enumeration value="extra"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+
+    <xs:element name="journal-mode" default="WAL">
+        <xs:simpleType>
+            <xs:restriction base="xs:string">
+                <xs:enumeration value="OFF"/>
+                <xs:enumeration value="DELETE"/>
+                <xs:enumeration value="TRUNCATE"/>
+                <xs:enumeration value="PERSIST"/>
+                <xs:enumeration value="MEMORY"/>
+                <xs:enumeration value="WAL"/>
             </xs:restriction>
         </xs:simpleType>
     </xs:element>

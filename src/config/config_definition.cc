@@ -79,12 +79,6 @@
 
 #define DEFAULT_TRANSCODING_ENABLED NO
 
-#define DEFAULT_SQLITE_SYNC "off"
-#define DEFAULT_SQLITE_RESTORE "restore"
-#define DEFAULT_SQLITE_BACKUP_ENABLED NO
-#define DEFAULT_SQLITE_BACKUP_INTERVAL 600
-#define DEFAULT_SQLITE_ENABLED YES
-
 #ifdef HAVE_MYSQL
 #define DEFAULT_MYSQL_HOST "localhost"
 #define DEFAULT_MYSQL_DB "gerbera"
@@ -95,7 +89,6 @@
 #define DEFAULT_MYSQL_ENABLED NO
 #endif
 
-#define DEFAULT_SQLITE3_DB_FILENAME "gerbera.db"
 #define DEFAULT_LIBOPTS_ENTRY_SEPARATOR "; "
 
 #ifdef HAVE_CURL
@@ -460,16 +453,19 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/storage/driver", "config-server.html#storage"),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_ENABLED,
         "/server/storage/sqlite3/attribute::enabled", "config-server.html#storage",
-        DEFAULT_SQLITE_ENABLED),
+        YES),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE,
         "/server/storage/sqlite3/database-file", "config-server.html#storage",
-        DEFAULT_SQLITE3_DB_FILENAME, true, false),
+        "gerbera.db", true, false),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
         "/server/storage/sqlite3/synchronous", "config-server.html#storage",
-        DEFAULT_SQLITE_SYNC, ConfigIntSetup::CheckSqlLiteSyncValue),
+        "off", ConfigIntSetup::CheckSqlLiteSyncValue),
+    std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE_JOURNALMODE,
+        "/server/storage/sqlite3/journal-mode", "config-server.html#storage",
+        "WAL", StringCheckFunction(ConfigStringSetup::CheckSqlJournalMode)),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_RESTORE,
         "/server/storage/sqlite3/on-error", "config-server.html#storage",
-        DEFAULT_SQLITE_RESTORE, StringCheckFunction(ConfigBoolSetup::CheckSqlLiteRestoreValue)),
+        "restore", StringCheckFunction(ConfigBoolSetup::CheckSqlLiteRestoreValue)),
 #ifdef SQLITE_BACKUP_ENABLED
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
@@ -477,11 +473,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #else
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
-        DEFAULT_SQLITE_BACKUP_ENABLED),
+        NO),
 #endif
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
         "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
-        DEFAULT_SQLITE_BACKUP_INTERVAL, 1, ConfigIntSetup::CheckMinValue),
+        600, 1, ConfigIntSetup::CheckMinValue),
 
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
         "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
@@ -1361,6 +1357,7 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
 const std::map<config_option_t, config_option_t> ConfigDefinition::dependencyMap = {
     { CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE, CFG_SERVER_STORAGE_SQLITE_ENABLED },
     { CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS, CFG_SERVER_STORAGE_SQLITE_ENABLED },
+    { CFG_SERVER_STORAGE_SQLITE_JOURNALMODE, CFG_SERVER_STORAGE_SQLITE_ENABLED },
     { CFG_SERVER_STORAGE_SQLITE_RESTORE, CFG_SERVER_STORAGE_SQLITE_ENABLED },
     { CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED, CFG_SERVER_STORAGE_SQLITE_ENABLED },
     { CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, CFG_SERVER_STORAGE_SQLITE_ENABLED },
