@@ -10,6 +10,7 @@
 - More statistics on web UI
 - Add support for ip subnets in client config
 - Defaults for virtual container upnp class
+- Configuration for SQLite database modes
 
 ### FIXES
 - Database update on autoscan table

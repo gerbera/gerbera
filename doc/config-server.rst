@@ -539,10 +539,22 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
         * Optional
         * Default: **off**
 
-        Possible values are ``off``, ``normal`` and ``full``.
+        Possible values are ``off``, ``normal``, ``full`` and ``extra``.
 
         This option sets the SQLite pragma **synchronous**. This setting will affect the performance of the database
-        write operations. For more information about this option see the SQLite documentation: http://www.sqlite.org/pragma.html#pragma_synchronous
+        write operations. For more information about this option see the SQLite documentation: https://www.sqlite.org/pragma.html#pragma_synchronous
+
+        .. code-block:: xml
+
+            <journal-mode>off</journal-mode>
+
+        * Optional
+        * Default: **WAL**
+
+        Possible values are  ``OFF``, ``DELETE``, ``TRUNCATE``, ``PERSIST``, ``MEMORY`` and ``WAL``
+
+        This option sets the SQLite pragma **journal_mode**. This setting will affect the performance of the database
+        write operations. For more information about this option see the SQLite documentation: https://www.sqlite.org/pragma.html#pragma_journal_mode
 
         .. code-block:: xml
 

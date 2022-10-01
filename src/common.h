@@ -114,10 +114,6 @@ static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 #define URL_VALUE_TRANSCODE_NO_RES_ID "none"
 #define URL_VALUE_TRANSCODE "1"
 
-#define MT_SQLITE_SYNC_FULL 2
-#define MT_SQLITE_SYNC_NORMAL 1
-#define MT_SQLITE_SYNC_OFF 0
-
 // misc
 #define LAYOUT_TYPE_JS "js"
 #define LAYOUT_TYPE_BUILTIN "builtin"

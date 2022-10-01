@@ -199,6 +199,7 @@ void ConfigManager::load(const fs::path& userHome)
         // read sqlite options
         setOption(root, CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+        setOption(root, CFG_SERVER_STORAGE_SQLITE_JOURNALMODE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_RESTORE);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);

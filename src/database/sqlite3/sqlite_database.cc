@@ -54,7 +54,7 @@ void Sqlite3Database::prepare()
 {
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
-    _exec("PRAGMA journal_mode = WAL");
+    _exec(fmt::format("PRAGMA journal_mode = {}", config->getOption(CFG_SERVER_STORAGE_SQLITE_JOURNALMODE)));
     exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
 }
 
