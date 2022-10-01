@@ -566,6 +566,7 @@ if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
             set (SYSTEMD_AFTER_TARGET "network.target network-online.target")
             set (SYSTEMD_DESCRIPTION "Gerbera Media Server")
         endif()
+        set (SYSTEMD_WANTS_TARGET "network-online.target")
 
         configure_file(${CMAKE_SOURCE_DIR}/scripts/systemd/gerbera.service.cmake gerbera.service)
         message(STATUS "Configuring systemd unit file: gerbera.service" )

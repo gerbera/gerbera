@@ -1,6 +1,7 @@
 [Unit]
 Description=${SYSTEMD_DESCRIPTION}
 After=${SYSTEMD_AFTER_TARGET}
+Wants=${SYSTEMD_WANTS_TARGET}
 
 [Service]
 Type=simple
