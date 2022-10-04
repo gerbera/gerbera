@@ -146,7 +146,7 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
         dirVect.push_back(container[c1]);
         dirVect.push_back(container[c2]);
         for (auto&& segment : dir) {
-            if (segment != "/" && !segment.empty())
+            if (segment != "/" && segment != ".." && !segment.empty())
                 dirVect.push_back(std::make_shared<CdsContainer>(segment.string()));
         }
         auto id = content->addContainerTree(dirVect);
@@ -159,6 +159,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
 {
     auto f2i = StringConverter::f2i(config);
     auto id = chain["/Video/All Video"];
+    log_debug("add video file {}", obj->getLocation().string());
 
     if (obj->getID() != INVALID_OBJECT_ID) {
         obj->setRefID(obj->getID());
@@ -194,6 +195,10 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
             add(obj, id);
         }
 
+        auto t = date.find('T');
+        if (t != std::string::npos) {
+            date = date.substr(0, t);
+        }
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(container["Video"]);
         ct.push_back(container["Video/Date"]);
@@ -208,6 +213,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
 void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
+    log_debug("add image file {}", obj->getLocation().string());
 
     auto id = chain["/Photos/All Photos"];
     if (obj->getID() != INVALID_OBJECT_ID) {
@@ -243,6 +249,10 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
             add(obj, id);
         }
 
+        auto t = date.find('T');
+        if (t != std::string::npos) {
+            date = date.substr(0, t);
+        }
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(container["Photos"]);
         ct.push_back(container["Photos/Date"]);
@@ -259,6 +269,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     auto f2i = StringConverter::f2i(config);
 
     std::string desc;
+    log_debug("add audio file {}", obj->getLocation().string());
 
     std::string title = obj->getMetaData(M_TITLE);
     if (title.empty())
@@ -418,6 +429,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
 #ifdef ATRAILERS
 void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
+    log_debug("add trailer {}", obj->getLocation().string());
     {
         auto id = chain["/Online Services/Apple/All Trailers"];
         if (obj->getID() != INVALID_OBJECT_ID) {
