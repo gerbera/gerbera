@@ -722,6 +722,10 @@ function addVideo(obj) {
             addCdsObject(obj, addContainerTree([chain.video, chain.allYears, chain.year, chain.month]));
         }
 
+        dateParts = date.split('T');
+        if (dateParts.length > 1) {
+            date = dateParts[0];
+        }
         chain.date.title = date;
         addCdsObject(obj, addContainerTree([chain.video, chain.allDates, chain.date]));
     }
@@ -767,6 +771,10 @@ function addImage(obj) {
             addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allYears, chain.year, chain.month]));
         }
 
+        dateParts = date.split('T');
+        if (dateParts.length > 1) {
+            date = dateParts[0];
+        }
         chain.date.title = date;
         addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allDates, chain.date]));
     }

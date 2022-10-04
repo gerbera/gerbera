@@ -328,6 +328,7 @@ protected:
     std::shared_ptr<Context> context;
     ///\brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
+    std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
@@ -363,12 +364,12 @@ protected:
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
-    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr) const;
+    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
     static void initUpnpMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
-    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const;
+    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count);
 
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);

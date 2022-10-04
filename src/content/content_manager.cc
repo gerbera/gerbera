@@ -509,10 +509,13 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(obj)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
+
             if (!adir || adir->hasContent(obj->getClass())) {
                 // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
                 layout->processCdsObject(obj, rootPath, contentType, adir ? adir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults);
+            } else {
+                log_debug("file ignored: {} adir={}, class={}, hasContent={}", dirEnt.path().c_str(), !!adir, obj->getClass(), adir ? adir->hasContent(obj->getClass()) : false);
             }
 
 #ifdef HAVE_JS
@@ -633,6 +636,7 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
     // Removing a file can lead to virtual directories to drop empty and be removed
     // So current container cache must be invalidated
     containerMap.clear();
+    containersWithFanArt.clear();
 
     if (!parentRemoved) {
         auto changedContainers = database->removeObject(objectID, all);
@@ -1021,7 +1025,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     finishScan(adir, subDir.path(), parentContainer, lastModifiedNewMax, firstObject);
 }
 
-void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject) const
+void ContentManager::finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
 {
     if (adir) {
         adir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));
@@ -1263,7 +1267,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     return { result, isNew };
 }
 
-void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count) const
+void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count)
 {
     if (!container)
         return;
@@ -1272,6 +1276,9 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
         container->setMTime(origObj->getMTime());
         database->updateObject(container, nullptr);
     }
+
+    if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end())
+        return;
 
     auto fanart = container->getResource(CdsResource::Purpose::Thumbnail);
     if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
@@ -1305,6 +1312,7 @@ void ContentManager::assignFanArt(const std::shared_ptr<CdsContainer>& container
             }
             database->updateObject(container, nullptr);
         }
+        containersWithFanArt[container->getID()] = container;
     }
 }
 
