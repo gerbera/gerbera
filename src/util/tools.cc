@@ -440,9 +440,11 @@ int HMSFToMilliseconds(std::string_view time)
     int minutes = 0;
     int seconds = 0;
     int ms = 0;
-    sscanf(time.data(), "%d:%d:%d.%d", &hours, &minutes, &seconds, &ms);
+    if (sscanf(time.data(), "%d:%d:%d.%d", &hours, &minutes, &seconds, &ms) > 3)
+        return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 
-    return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
+    log_warning("Could not parse time '{}'!", time);
+    return 0;
 }
 
 std::string escape(std::string_view string, char escapeChar, char toEscape)
