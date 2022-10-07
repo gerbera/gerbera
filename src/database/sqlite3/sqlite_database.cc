@@ -37,6 +37,10 @@
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
 static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
 
+#define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
+#define DELETE_CACHE_MAX_SIZE 60 // remove entries, if cache has more than 60
+#define DELETE_CACHE_RED_SIZE 50 // reduce cache to 50 entries
+
 Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(config, mime)
     , timer(std::move(timer))
@@ -355,8 +359,11 @@ void Sqlite3Database::threadProc()
 
             /* if nothing to do, sleep until awakened */
             auto now = currentTime();
-            if (now.count() - lastDelete.count() > 60) // drop cache if last delete was more than 60 secs ago
+            if (now.count() - lastDelete.count() > DELETE_CACHE_MAX_TIME) // drop cache if last delete was more than 60 secs ago
                 deletedEntries.clear();
+            else if (deletedEntries.size() > DELETE_CACHE_MAX_SIZE) // remove entries, if cache has more than 60
+                deletedEntries.erase(deletedEntries.begin(), deletedEntries.begin() + DELETE_CACHE_RED_SIZE);
+
             threadRunner->wait(lock);
         }
         log_debug("Exiting");
