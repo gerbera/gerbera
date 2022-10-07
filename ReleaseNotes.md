@@ -11,6 +11,7 @@
 - Add support for ip subnets in client config
 - Defaults for virtual container upnp class
 - Configuration for SQLite database modes
+- Offline mode for initial scan large libraries
 
 ### FIXES
 - Database update on autoscan table

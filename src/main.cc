@@ -187,6 +187,7 @@ int main(int argc, char** argv, char** envp)
         ("h,help", "Print this help and exit") //
         ("create-config", "Print a default config.xml file and exit") //
         ("check-config", "Check config.xml file and exit") //
+        ("offline", "Do not answer UPnP content requests") // good for initial scans
         ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
         ;
 
@@ -471,6 +472,10 @@ int main(int argc, char** argv, char** envp)
 
         log_debug("Datadir is: {}", dataDir.value_or("unset"));
 
+        bool offline = opts["offline"].as<bool>();
+        if (offline)
+            log_info("Running in offline mode");
+
         std::shared_ptr<ConfigManager> configManager;
         try {
             configManager = std::make_shared<ConfigManager>(
@@ -500,7 +505,7 @@ int main(int argc, char** argv, char** envp)
         auto server = std::make_shared<Server>(configManager);
 
         try {
-            server->init();
+            server->init(offline);
             server->run();
         } catch (const UpnpException& ue) {
             sigemptyset(&maskSet);
@@ -597,7 +602,7 @@ int main(int argc, char** argv, char** envp)
 
                     ///  \todo fix this for SIGHUP
                     server = std::make_shared<Server>(configManager);
-                    server->init();
+                    server->init(offline);
                     server->run();
 
                     _ctx.restartFlag = 0;
