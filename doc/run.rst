@@ -317,6 +317,16 @@ Compile Info
 
 Print the configuration summary (used libraries and enabled features) and exit.
 
+Offline
+------------
+
+::
+
+    --offline
+
+Do not answer UPnP requests like browse. This is helpful when running a large scan to initialize
+the database so no client can slow down the import by accessing the database.
+
 Version Information
 -------------------
 

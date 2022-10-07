@@ -64,9 +64,10 @@ Server::Server(std::shared_ptr<Config> config)
 {
 }
 
-void Server::init()
+void Server::init(bool offln)
 {
     virtual_directory = SERVER_VIRTUAL_DIR;
+    offline = offln;
 
     serverUDN = config->getOption(CFG_SERVER_UDN);
     aliveAdvertisementInterval = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
@@ -137,8 +138,8 @@ void Server::run()
     }
 
     log_debug("webroot: {}", webRoot);
-
     log_debug("Setting virtual dir to: {}", virtual_directory);
+
     ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpAddVirtualDir failed {}", virtual_directory));
@@ -463,7 +464,11 @@ void Server::routeActionRequest(ActionRequest& request)
     } else if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
         // log_debug("routeActionRequest: request for content directory service");
-        cds->processActionRequest(request);
+        if (!offline)
+            cds->processActionRequest(request);
+        else
+            request.setErrorCode(UPNP_E_INVALID_ACTION);
+
     } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
         mrreg->processActionRequest(request);
     } else {

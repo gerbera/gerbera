@@ -54,7 +54,7 @@ public:
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    void init();
+    void init(bool offln);
 
     /// \brief Cleanup routine to shutdown the server.
     ///
@@ -96,6 +96,8 @@ protected:
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};
+
+    bool offline {};
 
     /// \brief Handle for our upnp callbacks.
     UpnpDevice_Handle rootDeviceHandle {};
