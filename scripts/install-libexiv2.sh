@@ -16,10 +16,14 @@ src_dir="${script_dir}/libexiv2-${VERSION}"
 tgz_file="${script_dir}/libexiv2-${VERSION}.tar.gz"
 
 BUILD_SHARED=YES
+BUILD_XMP=YES
 
 if [ $# -gt 0 ]; then
     if [ "$1" = "static" ]; then
         BUILD_SHARED=NO
+    fi
+    if [ "$1" = "head" -o "$2" = "head" ]; then
+        BUILD_XMP=NO
     fi
 fi
 
@@ -42,7 +46,7 @@ fi
 mkdir build
 cd build
 
-cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DEXIV2_ENABLE_XMP=Off
+cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DEXIV2_ENABLE_XMP=${BUILD_XMP}
 
 if command -v nproc >/dev/null 2>&1; then
     make "-j$(nproc)"

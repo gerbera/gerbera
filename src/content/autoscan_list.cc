@@ -148,7 +148,7 @@ std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& paren
     for (auto it = list.begin(); it != list.end(); /*++it*/) {
         auto dir = *it;
 
-        if (parent <= dir->getLocation()) {
+        if (isSubDir(dir->getLocation(), parent)) {
             if (dir->persistent() && !persistent) {
                 ++it;
                 continue;

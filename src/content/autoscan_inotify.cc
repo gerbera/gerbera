@@ -235,7 +235,7 @@ void AutoscanInotify::threadProc()
 
                         int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR));
                         if (objectID != INVALID_OBJECT_ID)
-                            content->removeObject(adir, objectID, !(mask & IN_MOVED_TO));
+                            content->removeObject(adir, objectID, path, !(mask & IN_MOVED_TO));
                     }
                     // new file
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
@@ -409,7 +409,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
 
                     int objectID = database->findObjectIDByPath(path, true);
                     if (objectID != INVALID_OBJECT_ID)
-                        content->removeObject(adir, objectID, false);
+                        content->removeObject(adir, objectID, path, false);
                 }
             } catch (const std::out_of_range&) {
             } // Not found in map
@@ -597,7 +597,7 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
             auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
             if (watchAs->getNonexistingPathArray().empty()) {
                 fs::path testLocation = watchAs->getAutoscanDirectory()->getLocation();
-                if (testLocation <= path) {
+                if (isSubDir(path, testLocation)) {
                     if (!pathBestMatch.empty()) {
                         if (pathBestMatch < testLocation) {
                             pathBestMatch = testLocation;

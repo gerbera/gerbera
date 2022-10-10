@@ -79,7 +79,7 @@ function install-duktape() {
 
 function install-libexiv2() {
   echo "::group::Installing libexiv2"
-  sudo bash "${ROOT_DIR}"scripts/install-libexiv2.sh static
+  sudo bash "${ROOT_DIR}"scripts/install-libexiv2.sh static $*
   echo "::endgroup::"
 }
 
@@ -203,7 +203,7 @@ fi
 
 if [[ "${my_sys}" == "HEAD" ]]; then
   install-googletest
-  install-libexiv2
+  install-libexiv2 head
   install-pugixml
   install-duktape
   if [[ "$lsb_codename" != "jammy" ]]; then

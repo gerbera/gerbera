@@ -44,7 +44,7 @@ void Web::Remove::process()
     int objectID = intParam("object_id");
     bool all = intParam("all");
 
-    content->removeObject(nullptr, objectID, true, all);
+    content->removeObject(nullptr, objectID, "", true, all);
 
     log_debug("remove: returning");
 }

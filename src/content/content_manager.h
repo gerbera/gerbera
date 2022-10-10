@@ -97,12 +97,13 @@ protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<AutoscanDirectory> adir;
     int objectID;
+    fs::path path;
     bool all;
     bool rescanResource;
 
 public:
     CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-        int objectID, bool rescanResource, bool all);
+        int objectID, const fs::path& path, bool rescanResource, bool all);
     void run() override;
 };
 
@@ -202,7 +203,7 @@ public:
         bool async = true, bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(const fs::path& path) const;
-    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async = true, bool all = false);
+    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -355,7 +356,7 @@ protected:
     int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
-    std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all);
+    std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool all);
     void cleanupTasks(const fs::path& path);
 
     void scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI);
