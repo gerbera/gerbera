@@ -59,6 +59,8 @@ public:
     const fs::path& getPath() { return path; }
 };
 
+bool isSubDir(const fs::path& path, const fs::path& check);
+
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept;
 bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexcept;

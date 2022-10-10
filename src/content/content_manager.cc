@@ -587,7 +587,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
     int parentID = database->findObjectIDByPath(parentPath, false);
     if (parentID != INVALID_OBJECT_ID) {
         // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
-        _removeObject(adir, parentID, false, all);
+        _removeObject(adir, parentID, parentPath, false, all);
         // in order to rescan whole directory we have to set lmt to a very small value
         AutoScanSetting asSetting;
         asSetting.adir = adir;
@@ -611,7 +611,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
     return parentRemoved;
 }
 
-std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool all)
+std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool all)
 {
     if (objectID == CDS_ID_ROOT)
         throw_std_runtime_error("cannot remove root container");
@@ -631,7 +631,7 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
     }
 
     if (obj->isContainer()) {
-        cleanupTasks(obj->getLocation());
+        cleanupTasks(path);
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
     // So current container cache must be invalidated
@@ -738,7 +738,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     }
     if (ec || !dIter) {
         if (adir->persistent()) {
-            removeObject(adir, containerID, false);
+            removeObject(adir, containerID, location, false);
             if (location == adir->getLocation()) {
                 adir->setObjectID(INVALID_OBJECT_ID);
                 database->updateAutoscanDirectory(adir);
@@ -747,7 +747,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         }
 
         if (location == adir->getLocation()) {
-            removeObject(adir, containerID, false);
+            removeObject(adir, containerID, location, false);
             removeAutoscanDirectory(adir);
         }
         return;
@@ -800,7 +800,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             int objectID = database->findObjectIDByPath(newPath);
             if (objectID > 0) {
                 list.erase(objectID);
-                removeObject(adir, objectID, false);
+                removeObject(adir, objectID, newPath, false);
             }
             log_debug("link {} skipped", newPath.c_str());
             continue;
@@ -821,7 +821,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 if (lastModifiedCurrentMax < lwt) {
                     // re-add object - we have to do this in order to trigger
                     // layout
-                    auto removedParents = removeObject(adir, objectID, false, false);
+                    auto removedParents = removeObject(adir, objectID, newPath, false, false);
                     if (std::find_if(removedParents.begin(), removedParents.end(), [=](auto&& pId) { return containerID == pId; }) != removedParents.end()) {
                         // parent purged
                         parentContainer = nullptr;
@@ -945,7 +945,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
             auto dir = autoscanList->get(i);
             if (dir) {
                 log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
-                if ((subDir.path() <= dir->getLocation()) && fs::is_directory(dir->getLocation())) {
+                if (isSubDir(dir->getLocation(), subDir) && fs::is_directory(dir->getLocation())) {
                     adir = std::move(dir);
                 }
             }
@@ -1640,7 +1640,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
 
             if ((service->getItemPurgeInterval() > std::chrono::seconds::zero()) && ((current - last) > service->getItemPurgeInterval())) {
                 log_debug("Purging old online service object {}", obj->getTitle());
-                removeObject(nullptr, objectId, false);
+                removeObject(nullptr, objectId, "", false);
             }
         }
     }
@@ -1653,7 +1653,7 @@ void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, co
     if (t->getType() == AddFile) {
         auto addTask = std::static_pointer_cast<CMAddFileTask>(t);
         log_debug("comparing, task path: {}, remove path: {}", addTask->getPath().c_str(), path.c_str());
-        if (path <= addTask->getPath()) {
+        if (isSubDir(addTask->getPath(), path)) {
             log_debug("Invalidating task with path {}", addTask->getPath().c_str());
             addTask->invalidate();
         }
@@ -1684,28 +1684,17 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 #endif
 }
 
-std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, bool rescanResource, bool async, bool all)
+std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool async, bool all)
 {
     if (async) {
-        /*
-        // building container path for the description
-        auto objectPath = database->getObjectPath(objectID);
-        std::ostringstream desc;
-        desc << "Removing ";
-        // skip root container, start from 1
-        for (std::size_t i = 1; i < objectPath->size(); i++)
-            desc << '/' << objectPath->get(i)->getTitle();
-        */
         auto self = shared_from_this();
-        auto task = std::make_shared<CMRemoveObjectTask>(self, adir, objectID, rescanResource, all);
-        fs::path path;
+        auto task = std::make_shared<CMRemoveObjectTask>(self, adir, objectID, path, rescanResource, all);
         std::shared_ptr<CdsObject> obj;
 
         try {
             obj = database->loadObject(objectID);
-            path = obj->getLocation();
         } catch (const std::runtime_error&) {
-            log_debug("trying to remove an object ID which is no longer in the database! {}", objectID);
+            log_debug("Trying to remove an object ID which is no longer in the database! {}", objectID);
             return {};
         }
 
@@ -1716,11 +1705,14 @@ std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDire
         addTask(std::move(task));
         return {};
     }
-    return _removeObject(adir, objectID, rescanResource, all);
+    return _removeObject(adir, objectID, path, rescanResource, all);
 }
 
 void ContentManager::cleanupTasks(const fs::path& path)
 {
+    if (path.empty())
+        return;
+
     // make sure to remove possible child autoscan directories from the scanlist
     std::shared_ptr<AutoscanList> rmList = autoscanList->removeIfSubdir(path);
     for (std::size_t i = 0; i < rmList->size(); i++) {
@@ -1956,11 +1948,12 @@ void CMAddFileTask::run()
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-    int objectID, bool rescanResource, bool all)
+    int objectID, const fs::path& path, bool rescanResource, bool all)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
     , objectID(objectID)
+    , path(path)
     , all(all)
     , rescanResource(rescanResource)
 {
@@ -1970,7 +1963,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, 
 
 void CMRemoveObjectTask::run()
 {
-    content->_removeObject(adir, objectID, rescanResource, all);
+    content->_removeObject(adir, objectID, path, rescanResource, all);
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,

@@ -38,8 +38,8 @@ static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_inte
 static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
-#define DELETE_CACHE_MAX_SIZE 60 // remove entries, if cache has more than 60
-#define DELETE_CACHE_RED_SIZE 50 // reduce cache to 50 entries
+#define DELETE_CACHE_MAX_SIZE 150 // remove entries, if cache has more than 150
+#define DELETE_CACHE_RED_SIZE 120 // reduce cache to 120 entries
 
 Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(config, mime)

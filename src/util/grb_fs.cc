@@ -34,6 +34,14 @@ Gerbera - https://gerbera.io/
 
 #include "util/tools.h"
 
+bool isSubDir(const fs::path& path, const fs::path& check)
+{
+    auto pathStr = fmt::format("{}/", path.string());
+    auto chkStr = fmt::format("{}/", check.string());
+
+    return startswith(pathStr, chkStr);
+}
+
 bool isRegularFile(const fs::path& path, std::error_code& ec) noexcept
 {
     // unfortunately fs::is_regular_file(path, ec) is broken with old libstdc++ on 32bit systems (see #737)
