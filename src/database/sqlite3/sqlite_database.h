@@ -44,6 +44,8 @@ class Sqlite3Database;
 class Sqlite3Result;
 class SLTask;
 
+#define DELETE_CACHE_MAX_SIZE 500 // remove entries, if cache has more than 500 (default)
+
 /// \brief The Database class for using SQLite3
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
@@ -86,6 +88,7 @@ private:
     std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen {};
     std::vector<std::string> deletedEntries {};
+    size_t maxDeleteCount { DELETE_CACHE_MAX_SIZE };
     std::chrono::seconds lastDelete;
 
     void threadCleanup() override { }
