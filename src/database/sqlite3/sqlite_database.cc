@@ -38,8 +38,7 @@ static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_inte
 static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
-#define DELETE_CACHE_MAX_SIZE 150 // remove entries, if cache has more than 150
-#define DELETE_CACHE_RED_SIZE 120 // reduce cache to 120 entries
+#define DELETE_CACHE_RED_SIZE 0.2 // reduce cache to 80% of max entries
 
 Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
     : SQLDatabase(config, mime)
@@ -258,6 +257,7 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
         : fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), clause);
     try {
         log_debug("Adding delete to Queue: {}", query);
+        maxDeleteCount = maxDeleteCount > ids.size() * 10 ? maxDeleteCount : ids.size() * 10;
         for (auto&& id : ids) {
             deletedEntries.push_back(fmt::format("{}_{}", tableName, id));
         }
@@ -359,10 +359,11 @@ void Sqlite3Database::threadProc()
 
             /* if nothing to do, sleep until awakened */
             auto now = currentTime();
-            if (now.count() - lastDelete.count() > DELETE_CACHE_MAX_TIME) // drop cache if last delete was more than 60 secs ago
+            if (now.count() - lastDelete.count() > DELETE_CACHE_MAX_TIME) { // drop cache if last delete was more than 60 secs ago
+                maxDeleteCount = DELETE_CACHE_MAX_SIZE;
                 deletedEntries.clear();
-            else if (deletedEntries.size() > DELETE_CACHE_MAX_SIZE) // remove entries, if cache has more than 60
-                deletedEntries.erase(deletedEntries.begin(), deletedEntries.begin() + DELETE_CACHE_RED_SIZE);
+            } else if (deletedEntries.size() > maxDeleteCount) // dynamically increase if large DELETESs happen
+                deletedEntries.erase(deletedEntries.begin(), deletedEntries.begin() + maxDeleteCount * DELETE_CACHE_RED_SIZE);
 
             threadRunner->wait(lock);
         }

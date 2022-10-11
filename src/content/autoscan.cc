@@ -224,12 +224,16 @@ bool AutoscanDirectory::hasContent(const std::string& upnpClass) const
     bool result = true;
 
     for (auto&& [cls, active] : scanContent) {
-        if (cls == upnpClass)
+        if (cls == upnpClass) {
             return active;
-        if (startswith(upnpClass, cls))
+        }
+        if (startswith(upnpClass, cls)) {
             result = active;
-        else if (startswith(cls, upnpClass)) // looking for base class with sub class
+            if (result)
+                return true;
+        } else if (startswith(cls, upnpClass)) { // looking for base class with sub class
             result = false;
+        }
     }
     return result;
 }
