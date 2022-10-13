@@ -31,6 +31,7 @@ Gerbera - https://gerbera.io/
 class GrbNet {
 private:
     struct sockaddr_storage sockAddr = {};
+    std::string hostName;
 
 public:
     explicit GrbNet(const std::string& addr, int af = AF_INET);
@@ -40,7 +41,8 @@ public:
     in_port_t getPort() const;
     int getAdressFamily() const;
     struct sockaddr_storage readAddr() { return sockAddr; };
-    std::string getHostName() const;
+    std::string getHostName();
+    void setHostName(const std::string& hn) { hostName = hn; };
     bool equals(const std::string& match) const;
     bool equals(const std::shared_ptr<GrbNet>& other) const;
     std::string getNameInfo(bool withPort = true) const;
