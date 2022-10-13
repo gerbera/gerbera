@@ -139,8 +139,11 @@ bool GrbNet::equals(const std::shared_ptr<GrbNet>& other) const
     return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&other->sockAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0;
 }
 
-std::string GrbNet::getHostName() const
+std::string GrbNet::getHostName()
 {
+    if (!hostName.empty())
+        return hostName;
+
     auto addr = reinterpret_cast<const struct sockaddr*>(&sockAddr);
     char hoststr[NI_MAXHOST];
     char portstr[NI_MAXSERV];
@@ -149,7 +152,7 @@ std::string GrbNet::getHostName() const
     if (ret != 0) {
         log_debug("could not determine getnameinfo: {}", std::strerror(errno));
     }
-
+    hostName = hoststr;
     return hoststr;
 }
 

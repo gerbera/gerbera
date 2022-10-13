@@ -163,6 +163,16 @@ TEST_F(UpnpClientsTest, configuredIPRange)
     EXPECT_EQ(pInfo->flags, 456);
 }
 
+TEST_F(UpnpClientsTest, getHostName)
+{
+    auto addr = std::make_shared<GrbNet>("192.168.99.100");
+    auto hostname = addr->getHostName();
+    EXPECT_EQ(hostname, "192.168.99.100");
+    addr->setHostName("Wombat");
+    hostname = addr->getHostName();
+    EXPECT_EQ(hostname, "Wombat");
+}
+
 TEST_F(UpnpClientsTest, netmask4)
 {
     auto addr = GrbNet("192.168.2.100");
