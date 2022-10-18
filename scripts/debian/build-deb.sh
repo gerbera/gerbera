@@ -114,6 +114,9 @@ if ${GITHUB_ACTIONS}; then
 fi
 
 lsb_codename=$(lsb_release -c --short)
+if [[ "${lsb_codename}" == "n/a" ]]; then
+  lsb_codename="unstable"
+fi
 lsb_distro=$(lsb_release -i --short)
 
 install-gcc
