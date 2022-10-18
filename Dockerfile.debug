@@ -1,3 +1,4 @@
+# docker build -t gerbera-debug . -f Dockerfile.debug
 ARG BASE_IMAGE=alpine:3.16
 FROM ${BASE_IMAGE} AS builder
 
@@ -11,6 +12,7 @@ RUN apk add --no-cache  \
     fmt-dev \
     g++ \
     gcc \
+    gdb \
     git \
     libebml-dev \
     libexif-dev \
@@ -25,7 +27,9 @@ RUN apk add --no-cache  \
     taglib-dev \
     tini \
     util-linux-dev \
-    # packages to build libupnp
+    libexecinfo-dev \
+    libexecinfo \
+    # packages to build libupnp \
     autoconf \
     automake \
     libtool \
@@ -36,6 +40,11 @@ WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
 RUN ./install-ffmpegthumbnailer.sh
 
+# Build googletest
+WORKDIR /gtest_build
+COPY scripts/install-googletest.sh scripts/versions.sh ./
+RUN ./install-googletest.sh
+
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
@@ -45,8 +54,7 @@ RUN ./install-pupnp.sh
 WORKDIR /gerbera_build
 COPY . .
 RUN cmake -S . -B build \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_CXX_FLAGS=-g1 \
+        -DCMAKE_BUILD_TYPE=Debug \
         -DWITH_MAGIC=YES \
         -DWITH_MYSQL=YES \
         -DWITH_CURL=YES \
@@ -59,8 +67,11 @@ RUN cmake -S . -B build \
         -DWITH_LASTFM=NO \
         -DWITH_SYSTEMD=NO \
         -DWITH_DEBUG=YES \
+        -DWITH_DEBUG_OPTIONS=YES \
+        -DWITH_TESTS=YES \
     && \
-    cmake --build build -v -j$(nproc)
+    cmake --build build -v -j$(nproc) &&\
+    cmake --build build -v -t test ARGS="--output-on-failure"
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
@@ -69,6 +80,7 @@ RUN apk add --no-cache \
     ffmpeg4-libs \
     file \
     fmt \
+    gdb \
     libebml \
     libexif \
     libmatroska \
@@ -83,7 +95,11 @@ RUN apk add --no-cache \
     tini \
     tzdata \
     util-linux \
-    zlib
+    zlib \
+    ffmpeg \
+    libheif-tools \
+    libexecinfo \
+    vlc
 
 # Copy libupnp
 COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/libupnp.so* /usr/lib/
@@ -108,11 +124,5 @@ EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
-
-FROM gerbera AS with_transcoding
-RUN apk add --no-cache \
-    ffmpeg \
-    libheif-tools \
-    vlc
 
 FROM gerbera AS default

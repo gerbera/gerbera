@@ -18,6 +18,8 @@
 - Transcoding for external items
 - Sqlite errors because of deleted objects
 - Sorting by certain keys
+- Broken path comparison (skipped renaming, adding files)
+- Update docker images to alpine 3.16
 
 ### Code Improvements
 - Xml2Json rework
