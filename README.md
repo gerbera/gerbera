@@ -60,9 +60,9 @@ sudo make install
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |
 | [taglib]            | 1.12        | 1.12        | 1.12          | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |               | Optional      | File type detection        | Enabled  |
-| [wavpack]           | 5.1.0       | 5.4.0       | 5.4.0         | Optional      | WavPack metadata support   | Disabled |
-| [libmatroska]       |             | 1.6.3       | 1.6.3         | Optional      | MKV metadata               | Enabled  |
-| [libebml]           |             | 1.4.2       | 1.4.2         | Optional      | requird by [libmatroska]   | Enabled  |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.5.0         | Optional      | WavPack metadata support   | Disabled |
+| [libmatroska]       |             | 1.6.3       | 1.7.1         | Optional      | MKV metadata               | Enabled  |
+| [libebml]           |             | 1.4.2       | 1.4.4         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
 | libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
 | [libexiv2]          |             | v0.26       | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |

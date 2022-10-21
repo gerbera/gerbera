@@ -111,7 +111,7 @@ CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
 
 FROM gerbera AS with_transcoding
 RUN apk add --no-cache \
-    ffmpeg \
+    ffmpeg4 \
     libheif-tools \
     vlc
 

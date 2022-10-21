@@ -47,3 +47,18 @@ else
     make
 fi
 make install
+
+if [ "$(uname)" != 'Darwin' ]; then
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+    else
+        ID="Linux"
+    fi
+    if [ "${ID}" == "alpine" ]; then
+        ldconfig /
+    else
+        ldconfig
+    fi
+fi
+
+exit 0
