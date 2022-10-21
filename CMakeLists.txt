@@ -328,6 +328,13 @@ target_link_libraries(libgerbera PUBLIC std::filesystem)
 
 find_package(Iconv REQUIRED)
 target_link_libraries(libgerbera PUBLIC Iconv::Iconv)
+include(CheckPrototypeDefinition)
+set(CMAKE_REQUIRED_LIBRARIES Iconv::Iconv)
+check_prototype_definition(iconv "size_t iconv(iconv_t cd, const char **src, size_t *srcl, char **dst, size_t *dstl)" 0 "iconv.h" ICONV_CONST)
+if(ICONV_CONST)
+    target_compile_definitions(libgerbera PRIVATE ICONV_CONST)
+endif()
+unset(CMAKE_REQUIRED_LIBRARIES)
 
 find_package(UUID REQUIRED)
 target_link_libraries(libgerbera PUBLIC UUID::UUID)
