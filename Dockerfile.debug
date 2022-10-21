@@ -6,25 +6,17 @@ RUN apk add --no-cache  \
     bash \
     cmake zlib-dev \
     curl-dev \
-    duktape-dev \
     ffmpeg4-dev \
     file-dev \
-    fmt-dev \
     g++ \
     gcc \
     gdb \
     git \
-    libebml-dev \
     libexif-dev \
-    libmatroska-dev \
-    wavpack wavpack-dev \
     make \
     mariadb-connector-c-dev \
     pkgconf \
-    pugixml-dev \
-    spdlog-dev \
     sqlite-dev \
-    taglib-dev \
     tini \
     util-linux-dev \
     libexecinfo-dev \
@@ -35,10 +27,45 @@ RUN apk add --no-cache  \
     libtool \
     file
 
+# Build fmt
+WORKDIR /fmt_build
+COPY scripts/install-fmt.sh scripts/versions.sh ./
+RUN ./install-fmt.sh
+
+# Build spdlog
+WORKDIR /spdlog_build
+COPY scripts/install-spdlog.sh scripts/versions.sh ./
+RUN ./install-spdlog.sh
+
+# Build taglib
+WORKDIR /taglib_build
+COPY scripts/install-taglib.sh scripts/versions.sh ./
+RUN ./install-taglib.sh
+
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
 RUN ./install-ffmpegthumbnailer.sh
+
+# Build wavpack
+WORKDIR /ebml_build
+COPY scripts/install-wavpack.sh scripts/versions.sh ./
+RUN ./install-wavpack.sh
+
+# Build ebml
+WORKDIR /ebml_build
+COPY scripts/install-ebml.sh scripts/versions.sh ./
+RUN ./install-ebml.sh
+
+# Build matroska
+WORKDIR /mastroska_build
+COPY scripts/install-matroska.sh scripts/versions.sh ./
+RUN ./install-matroska.sh
+
+# Build pugixml
+WORKDIR /pugixml_build
+COPY scripts/install-pugixml.sh scripts/versions.sh ./
+RUN ./install-pugixml.sh
 
 # Build googletest
 WORKDIR /gtest_build
@@ -49,6 +76,11 @@ RUN ./install-googletest.sh
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
 RUN ./install-pupnp.sh
+
+# Build duktape
+WORKDIR /duktape_build
+COPY scripts/install-duktape.sh scripts/versions.sh ./
+RUN ./install-duktape.sh
 
 # Build Gerbera
 WORKDIR /gerbera_build
@@ -76,36 +108,37 @@ RUN cmake -S . -B build \
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
-    duktape \
     ffmpeg4-libs \
     file \
-    fmt \
     gdb \
-    libebml \
     libexif \
-    libmatroska \
-    wavpack \
     mariadb-connector-c \
-    pugixml \
-    spdlog \
     sqlite \
     sqlite-libs \
     su-exec \
-    taglib \
     tini \
     tzdata \
     util-linux \
     zlib \
-    ffmpeg \
+    ffmpeg4 \
     libheif-tools \
     libexecinfo \
     vlc
 
 # Copy libupnp
 COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/libupnp.so* /usr/lib/
-
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
+# Copy ebml
+COPY --from=builder /usr/local/lib/libebml.so* /usr/lib/
+# Copy mastroska
+COPY --from=builder /usr/local/lib/libmatroska.so* /usr/lib/
+# Copy wavpack
+COPY --from=builder /usr/local/lib/libwavpack.so* /usr/lib/
+# Copy fmt
+COPY --from=builder /usr/local/lib/libfmt.so* /usr/lib/
+# Copy spdlog
+COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
