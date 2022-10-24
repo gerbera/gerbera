@@ -23,7 +23,7 @@
 
 ### Code Improvements
 - Xml2Json rework
-- build with latest versions of exiv2, fmt and spdlog
+- build with latest versions of pupnp (1.14.14), wavpack (5.5.0), ebml (1.4.4), matroska (1.7.1), exiv2 (0.27.5), fmt (9.1.0) and spdlog (1.10.0)
 - Further Cleanups
 
 ### General

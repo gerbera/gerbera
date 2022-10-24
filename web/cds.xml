@@ -195,6 +195,31 @@
         </argument>
       </argumentList>
     </action>
+      <action>
+        <name>X_SetBookmark</name>
+        <argumentList>
+          <argument>
+            <name>CategoryType</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_CategoryType</relatedStateVariable>
+          </argument>
+          <argument>
+            <name>RID</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_RID</relatedStateVariable>
+          </argument>
+          <argument>
+            <name>PosSecond</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_PosSecond</relatedStateVariable>
+          </argument>
+          <argument>
+            <name>ObjectID</name>
+            <direction>in</direction>
+            <relatedStateVariable>A_ARG_TYPE_ObjectID</relatedStateVariable>
+          </argument>
+        </argumentList>
+      </action>
    </actionList>
    <serviceStateTable>
       <stateVariable sendEvents="no">
@@ -216,6 +241,10 @@
       <stateVariable sendEvents="yes">
          <name>ContainerUpdateIDs</name>
          <dataType>string</dataType>
+      </stateVariable>
+      <stateVariable sendEvents="no">
+         <name>A_ARG_TYPE_PosSecond</name>
+         <dataType>ui8</dataType>
       </stateVariable>
       <stateVariable sendEvents="no">
          <name>A_ARG_TYPE_Count</name>

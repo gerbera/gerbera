@@ -109,6 +109,8 @@ public:
         , lastPlayedPosition(lastPlayedPosition)
         , bookMarkPos(bookMarkPos)
     {
+        if (lastPlayed == 0)
+            setLastPlayed();
     }
 
     std::string getGroup() const { return group; }
