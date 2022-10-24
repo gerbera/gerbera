@@ -35,7 +35,7 @@
 #include "util/grb_net.h"
 #include "util/upnp_quirks.h"
 
-ActionRequest::ActionRequest(const UpnpXMLBuilder& xmlBuilder, const ClientManager& clients, UpnpActionRequest* upnpRequest)
+ActionRequest::ActionRequest(std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<ClientManager>& clients, UpnpActionRequest* upnpRequest)
     : upnp_request(upnpRequest)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnpRequest))
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnpRequest))

@@ -49,7 +49,15 @@ you should try the following settings
     $ route add -net 239.0.0.0 netmask 255.0.0.0 eth1
     $ ifconfig eth1 allmulti
 
-Those settings will be applied automatically by the init.d startup script.
+For distros that only support ``ip`` command suite it has to be
+
+.. code-block:: console
+
+    $ ip route add 239.0.0.0/8 dev eth1 scope link
+    $ ip link set dev eth1 allmulti on
+
+Those settings can be applied automatically by a ``init.d`` startup script (if you are still running init system).
+Otherwise add them to your network settings in ``/etc/sysconfig/network`` or ``/etc/network`` depending on your distro.
 
 You should also make sure that your firewall is not blocking port UDP port ``1900`` (required for SSDP) and UDP/TCP
 port of Gerbera. By default Gerbera will select a free port starting with ``49152``, however you can specify a port

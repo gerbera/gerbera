@@ -78,7 +78,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
     auto&& quirks = request.getQuirks();
-    auto arr = quirks->getSamsungFeatureRoot(*database, objID);
+    auto arr = quirks->getSamsungFeatureRoot(database, objID);
     int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
@@ -308,7 +308,7 @@ void ContentDirectoryService::doSamsungBookmark(ActionRequest& request) const
 {
     log_debug("start");
 
-    request.getQuirks()->saveSamsungBookMarkedPosition(*database, request);
+    request.getQuirks()->saveSamsungBookMarkedPosition(database, request);
 
     log_debug("end");
 }

@@ -85,9 +85,9 @@ void Server::init(bool offln)
     database = Database::createInstance(config, mime, timer);
     config->updateConfigFromDatabase(database);
 
-    clients = std::make_shared<ClientManager>(config, database);
+    clientManager = std::make_shared<ClientManager>(config, database);
     session_manager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clients, mime, database, session_manager);
+    context = std::make_shared<Context>(config, clientManager, mime, database, session_manager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
 }
@@ -154,10 +154,10 @@ void Server::run()
     std::string presentationURL = getPresentationUrl();
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlbuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
+    xmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
 
     // register root device with the library
-    auto desc = xmlbuilder->renderDeviceDescription();
+    auto desc = xmlBuilder->renderDeviceDescription();
     std::ostringstream buf;
     desc->print(buf, "", 0);
     std::string deviceDescription = buf.str();
@@ -185,14 +185,14 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(context, xmlbuilder, rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(context, xmlBuilder, rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(context, xmlbuilder, rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(context, xmlBuilder, rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(context, xmlbuilder, rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(context, xmlBuilder, rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
@@ -367,7 +367,7 @@ void Server::shutdown()
     context = nullptr;
 
     mime = nullptr;
-    clients = nullptr;
+    clientManager = nullptr;
 }
 
 int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
@@ -387,7 +387,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(*xmlbuilder, *clients, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(xmlBuilder, clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {
@@ -436,7 +436,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
         auto destAddr = std::make_shared<GrbNet>(UpnpDiscovery_get_DestAddr(dEvent));
         const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
-        clients->addClientByDiscovery(destAddr, userAgent, location);
+        clientManager->addClientByDiscovery(destAddr, userAgent, location);
         break;
     }
     default:
@@ -517,7 +517,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
-        return std::make_unique<FileRequestHandler>(content, xmlbuilder);
+        return std::make_unique<FileRequestHandler>(content, xmlBuilder);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
@@ -528,11 +528,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return Web::createWebRequestHandler(context, content, xmlbuilder, rType);
+        return Web::createWebRequestHandler(context, content, xmlBuilder, rType);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
-        return std::make_unique<DeviceDescriptionHandler>(content, xmlbuilder);
+        return std::make_unique<DeviceDescriptionHandler>(content, xmlBuilder);
     }
 
 #if defined(HAVE_CURL)

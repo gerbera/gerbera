@@ -82,7 +82,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<ClientManager> clients;
+    std::shared_ptr<ClientManager> clientManager;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<Web::SessionManager> session_manager;
@@ -122,7 +122,7 @@ protected:
     /// The value is read from the configuration.
     int aliveAdvertisementInterval {};
 
-    std::shared_ptr<UpnpXMLBuilder> xmlbuilder;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
     /// \brief ContentDirectoryService instance.
     ///
