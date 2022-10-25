@@ -23,12 +23,12 @@ jobs:
             arch: linux/arm/v7
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Build and upload deb
         run: |
