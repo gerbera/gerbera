@@ -30,13 +30,13 @@ jobs:
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       # Alternatively: uses: docker://conanio/gcc9:latest
       - name: Update package list
         run: |
           sudo apt-get update
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: "3.x"
       - name: Install conan
@@ -45,7 +45,7 @@ jobs:
           conan profile new default --detect
           conan profile update settings.compiler.libcxx=libstdc++11 default
       - name: Cache conan dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.conan/data
           key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
@@ -77,7 +77,7 @@ jobs:
           apt-get update -y
           apt-get install -y lsb-release sudo wget curl git
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
