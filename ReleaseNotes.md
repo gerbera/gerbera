@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## MAIN
+## v1.12.0
 
 ### NEW Features
 

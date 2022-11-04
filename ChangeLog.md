@@ -1,5 +1,65 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.12.0
+
+ - actions: use alpine 3.16 container
+ - Add cache for hostname
+ - add deleted copy functions for WavPackHandler
+ - Add edge tag to docker workflow
+ - Add files sizes to server stats
+ - Add support for ip subnets in client config
+ - Autoscan: Support configuration of upnp class of virtual containers
+ - Bump jquery-ui from 1.13.1 to 1.13.2 in /gerbera-web
+ - Bump terser from 5.13.1 to 5.14.2 in /gerbera-web
+ - clang-tidy: const ref to value
+ - clang-tidy: const string ref conversion
+ - clang-tidy: don't use else after return
+ - clang-tidy: use data() instead of pointer magic
+ - Cleanup tasks on removeObject
+ - CodeQL: Update version
+ - const member functions
+ - Coverity fixes
+ - database: clearFlags use bit operation
+ - Debian: fix unstable build
+ - Docker: Improve debugging build
+ - Docker: Update to alpine 3.16
+ - Drop scan_level on update to DB 19
+ - Fix 2663 No album sub-containers per artist created in "builtin"
+ - Fix build on systems that have const in second argument to iconv
+ - Fix build with fmt 9.0
+ - fix compilation with latest exiv2 master
+ - Fix npm vulnerabilities
+ - Fix removing flags in ui
+ - Fix static init
+ - Fix: Remove duplicate open breaking url transcoding
+ - Handle deleted objects in sqlite queue
+ - Handle Promise rejection
+ - Import: fix layout and performance issues
+ - Improve creating external links
+ - Improve error handling for Resolution
+ - Limit number of dynamic container entries
+ - Minor fixes
+ - more sonarlint
+ - Path handling cleanup
+ - Quirks: Avoid passing references
+ - Read Metadata from external files (asx playlist and NFO)
+ - remove const from member variables
+ - Remove dropped ubuntu versions
+ - replace some memcpy by std::copy_n
+ - Saveguard Samsung Quirks
+ - Simplify Xml2Json
+ - sonarlint fixes
+ - Sqlite: Configuration for database modes
+ - Support tweaking mimetypes for client
+ - Systemd: Add wants entry
+ - This and that
+ - Transcoding for external items
+ - Update node packages
+ - Update versions
+ - use fmt 9.0.0
+ - web: update jquery-ui to 1.13.2
+ - Workflows: Update actions
+
 ### v1.11.0
 
 - Add Clients to database
