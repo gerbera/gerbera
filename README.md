@@ -49,16 +49,16 @@ sudo make install
 | libupnp             | 1.14.6      | 1.14.14     | 1.14.14       | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp           | 4.2.1       | 4.2.1       | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]           |             | 1.10        | 1.12.1        | Required      | XML file and data support  |          |
+| [pugixml]           |             | 1.10        | 1.13          | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 7.1.3       | 9.1.0         | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.8.5       | 1.10.0        | Required      | Runtime logging            |          |
+| [spdlog]            | 1.8.1       | 1.8.5       | 1.11.0        | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |
-| [taglib]            | 1.12        | 1.12        | 1.12          | Optional      | Audio tag support          | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 1.13          | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |               | Optional      | File type detection        | Enabled  |
 | [wavpack]           | 5.1.0       | 5.4.0       | 5.5.0         | Optional      | WavPack metadata support   | Disabled |
 | [libmatroska]       |             | 1.6.3       | 1.7.1         | Optional      | MKV metadata               | Enabled  |
@@ -92,7 +92,7 @@ sudo make install
 [fmtlib]: https://github.com/fmtlib/fmt
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [libebml]: https://github.com/Matroska-Org/libebml
-[libexiv2]: https://github.com/Exiv2llibexiv2
+[libexiv2]: https://github.com/Exiv2/exiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml

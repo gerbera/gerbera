@@ -58,7 +58,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | libexif             | Optional      | JPEG Exif metadata         | WITH\_EXIF              | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libexiv2            | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                              |
+| libexiv2_           | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | lastfmlib_          | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
@@ -68,6 +68,7 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 
 .. _duktape: https://duktape.org
+.. _libexiv2: https://github.com/Exiv2/exiv2
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
