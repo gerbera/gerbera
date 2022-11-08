@@ -28,6 +28,7 @@
 */
 
 /// \file autoscan_inotify.cc
+#define LOG_FAC log_facility_t::autoscan
 
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h" // API

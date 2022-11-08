@@ -30,6 +30,7 @@
 /// \file atrailers_service.cc
 
 #ifdef ATRAILERS
+#define LOG_FAC log_facility_t::online
 #include "atrailers_service.h" // API
 
 #include "content/content_manager.h"

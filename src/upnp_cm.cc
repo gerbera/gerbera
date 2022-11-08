@@ -28,6 +28,7 @@
 */
 
 /// \file upnp_cm.cc
+#define LOG_FAC log_facility_t::connmgr
 
 #include "upnp_cm.h" // API
 

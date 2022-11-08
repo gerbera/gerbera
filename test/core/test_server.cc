@@ -48,7 +48,11 @@ public:
 
 TEST_F(ServerTest, ServerOutputsHelpInformation)
 {
+#ifdef GRBDEBUG
+    std::string expectedOutput = mockText("fixtures/mock-help-debug.out");
+#else
     std::string expectedOutput = mockText("fixtures/mock-help.out");
+#endif
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --help 2>&1";
     std::string output = exec(cmd.c_str());
 

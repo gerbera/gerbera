@@ -22,6 +22,7 @@
 */
 
 /// \file upnp_quirks.cc
+#define LOG_FAC log_facility_t::clients
 
 #include "upnp_quirks.h" // API
 

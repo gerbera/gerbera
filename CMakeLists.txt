@@ -36,6 +36,7 @@ set(WITH_MATROSKA          YES CACHE BOOL "Use libmatroska to extract video/mkv 
 set(WITH_SYSTEMD           YES CACHE BOOL "Install Systemd unit file")
 set(WITH_LASTFM            NO  CACHE BOOL "Enable scrobbling to LastFM")
 set(WITH_DEBUG             YES CACHE BOOL "Enables debug logging")
+set(WITH_DEBUG_OPTIONS     YES CACHE BOOL "Enables dedicated debug messages")
 set(WITH_TESTS             NO  CACHE BOOL "Build unit tests")
 
 # For building packages without depending on the old system libupnp
@@ -221,6 +222,7 @@ add_library(libgerbera STATIC
         src/util/grb_net.h
         src/util/jpeg_resolution.cc
         src/util/logger.h
+        src/util/logger.cc
         src/util/mime.cc
         src/util/mime.h
         src/util/mt_inotify.cc
@@ -310,7 +312,13 @@ target_compile_definitions(gerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREF
 
 if (WITH_DEBUG)
     target_compile_definitions(libgerbera PUBLIC TOMBDEBUG)
-    target_compile_definitions(libgerbera PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+    if (WITH_DEBUG_OPTIONS)
+        target_compile_definitions(libgerbera PUBLIC GRBDEBUG)
+        target_compile_definitions(gerbera PUBLIC GRBDEBUG)
+        target_compile_definitions(libgerbera PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+    else()
+        target_compile_definitions(libgerbera PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
+    endif()
 else()
     target_compile_definitions(libgerbera PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO)
 endif()

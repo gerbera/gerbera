@@ -28,6 +28,7 @@
 */
 
 /// \file session_manager.cc
+#define LOG_FAC log_facility_t::web
 
 #include "session_manager.h" // API
 

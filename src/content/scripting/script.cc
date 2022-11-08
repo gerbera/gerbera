@@ -30,6 +30,7 @@
 /// \file script.cc
 
 #ifdef HAVE_JS
+#define LOG_FAC log_facility_t::script
 #include "script.h" // API
 
 #include <array>

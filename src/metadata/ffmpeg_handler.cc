@@ -40,6 +40,7 @@
 // in the ffmpeg sources
 
 #ifdef HAVE_FFMPEG
+#define LOG_FAC log_facility_t::ffmpeg
 #include "ffmpeg_handler.h"
 
 #include <fmt/chrono.h>

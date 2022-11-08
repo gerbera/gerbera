@@ -30,6 +30,7 @@
 /// \file lastfm_scrobbler.cc
 
 #ifdef HAVE_LASTFMLIB
+#define LOG_FAC log_facility_t::online
 #include "lastfm_scrobbler.h" // API
 
 #include "config/config_manager.h"

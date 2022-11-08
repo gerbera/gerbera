@@ -30,6 +30,7 @@
 /// \file task_processor.cc
 
 #ifdef ONLINE_SERVICES
+#define LOG_FAC log_facility_t::online
 #include "task_processor.h" // API
 
 #include "content/content_manager.h"

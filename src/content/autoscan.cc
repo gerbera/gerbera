@@ -28,6 +28,7 @@
 */
 
 /// \file autoscan.cc
+#define LOG_FAC log_facility_t::autoscan
 
 #include "autoscan.h" // API
 

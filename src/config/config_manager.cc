@@ -129,6 +129,10 @@ void ConfigManager::load(const fs::path& userHome)
     if (std::stoi(version) > CONFIG_XML_VERSION)
         throw_std_runtime_error("Config version \"{}\" does not yet exist", version);
 
+#ifdef GRBDEBUG
+    GrbLogger::Logger.init(setOption(root, CFG_SERVER_DEBUG_MODE)->getIntOption());
+#endif
+
     // now go through the mandatory parameters,
     // if something is missing we will not start the server
     auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);

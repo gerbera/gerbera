@@ -28,6 +28,7 @@
 */
 
 /// \file file_io_handler.cc
+#define LOG_FAC log_facility_t::iohandler
 
 #include "file_io_handler.h" // API
 

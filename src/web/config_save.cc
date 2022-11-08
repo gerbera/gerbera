@@ -22,6 +22,7 @@
 */
 
 /// \file config_load.cc
+#define LOG_FAC log_facility_t::web
 
 #include "pages.h" // API
 

@@ -28,6 +28,7 @@
 */
 
 /// \file web_request_handler.cc
+#define LOG_FAC log_facility_t::web
 
 #include "web_request_handler.h" // API
 

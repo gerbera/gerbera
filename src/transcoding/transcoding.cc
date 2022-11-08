@@ -28,6 +28,7 @@
 */
 
 /// \file transcoding.cc
+#define LOG_FAC log_facility_t::transcoding
 
 #include "transcoding.h" // API
 

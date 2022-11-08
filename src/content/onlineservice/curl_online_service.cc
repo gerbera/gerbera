@@ -24,6 +24,7 @@
 /// \file curl_online_service.cc
 
 #ifdef HAVE_CURL
+#define LOG_FAC log_facility_t::online
 #include "curl_online_service.h" // API
 
 #include "config/config.h"

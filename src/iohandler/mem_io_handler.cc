@@ -28,6 +28,7 @@
 */
 
 /// \file mem_io_handler.cc
+#define LOG_FAC log_facility_t::iohandler
 
 #include "mem_io_handler.h" // API
 

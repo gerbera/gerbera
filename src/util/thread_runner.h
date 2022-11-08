@@ -46,7 +46,7 @@ public:
         , targetProc(std::move(targetProc))
         , target(target)
     {
-        log_debug("ThreadRunner: Creating {}", this->threadName);
+        log_threading("ThreadRunner: Creating {}", this->threadName);
         try {
             ThreadRunner::startThread();
         } catch (const std::runtime_error& ex) {
@@ -56,7 +56,7 @@ public:
 
     ~ThreadRunner() override
     {
-        log_debug("ThreadRunner: Destroying {}", threadName);
+        log_threading("ThreadRunner: Destroying {}", threadName);
         if (attr) {
             pthread_attr_destroy(attr);
             delete attr;
@@ -68,7 +68,7 @@ public:
 
     void join()
     {
-        log_debug("ThreadRunner: Waiting for join {}", threadName);
+        log_threading("ThreadRunner: Waiting for join {}", threadName);
         if (thread) {
             pthread_join(thread, nullptr);
         }
@@ -84,20 +84,20 @@ public:
 
     void setReady()
     {
-        log_debug("ThreadRunner: Setting {} ready", threadName);
+        log_threading("ThreadRunner: Setting {} ready", threadName);
         isReady = true;
         cond.notify_one();
     }
 
     void wait(std::unique_lock<Mutex>& lck)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_threading("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck);
     }
     void waitForReady()
     {
         auto lck = AutoLockU(mutex);
-        log_debug("ThreadRunner: Waiting for {} to become ready", threadName);
+        log_threading("ThreadRunner: Waiting for {} to become ready", threadName);
         cond.wait(lck, [this] { return isReady; });
         lck.unlock();
         isReady = false;
@@ -105,48 +105,48 @@ public:
     template <class Predicate>
     void wait(std::unique_lock<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_threading("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck, pred);
     }
     template <class Predicate>
     void wait(std::scoped_lock<Mutex>& lck, Predicate pred)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_threading("ThreadRunner: Waiting for {}", threadName);
         cond.wait(lck, pred);
     }
     std::cv_status waitFor(std::unique_lock<Mutex>& lck, std::chrono::milliseconds ms)
     {
-        log_debug("ThreadRunner: Waiting for {}", threadName);
+        log_threading("ThreadRunner: Waiting for {}", threadName);
         return cond.wait_for(lck, std::chrono::milliseconds(ms));
     }
     void notify()
     {
-        log_debug("ThreadRunner: Notifying {}", threadName);
+        log_threading("ThreadRunner: Notifying {}", threadName);
         cond.notify_one();
     }
     void notifyAll()
     {
-        log_debug("ThreadRunner: Notifying all {}", threadName);
+        log_threading("ThreadRunner: Notifying all {}", threadName);
         cond.notify_all();
     }
     AutoLock lockGuard([[maybe_unused]] const std::string& loc = "")
     {
-        log_debug("ThreadRunner: Guard for {} - {}", threadName, loc);
+        log_threading("ThreadRunner: Guard for {} - {}", threadName, loc);
         return AutoLock(mutex);
     }
     AutoLockU uniqueLockS([[maybe_unused]] const std::string& loc = "")
     {
-        log_debug("ThreadRunner: Lock {} - {}", threadName, loc);
+        log_threading("ThreadRunner: Lock {} - {}", threadName, loc);
         return AutoLockU(mutex);
     }
     AutoLockU uniqueLock()
     {
-        log_debug("ThreadRunner: Lock {}", threadName);
+        log_threading("ThreadRunner: Lock {}", threadName);
         return AutoLockU(mutex);
     }
     AutoLockU uniqueLock(std::defer_lock_t tag)
     {
-        log_debug("ThreadRunner: Lock with tag {}", threadName);
+        log_threading("ThreadRunner: Lock with tag {}", threadName);
         return AutoLockU(mutex, tag);
     }
     template <class Predicate>
@@ -154,7 +154,7 @@ public:
     {
         int count = 0;
         while (!(pred()) && count < max_count) {
-            log_debug("ThreadRunner: wait for pred {}", threadName);
+            log_threading("ThreadRunner: wait for pred {}", threadName);
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             count++;
         }
@@ -168,7 +168,7 @@ protected:
     void threadProc() override
     {
         targetProc(target);
-        log_debug("ThreadRunner: Terminating {}", threadName);
+        log_threading("ThreadRunner: Terminating {}", threadName);
     }
 
     /// \brief start the thread

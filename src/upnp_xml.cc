@@ -28,6 +28,7 @@
 */
 
 /// \file upnp_xml.cc
+#define LOG_FAC log_facility_t::xml
 
 #include "upnp_xml.h" // API
 

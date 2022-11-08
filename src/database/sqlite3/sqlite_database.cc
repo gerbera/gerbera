@@ -28,6 +28,7 @@
 */
 
 /// \file sqlite3_database.cc
+#define LOG_FAC log_facility_t::sqlite3
 
 #include "sqlite_database.h" // API
 

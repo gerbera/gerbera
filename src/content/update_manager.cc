@@ -28,6 +28,7 @@
 */
 
 /// \file update_manager.cc
+#define LOG_FAC log_facility_t::update
 
 #include "update_manager.h" // API
 

@@ -32,15 +32,51 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
+#include <array>
 #include <fmt/format.h>
+#include <map>
 #include <spdlog/spdlog.h>
 #include <type_traits>
 
-#define log_debug SPDLOG_DEBUG
+#define log_debug SPDLOG_TRACE
+#define log_dbg SPDLOG_TRACE
+#define log_faci SPDLOG_DEBUG
 #define log_info SPDLOG_INFO
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
 #define log_js SPDLOG_INFO
+
+enum class log_facility_t {
+    thread,
+    sqlite3,
+    cds,
+    server,
+    content,
+    update,
+    mysql,
+    sqldatabase,
+    proc,
+    autoscan,
+    script,
+    web,
+    layout,
+    exif,
+    transcoding,
+    taglib,
+    ffmpeg,
+    wavpack,
+    requests,
+    connmgr,
+    mrregistrar,
+    xml,
+    clients,
+    iohandler,
+    online,
+    metadata,
+    matroska,
+
+    log_MAX,
+};
 
 #ifndef __cpp_lib_to_underlying
 template <typename E>
@@ -51,6 +87,46 @@ constexpr auto to_underlying(E e) noexcept
 #else
 using std::to_underlying;
 #endif
+
+#ifdef GRBDEBUG
+class GrbLogger {
+public:
+    static GrbLogger Logger;
+
+    void init(int debugMode);
+    bool isDebugging(log_facility_t facility)
+    {
+        return GrbLogger::Logger.hasDebugging[to_underlying(facility)];
+    }
+    static std::string_view mapFacility(log_facility_t facility)
+    {
+        return GrbLogger::facilities[facility];
+    }
+    static int remapFacility(const std::string& optValue);
+    static int makeFacility(const std::string& optValue);
+
+private:
+    static std::map<log_facility_t, std::string_view> facilities;
+
+    std::array<bool, to_underlying(log_facility_t::log_MAX)> hasDebugging {};
+};
+
+#define log_facility(fac, ...) GrbLogger::Logger.isDebugging((fac)) ? log_faci(__VA_ARGS__) : log_dbg(__VA_ARGS__)
+
+#ifdef LOG_FAC
+
+#undef log_debug
+#define log_debug(...) log_facility(LOG_FAC, __VA_ARGS__)
+
+#endif
+
+#else
+
+#define log_facility(fac, ...) log_debug(__VA_ARGS__)
+
+#endif
+
+#define log_threading(...) log_facility(log_facility_t::thread, __VA_ARGS__)
 
 #if FMT_VERSION >= 80100
 template <typename T>

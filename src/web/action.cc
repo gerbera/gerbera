@@ -28,6 +28,7 @@
 */
 
 /// \file action.cc
+#define LOG_FAC log_facility_t::web
 
 #include "pages.h" // API
 

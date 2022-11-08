@@ -30,6 +30,7 @@
 /// \file js_functions.cc
 
 #ifdef HAVE_JS
+#define LOG_FAC log_facility_t::script
 #include "js_functions.h" // API
 
 #include "content/content_manager.h"

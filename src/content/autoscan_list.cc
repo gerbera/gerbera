@@ -22,6 +22,8 @@
 */
 
 /// \file autoscan_list.cc
+#define LOG_FAC log_facility_t::autoscan
+
 #include "autoscan_list.h"
 
 #include "autoscan.h"

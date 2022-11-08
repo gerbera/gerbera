@@ -30,6 +30,7 @@
 /// \file online_service_helper.cc
 
 #ifdef ONLINE_SERVICES
+#define LOG_FAC log_facility_t::online
 #include "online_service_helper.h" // API
 
 #include "cds_objects.h"

@@ -24,6 +24,7 @@
 /// \file matroska_handler.cc
 
 #ifdef HAVE_MATROSKA
+#define LOG_FAC log_facility_t::matroska
 #include "matroska_handler.h" // API
 
 #include <fmt/chrono.h>
