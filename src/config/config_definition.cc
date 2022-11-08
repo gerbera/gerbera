@@ -524,6 +524,12 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/ui/attribute::show-tooltips", "config-server.html#ui",
         DEFAULT_UI_SHOW_TOOLTIPS_VALUE),
 
+#ifdef GRBDEBUG
+    std::make_shared<ConfigIntSetup>(CFG_SERVER_DEBUG_MODE,
+        "/server/attribute::debug-mode", "config-server.html#debug-mode",
+        0, GrbLogger::makeFacility),
+#endif
+
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST,
         "/clients", "config-clients.html#clients"),
     std::make_shared<ConfigBoolSetup>(CFG_CLIENTS_LIST_ENABLED,

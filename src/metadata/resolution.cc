@@ -20,6 +20,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file resolution.cc
+#define LOG_FAC log_facility_t::metadata
 
 #include "resolution.h"
 #include "util/tools.h"

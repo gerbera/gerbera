@@ -28,6 +28,7 @@
 */
 
 /// \file sql_database.cc
+#define LOG_FAC log_facility_t::sqldatabase
 
 #include "sql_database.h" // API
 
@@ -933,7 +934,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     std::string addJoin;
 
     if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        int count = param.getRequestedCount();
+        auto count = param.getRequestedCount();
         bool doLimit = true;
         if (!count) {
             if (param.getStartingIndex())
@@ -1072,6 +1073,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
     }
+    log_debug("Search resolves to SQL [{}]", searchSQL);
 
     bool rootContainer = param.getContainerID() == "0";
 
@@ -1111,10 +1113,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     auto orderBy = fmt::format(" ORDER BY {}", orderByCode());
     std::string limit;
 
-    std::size_t startingIndex = param.getStartingIndex();
+    auto startingIndex = param.getStartingIndex();
     std::size_t requestedCount = param.getRequestedCount();
     if (startingIndex > 0 || requestedCount > 0) {
-        limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? 10000000000 : requestedCount), startingIndex);
+        limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? std::numeric_limits<int>::max() : requestedCount), startingIndex);
     }
 
     std::string retrievalSQL;

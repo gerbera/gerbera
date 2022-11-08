@@ -172,6 +172,9 @@ int main(int argc, char** argv, char** envp)
 
     options.add_options() //
         ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
+#ifdef GRBDEBUG
+        ("debug-mode", "Set Debugging Mode", cxxopts::value<std::string>()) //
+#endif
         ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u,user", "Drop privs to user", cxxopts::value<std::string>()) //
         ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>()) //
@@ -227,7 +230,7 @@ int main(int argc, char** argv, char** envp)
 
         bool debug = opts["debug"].as<bool>();
         if (debug) {
-            spdlog::set_level(spdlog::level::debug);
+            spdlog::set_level(spdlog::level::trace);
             spdlog::set_pattern("%Y-%m-%d %X.%e %^%6l%$: [%s:%#] %!(): %v");
         } else {
             spdlog::set_level(spdlog::level::info);
@@ -484,6 +487,13 @@ int main(int argc, char** argv, char** envp)
                 ip.value_or(""), interface.value_or(""), portnum.value_or(0),
                 debug);
             configManager->load(home.value_or(""));
+#ifdef GRBDEBUG
+            if (opts.count("debug-mode") > 0) {
+                auto debugMode = opts["debug-mode"].as<std::string>();
+                log_info("Setting Debug Mode {}", debugMode);
+                GrbLogger::Logger.init(GrbLogger::makeFacility(debugMode));
+            }
+#endif
             if (opts.count("check-config") > 0) {
                 std::exit(EXIT_SUCCESS);
             }

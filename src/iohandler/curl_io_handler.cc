@@ -28,6 +28,7 @@
 */
 
 /// \file curl_io_handler.cc
+#define LOG_FAC log_facility_t::iohandler
 
 #ifdef HAVE_CURL
 #include "curl_io_handler.h" // API

@@ -28,6 +28,7 @@
 */
 
 /// \file content_manager.cc
+#define LOG_FAC log_facility_t::content
 
 #include "content_manager.h" // API
 

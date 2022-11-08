@@ -30,6 +30,7 @@
 /// \file atrailers_content_handler.cc
 
 #ifdef ATRAILERS
+#define LOG_FAC log_facility_t::online
 #include "atrailers_content_handler.h" // API
 
 #include <array>

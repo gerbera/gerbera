@@ -28,6 +28,7 @@
 */
 
 /// \file upnp_cds.cc
+#define LOG_FAC log_facility_t::cds
 
 #include "upnp_cds.h" // API
 
@@ -59,11 +60,14 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     auto req = request.getRequest();
     auto reqRoot = req->document_element();
-#ifdef DEBUG_UPNP
-    for (auto&& child : req_root.children()) {
-        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
-    }
+
+#ifdef GRBDEBUG
+    if (GrbLogger::Logger.isDebugging(LOG_FAC))
+        for (auto&& child : reqRoot.children()) {
+            log_debug("request {} = {}", child.name(), reqRoot.child(child.name()).text().as_string());
+        }
 #endif
+
     std::string objID = reqRoot.child("ObjectID").text().as_string();
     std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
     // std::string filter; // not yet supported
@@ -154,11 +158,14 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     auto req = request.getRequest();
     auto reqRoot = req->document_element();
-#ifdef DEBUG_UPNP
-    for (auto&& child : req_root.children()) {
-        log_info("request {} = {}", child.name(), req_root.child(child.name()).text().as_string());
-    }
+
+#ifdef GRBDEBUG
+    if (GrbLogger::Logger.isDebugging(LOG_FAC))
+        for (auto&& child : reqRoot.children()) {
+            log_debug("request {} = {}", child.name(), reqRoot.child(child.name()).text().as_string());
+        }
 #endif
+
     std::string containerID = reqRoot.child("ContainerID").text().as_string();
     std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
     std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
@@ -408,7 +415,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 
 void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv)
 {
-    log_debug("start");
+    log_debug("start {}", containerUpdateIDsCsv);
 
     systemUpdateID++;
 

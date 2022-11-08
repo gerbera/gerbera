@@ -28,6 +28,7 @@
 */
 
 /// \file action_request.cc
+#define LOG_FAC log_facility_t::requests
 
 #include "action_request.h" // API
 

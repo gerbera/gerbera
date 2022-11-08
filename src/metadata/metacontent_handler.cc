@@ -22,6 +22,7 @@
 */
 
 /// \file metacontent_handler.cc
+#define LOG_FAC log_facility_t::metadata
 
 #include "metacontent_handler.h" // API
 

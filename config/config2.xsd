@@ -84,6 +84,7 @@
                 <xs:element ref="upnp" minOccurs="0"/>
                 <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="debug-mode" type="xs:string" minOccurs="0"/>
         </xs:complexType>
     </xs:element>
 

@@ -28,6 +28,7 @@
 */
 
 /// \file subscription_request.cc
+#define LOG_FAC log_facility_t::requests
 
 #include "subscription_request.h" // API
 

@@ -28,6 +28,7 @@
 */
 
 /// \file io_handler_chainer.cc
+#define LOG_FAC log_facility_t::iohandler
 
 #include "io_handler_chainer.h" // API
 

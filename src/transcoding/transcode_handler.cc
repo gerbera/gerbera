@@ -22,6 +22,7 @@
 */
 
 /// \file transcode_handler.cc
+#define LOG_FAC log_facility_t::transcoding
 
 #include "transcode_handler.h" // API
 

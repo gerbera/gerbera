@@ -28,6 +28,7 @@
 */
 
 /// \file url_request_handler.cc
+#define LOG_FAC log_facility_t::requests
 
 #ifdef HAVE_CURL
 #include "url_request_handler.h" // API

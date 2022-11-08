@@ -30,6 +30,7 @@
 /// \file libexif_handler.cc
 
 #ifdef HAVE_LIBEXIF
+#define LOG_FAC log_facility_t::exif
 #include "libexif_handler.h" // API
 
 #include <array>

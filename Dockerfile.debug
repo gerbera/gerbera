@@ -102,13 +102,12 @@ RUN cmake -S . -B build \
         -DWITH_DEBUG_OPTIONS=YES \
         -DWITH_TESTS=YES \
     && \
-    cmake --build build -v -j$(nproc) &&\
+    cmake --build build -v -j$(nproc) && \
     cmake --build build -v -t test ARGS="--output-on-failure"
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
-    ffmpeg4-libs \
     file \
     gdb \
     libexif \
@@ -159,5 +158,11 @@ EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
+
+RUN apk add --no-cache \
+    ffmpeg4-libs \
+    ffmpeg \
+    libheif-tools \
+    vlc
 
 FROM gerbera AS default

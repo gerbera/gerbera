@@ -30,6 +30,7 @@
 /// \file exiv2_handler.cc
 
 #ifdef HAVE_EXIV2
+#define LOG_FAC log_facility_t::exif
 #include "exiv2_handler.h" // API
 
 #include <exiv2/exiv2.hpp>

@@ -23,6 +23,7 @@
 
 /// \file upnp_clients.cc
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
+#define LOG_FAC log_facility_t::clients
 
 #include "upnp_clients.h" // API
 #include "config/client_config.h"

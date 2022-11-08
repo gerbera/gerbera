@@ -28,6 +28,7 @@
 */
 
 /// \file js_layout.cc
+#define LOG_FAC log_facility_t::layout
 
 #ifdef HAVE_JS
 #include "js_layout.h" // API

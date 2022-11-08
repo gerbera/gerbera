@@ -28,6 +28,7 @@
 */
 
 /// \file server.cc
+#define LOG_FAC log_facility_t::server
 
 #include "server.h" // API
 

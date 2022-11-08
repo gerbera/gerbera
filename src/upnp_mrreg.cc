@@ -28,6 +28,7 @@
 */
 
 /// \file upnp_mrreg.cc
+#define LOG_FAC log_facility_t::mrregistrar
 
 #include "upnp_mrreg.h" // API
 

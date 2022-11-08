@@ -28,6 +28,7 @@
 */
 
 /// \file builtin_layout.cc
+#define LOG_FAC log_facility_t::layout
 
 #include "builtin_layout.h" // API
 

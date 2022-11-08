@@ -28,6 +28,7 @@
 */
 
 /// \file mysql_database.cc
+#define LOG_FAC log_facility_t::mysql
 
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"

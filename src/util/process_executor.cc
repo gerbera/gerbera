@@ -28,6 +28,7 @@
 */
 
 /// \file process_executor.cc
+#define LOG_FAC log_facility_t::proc
 
 #include "process_executor.h" // API
 
@@ -40,6 +41,8 @@
 
 #include "exceptions.h"
 #include "logger.h"
+
+#include "fmt/core.h"
 
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<fs::path> tempPaths)
     : tempPaths(std::move(tempPaths))

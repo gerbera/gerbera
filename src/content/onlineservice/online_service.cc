@@ -30,7 +30,7 @@
 /// \file online_service.cc
 
 #ifdef ONLINE_SERVICES
-
+#define LOG_FAC log_facility_t::online
 #include "online_service.h" // API
 
 #include <array>

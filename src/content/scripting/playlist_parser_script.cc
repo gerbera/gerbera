@@ -30,6 +30,8 @@
 /// \file playlist_parser_script.cc
 
 #ifdef HAVE_JS
+#define LOG_FAC log_facility_t::script
+
 #include "playlist_parser_script.h" // API
 
 #include "cds_objects.h"

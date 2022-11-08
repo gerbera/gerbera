@@ -28,6 +28,7 @@
 */
 
 /// \file request_handler.cc
+#define LOG_FAC log_facility_t::requests
 
 #include "request_handler.h" // API
 
