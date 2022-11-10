@@ -66,7 +66,7 @@ FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
     duktape \
-    ffmpeg4-libs \
+    ffmpeg4 \
     file \
     fmt \
     libebml \
@@ -111,7 +111,8 @@ CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
 
 FROM gerbera AS with_transcoding
 RUN apk add --no-cache \
-    ffmpeg4 \
+    ffmpeg4-libs \
+    ffmpeg \
     libheif-tools \
     vlc
 
