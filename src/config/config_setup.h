@@ -36,6 +36,7 @@
 #include "config_options.h"
 #include "content/autoscan.h"
 #include "content/autoscan_list.h"
+#include "util/enum_iterator.h"
 
 class ConfigOption;
 class DirectoryTweak;

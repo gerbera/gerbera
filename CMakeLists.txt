@@ -213,6 +213,7 @@ add_library(libgerbera STATIC
         src/upnp_xml.h
         src/url_request_handler.cc
         src/url_request_handler.h
+        src/util/enum_iterator.h
         src/util/executor.h
         src/util/generic_task.cc
         src/util/generic_task.h

@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "common.h"
-#include "util/tools.h"
 #include "util/upnp_quirks.h"
 
 // forward declaration

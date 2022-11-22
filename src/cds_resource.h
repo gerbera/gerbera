@@ -37,6 +37,7 @@
 
 #include "common.h"
 #include "metadata/metadata_handler.h"
+#include "util/enum_iterator.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)

@@ -34,6 +34,7 @@
 #include <sstream>
 
 #include "metadata/resolution.h"
+#include "util/tools.h"
 #include "util/url_utils.h"
 
 #define RESOURCE_PART_SEP '~'
