@@ -35,7 +35,6 @@
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "iohandler/mem_io_handler.h"
-#include "util/tools.h"
 #include "util/upnp_headers.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
@@ -88,7 +87,7 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
     auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-    auto decodedParams = dictDecode(parameters);
+    auto decodedParams = URLUtils::dictDecode(parameters);
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {
@@ -118,7 +117,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum Up
 {
     this->filename = filename;
     auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
-    auto decodedParams = dictDecode(parameters);
+    auto decodedParams = URLUtils::dictDecode(parameters);
     if (params.empty()) {
         params = std::move(decodedParams);
     } else {

@@ -440,7 +440,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     auto&& resParams = res.getParameters();
     if (!resParams.empty()) {
         url.append(_URL_PARAM_SEPARATOR);
-        url.append(dictEncodeSimple(resParams));
+        url.append(URLUtils::dictEncodeSimple(resParams));
     }
 
     // Inject client group for content
@@ -515,9 +515,9 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     }
 
     if (!location.empty() && location.has_extension()) {
-        std::string extension = urlEscape(location.filename().extension().string());
+        std::string extension = URLUtils::urlEscape(location.filename().extension().string());
         if (!language.empty())
-            return fmt::format("{}.{}{}", urlExt, urlEscape(language), extension);
+            return fmt::format("{}.{}{}", urlExt, URLUtils::urlEscape(language), extension);
         return fmt::format("{}{}", urlExt, extension);
     }
 

@@ -1,5 +1,7 @@
 #include "util/grb_fs.h"
+#include "util/grb_net.h"
 #include "util/tools.h"
+#include "util/url_utils.h"
 
 #include <gtest/gtest.h>
 
@@ -48,12 +50,12 @@ TEST(ToolsTest, writeFileThrowsIfCantOpenFile)
 
 TEST(ToolsTest, renderWebUriV4)
 {
-    EXPECT_EQ(renderWebUri("192.168.5.5", 7777), "192.168.5.5:7777");
+    EXPECT_EQ(GrbNet::renderWebUri("192.168.5.5", 7777), "192.168.5.5:7777");
 }
 
 TEST(ToolsTest, renderWebUriV6)
 {
-    EXPECT_EQ(renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
+    EXPECT_EQ(GrbNet::renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
 }
 
 TEST(ToolsTest, splitStringTest)
@@ -152,47 +154,47 @@ TEST(ToolsTest, dictEncodeTest)
     std::map<std::string, std::string> values;
     values.emplace("Key 1", "Value 1");
     values.emplace("Key2", "Value 2");
-    EXPECT_EQ(dictEncode(values), "Key%201=Value%201&Key2=Value%202");
+    EXPECT_EQ(URLUtils::dictEncode(values), "Key%201=Value%201&Key2=Value%202");
 }
 
 TEST(ToolsTest, dictDecodeTest)
 {
-    std::map<std::string, std::string> values = dictDecode("Key%201=Value%201&Key2=Value%202");
+    std::map<std::string, std::string> values = URLUtils::dictDecode("Key%201=Value%201&Key2=Value%202");
     ASSERT_EQ(values.size(), 2);
     EXPECT_EQ(values["Key 1"], "Value 1");
     EXPECT_EQ(values["Key2"], "Value 2");
 
-    values = dictDecode("");
+    values = URLUtils::dictDecode("");
     EXPECT_EQ(values.size(), 0);
 }
 
 TEST(ToolsTest, pathToMapTest)
 {
-    std::map<std::string, std::string> values = pathToMap("Key 1/Value 1/Key 2/Value 2/Key3//");
+    std::map<std::string, std::string> values = URLUtils::pathToMap("Key 1/Value 1/Key 2/Value 2/Key3//");
     ASSERT_EQ(values.size(), 3);
     EXPECT_EQ(values["Key 1"], "Value 1");
     EXPECT_EQ(values["Key 2"], "Value 2");
     EXPECT_EQ(values["Key3"], "");
 
-    values = pathToMap("Key 1/Value 1/Key 2/");
+    values = URLUtils::pathToMap("Key 1/Value 1/Key 2/");
     ASSERT_EQ(values.size(), 2);
     EXPECT_EQ(values["Key 1"], "Value 1");
     EXPECT_EQ(values["Key 2"], "");
 
-    values = pathToMap("Key 1/Value 1/Key 2");
+    values = URLUtils::pathToMap("Key 1/Value 1/Key 2");
     ASSERT_EQ(values.size(), 2);
     EXPECT_EQ(values["Key 1"], "Value 1");
     EXPECT_EQ(values["Key 2"], "");
 
-    values = pathToMap("Key 1/");
+    values = URLUtils::pathToMap("Key 1/");
     ASSERT_EQ(values.size(), 1);
     EXPECT_EQ(values["Key 1"], "");
 
-    values = pathToMap("/");
+    values = URLUtils::pathToMap("/");
     ASSERT_EQ(values.size(), 1);
     EXPECT_EQ(values[""], "");
 
-    values = pathToMap("/meh");
+    values = URLUtils::pathToMap("/meh");
     ASSERT_EQ(values.size(), 1);
     EXPECT_EQ(values[""], "meh");
 }

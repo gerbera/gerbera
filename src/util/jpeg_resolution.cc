@@ -71,7 +71,7 @@ static uint16_t getuint16(const std::byte* shrt)
 static std::uint8_t getUint8(IOHandler& ioh)
 {
     std::byte byte {};
-    auto ret = ioh.read(&byte, 1);
+    auto ret = ioh.read(&byte, sizeof(std::byte));
     if (ret != 1) {
         throw_std_runtime_error("getJpegResolution: failed to read byte");
     }
@@ -80,16 +80,16 @@ static std::uint8_t getUint8(IOHandler& ioh)
 
 static Resolution getJpegResolutionRaw(IOHandler& ioh)
 {
-    int a = getUint8(ioh);
-    if (a != 0xff || getUint8(ioh) != M_SOI) {
+    auto initMark = getUint8(ioh);
+    if (initMark != 0xff || getUint8(ioh) != M_SOI) {
         throw_std_runtime_error("getJpegResolution: could not read jpeg specs");
     }
 
     while (true) {
-        int marker = 0;
+        uint8_t marker = 0;
         std::byte data[ITEM_BUF_SIZE];
 
-        for (a = 0; a < 7; a++) {
+        for (std::size_t a = 0; a < 7; a++) {
             marker = getUint8(ioh);
             if (marker != 0xff) {
                 break;
@@ -105,8 +105,8 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
         }
 
         // Read the length of the section.
-        int lh = getUint8(ioh);
-        int ll = getUint8(ioh);
+        auto lh = getUint8(ioh);
+        auto ll = getUint8(ioh);
 
         uint16_t itemLen = (lh << CHAR_BIT) | ll;
         if (itemLen < 2) {

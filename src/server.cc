@@ -305,7 +305,7 @@ std::string Server::getVirtualUrl() const
 {
     auto virtUrl = config->getOption(CFG_VIRTUAL_URL);
     if (virtUrl.empty()) {
-        virtUrl = renderWebUri(ip, port);
+        virtUrl = GrbNet::renderWebUri(ip, port);
     }
     if (!startswith(virtUrl, "http")) { // url does not start with http
         virtUrl = fmt::format("http://{}", virtUrl);
@@ -514,7 +514,7 @@ void Server::sendCDSSubscriptionUpdate(const std::string& updateString)
 
 std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const
 {
-    std::string link = urlUnescape(filename);
+    std::string link = URLUtils::urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
@@ -524,7 +524,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
         auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
-        auto params = dictDecode(parameters);
+        auto params = URLUtils::dictDecode(parameters);
 
         auto it = params.find(URL_REQUEST_TYPE);
         std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
@@ -551,7 +551,7 @@ int Server::registerVirtualDirCallbacks()
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            std::string link = urlUnescape(filename);
+            std::string link = URLUtils::urlUnescape(filename);
             reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
             return 0;
         } catch (const ServerShutdownException&) {
@@ -571,7 +571,7 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            std::string link = urlUnescape(filename);
+            std::string link = URLUtils::urlUnescape(filename);
             auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
             ioHandler->open(mode);
             return ioHandler.release();

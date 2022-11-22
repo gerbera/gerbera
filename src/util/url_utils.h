@@ -46,6 +46,20 @@ namespace URLUtils {
 std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = _URL_PARAM_SEPARATOR);
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
+
+/// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
+/// \param str String to be converted.
+/// \return string that contains the url-escaped representation of the original string.
+std::string urlEscape(std::string_view str);
+
+/// \brief Opposite of urlEscape :)
+std::string urlUnescape(std::string_view str);
+
+std::string dictEncode(const std::map<std::string, std::string>& dict);
+std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
+std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
+std::map<std::string, std::string> pathToMap(std::string_view url);
+
 } // namespace URLUtils
 
 #endif // GERBERA_URL_UTILS_H

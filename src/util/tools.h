@@ -85,9 +85,6 @@ void reduceString(std::string& str, char ch);
 void replaceString(std::string& str, std::string_view from, std::string_view to);
 void replaceAllString(std::string& str, std::string_view from, std::string_view to);
 
-/// \brief Render browser friendly uri (handle IPv6)
-std::string renderWebUri(std::string_view ip, int port);
-
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param ip IP address as string.
 /// \param port Port as string.
@@ -115,19 +112,6 @@ std::string hexMd5(const void* data, std::size_t length);
 
 /// \brief Generates hex md5 sum of the given string.
 std::string hexStringMd5(std::string_view str);
-
-/// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
-/// \param str String to be converted.
-/// \return string that contains the url-escaped representation of the original string.
-std::string urlEscape(std::string_view str);
-
-/// \brief Opposite of urlEscape :)
-std::string urlUnescape(std::string_view str);
-
-std::string dictEncode(const std::map<std::string, std::string>& dict);
-std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
-std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
-std::map<std::string, std::string> pathToMap(std::string_view url);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
 /// \param array that needs to be converted
@@ -161,10 +145,10 @@ std::chrono::seconds toSeconds(TP tp)
 }
 
 /// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
-std::string millisecondsToHMSF(long milliseconds);
+std::string millisecondsToHMSF(long long milliseconds);
 
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
-int HMSFToMilliseconds(std::string_view time);
+long long HMSFToMilliseconds(std::string_view time);
 
 std::string escape(std::string_view string, char escapeChar, char toEscape);
 
