@@ -51,6 +51,9 @@ public:
     /// \param ip i.e. 192.168.4.56.
     /// \return Interface name or nullptr if IP was not found.
     static std::string ipToInterface(std::string_view ip);
+
+    /// \brief Render browser friendly uri (handle IPv6)
+    static std::string renderWebUri(std::string_view ip, in_port_t port);
 };
 
 #endif // __GRB_NET_H__

@@ -49,6 +49,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
+#include "util/url_utils.h"
 
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
@@ -637,7 +638,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
 
     auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
-        cdsObjectSql.insert_or_assign("auxdata", quote(dictEncode(auxData)));
+        cdsObjectSql.insert_or_assign("auxdata", quote(URLUtils::dictEncode(auxData)));
     }
 
     const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
@@ -1485,7 +1486,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
     }
 
     std::string auxdataStr = fallbackString(getCol(row, BrowseCol::Auxdata), getCol(row, BrowseCol::RefAuxdata));
-    std::map<std::string, std::string> aux = dictDecode(auxdataStr);
+    std::map<std::string, std::string> aux = URLUtils::dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
     bool resourceZeroOk = false;
@@ -2740,11 +2741,11 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql["options"] = quote(dictEncode(options));
+                resourceSql["options"] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql["parameters"] = quote(dictEncode(parameters));
+                resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[CdsResource::getAttributeName(key)] = quote(val);
@@ -2764,11 +2765,11 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
             resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql["options"] = quote(dictEncode(options));
+                resourceSql["options"] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql["parameters"] = quote(dictEncode(parameters));
+                resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceSql[CdsResource::getAttributeName(key)] = quote(val);
@@ -2905,7 +2906,7 @@ bool SQLDatabase::doMetadataMigration()
 
 void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 {
-    std::map<std::string, std::string> dict = dictDecode(metadataStr);
+    std::map<std::string, std::string> dict = URLUtils::dictDecode(metadataStr);
 
     if (!dict.empty()) {
         log_debug("Migrating metadata for cds object {}", objectId);
@@ -3012,12 +3013,12 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             auto&& options = resource->getOptions();
             if (!options.empty()) {
                 fields.push_back(identifier("options"));
-                values.push_back(quote(dictEncode(options)));
+                values.push_back(quote(URLUtils::dictEncode(options)));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
                 fields.push_back(identifier("parameters"));
-                values.push_back(quote(dictEncode(parameters)));
+                values.push_back(quote(URLUtils::dictEncode(parameters)));
             }
             for (auto&& [key, val] : resourceSQLVals) {
                 fields.push_back(identifier(key));

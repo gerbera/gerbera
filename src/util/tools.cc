@@ -157,13 +157,6 @@ void replaceAllString(std::string& str, std::string_view from, std::string_view 
     }
 }
 
-std::string renderWebUri(std::string_view ip, int port)
-{
-    if (ip.find(':') != std::string_view::npos)
-        return fmt::format("[{}]:{}", ip, port);
-    return fmt::format("{}:{}", ip, port);
-}
-
 std::string httpRedirectTo(std::string_view addr, std::string_view page)
 {
     return fmt::format(R"(<html><head><meta http-equiv="Refresh" content="0;URL={}/{}"></head><body bgcolor="#dddddd"></body></html>)", addr, page);
@@ -247,143 +240,6 @@ std::string generateRandomId()
     return uuidString;
 }
 
-static constexpr auto hexCharS2 = "0123456789ABCDEF";
-
-std::string urlEscape(std::string_view str)
-{
-    std::ostringstream buf;
-    for (std::size_t i = 0; i < str.length();) {
-        auto c = str[i];
-        int cplen = 1;
-        if ((c & 0xf8) == 0xf0)
-            cplen = 4;
-        else if ((c & 0xf0) == 0xe0)
-            cplen = 3;
-        else if ((c & 0xe0) == 0xc0)
-            cplen = 2;
-        if ((i + cplen) > str.length())
-            cplen = 1;
-
-        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.') {
-            buf << char(c);
-        } else {
-            int hi = c >> 4;
-            int lo = c & 15;
-            if (cplen > 1)
-                buf << str.substr(i, cplen);
-            else
-                buf << '%' << hexCharS2[hi] << hexCharS2[lo];
-        }
-        i += cplen;
-    }
-    return buf.str();
-}
-
-std::string urlUnescape(std::string_view str)
-{
-    auto data = str.data();
-    int len = str.length();
-    std::ostringstream buf;
-
-    int i = 0;
-    while (i < len) {
-        const char c = data[i++];
-        if (c == '%') {
-            if (i + 2 > len)
-                break; // avoid buffer overrun
-            char chi = data[i++];
-            char clo = data[i++];
-
-            auto pos = std::strchr(hexCharS2, chi);
-            int hi = pos ? pos - hexCharS2 : 0;
-
-            pos = std::strchr(hexCharS2, clo);
-            int lo = pos ? pos - hexCharS2 : 0;
-
-            int ascii = (hi << 4) | lo;
-            buf << char(ascii);
-        } else if (c == '+') {
-            buf << ' ';
-        } else {
-            buf << c;
-        }
-    }
-    return buf.str();
-}
-
-static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
-{
-    std::ostringstream buf;
-    for (auto it = dict.begin(); it != dict.end(); ++it) {
-        if (it != dict.begin())
-            buf << sep1;
-        buf << urlEscape(it->first) << sep2
-            << urlEscape(it->second);
-    }
-    return buf.str();
-}
-
-std::string dictEncode(const std::map<std::string, std::string>& dict)
-{
-    return dictEncode(dict, '&', '=');
-}
-
-std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
-{
-    return dictEncode(dict, '/', '/');
-}
-
-std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape)
-{
-    std::map<std::string, std::string> dict;
-    const char* data = url.data();
-    const char* dataEnd = data + url.length();
-    while (data < dataEnd) {
-        const char* ampPos = std::strchr(data, '&');
-        if (!ampPos) {
-            ampPos = dataEnd;
-        }
-        const char* eqPos = std::strchr(data, '=');
-        if (eqPos && eqPos < ampPos) {
-            auto key = std::string_view(data, eqPos - data);
-            auto value = std::string_view(eqPos + 1, ampPos - eqPos - 1);
-            if (unEscape) {
-                dict.try_emplace(urlUnescape(key), urlUnescape(value));
-            } else {
-                dict.emplace(key, value);
-            }
-        }
-        data = ampPos + 1;
-    }
-    return dict;
-}
-
-std::map<std::string, std::string> pathToMap(std::string_view url)
-{
-    std::map<std::string, std::string> out;
-    std::size_t pos;
-    std::size_t lastPos = 0;
-    std::size_t size = url.size();
-    do {
-        pos = url.find('/', lastPos);
-        if (pos == std::string_view::npos)
-            pos = size;
-
-        std::string key = urlUnescape(url.substr(lastPos, pos - lastPos));
-        lastPos = pos == size ? size : pos + 1;
-        pos = url.find('/', lastPos);
-        if (pos == std::string::npos)
-            pos = size;
-
-        std::string value = urlUnescape(url.substr(lastPos, pos - lastPos));
-        lastPos = pos + 1;
-
-        out.emplace(key, value);
-    } while (lastPos < size);
-
-    return out;
-}
-
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
     return mimeTypes.empty() ? "" : fmt::format("http-get:*:{}:*", fmt::join(mimeTypes, ":*,http-get:*:"));
@@ -415,32 +271,32 @@ std::string_view getProtocol(std::string_view protocolInfo)
     return (pos == std::string_view::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
-std::string millisecondsToHMSF(long milliseconds)
+std::string millisecondsToHMSF(long long milliseconds)
 {
     auto ms = milliseconds % 1000;
     milliseconds /= 1000;
 
-    auto s = milliseconds % 60;
+    auto seconds = milliseconds % 60;
     milliseconds /= 60;
 
-    auto m = milliseconds % 60;
-    auto h = milliseconds / 60;
+    auto minutes = milliseconds % 60;
+    auto hours = milliseconds / 60;
 
-    return fmt::format("{:01}:{:02}:{:02}.{:03}", h, m, s, ms);
+    return fmt::format("{:01}:{:02}:{:02}.{:03}", hours, minutes, seconds, ms);
 }
 
-int HMSFToMilliseconds(std::string_view time)
+long long HMSFToMilliseconds(std::string_view time)
 {
     if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
         return 0;
     }
 
-    int hours = 0;
-    int minutes = 0;
-    int seconds = 0;
-    int ms = 0;
-    if (sscanf(time.data(), "%d:%d:%d.%d", &hours, &minutes, &seconds, &ms) > 3)
+    long long hours = 0;
+    long long minutes = 0;
+    long long seconds = 0;
+    long long ms = 0;
+    if (sscanf(time.data(), "%lld:%lld:%lld.%lld", &hours, &minutes, &seconds, &ms) > 3)
         return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 
     log_warning("Could not parse time '{}'!", time);

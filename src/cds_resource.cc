@@ -34,7 +34,7 @@
 #include <sstream>
 
 #include "metadata/resolution.h"
-#include "util/tools.h"
+#include "util/url_utils.h"
 
 #define RESOURCE_PART_SEP '~'
 
@@ -42,8 +42,8 @@ CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose, std::strin
     : purpose(purpose)
     , handlerType(handlerType)
 {
-    this->options = dictDecode(options);
-    this->parameters = dictDecode(parameters);
+    this->options = URLUtils::dictDecode(options);
+    this->parameters = URLUtils::dictDecode(parameters);
 }
 
 CdsResource::CdsResource(ContentHandler handlerType,
@@ -210,17 +210,17 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     std::map<std::string, std::string> par;
     std::map<std::string, std::string> opt;
 
-    attr = dictDecode(parts[1]);
+    attr = URLUtils::dictDecode(parts[1]);
     std::map<CdsResource::Attribute, std::string> attrParsed;
     for (auto [k, v] : attr) {
         attrParsed[CdsResource::mapAttributeName(k)] = v;
     }
 
     if (size >= 3)
-        par = dictDecode(parts[2]);
+        par = URLUtils::dictDecode(parts[2]);
 
     if (size >= 4)
-        opt = dictDecode(parts[3]);
+        opt = URLUtils::dictDecode(parts[3]);
 
     return std::make_shared<CdsResource>(handlerType, std::move(attrParsed), std::move(par), std::move(opt));
 }
