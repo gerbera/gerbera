@@ -36,8 +36,8 @@
 
 #include "common.h"
 #include "context.h"
+#include "util/enum_iterator.h"
 #include "util/grb_fs.h"
-#include "util/tools.h"
 
 // forward declaration
 class CdsItem;

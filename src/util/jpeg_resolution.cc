@@ -105,7 +105,7 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
         }
 
         // Read the length of the section.
-        auto lh = getUint8(ioh);
+        uint16_t lh = getUint8(ioh);
         auto ll = getUint8(ioh);
 
         uint16_t itemLen = (lh << CHAR_BIT) | ll;

@@ -29,6 +29,7 @@
 
 #include <numeric>
 
+#include "util/enum_iterator.h"
 #include "util/tools.h"
 
 using LogFacilityIterator = EnumIterator<log_facility_t, log_facility_t::thread, log_facility_t::log_MAX>;

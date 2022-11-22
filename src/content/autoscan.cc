@@ -34,6 +34,7 @@
 
 #include "content_manager.h"
 #include "database/database.h"
+#include "util/enum_iterator.h"
 
 #include <numeric>
 
