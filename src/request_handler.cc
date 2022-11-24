@@ -34,6 +34,7 @@
 
 #include "content/content_manager.h"
 #include "database/database.h"
+#include "util/grb_net.h"
 #include "util/tools.h"
 
 #include <fmt/core.h>

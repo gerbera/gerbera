@@ -27,9 +27,10 @@
 #define LOG_FAC log_facility_t::wavpack
 #include "wavpack_handler.h" // API
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
+#include "util/tools.h"
 
 static const auto fileFormats = std::map<int, std::string_view> {
     { WP_FORMAT_WAV, "WAV" },

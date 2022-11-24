@@ -7,8 +7,9 @@
 #include <memory>
 #include <pugixml.hpp>
 
-#include "cds_objects.h"
+#include "cds/cds_objects.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"

@@ -29,7 +29,7 @@
 #include <array>
 #include <utility>
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "server.h"

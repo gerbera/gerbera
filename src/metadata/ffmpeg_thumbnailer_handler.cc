@@ -24,10 +24,14 @@ Gerbera - https://gerbera.io/
 #ifdef HAVE_FFMPEGTHUMBNAILER
 #define LOG_FAC log_facility_t::ffmpeg
 
-#include "ffmpeg_thumbnailer_handler.h"
-#include "resolution.h"
+#include "ffmpeg_thumbnailer_handler.h" // API
+
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
+
+#include "cds/cds_item.h"
+#include "resolution.h"
+#include "util/tools.h"
 
 fs::path FfmpegThumbnailerHandler::getThumbnailCacheBasePath() const
 {

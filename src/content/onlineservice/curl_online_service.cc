@@ -27,10 +27,12 @@
 #define LOG_FAC log_facility_t::online
 #include "curl_online_service.h" // API
 
+#include "cds/cds_item.h"
 #include "config/config.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 #include "util/url.h"
 
 CurlContentHandler::CurlContentHandler(const std::shared_ptr<Context>& context)

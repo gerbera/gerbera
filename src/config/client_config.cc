@@ -29,6 +29,7 @@
 #include <array>
 #include <numeric>
 
+#include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 

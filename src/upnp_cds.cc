@@ -35,9 +35,12 @@
 #include <sstream>
 #include <vector>
 
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "database/sql_database.h"
+#include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 

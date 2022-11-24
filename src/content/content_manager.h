@@ -38,7 +38,6 @@
 #include <vector>
 
 #include "autoscan.h"
-#include "cds_objects.h"
 #include "common.h"
 #include "context.h"
 #include "util/generic_task.h"
@@ -72,6 +71,10 @@ class ScriptingRuntime;
 
 // forward declarations
 class AutoScanSetting;
+class CdsContainer;
+class CdsItem;
+class CdsObject;
+class CdsResource;
 class ContentManager;
 class LastFm;
 class Server;

@@ -26,7 +26,7 @@
 #ifndef __SCRIPTING_SCRIPT_NAMES_H__
 #define __SCRIPTING_SCRIPT_NAMES_H__
 
-#include "cds_objects.h"
+#include "cds/cds_resource.h"
 #include "metadata/metadata_handler.h"
 
 const static auto res_names = std::map<CdsResource::Attribute, std::string_view> {

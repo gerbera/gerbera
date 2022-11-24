@@ -32,7 +32,8 @@
 
 #include "pages.h" // API
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"

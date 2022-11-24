@@ -11,6 +11,8 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
+    Copyright (C) 2016-2022 Gerbera Contributors
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
@@ -28,7 +30,7 @@
 */
 
 /// \file cds_objects.h
-/// \brief Definition for the CdsObject, CdsItem and CdsContainer classes.
+/// \brief Definition for the CdsObject base class.
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
@@ -39,7 +41,6 @@
 #include "cds_resource.h"
 #include "common.h"
 #include "metadata/metadata_handler.h"
-#include "util/tools.h"
 
 // ATTENTION: These values need to be changed in web/js/items.js too.
 #define OBJECT_TYPE_CONTAINER 0x00000001u
@@ -68,8 +69,6 @@ static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type 
 #define OBJECT_AUTOSCAN_NONE 0u
 #define OBJECT_AUTOSCAN_UI 1u
 #define OBJECT_AUTOSCAN_CFG 2u
-
-class ClientStatusDetail;
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {
@@ -291,10 +290,7 @@ public:
     }
 
     /// \brief Query single auxdata value.
-    std::string getAuxData(const std::string& key) const
-    {
-        return getValueOrDefault(auxdata, key);
-    }
+    std::string getAuxData(const std::string& key) const;
 
     /// \brief Query entire auxdata dictionary.
     const std::map<std::string, std::string>& getAuxData() const { return auxdata; }
@@ -400,165 +396,6 @@ public:
     static std::string mapFlags(int flag);
     static int remapFlags(const std::string& flag);
     static int makeFlag(const std::string& optValue);
-};
-
-/// \brief An Item in the content directory.
-class CdsItem : public CdsObject {
-protected:
-    /// \brief mime-type of the media.
-    std::string mimeType { MIMETYPE_DEFAULT };
-
-    /// \brief number of part, e.g. disk or season
-    int partNumber {};
-
-    /// \brief number of track e.g. track on disk or episode of season
-    int trackNumber {};
-
-    /// \brief unique service ID
-    std::string serviceID;
-
-    std::shared_ptr<ClientStatusDetail> playStatus {};
-
-public:
-    /// \brief Constructor, sets the object type and default upnp:class (object.item)
-    CdsItem();
-
-    /// \brief Set mime-type information of the media.
-    void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
-
-    bool isItem() const override { return true; }
-    bool isPureItem() const override { return true; }
-
-    /// \brief Query mime-type information.
-    std::string getMimeType() const { return mimeType; }
-
-    /// \brief Sets the upnp:originalTrackNumber property
-    void setTrackNumber(int trackNumber)
-    {
-        if (trackNumber >= 0)
-            this->trackNumber = trackNumber;
-    }
-
-    int getTrackNumber() const { return trackNumber; }
-
-    /// \brief Sets the part number property
-    void setPartNumber(int partNumber)
-    {
-        if (partNumber >= 0)
-            this->partNumber = partNumber;
-    }
-
-    int getPartNumber() const { return partNumber; }
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)`
-    void copyTo(const std::shared_ptr<CdsObject>& obj) override;
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() const override;
-
-    /// \brief Set the unique service ID.
-    void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
-
-    /// \brief Retrieve the unique service ID.
-    std::string getServiceID() const { return serviceID; }
-
-    /// \brief Retrieve Play Status details
-    void setPlayStatus(const std::shared_ptr<ClientStatusDetail>& playStatus) { this->playStatus = playStatus; }
-
-    /// \brief Set Play Status details
-    std::shared_ptr<ClientStatusDetail> getPlayStatus() const { return playStatus; }
-};
-
-/// \brief An item that is accessible via a URL.
-class CdsItemExternalURL : public CdsItem {
-public:
-    /// \brief Constructor, sets the object type.
-    CdsItemExternalURL();
-    bool isPureItem() const override { return false; }
-    bool isExternalItem() const override { return true; }
-
-    /// \brief Sets the URL for the item.
-    /// \param URL full url to the item: http://somewhere.com/something.mpg
-    void setURL(const std::string& URL) { this->location = URL; }
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
-    // void copyTo(std::shared_ptr<CdsObject> obj) override;
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    // int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
-
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-    void validate() const override;
-};
-
-/// \brief A container in the content directory.
-class CdsContainer final : public CdsObject {
-protected:
-    /// \brief container update id.
-    int updateID {};
-
-    /// \brief childCount attribute
-    int childCount { -1 };
-
-    /// \brief whether this container is an autoscan start point.
-    int autoscanType { OBJECT_AUTOSCAN_NONE };
-
-public:
-    /// \brief Constructor, initializes default values for the flags and sets the object type.
-    CdsContainer();
-    explicit CdsContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
-    {
-        this->title = title;
-        this->upnpClass = upnpClass;
-    }
-
-    bool isContainer() const override { return true; }
-
-    /// \brief Set the searchable flag.
-    void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
-
-    /// \brief Query searchable flag.
-    int isSearchable() const { return getFlag(OBJECT_FLAG_SEARCHABLE); }
-
-    /// \brief Set the container update ID value.
-    void setUpdateID(int updateID) { this->updateID = updateID; }
-
-    /// \brief Query container update ID value.
-    int getUpdateID() const { return updateID; }
-
-    /// \brief Set container childCount attribute.
-    void setChildCount(int childCount) { this->childCount = childCount; }
-
-    /// \brief Retrieve number of children
-    int getChildCount() const { return childCount; }
-
-    /// \brief returns whether this container is an autoscan start point.
-    int getAutoscanType() const { return autoscanType; }
-
-    /// \brief sets whether this container is an autoscan start point.
-    void setAutoscanType(int type) { autoscanType = type; }
-
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
-    void copyTo(const std::shared_ptr<CdsObject>& obj) override;
-
-    /// \brief Checks if current object is equal to obj.
-    ///
-    /// See description for CdsObject::equals() for details.
-    bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
-    /*
-        /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-        void validate() const override;
-    */
 };
 
 #endif // __CDS_OBJECTS_H__

@@ -35,6 +35,8 @@
 #include <fmt/chrono.h>
 #include <regex>
 
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "config/directory_tweak.h"
 #include "database/database.h"
 #include "layout/builtin_layout.h"

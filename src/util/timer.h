@@ -37,8 +37,8 @@
 #include <memory>
 
 #include "common.h"
+#include "grb_time.h"
 #include "thread_runner.h"
-#include "tools.h"
 
 class Timer {
 public:

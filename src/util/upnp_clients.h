@@ -28,7 +28,6 @@
 #ifndef __UPNP_CLIENTS_H__
 #define __UPNP_CLIENTS_H__
 
-#include <chrono>
 #include <memory>
 #include <mutex>
 #include <pugixml.hpp>
@@ -36,6 +35,7 @@
 #include <vector>
 
 #include "common.h"
+#include "util/grb_time.h"
 #include "util/upnp_quirks.h"
 
 // forward declaration

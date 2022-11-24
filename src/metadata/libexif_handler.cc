@@ -35,7 +35,7 @@
 
 #include <array>
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/jpeg_resolution.h"

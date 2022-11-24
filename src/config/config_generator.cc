@@ -29,6 +29,7 @@
 
 #include "config/config_definition.h"
 #include "config/config_setup.h"
+#include "util/grb_time.h"
 #include "util/tools.h"
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()

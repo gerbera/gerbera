@@ -271,38 +271,6 @@ std::string_view getProtocol(std::string_view protocolInfo)
     return (pos == std::string_view::npos || pos == 0) ? PROTOCOL : protocolInfo.substr(0, pos);
 }
 
-std::string millisecondsToHMSF(long long milliseconds)
-{
-    auto ms = milliseconds % 1000;
-    milliseconds /= 1000;
-
-    auto seconds = milliseconds % 60;
-    milliseconds /= 60;
-
-    auto minutes = milliseconds % 60;
-    auto hours = milliseconds / 60;
-
-    return fmt::format("{:01}:{:02}:{:02}.{:03}", hours, minutes, seconds, ms);
-}
-
-long long HMSFToMilliseconds(std::string_view time)
-{
-    if (time.empty()) {
-        log_warning("Could not convert time representation to seconds!");
-        return 0;
-    }
-
-    long long hours = 0;
-    long long minutes = 0;
-    long long seconds = 0;
-    long long ms = 0;
-    if (sscanf(time.data(), "%lld:%lld:%lld.%lld", &hours, &minutes, &seconds, &ms) > 3)
-        return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
-
-    log_warning("Could not parse time '{}'!", time);
-    return 0;
-}
-
 std::string escape(std::string_view string, char escapeChar, char toEscape)
 {
     std::ostringstream buf;
@@ -366,27 +334,6 @@ std::string getValueOrDefault(const std::vector<std::pair<std::string, std::stri
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval)
 {
     return getValueOrDefault<std::string, std::string>(m, key, defval);
-}
-
-std::chrono::seconds currentTime()
-{
-    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
-}
-
-std::chrono::milliseconds currentTimeMS()
-{
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-}
-
-std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms)
-{
-    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    return now - ms;
-}
-
-std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second)
-{
-    return second - first;
 }
 
 std::vector<std::string> populateCommandLine(const std::string& line,

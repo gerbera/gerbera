@@ -32,7 +32,6 @@
 
 #include "transcode_dispatcher.h" // API
 
-#include "cds_objects.h"
 #include "iohandler/io_handler.h"
 #include "transcode_ext_handler.h"
 #include "transcoding.h"

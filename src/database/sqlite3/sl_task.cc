@@ -25,6 +25,7 @@
 
 #include "config/config_manager.h"
 #include "sqlite_database.h"
+#include "util/tools.h"
 
 bool SLTask::is_running() const
 {

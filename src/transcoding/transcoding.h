@@ -36,7 +36,7 @@
 #include <map>
 #include <vector>
 
-#include "cds_resource.h"
+#include "cds/cds_resource.h"
 #include "util/grb_fs.h"
 
 #define SOURCE (-1)

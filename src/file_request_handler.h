@@ -37,6 +37,8 @@
 #include "upnp_xml.h"
 #include <memory>
 
+class MetadataHandler;
+
 class FileRequestHandler : public RequestHandler {
 
 public:

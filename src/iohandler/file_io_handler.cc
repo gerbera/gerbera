@@ -32,8 +32,6 @@
 
 #include "file_io_handler.h" // API
 
-#include "cds_objects.h"
-
 FileIOHandler::FileIOHandler(const fs::path& filename)
     : file(filename)
 {

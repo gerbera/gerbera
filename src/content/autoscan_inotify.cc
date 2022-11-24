@@ -37,6 +37,7 @@
 
 #include "content_manager.h"
 #include "database/database.h"
+#include "util/tools.h"
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 

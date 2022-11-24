@@ -34,10 +34,13 @@
 
 #include <regex>
 
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
 
