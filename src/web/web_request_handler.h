@@ -40,6 +40,7 @@
 #include "request_handler.h"
 #include "session_manager.h"
 #include "util/generic_task.h"
+#include "util/tools.h"
 #include "util/xml_to_json.h"
 
 namespace Web {

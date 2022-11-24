@@ -33,12 +33,13 @@
 #ifdef HAVE_CURL
 #include "url_request_handler.h" // API
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
+#include "util/tools.h"
 #include "util/url.h"
 #include "util/url_utils.h"
 

@@ -32,13 +32,14 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "cds_objects.h"
 #include "common.h"
 #include "config/config_setup.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
 // forward declaration
+class CdsItemExternalURL;
+class CdsItem;
 class Config;
 class Database;
 class UpnpXMLBuilder;

@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "common.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "upnp_xml.h"
+#include "util/tools.h"
 
 #include "../mock/config_mock.h"
 #include "../mock/database_mock.h"

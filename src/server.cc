@@ -51,6 +51,7 @@
 #include "file_request_handler.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
+#include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/url_utils.h"
 #include "web/pages.h"

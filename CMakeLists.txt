@@ -57,10 +57,14 @@ endif(CYGWIN)
 add_library(libgerbera STATIC
         src/action_request.cc
         src/action_request.h
-        src/cds_objects.cc
-        src/cds_objects.h
-        src/cds_resource.cc
-        src/cds_resource.h
+        src/cds/cds_container.cc
+        src/cds/cds_container.h
+        src/cds/cds_item.cc
+        src/cds/cds_item.h
+        src/cds/cds_objects.cc
+        src/cds/cds_objects.h
+        src/cds/cds_resource.cc
+        src/cds/cds_resource.h
         src/common.h
         src/config/client_config.h
         src/config/client_config.cc
@@ -221,6 +225,8 @@ add_library(libgerbera STATIC
         src/util/grb_fs.h
         src/util/grb_net.cc
         src/util/grb_net.h
+        src/util/grb_time.cc
+        src/util/grb_time.h
         src/util/jpeg_resolution.cc
         src/util/logger.h
         src/util/logger.cc

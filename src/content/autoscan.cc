@@ -32,9 +32,11 @@
 
 #include "autoscan.h" // API
 
+#include "cds/cds_container.h"
 #include "content_manager.h"
 #include "database/database.h"
 #include "util/enum_iterator.h"
+#include "util/tools.h"
 
 #include <numeric>
 

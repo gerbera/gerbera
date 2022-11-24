@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "cds_objects.h"
+#include "cds/cds_objects.h"
 #include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"

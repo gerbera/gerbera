@@ -36,7 +36,8 @@
 #include <fmt/chrono.h>
 #include <vector>
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
 #include "config/dynamic_content.h"

@@ -52,9 +52,10 @@
 #include <vorbisfile.h>
 #include <wavpackfile.h>
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
+#include "util/grb_time.h"
 #include "util/mime.h"
 #include "util/tools.h"
 

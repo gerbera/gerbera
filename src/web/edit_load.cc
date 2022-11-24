@@ -34,7 +34,8 @@
 
 #include <fmt/chrono.h>
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "server.h"

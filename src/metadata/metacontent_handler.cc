@@ -30,7 +30,7 @@
 #include <regex>
 #include <sys/stat.h>
 
-#include "cds_objects.h"
+#include "cds/cds_objects.h"
 #include "config/config.h"
 #include "config/directory_tweak.h"
 #include "content/content_manager.h"

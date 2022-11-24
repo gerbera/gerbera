@@ -34,13 +34,15 @@
 
 #include "playlist_parser_script.h" // API
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 #define ONE_TEXTLINE_BYTES 1024
 

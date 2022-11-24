@@ -33,6 +33,7 @@
 #define LOG_FAC log_facility_t::script
 #include "import_script.h" // API
 
+#include "cds/cds_objects.h"
 #include "content/content_manager.h"
 #include "js_functions.h"
 #include "util/string_converter.h"

@@ -31,7 +31,6 @@
 #ifndef __TOOLS_H__
 #define __TOOLS_H__
 
-#include <chrono>
 #include <map>
 #include <optional>
 #include <vector>
@@ -136,20 +135,6 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 /// \return Protocol (i.e. http-get).
 std::string_view getProtocol(std::string_view protocolInfo);
 
-template <typename TP>
-std::chrono::seconds toSeconds(TP tp)
-{
-    auto asSystemTime = std::chrono::time_point_cast<std::chrono::system_clock::duration>(tp - TP::clock::now()
-        + std::chrono::system_clock::now());
-    return std::chrono::duration_cast<std::chrono::seconds>(asSystemTime.time_since_epoch());
-}
-
-/// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
-std::string millisecondsToHMSF(long long milliseconds);
-
-/// \brief converts a "H*:MM:SS.F*" representation to milliseconds
-long long HMSFToMilliseconds(std::string_view time);
-
 std::string escape(std::string_view string, char escapeChar, char toEscape);
 
 /// \brief Returns the first string if it isn't "nullptr", otherwise the fallback string.
@@ -182,12 +167,6 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
-
-std::chrono::seconds currentTime();
-std::chrono::milliseconds currentTimeMS();
-
-std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
-std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
 /// \brief Parses a command line, splitting the arguments into an array and
 /// substitutes %in and %out tokens with given strings.

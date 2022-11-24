@@ -52,7 +52,8 @@ extern "C" {
 
 } // extern "C"
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
+#include "util/grb_time.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

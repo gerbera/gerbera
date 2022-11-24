@@ -34,7 +34,7 @@
 
 #include <array>
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "content/scripting/script_names.h"
 #include "util/tools.h"

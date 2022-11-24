@@ -37,12 +37,16 @@
 #include <pugixml.hpp>
 #include <vector>
 
-#include "cds_objects.h"
 #include "common.h"
 #include "config/config.h"
 #include "context.h"
 #include "util/upnp_quirks.h"
 
+class CdsContainer;
+class CdsItem;
+class CdsObject;
+class CdsResource;
+enum class ContentHandler;
 class Quirks;
 
 class UpnpXMLBuilder {

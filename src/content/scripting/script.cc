@@ -36,7 +36,8 @@
 #include <array>
 #include <fmt/chrono.h>
 
-#include "cds_objects.h"
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
 #include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "content/content_manager.h"

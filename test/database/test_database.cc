@@ -23,10 +23,11 @@ Gerbera - https://gerbera.io/
 #include <gtest/gtest.h>
 #include <pugixml.hpp>
 
-#include "cds_objects.h"
+#include "cds/cds_objects.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "sqlite_config_fake.h"
 #include "upnp_xml.h"
+#include "util/tools.h"
 
 #if HAVE_MYSQL
 #include "database/mysql/mysql_database.h"

@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "cds/cds_objects.h"
 #include "content/autoscan.h"
 #include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"

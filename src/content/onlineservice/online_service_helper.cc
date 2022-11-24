@@ -33,7 +33,7 @@
 #define LOG_FAC log_facility_t::online
 #include "online_service_helper.h" // API
 
-#include "cds_objects.h"
+#include "cds/cds_item.h"
 #include "online_service.h"
 
 std::string OnlineServiceHelper::resolveURL(const std::shared_ptr<CdsItemExternalURL>& item)

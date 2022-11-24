@@ -34,6 +34,7 @@
 #include "atrailers_service.h" // API
 
 #include "content/content_manager.h"
+#include "util/tools.h"
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
