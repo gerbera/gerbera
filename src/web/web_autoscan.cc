@@ -35,6 +35,7 @@
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
+#include "util/xml_to_json.h"
 
 void Web::Autoscan::process()
 {
@@ -108,9 +109,9 @@ void Web::Autoscan::process()
             int mt = AutoscanDirectory::makeMediaType(fmt::format("{}", fmt::join(mediaType, "|")));
             // bool persistent = boolParam("persistent");
 
-            AutoscanDirectory::ScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
+            AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
             int interval = intParam("interval", 0);
-            if (scanMode == AutoscanDirectory::ScanMode::Timed && interval <= 0)
+            if (scanMode == AutoscanScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
@@ -120,9 +121,9 @@ void Web::Autoscan::process()
             //     recursive, audio, image, video, interval, hidden);
 
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
-            containerMap[AutoscanDirectory::MediaMode::Audio] = param("ctAudio");
-            containerMap[AutoscanDirectory::MediaMode::Image] = param("ctImage");
-            containerMap[AutoscanDirectory::MediaMode::Video] = param("ctVideo");
+            containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
+            containerMap[AutoscanMediaMode::Image] = param("ctImage");
+            containerMap[AutoscanMediaMode::Video] = param("ctVideo");
             auto autoscan = std::make_shared<AutoscanDirectory>(
                 "", // location
                 scanMode,
@@ -179,9 +180,9 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("videoTV").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value("0");
 
-        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
-        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
-        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
+        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio).c_str());
+        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image).c_str());
+        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video).c_str());
     } else {
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
@@ -200,8 +201,8 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("videoTV").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_BROADCAST) ? "1" : "0");
         element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MUSICVIDEOCLIP) ? "1" : "0");
 
-        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio).c_str());
-        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image).c_str());
-        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video).c_str());
+        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Audio).c_str());
+        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Image).c_str());
+        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Video).c_str());
     }
 }

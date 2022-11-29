@@ -57,6 +57,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "util/grb_time.h"
 #include "util/mime.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)

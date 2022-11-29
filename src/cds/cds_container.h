@@ -31,6 +31,7 @@ Gerbera - https://gerbera.io/
 #define __CDS_CONTAINER_H__
 
 #include "cds_objects.h"
+#include "upnp_common.h"
 
 /// \brief A container in the content directory.
 class CdsContainer final : public CdsObject {

@@ -37,6 +37,7 @@
 #include "database/database.h"
 #include "server.h"
 #include "upnp_xml.h"
+#include "util/xml_to_json.h"
 
 Web::Items::Items(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)
@@ -88,7 +89,7 @@ void Web::Items::process()
     int autoscanType = 0;
     if (parentDir) {
         autoscanType = parentDir->persistent() ? 2 : 1;
-        autoscanMode = "timed";
+        autoscanMode = AUTOSCAN_TIMED;
     }
 
 #ifdef HAVE_INOTIFY
@@ -110,12 +111,12 @@ void Web::Items::process()
 
         if (startpointId != INVALID_OBJECT_ID) {
             auto startPtDir = database->getAutoscanDirectory(startpointId);
-            if (startPtDir && startPtDir->getScanMode() == AutoscanDirectory::ScanMode::INotify) {
+            if (startPtDir && startPtDir->getScanMode() == AutoscanScanMode::INotify) {
                 protectItems = true;
                 if (autoscanType == 0 || startPtDir->persistent())
                     protectContainer = true;
 
-                autoscanMode = "inotify";
+                autoscanMode = AUTOSCAN_INOTIFY;
             }
         }
     }

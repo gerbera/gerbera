@@ -28,6 +28,7 @@
 
 #include "cds/cds_resource.h"
 #include "metadata/metadata_handler.h"
+#include "upnp_common.h"
 
 const static auto res_names = std::map<CdsResource::Attribute, std::string_view> {
     std::pair(CdsResource::Attribute::SIZE, "R_SIZE"),

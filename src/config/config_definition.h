@@ -31,6 +31,33 @@
 #include "config.h"
 #include "util/tools.h"
 
+#define CONFIG_XML_VERSION 2
+
+// default values
+#define DEFAULT_FILESYSTEM_CHARSET "UTF-8"
+#define DEFAULT_FALLBACK_CHARSET "US-ASCII"
+
+#define DEFAULT_CONFIG_NAME "config.xml"
+#define DEFAULT_ACCOUNT_USER "gerbera"
+#define DEFAULT_ACCOUNT_PASSWORD "gerbera"
+#define ALIVE_INTERVAL_MIN 62 // seconds
+#define DEFAULT_IMPORT_SCRIPT "import.js"
+#define DEFAULT_PLAYLISTS_SCRIPT "playlists.js"
+#define DEFAULT_METAFILE_SCRIPT "metadata.js"
+#define DEFAULT_COMMON_SCRIPT "common.js"
+#define DEFAULT_WEB_DIR "web"
+#define DEFAULT_JS_DIR "js"
+
+#define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE "prepend"
+
+#define DEFAULT_AUDIO_BUFFER_SIZE 1048576
+#define DEFAULT_AUDIO_CHUNK_SIZE 131072
+#define DEFAULT_AUDIO_FILL_SIZE 262144
+
+#define DEFAULT_VIDEO_BUFFER_SIZE 14400000
+#define DEFAULT_VIDEO_CHUNK_SIZE 512000
+#define DEFAULT_VIDEO_FILL_SIZE 120000
+
 class ConfigSetup;
 
 class ConfigDefinition {

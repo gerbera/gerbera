@@ -28,12 +28,11 @@
 #define __METADATA_MATROSKA_H__
 
 #ifdef HAVE_MATROSKA
+#include "metadata_handler.h"
 
 #include <ebml/EbmlStream.h>
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
-
-#include "metadata_handler.h"
 
 // forward declaration
 class MemIOHandler;

@@ -35,10 +35,10 @@
 #include <memory>
 
 #include "common.h"
-#include "content/autoscan.h"
 #include "script.h"
 
 // forward declaration
+enum class AutoscanMediaMode;
 class ContentManager;
 class ScriptingRuntime;
 
@@ -46,7 +46,7 @@ class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap);
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override
     {

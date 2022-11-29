@@ -40,7 +40,8 @@
 #include <tiostream.h>
 
 #include "metadata_handler.h"
-#include "util/string_converter.h"
+
+class StringConverter;
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata
 class TagLibHandler : public MetadataHandler {

@@ -37,6 +37,7 @@
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"
+#include "util/xml_to_json.h"
 
 void Web::AddObject::addContainer(int parentID)
 {

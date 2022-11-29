@@ -34,8 +34,12 @@
 
 #include <sstream>
 
+#include "action_request.h"
 #include "config/config_manager.h"
 #include "database/database.h"
+#include "subscription_request.h"
+#include "upnp_common.h"
+#include "upnp_xml.h"
 #include "util/tools.h"
 
 ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,

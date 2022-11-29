@@ -28,9 +28,14 @@
 #include <sstream>
 
 #include "config/config_definition.h"
+#include "config/config_options.h"
 #include "config/config_setup.h"
+#include "content/autoscan.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
+
+#define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
+#define XML_XMLNS "http://mediatomb.cc/config/"
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {

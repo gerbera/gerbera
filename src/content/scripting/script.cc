@@ -40,6 +40,7 @@
 #include "cds/cds_item.h"
 #include "config/config_definition.h"
 #include "config/config_setup.h"
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
@@ -202,13 +203,13 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 #ifdef ONLINE_SERVICES
-    duk_push_int(ctx, int(OS_None));
+    duk_push_int(ctx, to_underlying(service_type_t::OS_None));
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
 
 #ifdef ATRAILERS
-    duk_push_int(ctx, int(OS_ATrailers));
+    duk_push_int(ctx, to_underlying(service_type_t::OS_ATrailers));
     duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
     duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE);
     duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
@@ -433,19 +434,19 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
         duk_put_global_string(ctx, OBJECT_AUTOSCAN_ID);
 
         auto containerMap = autoScan->getContainerTypes();
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio)).c_str());
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image)).c_str());
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image)).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanDirectory::MediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video)).c_str());
+        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video)).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
 
     } else {
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
+        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video).c_str());
         duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
     }
 

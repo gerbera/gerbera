@@ -42,6 +42,7 @@
 #include "upnp_xml.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
+#include "util/xml_to_json.h"
 
 Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)

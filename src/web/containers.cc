@@ -37,6 +37,7 @@
 #include "database/database.h"
 #include "server.h"
 #include "upnp_xml.h"
+#include "util/xml_to_json.h"
 
 Web::Containers::Containers(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)
@@ -83,12 +84,12 @@ void Web::Containers::process()
 
         std::string autoscanMode = "none";
         if (autoscanType > 0) {
-            autoscanMode = "timed";
+            autoscanMode = AUTOSCAN_TIMED;
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 auto adir = database->getAutoscanDirectory(cont->getID());
-                if (adir && (adir->getScanMode() == AutoscanDirectory::ScanMode::INotify))
-                    autoscanMode = "inotify";
+                if (adir && (adir->getScanMode() == AutoscanScanMode::INotify))
+                    autoscanMode = AUTOSCAN_INOTIFY;
             }
 #endif
         }

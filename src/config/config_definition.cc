@@ -33,7 +33,10 @@
 #include "client_config.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "content/autoscan.h"
+#include "content/autoscan_list.h"
 #include "metadata/metadata_handler.h"
+#include "upnp_common.h"
 
 // device description defaults
 
@@ -830,20 +833,20 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "auto", StringCheckFunction(ConfigBoolSetup::CheckInotifyValue)),
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST,
         "/import/autoscan", "config-import.html#autoscan",
-        AutoscanDirectory::ScanMode::INotify),
+        AutoscanScanMode::INotify),
 #endif
     std::make_shared<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY,
         "directory", "config-import.html#autoscan",
         ""),
     std::make_shared<ConfigAutoscanSetup>(CFG_IMPORT_AUTOSCAN_TIMED_LIST,
         "/import/autoscan", "config-import.html#autoscan",
-        AutoscanDirectory::ScanMode::Timed),
+        AutoscanScanMode::Timed),
     std::make_shared<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION,
         "attribute::location", "config-import.html#autoscan",
         "", false, true, true),
-    std::make_shared<ConfigEnumSetup<AutoscanDirectory::ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE,
+    std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE,
         "attribute::mode", "config-import.html#autoscan",
-        std::map<std::string, AutoscanDirectory::ScanMode>({ { "timed", AutoscanDirectory::ScanMode::Timed }, { "inotify", AutoscanDirectory::ScanMode::INotify } })),
+        std::map<std::string, AutoscanScanMode>({ { AUTOSCAN_TIMED, AutoscanScanMode::Timed }, { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify } })),
     std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL,
         "attribute::interval", "config-import.html#autoscan",
         -1, 0, ConfigIntSetup::CheckMinValue),

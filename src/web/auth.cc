@@ -35,6 +35,7 @@
 #include "config/config_manager.h"
 #include "session_manager.h"
 #include "util/tools.h"
+#include "util/xml_to_json.h"
 
 static constexpr auto loginTimeout = std::chrono::seconds(10);
 

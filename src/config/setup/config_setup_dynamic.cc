@@ -30,6 +30,7 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/dynamic_content.h"
+#include "content/autoscan.h"
 
 /// \brief Creates an array of DynamicContent objects from a XML nodeset.
 /// \param element starting element of the nodeset.

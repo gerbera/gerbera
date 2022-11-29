@@ -31,6 +31,7 @@
 
 #include "cds_resource.h" // API
 
+#include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 #include "util/tools.h"
 #include "util/url_utils.h"

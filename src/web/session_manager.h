@@ -38,6 +38,8 @@
 
 #include "util/timer.h"
 
+static constexpr auto SESSION_TIMEOUT_CHECK_INTERVAL = std::chrono::minutes(5);
+
 // forward declaration
 class Config;
 

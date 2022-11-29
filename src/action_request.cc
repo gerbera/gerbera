@@ -32,6 +32,7 @@
 
 #include "action_request.h" // API
 
+#include "upnp_common.h"
 #include "upnp_xml.h"
 #include "util/grb_net.h"
 #include "util/upnp_quirks.h"
@@ -79,7 +80,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
 #endif
 
     if (ret.status != pugi::xml_parse_status::status_ok)
-        throw_std_runtime_error("Unable to parse ixml");
+        throw_std_runtime_error("Unable to parse ixml: {}", ret.description());
 
     return request;
 }

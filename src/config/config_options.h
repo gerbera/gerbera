@@ -36,10 +36,10 @@
 #include <map>
 #include <vector>
 
-#include "content/autoscan.h"
 #include "transcoding/transcoding.h"
 
 // forward declaration
+class AutoscanDirectory;
 class AutoscanList;
 class ClientConfigList;
 class DirectoryConfigList;

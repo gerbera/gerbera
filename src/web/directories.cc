@@ -34,19 +34,23 @@
 
 #include <array>
 
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+#include "util/xml_to_json.h"
 
 using dirInfo = std::pair<fs::path, bool>;
 
 void Web::Directories::process()
 {
+    static auto RootId = fmt::format("{}", CDS_ID_ROOT);
+
     checkRequest();
 
     std::string parentID = param("parent_id");
-    auto path = fs::path(parentID.empty() || parentID == "0" ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
+    auto path = fs::path(parentID.empty() || parentID == RootId ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
 
     auto root = xmlDoc->document_element();
 

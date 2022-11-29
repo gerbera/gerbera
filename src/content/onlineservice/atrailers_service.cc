@@ -33,6 +33,7 @@
 #define LOG_FAC log_facility_t::online
 #include "atrailers_service.h" // API
 
+#include "atrailers_content_handler.h"
 #include "content/content_manager.h"
 #include "util/tools.h"
 
@@ -55,6 +56,6 @@ std::unique_ptr<CurlContentHandler> ATrailersService::getContentHandler() const
 
 service_type_t ATrailersService::getServiceType() const
 {
-    return OS_ATrailers;
+    return service_type_t::OS_ATrailers;
 }
 #endif // ATRAILERS

@@ -43,6 +43,7 @@
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "iohandler/process_io_handler.h"
+#include "transcoding/transcoding.h"
 #include "util/process_executor.h"
 #include "util/tools.h"
 #include "web/session_manager.h"

@@ -33,7 +33,6 @@
 #define __WEB_PAGES_H__
 
 #include "common.h"
-#include "config/config_setup.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
@@ -41,6 +40,7 @@
 class CdsItemExternalURL;
 class CdsItem;
 class Config;
+class ConfigValue;
 class Database;
 class UpnpXMLBuilder;
 

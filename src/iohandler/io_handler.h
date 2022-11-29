@@ -38,6 +38,8 @@
 
 #include "common.h"
 
+#define CHECK_SOCKET (-666)
+
 class IOHandler {
 public:
     virtual ~IOHandler() = default;

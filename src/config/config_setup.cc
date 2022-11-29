@@ -29,6 +29,7 @@
 #include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
+#include "content/autoscan.h"
 
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {

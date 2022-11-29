@@ -29,10 +29,12 @@
 #include <array>
 #include <utility>
 
+#include "action_request.h"
 #include "cds/cds_item.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "server.h"
+#include "upnp_common.h"
 #include "util/grb_net.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"

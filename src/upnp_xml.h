@@ -40,7 +40,10 @@
 #include "common.h"
 #include "config/config.h"
 #include "context.h"
-#include "util/upnp_quirks.h"
+
+#define CONTENT_MEDIA_HANDLER "media"
+#define CONTENT_ONLINE_HANDLER "online"
+#define CONTENT_UI_HANDLER "interface"
 
 class CdsContainer;
 class CdsItem;

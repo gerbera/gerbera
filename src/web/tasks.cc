@@ -33,6 +33,7 @@
 #include "pages.h" // API
 
 #include "content/content_manager.h"
+#include "util/xml_to_json.h"
 
 void Web::Tasks::process()
 {

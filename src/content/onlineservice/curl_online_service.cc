@@ -29,7 +29,9 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "content/autoscan.h"
 #include "content/content_manager.h"
+#include "content/layout/layout.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

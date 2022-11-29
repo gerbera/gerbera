@@ -47,6 +47,8 @@
 #include "util/upnp_clients.h"
 #include "util/url_utils.h"
 
+#define URL_FILE_EXTENSION "ext"
+
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl, std::string presentationURL)
     : config(context->getConfig())
@@ -441,7 +443,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     // Add Params
     auto&& resParams = res.getParameters();
     if (!resParams.empty()) {
-        url.append(_URL_PARAM_SEPARATOR);
+        url.append(URL_PARAM_SEPARATOR);
         url.append(URLUtils::dictEncodeSimple(resParams));
     }
 

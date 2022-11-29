@@ -29,6 +29,7 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "content/autoscan.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 #include "transcoding/transcoding.h"

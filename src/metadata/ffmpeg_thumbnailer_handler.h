@@ -27,10 +27,10 @@ Gerbera - https://gerbera.io/
 #include <memory>
 
 #include "config/config.h"
-#include "iohandler/mem_io_handler.h"
 #include "metadata_handler.h"
 
 class CdsObject;
+class IOHandler;
 
 class FfmpegThumbnailerHandler : public MetadataHandler {
 public:
