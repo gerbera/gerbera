@@ -178,7 +178,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
     AutoLock lock(mutex);
 
     for (auto&& i : list) {
-        if (i->getScanMode() == AutoscanDirectory::ScanMode::Timed) {
+        if (i->getScanMode() == AutoscanScanMode::Timed) {
             sub->timerNotify(i->getTimerParameter());
         }
     }

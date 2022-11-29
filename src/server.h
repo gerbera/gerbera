@@ -32,17 +32,20 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
-#include "action_request.h"
-#include "context.h"
 #include "request_handler.h"
-#include "subscription_request.h"
-#include "upnp_cds.h"
-#include "upnp_cm.h"
-#include "upnp_mrreg.h"
 
 // forward declaration
-class Timer;
+class ActionRequest;
+class ClientManager;
+class ConnectionManagerService;
+class ContentDirectoryService;
 class ContentManager;
+class Context;
+class MRRegistrarService;
+class RequestHandler;
+class SubscriptionRequest;
+class Timer;
+class UpnpXMLBuilder;
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.

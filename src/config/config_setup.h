@@ -34,13 +34,16 @@
 #include "config.h"
 #include "config_manager.h"
 #include "config_options.h"
-#include "content/autoscan.h"
-#include "content/autoscan_list.h"
 #include "util/enum_iterator.h"
 
-class ConfigOption;
+class AutoscanDirectory;
+class AutoscanList;
+enum class AutoscanScanMode;
 class DirectoryTweak;
 class DynamicContent;
+
+#define YES "yes"
+#define NO "no"
 
 #define ITEM_PATH_ROOT (-1)
 #define ITEM_PATH_NEW (-2)
@@ -657,7 +660,7 @@ public:
 
 class ConfigAutoscanSetup : public ConfigSetup {
 protected:
-    AutoscanDirectory::ScanMode scanMode;
+    AutoscanScanMode scanMode;
     bool hiddenFiles = false;
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -668,7 +671,7 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, AutoscanDirectory& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, AutoscanDirectory::ScanMode scanmode)
+    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, AutoscanScanMode scanmode)
         : ConfigSetup(option, xpath, help)
         , scanMode(scanmode)
     {
@@ -680,7 +683,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getUniquePath() const override { return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode)); }
+    std::string getUniquePath() const override;
 
     std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
 

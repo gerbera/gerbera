@@ -38,9 +38,10 @@
 #include <utility>
 #include <vector>
 
+#include <upnp.h>
+
 #include "common.h"
 #include "context.h"
-#include "iohandler/io_handler.h"
 
 // forward declaration
 class CdsObject;
@@ -48,6 +49,7 @@ class Config;
 class Context;
 class ContentManager;
 class Database;
+class IOHandler;
 class Mime;
 class Server;
 

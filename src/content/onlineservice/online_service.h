@@ -50,7 +50,7 @@ class Layout;
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 // make sure to add the database prefixes when adding new services
-enum service_type_t {
+enum class service_type_t {
     OS_None = 0,
     OS_YouTube = 1,
 
@@ -144,7 +144,7 @@ public:
     std::shared_ptr<OnlineService> getService(service_type_t service) const;
 
 protected:
-    std::vector<std::shared_ptr<OnlineService>> service_list { OS_Max };
+    std::vector<std::shared_ptr<OnlineService>> service_list {};
 };
 
 #endif //__ONLINE_SERVICE_H__

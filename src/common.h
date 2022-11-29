@@ -32,42 +32,29 @@
 #define __COMMON_H__
 
 #include "exceptions.h"
-#include "upnp_common.h"
 #include "util/logger.h"
 
-#define CONFIG_XML_VERSION 2
-
 // fixed CdsObjectIDs
-#define CDS_ID_ROOT 0
-#define CDS_ID_FS_ROOT 1
+#define CDS_ID_ROOT (0)
+#define CDS_ID_FS_ROOT (1)
+#define INVALID_OBJECT_ID (-333)
+#define INVALID_OBJECT_ID_2 (-666)
 static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
-
-#define YES "yes"
-#define NO "no"
 
 // URL FORMATTING CONSTANTS
 #define URL_OBJECT_ID "object_id"
 #define URL_REQUEST_TYPE "req_type"
 #define URL_RESOURCE_ID "res_id"
-#define URL_FILE_EXTENSION "ext"
-#define URL_PARAM_SEPARATOR '/'
-#define _URL_PARAM_SEPARATOR "/"
+constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 #define URL_UI_PARAM_SEPARATOR '?'
 #define SERVER_VIRTUAL_DIR "content"
-#define CONTENT_MEDIA_HANDLER "media"
-#define CONTENT_ONLINE_HANDLER "online"
-#define CONTENT_UI_HANDLER "interface"
-#define DEVICE_DESCRIPTION_PATH "description.xml"
 
 // SEPARATOR
 #define FS_ROOT_DIRECTORY "/"
-#define DIR_SEPARATOR '/'
+constexpr auto DIR_SEPARATOR = char('/');
 #define VIRTUAL_CONTAINER_SEPARATOR '/'
 #define VIRTUAL_CONTAINER_ESCAPE '\\'
 
-// MIME TYPES FOR WEB UI
-#define MIMETYPE_TEXT "text/plain"
-#define MIMETYPE_JSON "application/json" // RFC 4627
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT "application/octet-stream"
 
@@ -77,37 +64,11 @@ constexpr auto PROTOCOL = std::string_view("http-get");
 // device description defaults
 #define DESC_MANUFACTURER_URL "http://gerbera.io/"
 
-// default values
 #define DEFAULT_INTERNAL_CHARSET "UTF-8"
-#define DEFAULT_FILESYSTEM_CHARSET "UTF-8"
-#define DEFAULT_FALLBACK_CHARSET "US-ASCII"
-
 #define DEFAULT_CONFIG_HOME ".config/gerbera"
-#define DEFAULT_CONFIG_NAME "config.xml"
-#define DEFAULT_ACCOUNT_USER "gerbera"
-#define DEFAULT_ACCOUNT_PASSWORD "gerbera"
-#define ALIVE_INTERVAL_MIN 62 // seconds
-#define DEFAULT_IMPORT_SCRIPT "import.js"
-#define DEFAULT_PLAYLISTS_SCRIPT "playlists.js"
-#define DEFAULT_METAFILE_SCRIPT "metadata.js"
-#define DEFAULT_COMMON_SCRIPT "common.js"
-#define DEFAULT_WEB_DIR "web"
-#define DEFAULT_JS_DIR "js"
+
 static constexpr auto CLIENT_GROUP_TAG = "group";
 #define DEFAULT_CLIENT_GROUP "default"
-static constexpr auto SESSION_TIMEOUT_CHECK_INTERVAL = std::chrono::minutes(5);
-
-#ifdef ONLINE_SERVICES
-static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
-#endif
-
-#define DEFAULT_AUDIO_BUFFER_SIZE 1048576
-#define DEFAULT_AUDIO_CHUNK_SIZE 131072
-#define DEFAULT_AUDIO_FILL_SIZE 262144
-
-#define DEFAULT_VIDEO_BUFFER_SIZE 14400000
-#define DEFAULT_VIDEO_CHUNK_SIZE 512000
-#define DEFAULT_VIDEO_FILL_SIZE 120000
 
 #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
 #define URL_PARAM_TRANSCODE "tr"
@@ -119,14 +80,6 @@ static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 #define LAYOUT_TYPE_BUILTIN "builtin"
 #define LAYOUT_TYPE_DISABLED "disabled"
 
-#define INVALID_OBJECT_ID (-333)
-#define INVALID_OBJECT_ID_2 (-666)
-#define CHECK_SOCKET (-666)
-
-#define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
-#define XML_XMLNS "http://mediatomb.cc/config/"
-
-#define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE "prepend"
 #define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
 #define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
 #define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"

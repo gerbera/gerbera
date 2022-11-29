@@ -35,27 +35,32 @@
 
 #include <mutex>
 
+#include "upnp_common.h"
 #include "util/timer.h"
 
 // forward declarations
 class CdsContainer;
 class Database;
 
+#define AUTOSCAN_INOTIFY "inotify"
+#define AUTOSCAN_TIMED "timed"
+
+///\brief Scan mode - type of scan (timed, inotify, etc.)
+enum class AutoscanScanMode {
+    Timed,
+    INotify
+};
+
+///\brief Media mode - media handling mode (timed, inotify, etc.)
+enum class AutoscanMediaMode {
+    Audio,
+    Image,
+    Video
+};
+
 /// \brief Provides information about one autoscan directory.
 class AutoscanDirectory {
 public:
-    ///\brief Scan mode - type of scan (timed, inotify, etc.)
-    enum class ScanMode {
-        Timed,
-        INotify
-    };
-    ///\brief Media mode - media handling mode (timed, inotify, etc.)
-    enum class MediaMode {
-        Audio,
-        Image,
-        Video
-    };
-
     enum class MediaType {
         Any = -1,
 
@@ -79,7 +84,7 @@ public:
     static std::string_view mapMediaType(MediaType mt);
     static std::string mapMediaType(int mt);
     static int remapMediaType(const std::string& flag);
-    static const std::map<MediaMode, std::string> ContainerTypesDefaults;
+    static const std::map<AutoscanMediaMode, std::string> ContainerTypesDefaults;
 
     AutoscanDirectory() = default;
 
@@ -90,8 +95,8 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, int mediaType = -1,
-        const std::map<MediaMode, std::string>& containerMap = ContainerTypesDefaults);
+    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, int mediaType = -1,
+        const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
@@ -100,8 +105,8 @@ public:
     void setLocation(const fs::path& location);
     const fs::path& getLocation() const { return location; }
 
-    void setScanMode(ScanMode mode) { this->mode = mode; }
-    ScanMode getScanMode() const { return mode; }
+    void setScanMode(AutoscanScanMode mode) { this->mode = mode; }
+    AutoscanScanMode getScanMode() const { return mode; }
 
     void setRecursive(bool recursive) { this->recursive = recursive; }
     bool getRecursive() const { return recursive; }
@@ -175,18 +180,18 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
     /// \brief Get the container types dictionary
-    const std::map<MediaMode, std::string>& getContainerTypes()
+    const std::map<AutoscanMediaMode, std::string>& getContainerTypes()
     {
         return containerMap;
     }
-    void setContainerType(MediaMode entry, const std::string& value)
+    void setContainerType(AutoscanMediaMode entry, const std::string& value)
     {
         containerMap[entry] = value;
     }
 
     /* helpers for autoscan stuff */
-    static const char* mapScanmode(ScanMode scanmode);
-    static AutoscanDirectory::ScanMode remapScanmode(const std::string& scanmode);
+    static const char* mapScanmode(AutoscanScanMode scanmode);
+    static AutoscanScanMode remapScanmode(const std::string& scanmode);
 
     /* Do do need these? */
     void invalidate()
@@ -200,7 +205,7 @@ public:
 
 protected:
     fs::path location;
-    ScanMode mode {};
+    AutoscanScanMode mode {};
     bool isOrig {};
     bool recursive {};
     bool hidden {};
@@ -217,7 +222,7 @@ protected:
     unsigned int activeScanCount {};
     std::map<std::string, bool> scanContent { { UPNP_CLASS_AUDIO_ITEM, true }, { UPNP_CLASS_IMAGE_ITEM, true }, { UPNP_CLASS_VIDEO_ITEM, true } };
     int mediaType { -1 };
-    std::map<MediaMode, std::string> containerMap;
+    std::map<AutoscanMediaMode, std::string> containerMap;
 
     constexpr const static int INVALID_SCAN_ID = -1;
 };

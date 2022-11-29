@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
 #include "cds/cds_item.h"
+#include "iohandler/mem_io_handler.h"
 #include "resolution.h"
 #include "util/tools.h"
 

@@ -33,6 +33,7 @@
 #include "upnp_xml.h"
 #include "util/grb_net.h"
 #include "util/upnp_clients.h"
+#include "util/xml_to_json.h"
 
 #include <fmt/chrono.h>
 

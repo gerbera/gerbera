@@ -42,10 +42,10 @@
 #include <array>
 #include <optional>
 
-#include "iohandler/io_handler.h"
 #include "metadata_handler.h"
 
 // forward declaration
+class IOHandler;
 struct AVFormatContext;
 
 /// \brief This class is responsible for reading id3 tags metadata

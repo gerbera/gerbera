@@ -33,6 +33,7 @@
 #include "autoscan.h" // API
 
 #include "cds/cds_container.h"
+#include "config/directory_tweak.h"
 #include "content_manager.h"
 #include "database/database.h"
 #include "util/enum_iterator.h"
@@ -40,13 +41,13 @@
 
 #include <numeric>
 
-const std::map<AutoscanDirectory::MediaMode, std::string> AutoscanDirectory::ContainerTypesDefaults = {
-    { AutoscanDirectory::MediaMode::Audio, UPNP_CLASS_MUSIC_ALBUM },
-    { AutoscanDirectory::MediaMode::Image, UPNP_CLASS_PHOTO_ALBUM },
-    { AutoscanDirectory::MediaMode::Video, UPNP_CLASS_CONTAINER },
+const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypesDefaults = {
+    { AutoscanMediaMode::Audio, UPNP_CLASS_MUSIC_ALBUM },
+    { AutoscanMediaMode::Image, UPNP_CLASS_PHOTO_ALBUM },
+    { AutoscanMediaMode::Video, UPNP_CLASS_CONTAINER },
 };
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, ScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType, const std::map<MediaMode, std::string>& containerMap)
+AutoscanDirectory::AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType, const std::map<AutoscanMediaMode, std::string>& containerMap)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
@@ -242,23 +243,23 @@ bool AutoscanDirectory::hasContent(const std::string& upnpClass) const
     return result;
 }
 
-const char* AutoscanDirectory::mapScanmode(ScanMode scanmode)
+const char* AutoscanDirectory::mapScanmode(AutoscanScanMode scanmode)
 {
     switch (scanmode) {
-    case ScanMode::Timed:
-        return "timed";
-    case ScanMode::INotify:
-        return "inotify";
+    case AutoscanScanMode::Timed:
+        return AUTOSCAN_TIMED;
+    case AutoscanScanMode::INotify:
+        return AUTOSCAN_INOTIFY;
     }
     throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
 }
 
-AutoscanDirectory::ScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
+AutoscanScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
 {
-    if (scanmode == "timed")
-        return ScanMode::Timed;
-    if (scanmode == "inotify")
-        return ScanMode::INotify;
+    if (scanmode == AUTOSCAN_TIMED)
+        return AutoscanScanMode::Timed;
+    if (scanmode == AUTOSCAN_INOTIFY)
+        return AutoscanScanMode::INotify;
 
     throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode);
 }

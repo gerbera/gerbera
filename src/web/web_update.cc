@@ -34,6 +34,7 @@
 
 #include "content/content_manager.h"
 #include "database/database.h"
+#include "util/xml_to_json.h"
 
 void Web::VoidType::process()
 {

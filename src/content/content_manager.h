@@ -37,46 +37,40 @@
 #include <unordered_set>
 #include <vector>
 
-#include "autoscan.h"
 #include "common.h"
+#include "config/directory_tweak.h"
 #include "context.h"
+#include "util/executor.h"
 #include "util/generic_task.h"
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
+// forward declarations
 #ifdef HAVE_JS
-// this is somewhat not nice, the playlist header needs the cm header and
-// vice versa
 class PlaylistParserScript;
-#include "scripting/playlist_parser_script.h"
-#else
-class ScriptingRuntime;
+class MetafileParserScript;
 #endif // HAVE_JS
 
-#include "layout/layout.h"
-
-#include "autoscan_list.h"
 #ifdef HAVE_INOTIFY
-#include "autoscan_inotify.h"
-#endif // HAVE_INOTIFY
-
-#include "config/directory_tweak.h"
-#include "transcoding/transcoding.h"
+class AutoscanInotify;
+#endif
 
 #ifdef ONLINE_SERVICES
-#include "onlineservice/online_service.h"
+class OnlineService;
+class OnlineServiceList;
+enum class service_type_t;
 #endif // ONLINE_SERVICES
 
-#include "util/executor.h"
-
-// forward declarations
 class AutoScanSetting;
+enum class AutoscanScanMode;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
 class CdsResource;
 class ContentManager;
+class Layout;
 class LastFm;
+class ScriptingRuntime;
 class Server;
 class TaskProcessor;
 
@@ -260,7 +254,7 @@ public:
     void updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates = true);
 
     /// \brief Gets an AutocsanDirectrory from the watch list.
-    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, AutoscanDirectory::ScanMode scanMode) const;
+    std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, AutoscanScanMode scanMode) const;
 
     /// \brief Gets an AutoscanDirectory (by objectID) from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) const;

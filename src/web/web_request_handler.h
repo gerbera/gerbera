@@ -38,10 +38,10 @@
 #include "config/config_manager.h"
 #include "context.h"
 #include "request_handler.h"
-#include "session_manager.h"
 #include "util/generic_task.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
+
+class Xml2Json;
 
 namespace Web {
 
@@ -53,6 +53,7 @@ class LoginException : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+class Session;
 class SessionManager;
 
 static constexpr auto SID = "GerberaSID";

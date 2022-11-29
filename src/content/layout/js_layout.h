@@ -32,10 +32,13 @@
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
 
+#include <map>
 #include <memory>
 
-#include "content/scripting/import_script.h"
 #include "layout.h"
+
+class ImportScript;
+class ScriptingRuntime;
 
 class JSLayout : public Layout {
 protected:
@@ -46,7 +49,7 @@ public:
     JSLayout(const std::shared_ptr<ContentManager>& content,
         const std::shared_ptr<ScriptingRuntime>& runtime);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap) override;
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 };
 
 #endif // __JS_LAYOUT_H__

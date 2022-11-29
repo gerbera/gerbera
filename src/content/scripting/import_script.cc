@@ -46,7 +46,7 @@ ImportScript::ImportScript(const std::shared_ptr<ContentManager>& content,
     load(scriptPath);
 }
 
-void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
+void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     processed = obj;
     try {

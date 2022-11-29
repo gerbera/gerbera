@@ -44,7 +44,7 @@ namespace URLUtils {
 /// path = "content/media"
 /// parameters = "object_id=12345&transcode=wav"
 std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
-std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = _URL_PARAM_SEPARATOR);
+std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = URL_PARAM_SEPARATOR);
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
 
 /// \brief Converts a string to a URL (meaning: %20 instead of space and so on)

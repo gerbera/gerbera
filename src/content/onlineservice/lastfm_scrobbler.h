@@ -38,9 +38,10 @@
 #include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
 
-#include "cds_objects.h"
-#include "config/config_manager.h"
 #include "context.h"
+
+class Config;
+class CdsItem;
 
 class LastFm {
 public:

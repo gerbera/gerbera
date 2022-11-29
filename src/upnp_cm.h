@@ -34,11 +34,15 @@
 
 #include <memory>
 
-#include "action_request.h"
+#include <upnp.h>
+
 #include "common.h"
 #include "context.h"
-#include "subscription_request.h"
-#include "upnp_xml.h"
+
+class ActionRequest;
+class CdsObject;
+class SubscriptionRequest;
+class UpnpXMLBuilder;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///

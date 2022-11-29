@@ -42,7 +42,7 @@ JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
 {
 }
 
-void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanDirectory::MediaMode, std::string>& containerMap)
+void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return;

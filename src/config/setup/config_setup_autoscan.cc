@@ -30,10 +30,16 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "content/autoscan.h"
+#include "content/autoscan_list.h"
 
 #ifdef HAVE_INOTIFY
 #include "util/mt_inotify.h"
 #endif
+
+std::string ConfigAutoscanSetup::getUniquePath() const
+{
+    return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode));
+}
 
 std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
 {
@@ -67,14 +73,14 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             continue;
         }
 
-        AutoscanDirectory::ScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AutoscanDirectory::ScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
+        AutoscanScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AutoscanScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
 
         if (mode != scanMode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
         }
 
         unsigned int interval = 0;
-        if (mode == AutoscanDirectory::ScanMode::Timed) {
+        if (mode == AutoscanScanMode::Timed) {
             interval = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }
 
@@ -88,9 +94,9 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
         try {
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
-            containerMap[AutoscanDirectory::MediaMode::Audio] = ctAudio;
-            containerMap[AutoscanDirectory::MediaMode::Image] = ctImage;
-            containerMap[AutoscanDirectory::MediaMode::Video] = ctVideo;
+            containerMap[AutoscanMediaMode::Audio] = ctAudio;
+            containerMap[AutoscanMediaMode::Image] = ctImage;
+            containerMap[AutoscanMediaMode::Video] = ctVideo;
             result.emplace_back(location, mode, recursive, true, interval, hidden, mt, containerMap);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
@@ -155,27 +161,27 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
     index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
     if (optItem == index) {
         if (entry.getOrig())
-            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
-        entry.setContainerType(AutoscanDirectory::MediaMode::Audio, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanMediaMode::Audio));
+        entry.setContainerType(AutoscanMediaMode::Audio, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanMediaMode::Audio));
         return true;
     }
 
     index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE);
     if (optItem == index) {
         if (entry.getOrig())
-            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
-        entry.setContainerType(AutoscanDirectory::MediaMode::Image, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanMediaMode::Image));
+        entry.setContainerType(AutoscanMediaMode::Image, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanMediaMode::Image));
         return true;
     }
 
     index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO);
     if (optItem == index) {
         if (entry.getOrig())
-            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
-        entry.setContainerType(AutoscanDirectory::MediaMode::Video, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
+            config->setOrigValue(index, entry.getContainerTypes().at(AutoscanMediaMode::Video));
+        entry.setContainerType(AutoscanMediaMode::Video, optValue);
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i].getContainerTypes().at(AutoscanMediaMode::Video));
         return true;
     }
     return false;

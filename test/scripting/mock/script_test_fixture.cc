@@ -57,11 +57,11 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
     const std::string& location, int onlineService)
 {
-    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Audio).c_str());
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio).c_str());
     duk_put_global_string(ctx, "grb_container_type_audio");
-    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Image).c_str());
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image).c_str());
     duk_put_global_string(ctx, "grb_container_type_image");
-    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanDirectory::MediaMode::Video).c_str());
+    duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video).c_str());
     duk_put_global_string(ctx, "grb_container_type_video");
 
     const std::string objectName = "orig";

@@ -36,13 +36,15 @@
 #include <memory>
 
 #include "common.h"
-#include "metadata/metadata_handler.h"
 #include "util/enum_iterator.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)
 #define RESOURCE_OPTION_URL "url"
 #define RESOURCE_OPTION_FOURCC "4cc"
+
+enum class ContentHandler;
+class MetadataHandler;
 
 class CdsResource {
 public:

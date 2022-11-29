@@ -35,6 +35,7 @@
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "util/upnp_clients.h"
+#include "util/xml_to_json.h"
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content)
     : WebRequestHandler(content)

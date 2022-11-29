@@ -44,22 +44,44 @@
 #include <sstream>
 #include <thread>
 
+#include "action_request.h"
 #include "config/config_manager.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "file_request_handler.h"
+#include "iohandler/io_handler.h"
+#include "subscription_request.h"
+#include "upnp_cds.h"
+#include "upnp_cm.h"
+#include "upnp_common.h"
+#include "upnp_mrreg.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/url_utils.h"
+#include "util/xml_to_json.h"
 #include "web/pages.h"
 #include "web/session_manager.h"
+
+#ifdef HAVE_JS
+#include "content/scripting/playlist_parser_script.h"
+#endif
 
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
 #endif
+
+#ifdef HAVE_INOTIFY
+#include "content/autoscan_inotify.h"
+#endif
+
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service.h"
+#endif
+
+constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view("description.xml");
 
 Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))

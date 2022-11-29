@@ -24,6 +24,7 @@ Gerbera - https://gerbera.io/
 #include <pugixml.hpp>
 
 #include "cds/cds_objects.h"
+#include "content/autoscan.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "sqlite_config_fake.h"
 #include "upnp_xml.h"

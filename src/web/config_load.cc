@@ -40,6 +40,7 @@
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "util/upnp_clients.h"
+#include "util/xml_to_json.h"
 
 Web::ConfigLoad::ConfigLoad(const std::shared_ptr<ContentManager>& content)
     : WebRequestHandler(content)
@@ -561,15 +562,15 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
-            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Audio));
+            setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Audio));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE);
-            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Image));
+            setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Image));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO);
-            setValue(item, adir->getContainerTypes().at(AutoscanDirectory::MediaMode::Video));
+            setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Video));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT);

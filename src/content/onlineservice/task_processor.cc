@@ -35,6 +35,7 @@
 
 #include "content/content_manager.h"
 #include "content/layout/layout.h"
+#include "online_service.h"
 
 TaskProcessor::TaskProcessor(std::shared_ptr<Config> config)
     : config(std::move(config))

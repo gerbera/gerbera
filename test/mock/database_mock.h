@@ -63,8 +63,8 @@ public:
     std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) override { return {}; }
     std::vector<std::map<std::string, std::string>> getClientGroupStats() override { return {}; }
 
-    std::shared_ptr<AutoscanList> getAutoscanList(AutoscanDirectory::ScanMode scanode) override { return {}; }
-    void updateAutoscanList(AutoscanDirectory::ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }
+    std::shared_ptr<AutoscanList> getAutoscanList(AutoscanScanMode scanode) override { return {}; }
+    void updateAutoscanList(AutoscanScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override { }
 
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) override { return {}; }
     void addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override { }

@@ -35,10 +35,13 @@
 #ifndef __ATRAILERS_SERVICE_H__
 #define __ATRAILERS_SERVICE_H__
 
-#include "atrailers_content_handler.h"
+#include "curl_online_service.h"
+
+static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 
 // forward declaration
 class ContentManager;
+class CurlContentHandler;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.

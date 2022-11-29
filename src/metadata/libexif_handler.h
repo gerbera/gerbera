@@ -33,12 +33,11 @@
 #define __METADATA_LIBEXIF_H__
 
 #ifdef HAVE_LIBEXIF
+#include "metadata_handler.h"
 
 #include <libexif/exif-content.h>
 #include <libexif/exif-data.h>
 #include <vector>
-
-#include "metadata_handler.h"
 
 // forward declaration
 class CdsItem;

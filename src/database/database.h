@@ -36,11 +36,12 @@
 #include <unordered_set>
 #include <vector>
 
-#include "content/autoscan.h"
 #include "util/grb_fs.h"
 
 // forward declaration
 class AutoscanList;
+class AutoscanDirectory;
+enum class AutoscanScanMode;
 class CdsContainer;
 class CdsObject;
 struct ClientCacheEntry;
@@ -305,8 +306,8 @@ public:
     virtual void storeInternalSetting(const std::string& key, const std::string& value) = 0;
 
     /* autoscan methods */
-    virtual std::shared_ptr<AutoscanList> getAutoscanList(AutoscanDirectory::ScanMode scanode) = 0;
-    virtual void updateAutoscanList(AutoscanDirectory::ScanMode scanmode, const std::shared_ptr<AutoscanList>& list) = 0;
+    virtual std::shared_ptr<AutoscanList> getAutoscanList(AutoscanScanMode scanode) = 0;
+    virtual void updateAutoscanList(AutoscanScanMode scanmode, const std::shared_ptr<AutoscanList>& list) = 0;
 
     /* config methods */
     virtual std::vector<ConfigValue> getConfigValues() = 0;

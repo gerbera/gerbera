@@ -33,6 +33,7 @@
 #define LOG_FAC log_facility_t::online
 #include "lastfm_scrobbler.h" // API
 
+#include "cds_item.h"
 #include "config/config_manager.h"
 #include "metadata/metadata_handler.h"
 #include "util/tools.h"

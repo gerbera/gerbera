@@ -34,6 +34,7 @@
 
 #include "config/config_manager.h"
 #include "content/content_manager.h"
+#include "util/xml_to_json.h"
 
 void Web::Action::process()
 {

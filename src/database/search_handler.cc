@@ -29,6 +29,7 @@
 
 #include "database/sql_database.h"
 #include "metadata/metadata_handler.h"
+#include "util/grb_time.h"
 #include "util/tools.h"
 
 static const std::unordered_map<std::string_view, TokenType> tokenTypes {
