@@ -50,7 +50,7 @@ public:
     explicit ATrailersService(const std::shared_ptr<ContentManager>& content);
 
     /// \brief Get the type of the service (i.e. Weborama, Shoutcast, etc.)
-    service_type_t getServiceType() const override;
+    OnlineServiceType getServiceType() const override;
 
 protected:
     std::unique_ptr<CurlContentHandler> getContentHandler() const override;

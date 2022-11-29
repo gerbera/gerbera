@@ -34,6 +34,7 @@
 #include "atrailers_service.h" // API
 
 #include "atrailers_content_handler.h"
+#include "config/directory_tweak.h"
 #include "content/content_manager.h"
 #include "util/tools.h"
 
@@ -54,8 +55,8 @@ std::unique_ptr<CurlContentHandler> ATrailersService::getContentHandler() const
     return std::make_unique<ATrailersContentHandler>(content->getContext());
 }
 
-service_type_t ATrailersService::getServiceType() const
+OnlineServiceType ATrailersService::getServiceType() const
 {
-    return service_type_t::OS_ATrailers;
+    return OnlineServiceType::OS_ATrailers;
 }
 #endif // ATRAILERS

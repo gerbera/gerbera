@@ -507,15 +507,15 @@ void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, cons
 
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        auto service = service_type_t(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID)));
+        auto service = OnlineServiceType(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID)));
 
         switch (service) {
 #ifdef ATRAILERS
-        case service_type_t::OS_ATrailers:
+        case OnlineServiceType::OS_ATrailers:
             addATrailers(clone);
             break;
 #endif
-        case service_type_t::OS_Max:
+        case OnlineServiceType::OS_Max:
         default:
             log_warning("No handler for service type");
             break;

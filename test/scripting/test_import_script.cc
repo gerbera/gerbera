@@ -252,7 +252,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "video/mpeg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.mp4";
-    auto onlineService = to_underlying(service_type_t::OS_None);
+    auto onlineService = to_underlying(OnlineServiceType::OS_None);
     int theora = 0;
     std::map<std::string, std::string> aux;
     std::vector<std::pair<std::string, std::string>> meta;
@@ -289,7 +289,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     std::string genre = "Genre";
     std::string id = "2";
     std::string location = "/home/gerbera/video.mp4";
-    auto onlineService = to_underlying(service_type_t::OS_ATrailers);
+    auto onlineService = to_underlying(OnlineServiceType::OS_ATrailers);
     int theora = 0;
     std::map<std::string, std::string> res;
 
@@ -338,7 +338,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     std::string date = "2018-01-01";
     std::string id = "2";
     std::string location = "/home/gerbera/image.jpg";
-    auto onlineService = to_underlying(service_type_t::OS_ATrailers);
+    auto onlineService = to_underlying(OnlineServiceType::OS_ATrailers);
     int theora = 0;
 
     std::vector<std::pair<std::string, std::string>> meta {
@@ -384,7 +384,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "application/ogg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.ogg";
-    auto onlineService = to_underlying(service_type_t::OS_None);
+    auto onlineService = to_underlying(OnlineServiceType::OS_None);
     int theora = 1;
     std::map<std::string, std::string> aux;
     std::vector<std::pair<std::string, std::string>> meta;

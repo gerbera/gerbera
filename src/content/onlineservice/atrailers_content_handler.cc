@@ -99,7 +99,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setMimeType(trailer_mimetype);
     resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(trailer_mimetype));
 
-    item->setAuxData(ONLINE_SERVICE_AUX_ID, fmt::to_string(to_underlying(service_type_t::OS_ATrailers)));
+    item->setAuxData(ONLINE_SERVICE_AUX_ID, fmt::to_string(to_underlying(OnlineServiceType::OS_ATrailers)));
 
     temp = trailer.attribute("id").as_string();
     if (temp.empty()) {
@@ -109,7 +109,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         return nullptr;
     }
 
-    temp = fmt::format("{}{}", OnlineService::getDatabasePrefix(service_type_t::OS_ATrailers), temp);
+    temp = fmt::format("{}{}", OnlineService::getDatabasePrefix(OnlineServiceType::OS_ATrailers), temp);
     item->setServiceID(temp);
 
     auto preview = trailer.child("preview");
