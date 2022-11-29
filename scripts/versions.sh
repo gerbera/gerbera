@@ -43,7 +43,7 @@ else
     PUGIXML="1.13"
     PUPNP="1.14.14"
     SPDLOG="1.11.0"
-    WAVPACK="5.5.0"
+    WAVPACK="5.6.0"
     TAGLIB="1.13"
 
 fi
