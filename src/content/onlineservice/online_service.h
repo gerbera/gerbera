@@ -50,7 +50,7 @@ class Layout;
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 // make sure to add the database prefixes when adding new services
-enum class service_type_t {
+enum class OnlineServiceType {
     OS_None = 0,
     OS_YouTube = 1,
 
@@ -79,7 +79,7 @@ public:
     virtual bool refreshServiceData(const std::shared_ptr<Layout>& layout) = 0;
 
     /// \brief Returns the service type
-    virtual service_type_t getServiceType() const = 0;
+    virtual OnlineServiceType getServiceType() const = 0;
 
     /// \brief Returns the service name
     virtual std::string getServiceName() const = 0;
@@ -88,7 +88,7 @@ public:
     char getDatabasePrefix() const;
 
     /// \brief Get the database prefix for a given service type
-    static char getDatabasePrefix(service_type_t service);
+    static char getDatabasePrefix(OnlineServiceType service);
 
     /// \brief Increments the task count.
     ///
@@ -141,7 +141,7 @@ public:
     void registerService(const std::shared_ptr<OnlineService>& service);
 
     /// \brief Retrieves a service given by the service ID from the list
-    std::shared_ptr<OnlineService> getService(service_type_t service) const;
+    std::shared_ptr<OnlineService> getService(OnlineServiceType service) const;
 
 protected:
     std::vector<std::shared_ptr<OnlineService>> service_list {};

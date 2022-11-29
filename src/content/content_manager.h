@@ -58,7 +58,7 @@ class AutoscanInotify;
 #ifdef ONLINE_SERVICES
 class OnlineService;
 class OnlineServiceList;
-enum class service_type_t;
+enum class OnlineServiceType;
 #endif // ONLINE_SERVICES
 
 class AutoScanSetting;
@@ -213,7 +213,7 @@ public:
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
     /// online service (like AppleTrailers etc.)
-    void fetchOnlineContent(service_type_t serviceType, bool lowPriority = true,
+    void fetchOnlineContent(OnlineServiceType serviceType, bool lowPriority = true,
         bool cancellable = true,
         bool unscheduledRefresh = false);
 

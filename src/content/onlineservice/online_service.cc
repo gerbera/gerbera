@@ -47,16 +47,16 @@ void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& se
     if (!service)
         return;
 
-    if (service->getServiceType() >= service_type_t::OS_Max) {
+    if (service->getServiceType() >= OnlineServiceType::OS_Max) {
         throw_std_runtime_error("Requested service with illegal type");
     }
 
     service_list.at(to_underlying(service->getServiceType())) = service;
 }
 
-std::shared_ptr<OnlineService> OnlineServiceList::getService(service_type_t service) const
+std::shared_ptr<OnlineService> OnlineServiceList::getService(OnlineServiceType service) const
 {
-    if (service > service_type_t::OS_Max)
+    if (service > OnlineServiceType::OS_Max)
         return nullptr;
 
     return service_list.at(to_underlying(service));
@@ -69,9 +69,9 @@ OnlineService::OnlineService(const std::shared_ptr<ContentManager>& content)
 {
 }
 
-char OnlineService::getDatabasePrefix(service_type_t service)
+char OnlineService::getDatabasePrefix(OnlineServiceType service)
 {
-    if (service >= service_type_t::OS_Max)
+    if (service >= OnlineServiceType::OS_Max)
         throw_std_runtime_error("Illegal service requested");
 
     return servicePrefixes.at(to_underlying(service));

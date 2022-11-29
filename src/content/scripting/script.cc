@@ -203,13 +203,13 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 #ifdef ONLINE_SERVICES
-    duk_push_int(ctx, to_underlying(service_type_t::OS_None));
+    duk_push_int(ctx, to_underlying(OnlineServiceType::OS_None));
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
 
 #ifdef ATRAILERS
-    duk_push_int(ctx, to_underlying(service_type_t::OS_ATrailers));
+    duk_push_int(ctx, to_underlying(OnlineServiceType::OS_ATrailers));
     duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
     duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE);
     duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
@@ -778,7 +778,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        auto service = service_type_t(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
+        auto service = OnlineServiceType(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
         setIntProperty("onlineservice", int(service));
     } else
 #endif

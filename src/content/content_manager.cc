@@ -267,7 +267,7 @@ void ContentManager::run()
             if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
                 i = CFG_DEFAULT_UPDATE_AT_START;
 
-            auto atParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, to_underlying(service_type_t::OS_ATrailers));
+            auto atParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, to_underlying(OnlineServiceType::OS_ATrailers));
             at->setTimerParameter(std::move(atParam));
             online_services->registerService(at);
             if (i > std::chrono::seconds::zero()) {
@@ -361,7 +361,7 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
     }
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
-        fetchOnlineContent(service_type_t(parameter->getID()));
+        fetchOnlineContent(OnlineServiceType(parameter->getID()));
     }
 #endif // ONLINE_SERVICES
 }
@@ -1611,7 +1611,7 @@ int ContentManager::addFileInternal(
 }
 
 #ifdef ONLINE_SERVICES
-void ContentManager::fetchOnlineContent(service_type_t serviceType, bool lowPriority, bool cancellable, bool unscheduledRefresh)
+void ContentManager::fetchOnlineContent(OnlineServiceType serviceType, bool lowPriority, bool cancellable, bool unscheduledRefresh)
 {
     auto service = online_services->getService(serviceType);
     if (!service) {
