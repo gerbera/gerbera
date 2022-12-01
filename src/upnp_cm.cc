@@ -32,8 +32,6 @@
 
 #include "upnp_cm.h" // API
 
-#include <sstream>
-
 #include "action_request.h"
 #include "config/config_manager.h"
 #include "database/database.h"
@@ -121,9 +119,7 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
     property.append_child("SinkProtocolInfo").append_child(pugi::node_pcdata).set_value("");
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(csv.c_str());
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
@@ -150,9 +146,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     auto property = propset->document_element().first_child();
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
