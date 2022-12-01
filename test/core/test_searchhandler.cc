@@ -505,7 +505,7 @@ TEST_F(ParserTest, SortCriteriaError)
 
 TEST_F(ParserTest, SortTrackNumber)
 {
-    EXPECT_EQ(OTN, "unknown");
+    EXPECT_TRUE(OTN == "unknown" || OTN == "upnp:originalTrackNumber");
     EXPECT_EQ(otn, "upnp:originalTrackNumber");
     EXPECT_EQ(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), "upnp:originalTrackNumber");
     EXPECT_TRUE(executeSortParserTest("+upnp:originalTrackNumber",

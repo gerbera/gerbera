@@ -145,22 +145,33 @@ std::string GrbNet::getHostName()
         return hostName;
 
     auto addr = reinterpret_cast<const struct sockaddr*>(&sockAddr);
-    char hoststr[NI_MAXHOST];
-    char portstr[NI_MAXSERV];
+    char hoststr[NI_MAXHOST] = "";
+    char portstr[NI_MAXSERV] = "";
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
     int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NOFQDN);
     if (ret != 0) {
-        log_debug("could not determine getnameinfo: {}", std::strerror(errno));
+        log_warning("Could not determine getnameinfo: {}", std::strerror(errno));
+        hoststr[0] = '\0';
     }
     hostName = hoststr;
+    if (hostName.empty()) {
+        ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST);
+        if (ret != 0) {
+            log_warning("Could not determine getnameinfo: {}", std::strerror(errno));
+            hoststr[0] = '\0';
+            return hostName;
+        }
+        hostName = hoststr;
+    }
+
     return hoststr;
 }
 
 std::string GrbNet::getNameInfo(bool withPort) const
 {
     auto addr = reinterpret_cast<const struct sockaddr*>(&sockAddr);
-    char hoststr[NI_MAXHOST];
-    char portstr[NI_MAXSERV];
+    char hoststr[NI_MAXHOST] = "";
+    char portstr[NI_MAXSERV] = "";
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
     int ret = getnameinfo(addr, len, hoststr, sizeof(hoststr), portstr, sizeof(portstr), NI_NUMERICHOST | NI_NUMERICSERV);
     if (ret != 0) {
@@ -181,7 +192,7 @@ std::string GrbNet::ipToInterface(std::string_view ip)
 
     struct ifaddrs* ifaddr;
     int family, s;
-    char host[NI_MAXHOST];
+    char host[NI_MAXHOST] = "";
 
     if (getifaddrs(&ifaddr) == -1) {
         log_error("Could not getifaddrs: {}", std::strerror(errno));

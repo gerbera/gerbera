@@ -668,11 +668,11 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     ::
 
-        <container location="image" parentCount="2" minDepth="2"/>
+        <container location="images" parentCount="2" minDepth="2"/>
 
     * Optional
 
-    Set up container images. Drop your artists' images or logos for default containers here and they are displayed as thumbnail when browsing with a compatible client.
+    Set up container images. The fanart of a media file is added automatically as a thumbnail to the container (e.g. the album container).
 
         ::
 
@@ -681,7 +681,8 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         * Optional
 
         Path to the directory containing the images to load. Relative paths are assumed to be under the server's home.
-        If the image is not found in that location, it is also searched in the physical folder itself
+        Drop your artists' images or logos for default containers here and they are displayed as thumbnail when browsing with a compatible client.
+        If the image is not found in that location, it is also searched in the physical folder itself.
 
         ::
 
@@ -689,7 +690,10 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
         * Optional
 
-        Number of level which the fanart of a media file can be propagated upwards.
+        This setting allows to increase the number of levels which the fanart of a media file can be propagated upwards (examples refer to basic layout /Root/Audio/Artist/Album/song).
+        A value of 1 adds the fanart only to the direct parent container when a media file is added (e.g. the Album container).
+        A value of 2 means you propagate that image to the parent container as well (e.g. the Artist container).
+        A value of 0 blocks propagation completely.
 
         ::
 
@@ -697,7 +701,8 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
         * Optional
 
-        Minimum number of path elements for container using fanart from media files.
+        Depending on the virtual layout propagating thumbnails can reach containers like Video or Audio. This settings forces a minimal depth for propagation to apply.
+        It is setting the minimum number of path elements for container using fanart from media files (e.g. /Root/Audio/Artist has level 3 so the image can be set).
 
 
 ``add-file``
