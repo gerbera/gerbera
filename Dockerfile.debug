@@ -122,6 +122,8 @@ RUN apk add --no-cache \
     ffmpeg4 \
     libheif-tools \
     # libexecinfo \
+    ffmpeg4-libs \
+    ffmpeg \
     vlc
 
 # Copy libupnp
@@ -158,11 +160,5 @@ EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
-
-RUN apk add --no-cache \
-    ffmpeg4-libs \
-    ffmpeg \
-    libheif-tools \
-    vlc
 
 FROM gerbera AS default

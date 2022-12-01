@@ -66,7 +66,7 @@ FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
     duktape \
-    ffmpeg4 \
+    ffmpeg4-libs \
     file \
     fmt \
     libebml \
