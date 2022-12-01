@@ -99,7 +99,7 @@ void ActionRequest::update()
 {
     if (response) {
         std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
-        log_debug("ActionRequest::update(): {}", xml);
+        log_debug("xml: {}", xml);
 
 #if defined(USING_NPUPNP)
         UpnpActionRequest_set_xmlResponse(upnp_request, xml);
@@ -109,7 +109,7 @@ void ActionRequest::update()
         int err = ixmlParseBufferEx(xml.c_str(), &result);
 
         if (err != IXML_SUCCESS) {
-            log_error("ActionRequest::update(): could not convert to iXML");
+            log_error("ActionRequest::update(): could not convert to iXML, code {}", err);
             UpnpActionRequest_set_ErrCode(upnp_request, UPNP_E_ACTION_FAILED);
             if (result)
                 ixmlDocument_free(result);

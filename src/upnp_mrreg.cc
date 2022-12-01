@@ -32,8 +32,6 @@
 
 #include "upnp_mrreg.h" // API
 
-#include <sstream>
-
 #include "action_request.h"
 #include "config/config_manager.h"
 #include "database/database.h"
@@ -116,9 +114,7 @@ void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
     property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
@@ -148,9 +144,7 @@ void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CS
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
     property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
     IXML_Document *event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);

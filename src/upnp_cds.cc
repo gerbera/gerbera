@@ -32,7 +32,6 @@
 
 #include "upnp_cds.h" // API
 
-#include <sstream>
 #include <vector>
 
 #include "action_request.h"
@@ -395,9 +394,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
@@ -430,9 +427,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDsCsv.c_str());
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
-    std::ostringstream buf;
-    propset->print(buf, "", 0);
-    std::string xml = buf.str();
+    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, xml);
