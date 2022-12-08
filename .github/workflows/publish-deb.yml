@@ -42,7 +42,7 @@ jobs:
           ${{ matrix.os-ver }} \
           bash /build/scripts/debian/build-deb.sh ${{ matrix.os-ver }} ${{ matrix.arch }}
 
-      - uses: frabert/replace-string-action@v2.3
+      - uses: frabert/replace-string-action@v2.4
         id: replace
         with:
           pattern: '(\w+):([\w\.]+):linux/(\w+)(?:/(\w+))?'
