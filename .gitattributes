@@ -1,0 +1,52 @@
+* text=auto
+
+###### Git
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.gitconfig text eol=lf
+.gitmodules text eol=lf
+
+# Documents
+*.sh text eol=lf
+*.sql text eol=lf
+*.md text eol=lf
+*.csv text eol=lf
+*.css text eol=lf
+*.htm text eol=lf
+*.html text eol=lf
+*.dockerignore text
+AUTHORS text eol=lf
+Dockerfile* text eol=lf
+*.txt text eol=lf
+# Configuration
+*.ini text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
+*.xml text eol=lf
+.editorconfig text eol=lf
+*.yml text eol=lf
+# Graphics
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.tif binary
+*.tiff binary
+*.ico binary
+*.bmp binary
+*.pdf binary
+*.svg text
+*.webp binary
+# Archives
+*.tar binary
+*.zip binary
+
+##### Language
+# C/C++
+*.c text eol=lf
+*.cc text eol=lf
+*.h text eol=lf
+
+# Other
+*.py text eol=lf
+*.js text eol=lf

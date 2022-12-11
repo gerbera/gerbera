@@ -508,7 +508,7 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     if (request.getUDN() != serverUDN) {
         // not for us
         log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request.getUDN(), serverUDN);
-        throw UpnpException(UPNP_E_BAD_REQUEST, "routeActionRequest: request not for this device");
+        throw UpnpException(UPNP_E_BAD_REQUEST, "routeSubscriptionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
@@ -596,8 +596,12 @@ int Server::registerVirtualDirCallbacks()
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
             auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
-            ioHandler->open(mode);
-            return ioHandler.release();
+            if (ioHandler) {
+                ioHandler->open(mode);
+                return ioHandler.release();
+            }
+            log_warning("No Handler for {}", link);
+            return nullptr;
         } catch (const ServerShutdownException& se) {
             return nullptr;
         } catch (const SubtitlesNotFoundException& sex) {
@@ -617,8 +621,8 @@ int Server::registerVirtualDirCallbacks()
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
-        auto handler = static_cast<IOHandler*>(f);
-        return handler->read(reinterpret_cast<std::byte*>(buf), length);
+        auto ioHandler = static_cast<IOHandler*>(f);
+        return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
     });
     if (ret != UPNP_E_SUCCESS)
         return ret;
@@ -635,8 +639,9 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
         // log_debug("{} seek({}, {})", f, offset, whence);
         try {
-            auto handler = static_cast<IOHandler*>(f);
-            handler->seek(offset, whence);
+            auto ioHandler = static_cast<IOHandler*>(f);
+            if (ioHandler)
+                ioHandler->seek(offset, whence);
             return 0;
         } catch (const std::runtime_error& e) {
             log_error("Exception during seek: {}", e.what());
@@ -650,12 +655,14 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
         // log_debug("{} close()", f);
         int retClose = 0;
-        auto handler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
-        try {
-            handler->close();
-        } catch (const std::runtime_error& e) {
-            log_error("Exception during close: {}", e.what());
-            retClose = -1;
+        auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
+        if (ioHandler) {
+            try {
+                ioHandler->close();
+            } catch (const std::runtime_error& e) {
+                log_error("Exception during close: {}", e.what());
+                retClose = -1;
+            }
         }
 
         return retClose;
