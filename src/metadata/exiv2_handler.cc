@@ -213,7 +213,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
     Exiv2::XmpProperties::unregisterNs();
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(const std::shared_ptr<CdsObject>& item, int resNum)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     return nullptr;
 }

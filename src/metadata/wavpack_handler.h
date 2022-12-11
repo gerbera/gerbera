@@ -42,7 +42,7 @@ public:
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) override;
+    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static void getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);

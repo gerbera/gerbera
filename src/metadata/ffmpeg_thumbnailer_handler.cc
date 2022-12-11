@@ -70,7 +70,7 @@ void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFile
     }
 }
 
-std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     if (!enabled)
         return nullptr;

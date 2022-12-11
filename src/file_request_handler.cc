@@ -123,15 +123,16 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (mimeType.empty())
             mimeType = metadataHandler->getMimeType();
 
-        // Why doesnt serveContent take an actual Resource object....
-        auto ioHandler = metadataHandler->serveContent(obj, resourceId);
+        auto ioHandler = metadataHandler->serveContent(obj, resource);
 
-        // Get size
-        ioHandler->open(UPNP_READ);
-        ioHandler->seek(0L, SEEK_END);
-        off_t size = ioHandler->tell();
-        ioHandler->close();
-        UpnpFileInfo_set_FileLength(info, size);
+        if (ioHandler) {
+            // Get size
+            ioHandler->open(UPNP_READ);
+            ioHandler->seek(0L, SEEK_END);
+            off_t size = ioHandler->tell();
+            ioHandler->close();
+            UpnpFileInfo_set_FileLength(info, size);
+        }
 
     } else if (!isResourceFile && !trProfile.empty()) {
 
@@ -216,7 +217,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     if (obj->getResource(resourceId)->getHandlerType() != ContentHandler::DEFAULT) {
         auto resource = obj->getResource(resourceId);
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
-        return metadataHandler->serveContent(obj, resourceId);
+        return metadataHandler->serveContent(obj, resource);
     }
 
     auto path = obj->getLocation();

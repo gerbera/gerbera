@@ -303,23 +303,21 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     exif_data_unref(exifData);
 }
 
-std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
         return nullptr;
 
-    auto res = item->getResource(resNum);
-
-    if (res->getPurpose() != CdsResource::Purpose::Thumbnail)
-        throw_std_runtime_error("Resource {} is not a Thumbnail", resNum);
+    if (resource->getPurpose() != CdsResource::Purpose::Thumbnail)
+        throw_std_runtime_error("Resource {} is not a Thumbnail", resource->getPurpose());
 
     ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
     if (!ed)
-        throw_std_runtime_error("Resource {} has no exif information", resNum);
+        throw_std_runtime_error("Resource {} has no exif information", item->getLocation().string());
 
     if (!(ed->size))
-        throw_std_runtime_error("Resource {} has no exif thumbnail", resNum);
+        throw_std_runtime_error("Resource {} has no exif thumbnail", item->getLocation().string());
 
     auto ioHandler = std::make_unique<MemIOHandler>(ed->data, ed->size);
     exif_data_unref(ed);

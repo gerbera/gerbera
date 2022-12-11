@@ -249,12 +249,11 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
     }
 }
 
-std::unique_ptr<IOHandler> WavPackHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> WavPackHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item) // not streamable
         return {};
-    auto resource = item->getResource(resNum);
     if (!resource)
         return {};
     auto artTag = resource->getOption(ALBUMART_OPTION);

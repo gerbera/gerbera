@@ -194,9 +194,9 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = obj->getResource(resNum)->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_FANART)[0];
     }
@@ -244,9 +244,9 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = obj->getResource(resNum)->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION))[0];
         if (path.empty()) {
@@ -311,9 +311,9 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = obj->getResource(resNum)->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_SUBTITLE)[0];
     }
@@ -355,7 +355,7 @@ void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 #endif
 }
 
-std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     return {};
 }
@@ -388,9 +388,9 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     }
 }
 
-std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = obj->getResource(resNum)->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_RESOURCE)[0];
     }

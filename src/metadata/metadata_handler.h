@@ -42,6 +42,7 @@
 // forward declaration
 class CdsItem;
 class CdsObject;
+class CdsResource;
 class ContentManager;
 class IOHandler;
 
@@ -145,9 +146,9 @@ public:
 
     /// \brief stream content of object or resource to client
     /// \param obj Object to stream
-    /// \param resNum number of resource
+    /// \param resource the resource
     /// \return iohandler to stream to client
-    virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, int resNum) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) = 0;
     virtual std::string getMimeType() const;
 
     static std::string mapContentHandler2String(ContentHandler ch);
