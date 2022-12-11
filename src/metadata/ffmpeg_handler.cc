@@ -286,12 +286,11 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     addFfmpegAuxdataFields(item, pFormatCtx);
     // Add resources using ffmpeg library calls
     addFfmpegResourceFields(item, pFormatCtx);
-
     // Close the video file
     avformat_close_input(&pFormatCtx);
 }
 
-std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj, int resNum)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
     return nullptr;
 }
