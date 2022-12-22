@@ -3,9 +3,11 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "common.h"
+#include "config/client_config.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "upnp_xml.h"
+#include "util/grb_net.h"
 #include "util/tools.h"
 
 #include "../mock/config_mock.h"
@@ -13,6 +15,13 @@
 
 using ::testing::_;
 using ::testing::Return;
+
+class MyConfigMock final : public ConfigMock {
+public:
+    MyConfigMock() { list = std::make_shared<ClientConfigList>(); }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return list; }
+    std::shared_ptr<ClientConfigList> list;
+};
 
 class UpnpXmlTest : public ::testing::Test {
 
@@ -26,15 +35,15 @@ public:
 
         std::string virtualDir = "http://server";
         std::string presentationURl = "http://someurl/";
-        subject = new UpnpXMLBuilder(context, virtualDir, presentationURl);
+        subject = std::make_shared<UpnpXMLBuilder>(context, virtualDir, presentationURl);
     }
 
     void TearDown() override
     {
-        delete subject;
+        subject = nullptr;
     }
 
-    UpnpXMLBuilder* subject;
+    std::shared_ptr<UpnpXMLBuilder> subject;
     std::shared_ptr<ConfigMock> config;
     std::shared_ptr<DatabaseMock> database;
     std::shared_ptr<Context> context;
@@ -85,9 +94,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     subject->renderObject(obj, std::string::npos, root);
 
     // assert
-    std::ostringstream buf;
-    didlLite.print(buf, "", 0);
-    std::string didlLiteXml = buf.str();
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
@@ -129,9 +136,101 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     subject->renderObject(obj, std::string::npos, root);
 
     // assert
-    std::ostringstream buf;
-    didlLite.print(buf, "", 0);
-    std::string didlLiteXml = buf.str();
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
+    EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
+}
+
+TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
+{
+    // arrange
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsItem>();
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title 'n Ticks");
+    obj->setClass(UPNP_CLASS_MUSIC_TRACK);
+    obj->addMetaData(M_DESCRIPTION, "Description < Input");
+    obj->addMetaData(M_ALBUM, "Album & Test");
+    obj->addMetaData(M_TRACKNUMBER, "10");
+    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+
+    auto clientConfig = std::make_shared<MyConfigMock>();
+    auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
+    auto addr = std::make_shared<GrbNet>("192.168.99.100");
+    auto quirks = std::make_unique<Quirks>(subject, clientManager, addr, "DLNADOC/1.50");
+
+    std::ostringstream expectedXml;
+    expectedXml << "<DIDL-Lite>\n";
+    expectedXml << "<item id=\"1\" parentID=\"2\" restricted=\"0\">\n";
+    expectedXml << "<dc:title>Title 'n Ticks</dc:title>\n";
+    expectedXml << "<upnp:class>object.item.audioItem.musicTrack</upnp:class>\n";
+    expectedXml << "<dc:date>2022-04-01T00:00:00</dc:date>\n";
+    expectedXml << "<dc:description>Description &lt; Input</dc:description>\n";
+    expectedXml << "<upnp:album>Album &amp; Test</upnp:album>\n";
+    expectedXml << "<upnp:originalTrackNumber>10</upnp:originalTrackNumber>\n";
+    expectedXml << "</item>\n";
+    expectedXml << "</DIDL-Lite>\n";
+
+    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+        .WillRepeatedly(Return(" / "));
+    log_warning(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    EXPECT_CALL(*config, getTranscodingProfileListOption(_))
+        .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
+
+    // act
+    subject->renderObject(obj, std::string::npos, root, quirks);
+
+    // assert
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
+    EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
+}
+
+TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
+{
+    // arrange
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsItem>();
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title 'n Ticks");
+    obj->setClass(UPNP_CLASS_MUSIC_TRACK);
+    obj->addMetaData(M_DESCRIPTION, "Description < Input");
+    obj->addMetaData(M_ALBUM, "Album & Test");
+    obj->addMetaData(M_TRACKNUMBER, "10");
+    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+
+    auto clientConfig = std::make_shared<MyConfigMock>();
+    auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
+    auto addr = std::make_shared<GrbNet>("192.168.99.100");
+    auto quirks = std::make_unique<Quirks>(subject, clientManager, addr, "Allegro-Software-WebClient/5.40b1 DLNADOC/1.50");
+
+    std::ostringstream expectedXml;
+    expectedXml << "<DIDL-Lite>\n";
+    expectedXml << "<item id=\"1\" parentID=\"2\" restricted=\"0\">\n";
+    expectedXml << "<dc:title>Title &apos;n Ticks</dc:title>\n";
+    expectedXml << "<upnp:class>object.item.audioItem.musicTrack</upnp:class>\n";
+    expectedXml << "<dc:date>2022-04-01T00:00:00</dc:date>\n";
+    expectedXml << "<dc:description>Description &lt; Input</dc:description>\n";
+    expectedXml << "<upnp:album>Album &amp; Test</upnp:album>\n";
+    expectedXml << "<upnp:originalTrackNumber>10</upnp:originalTrackNumber>\n";
+    expectedXml << "</item>\n";
+    expectedXml << "</DIDL-Lite>\n";
+
+    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+        .WillRepeatedly(Return(" / "));
+    log_warning(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    EXPECT_CALL(*config, getTranscodingProfileListOption(_))
+        .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
+
+    // act
+    subject->renderObject(obj, std::string::npos, root, quirks);
+
+    // assert
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", pugi::format_no_escapes);
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
@@ -208,10 +307,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     subject->renderObject(obj, std::string::npos, root);
 
     // assert
-    std::ostringstream buf;
-    didlLite.print(buf, "", 0);
-    std::string didlLiteXml = buf.str();
-
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 

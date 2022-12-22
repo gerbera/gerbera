@@ -139,6 +139,7 @@ static constexpr auto clientTypes = std::array {
     std::pair("SamsungBDJ5500", ClientType::SamsungBDJ5500),
     std::pair("EC-IRadio", ClientType::IRadio),
     std::pair("PanasonicTV", ClientType::PanasonicTV),
+    std::pair("BoseSoundtouch", ClientType::BoseSoundtouch),
     std::pair("StandardUPnP", ClientType::StandardUPnP),
 };
 
@@ -174,6 +175,7 @@ static constexpr auto quirkFlags = std::array {
     std::pair("IRADIO", QUIRK_FLAG_IRADIO),
     std::pair("PV_SUBTITLES", QUIRK_FLAG_PV_SUBTITLES),
     std::pair("PANASONIC", QUIRK_FLAG_PANASONIC),
+    std::pair("STRICTXML", QUIRK_FLAG_STRICTXML),
 };
 
 int ClientConfig::remapFlag(const std::string& flag)

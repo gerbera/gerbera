@@ -24,6 +24,7 @@ The automatic detection supports the following devices and software:
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
 - PanasonicTV, setting device flags to ``PANASONIC``
+- BoseSoundtouch, setting device flags to ``STRICTXML``
 
 Device Flags
 ~~~~~~~~~~~~
@@ -38,6 +39,7 @@ The device flags have the following meaning
 -  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
 -  ``PV_SUBTITLES``: 0x40, add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri`` to video files if subtitles exist
 -  ``PANASONIC``: 0x80, avoid adding part of the filename in item uri. Filename in item uri is used by other players, e.g. VLC to detect the language of a subtitle file.
+-  ``STRICTXML``: 0x100, encode most of special chars also, like ``'`` as ``&amp;apos;``
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~

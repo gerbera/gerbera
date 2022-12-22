@@ -261,6 +261,11 @@ int Quirks::getStringLimit() const
     return pClientInfo ? pClientInfo->stringLimit : -1;
 }
 
+bool Quirks::needsStrictXml() const
+{
+    return pClientInfo && (pClientInfo->flags & QUIRK_FLAG_STRICTXML) == QUIRK_FLAG_STRICTXML;
+}
+
 bool Quirks::getMultiValue() const
 {
     return pClientInfo ? pClientInfo->multiValue : true;
