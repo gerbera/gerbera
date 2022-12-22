@@ -171,6 +171,16 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
             ClientMatchType::UserAgent,
             "Panasonic MIL DLNA CP",
         },
+
+        // User-Agent(actionReq): Allegro-Software-WebClient/5.40b1 DLNADOC/1.50
+        {
+            "Bose Soundtouch",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::BoseSoundtouch,
+            QUIRK_FLAG_STRICTXML,
+            ClientMatchType::UserAgent,
+            "Allegro-Software-WebClient",
+        },
     };
 
     auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
@@ -220,7 +230,7 @@ const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, co
         updateCache(addr, userAgent, info);
     }
 
-    log_debug("client info: {} '{}' -> '{}' as {}", addr->getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type));
+    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr->getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type), ClientConfig::mapFlags(info->flags));
     return info;
 }
 

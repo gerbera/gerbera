@@ -130,7 +130,13 @@ protected:
 
     std::string renderExtension(const std::string& contentType, const fs::path& location, const std::string& language) const;
     void addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const;
-    void addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData, config_option_t itemProps, config_option_t nsProp) const;
+    void addPropertyList(bool strictXml,
+        std::size_t stringLimit,
+        pugi::xml_node& result,
+        const std::vector<std::pair<std::string, std::string>>& meta,
+        const std::map<std::string, std::string>& auxData,
+        config_option_t itemProps,
+        config_option_t nsProp) const;
     std::string findDlnaProfile(const CdsResource& res, const std::string& contentType) const;
     std::string dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted = true) const;
 

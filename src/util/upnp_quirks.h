@@ -42,6 +42,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC 0x00000020
 #define QUIRK_FLAG_PV_SUBTITLES 0x00000040
 #define QUIRK_FLAG_PANASONIC 0x00000080
+#define QUIRK_FLAG_STRICTXML 0x00000100
 
 // forward declaration
 class ActionRequest;
@@ -139,6 +140,13 @@ public:
      *
      */
     int getStringLimit() const;
+
+    /** \brief UPnP client needs everything escaped, esp. '
+     *
+     * \return bool
+     *
+     */
+    bool needsStrictXml() const;
 
     /** \brief Get multi value upnp properties
      *

@@ -134,16 +134,17 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
+    auto stringLimitClient = stringLimit;
     if (quirks->getStringLimit() > -1) {
-        stringLimit = quirks->getStringLimit();
+        stringLimitClient = quirks->getStringLimit();
     }
 
     for (auto&& obj : arr) {
         markPlayedItem(obj, obj->getTitle());
-        xmlBuilder->renderObject(obj, stringLimit, didlLiteRoot, quirks);
+        xmlBuilder->renderObject(obj, stringLimitClient, didlLiteRoot, quirks);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
@@ -210,13 +211,14 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
+    auto stringLimitClient = stringLimit;
     if (quirks->getStringLimit() > -1) {
-        stringLimit = quirks->getStringLimit();
+        stringLimitClient = quirks->getStringLimit();
     }
 
     for (auto&& cdsObject : results) {
         if (!cdsObject->isItem()) {
-            xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
+            xmlBuilder->renderObject(cdsObject, stringLimitClient, didlLiteRoot);
             continue;
         }
 
@@ -234,10 +236,10 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         }
 
         markPlayedItem(cdsObject, title);
-        xmlBuilder->renderObject(cdsObject, stringLimit, didlLiteRoot);
+        xmlBuilder->renderObject(cdsObject, stringLimitClient, didlLiteRoot);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);

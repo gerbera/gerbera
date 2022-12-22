@@ -75,7 +75,41 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
+static std::string enocdeEscapes(std::string& s)
+{
+    replaceAllString(s, "&", "&amp;");
+    replaceAllString(s, "'", "&apos;");
+    replaceAllString(s, "<", "&lt;");
+    replaceAllString(s, ">", "&gt;");
+    replaceAllString(s, "\"", "&quote;");
+    return s;
+}
+
+static constexpr std::string_view ellipse("...");
+
+static std::string limitString(std::size_t stringLimit, const std::string& s)
+{
+    // Do nothing if string is already short enough
+    if (s.length() <= stringLimit)
+        return s;
+
+    ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - ellipse.size());
+    return fmt::format("{}{}", s.substr(0, cutPosition), ellipse);
+}
+
+static std::string formatXmlString(bool strictXml, std::size_t stringLimit, const std::string& input)
+{
+    std::string s = input;
+    // Do nothing if disabled
+    if (strictXml)
+        s = enocdeEscapes(s);
+    // Do nothing if disabled
+    if (stringLimit != std::string::npos)
+        s = limitString(stringLimit, s);
+    return s;
+}
+
+void UpnpXMLBuilder::addPropertyList(bool strictXml, std::size_t stringLimit, pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
     config_option_t itemProps, config_option_t nsProp) const
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
@@ -88,14 +122,14 @@ void UpnpXMLBuilder::addPropertyList(pugi::xml_node& result, const std::vector<s
         bool wasMeta = false;
         for (auto&& [mkey, mvalue] : meta) {
             if ((metaField != M_MAX && mkey == MetadataHandler::getMetaFieldName(metaField)) || mkey == field) {
-                addField(result, tag, mvalue);
+                addField(result, tag, formatXmlString(strictXml, stringLimit, mvalue));
                 wasMeta = true;
             }
         }
         if (!wasMeta) {
             auto avalue = getValueOrDefault(auxData, field);
             if (!avalue.empty()) {
-                addField(result, tag, avalue);
+                addField(result, tag, formatXmlString(strictXml, stringLimit, avalue));
             }
         }
     }
@@ -144,19 +178,11 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     result.append_attribute("parentID") = obj->getParentID();
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
-    auto limitString = [stringLimit](const std::string& s) {
-        // Do nothing if disabled, or string is already short enough
-        if (stringLimit == std::string::npos || s.length() <= stringLimit)
-            return s;
-
-        ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - std::strlen("..."));
-        return s.substr(0, cutPosition) + "...";
-    };
-
+    auto strictXml = quirks && quirks->needsStrictXml();
     const std::string title = obj->getTitle();
     const std::string upnpClass = obj->getClass();
 
-    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(limitString(title).c_str());
+    result.append_child("dc:title").append_child(pugi::node_pcdata).set_value(formatXmlString(strictXml, stringLimit, title).c_str());
     result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(upnpClass.c_str());
 
     auto auxData = obj->getAuxData();
@@ -176,23 +202,23 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             if (mvMeta) {
                 for (auto&& val : group) {
                     // Trim metadata value as needed
-                    auto str = limitString(val);
+                    auto str = formatXmlString(strictXml, stringLimit, val);
                     if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
-                        addField(result, key, limitString(str));
+                        addField(result, key, str);
                 }
             } else {
                 // Trim metadata value as needed
-                auto str = limitString(fmt::format("{}", fmt::join(group, entrySeparator)));
+                auto str = formatXmlString(strictXml, stringLimit, fmt::format("{}", fmt::join(group, entrySeparator)));
                 if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                 else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                 else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
-                    addField(result, key, limitString(str));
+                    addField(result, key, str);
             }
         }
         auto meta = obj->getMetaData();
@@ -210,7 +236,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             addField(result, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]);
         }
 
-        addPropertyList(result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
+        addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
         addResources(item, result, quirks);
 
         result.set_name("item");
@@ -225,13 +251,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
-            addPropertyList(result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
-            addPropertyList(result, meta, auxData, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_ARTIST_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_ARTIST_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
-            addPropertyList(result, meta, auxData, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_GENRE_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_GENRE_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            addPropertyList(result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
         }
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
