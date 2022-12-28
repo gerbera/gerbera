@@ -192,7 +192,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (quirks) {
-            quirks->restoreSamsungBookMarkedPosition(item, result);
+            quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
         }
 

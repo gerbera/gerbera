@@ -192,7 +192,7 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
     request.setResponse(std::move(response));
 }
 
-void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result) const
+void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offset) const
 {
     if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
         log_debug("restoreSamsungBookMarkedPosition called, but it is not enabled for this client");
@@ -200,8 +200,8 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
     }
 
     auto positionToRestore = item->getPlayStatus() ? item->getPlayStatus()->getBookMarkPosition().count() : 0;
-    if (positionToRestore > 10)
-        positionToRestore -= 10;
+    if (positionToRestore > offset)
+        positionToRestore -= offset;
     log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
 
     if (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)

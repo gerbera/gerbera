@@ -37,6 +37,16 @@ This section defines the client behaviour additions.
 
     This attribute sets the amount of hours a client entry is kept in the cache.
 
+
+    ::
+
+        bookmark-offset=...
+
+    * Optional
+    * Default: **10**
+
+    This attribute sets the amount of seconds a playposition (Samsung bookmark) is reduced on resume to continue a bit before the last scene.
+
 **Child tags:**
 
 ``client``
