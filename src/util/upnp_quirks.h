@@ -70,7 +70,7 @@ public:
      * \return void
      *
      */
-    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result) const;
+    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offset = 10) const;
 
     /** \brief Stored bookmark information into the database
      *
