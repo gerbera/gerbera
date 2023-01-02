@@ -656,6 +656,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     }
     cdsObjectSql.emplace("last_updated", quote(currentTime().count()));
 
+    int parentID = obj->getParentID();
     if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
         fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
         cdsObjectSql.emplace("location", quote(dbLocation));
@@ -668,8 +669,10 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
             if (loc.empty())
                 throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
             if (obj->isPureItem()) {
-                int parentID = ensurePathExistence(loc.parent_path(), changedContainer);
-                obj->setParentID(parentID);
+                if (parentID < 0) {
+                    parentID = ensurePathExistence(loc.parent_path(), changedContainer);
+                    obj->setParentID(parentID);
+                }
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
                 cdsObjectSql.emplace("location", quote(dbLocation));
                 cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
@@ -711,7 +714,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
     }
 
-    cdsObjectSql.emplace("parent_id", quote(obj->getParentID()));
+    cdsObjectSql.emplace("parent_id", quote(parentID));
 
     std::vector<AddUpdateTable> returnVal;
     // check for a duplicate (virtual) object
@@ -1773,6 +1776,30 @@ std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContai
     return ret;
 }
 
+std::vector<std::pair<int, std::chrono::seconds>> SQLDatabase::getRefObjects(int objectId)
+{
+    auto colId = identifier("id");
+    auto colRefId = identifier("ref_id");
+    auto table = identifier(CDS_OBJECT_TABLE);
+    auto colUpdated = identifier("last_updated");
+
+    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} = {} AND {} != {}", colId, colUpdated, table, colRefId, objectId, identifier("object_type"), OBJECT_TYPE_CONTAINER);
+
+    auto res = select(getSql);
+    if (!res)
+        throw_std_runtime_error("db error");
+
+    std::vector<std::pair<int, std::chrono::seconds>> result;
+    if (res->getNumRows() == 0)
+        return result;
+
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        result.emplace_back(row->col_int(0, INVALID_OBJECT_ID), row->col_int(1, 0));
+    }
+    return result;
+}
+
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
     std::size_t count = list.size();
@@ -2565,7 +2592,7 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
 
 void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
 {
-    if (objectID == INVALID_OBJECT_ID || objectID == INVALID_OBJECT_ID_2)
+    if (objectID == INVALID_OBJECT_ID)
         return;
 
     exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));

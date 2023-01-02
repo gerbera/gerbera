@@ -29,8 +29,15 @@
 #include "util/timer.h"
 
 // forward declaration
-class Database;
 class AutoscanDirectory;
+class ContentManager;
+class Context;
+class Database;
+class Timer;
+
+#ifdef HAVE_INOTIFY
+class AutoscanInotify;
+#endif
 
 class AutoscanList {
 public:
@@ -72,6 +79,16 @@ public:
 
     /// \brief returns a copy of the autoscan list in the form of an array
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy() const;
+
+    void initTimer(
+        std::shared_ptr<ContentManager>& content,
+        std::shared_ptr<Timer>& timer,
+        std::shared_ptr<Context>& context
+#ifdef HAVE_INOTIFY
+        ,
+        bool doInotify, std::unique_ptr<AutoscanInotify>& inotify
+#endif
+    );
 
 protected:
     std::size_t origSize {};

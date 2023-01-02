@@ -43,6 +43,7 @@
 // forward declarations
 class CdsContainer;
 class Database;
+class ImportService;
 
 #define AUTOSCAN_INOTIFY "inotify"
 #define AUTOSCAN_TIMED "timed"
@@ -191,6 +192,9 @@ public:
         containerMap[entry] = value;
     }
 
+    void setImportService(std::shared_ptr<ImportService> is) { importService = std::move(is); }
+    std::shared_ptr<ImportService> getImportService() const { return importService; }
+
     /* helpers for autoscan stuff */
     static const char* mapScanmode(AutoscanScanMode scanmode);
     static AutoscanScanMode remapScanmode(const std::string& scanmode);
@@ -225,6 +229,7 @@ protected:
     std::map<std::string, bool> scanContent { { UPNP_CLASS_AUDIO_ITEM, true }, { UPNP_CLASS_IMAGE_ITEM, true }, { UPNP_CLASS_VIDEO_ITEM, true } };
     int mediaType { -1 };
     std::map<AutoscanMediaMode, std::string> containerMap;
+    std::shared_ptr<ImportService> importService;
 
     constexpr const static int INVALID_SCAN_ID = -1;
 };

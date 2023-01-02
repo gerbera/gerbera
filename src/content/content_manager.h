@@ -39,11 +39,10 @@
 #include <unordered_set>
 #include <vector>
 
+#include "cm_task.h"
 #include "common.h"
-#include "config/directory_tweak.h"
 #include "context.h"
 #include "util/executor.h"
-#include "util/generic_task.h"
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
@@ -63,80 +62,18 @@ class OnlineServiceList;
 enum class OnlineServiceType;
 #endif // ONLINE_SERVICES
 
-class AutoScanSetting;
 enum class AutoscanScanMode;
+class AutoScanSetting;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
 class CdsResource;
 class ContentManager;
+class ImportService;
 class Layout;
 class LastFm;
 class ScriptingRuntime;
 class Server;
-class TaskProcessor;
-
-class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
-protected:
-    std::shared_ptr<ContentManager> content;
-    fs::directory_entry dirEnt;
-    fs::path rootpath;
-    AutoScanSetting asSetting;
-
-public:
-    CMAddFileTask(std::shared_ptr<ContentManager> content,
-        fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable = true);
-    fs::path getPath() const;
-    fs::path getRootPath() const;
-    void run() override;
-};
-
-class CMRemoveObjectTask : public GenericTask {
-protected:
-    std::shared_ptr<ContentManager> content;
-    std::shared_ptr<AutoscanDirectory> adir;
-    int objectID;
-    fs::path path;
-    bool all;
-    bool rescanResource;
-
-public:
-    CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-        int objectID, const fs::path& path, bool rescanResource, bool all);
-    void run() override;
-};
-
-class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
-protected:
-    std::shared_ptr<ContentManager> content;
-    std::shared_ptr<AutoscanDirectory> adir;
-    int containerID;
-
-public:
-    CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable);
-    void run() override;
-};
-
-#ifdef ONLINE_SERVICES
-class CMFetchOnlineContentTask : public GenericTask {
-protected:
-    std::shared_ptr<ContentManager> content;
-    std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<Timer> timer;
-    std::shared_ptr<OnlineService> service;
-    std::shared_ptr<Layout> layout;
-    bool unscheduled_refresh;
-
-public:
-    CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<TaskProcessor> taskProcessor,
-        std::shared_ptr<Timer> timer,
-        std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
-        bool cancellable, bool unscheduledRefresh);
-    void run() override;
-};
-#endif
 
 class UpnpMap {
 private:
@@ -157,6 +94,7 @@ public:
     }
 
     bool isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const;
+    static void initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
 };
 
 class ContentManager : public Timer::Subscriber, public std::enable_shared_from_this<ContentManager> {
@@ -210,7 +148,7 @@ public:
     void updateObject(int objectID, const std::map<std::string, std::string>& parameters);
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false);
+    std::shared_ptr<CdsObject> createObjectFromFile(const std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false);
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
@@ -266,6 +204,8 @@ public:
 
     /// \brief returns an array of all autoscan directories
     std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
+
+    std::shared_ptr<AutoscanDirectory> findAutoscanDirectory(fs::path dir) const;
 
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir);
@@ -326,18 +266,12 @@ protected:
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<Web::SessionManager> session_manager;
     std::shared_ptr<Context> context;
-    ///\brief cache for containers while creating new layout
-    std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
-    std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
+    std::shared_ptr<ImportService> importService;
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<ScriptingRuntime> scripting_runtime;
     std::shared_ptr<LastFm> last_fm;
-
-    std::map<std::string, std::string> mimetypeContenttypeMap;
-    std::map<std::string, std::string> mimetypeUpnpclassMap;
-    std::vector<UpnpMap> upnpMap {};
 
     std::shared_ptr<AutoscanList> autoscanList;
 #ifdef HAVE_INOTIFY
@@ -355,6 +289,7 @@ protected:
     int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
+    std::shared_ptr<ImportService> getImportService(const std::shared_ptr<AutoscanDirectory>& adir);
     std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool all);
     void cleanupTasks(const fs::path& path);
 
@@ -366,15 +301,9 @@ protected:
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
     void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
-    static void initUpnpMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
-    std::string mimeTypeToUpnpClass(const std::string& mimeType);
-
-    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& origObj, int count);
 
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
-
-    void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
 
     std::shared_ptr<Layout> layout;
 
@@ -405,6 +334,7 @@ protected:
 
     unsigned int taskID { 1 };
 
+    friend class ImportService;
     friend void CMAddFileTask::run();
     friend void CMRemoveObjectTask::run();
     friend void CMRescanDirectoryTask::run();
