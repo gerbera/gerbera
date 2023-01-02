@@ -4,7 +4,7 @@
 
     curl_online_service.cc - this file is part of Gerbera.
 
-    Copyright (C) 2021-2022 Gerbera Contributors
+    Copyright (C) 2021-2023 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

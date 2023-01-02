@@ -54,7 +54,7 @@ Copyright
       | Sergey Bostandzhyan <jin at mediatomb dot cc>
       | Leonhard Wimmer <leo at mediatomb dot cc>
 
-   Copyright (C) 2016-2022
+   Copyright (C) 2016-2023
       | Gerbera Contributors
 
 License

@@ -13,6 +13,8 @@
 
     Copyright (C) 2020 Patrick Ammann <pammann@gmx.net>
 
+    Copyright (C) 2016-2023 Gerbera Contributors
+
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
