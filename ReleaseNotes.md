@@ -1,5 +1,25 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## v1.12.1
+
+### NEW Features
+
+- Debug options for specialized messages
+- Configure offset of lastPlayedPosition (aka Samsung bookmark)
+
+### FIXES
+
+- Calling null IOHandler
+- Encoding of ticks ' as &apos; for Bose
+- ffmpeg and transcoding in docker container
+- Tests failing on openSuSE > 15.3 and others
+- Update docker images to alpine 3.17
+
+### Code Improvements
+
+- Reduced header nesting
+- Build with latest versions of pugixml (1.13), spdlog (1.11.0), taglib (1.13), wavpack (5.6.0)
+
 ## v1.12.0
 
 ### NEW Features

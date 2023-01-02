@@ -1,5 +1,28 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v1.12.1
+
+- Actions: Update deprecated replace-string-action
+- Bump engine.io from 6.2.0 to 6.2.1 in /gerbera-web
+- Bump loader-utils from 2.0.2 to 2.0.3 in /gerbera-web
+- Clarify integer types handling
+- Debug Options: Allow separated facility debugging messages.
+- Docker: Bring back ffmpeg in transcoding image
+- Docker: fix ffmpeg-lib
+- Docker: Update to alpine 3.17
+- Fix file encoding
+- Fix Windows Explorer browsing
+- Gerbera 2023
+- libraries: add latest
+- MetadataHandler: Use resource instead of id
+- Minimal: fix test fixture
+- openSuSE: Fix test and inits
+- Reduce Header Nesting
+- Samsung: allow configuring bookmark offset
+- Server: Don't call handler if null
+- Update npm packages
+- XML: Allow escaping ticks for some clients
+
 ### v1.12.0
 
  - actions: use alpine 3.16 container
