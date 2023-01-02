@@ -42,11 +42,11 @@ void ConfigIntSetup::makeOption(std::string optValue, const std::shared_ptr<Conf
             throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (valueCheck) {
-        if (!valueCheck(std::stoi(optValue))) {
+        if (!valueCheck(stoiString(optValue))) {
             throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (minCheck) {
-        if (!minCheck(std::stoi(optValue), minValue)) {
+        if (!minCheck(stoiString(optValue), minValue)) {
             throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue);
         }
     }

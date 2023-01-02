@@ -27,7 +27,18 @@
 #include "autoscan_list.h"
 
 #include "autoscan.h"
+#include "content_manager.h"
 #include "database/database.h"
+#include "import_service.h"
+#include "util/timer.h"
+
+#ifdef HAVE_INOTIFY
+#include "autoscan_inotify.h"
+#endif
+
+#ifdef HAVE_JS
+#include "scripting/playlist_parser_script.h"
+#endif
 
 void AutoscanList::updateLMinDB(Database& database)
 {
@@ -181,5 +192,37 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
         if (i->getScanMode() == AutoscanScanMode::Timed) {
             sub->timerNotify(i->getTimerParameter());
         }
+    }
+}
+
+void AutoscanList::initTimer(
+    std::shared_ptr<ContentManager>& content,
+    std::shared_ptr<Timer>& timer,
+    std::shared_ptr<Context>& context
+#ifdef HAVE_INOTIFY
+    ,
+    bool doInotify, std::unique_ptr<AutoscanInotify>& inotify
+#endif
+)
+{
+    AutoLock lock(mutex);
+    for (auto&& autoScanDir : list) {
+#ifdef HAVE_INOTIFY
+        if (autoScanDir->getScanMode() == AutoscanScanMode::INotify) {
+            if (doInotify && inotify)
+                inotify->monitor(autoScanDir);
+            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, autoScanDir->getScanID());
+            log_debug("Adding one-shot inotify scan");
+            timer->addTimerSubscriber(content.get(), std::chrono::minutes(1), std::move(param), true);
+        }
+#endif
+        if (autoScanDir->getScanMode() == AutoscanScanMode::Timed) {
+            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, autoScanDir->getScanID());
+            log_debug("Adding timed scan with interval {}", autoScanDir->getInterval().count());
+            timer->addTimerSubscriber(content.get(), autoScanDir->getInterval(), std::move(param), false);
+        }
+        auto asImportService = std::make_shared<ImportService>(context);
+        asImportService->run(content, autoScanDir, autoScanDir->getLocation());
+        autoScanDir->setImportService(asImportService);
     }
 }

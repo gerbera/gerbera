@@ -40,7 +40,6 @@
 #define CDS_ID_ROOT (0)
 #define CDS_ID_FS_ROOT (1)
 #define INVALID_OBJECT_ID (-333)
-#define INVALID_OBJECT_ID_2 (-666)
 static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
 
 // URL FORMATTING CONSTANTS

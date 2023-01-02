@@ -137,6 +137,7 @@ public:
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
 
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
+    std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override;
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override;

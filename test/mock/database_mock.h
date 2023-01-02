@@ -24,10 +24,7 @@
 
 #include <gtest/gtest.h>
 
-#include "config/config.h"
-#include "config/config_setup.h"
 #include "database/database.h"
-#include "util/upnp_clients.h"
 
 class DatabaseMock : public Database {
 public:
@@ -61,6 +58,7 @@ public:
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return {}; }
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override { return {}; }
+    std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override { return {}; }
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return {}; }

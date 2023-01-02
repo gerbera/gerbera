@@ -137,7 +137,8 @@ duk_ret_t jsGetCdsObject(duk_context* ctx)
         ec.clear();
         auto dirEnt = fs::directory_entry(path, ec);
         if (!ec) {
-            obj = cm->createObjectFromFile(dirEnt, false);
+            auto adir = cm->findAutoscanDirectory(path);
+            obj = cm->createObjectFromFile(adir, dirEnt, false);
         } else {
             log_error("Failed to read {}: {}", path.c_str(), ec.message());
         }

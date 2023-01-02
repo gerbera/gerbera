@@ -100,8 +100,12 @@ add_library(libgerbera STATIC
         src/content/autoscan_list.h
         src/content/autoscan_inotify.cc
         src/content/autoscan_inotify.h
+        src/content/cm_task.cc
+        src/content/cm_task.h
         src/content/content_manager.cc
         src/content/content_manager.h
+        src/content/import_service.cc
+        src/content/import_service.h
         src/content/layout/builtin_layout.cc
         src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc

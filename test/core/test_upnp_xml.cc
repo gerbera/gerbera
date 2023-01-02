@@ -25,6 +25,7 @@ Gerbera - https://gerbera.io/
 #include "cds/cds_item.h"
 #include "common.h"
 #include "config/client_config.h"
+#include "config/config_setup.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
 #include "upnp_xml.h"
