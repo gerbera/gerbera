@@ -245,8 +245,12 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
                 resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioSet = true;
-
+// FF_API_OLD_CHANNEL_LAYOUT
+#if LIBAVUTIL_VERSION_MAJOR < 57
                 int audioCh = as_codecpar(st)->channels;
+#else
+                int audioCh = as_codecpar(st)->ch_layout.nb_channels;
+#endif
                 if (audioCh > 0) {
                     log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
                     resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
