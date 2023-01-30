@@ -39,14 +39,14 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "fmt/7.1.3",
-        "spdlog/1.8.5",
-        "pugixml/1.10",
+        "fmt/9.1.0",
+        "spdlog/1.11.0",
+        "pugixml/1.13",
         "libiconv/1.16",
         "sqlite3/[>=3.35.5]",
         "zlib/1.2.11",
         "pupnp/[>=1.14.6]",
-        "taglib/1.12",
+        "taglib/1.13",
         "openssl/1.1.1k", # Needed to fix conflicts
     ]
 
@@ -70,7 +70,7 @@ class GerberaConan(ConanFile):
             self.requires("gtest/1.10.0")
 
         if self.options.js:
-            self.requires("duktape/2.5.0")
+            self.requires("duktape/2.7.0")
 
         if self.options.curl:
             self.requires("libcurl/[>=7.74.0]")
