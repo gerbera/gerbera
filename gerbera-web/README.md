@@ -8,8 +8,8 @@ The Gerbera Web UI is written with the following tools:
 
 ### Client-side
 
-- JQuery v3.4.1
-- Bootstrap v4.0.0
+- JQuery v3.6.3
+- Bootstrap v4.6.2
 
 
 ### Development
