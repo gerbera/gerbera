@@ -5,7 +5,7 @@ module.exports = function(config) {
           pattern: 'test/client/fixtures/**/*',
         },
         {
-          pattern: '../web/js/md5.js',
+          pattern: '../web/vendor/md5.min.js',
         },
         {
           pattern: 'test-context.js', watched: false
@@ -25,6 +25,8 @@ module.exports = function(config) {
     browsers: ['ChromeHeadless'],
     reporters: ['mocha'],
     concurrency: Infinity,
-    singleRun: true
+    singleRun: true,
+    useIframe: false,
+    processKillTimeout: 15000
   });
 };
