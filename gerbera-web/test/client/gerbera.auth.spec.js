@@ -133,12 +133,12 @@ describe('Gerbera Auth', () => {
       GerberaApp.serverConfig = {
         accounts: true
       };
+      spyOn(Updates, 'initialize');
       spyOn(Tree, 'initialize');
       spyOn(Items, 'initialize');
       spyOn(Menu, 'initialize');
       spyOn(Trail, 'initialize');
       spyOn(Autoscan, 'initialize');
-      spyOn(Updates, 'initialize');
 
       await Auth.authenticate();
 

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "karma start karma.conf.js",
+    "test:debug": "karma start karma.conf.js --log-level debug",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
     "e2e": "SELENIUM_BROWSER=chrome mocha --timeout 15000 \"test/e2e/**.spec.js\"",
     "screenshot": "rimraf _build && mkdirp _build/doc && mocha --timeout 15000 \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
@@ -23,6 +24,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.18.9",
+    "@popperjs/core": "^2.11.6",
     "babel-loader": "^8.3.0",
     "bootstrap": "^4.6.2",
     "braces": "^3.0.2",
@@ -54,7 +56,6 @@
     "lodash": "^4.17.21",
     "mkdirp": "^0.5.6",
     "mocha": "^10.2.0",
-    "popper.js": "^1.16.1",
     "rimraf": "^3.0.2",
     "selenium-webdriver": "^4.8.0",
     "webpack": "^5.75.0",

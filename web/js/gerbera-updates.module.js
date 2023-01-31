@@ -58,6 +58,7 @@ const showMessage = (message, callback, type, icon) => {
 
 const showTask = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
+  console.log(`${type}: ${message}`);
   if (callback) {
     toast.callback = callback;
   }
