@@ -26,10 +26,12 @@ import {Tree} from "./gerbera-tree.module.js";
 
 let POLLING_INTERVAL;
 let UI_TIMEOUT;
+let initialized;
 
 const initialize = () => {
   $('#toast').toast();
   $(document).ajaxComplete(errorCheck);
+  initialized = true
   return Promise.resolve();
 };
 
@@ -50,10 +52,12 @@ const errorCheck = (event, xhr) => {
 const showMessage = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
   console.log(`${type}: ${message}`);
-  if (callback) {
-    toast.callback = callback;
+  if (initialized) {
+    if (callback) {
+      toast.callback = callback;
+    }
+    $('#toast').toast('show', toast);
   }
-  $('#toast').toast('show', toast);
 };
 
 const showTask = (message, callback, type, icon) => {
