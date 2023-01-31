@@ -30,6 +30,7 @@ import {Autoscan} from './gerbera-autoscan.module.js';
 import {Updates} from './gerbera-updates.module.js';
 
 const SID = 'GerberaSID';
+let Updates_initialized;
 
 const checkSID = () => {
   var data = {
@@ -90,6 +91,10 @@ const authenticate = () => {
         GerberaApp.error(err);
       });
   } else {
+    if (!Updates_initialized) {
+      Updates.initialize();
+      Updates_initialized = true
+    }
     Updates.showMessage('Please enter username and password', undefined, 'warning', 'fa-sign-in');
     promise = Promise.resolve({});
   }
@@ -119,6 +124,10 @@ const submitLogin = (response) => {
       GerberaApp.error(err);
     });
   } else {
+    if (!Updates_initialized) {
+      Updates.initialize();
+      Updates_initialized = true
+    }
     Updates.showMessage(response.error.text, undefined, 'warning', 'fa-exclamation-circle')
   }
 };
@@ -138,7 +147,10 @@ const checkLogin = (response) => {
     Trail.initialize();
     Menu.initialize();
     Autoscan.initialize();
-    Updates.initialize();
+    if (!Updates_initialized) {
+      Updates.initialize();
+      Updates_initialized = true
+    }
   }
 };
 
