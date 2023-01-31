@@ -62,10 +62,13 @@ const showMessage = (message, callback, type, icon) => {
 
 const showTask = (message, callback, type, icon) => {
   const toast = {message: message, type: type, icon: icon};
-  if (callback) {
-    toast.callback = callback;
+  console.log(`${type}: ${message}`);
+  if (initialized) {
+    if (callback) {
+      toast.callback = callback;
+    }
+    $('#toast').toast('showTask', toast);
   }
-  $('#toast').toast('showTask', toast);
 };
 
 const getUpdates = (force) => {
