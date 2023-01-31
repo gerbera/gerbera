@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "karma start karma.conf.js",
-    "testDebug": "karma start karma.conf.js --log-level debug",
+    "test:debug": "karma start karma.conf.js --log-level debug",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
     "e2e": "SELENIUM_BROWSER=chrome mocha --timeout 15000 \"test/e2e/**.spec.js\"",
     "screenshot": "rimraf _build && mkdirp _build/doc && mocha --timeout 15000 \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/",
