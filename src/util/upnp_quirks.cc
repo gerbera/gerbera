@@ -47,9 +47,14 @@ Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr
         pClientInfo = clientManager->getInfo(addr, userAgent);
 }
 
-int Quirks::checkFlags(int flags) const
+long Quirks::checkFlags(long flags) const
 {
     return pClientInfo ? pClientInfo->flags & flags : 0;
+}
+
+bool Quirks::hasFlag(long flag) const
+{
+    return pClientInfo && (pClientInfo->flags & flag) == flag;
 }
 
 std::string Quirks::getGroup() const
@@ -59,7 +64,7 @@ std::string Quirks::getGroup() const
 
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
 {
-    if (!pClientInfo || (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG)) {
         log_debug("addCaptionInfo called, but it is not enabled for this client");
         return;
     }
@@ -79,7 +84,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
 
 void Quirks::getSamsungFeatureList(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG)) {
         log_debug("X_GetFeatureList called, but it is not enabled for this client");
         return;
     }
@@ -115,7 +120,7 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
 
 std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::shared_ptr<Database>& database, const std::string& objId) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
         log_debug("getSamsungFeatureRoot called, but it is not enabled for this client");
         return {};
     }
@@ -145,7 +150,7 @@ static std::string xmlChild(const pugi::xml_node& root, const char* child)
 
 void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
         log_debug("X_GetObjectIDfromIndex called, but it is not enabled for this client");
         return;
     }
@@ -170,7 +175,7 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 
 void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_FEATURES) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
         log_debug("X_GetIndexfromRID called, but it is not enabled for this client");
         return;
     }
@@ -194,7 +199,7 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 
 void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offset) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) && !hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)) {
         log_debug("restoreSamsungBookMarkedPosition called, but it is not enabled for this client");
         return;
     }
@@ -204,7 +209,7 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
         positionToRestore -= offset;
     log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
 
-    if (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)
+    if (hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC))
         positionToRestore *= 1000;
 
     auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", item->getTitle(), positionToRestore);
@@ -213,10 +218,10 @@ void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& it
 
 void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& database, ActionRequest& request) const
 {
-    if ((pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) == 0 && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0) {
+    if (!hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC) && !hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC)) {
         log_debug("X_SetBookmark called, but it is not enabled for this client");
     } else {
-        auto divider = (pClientInfo->flags & QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) == 0 ? 1 : 1000;
+        auto divider = hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) ? 1 : 1000;
         auto reqRoot = request.getRequest()->document_element();
         if (reqRoot) {
             auto objectID = stoiString(xmlChild(reqRoot, "ObjectID"));
@@ -243,12 +248,12 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
 
 bool Quirks::blockXmlDeclaration() const
 {
-    return (pClientInfo && (pClientInfo->flags & QUIRK_FLAG_IRADIO) == QUIRK_FLAG_IRADIO);
+    return hasFlag(QUIRK_FLAG_IRADIO);
 }
 
 bool Quirks::needsFileNameUri() const
 {
-    return !pClientInfo || (pClientInfo->flags & QUIRK_FLAG_PANASONIC) != QUIRK_FLAG_PANASONIC;
+    return !hasFlag(QUIRK_FLAG_PANASONIC);
 }
 
 int Quirks::getCaptionInfoCount() const
@@ -263,7 +268,7 @@ int Quirks::getStringLimit() const
 
 bool Quirks::needsStrictXml() const
 {
-    return pClientInfo && (pClientInfo->flags & QUIRK_FLAG_STRICTXML) == QUIRK_FLAG_STRICTXML;
+    return hasFlag(QUIRK_FLAG_STRICTXML);
 }
 
 bool Quirks::getMultiValue() const

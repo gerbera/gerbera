@@ -125,7 +125,7 @@ public:
      * \return bitset of the flags
      *
      */
-    int checkFlags(int flags) const;
+    long checkFlags(long flags) const;
 
     /** \brief Get number of allow CaptionInfoEx entries
      *
@@ -172,6 +172,8 @@ public:
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientInfo* pClientInfo;
+
+    bool hasFlag(long flag) const;
 };
 
 #endif // __UPNP_QUIRKS_H__
