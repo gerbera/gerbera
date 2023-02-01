@@ -54,7 +54,7 @@ long Quirks::checkFlags(long flags) const
 
 bool Quirks::hasFlag(long flag) const
 {
-    return pClientInfo && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == flag;
+    return pClientInfo && (pClientInfo->flags & flag) == flag;
 }
 
 std::string Quirks::getGroup() const
