@@ -52,6 +52,10 @@ services:
     volumes:
       - gerbera-config:/var/run/gerbera
       - /some/files:/content:ro
+
+volumes:
+  gerbera-config:
+    external: false
 ```
 
 The directory `/content` is automatically scanned for content by default.
