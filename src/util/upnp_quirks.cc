@@ -52,7 +52,6 @@ long Quirks::checkFlags(long flags) const
     return pClientInfo ? pClientInfo->flags & flags : 0;
 }
 
-
 bool Quirks::hasFlag(long flag) const
 {
     return pClientInfo && (pClientInfo->flags & QUIRK_FLAG_SAMSUNG) == flag;
