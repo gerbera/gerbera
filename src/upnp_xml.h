@@ -74,7 +74,7 @@ public:
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item
-    void renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks = nullptr) const;
+    void renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, std::optional<std::reference_wrapper<Quirks>> quirks = std::nullopt) const;
 
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
@@ -101,7 +101,7 @@ public:
 
     std::string renderResourceURL(const CdsObject& item, const CdsResource& res, const std::map<std::string, std::string>& mimeMappings, const std::string& clientGroup = "") const;
 
-    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const;
+    void addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const Quirks& quirks) const;
 
     /// \brief build path for first resource from item
     /// depending on the item type it returns the url to the media
@@ -128,7 +128,7 @@ protected:
     std::map<std::string, std::string> transferMappings;
 
     std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const CdsObject& object) const;
-    std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const;
+    std::pair<bool, int> insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const Quirks& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const;
 
     std::string renderExtension(const std::string& contentType, const fs::path& location, const std::string& language) const;
     void addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const;

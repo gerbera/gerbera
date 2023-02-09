@@ -65,9 +65,9 @@ std::string ActionRequest::getServiceID() const
     return serviceID;
 }
 
-const std::unique_ptr<Quirks>& ActionRequest::getQuirks() const
+const Quirks& ActionRequest::getQuirks() const
 {
-    return quirks;
+    return *quirks;
 }
 
 std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const

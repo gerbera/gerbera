@@ -163,7 +163,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #endif
     } else if (item) {
         UpnpFileInfo_set_FileLength(info, statbuf.st_size);
-        quirks->addCaptionInfo(item, headers);
+        quirks.addCaptionInfo(item, headers);
         resource = item->getResource(resourceId);
 
         // Generate DNLA Headers
@@ -265,10 +265,10 @@ std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::str
     return resourceId;
 }
 
-std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
+const Quirks FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
 {
     auto ctrlPtIPAddr = GrbNet(UpnpFileInfo_get_CtrlPtIPAddr(info));
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    return std::make_unique<Quirks>(*xmlBuilder, *(context->getClients()), ctrlPtIPAddr, std::move(userAgent));
+    return Quirks(*xmlBuilder, *(context->getClients()), ctrlPtIPAddr, userAgent);
 }

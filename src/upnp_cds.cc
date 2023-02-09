@@ -88,8 +88,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
-    auto&& quirks = request.getQuirks();
-    auto arr = quirks->getSamsungFeatureRoot(database, objID);
+    auto quirks = request.getQuirks();
+    auto arr = quirks.getSamsungFeatureRoot(database, objID);
     int objectID = stoiString(objID);
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
@@ -100,7 +100,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
             "Invalid browse flag: " + browseFlag);
 
-    auto parent = database->loadObject(quirks->getGroup(), objectID);
+    auto parent = database->loadObject(quirks.getGroup(), objectID);
     auto upnpClass = parent->getClass();
     if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
@@ -110,11 +110,11 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     auto param = BrowseParam(parent, flag);
 
-    param.setDynamicContainers(!quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
+    param.setDynamicContainers(!quirks.checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
     param.setStartingIndex(stoiString(startingIndex));
     param.setRequestedCount(stoiString(requestedCount));
     param.setSortCriteria(trimString(sortCriteria));
-    param.setGroup(quirks->getGroup());
+    param.setGroup(quirks.getGroup());
 
     try {
         if (arr.empty())
@@ -125,7 +125,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     }
 
     pugi::xml_document didlLite;
-    if (!quirks->blockXmlDeclaration()) {
+    if (!quirks.blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -137,8 +137,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
 
     auto stringLimitClient = stringLimit;
-    if (quirks->getStringLimit() > -1) {
-        stringLimitClient = quirks->getStringLimit();
+    if (quirks.getStringLimit() > -1) {
+        stringLimitClient = quirks.getStringLimit();
     }
 
     for (auto&& obj : arr) {
@@ -146,7 +146,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         xmlBuilder->renderObject(obj, stringLimitClient, didlLiteRoot, quirks);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks.needsStrictXml() ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
@@ -185,7 +185,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
-    if (!quirks->blockXmlDeclaration()) {
+    if (!quirks.blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -195,13 +195,13 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
-    if (quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES))
+    if (quirks.checkFlags(QUIRK_FLAG_PV_SUBTITLES))
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
     if (sortCriteria.empty()) {
         sortCriteria = fmt::format("+{}", MetadataHandler::getMetaFieldName(M_TITLE));
     }
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
-        stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
+        stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks.getGroup());
 
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
@@ -214,8 +214,8 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     }
 
     auto stringLimitClient = stringLimit;
-    if (quirks->getStringLimit() > -1) {
-        stringLimitClient = quirks->getStringLimit();
+    if (quirks.getStringLimit() > -1) {
+        stringLimitClient = quirks.getStringLimit();
     }
 
     for (auto&& cdsObject : results) {
@@ -241,7 +241,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         xmlBuilder->renderObject(cdsObject, stringLimitClient, didlLiteRoot);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks.needsStrictXml() ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
@@ -324,7 +324,9 @@ void ContentDirectoryService::doSamsungBookmark(ActionRequest& request) const
 {
     log_debug("start");
 
-    request.getQuirks()->saveSamsungBookMarkedPosition(database, request);
+    auto quirks = request.getQuirks();
+    log_debug("got quirks");
+    quirks.saveSamsungBookMarkedPosition(database, request);
 
     log_debug("end");
 }
@@ -333,7 +335,7 @@ void ContentDirectoryService::doSamsungFeatureList(ActionRequest& request)
 {
     log_debug("start");
 
-    request.getQuirks()->getSamsungFeatureList(request);
+    request.getQuirks().getSamsungFeatureList(request);
 
     log_debug("end");
 }
@@ -342,7 +344,7 @@ void ContentDirectoryService::doSamsungGetObjectIDfromIndex(ActionRequest& reque
 {
     log_debug("start");
 
-    request.getQuirks()->getSamsungObjectIDfromIndex(request);
+    request.getQuirks().getSamsungObjectIDfromIndex(request);
 
     log_debug("end");
 }
@@ -351,7 +353,7 @@ void ContentDirectoryService::doSamsungGetIndexfromRID(ActionRequest& request)
 {
     log_debug("start");
 
-    request.getQuirks()->getSamsungIndexfromRID(request);
+    request.getQuirks().getSamsungIndexfromRID(request);
 
     log_debug("end");
 }

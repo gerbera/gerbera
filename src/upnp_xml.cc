@@ -172,7 +172,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, std::optional<std::reference_wrapper<Quirks>> quirks) const
 {
     auto result = parent.append_child("");
 
@@ -180,7 +180,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     result.append_attribute("parentID") = obj->getParentID();
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
-    auto strictXml = quirks && quirks->needsStrictXml();
+    auto strictXml = quirks || quirks->get().needsStrictXml();
     const std::string title = obj->getTitle();
     const std::string upnpClass = obj->getClass();
 
@@ -194,8 +194,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
         if (quirks) {
-            quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
-            mvMeta = quirks->getMultiValue();
+            quirks->get().restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
+            mvMeta = quirks->get().getMultiValue();
         }
 
         auto metaGroups = obj->getMetaGroups();
@@ -239,7 +239,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         }
 
         addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
-        addResources(item, result, quirks);
+        addResources(item, result, quirks->get());
 
         result.set_name("item");
     } else if (obj->isContainer()) {
@@ -648,7 +648,7 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     return orderedResources;
 }
 
-std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const
+std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const Quirks& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const
 {
     bool hideOriginalResource = false;
     int originalResource = -1;
@@ -676,7 +676,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
                 continue;
             }
             // check for client profile prop and filter if no match
-            if (quirks && filter->getClientFlags() > 0 && quirks->checkFlags(filter->getClientFlags()) == 0) {
+            if (filter->getClientFlags() > 0 && quirks.checkFlags(filter->getClientFlags()) == 0) {
                 continue;
             }
             // check for transcoding profile
@@ -688,7 +688,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (!tp->isEnabled())
                 continue;
             // check for client profile prop and filter if no match
-            if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0) {
+            if (tp->getClientFlags() > 0 && quirks.checkFlags(tp->getClientFlags()) == 0) {
                 continue;
             }
             if (ct == CONTENT_TYPE_OGG) {
@@ -791,7 +791,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     return { hideOriginalResource, originalResource };
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const Quirks& quirks) const
 {
     bool isExternalURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
@@ -802,7 +802,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     // Subtitles are used to build CaptionInfoEx tags
     // Real resources are rendered lower down
     std::vector<std::map<std::string, std::string>> captionInfoEx;
-    auto mimeMappings = quirks ? quirks->getMimeMappings() : std::map<std::string, std::string>();
+    auto mimeMappings = quirks.getMimeMappings(); // ?? : std::map<std::string, std::string>();
     for (auto&& res : orderedResources) {
         auto purpose = res->getPurpose();
         if (purpose == CdsResource::Purpose::Content)
@@ -841,7 +841,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     }
 
     if (!captionInfoEx.empty()) {
-        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
+        auto count = (quirks.getCaptionInfoCount() > -1) ? quirks.getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
         for (auto&& captionInfo : captionInfoEx) {
             count--;
             if (count < 0)
@@ -861,7 +861,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
     for (auto&& res : orderedResources) {
         std::map<std::string, std::string> clientSpecficAttrs;
-        if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
+        if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks.checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
             auto captionInfo = captionInfoEx[0];
             clientSpecficAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]);
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];
@@ -869,7 +869,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
 
         // bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         bool transcoded = res->getPurpose() == CdsResource::Purpose::Transcode;
-        auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
+        auto clientGroup = quirks.getGroup(); // : DEFAULT_CLIENT_GROUP;
 
         buildProtocolInfo(*res, mimeMappings);
 

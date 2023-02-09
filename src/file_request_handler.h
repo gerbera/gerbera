@@ -53,7 +53,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 private:
-    std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
+    const Quirks getQuirks(const UpnpFileInfo* info) const;
     static std::size_t parseResourceInfo(std::map<std::string, std::string>& params);
     std::unique_ptr<MetadataHandler> getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const;
 };
