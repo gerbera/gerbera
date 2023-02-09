@@ -40,11 +40,11 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_headers.h"
 
-Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
-    : xmlBuilder(std::move(xmlBuilder))
+Quirks::Quirks(const UpnpXMLBuilder& xmlBuilder, const ClientManager& clientManager, const GrbNet& addr, const std::string& userAgent)
+    : xmlBuilder(xmlBuilder)
 {
-    if (addr || !userAgent.empty())
-        pClientInfo = clientManager->getInfo(addr, userAgent);
+    if (!userAgent.empty())
+        pClientInfo = clientManager.getInfo(addr, userAgent);
 }
 
 long Quirks::checkFlags(long flags) const
@@ -74,7 +74,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
         return;
     }
 
-    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientInfo->mimeMappings);
+    auto subAdded = xmlBuilder.renderSubtitleURL(item, pClientInfo->mimeMappings);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
@@ -91,7 +91,7 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
 
     log_debug("Call for Samsung extension: X_GetFeatureList");
 
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     pugi::xml_document respRoot;
     auto features = respRoot.append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
@@ -168,7 +168,7 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
     } else {
         log_warning("X_GetObjectIDfromIndex called without correct content");
     }
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
 }
@@ -192,7 +192,7 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
     } else {
         log_warning("X_GetIndexfromRID called without correct content");
     }
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     response->document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
 }
@@ -242,7 +242,7 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
             log_warning("X_SetBookmark called without correct content");
         }
     }
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto response = xmlBuilder.createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     request.setResponse(std::move(response));
 }
 

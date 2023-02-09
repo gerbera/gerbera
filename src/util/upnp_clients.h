@@ -32,9 +32,11 @@
 #include <mutex>
 #include <pugixml.hpp>
 #include <sys/socket.h>
+#include <utility>
 #include <vector>
 
 #include "common.h"
+#include "grb_net.h"
 #include "util/grb_time.h"
 #include "util/upnp_quirks.h"
 
@@ -83,7 +85,7 @@ struct ClientInfo {
 };
 
 struct ClientCacheEntry {
-    ClientCacheEntry(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+    ClientCacheEntry(GrbNet addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
         : addr(std::move(addr))
         , userAgent(std::move(userAgent))
         , last(last)
@@ -92,7 +94,7 @@ struct ClientCacheEntry {
     {
     }
 
-    std::shared_ptr<GrbNet> addr {};
+    GrbNet addr;
     std::string userAgent;
     std::chrono::seconds last;
     std::chrono::seconds age;
@@ -145,17 +147,17 @@ public:
     void refresh(const std::shared_ptr<Config>& config);
 
     // always return something, 'Unknown' if we do not know better
-    const ClientInfo* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const;
+    const ClientInfo* getInfo(const GrbNet& addr, const std::string& userAgent) const;
 
-    void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
+    void addClientByDiscovery(const GrbNet& addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
 
 private:
-    const ClientInfo* getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const;
+    const ClientInfo* getInfoByAddr(const GrbNet& addr) const;
     const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
 
-    const ClientInfo* getInfoByCache(const std::shared_ptr<GrbNet>& addr) const;
-    void updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const;
+    const ClientInfo* getInfoByCache(const GrbNet& addr) const;
+    void updateCache(const GrbNet& addr, const std::string& userAgent, const ClientInfo* pInfo) const;
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 

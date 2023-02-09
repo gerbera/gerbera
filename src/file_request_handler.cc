@@ -267,8 +267,8 @@ std::size_t FileRequestHandler::parseResourceInfo(std::map<std::string, std::str
 
 std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
 {
-    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
+    auto ctrlPtIPAddr = GrbNet(UpnpFileInfo_get_CtrlPtIPAddr(info));
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    return std::make_unique<Quirks>(xmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
+    return std::make_unique<Quirks>(*xmlBuilder, *(context->getClients()), ctrlPtIPAddr, std::move(userAgent));
 }

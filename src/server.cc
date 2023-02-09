@@ -413,7 +413,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(xmlBuilder, clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(*xmlBuilder, *clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {
@@ -459,7 +459,7 @@ int Server::handleUpnpClientEvent(Upnp_EventType eventType, const void* event)
     case UPNP_DISCOVERY_SEARCH_RESULT: {
         auto dEvent = static_cast<const UpnpDiscovery*>(event);
         const char* userAgent = UpnpDiscovery_get_Os_cstr(dEvent);
-        auto destAddr = std::make_shared<GrbNet>(UpnpDiscovery_get_DestAddr(dEvent));
+        auto destAddr = GrbNet(UpnpDiscovery_get_DestAddr(dEvent));
         const char* location = UpnpDiscovery_get_Location_cstr(dEvent);
 
         clientManager->addClientByDiscovery(destAddr, userAgent, location);

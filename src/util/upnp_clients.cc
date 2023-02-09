@@ -190,7 +190,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
-void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation)
+void ClientManager::addClientByDiscovery(const GrbNet& addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
     const ClientInfo* info = nullptr;
@@ -203,7 +203,7 @@ void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, co
 #endif
 }
 
-const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const
+const ClientInfo* ClientManager::getInfo(const GrbNet& addr, const std::string& userAgent) const
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -230,20 +230,20 @@ const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, co
         updateCache(addr, userAgent, info);
     }
 
-    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr->getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type), ClientConfig::mapFlags(info->flags));
+    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr.getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type), ClientConfig::mapFlags(info->flags));
     return info;
 }
 
-const ClientInfo* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
+const ClientInfo* ClientManager::getInfoByAddr(const GrbNet& addr) const
 {
     auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
             return false;
-        return addr->equals(c.match);
+        return addr.equals(c.match);
     });
 
     if (it != clientInfo.end()) {
-        log_debug("found client by IP (ip='{}')", addr->getHostName());
+        log_debug("found client by IP (ip='{}')", addr.getHostName());
         return &(*it);
     }
 
@@ -263,22 +263,22 @@ const ClientInfo* ClientManager::getInfoByType(const std::string& match, ClientM
     return nullptr;
 }
 
-const ClientInfo* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& addr) const
+const ClientInfo* ClientManager::getInfoByCache(const GrbNet& addr) const
 {
     AutoLock lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr); });
+        { return entry.addr.equals(addr); });
 
     if (it != cache.end()) {
-        log_debug("found client by cache (hostname='{}')", it->addr->getHostName());
+        log_debug("found client by cache (hostname='{}')", it->addr.getHostName());
         return it->pInfo;
     }
 
     return nullptr;
 }
 
-void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const
+void ClientManager::updateCache(const GrbNet& addr, const std::string& userAgent, const ClientInfo* pInfo) const
 {
     AutoLock lock(mutex);
 
@@ -289,7 +289,7 @@ void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr); });
+        { return entry.addr.equals(addr); });
 
     if (it != cache.end()) {
         it->last = now;

@@ -2183,8 +2183,8 @@ std::vector<ClientCacheEntry> SQLDatabase::getClients()
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        auto net = std::make_shared<GrbNet>(row->col(0), row->col_int(2, AF_INET));
-        net->setPort(row->col_int(1, 0));
+        auto net = GrbNet(row->col(0), row->col_int(2, AF_INET));
+        net.setPort(row->col_int(1, 0));
         result.emplace_back(net,
             row->col(3),
             std::chrono::seconds(row->col_int(4, 0)),
@@ -2209,9 +2209,9 @@ void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
     };
     for (auto& client : cache) {
         auto values = std::vector {
-            quote(client.addr->getNameInfo(false)),
-            quote(client.addr->getPort()),
-            quote(client.addr->getAdressFamily()),
+            quote(client.addr.getNameInfo(false)),
+            quote(client.addr.getPort()),
+            quote(client.addr.getAdressFamily()),
             quote(client.userAgent),
             quote(client.last.count()),
             quote(client.age.count()),

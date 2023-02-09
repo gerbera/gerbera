@@ -39,15 +39,15 @@
 #include "util/grb_net.h"
 #include "util/upnp_quirks.h"
 
-ActionRequest::ActionRequest(std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<ClientManager>& clients, UpnpActionRequest* upnpRequest)
+ActionRequest::ActionRequest(const UpnpXMLBuilder& xmlBuilder, const ClientManager& clients, UpnpActionRequest* upnpRequest)
     : upnp_request(upnpRequest)
     , actionName(UpnpActionRequest_get_ActionName_cstr(upnpRequest))
     , UDN(UpnpActionRequest_get_DevUDN_cstr(upnpRequest))
     , serviceID(UpnpActionRequest_get_ServiceID_cstr(upnpRequest))
 {
-    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest));
+    auto grbNet = GrbNet(UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest));
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnpRequest);
-    quirks = std::make_unique<Quirks>(xmlBuilder, clients, ctrlPtIPAddr, userAgent);
+    quirks = std::make_unique<Quirks>(xmlBuilder, clients, grbNet, userAgent);
 }
 
 std::string ActionRequest::getActionName() const

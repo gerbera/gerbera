@@ -53,9 +53,9 @@ void Web::Clients::process()
     auto&& clientArr = content->getContext()->getClients()->getClientList();
     for (auto&& obj : clientArr) {
         auto item = clients.append_child("client");
-        auto ip = obj.addr->getNameInfo();
+        auto ip = obj.addr.getNameInfo();
         item.append_attribute("ip") = ip.c_str();
-        auto hostName = obj.addr->getHostName();
+        auto hostName = obj.addr.getHostName();
         item.append_attribute("host") = hostName.c_str();
         item.append_attribute("time") = secondsToString(obj.age).c_str();
         item.append_attribute("last") = secondsToString(obj.last).c_str();

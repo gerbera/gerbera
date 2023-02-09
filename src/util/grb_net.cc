@@ -134,12 +134,12 @@ bool GrbNet::equals(const std::string& match) const
     return false;
 }
 
-bool GrbNet::equals(const std::shared_ptr<GrbNet>& other) const
+bool GrbNet::equals(const GrbNet& other) const
 {
-    return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&other->sockAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0;
+    return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&other.sockAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0;
 }
 
-std::string GrbNet::getHostName()
+std::string GrbNet::getHostName() const
 {
     if (!hostName.empty())
         return hostName;
