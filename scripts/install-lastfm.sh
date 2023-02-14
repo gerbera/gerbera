@@ -4,7 +4,7 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 set -ex
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+.$(dirname "${BASH_SOURCE[0]}")/versions.sh
 
 VERSION="${LASTFM-0.4.0}"
 wget "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lastfmlib/lastfmlib-${VERSION}.tar.gz"
