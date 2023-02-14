@@ -7,6 +7,7 @@ RUN apk add --no-cache  \
     curl-dev \
     duktape-dev \
     ffmpeg4-dev \
+    jpeg-dev \
     file-dev \
     fmt-dev \
     g++ \
@@ -67,6 +68,7 @@ RUN apk add --no-cache \
     curl \
     duktape \
     ffmpeg4-libs \
+    libjpeg \
     file \
     fmt \
     libebml \

@@ -7,6 +7,7 @@ RUN apk add --no-cache  \
     cmake zlib-dev \
     curl-dev \
     ffmpeg4-dev \
+    jpeg-dev \
     file-dev \
     g++ \
     gcc \
@@ -120,6 +121,7 @@ RUN apk add --no-cache \
     util-linux \
     zlib \
     ffmpeg4 \
+    libjpeg \
     libheif-tools \
     # libexecinfo \
     ffmpeg4-libs \
