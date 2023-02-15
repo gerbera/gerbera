@@ -140,14 +140,6 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
     return {};
 }
 
-static std::string xmlChild(const pugi::xml_node& root, const char* child)
-{
-    auto childNode = root.child(child);
-    if (childNode)
-        return childNode.text().as_string();
-    return {};
-}
-
 void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 {
     if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
@@ -157,12 +149,13 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
 
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
-    auto reqRoot = request.getRequest()->document_element();
+    auto doc = request.getRequest();
+    auto reqRoot = doc->document_element();
     if (reqRoot) {
         log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-        [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
-        [[maybe_unused]] auto index = xmlChild(reqRoot, "Index");
+        [[maybe_unused]] auto categoryType = reqRoot.child_value("CategoryType");
+        [[maybe_unused]] auto index = reqRoot.child_value("Index");
 
         log_debug("X_GetObjectIDfromIndex CategoryType [{}] Index[{}]", categoryType, index);
     } else {
@@ -181,12 +174,13 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
     }
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
-    auto reqRoot = request.getRequest()->document_element();
+    auto doc = request.getRequest();
+    auto reqRoot = doc->document_element();
     if (reqRoot) {
         log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
-        [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
-        [[maybe_unused]] auto rID = xmlChild(reqRoot, "RID");
+        [[maybe_unused]] auto categoryType = reqRoot.child_value("CategoryType");
+        [[maybe_unused]] auto rID = reqRoot.child_value("RID");
 
         log_debug("X_GetIndexfromRID CategoryType [{}] RID[{}]", categoryType, rID);
     } else {
@@ -222,12 +216,15 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
         log_debug("X_SetBookmark called, but it is not enabled for this client");
     } else {
         auto divider = hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) ? 1 : 1000;
-        auto reqRoot = request.getRequest()->document_element();
+        auto doc = request.getRequest();
+        auto reqRoot = doc->document_element();
         if (reqRoot) {
-            auto objectID = stoiString(xmlChild(reqRoot, "ObjectID"));
-            auto bookMarkPos = stoiString(xmlChild(reqRoot, "PosSecond")) / divider;
-            [[maybe_unused]] auto categoryType = xmlChild(reqRoot, "CategoryType");
-            [[maybe_unused]] auto rID = xmlChild(reqRoot, "RID");
+            log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
+
+            auto objectID = stoiString(reqRoot.child_value("ObjectID"));
+            auto bookMarkPos = stoiString(reqRoot.child_value("PosSecond")) / divider;
+            [[maybe_unused]] auto categoryType = reqRoot.child_value("CategoryType");
+            [[maybe_unused]] auto rID = reqRoot.child_value("RID");
 
             log_debug("X_SetBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
             auto playStatus = database->getPlayStatus(pClientInfo->group, objectID);
