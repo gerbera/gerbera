@@ -46,7 +46,7 @@ class ScriptingRuntime;
 
 class ImportScript : public Script {
 public:
-    ImportScript(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<ScriptingRuntime>& runtime);
+    ImportScript(const std::shared_ptr<ContentManager>& content);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;

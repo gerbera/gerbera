@@ -44,31 +44,31 @@
 #define SOURCE (-1)
 #define OFF 0
 
-enum transcoding_type_t {
-    TR_None,
-    TR_External,
-    TR_Remote
+enum class TranscodingType {
+    None,
+    External,
+    Remote
 };
 
-enum avi_fourcc_listmode_t {
-    FCC_None,
-    FCC_Process,
-    FCC_Ignore
+enum class AviFourccListmode {
+    None,
+    Process,
+    Ignore
 };
 
 /// \brief this class keeps all data associated with one transcoding profile.
 class TranscodingProfile {
 public:
-    TranscodingProfile(bool enabled, transcoding_type_t trType, std::string name);
+    TranscodingProfile(bool enabled, TranscodingType trType, std::string name);
 
     int getClientFlags() const { return clientFlags; }
     void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
 
     /// \brief returns the transcoding type.
-    transcoding_type_t getType() const { return trType; }
+    TranscodingType getType() const { return trType; }
 
     /// \brief set type of the transcoding profile
-    void setType(transcoding_type_t type) { this->trType = type; }
+    void setType(TranscodingType type) { this->trType = type; }
 
     /// \brief set name of the transcoding profile
     void setName(const std::string& name) { this->name = name; }
@@ -172,12 +172,12 @@ public:
     /// \param list List of FourCC entries.
     /// \param mode Specifies if the FourCCs in the list are accepted or ignored
     void setAVIFourCCList(const std::vector<std::string>& list,
-        avi_fourcc_listmode_t mode = FCC_Ignore);
+        AviFourccListmode mode = AviFourccListmode::Ignore);
 
     /// \brief Retrieves the FourCC list
     const std::vector<std::string>& getAVIFourCCList() const;
     /// \brief Provides information on the mode of the list
-    avi_fourcc_listmode_t getAVIFourCCListMode() const { return fourccMode; }
+    AviFourccListmode getAVIFourCCListMode() const { return fourccMode; }
 
     /// \brief Send out the data in chunked encoding
     void setEnabled(bool newEnabled) { enabled = newEnabled; }
@@ -190,8 +190,6 @@ public:
     /// \brief Number of channels
     void setNumChannels(int chans) { numberOfChannels = chans; }
     int getNumChannels() const { return numberOfChannels; }
-
-    static std::string mapFourCcMode(avi_fourcc_listmode_t mode);
 
 protected:
     bool enabled { true };
@@ -208,13 +206,13 @@ protected:
     std::size_t bufferSize {};
     std::size_t chunkSize {};
     std::size_t initialFillSize {};
-    transcoding_type_t trType;
+    TranscodingType trType { TranscodingType::None };
     int numberOfChannels { SOURCE };
     int sampleFrequency { SOURCE };
     std::map<CdsResource::Attribute, std::string> attributeOverrides;
     std::map<std::string, std::string> environment;
     std::vector<std::string> fourccList;
-    avi_fourcc_listmode_t fourccMode { FCC_None };
+    AviFourccListmode fourccMode { AviFourccListmode::None };
     int clientFlags { 0 };
     std::string dlnaProf;
 };

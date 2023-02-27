@@ -28,6 +28,7 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "content/autoscan.h"
+#include "util/string_converter.h"
 
 #include <array>
 
@@ -56,4 +57,15 @@ bool ConfigStringSetup::CheckSqlJournalMode(std::string& value)
 {
     value.assign(toUpper(value));
     return std::find(sqliteJournalModes.begin(), sqliteJournalModes.end(), value) != sqliteJournalModes.end();
+}
+
+bool ConfigStringSetup::CheckCharset(std::string& value)
+{
+    try {
+        auto conv = StringConverter(value, DEFAULT_INTERNAL_CHARSET);
+    } catch (const std::runtime_error& e) {
+        log_error("Error in config file: unsupported charset specified: {}\n{}", value, e.what());
+        return false;
+    }
+    return true;
 }

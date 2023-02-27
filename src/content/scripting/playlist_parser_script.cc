@@ -177,9 +177,8 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx)
 }
 
 ParserScript::ParserScript(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime,
     const std::string& name, const std::string& objName)
-    : Script(content, runtime, name, objName, StringConverter::p2i(content->getContext()->getConfig()))
+    : Script(content, name, objName, StringConverter::p2i(content->getContext()->getConfig()))
 {
     defineFunction("readln", jsReadln, 0);
     defineFunction("readXml", jsReadXml, 1);
@@ -232,9 +231,8 @@ std::pair<std::string, bool> ParserScript::readLine()
     }
 }
 
-PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime)
-    : ParserScript(content, runtime, "playlist", "playlist")
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content)
+    : ParserScript(content, "playlist", "playlist")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
@@ -397,9 +395,8 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
     }
 }
 
-MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime)
-    : ParserScript(content, runtime, "metafile", "obj")
+MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content)
+    : ParserScript(content, "metafile", "obj")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 0);

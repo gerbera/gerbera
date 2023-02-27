@@ -34,13 +34,14 @@
 #include "cds/cds_item.h"
 #include "content_manager.h"
 #include "database/database.h"
-#include "layout/layout.h"
+#include "layout/builtin_layout.h"
 #include "upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
 #ifdef HAVE_JS
+#include "layout/js_layout.h"
 #include "scripting/import_script.h"
 #include "scripting/playlist_parser_script.h"
 #endif
@@ -54,6 +55,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     hasReadableNames = config->getBoolOption(CFG_IMPORT_READABLE_NAMES);
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
 
@@ -64,6 +66,43 @@ void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr
         this->autoscanDir = std::move(autoScan);
         this->rootPath = path;
     }
+}
+
+void ImportService::initLayout(LayoutType layoutType)
+{
+#ifdef HAVE_JS
+    if (!playlistParserScript) {
+        playlistParserScript = std::make_unique<PlaylistParserScript>(content);
+    }
+#endif
+    if (!layout) {
+        log_debug("virtual layout Type {}", layoutType);
+        try {
+            std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
+
+            if (layoutType == LayoutType::Js) {
+#ifdef HAVE_JS
+                layout = std::make_shared<JSLayout>(content);
+#else
+                log_error("Cannot init virtual layout:\nGerbera compiled without JavaScript support, but JavaScript was requested.");
+#endif
+            } else if (layoutType == LayoutType::Builtin) {
+                layout = std::make_shared<BuiltinLayout>(content);
+            }
+        } catch (const std::runtime_error& e) {
+            layout = nullptr;
+            log_error("Init virtual container layout failed: {}", e.what());
+            throw;
+        }
+    }
+}
+
+void ImportService::destroyLayout()
+{
+    layout = nullptr;
+#ifdef HAVE_JS
+    playlistParserScript = nullptr;
+#endif
 }
 
 std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType)
@@ -163,7 +202,7 @@ void ImportService::createItems(AutoScanSetting& settings)
     std::error_code ec;
     std::shared_ptr<CdsContainer> parentContainer = nullptr;
     auto lastModifiedCurrentMax = std::chrono::seconds::zero();
-    // auto currentTme = currentTime();
+    // auto_currentTme_=_currentTime();
     auto lastModifiedNewMax = lastModifiedCurrentMax;
     fs::path contPath;
 
@@ -257,17 +296,17 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
 {
     std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : object;
 
-    if (cdsObject->isItem() && content->layout) {
+    if (cdsObject && cdsObject->isItem() && layout) {
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
             if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
-                std::scoped_lock<decltype(content->layoutMutex)> lock(content->layoutMutex);
+                std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
                 // get ref'd objects with last mod time
                 auto listOrig = state ? database->getRefObjects(cdsObject->getID()) : std::vector<std::pair<int, std::chrono::seconds>> {};
-                content->layout->processCdsObject(cdsObject, rootPath, contentType, autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults);
+                layout->processCdsObject(cdsObject, rootPath, contentType, autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults);
                 // compare ref'd objects last mod time
                 auto listResult = state ? database->getRefObjects(cdsObject->getID()) : std::vector<std::pair<int, std::chrono::seconds>> {};
                 for (auto&& origEntry : listOrig) {
@@ -389,10 +428,13 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(const fs::dir
     std::vector<int> createdIds;
     addContainerTree(cVec, createdIds);
 
-    auto result = containerMap.at(location);
-    std::error_code ec;
-    result->setMTime(toSeconds(dirEntry.last_write_time(ec)));
-    return result;
+    if (containerMap.find(location) != containerMap.end()) {
+        auto result = containerMap.at(location);
+        std::error_code ec;
+        result->setMTime(toSeconds(dirEntry.last_write_time(ec)));
+        return result;
+    }
+    return {};
 }
 
 /// \param createdIds used by messaging in ContentManager
@@ -409,7 +451,7 @@ std::pair<int, bool> ImportService::addContainerTree(const std::vector<std::shar
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received container chain item {}", tree);
-        for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
+        for (auto&& [key, val] : configLayoutMapping) {
             tree = std::regex_replace(tree, std::regex(key), val);
         }
         if (containerMap.find(tree) == containerMap.end()) {

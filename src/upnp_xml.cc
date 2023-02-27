@@ -697,12 +697,12 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
                 }
             } else if (ct == CONTENT_TYPE_AVI) {
                 // check user fourcc settings
-                avi_fourcc_listmode_t fccMode = tp->getAVIFourCCListMode();
+                AviFourccListmode fccMode = tp->getAVIFourCCListMode();
 
                 const auto& fccList = tp->getAVIFourCCList();
                 // mode is either process or ignore, so we will have to take a
                 // look at the settings
-                if (fccMode != FCC_None) {
+                if (fccMode != AviFourccListmode::None) {
                     std::string currentFcc = mainResource->getOption(RESOURCE_OPTION_FOURCC);
                     // we can not do much if the item has no fourcc info,
                     // so we will transcode it anyway
@@ -710,16 +710,16 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
                         // the process mode specifies that we will transcode
                         // ONLY if the fourcc matches the list; since an invalid
                         // fourcc can not match anything we will skip the item
-                        if (fccMode == FCC_Process)
+                        if (fccMode == AviFourccListmode::Process)
                             continue;
                     } else {
                         // we have the current and hopefully valid fcc string
                         // let's have a look if it matches the list
                         bool fccMatch = std::find(fccList.begin(), fccList.end(), currentFcc) != fccList.end();
-                        if (!fccMatch && (fccMode == FCC_Process))
+                        if (!fccMatch && (fccMode == AviFourccListmode::Process))
                             continue;
 
-                        if (fccMatch && (fccMode == FCC_Ignore))
+                        if (fccMatch && (fccMode == AviFourccListmode::Ignore))
                             continue;
                     }
                 }

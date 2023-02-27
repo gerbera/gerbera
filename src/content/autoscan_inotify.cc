@@ -252,9 +252,10 @@ void AutoscanInotify::threadProc()
                             asSetting.recursive = adir->getRecursive();
                             asSetting.hidden = adir->getHidden();
                             asSetting.rescanResource = true;
+                            asSetting.async = true;
                             asSetting.mergeOptions(config, path);
                             // path, recursive, async, hidden, rescanResource, low priority, cancellable
-                            content->addFile(dirEnt, adir->getLocation(), asSetting, true, true, false);
+                            content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
                             if (mask & IN_ISDIR) {
                                 monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
                             }

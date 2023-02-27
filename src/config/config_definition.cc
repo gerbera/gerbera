@@ -31,10 +31,13 @@
 #endif
 
 #include "client_config.h"
+#include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "config_setup_enum.h"
 #include "content/autoscan.h"
 #include "content/autoscan_list.h"
+#include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
@@ -67,9 +70,7 @@
 #define DEFAULT_RESOURCES_CASE_SENSITIVE YES
 #define DEFAULT_UPNP_STRING_LIMIT (-1)
 #define DEFAULT_SESSION_TIMEOUT 30
-#define DEFAULT_PRES_URL_APPENDTO_ATTR "none"
 #define DEFAULT_ITEMS_PER_PAGE 25
-#define DEFAULT_LAYOUT_TYPE LAYOUT_TYPE_BUILTIN
 #define DEFAULT_HIDE_PC_DIRECTORY NO
 #define DEFAULT_CLIENTS_EN_VALUE NO
 
@@ -77,7 +78,6 @@
 #define DEFAULT_ATRAILERS_ENABLED NO
 #define DEFAULT_ATRAILERS_UPDATE_AT_START NO
 #define DEFAULT_ATRAILERS_REFRESH 43200
-#define DEFAULT_ATRAILERS_RESOLUTION 640
 #endif
 
 #define DEFAULT_TRANSCODING_ENABLED NO
@@ -383,10 +383,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DESC_SERIAL_NUMBER),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_PRESENTATION_URL,
         "/server/presentationURL", "config-server.html#presentationurl", ""),
-    std::make_shared<ConfigEnumSetup<std::string>>(CFG_SERVER_APPEND_PRESENTATION_URL_TO,
+    std::make_shared<ConfigEnumSetup<UrlAppendMode>>(CFG_SERVER_APPEND_PRESENTATION_URL_TO,
         "/server/presentationURL/attribute::append-to", "config-server.html#presentationurl",
-        DEFAULT_PRES_URL_APPENDTO_ATTR,
-        std::map<std::string, std::string>({ { "none", "none" }, { "ip", "ip" }, { "port", "port" } })),
+        UrlAppendMode::none,
+        std::map<std::string, UrlAppendMode>({ { "none", UrlAppendMode::none }, { "ip", UrlAppendMode::ip }, { "port", UrlAppendMode::port } })),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_UDN,
         "/server/udn", "config-server.html#udn"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_HOME,
@@ -404,7 +404,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_HIDE_PC_DIRECTORY),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_BOOKMARK_FILE,
         "/server/bookmark", "config-server.html#bookmark",
-        DEFAULT_BOOKMARK_FILE, true, false),
+        DEFAULT_BOOKMARK_FILE, ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT,
         "/server/upnp-string-limit", "config-server.html#upnp-string-limit",
         DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
@@ -441,10 +441,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_MYSQL_DB),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE,
         "/server/storage/mysql/init-sql-file", "config-server.html#storage",
-        "", true), // This should really be "dataDir / mysql.sql"
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty), // This should really be "dataDir / mysql.sql"
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE,
         "/server/storage/mysql/upgrade-file", "config-server.html#storage",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
 #else
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_MYSQL_ENABLED,
         "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
@@ -459,7 +459,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         YES),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE,
         "/server/storage/sqlite3/database-file", "config-server.html#storage",
-        "gerbera.db", true, false),
+        "gerbera.db", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
         "/server/storage/sqlite3/synchronous", "config-server.html#storage",
         "off", ConfigIntSetup::CheckSqlLiteSyncValue),
@@ -484,10 +484,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
         "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
-        "", true), // This should really be "dataDir / sqlite3.sql"
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty), // This should really be "dataDir / sqlite3.sql"
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE,
         "/server/storage/sqlite3/upgrade-file", "config-server.html#storage",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLED,
         "/server/ui/attribute::enabled", "config-server.html#ui",
@@ -566,9 +566,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_FOLLOW_SYMLINKS,
         "/import/attribute::follow-symlinks", "config-import.html#import",
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
-    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_NEW_MODE,
+    std::make_shared<ConfigEnumSetup<ImportMode>>(CFG_IMPORT_LAYOUT_MODE,
         "/import/attribute::import-mode", "config-import.html#import",
-        NO),
+        ImportMode::MediaTomb,
+        std::map<std::string, ImportMode>({ { "mt", ImportMode::MediaTomb }, { "grb", ImportMode::Gerbera } })),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_READABLE_NAMES,
         "/import/attribute::readable-names", "config-import.html#import",
         YES),
@@ -611,25 +612,25 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_JS
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_CHARSET,
         "/import/scripting/attribute::script-charset", "config-import.html#scripting",
-        DEFAULT_JS_CHARSET),
+        DEFAULT_JS_CHARSET, ConfigStringSetup::CheckCharset),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT,
         "/import/scripting/common-script", "config-import.html#common-script",
-        "", true, false),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT,
         "/import/scripting/custom-script", "config-import.html#custom-script",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
         "/import/scripting/playlist-script", "config-import.html#playlist-script",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT,
         "/import/scripting/metafile-script", "config-import.html#metafile-script",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
         "/import/scripting/playlist-script/attribute::create-link", "config-import.html#playlist-script",
         DEFAULT_PLAYLIST_CREATE_LINK),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT,
         "/import/scripting/virtual-layout/import-script", "config-import.html#scripting",
-        "", true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO,
         "/import/scripting/virtual-layout/attribute::audio-layout", "config-import.html#scripting",
         ""),
@@ -671,17 +672,17 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ATTR_IMPORT_LAYOUT_GENRE, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_FILESYSTEM_CHARSET,
         "/import/filesystem-charset", "config-import.html#filesystem-charset",
-        DEFAULT_FILESYSTEM_CHARSET),
+        DEFAULT_FILESYSTEM_CHARSET, ConfigStringSetup::CheckCharset),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_METADATA_CHARSET,
         "/import/metadata-charset", "config-import.html#metadata-charset",
-        DEFAULT_FILESYSTEM_CHARSET),
+        DEFAULT_FILESYSTEM_CHARSET, ConfigStringSetup::CheckCharset),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_PLAYLIST_CHARSET,
         "/import/playlist-charset", "config-import.html#playlist-charset",
-        DEFAULT_FILESYSTEM_CHARSET),
-    std::make_shared<ConfigEnumSetup<std::string>>(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
+        DEFAULT_FILESYSTEM_CHARSET, ConfigStringSetup::CheckCharset),
+    std::make_shared<ConfigEnumSetup<LayoutType>>(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
         "/import/scripting/virtual-layout/attribute::type", "config-import.html#scripting",
-        DEFAULT_LAYOUT_TYPE,
-        std::map<std::string, std::string>({ { LAYOUT_TYPE_JS, LAYOUT_TYPE_JS }, { LAYOUT_TYPE_BUILTIN, LAYOUT_TYPE_BUILTIN }, { LAYOUT_TYPE_DISABLED, LAYOUT_TYPE_DISABLED } })),
+        LayoutType::Builtin,
+        std::map<std::string, LayoutType>({ { "js", LayoutType::Js }, { "builtin", LayoutType::Builtin }, { "disabled", LayoutType::Disabled } })),
 
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_TRANSCODING_ENABLED,
         "/transcoding/attribute::enabled", "config-transcode.html#transcoding",
@@ -827,10 +828,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER,
         "/import/online-content/AppleTrailers/attribute::purge-after", "config-online.html#appletrailers",
         DEFAULT_ATRAILERS_REFRESH),
-    std::make_shared<ConfigEnumSetup<std::string>>(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION,
+    std::make_shared<ConfigEnumSetup<AtrailerResolution>>(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION,
         "/import/online-content/AppleTrailers/attribute::resolution", "config-online.html#appletrailers",
-        fmt::to_string(DEFAULT_ATRAILERS_RESOLUTION).c_str(),
-        std::map<std::string, std::string>({ { "640", "640" }, { "720", "720p" }, { "720p", "720p" } })),
+        AtrailerResolution::Low,
+        std::map<std::string, AtrailerResolution>({ { "640", AtrailerResolution::Low }, { "720", AtrailerResolution::Hi }, { "720p", AtrailerResolution::Hi } })),
 #endif
 
 #ifdef HAVE_INOTIFY
@@ -849,7 +850,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         AutoscanScanMode::Timed),
     std::make_shared<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION,
         "attribute::location", "config-import.html#autoscan",
-        "", false, true, true),
+        "", ConfigPathArguments::mustExist | ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE,
         "attribute::mode", "config-import.html#autoscan",
         std::map<std::string, AutoscanScanMode>({ { AUTOSCAN_TIMED, AutoscanScanMode::Timed }, { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify } })),
@@ -930,7 +931,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_MAGIC
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_MAGIC_FILE,
         "/import/magic-file", "config-import.html#magic-file",
-        ""),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
 #endif
 
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED,
@@ -939,12 +940,12 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED,
         "/transcoding/profiles/attribute::allow-unused", "config-transcode.html#profiles",
         NO),
-    std::make_shared<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE,
+    std::make_shared<ConfigEnumSetup<TranscodingType>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE,
         "attribute::type", "config-transcode.html#profiles",
-        std::map<std::string, transcoding_type_t>({ { "none", TR_None }, { "external", TR_External }, /* for the future...{"remote", TR_Remote}*/ })),
-    std::make_shared<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
+        std::map<std::string, TranscodingType>({ { "none", TranscodingType::None }, { "external", TranscodingType::External }, /* for the future...{"remote", TranscodingType::Remote}*/ })),
+    std::make_shared<ConfigEnumSetup<AviFourccListmode>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
         "mode", "config-transcode.html#profiles",
-        std::map<std::string, avi_fourcc_listmode_t>({ { "ignore", FCC_Ignore }, { "process", FCC_Process }, { "disabled", FCC_None } })),
+        std::map<std::string, AviFourccListmode>({ { "ignore", AviFourccListmode::Ignore }, { "process", AviFourccListmode::Process }, { "disabled", AviFourccListmode::None } })),
     std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING,
         "attribute::using", "config-transcode.html#profiles",
         ""),
@@ -1008,7 +1009,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         true, "", true),
     std::make_shared<ConfigPathSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND,
         "attribute::command", "config-transcode.html#profiles",
-        "", true, true, true, true),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::notEmpty | ConfigPathArguments::isExe | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS,
         "attribute::arguments", "config-transcode.html#profiles",
         true, "", true),
@@ -1036,7 +1037,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigPathSetup>(ATTR_DIRECTORIES_TWEAK_LOCATION,
         "attribute::location", "config-import.html#autoscan",
-        "", false, true, true),
+        "", ConfigPathArguments::mustExist | ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigBoolSetup>(ATTR_DIRECTORIES_TWEAK_INHERIT,
         "attribute::inherit", "config-import.html#autoscan",
         false, true),
@@ -1053,7 +1054,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_META_CHARSET,
         "attribute::meta-charset", "config-import.html#charset",
-        ""),
+        "", ConfigStringSetup::CheckCharset),
     std::make_shared<ConfigStringSetup>(ATTR_DIRECTORIES_TWEAK_FANART_FILE,
         "attribute::fanart-file", "config-import.html#resources",
         ""),
@@ -1197,10 +1198,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         true, false),
     std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION,
         "attribute::location", "config-server.html#location",
-        "/Auto", true, false, true),
+        "/Auto", ConfigPathArguments::isFile | ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_IMAGE,
         "attribute::image", "config-server.html#image",
-        "", true, false),
+        "", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_TITLE,
         "attribute::title", "config-server.html#title",
         ""),

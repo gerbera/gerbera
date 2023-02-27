@@ -51,7 +51,8 @@ void ConfigIntSetup::makeOption(std::string optValue, const std::shared_ptr<Conf
         }
     }
     try {
-        optionValue = std::make_shared<IntOption>(std::stoi(optValue));
+        auto intValue = (parseValue) ? parseValue(optValue) : std::stoi(optValue);
+        optionValue = std::make_shared<IntOption>(intValue);
         setOption(config);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue);
@@ -66,11 +67,11 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
                 throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, sVal);
             }
         } else if (valueCheck) {
-            if (!valueCheck(std::stoi(sVal))) {
+            if (!valueCheck(stoiString(sVal))) {
                 throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, sVal);
             }
         } else if (minCheck) {
-            if (!minCheck(std::stoi(sVal), minValue)) {
+            if (!minCheck(stoiString(sVal), minValue)) {
                 throw_std_runtime_error("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue);
             }
         }

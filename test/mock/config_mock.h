@@ -42,6 +42,7 @@ public:
             return 0;
         }
     }
+    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override
     {

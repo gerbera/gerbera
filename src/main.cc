@@ -96,7 +96,7 @@ static void printCopyright()
 static void logCopyright()
 {
     log_info("Gerbera UPnP Server {} - {}", GERBERA_VERSION, DESC_MANUFACTURER_URL);
-    log_info("Copyright 2016-2022 Gerbera Contributors.");
+    log_info("Copyright 2016-2023 Gerbera Contributors.");
     log_info("Gerbera is free software, covered by the GNU General Public License version 2");
 }
 

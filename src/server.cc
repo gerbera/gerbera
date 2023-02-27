@@ -48,6 +48,7 @@
 
 #include "action_request.h"
 #include "config/config_manager.h"
+#include "config/config_option_enum.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
@@ -296,10 +297,10 @@ std::string Server::getPresentationUrl() const
     if (presentationURL.empty()) {
         presentationURL = fmt::format("http://{}:{}/", ip, port);
     } else {
-        std::string appendto = config->getOption(CFG_SERVER_APPEND_PRESENTATION_URL_TO);
-        if (appendto == "ip") {
+        auto appendto = EnumOption<UrlAppendMode>::getEnumOption(config, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+        if (appendto == UrlAppendMode::ip) {
             presentationURL = fmt::format("http://{}:{}", ip, presentationURL);
-        } else if (appendto == "port") {
+        } else if (appendto == UrlAppendMode::port) {
             presentationURL = fmt::format("http://{}:{}/{}", ip, port, presentationURL);
         } // else appendto is none and we take the URL as it entered by user
     }

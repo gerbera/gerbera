@@ -37,10 +37,9 @@
 
 #include "content/scripting/import_script.h"
 
-JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime)
+JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content)
     : Layout(content)
-    , import_script(std::make_unique<ImportScript>(content, runtime))
+    , import_script(std::make_unique<ImportScript>(content))
 {
 }
 

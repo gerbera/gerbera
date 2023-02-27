@@ -44,6 +44,7 @@ public:
     bool recursive = true;
     bool hidden = false;
     bool rescanResource = true;
+    bool async = true;
     std::shared_ptr<AutoscanDirectory> adir;
     std::vector<std::string> resourcePatterns;
 

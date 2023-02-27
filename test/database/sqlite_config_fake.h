@@ -48,6 +48,7 @@ public:
     }
     void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
     int getIntOption(config_option_t option) const override { return 0; }
+    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override
     {
         if (option == CFG_SERVER_STORAGE_SQLITE_RESTORE) {

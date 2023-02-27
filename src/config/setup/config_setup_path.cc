@@ -35,7 +35,7 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
         return false;
     }
     pathValue.assign(resolvePath(optValue));
-    return !notEmpty || !pathValue.empty();
+    return !isSet(ConfigPathArguments::notEmpty) || !pathValue.empty();
 }
 
 bool ConfigPathSetup::checkExecutable(std::string& optValue) const
@@ -45,22 +45,22 @@ bool ConfigPathSetup::checkExecutable(std::string& optValue) const
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
         if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
-            log_warning("Error in configuration, could not find command \"{}\"", optValue);
-            return !mustExist;
+            log_warning("Error in configuration, could not find command \"{}\" for '{}'", optValue, cpath);
+            return !isSet(ConfigPathArguments::mustExist);
         }
         tmpPath = optValue;
     } else {
         tmpPath = findInPath(optValue);
         if (tmpPath.empty()) {
-            log_warning("Error in configuration, could not find  command \"{}\" in $PATH", optValue);
-            return !mustExist;
+            log_warning("Error in configuration, could not find  command \"{}\" in $PATH for '{}'", optValue, cpath);
+            return !isSet(ConfigPathArguments::mustExist);
         }
     }
 
     int err = 0;
     if (!isExecutable(tmpPath, &err)) {
-        log_warning("Error in configuration, file {} is not executable: {}", optValue, std::strerror(err));
-        return !mustExist;
+        log_warning("Error in configuration, file {} is not executable: {} for '{}'", optValue, std::strerror(err), cpath);
+        return !isSet(ConfigPathArguments::mustExist);
     }
     return true;
 }
@@ -68,7 +68,7 @@ bool ConfigPathSetup::checkExecutable(std::string& optValue) const
 std::string ConfigPathSetup::getXmlContent(const pugi::xml_node& root)
 {
     auto optValue = ConfigSetup::getXmlContent(root, true);
-    if (isExe) {
+    if (isSet(ConfigPathArguments::isExe)) {
         if (!checkExecutable(optValue)) {
             throw_std_runtime_error("Invalid {} file is not an executable '{}'", xpath, optValue);
         }
@@ -82,7 +82,7 @@ std::string ConfigPathSetup::getXmlContent(const pugi::xml_node& root)
 /// \param mustExist file/directory must exist
 fs::path ConfigPathSetup::resolvePath(fs::path path) const
 {
-    if (!resolveEmpty && path.empty()) {
+    if (!isSet(ConfigPathArguments::resolveEmpty) && path.empty()) {
         return path;
     }
     if (path.is_absolute() || (Home.is_relative() && path.is_relative()))
@@ -94,22 +94,22 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
 
     // verify that file/directory is there
     std::error_code ec;
-    if (isFile) {
-        if (mustExist) {
+    if (isSet(ConfigPathArguments::isFile)) {
+        if (isSet(ConfigPathArguments::mustExist)) {
             fs::directory_entry dirEnt(path, ec);
             if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
-                throw_std_runtime_error("File '{}' does not exist", path.string());
+                throw_std_runtime_error("File '{}' does not exist for '{}'", path.string(), cpath);
             }
         } else {
             fs::directory_entry dirEnt(path.parent_path(), ec);
             if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
-                throw_std_runtime_error("Parent directory '{}' does not exist", path.string());
+                throw_std_runtime_error("Parent directory '{}' does not exist for '{}'", path.string(), cpath);
             }
         }
-    } else if (mustExist) {
+    } else if (isSet(ConfigPathArguments::mustExist)) {
         fs::directory_entry dirEnt(path, ec);
         if (!dirEnt.is_directory(ec) && !dirEnt.is_symlink(ec)) {
-            throw_std_runtime_error("Directory '{}' does not exist", path.string());
+            throw_std_runtime_error("Directory '{}' does not exist for '{}'", path.string(), cpath);
         }
     }
 
@@ -121,21 +121,26 @@ void ConfigPathSetup::loadArguments(const std::map<std::string, std::string>* ar
 {
     if (arguments) {
         if (arguments->find("isFile") != arguments->end()) {
-            isFile = arguments->at("isFile") == "true";
+            setFlag(arguments->at("isFile") == "true", ConfigPathArguments::isFile);
         }
         if (arguments->find("mustExist") != arguments->end()) {
-            mustExist = arguments->at("mustExist") == "true";
+            setFlag(arguments->at("mustExist") == "true", ConfigPathArguments::mustExist);
         }
         if (arguments->find("notEmpty") != arguments->end()) {
-            notEmpty = arguments->at("notEmpty") == "true";
+            setFlag(arguments->at("notEmpty") == "true", ConfigPathArguments::notEmpty);
         }
         if (arguments->find("resolveEmpty") != arguments->end()) {
-            resolveEmpty = arguments->at("resolveEmpty") == "true";
+            setFlag(arguments->at("resolveEmpty") == "true", ConfigPathArguments::resolveEmpty);
         }
         if (arguments->find("isExe") != arguments->end()) {
-            isExe = arguments->at("isExe") == "true";
+            setFlag(arguments->at("isExe") == "true", ConfigPathArguments::isExe);
         }
     }
+}
+
+void ConfigPathSetup::setFlag(bool hasFlag, ConfigPathArguments flag)
+{
+    this->arguments = hasFlag ? (this->arguments | flag) : (this->arguments & static_cast<ConfigPathArguments>(~static_cast<int>(flag)));
 }
 
 void ConfigPathSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -156,7 +161,7 @@ void ConfigPathSetup::makeOption(std::string optValue, const std::shared_ptr<Con
 std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
-    if (isExe) {
+    if (isSet(ConfigPathArguments::isExe)) {
         if (!checkExecutable(optValue)) {
             throw_std_runtime_error("Invalid {} file is not an executable '{}'", xpath, optValue);
         }

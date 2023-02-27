@@ -25,14 +25,14 @@ Gerbera - https://gerbera.io/
 #define __ENUM_ITERATOR_H__
 
 /// \brief Iterator over values of a sequential enum between begin and end
-template <typename C, C beginVal, C endVal>
+template <typename En, En beginVal, En endVal>
 class EnumIterator {
 private:
-    using val_t = std::underlying_type_t<C>;
+    using val_t = std::underlying_type_t<En>;
     val_t val;
 
 public:
-    explicit EnumIterator(const C& f)
+    explicit EnumIterator(const En& f)
         : val(static_cast<val_t>(f))
     {
     }
@@ -47,7 +47,7 @@ public:
         return *this;
     }
 
-    C operator*() { return static_cast<C>(val); }
+    En operator*() { return static_cast<En>(val); }
 
     EnumIterator begin() const { return *this; }
     EnumIterator end() const
@@ -59,6 +59,25 @@ public:
     {
         return val != i.val;
     }
+};
+
+template<class En, class Under=typename std::underlying_type<En>::type>
+class FlagEnum
+{
+public:
+    FlagEnum() : _flags(0) {}
+    FlagEnum(En flag) : _flags(flag) {}
+    FlagEnum(const FlagEnum& original) : _flags(original._flags) {}
+
+    FlagEnum& operator |=(En addFlag) { _flags |= addFlag; return *this; }
+    FlagEnum operator |(En addFlag) { FlagEnum  result(*this); result |= addFlag; return result; }
+    FlagEnum& operator &=(En maskFlag) { _flags &= maskFlag; return *this; }
+    FlagEnum operator &(En maskFlag) { FlagEnum  result(*this); result &= maskFlag; return result; }
+    FlagEnum operator ~() { FlagEnum  result(*this); result._flags = ~result._flags; return result; }
+    explicit operator bool() { return _flags != 0; }
+
+protected:
+    Under  _flags;
 };
 
 #endif // __ENUM_ITERATOR_H__

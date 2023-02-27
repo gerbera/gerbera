@@ -171,12 +171,11 @@ void Script::setIntProperty(const std::string& name, int value)
 /* **************** */
 
 Script::Script(const std::shared_ptr<ContentManager>& content,
-    const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
-    std::string objName, std::unique_ptr<StringConverter> sc)
+    const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)
-    , runtime(runtime)
+    , runtime(content->getScriptingRuntime())
     , sc(std::move(sc))
     , name(name)
     , objectName(std::move(objName))

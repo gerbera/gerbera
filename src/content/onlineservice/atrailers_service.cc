@@ -36,7 +36,8 @@
 #include "atrailers_service.h" // API
 
 #include "atrailers_content_handler.h"
-#include "config/directory_tweak.h"
+#include "config/config_option_enum.h"
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "util/tools.h"
 
@@ -46,7 +47,7 @@
 ATrailersService::ATrailersService(const std::shared_ptr<ContentManager>& content)
     : CurlOnlineService(content, ATRAILERS_SERVICE)
 {
-    if (config->getOption(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == "640")
+    if (EnumOption<AtrailerResolution>::getEnumOption(config, CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == AtrailerResolution::Low)
         service_url = ATRAILERS_SERVICE_URL_640;
     else
         service_url = ATRAILERS_SERVICE_URL_720P;

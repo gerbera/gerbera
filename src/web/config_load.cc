@@ -31,7 +31,9 @@
 
 #include "config/client_config.h"
 #include "config/config_definition.h"
+#include "config/config_option_enum.h"
 #include "config/config_setup.h"
+#include "config/config_setup_enum.h"
 #include "config/directory_tweak.h"
 #include "config/dynamic_content.h"
 #include "content/autoscan.h"
@@ -451,8 +453,9 @@ void Web::ConfigLoad::process()
         setValue(item, entry->isEnabled());
 
         item = values.append_child("item");
+        auto ttEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
-        setValue(item, (entry->getType() == TR_External ? "external" : "none"));
+        setValue(item, ttEnumSetup->mapEnumValue(entry->getType()));
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
@@ -515,10 +518,11 @@ void Web::ConfigLoad::process()
         setValue(item, entry->getBufferInitialFillSize());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
-        if (fourCCMode != FCC_None) {
+        if (fourCCMode != AviFourccListmode::None) {
             item = values.append_child("item");
             createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
-            setValue(item, TranscodingProfile::mapFourCcMode(fourCCMode));
+            auto fccEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            setValue(item, fccEnumSetup->mapEnumValue(fourCCMode));
 
             const auto& fourCCList = entry->getAVIFourCCList();
             if (!fourCCList.empty()) {

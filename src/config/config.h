@@ -122,7 +122,7 @@ enum config_option_t {
 #endif
     CFG_IMPORT_HIDDEN_FILES,
     CFG_IMPORT_FOLLOW_SYMLINKS,
-    CFG_IMPORT_NEW_MODE,
+    CFG_IMPORT_LAYOUT_MODE,
     CFG_IMPORT_FILESYSTEM_CHARSET,
     CFG_IMPORT_METADATA_CHARSET,
     CFG_IMPORT_PLAYLIST_CHARSET,
@@ -364,6 +364,23 @@ enum config_option_t {
     ATTR_DYNAMIC_CONTAINER_MAXCOUNT,
 };
 
+enum class UrlAppendMode {
+    none,
+    ip,
+    port
+};
+
+enum class LayoutType {
+    Disabled,
+    Builtin,
+    Js,
+};
+
+enum class AtrailerResolution {
+    Low,
+    Hi
+};
+
 class Config {
 public:
     virtual ~Config() = default;
@@ -381,6 +398,8 @@ public:
     /// \param option option type to add.
     /// \param option option to add.
     virtual void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) = 0;
+
+    virtual std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
