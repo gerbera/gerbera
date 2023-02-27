@@ -61,23 +61,57 @@ public:
     }
 };
 
-template<class En, class Under=typename std::underlying_type<En>::type>
-class FlagEnum
-{
+template <class En, class Under = typename std::underlying_type<En>::type>
+class FlagEnum {
 public:
-    FlagEnum() : _flags(0) {}
-    FlagEnum(En flag) : _flags(flag) {}
-    FlagEnum(const FlagEnum& original) : _flags(original._flags) {}
+    FlagEnum()
+        : _flags(0)
+    {
+    }
+    FlagEnum(En flag)
+        : _flags(flag)
+    {
+    }
+    FlagEnum(const FlagEnum& original)
+        : _flags(original._flags)
+    {
+    }
 
-    FlagEnum& operator |=(En addFlag) { _flags |= addFlag; return *this; }
-    FlagEnum operator |(En addFlag) { FlagEnum  result(*this); result |= addFlag; return result; }
-    FlagEnum& operator &=(En maskFlag) { _flags &= maskFlag; return *this; }
-    FlagEnum operator &(En maskFlag) { FlagEnum  result(*this); result &= maskFlag; return result; }
-    FlagEnum operator ~() { FlagEnum  result(*this); result._flags = ~result._flags; return result; }
-    explicit operator bool() { return _flags != 0; }
+    FlagEnum& operator|=(En addFlag)
+    {
+        _flags |= addFlag;
+        return *this;
+    }
+    FlagEnum operator|(En addFlag)
+    {
+        FlagEnum result(*this);
+        result |= addFlag;
+        return result;
+    }
+    FlagEnum& operator&=(En maskFlag)
+    {
+        _flags &= maskFlag;
+        return *this;
+    }
+    FlagEnum operator&(En maskFlag)
+    {
+        FlagEnum result(*this);
+        result &= maskFlag;
+        return result;
+    }
+    FlagEnum operator~()
+    {
+        FlagEnum result(*this);
+        result._flags = ~result._flags;
+        return result;
+    }
+    explicit operator bool()
+    {
+        return _flags != 0;
+    }
 
 protected:
-    Under  _flags;
+    Under _flags;
 };
 
 #endif // __ENUM_ITERATOR_H__

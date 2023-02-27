@@ -26,6 +26,9 @@ Gerbera - https://gerbera.io/
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
+#include <regex>
+
+#include "util/tools.h"
 
 namespace fs = std::filesystem;
 
@@ -74,6 +77,26 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
 #else
     std::string expectedOutput = mockText("fixtures/mock-help.out");
 #endif
+    std::smatch base_match;
+    auto result = std::vector<std::string>();
+    auto patternList = std::vector<std::string> {
+#ifndef HAVE_MAGIC
+        ".*--magic FILE.*Set magic FILE.*",
+#endif
+#ifndef GRBDEBUG
+        ".*--debug-mode FACILITY.*Set debugging mode to FACILITY.*",
+#endif
+    };
+    for (auto&& line : splitString(expectedOutput, '\n', true)) {
+        bool found = false;
+        for (auto&& pattern : patternList) {
+            if (std::regex_match(line, base_match, std::regex(pattern)))
+                found = true;
+        }
+        if (!found)
+            result.push_back(line);
+    }
+    expectedOutput = fmt::format("{}", fmt::join(result, "\n"));
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --help 2>&1";
     std::string output = exec(cmd.c_str());
 

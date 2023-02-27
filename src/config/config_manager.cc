@@ -43,8 +43,8 @@
 
 #include "client_config.h"
 #include "config_definition.h"
-#include "config_options.h"
 #include "config_option_enum.h"
+#include "config_options.h"
 #include "config_setup.h"
 #include "content/autoscan.h"
 #include "database/database.h"
@@ -56,15 +56,9 @@ bool ConfigManager::debug = false;
 
 ConfigManager::ConfigManager(fs::path filename,
     const fs::path& userHome, const fs::path& configDir,
-    fs::path dataDir, fs::path magicFile,
-    std::string ip, std::string interface, in_port_t port,
-    bool debug)
+    fs::path dataDir, bool debug)
     : filename(std::move(filename))
     , dataDir(std::move(dataDir))
-    , magicFile(std::move(magicFile))
-    , ip(std::move(ip))
-    , interface(std::move(interface))
-    , port(port)
 {
     ConfigManager::debug = debug;
 
@@ -117,7 +111,7 @@ void ConfigManager::load(const fs::path& userHome)
         throw ConfigParseException(result.description());
     }
 
-    log_info("Checking configuration...");
+    log_info("Parsing configuration...");
 
     auto root = xmlDoc->document_element();
 
@@ -132,10 +126,6 @@ void ConfigManager::load(const fs::path& userHome)
     std::string version = root.attribute("version").as_string();
     if (std::stoi(version) > CONFIG_XML_VERSION)
         throw_std_runtime_error("Config version \"{}\" does not yet exist", version);
-
-#ifdef GRBDEBUG
-    GrbLogger::Logger.init(setOption(root, CFG_SERVER_DEBUG_MODE)->getIntOption());
-#endif
 
     // now go through the mandatory parameters,
     // if something is missing we will not start the server
@@ -167,14 +157,6 @@ void ConfigManager::load(const fs::path& userHome)
         sqlite3En = setOption(root, CFG_SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
 
-    if (sqlite3En && mysqlEn)
-        throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
-                                "only one database driver may be active at a time");
-
-    if (!sqlite3En && !mysqlEn)
-        throw_std_runtime_error("You disabled both sqlite3 and mysql but "
-                                "one database driver must be active");
-
     std::string dbDriver;
 
 #ifdef HAVE_MYSQL
@@ -194,12 +176,6 @@ void ConfigManager::load(const fs::path& userHome)
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
         dbDriver = "mysql";
-    }
-#else
-    if (mysqlEn) {
-        throw_std_runtime_error("You enabled MySQL database in configuration, "
-                                "however this version of Gerbera was compiled "
-                                "without MySQL support!");
     }
 #endif // HAVE_MYSQL
 
@@ -223,16 +199,6 @@ void ConfigManager::load(const fs::path& userHome)
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_DRIVER);
     co->makeOption(dbDriver, self);
-
-    // now go through the optional settings and fix them if anything is missing
-    auto defIpp = setOption(root, CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE)->getIntOption();
-
-    // now get the option list for the drop-down menu
-    auto menuOpts = setOption(root, CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN)->getArrayOption();
-    if (std::find(menuOpts.begin(), menuOpts.end(), fmt::to_string(defIpp)) == menuOpts.end())
-        throw_std_runtime_error("Error in config file: at least one <option> "
-                                "under <items-per-page> must match the "
-                                "<items-per-page default=\"\" /> attribute");
 
     bool multiValue = setOption(root, CFG_UPNP_MULTI_VALUES_ENABLED)->getBoolOption();
     co = ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_MULTI_VALUE);
@@ -265,59 +231,15 @@ void ConfigManager::load(const fs::path& userHome)
     }
     co->setDefaultValue(defaultCharSet);
 
-    std::string charset = co->getXmlContent(root);
-    try {
-        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
-    } catch (const std::runtime_error& e) {
-        throw_std_runtime_error("Error in config file: unsupported filesystem-charset specified: {}\n{}", charset, e.what());
-    }
-    log_debug("Setting filesystem import charset to {}", charset);
-    co->makeOption(charset, self);
-
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
     co->setDefaultValue(defaultCharSet);
-    charset = co->getXmlContent(root);
-    try {
-        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
-    } catch (const std::runtime_error& e) {
-        throw_std_runtime_error("Error in config file: unsupported metadata-charset specified: {}\n{}", charset, e.what());
-    }
-    log_debug("Setting metadata import charset to {}", charset);
-    co->makeOption(charset, self);
 
-    // read playlist options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
     co->setDefaultValue(defaultCharSet);
-    charset = co->getXmlContent(root);
-    try {
-        auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
-    } catch (const std::runtime_error& e) {
-        throw_std_runtime_error("Error in config file: unsupported playlist-charset specified: {}\n{}", charset, e.what());
-    }
-    log_debug("Setting playlist charset to {}", charset);
-    co->makeOption(charset, self);
 
-    // read network options
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_NETWORK_INTERFACE);
-    co->makeOption((interface.empty()) ? co->getXmlContent(root) : interface, self);
+    co = ConfigDefinition::findConfigSetup(ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+    co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_IP);
-    // bind to any IP address
-    co->makeOption(ip.empty() ? co->getXmlContent(root) : ip, self);
-
-    if (!getOption(CFG_SERVER_NETWORK_INTERFACE).empty() && !getOption(CFG_SERVER_IP).empty())
-        throw_std_runtime_error("Error in config file: you can not specify interface and ip at the same time");
-
-    // read server options
-    {
-        std::string temp = setOption(root, CFG_SERVER_APPEND_PRESENTATION_URL_TO)->getOption();
-        if ((temp == "ip" || temp == "port") && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
-            throw_std_runtime_error("Error in config file: \"append-to\" attribute "
-                                    "value in <presentationURL> tag is set to \"{}\""
-                                    "but no URL is specified",
-                temp);
-        }
-    }
 #ifdef HAVE_JS
     // read javascript options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
@@ -332,41 +254,19 @@ void ConfigManager::load(const fs::path& userHome)
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
     co->makeOption(root, self);
 
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
-    args["resolveEmpty"] = "false";
-    co->makeOption(root, self, &args);
-    args.clear();
-#endif
-
-    auto layoutType = setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE)->getOption();
-
-#ifndef HAVE_JS
-    if (layoutType == LAYOUT_TYPE_JS)
-        throw_std_runtime_error("Gerbera was compiled without JS support, "
-                                "however you specified \"js\" to be used for the "
-                                "virtual-layout.");
-#else
+    setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(self, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     // read more javascript options
-    charset = setOption(root, CFG_IMPORT_SCRIPTING_CHARSET)->getOption();
-    if (layoutType == LAYOUT_TYPE_JS) {
-        try {
-            auto conv = std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
-        } catch (const std::runtime_error& e) {
-            throw_std_runtime_error("Error in config file: unsupported import script charset specified: {}\n{}", charset, e.what());
-        }
-    }
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CHARSET);
+    co->setDefaultValue(defaultCharSet);
 
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    args["mustExist"] = fmt::to_string(layoutType == LAYOUT_TYPE_JS);
-    args["notEmpty"] = fmt::to_string(layoutType == LAYOUT_TYPE_JS);
+    args["mustExist"] = fmt::to_string(layoutType == LayoutType::Js);
+    args["notEmpty"] = fmt::to_string(layoutType == LayoutType::Js);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
     co->makeOption(root, self, &args);
     args.clear();
 #endif
-
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_PORT);
-    // 0 means, that the SDK will any free port itself
-    co->makeOption((port == 0) ? co->getXmlContent(root) : fmt::to_string(port), self);
 
     args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";
     setOption(root, CFG_IMPORT_AUTOSCAN_TIMED_LIST, &args);
@@ -414,12 +314,6 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
 
-    bool markingEnabled = setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED)->getBoolOption();
-    bool contentArrayEmpty = setOption(root, CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST)->getArrayOption().empty();
-    if (markingEnabled && contentArrayEmpty) {
-        throw_std_runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag");
-    }
-
 #if defined(HAVE_LASTFMLIB)
     auto lfmEn = setOption(root, CFG_SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
     if (lfmEn) {
@@ -428,28 +322,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
 
-#ifdef HAVE_MAGIC
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_MAGIC_FILE);
-    args["isFile"] = "true";
-    args["resolveEmpty"] = "false";
-    co->makeOption(!magicFile.empty() ? magicFile.string() : co->getXmlContent(root), self, &args);
-    args.clear();
-#endif
-
-#ifdef HAVE_INOTIFY
-    auto configTimedList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    auto configInotifyList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
-
-    for (const auto& iDir : configInotifyList) {
-        for (const auto& tDir : configTimedList) {
-            if (iDir.getLocation() == tDir.getLocation())
-                throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");
-        }
-    }
-#endif
-
     // read online content options
-
 #ifdef ATRAILERS
     int atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
@@ -464,14 +337,92 @@ void ConfigManager::load(const fs::path& userHome)
         }
     }
 
-    log_info("Configuration check succeeded.");
+    log_info("Configuration load succeeded.");
 
     std::ostringstream buf;
     xmlDoc->print(buf, "  ");
-    log_debug("Config file dump after validation: {}", buf.str());
+    log_debug("Config file dump after loading: {}", buf.str());
 
     // now the XML is no longer needed we can destroy it
     xmlDoc = nullptr;
+}
+
+/// \brief: Validate that correlated options have correct values
+bool ConfigManager::validate()
+{
+    log_info("Validating configuration...");
+    auto self = getSelf();
+
+    if (!getOption(CFG_SERVER_NETWORK_INTERFACE).empty() && !getOption(CFG_SERVER_IP).empty())
+        throw_std_runtime_error("Error in config file: you can not specify interface and ip at the same time");
+
+    // checking database driver options
+    bool mysqlEn = getBoolOption(CFG_SERVER_STORAGE_MYSQL_ENABLED);
+    bool sqlite3En = getBoolOption(CFG_SERVER_STORAGE_SQLITE_ENABLED);
+
+    if (sqlite3En && mysqlEn)
+        throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
+                                "only one database driver may be active at a time");
+
+    if (!sqlite3En && !mysqlEn)
+        throw_std_runtime_error("You disabled both sqlite3 and mysql but "
+                                "one database driver must be active");
+
+#ifndef HAVE_MYSQL
+    if (mysqlEn) {
+        throw_std_runtime_error("You enabled MySQL database in configuration, "
+                                "however this version of Gerbera was compiled "
+                                "without MySQL support!");
+    }
+#endif // HAVE_MYSQL
+
+    auto appendto = EnumOption<UrlAppendMode>::getEnumOption(self, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+    if ((appendto == UrlAppendMode::ip || appendto == UrlAppendMode::port) && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
+        throw_std_runtime_error("Error in config file: \"append-to\" attribute "
+                                "value in <presentationURL> tag is set to \"{}\""
+                                "but no URL is specified",
+            appendto);
+    }
+
+#ifdef HAVE_INOTIFY
+    auto configTimedList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+    auto configInotifyList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+
+    for (const auto& iDir : configInotifyList) {
+        for (const auto& tDir : configTimedList) {
+            if (iDir.getLocation() == tDir.getLocation())
+                throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");
+        }
+    }
+#endif
+
+    // now go through the optional settings and fix them if anything is missing
+    auto defIpp = getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
+
+    // now get the option list for the drop-down menu
+    auto menuOpts = getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+    if (std::find(menuOpts.begin(), menuOpts.end(), fmt::to_string(defIpp)) == menuOpts.end())
+        throw_std_runtime_error("Error in config file: at least one <option> "
+                                "under <items-per-page> must match the "
+                                "<items-per-page default=\"\" /> attribute");
+
+    bool markingEnabled = getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
+    bool contentArrayEmpty = getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST).empty();
+    if (markingEnabled && contentArrayEmpty) {
+        throw_std_runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag");
+    }
+
+#ifndef HAVE_JS
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(self, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+
+    if (layoutType == LayoutType::Js)
+        throw_std_runtime_error("Gerbera was compiled without JS support, "
+                                "however you specified \"js\" to be used for the "
+                                "virtual-layout.");
+#endif
+
+    log_info("Configuration check succeeded.");
+    return true;
 }
 
 void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& database)
