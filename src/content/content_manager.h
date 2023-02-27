@@ -75,6 +75,11 @@ class LastFm;
 class ScriptingRuntime;
 class Server;
 
+enum class ImportMode {
+    MediaTomb,
+    Gerbera,
+};
+
 class UpnpMap {
 private:
     std::vector<std::tuple<std::string, std::string, std::string>> filters;
@@ -125,7 +130,7 @@ public:
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     int addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
-        bool async = true, bool lowPriority = false, bool cancellable = true);
+        bool lowPriority = false, bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
     /// \param dirEnt absolute path to the file
@@ -137,7 +142,7 @@ public:
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
-        bool async = true, bool lowPriority = false, bool cancellable = true);
+        bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(const fs::path& path) const;
     std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, int objectID, const fs::path& path, bool rescanResource, bool async = true, bool all = false);
@@ -243,20 +248,16 @@ public:
 
     void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj);
 
-    void initLayout();
-    void destroyLayout();
-
     /// \brief parse a file containing metadata for object
     void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const;
-
-#ifdef HAVE_JS
-    void initJS();
-    void destroyJS();
-#endif
 
     std::shared_ptr<Context> getContext() const
     {
         return context;
+    }
+    std::shared_ptr<ScriptingRuntime> getScriptingRuntime() const
+    {
+        return scriptingRuntime;
     }
 
 protected:
@@ -270,7 +271,7 @@ protected:
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
-    std::shared_ptr<ScriptingRuntime> scripting_runtime;
+    std::shared_ptr<ScriptingRuntime> scriptingRuntime;
     std::shared_ptr<LastFm> last_fm;
 
     std::shared_ptr<AutoscanList> autoscanList;
@@ -282,7 +283,6 @@ protected:
 
     int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
         AutoScanSetting& asSetting,
-        bool async = true,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
@@ -299,24 +299,26 @@ protected:
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
-    void finishScan(const std::shared_ptr<AutoscanDirectory>& adir, const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
+
+    void initLayout();
+    void destroyLayout();
+
+#ifdef HAVE_JS
+    void initJS();
+    void destroyJS();
+#endif
 
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
-
-    std::shared_ptr<Layout> layout;
 
 #ifdef ONLINE_SERVICES
     std::unique_ptr<OnlineServiceList> online_services;
 #endif // ONLINE_SERVICES
 
 #ifdef HAVE_JS
-    std::unique_ptr<PlaylistParserScript> playlist_parser_script;
     std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
-
-    std::mutex layoutMutex;
 
     bool layoutEnabled {};
     void threadProc();

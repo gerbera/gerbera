@@ -201,85 +201,31 @@ public:
     std::shared_ptr<ConfigOption> newOption(const std::string& optValue);
 
     static bool CheckSqlJournalMode(std::string& value);
+    static bool CheckCharset(std::string& value);
 };
 
-template <class En>
-class ConfigEnumSetup : public ConfigSetup {
-protected:
-    bool notEmpty = true;
-    std::map<std::string, En> valueMap;
-
-public:
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
-        : ConfigSetup(option, xpath, help, false, "")
-        , notEmpty(notEmpty)
-        , valueMap(std::move(valueMap))
-    {
-    }
-
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
-        : ConfigSetup(option, xpath, help, false, defaultValue)
-        , notEmpty(notEmpty)
-        , valueMap(std::move(valueMap))
-    {
-    }
-
-    std::string getTypeString() const override { return "Enum"; }
-
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
-    {
-        if (arguments && arguments->find("notEmpty") != arguments->end()) {
-            notEmpty = arguments->find("notEmpty")->second == "true";
-        }
-        newOption(ConfigSetup::getXmlContent(root, true));
-        setOption(config);
-    }
-
-    bool checkEnumValue(const std::string& value, En& result) const
-    {
-        if (valueMap.find(value) != valueMap.end()) {
-            result = valueMap.at(value);
-            return true;
-        }
-        return false;
-    }
-
-    En getXmlContent(const pugi::xml_node& root)
-    {
-        std::string optValue = ConfigSetup::getXmlContent(root, true);
-        log_debug("Config: option: '{}' value: '{}'", xpath, optValue);
-        if (notEmpty && optValue.empty()) {
-            throw_std_runtime_error("Error in config file: Invalid {}/{} empty value '{}'", root.path(), xpath, optValue);
-        }
-        En result;
-        if (!checkEnumValue(optValue, result)) {
-            throw_std_runtime_error("Error in config file: {}/{} unsupported Enum value '{}'", root.path(), xpath, optValue);
-        }
-        return result;
-    }
-
-    std::shared_ptr<ConfigOption> newOption(const std::string& optValue)
-    {
-        if (notEmpty && optValue.empty()) {
-            throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue);
-        }
-        En result;
-        if (!checkEnumValue(optValue, result)) {
-            throw_std_runtime_error("Error in config file: {} unsupported Enum value '{}'", xpath, optValue);
-        }
-        optionValue = std::make_shared<Option>(optValue);
-        return optionValue;
-    }
+enum class ConfigPathArguments {
+    none = 0,
+    isFile = (1 << 0),
+    mustExist = (1 << 1),
+    notEmpty = (1 << 2),
+    isExe = (1 << 3),
+    resolveEmpty = (1 << 4),
 };
+
+inline ConfigPathArguments operator|(ConfigPathArguments a, ConfigPathArguments b)
+{
+    return static_cast<ConfigPathArguments>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline ConfigPathArguments operator&(ConfigPathArguments a, ConfigPathArguments b)
+{
+    return static_cast<ConfigPathArguments>(static_cast<int>(a) & static_cast<int>(b));
+}
 
 class ConfigPathSetup : public ConfigSetup {
 protected:
-    bool isFile = false;
-    bool mustExist = false;
-    bool notEmpty = false;
-    bool isExe = false;
-    bool resolveEmpty = true;
-
+    ConfigPathArguments arguments;
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
     /// \param path path to be resolved
     /// \param isFile file or directory
@@ -289,15 +235,15 @@ protected:
     void loadArguments(const std::map<std::string, std::string>* arguments = nullptr);
     bool checkExecutable(std::string& optValue) const;
 
+    bool isSet(ConfigPathArguments a) const { return (arguments & a) == a; }
+
 public:
+
     static fs::path Home;
 
-    ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", bool isFile = false, bool mustExist = true, bool notEmpty = false, bool isExe = false)
+    ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", ConfigPathArguments arguments = ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty)
         : ConfigSetup(option, xpath, help, false, defaultValue)
-        , isFile(isFile)
-        , mustExist(mustExist)
-        , notEmpty(notEmpty)
-        , isExe(isExe)
+        , arguments(ConfigPathArguments(arguments))
     {
     }
 
@@ -312,7 +258,7 @@ public:
 
     bool checkPathValue(std::string& optValue, std::string& pathValue) const;
 
-    void setMustExist(bool mustExist) { this->mustExist = mustExist; }
+    void setFlag(bool hasFlag, ConfigPathArguments flag);
 };
 
 class ConfigIntSetup : public ConfigSetup {

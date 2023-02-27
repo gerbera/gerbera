@@ -76,6 +76,7 @@ add_library(libgerbera STATIC
         src/config/config_manager.h
         src/config/config_options.cc
         src/config/config_options.h
+        src/config/config_option_enum.h
         src/config/setup/config_setup_array.cc
         src/config/setup/config_setup_autoscan.cc
         src/config/setup/config_setup_bool.cc
@@ -90,6 +91,7 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_vector.cc
         src/config/config_setup.cc
         src/config/config_setup.h
+        src/config/config_setup_enum.h
         src/config/directory_tweak.cc
         src/config/directory_tweak.h
         src/config/dynamic_content.cc

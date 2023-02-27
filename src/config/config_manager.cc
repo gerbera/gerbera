@@ -44,6 +44,7 @@
 #include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
+#include "config_option_enum.h"
 #include "config_setup.h"
 #include "content/autoscan.h"
 #include "database/database.h"
@@ -543,6 +544,15 @@ int ConfigManager::getIntOption(config_option_t option) const
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getIntOption();
+}
+
+std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(config_option_t option) const
+{
+    auto optionValue = options.at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue;
 }
 
 bool ConfigManager::getBoolOption(config_option_t option) const

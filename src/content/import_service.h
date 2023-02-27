@@ -44,6 +44,7 @@ class Database;
 class GenericTask;
 class ImportService;
 class Layout;
+enum class LayoutType;
 class Mime;
 class ScriptingRuntime;
 class UpnpMap;
@@ -68,7 +69,7 @@ class ContentState {
 private:
     ImportState state;
     /// \brief directory_entry to process
-    const fs::directory_entry& dirEntry;
+    fs::directory_entry dirEntry;
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
     std::chrono::seconds mtime {};
@@ -90,7 +91,7 @@ public:
         this->cdsObject = cdsObject;
     }
     std::shared_ptr<CdsObject> getObject() { return cdsObject; }
-    const fs::directory_entry& getDirEntry() { return dirEntry; }
+    fs::directory_entry getDirEntry() { return dirEntry; }
     /// \brief Set modification time of file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
@@ -107,6 +108,7 @@ private:
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
     std::map<std::string, std::string> mimetypeUpnpclassMap;
+    std::map<std::string, std::string> configLayoutMapping;
     std::vector<UpnpMap> upnpMap {};
 
     std::shared_ptr<AutoscanDirectory> autoscanDir;
@@ -117,6 +119,8 @@ private:
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
     std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
+    std::mutex layoutMutex;
+    std::shared_ptr<Layout> layout;
 #ifdef HAVE_JS
     std::unique_ptr<PlaylistParserScript> playlistParserScript;
 #endif
@@ -133,7 +137,10 @@ private:
 
 public:
     ImportService(std::shared_ptr<Context> context);
+
     void run(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> autoScan = {}, fs::path path = "");
+    void initLayout(LayoutType layoutType);
+    void destroyLayout();
 
     void doImport(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task);
     void clearCache();
@@ -146,6 +153,8 @@ public:
     std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
+
+    std::shared_ptr<Layout> getLayout() const { return layout; }
 };
 
 #endif

@@ -36,6 +36,7 @@
 #include "curl_io_handler.h" // API
 
 #include "config/config_manager.h"
+#include "content/autoscan.h"
 #include "util/tools.h"
 
 CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)

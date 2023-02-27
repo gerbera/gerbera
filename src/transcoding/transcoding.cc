@@ -36,7 +36,7 @@
 
 #include "util/tools.h"
 
-TranscodingProfile::TranscodingProfile(bool enabled, transcoding_type_t trType, std::string name)
+TranscodingProfile::TranscodingProfile(bool enabled, TranscodingType trType, std::string name)
     : enabled(enabled)
     , name(std::move(name))
     , trType(trType)
@@ -75,7 +75,7 @@ std::map<CdsResource::Attribute, std::string> TranscodingProfile::getAttributeOv
     return attributeOverrides;
 }
 
-void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, avi_fourcc_listmode_t mode)
+void TranscodingProfile::setAVIFourCCList(const std::vector<std::string>& list, AviFourccListmode mode)
 {
     fourccList = list;
     fourccMode = mode;
@@ -93,17 +93,4 @@ std::shared_ptr<TranscodingProfile> TranscodingProfileList::getByName(const std:
             return filter->getTranscodingProfile();
     }
     return {};
-}
-
-std::string TranscodingProfile::mapFourCcMode(avi_fourcc_listmode_t mode)
-{
-    switch (mode) {
-    case FCC_None:
-        return "disabled";
-    case FCC_Ignore:
-        return "ignore";
-    case FCC_Process:
-        return "process";
-    }
-    return "disabled";
 }

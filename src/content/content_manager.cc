@@ -41,10 +41,11 @@
 #include "autoscan_list.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config_option_enum.h"
+#include "config/config_options.h"
 #include "config/directory_tweak.h"
 #include "database/database.h"
 #include "import_service.h"
-#include "layout/builtin_layout.h"
 #include "metadata/metadata_handler.h"
 #include "update_manager.h"
 #include "util/mime.h"
@@ -58,6 +59,7 @@
 #include "layout/js_layout.h"
 #include "scripting/import_script.h"
 #include "scripting/playlist_parser_script.h"
+#include "scripting/scripting_runtime.h"
 #endif
 
 #ifdef HAVE_LASTFMLIB
@@ -71,10 +73,6 @@
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service.h"
 #include "onlineservice/task_processor.h"
-#endif
-
-#ifdef HAVE_JS
-#include "scripting/scripting_runtime.h"
 #endif
 
 #ifdef HAVE_INOTIFY
@@ -156,7 +154,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , context(context)
     , timer(std::move(timer))
 #ifdef HAVE_JS
-    , scripting_runtime(std::make_shared<ScriptingRuntime>())
+    , scriptingRuntime(std::make_shared<ScriptingRuntime>())
 #endif
 #ifdef HAVE_LASTFMLIB
     , last_fm(std::make_shared<LastFm>(context))
@@ -249,9 +247,9 @@ void ContentManager::run()
     inotify->run();
 #endif
 
-    std::string layoutType = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     log_debug("virtual layout Type {}", layoutType);
-    layoutEnabled = (layoutType == LAYOUT_TYPE_BUILTIN || layoutType == LAYOUT_TYPE_JS);
+    layoutEnabled = (layoutType == LayoutType::Builtin || layoutType == LayoutType::Js);
 
 #ifdef ONLINE_SERVICES
     online_services = std::make_unique<OnlineServiceList>();
@@ -395,7 +393,7 @@ void ContentManager::shutdown()
     last_fm = nullptr;
 #endif
 #ifdef HAVE_JS
-    scripting_runtime = nullptr;
+    scriptingRuntime = nullptr;
 #endif
 #ifdef ONLINE_SERVICES
     task_processor->shutdown();
@@ -568,12 +566,13 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
         asSetting.recursive = true;
         asSetting.rescanResource = false;
+        asSetting.async = true;
         asSetting.mergeOptions(config, parentPath);
         std::error_code ec;
-        // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+        // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
-            addFile(dirEntry, asSetting, true, true, false);
+            addFile(dirEntry, asSetting, true, false);
             log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), obj->getLocation().c_str());
             parentRemoved = true;
         } else {
@@ -743,8 +742,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         thisTaskID = 0;
     }
 
-    bool newImport = config->getBoolOption(CFG_IMPORT_NEW_MODE);
-    if (newImport) {
+    auto importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
+    if (importMode == ImportMode::Gerbera) {
         getImportService(adir)->doImport(dIter, asSetting, list, task);
     } else {
         auto lastModifiedCurrentMax = adir->getPreviousLMT(location, parentContainer);
@@ -803,7 +802,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                         }
                         asSetting.recursive = false;
                         asSetting.rescanResource = false;
-                        objectID = addFileInternal(dirEnt, rootpath, asSetting, false);
+                        asSetting.async = false;
+                        objectID = addFileInternal(dirEnt, rootpath, asSetting);
                         // update time variable
                         if (lastModifiedNewMax < lwt && lwt <= currentTme)
                             lastModifiedNewMax = lwt;
@@ -812,7 +812,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     // add file, not recursive, not async, not forced
                     asSetting.recursive = false;
                     asSetting.rescanResource = false;
-                    objectID = addFileInternal(dirEnt, rootpath, asSetting, false);
+                    asSetting.async = false;
+                    objectID = addFileInternal(dirEnt, rootpath, asSetting);
                     if (lastModifiedNewMax < lwt && lwt <= currentTme)
                         lastModifiedNewMax = lwt;
                 }
@@ -851,9 +852,10 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     // add directory, recursive, async, hidden flag, low priority
                     asSetting.recursive = true;
                     asSetting.rescanResource = false;
+                    asSetting.async = true;
                     asSetting.mergeOptions(config, newPath);
                     // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
-                    addFileInternal(dirEnt, rootpath, asSetting, true, true, thisTaskID, task->isCancellable());
+                    addFileInternal(dirEnt, rootpath, asSetting, true, thisTaskID, task->isCancellable());
                     log_debug("addSubDirectory {} done", newPath.c_str());
                 }
             }
@@ -1261,26 +1263,14 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const std::share
 
 void ContentManager::initLayout()
 {
-    if (layoutEnabled && !layout) {
+    if (layoutEnabled) {
         auto lock = threadRunner->lockGuard("initLayout");
-        if (!layout) {
-            std::string layoutType = config->getOption(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-            log_debug("virtual layout Type {}", layoutType);
-            try {
-                auto self = shared_from_this();
-                if (layoutType == LAYOUT_TYPE_JS) {
-#ifdef HAVE_JS
-                    layout = std::make_shared<JSLayout>(self, scripting_runtime);
-#else
-                    log_error("Cannot init virtual layout:\nGerbera compiled without JavaScript support, but JavaScript was requested.");
-#endif
-                } else if (layoutType == LAYOUT_TYPE_BUILTIN) {
-                    layout = std::make_shared<BuiltinLayout>(self);
-                }
-            } catch (const std::runtime_error& e) {
-                layout = nullptr;
-                log_error("Init virtual container layout failed: {}", e.what());
-                throw;
+        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+        importService->initLayout(layoutType);
+        for (std::size_t i = 0; i < autoscanList->size(); i++) {
+            auto autoscanDir = autoscanList->get(i);
+            if (autoscanDir) {
+                getImportService(autoscanDir)->initLayout(layoutType);
             }
         }
     }
@@ -1290,17 +1280,13 @@ void ContentManager::initLayout()
 void ContentManager::initJS()
 {
     auto self = shared_from_this();
-    if (!playlist_parser_script) {
-        playlist_parser_script = std::make_unique<PlaylistParserScript>(self, scripting_runtime);
-    }
     if (!metafileParserScript) {
-        metafileParserScript = std::make_unique<MetafileParserScript>(self, scripting_runtime);
+        metafileParserScript = std::make_unique<MetafileParserScript>(self);
     }
 }
 
 void ContentManager::destroyJS()
 {
-    playlist_parser_script = nullptr;
     metafileParserScript = nullptr;
 }
 
@@ -1308,20 +1294,13 @@ void ContentManager::destroyJS()
 
 void ContentManager::destroyLayout()
 {
-    layout = nullptr;
-}
-
-void ContentManager::reloadLayout()
-{
-    std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
-    destroyLayout();
-#ifdef HAVE_JS
-    destroyJS();
-#endif // HAVE_JS
-    initLayout();
-#ifdef HAVE_JS
-    initJS();
-#endif // HAVE_JS
+    importService->destroyLayout();
+    for (std::size_t i = 0; i < autoscanList->size(); i++) {
+        auto autoscanDir = autoscanList->get(i);
+        if (autoscanDir) {
+            getImportService(autoscanDir)->destroyLayout();
+        }
+    }
 }
 
 void ContentManager::threadProc()
@@ -1389,23 +1368,23 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     threadRunner->notify();
 }
 
-int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
 {
     fs::path rootpath;
     if (dirEnt.is_directory())
         rootpath = dirEnt.path();
-    return addFileInternal(dirEnt, rootpath, asSetting, async, lowPriority, 0, cancellable);
+    return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, bool cancellable)
+int ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
 {
-    return addFileInternal(dirEnt, rootpath, asSetting, async, lowPriority, 0, cancellable);
+    return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
 int ContentManager::addFileInternal(
-    const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
-    if (async) {
+    if (asSetting.async) {
         auto self = shared_from_this();
         auto task = std::make_shared<CMAddFileTask>(self, dirEnt, rootpath, asSetting, cancellable);
         task->setDescription(fmt::format("Importing: {}", dirEnt.path().string()));
@@ -1428,7 +1407,7 @@ void ContentManager::fetchOnlineContent(OnlineServiceType serviceType, bool lowP
     unsigned int parentTaskID = 0;
 
     auto self = shared_from_this();
-    auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, layout, cancellable, unscheduledRefresh);
+    auto task = std::make_shared<CMFetchOnlineContentTask>(self, task_processor, timer, service, importService->getLayout(), cancellable, unscheduledRefresh);
     task->setDescription(fmt::format("Updating content from {}", service->getServiceName()));
     task->setParentID(parentTaskID);
     service->incTaskCount();
@@ -1698,7 +1677,6 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI)
 {
     autoscanList->add(dir);
-    reloadLayout();
 
     if (dir->getScanMode() == AutoscanScanMode::Timed)
         timerNotify(dir->getTimerParameter());

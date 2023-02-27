@@ -77,9 +77,6 @@ static constexpr auto CLIENT_GROUP_TAG = "group";
 #define URL_VALUE_TRANSCODE "1"
 
 // misc
-#define LAYOUT_TYPE_JS "js"
-#define LAYOUT_TYPE_BUILTIN "builtin"
-#define LAYOUT_TYPE_DISABLED "disabled"
 
 #define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
 #define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"

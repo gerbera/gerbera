@@ -28,7 +28,9 @@
 
 #include "config/client_config.h"
 #include "config/config_definition.h"
+#include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/config_setup_enum.h"
 #include "content/autoscan.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
@@ -82,7 +84,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
 
         auto prof = std::make_shared<TranscodingProfile>(
             ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child),
-            ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
+            ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
         prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
         prof->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
@@ -106,8 +108,8 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             auto cs = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC);
             if (cs->hasXmlElement(child)) {
                 sub = cs->getXmlElement(child);
-                avi_fourcc_listmode_t fccMode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
-                if (fccMode != FCC_None) {
+                AviFourccListmode fccMode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
+                if (fccMode != AviFourccListmode::None) {
                     prof->setAVIFourCCList(cs->getXmlContent(sub), fccMode);
                 }
             }
@@ -158,7 +160,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
-            cs->setMustExist(prof->isEnabled());
+            cs->setFlag(prof->isEnabled(), ConfigPathArguments::mustExist);
             prof->setCommand(cs->getXmlContent(sub));
         }
         prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
@@ -318,9 +320,10 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
             if (optItem == index) {
-                transcoding_type_t type;
-                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<transcoding_type_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->checkEnumValue(optValue, type)) {
-                    config->setOrigValue(index, entry->getType());
+                TranscodingType type;
+                auto setup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE);
+                if (setup->checkEnumValue(optValue, type)) {
+                    config->setOrigValue(index, setup->mapEnumValue(entry->getType()));
                     entry->setType(type);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getType());
                     return true;
@@ -464,13 +467,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update 4cc options
-            avi_fourcc_listmode_t fccMode = entry->getAVIFourCCListMode();
+            AviFourccListmode fccMode = entry->getAVIFourCCListMode();
             auto fccList = entry->getAVIFourCCList();
             bool set4cc = false;
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC, ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             if (optItem == index) {
-                config->setOrigValue(index, TranscodingProfile::mapFourCcMode(fccMode));
-                if (ConfigDefinition::findConfigSetup<ConfigEnumSetup<avi_fourcc_listmode_t>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->checkEnumValue(optValue, fccMode)) {
+                auto setup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ATTR_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+                config->setOrigValue(index, setup->mapEnumValue(fccMode));
+                if (setup->checkEnumValue(optValue, fccMode)) {
                     set4cc = true;
                 }
             }

@@ -95,8 +95,7 @@ public:
 
 protected:
     Script(const std::shared_ptr<ContentManager>& content,
-        const std::shared_ptr<ScriptingRuntime>& runtime, const std::string& name,
-        std::string objName, std::unique_ptr<StringConverter> sc);
+        const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
 
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
     void cleanup();

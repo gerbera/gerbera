@@ -83,6 +83,10 @@ public:
     /// \param option option to retrieve.
     int getIntOption(config_option_t option) const override;
 
+    /// \brief returns a config option of any type
+    /// \param option option to retrieve.
+    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override;
+
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
     bool getBoolOption(config_option_t option) const override;

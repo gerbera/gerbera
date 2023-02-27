@@ -29,6 +29,8 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/config_option_enum.h"
+#include "config/config_setup_enum.h"
 #include "content/autoscan.h"
 #include "content/autoscan_list.h"
 

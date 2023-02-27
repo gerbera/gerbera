@@ -51,6 +51,7 @@ public:
     }
     void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
     int getIntOption(config_option_t option) const override { return 0; }
+    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override { return {}; }
