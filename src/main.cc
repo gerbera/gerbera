@@ -40,6 +40,7 @@
 #include <fmt/core.h>
 #include <mutex>
 #include <spdlog/sinks/basic_file_sink.h>
+#include <vector>
 
 #include <upnpconfig.h>
 #ifdef UPNP_HAVE_TOOLS
@@ -62,8 +63,11 @@
 #include <unistd.h>
 
 #include "common.h"
+#include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "config/config_setup.h"
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "contrib/cxxopts.hpp"
 #include "server.h"
@@ -87,10 +91,26 @@ static struct {
 static void printCopyright()
 {
     fmt::print("\nGerbera UPnP Server {}\n"
-               "Copyright 2016-2022 Gerbera Contributors.\n"
+               "Copyright 2016-2023 Gerbera Contributors.\n"
                "Licence GPLv2: GNU GPL version 2.\n"
                "This is free software: you are free to change and redistribute it.\n\n",
         GERBERA_VERSION);
+}
+
+static void printOptions()
+{
+    auto setupList = ConfigDefinition::getOptionList();
+    auto resultMap = std::map<config_option_t, std::string>();
+    fmt::print("Active Options\n");
+    for (auto&& setup : setupList) {
+        if (setup && setup->getTypeString() != "List" && setup->option < CFG_MAX) {
+            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
+            resultMap[setup->option] = fmt::format("[{}] : {} = {}", setup->getUniquePath(), setup->getTypeString(), value);
+        }
+    }
+    for (auto&& [option, text] : resultMap) {
+        fmt::print("{:3d} {}\n", option, text);
+    }
 }
 
 static void logCopyright()
@@ -171,35 +191,122 @@ static void installSignalHandler()
     }
 }
 
+class ConfigOptionArgs {
+public:
+    config_option_t option;
+    std::string optShort;
+    std::string optLong;
+    std::string desc;
+    std::optional<std::string> defaultValue;
+    std::string argDesc;
+};
+
+void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<Config>& configManager)
+{
+    if (opts["set-option"].count() > 0) {
+        auto setValueList = opts["set-option"].as<std::vector<std::string>>();
+        for (auto&& valueString : setValueList) {
+            auto valueList = splitString(valueString, '=');
+            auto option = (config_option_t)stoiString(valueList[0]);
+            auto setup = ConfigDefinition::findConfigSetup(option);
+            if (!setup)
+                continue;
+            if (setup->getTypeString() == "Boolean" && valueList.size() < 1) {
+                setup->makeOption("yes", configManager);
+            } else if (valueList.size() >= 1) {
+                setup->makeOption(valueList[0], configManager);
+            }
+            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
+            log_debug("{} [{}] = {}\n", option, setup->getUniquePath(), value);
+        }
+    }
+}
+
+void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOptionArgs> additionalArgs, const std::shared_ptr<Config>& configManager)
+{
+    for (auto&& addArg : additionalArgs) {
+        if (opts[addArg.optLong].count() > 0) {
+            auto valueList = opts[addArg.optLong].as<std::vector<std::string>>();
+            auto setup = ConfigDefinition::findConfigSetup(addArg.option);
+            if (!setup)
+                continue;
+            if (setup->getTypeString() == "Boolean" && valueList.size() < 1) {
+                setup->makeOption("yes", configManager);
+            } else if (valueList.size() >= 1) {
+                setup->makeOption(fmt::format("{}", fmt::join(valueList, ",")), configManager);
+            }
+            log_debug("addArg {} [{}] = {}\n", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+        } else if (addArg.defaultValue) {
+            auto setup = ConfigDefinition::findConfigSetup(addArg.option);
+            setup->makeOption(addArg.defaultValue.value(), configManager);
+            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
+            log_debug("addArg {} [{}] = {}\n", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+        }
+    }
+}
+
+std::optional<std::string> getEnv(const std::string& envVar)
+{
+    std::optional<std::string> result;
+    char* envVal = std::getenv(fmt::format("GERBERA_{}", envVar).c_str());
+    if (envVal) {
+        result = envVal;
+    } else {
+        envVal = std::getenv(fmt::format("MEDIATOMB_{}", envVar).c_str());
+        if (envVal)
+            result = envVal;
+    }
+    log_debug("getEnv {} = {}", envVar, result.value_or(envVar));
+    return result;
+}
+
 int main(int argc, char** argv, char** envp)
 {
+    std::optional<std::string> magic = getEnv("MAGIC_FILE");
+    const auto additionalArgs = std::vector<ConfigOptionArgs> {
+        { CFG_SERVER_PORT, "p", "port", "Port to bind with, must be >=49152", std::optional<std::string>(), "PORT" },
+        { CFG_SERVER_IP, "i", "ip", "IP to bind with", std::optional<std::string>(), "IP" },
+        { CFG_SERVER_NETWORK_INTERFACE, "e", "interface", "Interface to bind with", std::optional<std::string>(), "IF" },
+        { CFG_SERVER_HOME, "m", "home", "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
+#ifdef HAVE_MAGIC
+        { CFG_IMPORT_MAGIC_FILE, "", "magic", "Set magic FILE", magic, "FILE" },
+#endif
+        { CFG_IMPORT_LAYOUT_MODE, "", "import-mode", "Activate import MODE ('mt' or 'grb')", std::optional<std::string>(), "MODE" },
+#ifdef GRBDEBUG
+        { CFG_SERVER_DEBUG_MODE, "", "debug-mode", "Set debugging mode to FACILITY", std::optional<std::string>(), "FACILITY" },
+#endif
+    };
+
     cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
 
     options.add_options() //
-        ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
-#ifdef GRBDEBUG
-        ("debug-mode", "Set Debugging Mode", cxxopts::value<std::string>()) //
-#endif
-        ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
-        ("u,user", "Drop privs to user", cxxopts::value<std::string>()) //
-        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>()) //
-        ("e,interface", "Interface to bind with", cxxopts::value<std::string>()) //
-        ("p,port", "Port to bind with, must be >=49152", cxxopts::value<in_port_t>()) //
-        ("i,ip", "IP to bind with", cxxopts::value<std::string>()) //
-        ("c,config", "Path to config file", cxxopts::value<fs::path>()) //
-        ("m,home", "Search this directory for a .config/gerbera folder containing a config file", cxxopts::value<fs::path>()) //
-        ("f,cfgdir", "Override name of config folder (.config/gerbera) in home folder.", cxxopts::value<fs::path>()) //
-        ("l,logfile", "Set log location", cxxopts::value<fs::path>()) //
-        ("compile-info", "Print compile info and exit") //
-        ("v,version", "Print version info and exit") //
         ("h,help", "Print this help and exit") //
+        ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
+        ("v,version", "Print version info and exit") //
+        ("compile-info", "Print compile info and exit") //
         ("create-config", "Print a default config.xml file and exit") //
         ("check-config", "Check config.xml file and exit") //
+        ("print-options", "Print simple config options and exit") //
         ("offline", "Do not answer UPnP content requests") // good for initial scans
+        ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
+        ("u,user", "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
+        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
+        ("c,config", "Path to config file", cxxopts::value<fs::path>(), "DIR") //
+        ("f,cfgdir", "Override name of config folder (.config/gerbera) in home folder.", cxxopts::value<fs::path>(), "DIR") //
+        ("l,logfile", "Set log location", cxxopts::value<fs::path>(), "FILE") //
         ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
+        ("set-option", "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
         ;
 
     try {
+        for (auto&& addArg : additionalArgs) {
+            auto value = cxxopts::value<std::vector<std::string>>();
+            if (addArg.defaultValue) {
+                log_debug("defValue {} = {}", addArg.optLong, addArg.defaultValue.value());
+                value->default_value(addArg.defaultValue.value());
+            }
+            options.add_option("", addArg.optShort, addArg.optLong, addArg.desc, value, addArg.argDesc);
+        }
         cxxopts::ParseResult opts = options.parse(argc, argv);
 
         if (opts.count("help") > 0) {
@@ -209,6 +316,11 @@ int main(int argc, char** argv, char** envp)
 
         if (opts.count("version") > 0) {
             printCopyright();
+            std::exit(EXIT_SUCCESS);
+        }
+
+        if (opts.count("print-options") > 0) {
+            printOptions();
             std::exit(EXIT_SUCCESS);
         }
 
@@ -431,27 +543,9 @@ int main(int argc, char** argv, char** envp)
             log_debug("Home detected as: {}", home->c_str());
         }
 
-        std::optional<std::string> dataDir;
-        char* pref = std::getenv("GERBERA_DATADIR");
-        if (pref) {
-            dataDir = pref;
-        } else {
-            pref = std::getenv("MEDIATOMB_DATADIR");
-            if (pref)
-                dataDir = pref;
-        }
+        std::optional<std::string> dataDir = getEnv("DATADIR");
         if (!dataDir.has_value())
             dataDir = PACKAGE_DATADIR;
-
-        std::optional<std::string> magic;
-        char* mgc = std::getenv("GERBERA_MAGIC_FILE");
-        if (mgc) {
-            magic = mgc;
-        } else {
-            mgc = std::getenv("MEDIATOMB_MAGIC_FILE");
-            if (mgc)
-                magic = mgc;
-        }
 
         if (opts.count("create-config") > 0) {
             ConfigGenerator configGenerator;
@@ -463,21 +557,6 @@ int main(int argc, char** argv, char** envp)
             std::exit(EXIT_SUCCESS);
         }
 
-        std::optional<in_port_t> portnum;
-        if (opts.count("port") > 0) {
-            portnum = opts["port"].as<in_port_t>();
-        }
-
-        std::optional<std::string> ip;
-        if (opts.count("ip") > 0) {
-            ip = opts["ip"].as<std::string>();
-        }
-
-        std::optional<std::string> interface;
-        if (opts.count("interface") > 0) {
-            interface = opts["interface"].as<std::string>();
-        }
-
         log_debug("Datadir is: {}", dataDir.value_or("unset"));
 
         bool offline = opts["offline"].as<bool>();
@@ -485,24 +564,22 @@ int main(int argc, char** argv, char** envp)
             log_info("Running in offline mode");
 
         std::shared_ptr<ConfigManager> configManager;
+        int portnum = -1;
         try {
             configManager = std::make_shared<ConfigManager>(
                 configFile.value_or(""), home.value_or(""), confdir.value_or(""),
-                dataDir.value_or(""), magic.value_or(""),
-                ip.value_or(""), interface.value_or(""), portnum.value_or(0),
-                debug);
+                dataDir.value_or(""), debug);
             configManager->load(home.value_or(""));
+            handleOptionArgs(opts, configManager);
+            handleAdditionalArgs(opts, additionalArgs, configManager);
+            configManager->validate();
 #ifdef GRBDEBUG
-            if (opts.count("debug-mode") > 0) {
-                auto debugMode = opts["debug-mode"].as<std::string>();
-                log_info("Setting Debug Mode {}", debugMode);
-                GrbLogger::Logger.init(GrbLogger::makeFacility(debugMode));
-            }
+            GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_DEBUG_MODE));
 #endif
             if (opts.count("check-config") > 0) {
                 std::exit(EXIT_SUCCESS);
             }
-            portnum = in_port_t(configManager->getIntOption(CFG_SERVER_PORT));
+            portnum = configManager->getIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
             std::exit(EXIT_FAILURE);
@@ -528,7 +605,7 @@ int main(int argc, char** argv, char** envp)
 
             if (ue.getErrorCode() == UPNP_E_SOCKET_BIND) {
                 log_error("LibUPnP could not bind to socket");
-                log_error("Please check if another instance of Gerbera or another application is running on port TCP {} or UDP 1900.", portnum.value());
+                log_error("Please check if another instance of Gerbera or another application is running on port TCP {} or UDP 1900.", portnum);
             } else if (ue.getErrorCode() == UPNP_E_SOCKET_ERROR) {
                 log_error("LibUPnP Socket error");
                 log_error("Please check if your network interface was configured for multicast!");
@@ -600,9 +677,11 @@ int main(int argc, char** argv, char** envp)
                     try {
                         configManager = std::make_shared<ConfigManager>(
                             configFile.value_or(""), home.value_or(""), confdir.value_or(""),
-                            dataDir.value_or(""), magic.value_or(""),
-                            ip.value_or(""), interface.value_or(""), portnum.value_or(-1),
-                            debug);
+                            dataDir.value_or(""), debug);
+                        handleOptionArgs(opts, configManager);
+                        handleAdditionalArgs(opts, additionalArgs, configManager);
+                        configManager->validate();
+                        portnum = configManager->getIntOption(CFG_SERVER_PORT);
                     } catch (const ConfigParseException& ce) {
                         log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
                         log_error("Could not restart Gerbera");

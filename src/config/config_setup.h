@@ -238,7 +238,6 @@ protected:
     bool isSet(ConfigPathArguments a) const { return (arguments & a) == a; }
 
 public:
-
     static fs::path Home;
 
     ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", ConfigPathArguments arguments = ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty)

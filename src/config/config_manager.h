@@ -60,14 +60,13 @@ class ConfigManager : public Config, public std::enable_shared_from_this<Config>
 public:
     ConfigManager(fs::path filename,
         const fs::path& userHome, const fs::path& configDir,
-        fs::path dataDir, fs::path magicFile,
-        std::string ip, std::string interface, in_port_t port,
-        bool debug);
+        fs::path dataDir, bool debug);
 
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
     void load(const fs::path& userHome);
+    bool validate();
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override;
 
     /// \brief add a config option
@@ -143,9 +142,6 @@ protected:
     fs::path filename;
     fs::path dataDir;
     fs::path magicFile;
-    std::string ip;
-    std::string interface;
-    in_port_t port;
     static bool debug;
     std::map<std::string, std::string> origValues;
 
