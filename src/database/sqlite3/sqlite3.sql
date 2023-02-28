@@ -5,7 +5,7 @@ CREATE TABLE "mt_cds_object" (
   "parent_id" integer NOT NULL default 0,
   "object_type" tinyint unsigned NOT NULL,
   "upnp_class" varchar(80) default NULL,
-  "dc_title" varchar(255) default NULL,
+  "dc_title" varchar(255) default NULL COLLATE NOCASE,
   "location" text default NULL,
   "location_hash" integer unsigned default NULL,
   "auxdata" text default NULL,

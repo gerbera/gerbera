@@ -12,7 +12,7 @@ CREATE TABLE `mt_cds_object` (
   `parent_id` int(11) NOT NULL default '0',
   `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
-  `dc_title` varchar(255) default NULL,
+  `dc_title` varchar(255) default NULL COLLATE utf8_general_ci,
   `location` blob,
   `location_hash` int(11) unsigned default NULL,
   `auxdata` blob,
