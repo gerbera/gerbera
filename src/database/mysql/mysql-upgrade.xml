@@ -134,4 +134,7 @@
         <script>ALTER TABLE `mt_autoscan` ADD `ct_image` varchar(255) NOT NULL default 'object.container.album.photoAlbum'</script>
         <script>ALTER TABLE `mt_autoscan` ADD `ct_video` varchar(255) NOT NULL default 'object.container'</script>
     </version>
+    <version number="21" remark="set default column colation">
+        <script>ALTER TABLE `mt_cds_object` MODIFY `dc_title` varchar(255) default NULL COLLATE utf8_general_ci</script>
+    </version>
 </upgrade>
