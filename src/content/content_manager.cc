@@ -1247,7 +1247,33 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
             log_error("Received chain item without title");
             return { INVALID_OBJECT_ID, false };
         }
-        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
+
+        std::string itemIdentifier = item->getTitle();
+        if (item->getClass() == "object.container.album.musicAlbum") {
+            // Workaround to create a unique path in the tree combining "Album Title", "Album Artist" and Year
+            // This allows to distinguish 2 or more different albums with the same name. E.g.
+            //   - Greatest Hits performed by two different artists
+            //   - Greatest Hits performed by the same artist but released in different years
+
+            auto albumArtist = item->getMetaData(M_ALBUMARTIST);
+            if (albumArtist.empty()) {
+                albumArtist = item->getMetaData(M_ARTIST);
+            }
+            itemIdentifier += "_" + albumArtist;
+
+            std::regex year_regex("^([0-9]{4})-");
+            std::cmatch match;
+
+            if ( std::regex_search(item->getMetaData(M_DATE).c_str(), match, year_regex) && match.size() > 1) {
+                itemIdentifier.append("_");
+                itemIdentifier.append(match.str(1));
+            }
+
+            log_debug("Applying 'Greatest Hits' workaround for musicAlbum container");
+        }
+
+        tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(itemIdentifier, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
+
         log_debug("Received container chain item {}", tree);
         for (auto&& [key, val] : config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING)) {
             tree = std::regex_replace(tree, std::regex(key), val);
