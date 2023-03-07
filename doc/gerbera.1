@@ -16,29 +16,11 @@ gerbera \- UPnP MediaServer
 .if (\nx>(\n(.l/2)) .nr x (\n(.l/5)
 'in \n(.iu+\nxu
 [
-\fB-i|--ip \fIIP address\fB
-\fR] [
-\fB-e|--interface \fIinterface\fB
-\fR] [
-\fB-p|--port \fIport\fB
-\fR] [
-\fB-u|--user \fIusername\fB
-\fR] [
-\fB-c|--config \fIconfig file\fB
-\fR] [
-\fB-m|--home \fIhome dir\fB
-\fR] [
-\fB-f|--cfgdir \fIconfig dir\fB
-\fR] [
-\fB-P|--pidfile \fIpid file\fB
-\fR] [
-\fB--add-file \fIfile\fB
-\fR]  [
-\fB-l|--logfile \fIlogfile\fB
-\fR] [
-\fB-d|-daemon\fR
+\fB-h|--help\fR
 ] [
 \fB-D|--debug\fR
+] [
+\fB-v|--version\fR
 ] [
 \fB--compile-info\fR
 ] [
@@ -46,12 +28,40 @@ gerbera \- UPnP MediaServer
 ] [
 \fB--check-config\fR
 ] [
+\fB--print-options\fR
+] [
 \fB--offline\fR
 ] [
-\fB-v|--version\fR
+\fB-d|-daemon\fR
 ] [
-\fB-h|--help\fR
-]
+\fB-u|--user \fIusername\fB
+\fR] [
+\fB-P|--pidfile \fIpid file\fB
+\fR] [
+\fB-c|--config \fIconfig file\fB
+\fR] [
+\fB-f|--cfgdir \fIconfig dir\fB
+\fR] [
+\fB-l|--logfile \fIlogfile\fB
+\fR] [
+\fB--add-file \fIfile\fB
+\fR] [
+\fB--set-option \fIopt=val\fB
+\fR] [
+\fB-p|--port \fIport\fB
+\fR] [
+\fB-i|--ip \fIIP address\fB
+\fR] [
+\fB-e|--interface \fIinterface\fB
+\fR] [
+\fB-m|--home \fIhome dir\fB
+\fR] [
+\fB--magic \fImagic\fB
+\fR] [
+\fB--import-mode \fImt|grb\fB
+\fR] [
+\fB-l|--debug-mode \fIfacilities\fB
+\fR]
 'in \n(.iu-\nxu
 .ad b
 'hy
@@ -86,7 +96,7 @@ name and location of your choice. The file name must be absolute.
 .TP
 \*(T<\fB\-m\fR\*(T>, \*(T<\fB\-\-home\fR\*(T>
 Specify an alternative home directory. By default Gerbera will try to
-retrieve the users home directory from the environment, then it will look for a
+retrieve the users home directory from the environment (HOME), then it will look for a
 .config/gerbera directory in users home. If .config/gerbera was found we will try to find
 the default configuration file (config.xml).
 
@@ -103,11 +113,23 @@ default that equals to .config/gerbera, this option allows you to override the
 default directory naming. This is useful when you want to set up the server in a
 nonstandard location.
 .TP
+\*(T<\fB\-f\fR\*(T>, \*(T<\fB\-\-magic\fR\*(T>
+The magic file is set/overwritten. By default it is read from environment variables GERBERA_MAGIC_FILE or MEDIATOMB_MAGIC_FILE.
+.TP
 \*(T<\fB\-\-add\-file\fR\*(T>
 Add the specified file name to the database without UI
 interaction. The path must be absolute, if path is a directory then it will be
 added recursively. If path is a file, then only the given file will be
 imported.
+.TP
+\*(T<\fB\-\-print\-options\fR\*(T>
+Print all option numbers available for use with --set-option.
+.TP
+\*(T<\fB\-\-set\-option\fR\*(T>
+Set the specified option number to its proper value like in config.xml. This overwrites
+values from config.xml. See --print-options for valid options.
+Multiple options can either be specified sperated by commas or
+with another use of --set-option.
 .TP
 \*(T<\fB\-l\fR\*(T>, \*(T<\fB\-\-logfile\fR\*(T>
 Do not output log messages to stdout, but redirect everything to a specified
