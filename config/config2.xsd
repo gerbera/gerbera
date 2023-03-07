@@ -545,6 +545,14 @@
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
             <xs:attribute name="follow-symlinks" type="boolean" default="yes"/>
             <xs:attribute name="readable-names" type="boolean" default="yes"/>
+            <xs:attribute name="import-mode" default="mt">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="grb"/>
+                        <xs:enumeration value="mt"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 

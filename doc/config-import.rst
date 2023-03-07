@@ -50,6 +50,20 @@ This tag defines the import section.
 
     This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed. This changes the title of the entry if no metadata is available
 
+    ::
+
+        import-mode="mt|grb"
+
+    * Optional
+
+    * Default: **mt**
+
+    This attribute sets the import process:
+
+    - **mt**: traditional mode, that handles each file completely
+    - **grb**: modern mode, that first imports all files and then processes the layout of the files
+
+
 **Child tags:**
 
 ``filesystem-charset``

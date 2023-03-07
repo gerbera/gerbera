@@ -277,6 +277,15 @@ The default configuration directory is combined out of the users home and the de
 this option allows you to override the default directory naming. This is useful when you want to setup the server in a
 nonstandard location, but want that the default configuration to be written by the server.
 
+Magic File
+----------
+
+::
+
+    --magic
+
+The magic file is set/overwritten. By default it is read from environment variables GERBERA_MAGIC_FILE or MEDIATOMB_MAGIC_FILE.
+
 Add Content
 -----------
 
@@ -315,6 +324,23 @@ Check Config
 
 Check the current configuration and exit. Useful to check new settings before running gerbera as a service.
 Best use with --debug in case of problems.
+
+Set Option/Print Options
+-------------------------
+
+::
+
+    --set-option
+
+Set the specified option number to its proper value like in config.xml. This overwrites values from config.xml.
+See --print-options for valid options. Multiple options can either be specified sperated by commas or
+with another use of --set-option. The syntax is OPT=VAL.
+
+::
+
+    --print-options
+
+Print all option numbers available for use with --set-option.
 
 Compile Info
 ------------
