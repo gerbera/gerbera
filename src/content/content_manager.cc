@@ -79,72 +79,6 @@
 #include "autoscan_inotify.h"
 #endif
 
-bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
-{
-    if (op == "=" && actual.find(expect) != std::string::npos)
-        return true;
-    if (op == "!=" && actual.find(expect) == std::string::npos)
-        return true;
-    if (op == "<" && actual < expect)
-        return true;
-    return (op == ">" && actual > expect);
-}
-
-bool UpnpMap::checkValue(const std::string& op, int expect, int actual) const
-{
-    if (op == "=" && actual != expect)
-        return true;
-    if (op == "!=" && actual == expect)
-        return true;
-    if (op == "<" && actual < expect)
-        return true;
-    return (op == ">" && actual > expect);
-}
-
-bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const
-{
-    bool match = false;
-    if (startswith(mt, mimeType)) {
-        for (auto&& [root, op, expect] : filters) {
-            if (root == "location") {
-                match = checkValue(op, expect, item->getLocation().string());
-            } else if (root == "tracknumber") {
-                match = checkValue(op, stoiString(expect), item->getTrackNumber());
-            } else if (root == "partnumber") {
-                match = checkValue(op, stoiString(expect), item->getPartNumber());
-            } else if (std::find_if(MetadataHandler::mt_keys.begin(), MetadataHandler::mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != MetadataHandler::mt_keys.end()) {
-                match = checkValue(op, expect, item->getMetaData(root));
-            }
-        }
-    }
-    return match;
-}
-
-void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source)
-{
-    auto re = std::regex("^([A-Za-z0-9_:]+)(<|>|=|!=)([A-Za-z0-9_]+)$");
-    for (auto&& [key, cls] : source) {
-        auto filterList = splitString(key, ';');
-        auto filters = std::vector<std::tuple<std::string, std::string, std::string>>();
-        auto mt = filterList.front();
-        std::vector<std::string> parts = splitString(mt, '/');
-
-        if (parts.size() == 2 && parts.at(1) == "*")
-            mt = fmt::format("{}/", parts.at(0));
-        filterList.erase(filterList.begin());
-
-        for (auto&& filter : filterList) {
-            std::smatch match;
-            std::regex_match(filter, match, re);
-            if (match.size() == 4) {
-                filters.emplace_back(match[1], match[2], match[3]);
-            }
-        }
-
-        target.emplace_back(mt, cls, filters);
-    }
-}
-
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer)
     : config(context->getConfig())
@@ -290,9 +224,9 @@ void ContentManager::run()
     log_debug("autoscan_timed");
     autoscanList->notifyAll(this);
 #ifdef HAVE_INOTIFY
-    autoscanList->initTimer(self, timer, context, config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
+    autoscanList->initTimer(self, timer, config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
 #else
-    autoscanList->initTimer(self, timer, context);
+    autoscanList->initTimer(self, timer);
 #endif
 }
 
@@ -1238,7 +1172,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const std::share
 
     std::shared_ptr<CdsObject> obj;
     if (isRegularFile(dirEnt, ec) || (allowFifo && dirEnt.is_fifo(ec))) { // item
-        getImportService(adir)->createSingleItem(dirEnt);
+        obj = getImportService(adir)->createSingleItem(dirEnt);
     } else if (dirEnt.is_directory(ec)) {
         obj = std::make_shared<CdsContainer>();
         /* adding containers is done by Database now
@@ -1264,14 +1198,17 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const std::share
 void ContentManager::initLayout()
 {
     if (layoutEnabled) {
+        auto self = shared_from_this();
         auto lock = threadRunner->lockGuard("initLayout");
         auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
         importService->initLayout(layoutType);
         for (std::size_t i = 0; i < autoscanList->size(); i++) {
             auto autoscanDir = autoscanList->get(i);
-            if (autoscanDir) {
-                getImportService(autoscanDir)->initLayout(layoutType);
-            }
+
+            auto asImportService = std::make_shared<ImportService>(context);
+            asImportService->run(self, autoscanDir, autoscanDir->getLocation());
+            autoscanDir->setImportService(asImportService);
+            asImportService->initLayout(layoutType);
         }
     }
 }
@@ -1648,6 +1585,8 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         auto asImportService = std::make_shared<ImportService>(context);
         asImportService->run(self, dir, dir->getLocation());
         dir->setImportService(asImportService);
+        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+        asImportService->initLayout(layoutType);
         scanDir(dir, true);
         return;
     }

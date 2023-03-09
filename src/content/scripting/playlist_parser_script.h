@@ -58,7 +58,7 @@ public:
     pugi::xml_node& readXml(int direction);
 
 protected:
-    ParserScript(const std::shared_ptr<ContentManager>& content, const std::string& name, const std::string& objName);
+    ParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent, const std::string& name, const std::string& objName);
 
     std::FILE* currentHandle {};
     int currentObjectID { INVALID_OBJECT_ID };
@@ -70,7 +70,7 @@ protected:
 
 class PlaylistParserScript : public ParserScript {
 public:
-    PlaylistParserScript(const std::shared_ptr<ContentManager>& content);
+    PlaylistParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;

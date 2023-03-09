@@ -60,6 +60,15 @@ public:
         setOption(config);
     }
 
+    void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
+    {
+        if (arguments && arguments->find("notEmpty") != arguments->end()) {
+            notEmpty = arguments->find("notEmpty")->second == "true";
+        }
+        newOption(optValue);
+        setOption(config);
+    }
+
     bool checkEnumValue(const std::string& value, En& result) const
     {
         if (valueMap.find(value) != valueMap.end()) {

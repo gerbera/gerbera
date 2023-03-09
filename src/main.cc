@@ -213,11 +213,11 @@ void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<Config>&
                 continue;
             if (setup->getTypeString() == "Boolean" && valueList.size() < 1) {
                 setup->makeOption("yes", configManager);
-            } else if (valueList.size() >= 1) {
-                setup->makeOption(valueList[0], configManager);
+            } else if (valueList.size() >= 2) {
+                setup->makeOption(valueList[1], configManager);
             }
             auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
-            log_debug("{} [{}] = {}\n", option, setup->getUniquePath(), value);
+            log_debug("set-option {} [{}] = {}", option, setup->getUniquePath(), value);
         }
     }
 }
@@ -235,12 +235,12 @@ void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOp
             } else if (valueList.size() >= 1) {
                 setup->makeOption(fmt::format("{}", fmt::join(valueList, ",")), configManager);
             }
-            log_debug("addArg {} [{}] = {}\n", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
         } else if (addArg.defaultValue) {
             auto setup = ConfigDefinition::findConfigSetup(addArg.option);
             setup->makeOption(addArg.defaultValue.value(), configManager);
             auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
-            log_debug("addArg {} [{}] = {}\n", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
         }
     }
 }

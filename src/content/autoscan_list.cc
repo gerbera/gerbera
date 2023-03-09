@@ -29,15 +29,10 @@
 #include "autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
-#include "import_service.h"
 #include "util/timer.h"
 
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h"
-#endif
-
-#ifdef HAVE_JS
-#include "scripting/playlist_parser_script.h"
 #endif
 
 void AutoscanList::updateLMinDB(Database& database)
@@ -197,8 +192,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
 
 void AutoscanList::initTimer(
     std::shared_ptr<ContentManager>& content,
-    std::shared_ptr<Timer>& timer,
-    std::shared_ptr<Context>& context
+    std::shared_ptr<Timer>& timer
 #ifdef HAVE_INOTIFY
     ,
     bool doInotify, std::unique_ptr<AutoscanInotify>& inotify
@@ -221,8 +215,5 @@ void AutoscanList::initTimer(
             log_debug("Adding timed scan with interval {}", autoScanDir->getInterval().count());
             timer->addTimerSubscriber(content.get(), autoScanDir->getInterval(), std::move(param), false);
         }
-        auto asImportService = std::make_shared<ImportService>(context);
-        asImportService->run(content, autoScanDir, autoScanDir->getLocation());
-        autoScanDir->setImportService(asImportService);
     }
 }
