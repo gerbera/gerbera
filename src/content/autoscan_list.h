@@ -82,8 +82,7 @@ public:
 
     void initTimer(
         std::shared_ptr<ContentManager>& content,
-        std::shared_ptr<Timer>& timer,
-        std::shared_ptr<Context>& context
+        std::shared_ptr<Timer>& timer
 #ifdef HAVE_INOTIFY
         ,
         bool doInotify, std::unique_ptr<AutoscanInotify>& inotify

@@ -98,6 +98,28 @@ public:
     std::chrono::seconds getMTime() const { return mtime; }
 };
 
+class UpnpMap {
+private:
+    std::vector<std::tuple<std::string, std::string, std::string>> filters;
+
+    bool checkValue(const std::string& op, const std::string& expect, const std::string& actual) const;
+    bool checkValue(const std::string& op, int expect, int actual) const;
+
+public:
+    std::string mimeType;
+    std::string upnpClass;
+
+    UpnpMap(std::string mt, std::string cls, std::vector<std::tuple<std::string, std::string, std::string>> f)
+        : filters(std::move(f))
+        , mimeType(std::move(mt))
+        , upnpClass(std::move(cls))
+    {
+    }
+
+    bool isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const;
+    static void initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
+};
+
 class ImportService {
 private:
     std::shared_ptr<Context> context;

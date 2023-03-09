@@ -48,7 +48,7 @@ protected:
     std::unique_ptr<ImportScript> import_script;
 
 public:
-    JSLayout(const std::shared_ptr<ContentManager>& content);
+    JSLayout(const std::shared_ptr<ContentManager>& content, const std::string& parent);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 };

@@ -94,7 +94,7 @@ public:
     std::shared_ptr<CdsObject> getProcessedObject() const { return processed; }
 
 protected:
-    Script(const std::shared_ptr<ContentManager>& content,
+    Script(const std::shared_ptr<ContentManager>& content, const std::string& parent,
         const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
 
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
@@ -119,8 +119,9 @@ protected:
 
 private:
     std::string entrySeparator;
-    std::string name;
+    std::string contextName;
     std::string objectName;
+    std::string scriptPath;
     void _load(const fs::path& scriptPath);
     void _execute();
     std::unique_ptr<StringConverter> _p2i;

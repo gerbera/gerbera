@@ -24,7 +24,7 @@
 /// \file import_service.cc
 #define LOG_FAC log_facility_t::content
 
-#include "import_service.h"
+#include "import_service.h" // API
 
 #include <fmt/chrono.h>
 #include <regex>
@@ -45,6 +45,72 @@
 #include "scripting/import_script.h"
 #include "scripting/playlist_parser_script.h"
 #endif
+
+bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
+{
+    if (op == "=" && actual.find(expect) != std::string::npos)
+        return true;
+    if (op == "!=" && actual.find(expect) == std::string::npos)
+        return true;
+    if (op == "<" && actual < expect)
+        return true;
+    return (op == ">" && actual > expect);
+}
+
+bool UpnpMap::checkValue(const std::string& op, int expect, int actual) const
+{
+    if (op == "=" && actual != expect)
+        return true;
+    if (op == "!=" && actual == expect)
+        return true;
+    if (op == "<" && actual < expect)
+        return true;
+    return (op == ">" && actual > expect);
+}
+
+bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const
+{
+    bool match = false;
+    if (startswith(mt, mimeType)) {
+        for (auto&& [root, op, expect] : filters) {
+            if (root == "location") {
+                match = checkValue(op, expect, item->getLocation().string());
+            } else if (root == "tracknumber") {
+                match = checkValue(op, stoiString(expect), item->getTrackNumber());
+            } else if (root == "partnumber") {
+                match = checkValue(op, stoiString(expect), item->getPartNumber());
+            } else if (std::find_if(MetadataHandler::mt_keys.begin(), MetadataHandler::mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != MetadataHandler::mt_keys.end()) {
+                match = checkValue(op, expect, item->getMetaData(root));
+            }
+        }
+    }
+    return match;
+}
+
+void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source)
+{
+    auto re = std::regex("^([A-Za-z0-9_:]+)(<|>|=|!=)([A-Za-z0-9_]+)$");
+    for (auto&& [key, cls] : source) {
+        auto filterList = splitString(key, ';');
+        auto filters = std::vector<std::tuple<std::string, std::string, std::string>>();
+        auto mt = filterList.front();
+        std::vector<std::string> parts = splitString(mt, '/');
+
+        if (parts.size() == 2 && parts.at(1) == "*")
+            mt = fmt::format("{}/", parts.at(0));
+        filterList.erase(filterList.begin());
+
+        for (auto&& filter : filterList) {
+            std::smatch match;
+            std::regex_match(filter, match, re);
+            if (match.size() == 4) {
+                filters.emplace_back(match[1], match[2], match[3]);
+            }
+        }
+        log_debug("UpnpMap: {} -> {}", mt, cls);
+        target.emplace_back(mt, cls, filters);
+    }
+}
 
 ImportService::ImportService(std::shared_ptr<Context> context)
     : context(std::move(context))
@@ -70,11 +136,6 @@ void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr
 
 void ImportService::initLayout(LayoutType layoutType)
 {
-#ifdef HAVE_JS
-    if (!playlistParserScript) {
-        playlistParserScript = std::make_unique<PlaylistParserScript>(content);
-    }
-#endif
     if (!layout) {
         log_debug("virtual layout Type {}", layoutType);
         try {
@@ -82,7 +143,7 @@ void ImportService::initLayout(LayoutType layoutType)
 
             if (layoutType == LayoutType::Js) {
 #ifdef HAVE_JS
-                layout = std::make_shared<JSLayout>(content);
+                layout = std::make_shared<JSLayout>(content, rootPath.string());
 #else
                 log_error("Cannot init virtual layout:\nGerbera compiled without JavaScript support, but JavaScript was requested.");
 #endif
@@ -95,6 +156,11 @@ void ImportService::initLayout(LayoutType layoutType)
             throw;
         }
     }
+#ifdef HAVE_JS
+    if (!playlistParserScript) {
+        playlistParserScript = std::make_unique<PlaylistParserScript>(content, rootPath.string());
+    }
+#endif
 }
 
 void ImportService::destroyLayout()
@@ -144,19 +210,19 @@ void ImportService::doImport(std::unique_ptr<fs::directory_iterator>& dirIterato
 void ImportService::readDir(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings)
 {
     for (auto&& dirEntry : *dirIterator) {
-        auto&& newPath = dirEntry.path();
-        auto&& name = newPath.filename().string();
+        auto&& entryPath = dirEntry.path();
+        auto&& name = entryPath.filename().string();
         if ((name[0] == '.' && !settings.hidden)
             || (!settings.followSymlinks && dirEntry.is_symlink())
-            || config->getConfigFilename() == newPath) {
-            contentStateCache[newPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
+            || config->getConfigFilename() == entryPath) {
+            contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
             continue;
         }
         std::error_code ec;
-        contentStateCache[newPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         if (dirEntry.is_directory(ec) && settings.recursive) {
             if (!ec) {
-                auto subIterator = std::make_unique<fs::directory_iterator>(newPath, ec);
+                auto subIterator = std::make_unique<fs::directory_iterator>(entryPath, ec);
                 if (!ec) {
                     readDir(subIterator, settings);
                 }
@@ -202,7 +268,7 @@ void ImportService::createItems(AutoScanSetting& settings)
     std::error_code ec;
     std::shared_ptr<CdsContainer> parentContainer = nullptr;
     auto lastModifiedCurrentMax = std::chrono::seconds::zero();
-    // auto_currentTme_=_currentTime();
+    // auto currentTme = currentTime()
     auto lastModifiedNewMax = lastModifiedCurrentMax;
     fs::path contPath;
 
@@ -211,6 +277,9 @@ void ImportService::createItems(AutoScanSetting& settings)
         auto cdsObj = stateEntry->getObject();
         std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
         if (container) {
+            if (contPath != "") {
+                contentStateCache[contPath]->setMTime(lastModifiedNewMax);
+            }
             parentContainer = container;
             contPath = itemPath;
             if (autoscanDir) {
@@ -230,6 +299,9 @@ void ImportService::createItems(AutoScanSetting& settings)
                 database->addObject(cdsObj, nullptr);
             }
         }
+    }
+    if (autoscanDir && contPath != "") {
+        autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
     }
 }
 
@@ -257,7 +329,6 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
     log_debug("UpnpClass '{}' for file {}", upnpClass, objectPath.c_str());
 
     auto item = std::make_shared<CdsItem>();
-    std::shared_ptr<CdsObject> obj = item;
     item->setLocation(objectPath);
     item->setMTime(toSeconds(dirEntry.last_write_time(ec)));
     item->setSizeOnDisk(getFileSize(dirEntry));
@@ -275,12 +346,12 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
         title = objectPath.stem().string();
         std::replace(title.begin(), title.end(), '_', ' ');
     }
-    obj->setTitle(f2i->convert(title));
+    item->setTitle(f2i->convert(title));
 
     MetadataHandler::extractMetaData(context, content, item, dirEntry);
     updateItemData(item, mimetype);
 
-    return obj;
+    return item;
 }
 
 void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)

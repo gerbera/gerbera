@@ -170,20 +170,21 @@ void Script::setIntProperty(const std::string& name, int value)
 
 /* **************** */
 
-Script::Script(const std::shared_ptr<ContentManager>& content,
+Script::Script(const std::shared_ptr<ContentManager>& content, const std::string& parent,
     const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)
     , runtime(content->getScriptingRuntime())
     , sc(std::move(sc))
-    , name(name)
+    , contextName(fmt::format("{}_{}", name, parent))
     , objectName(std::move(objName))
 {
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    ctx = runtime->createContext(name);
+    replaceAllString(contextName, "/", "_");
+    ctx = runtime->createContext(contextName);
     if (!ctx)
         throw_std_runtime_error("Scripting: could not initialize js context");
 
@@ -336,7 +337,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content,
 
 Script::~Script()
 {
-    runtime->destroyContext(name);
+    runtime->destroyContext(contextName);
 }
 
 Script* Script::getContextScript(duk_context* ctx)
@@ -368,7 +369,7 @@ void Script::defineFunctions(const duk_function_list_entry* functions)
 void Script::_load(const fs::path& scriptPath)
 {
     std::string scriptText = GrbFile(scriptPath).readTextFile();
-
+    this->scriptPath = scriptPath;
     if (scriptText.empty())
         throw_std_runtime_error("empty script");
 
@@ -398,7 +399,7 @@ void Script::load(const fs::path& scriptPath)
 void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-        log_error("Failed to execute script: {}", duk_safe_to_string(ctx, -1));
+        log_error("Failed to execute script {}: {}", scriptPath, duk_safe_to_string(ctx, -1));
         throw_std_runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
