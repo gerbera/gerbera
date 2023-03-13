@@ -47,8 +47,8 @@ public:
 
     std::vector<std::string> getMimeTypes() override { return {}; }
     std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override { return {}; }
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, bool wasRegularFile = false) override { return {}; }
-    int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override { return INVALID_OBJECT_ID; }
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, DbFileType fileType = DbFileType::Auto) override { return {}; }
+    int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
     std::shared_ptr<CdsObject> loadObject(int objectID) override { return nullptr; }

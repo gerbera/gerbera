@@ -92,10 +92,13 @@ public:
     }
     std::shared_ptr<CdsObject> getObject() { return cdsObject; }
     fs::directory_entry getDirEntry() { return dirEntry; }
+
     /// \brief Set modification time of file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
     /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
     std::chrono::seconds getMTime() const { return mtime; }
+
+    ImportState getState() const { return state; }
 };
 
 class UpnpMap {
@@ -151,8 +154,8 @@ private:
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
-    void readDir(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings);
-    void createContainers();
+    void readDir(const fs::path& location, AutoScanSetting& settings);
+    void createContainers(int parentContainerId);
     void createItems(AutoScanSetting& settings);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
@@ -164,15 +167,15 @@ public:
     void initLayout(LayoutType layoutType);
     void destroyLayout();
 
-    void doImport(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task);
+    void doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task);
     void clearCache();
 
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEntry);
-    std::shared_ptr<CdsContainer> createSingleContainer(const fs::directory_entry& dirEntry, const std::string& upnpClass);
+    std::shared_ptr<CdsContainer> createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass);
     void fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<GenericTask>& task);
 
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
-    std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);
+    std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
 

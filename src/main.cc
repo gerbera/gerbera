@@ -201,7 +201,7 @@ public:
     std::string argDesc;
 };
 
-void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<Config>& configManager)
+static void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<Config>& configManager)
 {
     if (opts["set-option"].count() > 0) {
         auto setValueList = opts["set-option"].as<std::vector<std::string>>();
@@ -222,7 +222,7 @@ void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<Config>&
     }
 }
 
-void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOptionArgs> additionalArgs, const std::shared_ptr<Config>& configManager)
+static void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOptionArgs> additionalArgs, const std::shared_ptr<Config>& configManager)
 {
     for (auto&& addArg : additionalArgs) {
         if (opts[addArg.optLong].count() > 0) {
@@ -245,7 +245,7 @@ void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOp
     }
 }
 
-std::optional<std::string> getEnv(const std::string& envVar)
+static std::optional<std::string> getEnv(const std::string& envVar)
 {
     std::optional<std::string> result;
     char* envVal = std::getenv(fmt::format("GERBERA_{}", envVar).c_str());
@@ -678,6 +678,7 @@ int main(int argc, char** argv, char** envp)
                         configManager = std::make_shared<ConfigManager>(
                             configFile.value_or(""), home.value_or(""), confdir.value_or(""),
                             dataDir.value_or(""), debug);
+                        configManager->load(home.value_or(""));
                         handleOptionArgs(opts, configManager);
                         handleAdditionalArgs(opts, additionalArgs, configManager);
                         configManager->validate();

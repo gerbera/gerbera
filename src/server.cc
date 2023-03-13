@@ -519,7 +519,8 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
         // log_debug("routeSubscriptionRequest: request for content directory service");
-        cds->processSubscriptionRequest(request);
+        if (!offline)
+            cds->processSubscriptionRequest(request);
     } else if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
         // log_debug("routeSubscriptionRequest: request for connection manager service");
@@ -536,7 +537,8 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
 // Temp
 void Server::sendCDSSubscriptionUpdate(const std::string& updateString)
 {
-    cds->sendSubscriptionUpdate(updateString);
+    if (!offline)
+        cds->sendSubscriptionUpdate(updateString);
 }
 
 std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const
