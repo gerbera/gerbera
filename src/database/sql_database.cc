@@ -1245,11 +1245,11 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, bool wasRegularFile)
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, DbFileType fileType)
 {
-    std::string dbLocation = [&fullpath, wasRegularFile] {
+    std::string dbLocation = [&fullpath, fileType] {
         std::error_code ec;
-        if (wasRegularFile || isRegularFile(fullpath, ec))
+        if (fileType == DbFileType::File || (fileType == DbFileType::Auto && isRegularFile(fullpath, ec)))
             return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
         return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     }();
@@ -1278,9 +1278,9 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
     return result;
 }
 
-int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile)
+int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, DbFileType fileType)
 {
-    auto obj = findObjectByPath(fullpath, wasRegularFile);
+    auto obj = findObjectByPath(fullpath, fileType);
     if (!obj)
         return INVALID_OBJECT_ID;
     return obj->getID();
@@ -1294,7 +1294,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
-    auto obj = findObjectByPath(path);
+    auto obj = findObjectByPath(path, DbFileType::Directory);
     if (obj)
         return obj->getID();
 
@@ -1435,7 +1435,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
         *containerID = CDS_ID_ROOT;
         return false;
     }
-    std::string dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, virtualPath);
+    std::string dbLocation = addLocationPrefix(cont->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
     auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1", identifier("id"), identifier(CDS_OBJECT_TABLE), identifier("location_hash"), quote(stringHash(dbLocation)), identifier("location"), quote(dbLocation)));
@@ -1455,7 +1455,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     if (cont->getMetaData(M_DATE).empty())
         cont->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
 
-    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), true, cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
+    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
     return true;
 }
 

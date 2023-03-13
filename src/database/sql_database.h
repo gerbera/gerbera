@@ -156,8 +156,8 @@ public:
 
     std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override;
     // virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, bool wasRegularFile = false) override;
-    int findObjectIDByPath(const fs::path& fullpath, bool wasRegularFile = false) override;
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
+    int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;

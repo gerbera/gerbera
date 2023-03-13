@@ -196,20 +196,36 @@ void ImportService::clearCache()
     containersWithFanArt.clear();
 }
 
-void ImportService::doImport(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
+void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
 {
-    readDir(dirIterator, settings);
-    createContainers();
+    std::error_code ec;
+    auto rootEntry = fs::directory_entry(location);
+    contentStateCache[location] = std::make_shared<ContentState>(rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
+    if (ec) {
+        log_error("Failed to start {}, {}", location.c_str(), ec.message());
+        return;
+    }
+
+    readDir(location, settings);
+    createContainers(CDS_ID_FS_ROOT);
     createItems(settings);
     fillLayout(task);
     // ToDo: update currentContent
+    currentContent.clear();
 
     contentStateCache.clear();
 }
 
-void ImportService::readDir(std::unique_ptr<fs::directory_iterator>& dirIterator, AutoScanSetting& settings)
+void ImportService::readDir(const fs::path& location, AutoScanSetting& settings)
 {
-    for (auto&& dirEntry : *dirIterator) {
+    log_debug("start {}", location.string());
+    std::error_code ec;
+    auto dirIterator = fs::directory_iterator(location, ec);
+    if (ec) {
+        log_error("Failed to iterate {}, {}", location.c_str(), ec.message());
+        return;
+    }
+    for (auto&& dirEntry : dirIterator) {
         auto&& entryPath = dirEntry.path();
         auto&& name = entryPath.filename().string();
         if ((name[0] == '.' && !settings.hidden)
@@ -218,33 +234,33 @@ void ImportService::readDir(std::unique_ptr<fs::directory_iterator>& dirIterator
             contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
             continue;
         }
-        std::error_code ec;
         contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         if (dirEntry.is_directory(ec) && settings.recursive) {
             if (!ec) {
-                auto subIterator = std::make_unique<fs::directory_iterator>(entryPath, ec);
-                if (!ec) {
-                    readDir(subIterator, settings);
-                }
+                readDir(entryPath, settings);
             }
         }
     }
+    log_debug("end {}", location.string());
 }
 
-void ImportService::createContainers()
+void ImportService::createContainers(int parentContainerId)
 {
     std::error_code ec;
 
+    log_debug("start {} {}", rootPath.string(), parentContainerId);
     for (auto&& [contPath, stateEntry] : contentStateCache) {
+        if (stateEntry->getState() != ImportState::New)
+            continue;
         auto dirEntry = stateEntry->getDirEntry();
         if (dirEntry.exists(ec) && dirEntry.is_directory(ec)) {
-            int containerID = database->findObjectIDByPath(contPath);
+            auto cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
 
-            if (containerID != INVALID_OBJECT_ID) {
+            if (cdsObj) {
                 try {
-                    std::shared_ptr<CdsObject> container = database->loadObject(containerID);
-                    if (!container || !container->isContainer()) {
-                        throw_std_runtime_error("Item {} is not a container", containerID);
+                    std::shared_ptr<CdsObject> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
+                    if (!container || !cdsObj->isContainer()) {
+                        throw_std_runtime_error("Object {} is not a container", cdsObj->getLocation().string());
                     }
                     stateEntry->setObject(ImportState::Existing, container);
                     auto lastModified = toSeconds(dirEntry.last_write_time(ec));
@@ -253,18 +269,20 @@ void ImportService::createContainers()
                     }
 
                 } catch (const std::runtime_error& e) {
-                    log_error("createObjects: Failed to load parent container {}, {}", contPath.c_str(), e.what());
+                    log_error("createContainers: Failed to load parent container {}, {}", contPath.c_str(), e.what());
                 }
             } else {
                 // Create container
-                stateEntry->setObject(ImportState::Created, createSingleContainer(dirEntry, UPNP_CLASS_CONTAINER));
+                stateEntry->setObject(ImportState::Created, createSingleContainer(parentContainerId, dirEntry, UPNP_CLASS_CONTAINER));
             }
         }
     }
+    log_debug("end {}", rootPath.string());
 }
 
 void ImportService::createItems(AutoScanSetting& settings)
 {
+    log_debug("start {}", rootPath.string());
     std::error_code ec;
     std::shared_ptr<CdsContainer> parentContainer = nullptr;
     auto lastModifiedCurrentMax = std::chrono::seconds::zero();
@@ -273,10 +291,12 @@ void ImportService::createItems(AutoScanSetting& settings)
     fs::path contPath;
 
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
+        if (stateEntry->getState() != ImportState::New)
+            continue;
         auto dirEntry = stateEntry->getDirEntry();
         auto cdsObj = stateEntry->getObject();
-        std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
-        if (container) {
+        if (cdsObj && cdsObj->isContainer()) {
+            std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (contPath != "") {
                 contentStateCache[contPath]->setMTime(lastModifiedNewMax);
             }
@@ -288,24 +308,44 @@ void ImportService::createItems(AutoScanSetting& settings)
                 autoscanDir->setCurrentLMT(contPath, std::chrono::seconds::zero());
             }
         } else if (isRegularFile(dirEntry, ec)) { // item
-            cdsObj = database->findObjectByPath(itemPath);
+            auto contState = contentStateCache[itemPath.parent_path()];
+            if (contState)
+                parentContainer = std::dynamic_pointer_cast<CdsContainer>(contState->getObject());
+            else
+                log_error("No Container parent for Item {}", itemPath.string());
+
+            if (!cdsObj) {
+                cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
+            }
+            if (cdsObj && stateEntry->getMTime() > cdsObj->getMTime()) {
+                log_debug("Removing Item {} from database {}", itemPath.string(), cdsObj->getID());
+                database->removeObject(cdsObj->getID(), false);
+                cdsObj = nullptr;
+            }
             if (cdsObj) {
                 stateEntry->setObject(ImportState::Existing, cdsObj);
             } else {
                 cdsObj = createSingleItem(dirEntry);
-                lastModifiedNewMax = lastModifiedNewMax < cdsObj->getMTime() ? lastModifiedNewMax : cdsObj->getMTime();
-                stateEntry->setObject(ImportState::Created, cdsObj);
-                cdsObj->setParentID(parentContainer ? parentContainer->getID() : INVALID_OBJECT_ID);
-                database->addObject(cdsObj, nullptr);
+                if (cdsObj) {
+                    if (contState && contState->getMTime() < cdsObj->getMTime()) {
+                        contState->setMTime(cdsObj->getMTime());
+                    }
+                    stateEntry->setObject(ImportState::Created, cdsObj);
+                    cdsObj->setParentID(parentContainer ? parentContainer->getID() : INVALID_OBJECT_ID);
+                    database->addObject(cdsObj, nullptr);
+                } else {
+                    log_error("Object not created for file {}", dirEntry.path().string());
+                }
             }
         }
     }
     if (autoscanDir && contPath != "") {
         autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
     }
+    log_debug("end {}", rootPath.string());
 }
 
-std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_entry& dirEntry)
+std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_entry& dirEntry) // ToDo: Use StateEntry here
 {
     auto objectPath = dirEntry.path();
     std::error_code ec;
@@ -313,6 +353,7 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
     /* retrieve information about item and decide if it should be included */
     std::string mimetype = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
     if (mimetype.empty()) {
+        log_error("Mime not found for file {}", objectPath.c_str());
         return nullptr;
     }
     log_debug("Mime '{}' for file {}", mimetype, objectPath.c_str());
@@ -435,6 +476,7 @@ void ImportService::finishScan(const fs::path& location, const std::shared_ptr<C
         }
     }
 }
+
 void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count)
 {
     if (!container)
@@ -489,15 +531,16 @@ std::shared_ptr<CdsContainer> ImportService::getContainer(const fs::path& locati
     return containerMap.at(location);
 }
 
-std::shared_ptr<CdsContainer> ImportService::createSingleContainer(const fs::directory_entry& dirEntry, const std::string& upnpClass)
+std::shared_ptr<CdsContainer> ImportService::createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass)
 {
     std::vector<std::shared_ptr<CdsObject>> cVec;
     auto location = dirEntry.path();
     for (auto&& segment : location) {
-        cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
+        if (segment != "/")
+            cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
     }
     std::vector<int> createdIds;
-    addContainerTree(cVec, createdIds);
+    addContainerTree(parentContainerId, cVec, createdIds);
 
     if (containerMap.find(location) != containerMap.end()) {
         auto result = containerMap.at(location);
@@ -509,11 +552,12 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(const fs::dir
 }
 
 /// \param createdIds used by messaging in ContentManager
-std::pair<int, bool> ImportService::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds)
+std::pair<int, bool> ImportService::addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds)
 {
     std::string tree; // accumulate path to container here
-    int result = CDS_ID_ROOT;
+    int result = parentContainerId;
     bool isNew = false;
+    bool isVirtual = parentContainerId != CDS_ID_FS_ROOT;
     int count = 0;
     for (auto&& item : chain) {
         if (item->getTitle().empty()) {
@@ -522,14 +566,18 @@ std::pair<int, bool> ImportService::addContainerTree(const std::vector<std::shar
         }
         tree = fmt::format("{}{}{}", tree, VIRTUAL_CONTAINER_SEPARATOR, escape(item->getTitle(), VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
         log_debug("Received container chain item {}", tree);
-        for (auto&& [key, val] : configLayoutMapping) {
-            tree = std::regex_replace(tree, std::regex(key), val);
+        if (isVirtual) {
+            for (auto&& [key, val] : configLayoutMapping) {
+                tree = std::regex_replace(tree, std::regex(key), val);
+            }
         }
         if (containerMap.find(tree) == containerMap.end()) {
             item->removeMetaData(M_TITLE);
             item->addMetaData(M_TITLE, item->getTitle());
+            item->setParentID(result);
             auto cont = std::dynamic_pointer_cast<CdsContainer>(item);
-            log_debug("Creating container chain item {}", tree);
+            cont->setVirtual(isVirtual);
+            log_debug("Creating container chain item {} virtual {}", tree, cont->isVirtual());
             if (database->addContainer(result, tree, cont, &result)) {
                 createdIds.push_back(result);
             }

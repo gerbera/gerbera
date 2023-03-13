@@ -488,7 +488,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         return false;
 
     bool parentRemoved = false;
-    int parentID = database->findObjectIDByPath(parentPath, false);
+    int parentID = database->findObjectIDByPath(parentPath, DbFileType::Auto);
     if (parentID != INVALID_OBJECT_ID) {
         // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
         _removeObject(adir, parentID, parentPath, false, all);
@@ -678,7 +678,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     auto importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
     if (importMode == ImportMode::Gerbera) {
-        getImportService(adir)->doImport(dIter, asSetting, list, task);
+        getImportService(adir)->doImport(location, asSetting, list, task);
     } else {
         auto lastModifiedCurrentMax = adir->getPreviousLMT(location, parentContainer);
         auto currentTme = currentTime();
@@ -794,7 +794,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 }
             }
             if (!parentContainer && !location.empty()) {
-                std::shared_ptr<CdsObject> obj = database->findObjectByPath(location, false);
+                std::shared_ptr<CdsObject> obj = database->findObjectByPath(location, DbFileType::Directory);
                 if (!obj || !obj->isContainer()) {
                     log_error("Updated parent {} is not available or no container", location.string());
                 } else {
@@ -1132,7 +1132,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     }
     std::vector<int> createdIds;
 
-    auto result = importService->addContainerTree(chain, createdIds);
+    auto result = importService->addContainerTree(CDS_ID_ROOT, chain, createdIds);
 
     if (!createdIds.empty()) {
         update_manager->containerChanged(result.first);

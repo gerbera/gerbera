@@ -237,7 +237,7 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR));
+                        int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR) ? DbFileType::File : DbFileType::Directory);
                         if (objectID != INVALID_OBJECT_ID)
                             content->removeObject(adir, objectID, path, !(mask & IN_MOVED_TO));
                     }
@@ -412,7 +412,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                         content->handlePeristentAutoscanRemove(adir);
                     }
 
-                    int objectID = database->findObjectIDByPath(path, true);
+                    int objectID = database->findObjectIDByPath(path, DbFileType::File);
                     if (objectID != INVALID_OBJECT_ID)
                         content->removeObject(adir, objectID, path, false);
                 }
