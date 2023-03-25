@@ -973,7 +973,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
             where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER));
-            orderBy = fmt::format(" ORDER BY {}", orderByCode());
+            // Sorting by UpnpClass will avoid mixing different types of containers
+            // "Special" containers like "All Songs" (which are of upnp_class 'object.container') will be displayed before
+            // albums (which are of upnp_class 'object.container.album.musicAlbum')
+            orderBy = fmt::format(" ORDER BY {}, {}", browseColumnMapper->mapQuoted(BrowseCol::UpnpClass), orderByCode());
         } else if (!getContainers && getItems) {
             where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
