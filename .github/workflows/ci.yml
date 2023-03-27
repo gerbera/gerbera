@@ -41,7 +41,7 @@ jobs:
           python-version: "3.x"
       - name: Install conan
         run: |
-          pip install -U --no-cache-dir conan
+          pip install -U --no-cache-dir conan==1.59
           conan profile new default --detect
           conan profile update settings.compiler.libcxx=libstdc++11 default
       - name: Cache conan dependencies
