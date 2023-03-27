@@ -58,7 +58,7 @@
     "mocha": "^10.2.0",
     "rimraf": "^3.0.2",
     "selenium-webdriver": "^4.8.0",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "yargs": "^17.6.2"
   }
 }
