@@ -95,7 +95,7 @@ Denon
 -  S-52
 -  ASD-3N
 -  RCD-N9
--  HEOS Multiroom, all devices with buildin HEOS by Denon or Marantz
+-  HEOS Multiroom, all devices with buildin HEOS by Denon or Marantz (set ``searchable-container-flag="yes"`` in ``upnp``-section to avoid duplicate entries in HEOS app while browsing your library)
 
 D-Link
 ~~~~~~
