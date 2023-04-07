@@ -260,13 +260,12 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
         asSetting.rescanResource = false;
         asSetting.mergeOptions(config, loc);
 
-        int pcdId = content->addFile(dirEnt, rootPath, asSetting, false);
-        if (pcdId == INVALID_OBJECT_ID) {
+        auto mainObj = content->addFile(dirEnt, rootPath, asSetting, false);
+        if (!mainObj) {
             log_error("Failed to add object {}", dirEnt.path().string());
             return { {}, INVALID_OBJECT_ID };
         }
-        auto mainObj = database->loadObject(pcdId);
-        return { dukObject2cdsObject(mainObj), pcdId };
+        return { dukObject2cdsObject(mainObj), mainObj->getID() };
     }
 
     log_error("Failed to read {}: {}", loc.c_str(), ec.message());

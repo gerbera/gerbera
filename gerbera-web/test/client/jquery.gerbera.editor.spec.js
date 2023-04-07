@@ -173,7 +173,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       editModal.editmodal('loadItem', itemData);
 
-      expect(editObjectType.val()).toEqual('video');
+      expect(editObjectType.val()).toEqual('item');
       expect(editTitle.val()).toEqual('Test.mp4');
       expect(editLocation.val()).toEqual('/folder/location/Test.mp4');
       expect(editClass.val()).toEqual('object.item.videoItem');

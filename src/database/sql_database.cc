@@ -1251,6 +1251,8 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         std::error_code ec;
         if (fileType == DbFileType::File || (fileType == DbFileType::Auto && isRegularFile(fullpath, ec)))
             return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+        if (fileType == DbFileType::Virtual)
+            return addLocationPrefix(LOC_VIRT_PREFIX, fullpath);
         return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
     }();
 

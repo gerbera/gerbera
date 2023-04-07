@@ -312,7 +312,7 @@ describe('Gerbera Items', () => {
 
       Items.loadEditItem(editItemResponse);
 
-      expect(editObjectType.val()).toBe('video');
+      expect(editObjectType.val()).toBe('item');
       expect(editTitle.val()).toBe('Test.mp4');
       expect(editLocation.val()).toBe('/folder/location/Test.mp4');
       expect(editClass.val()).toBe('object.item.videoItem');

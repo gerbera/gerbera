@@ -343,6 +343,12 @@ static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
     { "performer", "upnp:artist@role[Performer]" },
 };
 
+/// \brief default values for CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS
+static const std::vector<std::string> virtualDirectoryKeys {
+    "M_ALBUMARTIST",
+    "M_UPNP_DATE",
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -570,6 +576,17 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/attribute::import-mode", "config-import.html#import",
         ImportMode::MediaTomb,
         std::map<std::string, ImportMode>({ { "mt", ImportMode::MediaTomb }, { "grb", ImportMode::Gerbera } })),
+    std::make_shared<ConfigArraySetup>(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS,
+        "/import/virtual-directories", "config-import.html#virtual-directories",
+        ATTR_IMPORT_VIRT_DIR_KEY, ATTR_IMPORT_VIRT_DIR_METADATA, false, false,
+        virtualDirectoryKeys),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_VIRT_DIR_KEY,
+        "attribute::key", "config-import.html#virtual-directories",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_VIRT_DIR_METADATA,
+        "attribute::metadata", "config-import.html#virtual-directories",
+        ""),
+
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_READABLE_NAMES,
         "/import/attribute::readable-names", "config-import.html#import",
         YES),

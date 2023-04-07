@@ -192,6 +192,7 @@ enum class DbFileType {
     Auto,
     Directory,
     File,
+    Virtual,
 };
 
 class Database {
