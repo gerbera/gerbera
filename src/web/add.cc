@@ -51,6 +51,8 @@ void Web::Add::process()
 
     AutoScanSetting asSetting;
     asSetting.recursive = true;
+    asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+    asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
     asSetting.mergeOptions(config, path);
 
     std::error_code ec;
