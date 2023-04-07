@@ -39,6 +39,8 @@
     container: {oclass: 'object.container', type: 'container'},
     item: {oclass: 'object.item', type: 'item'},
     external_url: {oclass: 'object.item', type: 'external_url', protocol: 'http-get'},
+    image: {oclass: 'object.item.imageItem', type: 'item'},
+    imagePhoto: {oclass: 'object.item.imageItem.photo', type: 'item'},
     audio: {oclass: 'object.item.audioItem', type: 'item'},
     audioBroadcast: {oclass: 'object.item.audioItem.audioBroadcast', type: 'external_url', protocol: 'http-get'},
     video: {oclass: 'object.item.videoItem', type: 'item'},
@@ -214,7 +216,7 @@
       if (item.class.value !== 'object.item') {
         Object.getOwnPropertyNames(defaultClasses).forEach((cls) => {
           if (item.class.value.startsWith(defaultClasses[cls].oclass)) {
-            obj_type = cls;
+            obj_type = defaultClasses[cls].type;
           }
         });
       }

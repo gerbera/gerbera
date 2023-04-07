@@ -63,6 +63,7 @@ enum class ImportState {
     WithLayout,
     ToDelete,
     LayoutDeleted,
+    Broken,
 };
 
 class ContentState {
@@ -151,10 +152,12 @@ private:
 #endif
 
     std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
+    std::error_code ec;
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
     void readDir(const fs::path& location, AutoScanSetting& settings);
+    void readFile(const fs::path& location);
     void createContainers(int parentContainerId);
     void createItems(AutoScanSetting& settings);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
@@ -177,8 +180,9 @@ public:
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
-    std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
 
+    std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
+    std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
     std::shared_ptr<Layout> getLayout() const { return layout; }
 };
 

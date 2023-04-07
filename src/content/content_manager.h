@@ -107,7 +107,7 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
+    std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true);
 
     /// \brief Adds a file or directory to the database.
@@ -119,7 +119,7 @@ public:
     /// \param rescanResource true allows to reload a directory containing a resource
     /// \param queue for immediate processing or in normal order
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    int addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
+    std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(const fs::path& path) const;
@@ -259,12 +259,12 @@ protected:
 
     std::vector<std::shared_ptr<Executor>> process_list;
 
-    int addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
+    std::shared_ptr<CdsObject> addFileInternal(const fs::directory_entry& dirEnt, const fs::path& rootpath,
         AutoScanSetting& asSetting,
         bool lowPriority = false,
         unsigned int parentTaskID = 0,
         bool cancellable = true);
-    int _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
+    std::shared_ptr<CdsObject> _addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
     std::shared_ptr<ImportService> getImportService(const std::shared_ptr<AutoscanDirectory>& adir);
@@ -298,6 +298,7 @@ protected:
     std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
+    ImportMode importMode = ImportMode::MediaTomb;
     bool layoutEnabled {};
     void threadProc();
 

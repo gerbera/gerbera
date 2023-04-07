@@ -99,6 +99,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     task_processor = std::make_shared<TaskProcessor>(config);
 #endif
     importService = std::make_shared<ImportService>(this->context);
+    importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
 }
 
 void ContentManager::run()
@@ -423,7 +424,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
         obj = createObjectFromFile(adir, dirEnt, followSymlinks);
         if (!obj) { // object ignored
             log_debug("Link to file or directory ignored: {}", dirEnt.path().c_str());
-            return nullptr;
+            return obj;
         }
         if (obj->isItem()) {
             addObject(obj, firstChild);
@@ -454,32 +455,40 @@ void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const 
 #endif // HAVE_JS
 }
 
-int ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!asSetting.hidden && dirEnt.path().is_relative())
-        return INVALID_OBJECT_ID;
+        return nullptr;
 
     // never add the server configuration file
     if (config->getConfigFilename() == dirEnt.path())
-        return INVALID_OBJECT_ID;
+        return nullptr;
 
     if (rootPath.empty() && task)
         rootPath = task->getRootPath();
-    // checkDatabase, don't process existing
-    auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
-    if (!obj) // object ignored
-        return INVALID_OBJECT_ID;
 
-    if (asSetting.recursive && obj->isContainer()) {
-        addRecursive(asSetting.adir, dirEnt, asSetting.followSymlinks, asSetting.hidden, task);
+    if (importMode == ImportMode::Gerbera) {
+        std::unordered_set<int> currentContent;
+        getImportService(asSetting.adir)->doImport(dirEnt.path(), asSetting, currentContent, task);
+
+        return getImportService(asSetting.adir)->getObject(dirEnt.path());
+    } else {
+        // checkDatabase, don't process existing
+        auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
+        if (!obj) // object ignored
+            return obj;
+
+        if (asSetting.recursive && obj->isContainer()) {
+            addRecursive(asSetting.adir, dirEnt, asSetting.followSymlinks, asSetting.hidden, task);
+        }
+
+        if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
+            std::string parentPath = dirEnt.path().parent_path();
+            updateAttachedResources(asSetting.adir, obj, parentPath, true);
+        }
+
+        return obj;
     }
-
-    if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
-        std::string parentPath = dirEnt.path().parent_path();
-        updateAttachedResources(asSetting.adir, obj, parentPath, true);
-    }
-
-    return obj->getID();
 }
 
 bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all)
@@ -503,9 +512,9 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         asSetting.async = true;
         asSetting.mergeOptions(config, parentPath);
         std::error_code ec;
-        // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
         auto dirEntry = fs::directory_entry(parentPath, ec);
         if (!ec) {
+            // addFile(const fs::directory_entry& path, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
             addFile(dirEntry, asSetting, true, false);
             log_debug("Forced rescan of {} for resource {}", parentPath.c_str(), obj->getLocation().c_str());
             parentRemoved = true;
@@ -676,7 +685,6 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         thisTaskID = 0;
     }
 
-    auto importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
     if (importMode == ImportMode::Gerbera) {
         getImportService(adir)->doImport(location, asSetting, list, task);
     } else {
@@ -721,15 +729,15 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             auto lwt = toSeconds(dirEnt.last_write_time(ec));
 
             if (isRegularFile(dirEnt, ec)) {
-                int objectID = database->findObjectIDByPath(newPath);
-                if (objectID > 0) {
-                    list.erase(objectID);
+                auto newObject = database->findObjectByPath(newPath);
+                if (newObject) {
+                    list.erase(newObject->getID());
 
                     // check modification time and update file if chagned
                     if (lastModifiedCurrentMax < lwt) {
                         // re-add object - we have to do this in order to trigger
                         // layout
-                        auto removedParents = removeObject(adir, objectID, newPath, false, false);
+                        auto removedParents = removeObject(adir, newObject->getID(), newPath, false, false);
                         if (std::find_if(removedParents.begin(), removedParents.end(), [=](auto&& pId) { return containerID == pId; }) != removedParents.end()) {
                             // parent purged
                             parentContainer = nullptr;
@@ -737,7 +745,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                         asSetting.recursive = false;
                         asSetting.rescanResource = false;
                         asSetting.async = false;
-                        objectID = addFileInternal(dirEnt, rootpath, asSetting);
+                        newObject = addFileInternal(dirEnt, rootpath, asSetting);
                         // update time variable
                         if (lastModifiedNewMax < lwt && lwt <= currentTme)
                             lastModifiedNewMax = lwt;
@@ -747,25 +755,25 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     asSetting.recursive = false;
                     asSetting.rescanResource = false;
                     asSetting.async = false;
-                    objectID = addFileInternal(dirEnt, rootpath, asSetting);
+                    newObject = addFileInternal(dirEnt, rootpath, asSetting);
                     if (lastModifiedNewMax < lwt && lwt <= currentTme)
                         lastModifiedNewMax = lwt;
                 }
-                if (!firstObject && objectID > 0) {
-                    firstObject = database->loadObject(objectID);
+                if (!firstObject && newObject) {
+                    firstObject = newObject;
                     if (!firstObject->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                         firstObject = nullptr;
                     }
                 }
             } else if (dirEnt.is_directory(ec) && asSetting.recursive) {
-                int objectID = database->findObjectIDByPath(newPath);
+                auto newObject = database->findObjectByPath(newPath);
                 if (lastModifiedNewMax < lwt && lwt <= currentTme)
                     lastModifiedNewMax = lwt;
-                if (objectID > 0) {
+                if (newObject) {
                     log_debug("rescanSubDirectory {}", newPath.c_str());
-                    list.erase(objectID);
+                    list.erase(newObject->getID());
                     // add a task to rescan the directory that was found
-                    rescanDirectory(adir, objectID, newPath, task->isCancellable());
+                    rescanDirectory(adir, newObject->getID(), newPath, task->isCancellable());
                 } else {
                     log_debug("addSubDirectory {}", newPath.c_str());
 
@@ -788,7 +796,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     asSetting.rescanResource = false;
                     asSetting.async = true;
                     asSetting.mergeOptions(config, newPath);
-                    // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool async, bool lowPriority, unsigned int parentTaskID, bool cancellable
+                    // const fs::path& path, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, unsigned int parentTaskID, bool cancellable
                     addFileInternal(dirEnt, rootpath, asSetting, true, thisTaskID, task->isCancellable());
                     log_debug("addSubDirectory {} done", newPath.c_str());
                 }
@@ -1305,7 +1313,7 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     threadRunner->notify();
 }
 
-int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
+std::shared_ptr<CdsObject> ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
 {
     fs::path rootpath;
     if (dirEnt.is_directory())
@@ -1313,12 +1321,12 @@ int ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& 
     return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
+std::shared_ptr<CdsObject> ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
 {
     return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
-int ContentManager::addFileInternal(
+std::shared_ptr<CdsObject> ContentManager::addFileInternal(
     const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, unsigned int parentTaskID, bool cancellable)
 {
     if (asSetting.async) {
@@ -1327,7 +1335,7 @@ int ContentManager::addFileInternal(
         task->setDescription(fmt::format("Importing: {}", dirEnt.path().string()));
         task->setParentID(parentTaskID);
         addTask(std::move(task), lowPriority);
-        return INVALID_OBJECT_ID;
+        return nullptr;
     }
     return _addFile(dirEnt, rootpath, asSetting);
 }
