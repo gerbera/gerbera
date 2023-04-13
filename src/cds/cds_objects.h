@@ -294,6 +294,7 @@ public:
 
     /// \brief Query entire auxdata dictionary.
     const std::map<std::string, std::string>& getAuxData() const { return auxdata; }
+    void clearAuxData() { auxdata.clear(); }
 
     /// \brief Set a single auxdata value.
     void setAuxData(const std::string& key, const std::string& value)
@@ -315,6 +316,7 @@ public:
     {
         return resources;
     }
+    void clearResources() { resources.clear(); }
 
     /// \brief Set resources
     void setResources(std::vector<std::shared_ptr<CdsResource>> res)

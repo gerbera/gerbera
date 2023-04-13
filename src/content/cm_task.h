@@ -32,6 +32,7 @@
 #include "util/grb_fs.h"
 
 class AutoDirectory;
+class CdsObject;
 class ContentManager;
 class Layout;
 class TaskProcessor;
@@ -60,14 +61,14 @@ class CMRemoveObjectTask : public GenericTask {
 protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<AutoscanDirectory> adir;
-    int objectID;
+    std::shared_ptr<CdsObject> object;
     fs::path path;
     bool all;
     bool rescanResource;
 
 public:
     CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-        int objectID, const fs::path& path, bool rescanResource, bool all);
+        std::shared_ptr<CdsObject> object, const fs::path& path, bool rescanResource, bool all);
     void run() override;
 };
 

@@ -237,9 +237,9 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        int objectID = database->findObjectIDByPath(path, !(mask & IN_ISDIR) ? DbFileType::File : DbFileType::Directory);
-                        if (objectID != INVALID_OBJECT_ID)
-                            content->removeObject(adir, objectID, path, !(mask & IN_MOVED_TO));
+                        auto object = database->findObjectByPath(path, !(mask & IN_ISDIR) ? DbFileType::File : DbFileType::Directory);
+                        if (object)
+                            content->removeObject(adir, object, path, !(mask & IN_MOVED_TO));
                     }
                     // new file
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
@@ -412,9 +412,9 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                         content->handlePeristentAutoscanRemove(adir);
                     }
 
-                    int objectID = database->findObjectIDByPath(path, DbFileType::File);
-                    if (objectID != INVALID_OBJECT_ID)
-                        content->removeObject(adir, objectID, path, false);
+                    auto object = database->findObjectByPath(path, DbFileType::File);
+                    if (object)
+                        content->removeObject(adir, object, path, false);
                 }
             } catch (const std::out_of_range&) {
             } // Not found in map
