@@ -350,16 +350,26 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_error("No Container parent for Item {}", itemPath.string());
 
             if (!cdsObj) {
+                log_debug("Searching Item {} in database", itemPath.string());
                 cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
             }
-            if (cdsObj && stateEntry->getMTime() > cdsObj->getMTime()) {
+            if (cdsObj && cdsObj->isItem() && stateEntry->getMTime() > cdsObj->getMTime()) {
                 log_debug("Removing Item {} from database {}", itemPath.string(), cdsObj->getID());
-                database->removeObject(cdsObj->getID(), false);
-                cdsObj = nullptr;
+                auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
+                item->clearMetaData();
+                item->clearAuxData();
+                item->clearResources();
+                updateSingleItem(dirEntry, item, item->getMimeType());
+                database->updateObject(cdsObj, nullptr);
             }
             if (cdsObj) {
+                if (contState && contState->getMTime() < cdsObj->getMTime()) {
+                    contState->setMTime(cdsObj->getMTime());
+                }
                 stateEntry->setObject(ImportState::Existing, cdsObj);
+                log_debug("Item found {} {}", itemPath.string(), cdsObj->getID());
             } else {
+                log_debug("Creating Item {}", itemPath.string());
                 cdsObj = createSingleItem(dirEntry);
                 if (cdsObj) {
                     if (contState && contState->getMTime() < cdsObj->getMTime()) {
@@ -406,8 +416,6 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
 
     auto item = std::make_shared<CdsItem>();
     item->setLocation(objectPath);
-    item->setMTime(toSeconds(dirEntry.last_write_time(ec)));
-    item->setSizeOnDisk(getFileSize(dirEntry));
 
     if (!mimetype.empty()) {
         item->setMimeType(mimetype);
@@ -423,11 +431,18 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
         std::replace(title.begin(), title.end(), '_', ' ');
     }
     item->setTitle(f2i->convert(title));
+    updateSingleItem(dirEntry, item, mimetype);
+
+    return item;
+}
+
+void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype)
+{
+    item->setMTime(toSeconds(dirEntry.last_write_time(ec)));
+    item->setSizeOnDisk(getFileSize(dirEntry));
 
     MetadataHandler::extractMetaData(context, content, item, dirEntry);
     updateItemData(item, mimetype);
-
-    return item;
 }
 
 void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
@@ -461,6 +476,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                 for (auto&& origEntry : listOrig) {
                     auto newEntry = std::find_if(listResult.begin(), listResult.end(), [&](auto& entry) { return origEntry.first == entry.first && origEntry.second > entry.second; });
                     if (newEntry == listResult.end()) {
+                        log_debug("Deleting ophaned virtual item {}", origEntry.first);
                         database->removeObject(origEntry.first, false);
                     }
                 }

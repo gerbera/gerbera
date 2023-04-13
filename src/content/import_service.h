@@ -160,6 +160,7 @@ private:
     void readFile(const fs::path& location);
     void createContainers(int parentContainerId);
     void createItems(AutoScanSetting& settings);
+    void updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
 

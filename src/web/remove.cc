@@ -48,7 +48,14 @@ void Web::Remove::process()
     int objectID = intParam("object_id");
     bool all = intParam("all");
 
-    content->removeObject(nullptr, objectID, "", true, all);
+    std::shared_ptr<CdsObject> obj;
+    try {
+        obj = database->loadObject(objectID);
+    } catch (const std::runtime_error&) {
+        log_error("Trying to remove an object ID which is no longer in the database! {}", objectID);
+        return;
+    }
+    content->removeObject(nullptr, obj, "", true, all);
 
     log_debug("remove: returning");
 }
