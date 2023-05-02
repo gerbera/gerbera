@@ -993,7 +993,7 @@ Note:
 
 ::
 
- <treat mimetype="audio/mpeg" as="mp3"/>
+  <treat mimetype="audio/mpeg" as="mp3"/>
 
 * Optional
 
@@ -1073,6 +1073,42 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 ::
 
     <map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
+
+
+
+``virtual-directories``
+~~~~~~~~~~~~~~~~~~~~~~~
+
+::
+
+    <virtual-directories>
+
+* Optional
+
+This section holds the additional identifiers for virtual directories to make sure, e.g. albums with the same title
+are distiguished by their artist even if the displayed text is identical.
+
+**Child tags:**
+
+``key``
+-------
+
+::
+
+    <key metadata="M_ARTIST"/>
+
+* Optional
+
+Specifies the metadata fields to add for identification internally. For a list of valid metadata see `Server section <https://docs.gerbera.io/en/stable/config-server.html?#upnp>`_
+
+* Example
+
+::
+
+    <virtual-directories>
+        <key metadata="M_ALBUMARTIST"/>
+        <key metadata="M_UPNP_DATE"/>
+    </virtual-directories>
 
 
 ``library-options``
