@@ -337,7 +337,7 @@ however the script can be adapted to parse almost any kind of text based playlis
 
 
 ``metafile-script``
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1070,10 +1070,10 @@ mimetype exist, mappings with more details are preferred to simple from-to mappi
 Resource attributes can be seen in the details page for an item on the web UI. The value must either match exactly the transformed value (incl. unit) or the raw value.
 
 * Example:
+
 ::
 
     <map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
-
 
 
 ``virtual-directories``

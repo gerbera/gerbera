@@ -36,6 +36,8 @@
 /// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
+#define LOG_FAC log_facility_t::server
+
 #include <csignal>
 #include <fmt/core.h>
 #include <mutex>
@@ -253,8 +255,13 @@ static std::optional<std::string> getEnv(const std::string& envVar)
         result = envVal;
     } else {
         envVal = std::getenv(fmt::format("MEDIATOMB_{}", envVar).c_str());
-        if (envVal)
+        if (envVal) {
             result = envVal;
+        } else {
+            envVal = std::getenv(envVar.c_str());
+            if (envVal)
+                result = envVal;
+        }
     }
     log_debug("getEnv {} = {}", envVar, result.value_or(envVar));
     return result;
@@ -372,9 +379,12 @@ int main(int argc, char** argv, char** envp)
 
         std::optional<fs::path> home;
         if (opts.count("home") > 0) {
-            home = opts["home"].as<fs::path>();
-            if (!fs::directory_entry(*home).exists()) {
-                log_warning("Home dir {} missing", home->c_str());
+            auto homePath = opts["home"].as<std::vector<std::string>>();
+            if (!homePath.empty()) {
+                home = fs::path(homePath[0]);
+                if (!fs::directory_entry(*home).exists()) {
+                    log_warning("Home dir {} missing", home->c_str());
+                }
             }
         }
 
@@ -531,16 +541,16 @@ int main(int argc, char** argv, char** envp)
                 confdir = "gerbera";
             } else {
                 // Then look for home
-                h = std::getenv("HOME");
-                if (h)
-                    home = h;
+                auto hEnv = getEnv("HOME");
+                if (hEnv.has_value())
+                    home = hEnv;
             }
 
             if (!home.has_value()) {
                 log_error("Could not determine users home directory");
                 std::exit(EXIT_FAILURE);
             }
-            log_debug("Home detected as: {}", home->c_str());
+            log_info("Home detected as: {}", home->c_str());
         }
 
         std::optional<std::string> dataDir = getEnv("DATADIR");

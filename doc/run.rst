@@ -259,12 +259,12 @@ Home Directory
 
 Specify an alternative home directory. By default Gerbera will try to retrieve the users home directory from the
 environment, then it will look for a ``.config/gerbera`` directory in users home. If ``.config/gerbera`` was found the system tries to
-find the default configuration file (config.xml), if not found the system creates both, the ``.config/gerbera`` directory and the default config file.
+find the default configuration file (config.xml), if not found the system creates the ``.config/gerbera`` directory.
 
-This option is useful in two cases: when the home directory can not be retrieved from the environment (in this case
-you could also use -c to point Gerbera to your configuration file or when you want to create a new configuration
-in a non standard location (for example, when setting up daemon mode). In the latter case you can combine this parameter
-with the parameter described in ?
+This option is useful in two cases: when the home directory cannot be retrieved from the environment (in this case
+you could also use -c to point Gerbera to your configuration file or when you want test
+a non standard location (for example, when setting up daemon mode). In both cases you can also
+set the environment variable ``GERBERA_HOME`` to override ``HOME``.
 
 Config Directory
 ----------------

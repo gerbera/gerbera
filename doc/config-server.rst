@@ -213,13 +213,28 @@ yourself.  Review the :ref:`Generating Configuration <generateConfig>` section o
 
 .. code-block:: xml
 
-    <home>/home/your_user_name/.config/gerbera</home>
+    <home override="yes">/home/your_user_name/gerbera</home>
 
 * Required
-* Default: **`~/.config/gerbera`**
+* Default: **`~`** - the HOME directory of the user running gerbera.
 
 Server home - the server will search for the data that it needs relative to this directory - basically for the sqlite database file.
 The gerbera.html bookmark file will also be generated in that directory.
+The home directory is only relevant if the config file or the config dir was specified
+in the command line. Otherwise it defaults to the ``HOME`` path of the user runnung
+Gerbera. The environment variable ``GERBERA_HOME`` can be used to point to another directory,
+in which case the config file is expected as ``${GERBERA_HOME}/.config/gerbera``.
+
+      ::
+
+          override="yes"
+
+      * Optional
+      * Default: **”no”**
+
+      Force all relative paths to base on the home directory of the config file even
+      if it was read relative to the environment variables or from command line. This
+      means that Gerbara changes its home during startup.
 
 ``webroot``
 ~~~~~~~~~~~

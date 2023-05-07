@@ -132,11 +132,17 @@ void ConfigManager::load(const fs::path& userHome)
     auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
     // respect command line if available; ignore xml value
     {
-        std::string temp = !userHome.empty() ? userHome.string() : co->getXmlContent(root);
-        if (!fs::is_directory(temp))
-            throw_std_runtime_error("Directory '{}' does not exist", temp);
-        co->makeOption(temp, self);
-        ConfigPathSetup::Home = temp;
+        std::string activeHome = userHome.string();
+        bool homeOverride = setOption(root, CFG_SERVER_HOME_OVERRIDE)->getBoolOption();
+        if (userHome.empty() || homeOverride) {
+            activeHome = co->getXmlContent(root);
+        } else {
+            if (!fs::is_directory(activeHome))
+                throw_std_runtime_error("Directory '{}' does not exist", activeHome);
+            log_info("Using home directory '{}'", activeHome);
+        }
+        co->makeOption(activeHome, self);
+        ConfigPathSetup::Home = activeHome;
     }
 
     // checking database driver options
