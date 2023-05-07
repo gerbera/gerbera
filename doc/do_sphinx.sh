@@ -30,7 +30,7 @@ function setup {
     if [ ! -d "$DOC_BUILD_DIR/$VENV_NAME" ]
     then
       printf "\nCreating Gerbera Python virtualenv\n\n"
-      python3 -m virtualenv $VENV_NAME
+      python3.10 -m virtualenv $VENV_NAME
     fi
 
     source $VENV_NAME/bin/activate
@@ -38,7 +38,7 @@ function setup {
 
 function install {
     printf "\nInstalling Sphinx document generator with $SPHINX_THEME theme\n\n"
-    pip install Sphinx $SPHINX_THEME
+    pip3.10 install Sphinx $SPHINX_THEME
 }
 
 function build {

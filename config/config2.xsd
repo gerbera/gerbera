@@ -124,7 +124,11 @@
 
     <xs:element name="udn" type="xs:string"/>
 
-    <xs:element name="home" type="xs:string" default="~/.mediatomb"/>
+    <xs:element name="home" type="xs:string" default="~"/>
+        <xs:complexType>
+            <xs:attribute name="override" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="webroot" type="xs:string"/>
 
