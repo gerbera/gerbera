@@ -91,7 +91,7 @@ std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& roo
     auto co = ConfigDefinition::findConfigSetup(option);
     auto self = getSelf();
     co->makeOption(root, self, arguments);
-    log_debug("Config: option set: '{}'", co->xpath);
+    log_debug("Config: option set: '{}' = '{}'", co->xpath, co->getCurrentValue());
     return co->getValue();
 }
 
@@ -248,30 +248,13 @@ void ConfigManager::load(const fs::path& userHome)
 
 #ifdef HAVE_JS
     // read javascript options
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
-    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT);
+    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
+    co->setDefaultValue(dataDir / DEFAULT_JS_DIR);
     co->makeOption(root, self);
 
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
-    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_METAFILE_SCRIPT);
-    co->makeOption(root, self);
-
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
-    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT);
-    co->makeOption(root, self);
-
-    setOption(root, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-    auto layoutType = EnumOption<LayoutType>::getEnumOption(self, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     // read more javascript options
     co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CHARSET);
     co->setDefaultValue(defaultCharSet);
-
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    args["mustExist"] = fmt::to_string(layoutType == LayoutType::Js);
-    args["notEmpty"] = fmt::to_string(layoutType == LayoutType::Js);
-    co->setDefaultValue(dataDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT);
-    co->makeOption(root, self, &args);
-    args.clear();
 #endif
 
     args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";

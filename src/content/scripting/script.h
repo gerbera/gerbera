@@ -42,6 +42,7 @@
 #include "util/grb_fs.h"
 
 // forward declaration
+enum class AutoscanMediaMode;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
@@ -79,6 +80,7 @@ public:
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
     void load(const fs::path& scriptPath);
+    void loadFolder(const fs::path& scriptFolder);
 
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
@@ -98,6 +100,7 @@ protected:
         const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
 
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
+    void call(const std::shared_ptr<CdsObject>& obj, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
     void cleanup();
     int gc_counter {};
     void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const;

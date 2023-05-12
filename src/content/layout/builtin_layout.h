@@ -41,13 +41,11 @@
 
 // forward declaration
 class CdsContainer;
-class CdsObject;
+class Config;
 
 class BuiltinLayout : public Layout {
 public:
     explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
-
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 
 protected:
     std::shared_ptr<Config> config;
@@ -57,13 +55,18 @@ protected:
 
     void add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
     void getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string& c1, const std::string& c2, const std::string& upnpClass);
-    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    std::string mapGenre(const std::string& genre);
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+
+#ifdef ONLINE_SERVICES
+    void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #ifdef ATRAILERS
     void addATrailers(const std::shared_ptr<CdsObject>& obj);
 #endif
+#endif
+
+    std::string mapGenre(const std::string& genre);
 };
 
 #endif // __BUILTIN_LAYOUT_H__

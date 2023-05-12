@@ -235,7 +235,10 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>
     : ParserScript(content, parent, "playlist", "playlist")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
-    load(scriptPath);
+    if (!scriptPath.empty()) {
+        load(scriptPath);
+        scriptMode = true;
+    }
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)
@@ -358,10 +361,17 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        execute(obj, rootPath);
+        if (scriptMode) {
+            execute(obj, rootPath);
+        } else {
+            auto playlistFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
+            call(obj, playlistFunction, rootPath, "");
+        }
     } catch (const std::runtime_error&) {
-        cleanup();
-        duk_pop(ctx);
+        if (scriptMode) {
+            cleanup();
+            duk_pop(ctx);
+        }
 
         currentHandle = nullptr;
 
@@ -398,7 +408,10 @@ MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 0);
-    load(scriptPath);
+    if (!scriptPath.empty()) {
+        load(scriptPath);
+        scriptMode = true;
+    }
 }
 
 void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
@@ -427,10 +440,17 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        execute(obj, path);
+        if (scriptMode) {
+            execute(obj, path);
+        } else {
+            auto metafileFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
+            call(obj, metafileFunction, path, "");
+        }
     } catch (const std::runtime_error&) {
-        cleanup();
-        duk_pop(ctx);
+        if (scriptMode) {
+            cleanup();
+            duk_pop(ctx);
+        }
 
         currentHandle = nullptr;
 

@@ -313,9 +313,12 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
     defineFunctions(jsGlobalFunctions.data());
 
     std::string commonScrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
+    std::string commonFdrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
 
-    if (commonScrPath.empty()) {
+    if (commonScrPath.empty() && commonFdrPath.empty()) {
         log_js("Common script disabled in configuration");
+    } else if (commonScrPath.empty()) {
+        loadFolder(commonFdrPath);
     } else {
         try {
             _load(commonScrPath);
@@ -325,6 +328,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
         }
     }
     std::string customScrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    std::string customFdrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_FOLDER);
     if (!customScrPath.empty()) {
         try {
             _load(customScrPath);
@@ -332,6 +336,8 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
         } catch (const std::runtime_error& e) {
             log_js("Unable to load {}: {}", customScrPath, e.what());
         }
+    } else if (!customFdrPath.empty()) {
+        loadFolder(customFdrPath);
     }
 }
 
@@ -405,6 +411,34 @@ void Script::_execute()
     duk_pop(ctx);
 }
 
+void Script::loadFolder(const fs::path& scriptFolder)
+{
+    log_debug("Loading folder {}", scriptFolder.c_str());
+    std::error_code ec;
+    auto dirEntry = fs::directory_entry(scriptFolder);
+    if (!dirEntry.exists(ec) || !dirEntry.is_directory(ec)) {
+        log_error("Script folder not found: {}", scriptFolder.c_str());
+        return;
+    }
+    auto dirIterator = fs::directory_iterator(scriptFolder, ec);
+    if (ec) {
+        log_error("Failed to iterate {}, {}", scriptFolder.c_str(), ec.message());
+        return;
+    }
+    for (auto&& dirEntry : dirIterator) {
+        auto&& entryPath = dirEntry.path();
+        if (entryPath.extension() == ".js") {
+            try {
+                _load(entryPath);
+                _execute();
+                log_debug("Loaded {}", entryPath.c_str());
+            } catch (const std::runtime_error& e) {
+                log_error("Unable to load {}: {}", entryPath.c_str(), e.what());
+            }
+        }
+    }
+}
+
 #define GRB_CONTAINERTYPE_AUDIO "grb_container_type_audio"
 #define GRB_CONTAINERTYPE_IMAGE "grb_container_type_image"
 #define GRB_CONTAINERTYPE_VIDEO "grb_container_type_video"
@@ -459,6 +493,52 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
 
     _execute();
     cleanup();
+    duk_pop(ctx);
+}
+
+void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
+{
+    // functionName(object, rootPath, autoScanId, containerType)
+
+    // Push function onto stack
+    if (!duk_get_global_string(ctx, functionName.c_str())) {
+        log_error("javascript function not found: {}()", functionName);
+        duk_pop(ctx);
+        throw_std_runtime_error("javascript function not found: {}()", functionName);
+    }
+
+    int narg = 0;
+
+    // Push obj structure onto stack
+    cdsObject2dukObject(obj);
+    narg++;
+
+    // push rootPath onto stack
+    duk_push_sprintf(ctx, "%s", rootPath.c_str());
+    narg++;
+
+    auto autoScan = content->getAutoscanDirectory(rootPath);
+
+    if (autoScan && !rootPath.empty()) {
+        // Push autoScanId onto stack
+        duk_push_sprintf(ctx, "%d", autoScan->getScanID());
+        narg++;
+    } else {
+        // Push autoScanId onto stack
+        duk_push_sprintf(ctx, "%d", -1);
+        narg++;
+    }
+    // Container Type onto stack
+    duk_push_sprintf(ctx, "%s", containerType);
+    narg++;
+
+    if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
+        // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
+        // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
+        log_error("javascript runtime error: {}() - {}\n", functionName, duk_safe_to_string(ctx, -1));
+        duk_pop(ctx);
+        throw_std_runtime_error("javascript runtime error");
+    }
     duk_pop(ctx);
 }
 

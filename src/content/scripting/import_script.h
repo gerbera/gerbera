@@ -48,12 +48,23 @@ class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+#ifdef ONLINE_SERVICES
+    void addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+#endif
+
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override
     {
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
     }
+    bool hasImportFunctions() const;
+
+private:
+    void callFunction(const std::shared_ptr<CdsObject>& obj, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap);
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__
