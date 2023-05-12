@@ -66,6 +66,7 @@ protected:
     std::shared_ptr<GenericTask> currentTask;
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
     pugi::xml_node root;
+    bool scriptMode { false };
 };
 
 class PlaylistParserScript : public ParserScript {

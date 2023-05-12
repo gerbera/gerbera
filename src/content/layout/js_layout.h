@@ -47,6 +47,14 @@ protected:
     std::shared_ptr<ScriptingRuntime> runtime;
     std::unique_ptr<ImportScript> import_script;
 
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+
+#ifdef ONLINE_SERVICES
+    void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+#endif
+
 public:
     JSLayout(const std::shared_ptr<ContentManager>& content, const std::string& parent);
 

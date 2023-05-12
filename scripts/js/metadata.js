@@ -3,7 +3,7 @@
 
   metadata.js - this file is part of Gerbera.
 
-  Copyright (C) 2022 Gerbera Contributors
+  Copyright (C) 2022-2023 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -20,11 +20,20 @@
   $Id$
 */
 
-const arr = object_script_path.split('.');
-print("Processing metafile: " + object_script_path + " for " + obj.location + " " + arr[arr.length-1].toLowerCase());
-switch (arr[arr.length-1].toLowerCase()) {
-    case "nfo":
-        parseNfo(obj, object_script_path);
-        updateCdsObject();
-        break;
+var obj;
+
+function importMetadata(meta, rootPath, autoscanId, containerType) {
+    obj = meta;
+    const arr = rootPath.split('.');
+    print("Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
+    switch (arr[arr.length-1].toLowerCase()) {
+        case "nfo":
+            parseNfo(meta, rootPath);
+            updateCdsObject();
+            break;
+    }
 }
+
+// compatibility with older configurations
+if (obj && obj !== undefined)
+    importMetadata(obj, object_script_path, -1, "");

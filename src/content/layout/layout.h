@@ -34,13 +34,13 @@
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
 
-#include "context.h"
 #include "util/grb_fs.h"
 
 // forward declaration
 enum class AutoscanMediaMode;
 class CdsObject;
 class ContentManager;
+enum class OnlineServiceType;
 
 class Layout {
 public:
@@ -51,9 +51,17 @@ public:
 
     virtual ~Layout() = default;
 
-    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap);
 
 protected:
+    virtual void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+    virtual void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+    virtual void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+
+#ifdef ONLINE_SERVICES
+    virtual void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+#endif
+
     std::shared_ptr<ContentManager> content;
 };
 

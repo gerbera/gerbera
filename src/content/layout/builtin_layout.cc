@@ -38,6 +38,7 @@
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "metadata/metadata_handler.h"
@@ -432,6 +433,23 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::pa
     getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
 }
 
+#ifdef ONLINE_SERVICES
+void BuiltinLayout::addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    switch (serviceType) {
+#ifdef ATRAILERS
+    case OnlineServiceType::OS_ATrailers:
+        addATrailers(obj);
+        break;
+#endif
+    case OnlineServiceType::OS_Max:
+    default:
+        log_warning("No handler for service type");
+        break;
+    }
+}
+#endif
+
 #ifdef ATRAILERS
 void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
@@ -498,48 +516,4 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
         }
     }
     return genre;
-}
-
-void BuiltinLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
-{
-    log_debug("Process CDS Object: {}", obj->getTitle());
-    auto clone = CdsObject::createObject(obj->getObjectType());
-    obj->copyTo(clone);
-    clone->setVirtual(true);
-
-#ifdef ONLINE_SERVICES
-    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        auto service = OnlineServiceType(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID)));
-
-        switch (service) {
-#ifdef ATRAILERS
-        case OnlineServiceType::OS_ATrailers:
-            addATrailers(clone);
-            break;
-#endif
-        case OnlineServiceType::OS_Max:
-        default:
-            log_warning("No handler for service type");
-            break;
-        }
-    } else {
-#endif
-
-        auto objCls = std::static_pointer_cast<CdsItem>(obj)->getClass();
-        if (contentType == CONTENT_TYPE_OGG) {
-            if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-                addVideo(clone, rootpath, containerMap);
-            else
-                addAudio(clone, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_VIDEO_ITEM)) {
-            addVideo(clone, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_IMAGE_ITEM)) {
-            addImage(clone, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_AUDIO_ITEM) && contentType != CONTENT_TYPE_PLAYLIST) {
-            addAudio(clone, rootpath, containerMap);
-        }
-
-#ifdef ONLINE_SERVICES
-    }
-#endif
 }

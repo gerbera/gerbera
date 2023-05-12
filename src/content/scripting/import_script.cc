@@ -36,18 +36,22 @@
 #include "import_script.h" // API
 
 #include "cds/cds_objects.h"
+#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "js_functions.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 ImportScript::ImportScript(const std::shared_ptr<ContentManager>& content, const std::string& parent)
     : Script(content, parent, "import", "orig", StringConverter::i2i(content->getContext()->getConfig()))
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    load(scriptPath);
+    if (!scriptPath.empty()) {
+        load(scriptPath);
+    }
 }
 
-void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::string& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     processed = obj;
     try {
@@ -65,6 +69,61 @@ void ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const
         duk_gc(ctx, 0);
         gc_counter = 0;
     }
+}
+
+void ImportScript::callFunction(const std::shared_ptr<CdsObject>& obj, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    processed = obj;
+    try {
+        auto autoScan = content->getAutoscanDirectory(scriptPath);
+        std::string containerType;
+        if (autoScan && !scriptPath.empty() && containerMap.find(mediaMode) != containerMap.end()) {
+            containerType = getValueOrDefault(containerMap, mediaMode, containerMap.at(mediaMode));
+        } else {
+            containerType = AutoscanDirectory::ContainerTypesDefaults.at(mediaMode);
+        }
+
+        log_debug("{}, path = {}, containerType = {}", function, scriptPath.c_str(), containerType);
+        call(obj, function, scriptPath, containerType);
+    } catch (const std::runtime_error&) {
+        processed = nullptr;
+        throw;
+    }
+
+    processed = nullptr;
+
+    gc_counter++;
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
+        duk_gc(ctx, 0);
+        gc_counter = 0;
+    }
+}
+
+void ImportScript::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    callFunction(obj, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE), scriptPath, AutoscanMediaMode::Audio, containerMap);
+}
+
+void ImportScript::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    callFunction(obj, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
+}
+
+void ImportScript::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    callFunction(obj, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
+}
+
+#ifdef ONLINE_SERVICES
+void ImportScript::addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    callFunction(obj, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER), scriptPath, AutoscanMediaMode::Video, containerMap);
+}
+#endif
+
+bool ImportScript::hasImportFunctions() const
+{
+    return config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT).empty();
 }
 
 bool ImportScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)

@@ -312,23 +312,17 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
 #ifdef HAVE_JS
     setValue(CFG_IMPORT_SCRIPTING_CHARSET);
 
-    std::string script;
-    script = prefixDir / DEFAULT_JS_DIR / DEFAULT_COMMON_SCRIPT;
-    setValue(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT, script);
-
-    script = prefixDir / DEFAULT_JS_DIR / DEFAULT_PLAYLISTS_SCRIPT;
-    setValue(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT, script);
-
-    script = prefixDir / DEFAULT_JS_DIR / DEFAULT_METAFILE_SCRIPT;
-    setValue(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT, script);
+    std::string scriptDir;
+    scriptDir = prefixDir / DEFAULT_JS_DIR;
+    setValue(CFG_IMPORT_SCRIPTING_COMMON_FOLDER, scriptDir);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE);
+    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER);
 #endif
-
     setValue(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
-
-#ifdef HAVE_JS
-    script = prefixDir / DEFAULT_JS_DIR / DEFAULT_IMPORT_SCRIPT;
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT, script);
-#endif
 
     generateMappings();
 #ifdef ONLINE_SERVICES

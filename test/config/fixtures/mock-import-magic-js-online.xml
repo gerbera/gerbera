@@ -1,12 +1,18 @@
 <import hidden-files="no">
   <magic-file>magic.file</magic-file>
   <scripting script-charset="UTF-8">
-    <common-script>/usr/local/share/gerbera/js/common.js</common-script>
-    <playlist-script>/usr/local/share/gerbera/js/playlists.js</playlist-script>
-    <metafile-script>/usr/local/share/gerbera/js/metadata.js</metafile-script>
-    <virtual-layout type="builtin">
-      <import-script>/usr/local/share/gerbera/js/import.js</import-script>
-    </virtual-layout>
+    <script-folder>
+      <common>/usr/local/share/gerbera/js</common>
+    </script-folder>
+    <import-function>
+      <playlist>importPlaylist</playlist>
+      <meta-file>importMetadata</meta-file>
+      <audio-file>importAudio</audio-file>
+      <video-file>importVideo</video-file>
+      <image-file>importImage</image-file>
+      <trailer>importTrailer</trailer>
+    </import-function>
+    <virtual-layout type="builtin" />
   </scripting>
   <mappings>
     <extension-mimetype ignore-unknown="no">

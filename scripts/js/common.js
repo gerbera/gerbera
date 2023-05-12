@@ -3,7 +3,7 @@
 
   common.js - this file is part of Gerbera.
 
-  Copyright (C) 2018-2022 Gerbera Contributors
+  Copyright (C) 2018-2023 Gerbera Contributors
 
   Gerbera is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 2
@@ -243,7 +243,7 @@ function mapGenre(genre) {
 }
 
 // doc-add-audio-begin
-function addAudio(obj) {
+function addAudio(obj, containerType) {
     // Note the difference between obj.title and obj.metaData[M_TITLE] -
     // while object.title will originally be set to the file name,
     // obj.metaData[M_TITLE] will contain the parsed title - in this
@@ -468,7 +468,7 @@ function stringFromConfig(entry, defValue) {
 }
 // doc-map-string-config-end
 
-function addAudioStructured(obj) {
+function addAudioStructured(obj, containerType) {
     // first gather data
     var title = obj.title;
     if (obj.metaData[M_TITLE] && obj.metaData[M_TITLE][0]) {
@@ -662,7 +662,6 @@ function addAudioStructured(obj) {
         }
     }
     chain.album_artist.searchable = false;
-        
 
     // Tracks
 
@@ -697,7 +696,7 @@ function addAudioStructured(obj) {
 }
 
 // doc-add-video-begin
-function addVideo(obj) {
+function addVideo(obj, containerType) {
     const dir = getRootPath(object_script_path, obj.location);
     const chain = {
         video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
@@ -734,7 +733,7 @@ function addVideo(obj) {
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat({ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
         }
-        tree[tree.length-1].upnpclass = grb_container_type_video;
+        tree[tree.length-1].upnpclass = containerType;
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = obj.res;
         tree[tree.length-1].aux = obj.aux;
@@ -745,7 +744,7 @@ function addVideo(obj) {
 // doc-add-video-end
 
 // doc-add-image-begin
-function addImage(obj) {
+function addImage(obj, containerType) {
     const dir = getRootPath(object_script_path, obj.location);
 
     const chain = {
@@ -783,7 +782,7 @@ function addImage(obj) {
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
         }
-        tree[tree.length-1].upnpclass = grb_container_type_image;
+        tree[tree.length-1].upnpclass = containerType;
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = obj.res;
         tree[tree.length-1].aux = obj.aux;
@@ -862,7 +861,7 @@ function addTrailer(obj) {
 // doc-add-trailer-end
 
 // doc-add-playlist-item-begin
-function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
+function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder) {
     // Determine if the item that we got is an URL or a local file.
 
     if (entry.location.match(/^.*:\/\//)) {
@@ -926,7 +925,7 @@ function addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder) {
 // doc-add-playlist-item-end
 
 // doc-playlist-m3u-parse-begin
-function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
+function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain) {
     var entry = {
         title: null,
         location: null,
@@ -961,11 +960,11 @@ function readM3uPlaylist(playlist_title, playlistChain, playlistDirChain) {
         } else if (!line.match(/^(#|\s*$)/)) {
             entry.location = line;
             // Call the helper function to add the item once you gathered the data:
-            var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+            var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
 
             // Also add to "Directories"
             if (playlistDirChain && state)
-                state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
 
             entry.title = null;
             entry.mimetype = null;
@@ -985,7 +984,7 @@ function addMeta(obj, key, value) {
         obj.metaData[key] = [ value ];
 }
 
-function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
+function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain) {
     var entry = {
         title: null,
         location: null,
@@ -1010,10 +1009,10 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
             if (entry.location) {
                 if (base)
                     entry.location = base + '/' + entry.location;
-                var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
                 if (playlistDirChain && state) {
                     entry.writeThrough = 0;
-                    state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                    state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
                 }
                 if (state)
                     playlistOrder++;
@@ -1064,15 +1063,15 @@ function readAsxPlaylist(playlist_title, playlistChain, playlistDirChain) {
     }
 
     if (entry.location) {
-        var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
         if (playlistDirChain && state) {
             entry.writeThrough = 0;
-            addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
         }
     }
 }
 
-function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
+function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain) {
     var entry = {
         title: null,
         location: null,
@@ -1103,9 +1102,9 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
                     if (state)
                         playlistOrder++;
                 }
@@ -1123,9 +1122,9 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
                     if (state)
                         playlistOrder++;
                 }
@@ -1143,9 +1142,9 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
                     if (state)
                         playlistOrder++;
                 }
@@ -1163,9 +1162,9 @@ function readPlsPlaylist(playlist_title, playlistChain, playlistDirChain) {
     } while (line !== undefined);
 
     if (entry.location) {
-        var state = addPlaylistItem(playlist_title, entry, playlistChain, playlistOrder);
+        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
         if (playlistDirChain && state)
-            addPlaylistItem(playlist_title, entry, playlistDirChain, playlistOrder);
+            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
     }
 }
 

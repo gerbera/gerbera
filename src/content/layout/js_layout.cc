@@ -48,7 +48,43 @@ void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs:
     if (!import_script)
         return;
 
-    import_script->processCdsObject(obj, rootpath, containerMap);
+    if (import_script->hasImportFunctions())
+        Layout::processCdsObject(obj, rootpath, contentType, containerMap);
+    else
+        import_script->processCdsObject(obj, rootpath, containerMap);
 }
 
+void JSLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    if (!import_script)
+        return;
+
+    import_script->addAudio(obj, rootpath, containerMap);
+}
+
+void JSLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    if (!import_script)
+        return;
+
+    import_script->addVideo(obj, rootpath, containerMap);
+}
+
+void JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    if (!import_script)
+        return;
+
+    import_script->addImage(obj, rootpath, containerMap);
+}
+
+#ifdef ONLINE_SERVICES
+void JSLayout::addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+{
+    if (!import_script)
+        return;
+
+    import_script->addTrailer(obj, rootpath, containerMap);
+}
+#endif
 #endif // HAVE_JS
