@@ -49,6 +49,7 @@ public:
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "metadata.js";
+        functionName = "importMetadata";
     }
 
     ~MetafileNfoTest() override
@@ -290,8 +291,6 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
     EXPECT_CALL(*commonScriptMock, updateCdsObject(IsIdenticalMap(asDictionary))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockMetafile(ctx, location, fileName);
-
-    executeScript(ctx);
+    callFunction(ctx, dukMockMetafile, {{"location", location}}, fileName);
 }
 #endif

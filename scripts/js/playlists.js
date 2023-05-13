@@ -28,7 +28,7 @@ function importPlaylist(obj, rootPath, autoscanId, containerType) {
         print("Playlist undefined");
     }
 
-    print("Processing obj: " + obj.location);
+    print("Processing playlist: " + obj.location);
 
     const objLocation = obj.location.substring(0, obj.location.lastIndexOf('/') + 1);
     const type = getPlaylistType(obj.mimetype);
@@ -54,7 +54,7 @@ function importPlaylist(obj, rootPath, autoscanId, containerType) {
     }
 
     if (type === '') {
-        print("Unknown obj mimetype: '" + obj.mimetype + "' of obj '" + obj.location + "'");
+        print("Unknown playlist mimetype: '" + obj.mimetype + "' of playlist '" + obj.location + "'");
     } else if (type === 'm3u') {
         readM3uPlaylist(obj_title, objLocation, objChain, objDirChain);
     } else if (type === 'pls') {
