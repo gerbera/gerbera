@@ -46,6 +46,7 @@ public:
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
+        functionName = "importPlaylist";
     }
 
     ~ExternalUrlPLSPlaylistTest() override
@@ -160,9 +161,7 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     EXPECT_CALL(*commonScriptMock, print(Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.pls'"))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "no/type");
-
-    executeScript(ctx);
+    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.pls"}, {"mimetype", "no/type"}});
 }
 
 TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -200,9 +199,7 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
-
-    executeScript(ctx);
+    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.pls"}, {"mimetype", "audio/x-scpls"}});
 }
 
 TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -241,8 +238,6 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.pls", "audio/x-scpls");
-
-    executeScript(ctx);
+    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.pls"}, {"mimetype", "audio/x-scpls"}});
 }
 #endif

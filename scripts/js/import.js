@@ -20,17 +20,17 @@
   $Id$
 */
 
-function importItem(orig) {
-    if (getPlaylistType(orig.mimetype) === '') {
-        var arr = orig.mimetype.split('/');
+function importItem(item) {
+    if (getPlaylistType(item.mimetype) === '') {
+        var arr = item.mimetype.split('/');
         var mime = arr[0];
 
         // All virtual objects are references to objects in the
         // PC-Directory, so make sure to correctly set the reference ID!
-        var obj = orig;
-        obj.refID = orig.id;
+        var obj = item;
+        obj.refID = item.id;
 
-        const upnpClass = orig.upnpclass;
+        const upnpClass = item.upnpclass;
         var audioLayout = config['/import/scripting/virtual-layout/attribute::audio-layout'];
         if (!audioLayout) {
             audioLayout = 'Default';
@@ -64,14 +64,14 @@ function importItem(orig) {
             case "object.item.textItem":
             case "object.item.bookmarkItem":
             case "object.item.playlistItem":
-                print("Unable to handle upnp class " + orig.upnpclass + " for " + obj.location);
+                print("Unable to handle upnp class " + item.upnpclass + " for " + obj.location);
                 break;
             default:
-                print("Unable to handle upnp class " + orig.upnpclass + " for " + obj.location);
+                print("Unable to handle upnp class " + item.upnpclass + " for " + obj.location);
                 if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
                     mime = 'trailer';
-                } else if (orig.mimetype === 'application/ogg') {
-                    mime = (orig.theora === 1) ? 'video' : 'audio';
+                } else if (item.mimetype === 'application/ogg') {
+                    mime = (item.theora === 1) ? 'video' : 'audio';
                 }
                 switch (mime) {
                     case "audio":
@@ -94,7 +94,7 @@ function importItem(orig) {
                         addImage(obj, grb_container_type_image);
                         break;
                     default:
-                        print("Unable to handle mime type " + orig.mimetype + " for " + obj.location);
+                        print("Unable to handle mime type " + item.mimetype + " for " + obj.location);
                         break;
                 }
                 break;
@@ -107,7 +107,7 @@ var object_script_path;
 var object_autoscan_id;
 var orig;
 
-function importAudo(obj, rootPath, autoscanId, containerType) {
+function importAudio(obj, rootPath, autoscanId, containerType) {
     object_script_path = rootPath;
     object_autoscan_id = autoscanId;
     orig = obj;
@@ -137,6 +137,7 @@ function importTrailer(obj, rootPath, autoscanId, containerType) {
     orig = obj;
     addTrailer(obj);
 }
+
 // compatibility with older configurations
 if (orig && orig !== undefined)
     importItem(orig);

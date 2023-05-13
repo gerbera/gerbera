@@ -501,7 +501,7 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& func
     // functionName(object, rootPath, autoScanId, containerType)
 
     // Push function onto stack
-    if (!duk_get_global_string(ctx, functionName.c_str())) {
+    if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
         log_error("javascript function not found: {}()", functionName);
         duk_pop(ctx);
         throw_std_runtime_error("javascript function not found: {}()", functionName);
@@ -529,7 +529,7 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& func
         narg++;
     }
     // Container Type onto stack
-    duk_push_sprintf(ctx, "%s", containerType);
+    duk_push_sprintf(ctx, "%s", containerType.c_str());
     narg++;
 
     if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {

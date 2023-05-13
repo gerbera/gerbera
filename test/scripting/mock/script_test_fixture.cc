@@ -45,13 +45,15 @@ void ScriptTestFixture::SetUp()
 
     loadCommon(ctx);
 
-    fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
-    std::string scriptContent = GrbFile(scriptFile).readTextFile();
-    duk_push_thread_stash(ctx, ctx);
-    duk_push_string(ctx, scriptFile.c_str());
-    duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
-    duk_put_global_string(ctx, "script_under_test");
-    duk_pop(ctx);
+    if (functionName.empty()) {
+        fs::path scriptFile = fs::path(SCRIPTS_DIR) / "js" / scriptName;
+        std::string scriptContent = GrbFile(scriptFile).readTextFile();
+        duk_push_thread_stash(ctx, ctx);
+        duk_push_string(ctx, scriptFile.c_str());
+        duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
+        duk_put_global_string(ctx, "script_under_test");
+        duk_pop(ctx);
+    }
 }
 
 void ScriptTestFixture::TearDown()
@@ -61,7 +63,7 @@ void ScriptTestFixture::TearDown()
 
 void ScriptTestFixture::loadCommon(duk_context* ctx) const
 {
-    if (scriptName != "common.js") {
+    if (scriptName != "common.js" && functionName.empty()) {
         fs::path commonScript = fs::path(SCRIPTS_DIR) / "js" / "common.js";
         std::string script = GrbFile(commonScript).readTextFile();
         duk_push_string(ctx, commonScript.c_str());
@@ -71,6 +73,84 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
             std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
         }
         duk_pop(ctx); // commonScript
+    } else if (scriptName != "common.js") {
+        auto dirIterator = fs::directory_iterator(fs::path(SCRIPTS_DIR) / "js");
+        for (auto&& dirEntry : dirIterator) {
+            auto&& entryPath = dirEntry.path();
+            if (entryPath.extension() == ".js") {
+                try {
+                    std::string script = GrbFile(entryPath).readTextFile();
+                    duk_push_string(ctx, entryPath.c_str());
+                    duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
+
+                    if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
+                        std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
+                    }
+                    duk_pop(ctx); // entryPath
+                    log_debug("Loaded {}", entryPath.c_str());
+                } catch (const std::runtime_error& e) {
+                    log_error("Unable to load {}: {}", entryPath.c_str(), e.what());
+                }
+            }
+        }
+    }
+}
+
+void ScriptTestFixture::dukMockItem(duk_context* ctx, const std::map<std::string, std::string>& props,
+    const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res)
+{
+    duk_idx_t origIdx = duk_push_object(ctx);
+    for (auto&& [name, value] : props) {
+        duk_push_string(ctx, value.c_str());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+
+    std::map<std::string, std::vector<std::string>> metaGroups;
+    for (auto&& [mkey, mvalue] : meta) {
+        if (metaGroups.find(mkey) == metaGroups.end()) {
+            metaGroups[mkey] = std::vector<std::string>();
+        }
+        metaGroups[mkey].push_back(mvalue);
+    }
+
+    // obj.meta
+    duk_idx_t metaIdx = duk_push_object(ctx);
+    for (auto&& [key, array] : metaGroups) {
+        duk_push_string(ctx, fmt::format("{}", fmt::join(array, "/")).c_str());
+        duk_put_prop_string(ctx, metaIdx, key.c_str());
+    }
+    duk_put_prop_string(ctx, origIdx, "meta");
+
+    metaIdx = duk_push_object(ctx);
+    // obj.metaData
+    for (auto&& [key, array] : metaGroups) {
+        auto dukArray = duk_push_array(ctx);
+        for (std::size_t i = 0; i < array.size(); i++) {
+            duk_push_string(ctx, array[i].c_str());
+            duk_put_prop_index(ctx, dukArray, i);
+        }
+        duk_put_prop_string(ctx, metaIdx, key.c_str());
+    }
+    duk_put_prop_string(ctx, origIdx, "metaData");
+
+    // obj.res
+    if (!res.empty()) {
+        duk_idx_t resIdx = duk_push_object(ctx);
+        for (auto const& val : res) {
+            duk_push_string(ctx, val.second.c_str());
+            duk_put_prop_string(ctx, resIdx, val.first.c_str());
+        }
+        duk_put_prop_string(ctx, origIdx, "res");
+    }
+
+    // obj.aux
+    if (!aux.empty()) {
+        duk_idx_t auxIdx = duk_push_object(ctx);
+        for (auto const& val : aux) {
+            duk_push_string(ctx, val.second.c_str());
+            duk_put_prop_string(ctx, auxIdx, val.first.c_str());
+        }
+        duk_put_prop_string(ctx, origIdx, "aux");
     }
 }
 
@@ -166,6 +246,15 @@ void ScriptTestFixture::mockPlaylistFile(const std::string& mockFile)
     readLineCnt = 0;
 }
 
+void ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::map<std::string, std::string>& props)
+{
+    duk_push_object(ctx);
+    for (auto&& [name, value] : props) {
+        duk_push_string(ctx, value.c_str());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+}
+
 duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype)
 {
     const std::string objectName = "playlist";
@@ -212,6 +301,36 @@ duk_ret_t ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::string
     duk_push_string(ctx, fileName.c_str());
     duk_put_global_string(ctx, "object_script_path");
     return 0;
+}
+
+void ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::map<std::string, std::string>& props)
+{
+    duk_push_object(ctx);
+    for (auto&& [name, value] : props) {
+        duk_push_string(ctx, value.c_str());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_push_string(ctx, fmt::to_string(10).c_str());
+    duk_put_prop_string(ctx, -2, "trackNumber");
+    duk_push_string(ctx, fmt::to_string(0).c_str());
+    duk_put_prop_string(ctx, -2, "partNumber");
+    // setting metadata
+    {
+        duk_push_object(ctx);
+        auto dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, fmt::to_string(10).c_str());
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_TRACKNUMBER).c_str());
+        dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, fmt::to_string(0).c_str());
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_PARTNUMBER).c_str());
+        dukArray = duk_push_array(ctx);
+        duk_push_string(ctx, "done");
+        duk_put_prop_index(ctx, dukArray, 0);
+        duk_put_prop_string(ctx, -2, "upnp:none");
+        duk_put_prop_string(ctx, -2, "metaData");
+    }
 }
 
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
@@ -282,6 +401,45 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
         }
         duk_pop(ctx); // script_under_test
     }
+}
+
+void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props), const std::map<std::string, std::string>& props, const std::string& rootPath)
+{
+    // functionName(object, rootPath, autoScanId, containerType)
+std::string containerType;
+    // Push function onto stack
+    if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
+        std::cerr << "javascript function not found: " << functionName << std::endl;
+        duk_pop(ctx);
+        return;
+    }
+
+    int narg = 0;
+
+    // Push obj structure onto stack
+    dukMockFunction(ctx, props);
+    narg++;
+
+    // push rootPath onto stack
+    duk_push_sprintf(ctx, "%s", rootPath.c_str());
+    narg++;
+
+    // Push autoScanId onto stack
+    duk_push_sprintf(ctx, "%d", -1);
+    narg++;
+
+    // Container Type onto stack
+    duk_push_sprintf(ctx, "%s", containerType.c_str());
+    narg++;
+
+    if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
+        // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
+        // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
+        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_string(ctx, -1) << std::endl;
+        duk_pop(ctx);
+        return;
+    }
+    duk_pop(ctx);
 }
 
 std::vector<std::string> ScriptTestFixture::createContainerChain(duk_context* ctx)

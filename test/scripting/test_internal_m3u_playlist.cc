@@ -45,6 +45,7 @@ public:
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
+        functionName = "importPlaylist";
     }
 
     ~InternalUrlM3UPlaylistTest() override
@@ -213,8 +214,6 @@ TEST_F(InternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    dukMockPlaylist(ctx, "Playlist Title", "/location/of/playlist.m3u", "audio/x-mpegurl");
-
-    executeScript(ctx);
+    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
 }
 #endif

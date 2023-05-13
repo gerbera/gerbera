@@ -78,14 +78,18 @@ public:
     static duk_ret_t dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
         const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
         const std::string& location, int onlineService);
+    void dukMockItem(duk_context* ctx, const std::map<std::string, std::string>& props,
+        const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res);
 
     // Load playlist file from fixtures
     static void mockPlaylistFile(const std::string& mockFile);
 
     // Creates a mock metafile global object in Duktape context
     static duk_ret_t dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName);
+    static void dukMockMetafile(duk_context* ctx, const std::map<std::string, std::string>& props);
 
     // Creates a mock playlist global object in Duktape context
+    static void dukMockPlaylist(duk_context* ctx, const std::map<std::string, std::string>& props);
     static duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
 
     // Add global Duktape methods to proxy into c++ layer
@@ -96,6 +100,7 @@ public:
 
     // Access the global object(script) by name, and execute
     static void executeScript(duk_context* ctx);
+    void callFunction(duk_context* ctx, void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props), const std::map<std::string, std::string>& props, const std::string& rootPath = "");
 
     // Proxy the common.js script with `createContainerChain`
     // Mimics the creation of a directory chain
@@ -149,6 +154,7 @@ public:
     // Script file name under test
     // System defaults to known project path `/scripts/js/<scriptName>`
     std::string scriptName;
+    std::string functionName;
     // Select audio layout to test
     std::string audioLayout;
 
