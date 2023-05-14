@@ -102,6 +102,7 @@ function importItem(item) {
     }
 }
 
+// doc-import-begin
 function importAudio(obj, rootPath, autoscanId, containerType) {
     addAudio(obj, rootPath, containerType);
 }
@@ -117,6 +118,7 @@ function importImage(obj, rootPath, autoscanId, containerType) {
 function importTrailer(obj, rootPath, autoscanId, containerType) {
     addTrailer(obj);
 }
+// doc-import-end
 
 // Global Variables
 var orig;
