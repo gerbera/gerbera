@@ -872,7 +872,7 @@ Create a transcoder-script
 Modify Your Import Scripts
 --------------------------
 
-Add following code to the playlist.js script inside the if-statement.
+Add following code to the playlists.js script inside the if-statement.
 
 ::
 
@@ -1000,7 +1000,7 @@ Add following code to the playlist.js script inside the if-statement.
      createSubItem(thisFileName, thisGenre, thisDate, discArtist, discTitle, thisArtist, thisTitle, thisTrackIdx, thisStart, thisStop);
   }
 
-And add a function createSubItem to playlist.js:
+And add a function createSubItem to playlists.js:
 
 ::
 
