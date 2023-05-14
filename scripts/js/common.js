@@ -243,7 +243,7 @@ function mapGenre(genre) {
 }
 
 // doc-add-audio-begin
-function addAudio(obj, containerType) {
+function addAudio(obj, rootPath, containerType) {
     // Note the difference between obj.title and obj.metaData[M_TITLE] -
     // while object.title will originally be set to the file name,
     // obj.metaData[M_TITLE] will contain the parsed title - in this
@@ -468,7 +468,7 @@ function stringFromConfig(entry, defValue) {
 }
 // doc-map-string-config-end
 
-function addAudioStructured(obj, containerType) {
+function addAudioStructured(obj, rootPath, containerType) {
     // first gather data
     var title = obj.title;
     if (obj.metaData[M_TITLE] && obj.metaData[M_TITLE][0]) {
@@ -696,8 +696,8 @@ function addAudioStructured(obj, containerType) {
 }
 
 // doc-add-video-begin
-function addVideo(obj, containerType) {
-    const dir = getRootPath(object_script_path, obj.location);
+function addVideo(obj, rootPath, containerType) {
+    const dir = getRootPath(rootPath, obj.location);
     const chain = {
         video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
         allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -744,8 +744,8 @@ function addVideo(obj, containerType) {
 // doc-add-video-end
 
 // doc-add-image-begin
-function addImage(obj, containerType) {
-    const dir = getRootPath(object_script_path, obj.location);
+function addImage(obj, rootPath, containerType) {
+    const dir = getRootPath(rootPath, obj.location);
 
     const chain = {
         imageRoot: { title: 'Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },

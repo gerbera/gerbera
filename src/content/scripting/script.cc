@@ -415,8 +415,8 @@ void Script::loadFolder(const fs::path& scriptFolder)
 {
     log_debug("Loading folder {}", scriptFolder.c_str());
     std::error_code ec;
-    auto dirEntry = fs::directory_entry(scriptFolder);
-    if (!dirEntry.exists(ec) || !dirEntry.is_directory(ec)) {
+    auto rootEntry = fs::directory_entry(scriptFolder);
+    if (!rootEntry.exists(ec) || !rootEntry.is_directory(ec)) {
         log_error("Script folder not found: {}", scriptFolder.c_str());
         return;
     }
@@ -498,6 +498,10 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
 
 void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
 {
+    // write global object used in callback functionss
+    cdsObject2dukObject(obj);
+    duk_put_global_string(ctx, objectName.c_str());
+
     // functionName(object, rootPath, autoScanId, containerType)
 
     // Push function onto stack

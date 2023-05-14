@@ -20,20 +20,18 @@
   $Id$
 */
 
-var obj;
-
 function importMetadata(meta, rootPath, autoscanId, containerType) {
-    obj = meta;
     const arr = rootPath.split('.');
     print("Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
     switch (arr[arr.length-1].toLowerCase()) {
         case "nfo":
             parseNfo(meta, rootPath);
-            updateCdsObject();
+            updateCdsObject(meta);
             break;
     }
 }
 
+var obj;
 // compatibility with older configurations
 if (obj && obj !== undefined)
     importMetadata(obj, object_script_path, -1, "");

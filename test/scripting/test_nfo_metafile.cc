@@ -50,6 +50,7 @@ public:
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "metadata.js";
         functionName = "importMetadata";
+        objectName = "obj";
     }
 
     ~MetafileNfoTest() override
@@ -157,16 +158,17 @@ static std::vector<std::string> getArrayProperty(duk_context* ctx, const std::st
 
 duk_ret_t updateCdsObject(duk_context* ctx)
 {
-    duk_get_global_string(ctx, "obj");
+    const std::string objectName = "obj";
     std::map<std::string, std::string> result;
 
     if (duk_is_undefined(ctx, -1)) {
-        log_debug("Could not retrieve global {} object", "obj");
+        std::cerr << "Could not retrieve stack " << objectName << " object" << std::endl;
         return 0;
     }
 
     duk_get_prop_string(ctx, -1, "title");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
+        std::cerr << "Could not retrieve stack " << objectName << ".title" << std::endl;
         duk_pop(ctx);
         return 0;
     }
@@ -175,6 +177,7 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 
     duk_get_prop_string(ctx, -1, "upnpclass");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
+        std::cerr << "Could not retrieve stack " << objectName << ".upnpclass" << std::endl;
         duk_pop(ctx);
         return 0;
     }
@@ -183,6 +186,7 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 
     duk_get_prop_string(ctx, -1, "description");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
+        std::cerr << "Could not retrieve stack " << objectName << ".description" << std::endl;
         duk_pop(ctx);
         return 0;
     }
@@ -214,7 +218,7 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 static duk_function_list_entry js_global_functions[] = {
     { "print", print, DUK_VARARGS },
     { "readXml", readXml, 1 },
-    { "updateCdsObject", updateCdsObject, 0 },
+    { "updateCdsObject", updateCdsObject, 1 },
     { nullptr, nullptr, 0 },
 };
 
