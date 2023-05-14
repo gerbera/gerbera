@@ -158,19 +158,13 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx)
         return 0;
     }
 
-    if (self->getOrigName().empty())
-        duk_push_undefined(ctx);
-    else
-        duk_get_global_string(ctx, self->getOrigName().c_str());
-    // stack: js_cds_obj
-
     if (duk_is_undefined(ctx, -1)) {
-        log_debug("Could not retrieve global {} object", self->getOrigName());
+        log_debug("Could not retrieve {} object", self->getOrigName());
         return 0;
     }
     auto origObject = self->dukObject2cdsObject(self->getProcessedObject());
     if (!origObject) {
-        log_debug("Could not load global {} object", self->getOrigName());
+        log_debug("Could not load {} object", self->getOrigName());
         return 0;
     }
     return 1;
@@ -286,7 +280,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
         }
         cdsObj->setRefID(pcdId);
         cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    } else if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS)) {
+    } else if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
         cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
         cdsObj->setRefID(origObject->getID());
     }
@@ -295,7 +289,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 
 void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont)
 {
-    if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) && cont->getRefID() > 0) {
+    if ((config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) && cont->getRefID() > 0) {
         cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
     }
 }
@@ -407,7 +401,7 @@ MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>
     : ParserScript(content, "", "metafile", "obj")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
-    defineFunction("updateCdsObject", jsUpdateCdsObject, 0);
+    defineFunction("updateCdsObject", jsUpdateCdsObject, 1);
     if (!scriptPath.empty()) {
         load(scriptPath);
         scriptMode = true;

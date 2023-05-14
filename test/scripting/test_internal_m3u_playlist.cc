@@ -46,6 +46,7 @@ public:
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
         functionName = "importPlaylist";
+        objectName = "playlist";
     }
 
     ~InternalUrlM3UPlaylistTest() override

@@ -257,7 +257,6 @@ void ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::map<std::st
 
 duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype)
 {
-    const std::string objectName = "playlist";
     duk_push_object(ctx);
     duk_push_string(ctx, location.c_str());
     duk_put_prop_string(ctx, -2, "location");
@@ -271,7 +270,6 @@ duk_ret_t ScriptTestFixture::dukMockPlaylist(duk_context* ctx, const std::string
 
 duk_ret_t ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName)
 {
-    const std::string objectName = "obj";
     duk_push_object(ctx);
     duk_push_string(ctx, location.c_str());
     duk_put_prop_string(ctx, -2, "location");
@@ -405,6 +403,8 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
 
 void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props), const std::map<std::string, std::string>& props, const std::string& rootPath)
 {
+    dukMockFunction(ctx, props);
+    duk_put_global_string(ctx, objectName.c_str());
     // functionName(object, rootPath, autoScanId, containerType)
 std::string containerType;
     // Push function onto stack

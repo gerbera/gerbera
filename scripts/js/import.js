@@ -42,16 +42,16 @@ function importItem(item) {
             case "object.item.audioItem.audioBroadcast":
                 switch (audioLayout) {
                 case 'Structured':
-                    addAudioStructured(obj, grb_container_type_audio);
+                    addAudioStructured(obj, object_script_path, grb_container_type_audio);
                     break;
                 default:
-                    addAudio(obj, grb_container_type_audio);
+                    addAudio(obj, object_script_path, grb_container_type_audio);
                     break;
                 }
                 break;
             case "object.item.videoItem":
             case "object.item.videoItem.movie":
-                addVideo(obj, grb_container_type_video);
+                addVideo(obj, object_script_path, grb_container_type_video);
                 break;
             case "object.item.videoItem.musicVideoClip":
             case "object.item.videoItem.videoBroadcast":
@@ -59,7 +59,7 @@ function importItem(item) {
                 break;
             case "object.item.imageItem":
             case "object.item.imageItem.photo":
-                addImage(obj, grb_container_type_image);
+                addImage(obj, object_script_path, grb_container_type_image);
                 break;
             case "object.item.textItem":
             case "object.item.bookmarkItem":
@@ -77,21 +77,21 @@ function importItem(item) {
                     case "audio":
                         switch (audioLayout) {
                         case 'Structured':
-                            addAudioStructured(obj, grb_container_type_audio);
+                            addAudioStructured(obj, object_script_path, grb_container_type_audio);
                             break;
                         default:
-                            addAudio(obj, grb_container_type_audio);
+                            addAudio(obj, object_script_path, grb_container_type_audio);
                             break;
                         }
                         break;
                     case "video":
-                        addVideo(obj, grb_container_type_video);
+                        addVideo(obj, object_script_path, grb_container_type_video);
                         break;
                     case "trailer":
                         addTrailer(obj);
                         break;
                     case "image":
-                        addImage(obj, grb_container_type_image);
+                        addImage(obj, object_script_path, grb_container_type_image);
                         break;
                     default:
                         print("Unable to handle mime type " + item.mimetype + " for " + obj.location);
@@ -102,42 +102,24 @@ function importItem(item) {
     }
 }
 
-// Global Variables
-var object_script_path;
-var object_autoscan_id;
-var orig;
-
 function importAudio(obj, rootPath, autoscanId, containerType) {
-    object_script_path = rootPath;
-    object_autoscan_id = autoscanId;
-    orig = obj;
-    addAudio(obj, containerType);
+    addAudio(obj, rootPath, containerType);
 }
 function importAudioStructured(obj, rootPath, autoscanId, containerType) {
-    object_script_path = rootPath;
-    object_autoscan_id = autoscanId;
-    orig = obj;
-    addAudioStructured(obj, containerType);
+    addAudioStructured(obj, rootPath, containerType);
 }
 function importVideo(obj, rootPath, autoscanId, containerType) {
-    object_script_path = rootPath;
-    object_autoscan_id = autoscanId;
-    orig = obj;
-    addVideo(obj, containerType);
+    addVideo(obj, rootPath, containerType);
 }
 function importImage(obj, rootPath, autoscanId, containerType) {
-    object_script_path = rootPath;
-    object_autoscan_id = autoscanId;
-    orig = obj;
-    addImage(obj, containerType);
+    addImage(obj, rootPath, containerType);
 }
 function importTrailer(obj, rootPath, autoscanId, containerType) {
-    object_script_path = rootPath;
-    object_autoscan_id = autoscanId;
-    orig = obj;
     addTrailer(obj);
 }
 
+// Global Variables
+var orig;
 // compatibility with older configurations
 if (orig && orig !== undefined)
     importItem(orig);

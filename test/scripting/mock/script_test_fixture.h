@@ -78,19 +78,19 @@ public:
     static duk_ret_t dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
         const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
         const std::string& location, int onlineService);
-    void dukMockItem(duk_context* ctx, const std::map<std::string, std::string>& props,
+    static void dukMockItem(duk_context* ctx, const std::map<std::string, std::string>& props,
         const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res);
 
     // Load playlist file from fixtures
     static void mockPlaylistFile(const std::string& mockFile);
 
     // Creates a mock metafile global object in Duktape context
-    static duk_ret_t dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName);
+    duk_ret_t dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName);
     static void dukMockMetafile(duk_context* ctx, const std::map<std::string, std::string>& props);
 
     // Creates a mock playlist global object in Duktape context
+    duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
     static void dukMockPlaylist(duk_context* ctx, const std::map<std::string, std::string>& props);
-    static duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
 
     // Add global Duktape methods to proxy into c++ layer
     void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {});
@@ -155,6 +155,7 @@ public:
     // System defaults to known project path `/scripts/js/<scriptName>`
     std::string scriptName;
     std::string functionName;
+    std::string objectName = "obj";
     // Select audio layout to test
     std::string audioLayout;
 
