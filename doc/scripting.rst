@@ -619,6 +619,10 @@ Walkthrough
 Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
 the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
 
+On startup gerbera loads all the javascript files from that directory (`common-folder` in `config.xml`) then loads all files from
+`custom-folder`. If a function defined in a common file is also found in the custom folder it overwrites it.
+
+You can still use the former mechanism of defining `common-script` and `custom-script` in `config.xml` which works as follows:
 The functions are defined in `common.js` and can easily be overwritten in a file which is set in `custom-script` in `config.xml`.
 Compared to former versions of gerbera you do not have to copy the whole file to overwrite one function.
 
@@ -626,13 +630,32 @@ Compared to former versions of gerbera you do not have to copy the whole file to
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
   language.
 
-Import Script
--------------
+Import Logic
+------------
 
 We start with a walkthrough of the default import script, it is called import.js in the Gerbera distribution.
 
 Below are the import script functions that organize our content in the database by creating the virtual structure.
 Each media type - audio, image and video is handled by a separate function.
+
+The entry point of each import function has the following synopsis
+
+.. js:function:: importFile(obj, rootPath, autoscanId, containerType)
+
+    Create virtual layout for a specific file type
+
+    :param object obj: Original object as created in PC Directory
+    :param string rootPath: Root folder of the autoscan directoy
+    :param int autoscanId: Id of the autoscan directoy
+    :param string containerType: UPnP  type configured to create containers
+    :returns: nothing
+
+Each entry function is a wrapper around the common function that contains the logic
+
+.. literalinclude:: ../scripts/js/import.js
+    :start-after: // doc-import-begin
+    :end-before: // doc-import-end
+    :language: js
 
 Audio Content Handler
 :::::::::::::::::::::
@@ -711,11 +734,24 @@ date and release date, additionally we will also add a container holding all tra
 Putting it all together
 :::::::::::::::::::::::
 
-This is the main part of the script, it looks at the mimetype of the original object and feeds the object to the appropriate
-content handler.
+In the default configuration these functions are registered as entry points so that all parameters are supplied by the runtime
+
+
+.. code-block:: xml
+
+    <import-function>
+        <audio-file>importAudioKarl</audio-file>
+        <video-file>importVideo</video-file>
+        <image-file>importImage</image-file>
+        <playlist create-link="yes">importPlaylist</playlist>
+        <meta-file>importMetadata</meta-file>
+        <trailer>importTrailer</trailer>
+    </import-function>
+
+If you set `import-script` in `config.xml` the script is fully evaluated and calls the wrapper to select the correct import function.
 
 .. literalinclude:: ../scripts/js/import.js
-    :start-after: // main script part
+    :start-after: // Global Variables
     :language: js
 
 
@@ -737,7 +773,7 @@ Adding Items
 
 We will first look at a helper function:
 
-``addPlaylistItem(location, title, playlistChain);``
+.. js:function:: importPlaylist(obj, rootPath, autoscanId, containerType)
 
 It is defined in playlists.js, it receives the location (path on disk or HTTP URL), the title and the desired position of the
 item in the database layout (remember the container chains used in the import script).
