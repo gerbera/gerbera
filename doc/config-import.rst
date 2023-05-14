@@ -112,7 +112,40 @@ Defines the scripting section.
 
 Below are the available scripting options:
 
-    ``virtual-layout``
+``script-folder``
+~~~~~~~~~~~~~~~~~
+
+    ::
+
+        <script-folder>
+            <common>/usr/local/share/gerbera/js</common>
+            <custom>/home/dev/Source/gerbera/scripts/js</custom>
+        </script-folder>
+
+    Defines the locations of the script folders. If set, first all Javascript files from `common` are loaded and then all Javascript files from `custom`.
+    If a function is defined in a common and a custom file the custom defintion overwrites the common defintion. No function should be duplicate in
+    the same folder. Setting `script-folder` is the replacement for setting the various script files `common-script`.
+
+``import-function``
+~~~~~~~~~~~~~~~~~~~
+
+    ::
+
+        <import-function>
+            <audio-file>importAudioInitial</audio-file>
+            <video-file>importVideo</video-file>
+            <image-file>importImage</image-file>
+            <playlist create-link="yes">importPlaylist</playlist>
+            <meta-file>importMetadata</meta-file>
+            <trailer>importTrailer</trailer>
+        </import-function>
+
+    Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
+    the layout type in `virtual-layout`. The entry points are directly called for Gerbera code and must have a defined synopsis.
+    For further details see :ref:`scripting <scripting>`.
+
+``virtual-layout``
+~~~~~~~~~~~~~~~~~~
 
     ::
 
@@ -495,7 +528,7 @@ the removed directory if it becomes available/gets created again.
 
         Set the default container type for virtual containers during import.
         This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
-        The first object that is added to the container determines the property (audio/image/video) used. 
+        The first object that is added to the container determines the property (audio/image/video) used.
 
 
 ``system-directories``
@@ -920,7 +953,7 @@ Specifies a mapping from a certain mime type to upnp:class in the Content Direct
 entered explicitly "audio/mpeg" or using a wildcard after the slash ``audio/\*``. The values of **from** and **to**
 attributes are case sensitive.
 
-For detailled mapping the **from** attribute can specify further filtering criteria like ``upnp:genre=Book`` which is 
+For detailled mapping the **from** attribute can specify further filtering criteria like ``upnp:genre=Book`` which is
 expanded to `if genre contains Book`.
 
 * Example
@@ -1130,9 +1163,9 @@ Here is some information on the auxdata: UPnP defines certain tags to pass along
 This additional metadata can be used to fine tune the server layout, it allows the user to create a more
 complex container structure using a customized import script. The metadata that can be extracted depends on the
 library, currently we support **taglib** (or id3lib if absent), **ffmpeg and libexif** and **libexiv2** (if compiled with WITH_EXIV2 enabled) which provide a default set of keys
-that can be passed in the options below. The data according to those keys will the be extracted from the media and imported 
-into the database along with the item. When processing the item, the import script will have full access to the gathered 
-metadata, thus allowing the user to organize the data with the use of the extracted information. A practical example would be: 
+that can be passed in the options below. The data according to those keys will the be extracted from the media and imported
+into the database along with the item. When processing the item, the import script will have full access to the gathered
+metadata, thus allowing the user to organize the data with the use of the extracted information. A practical example would be:
 having more than one digital camera in your family you could extract the camera model from the Exif tags and sort your photos
 in a structure of your choice, like:
 
@@ -1268,9 +1301,9 @@ A sample configuration for the example described above would be:
 
 These options apply to id3lib or taglib libraries.
 
-The keywords are those defined in the specifications, e.g. 
+The keywords are those defined in the specifications, e.g.
 `ID3v2.4 <https://id3.org/id3v2.4.0-frames>`_ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`_
-We do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag 
+We do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag
 nothing bad will happen.
 
 Here is a list of some extra keywords not beeing part of UPnP:
@@ -1313,7 +1346,7 @@ A sample configuration for the example described above would be:
 
 These options apply to ffmpeg libraries.
 
-`This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_ 
+`This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_
 documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
 
 A sample configuration for the example described above would be:
