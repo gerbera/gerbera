@@ -139,6 +139,7 @@ private:
 
     std::shared_ptr<AutoscanDirectory> autoscanDir;
     fs::path rootPath;
+    std::string noMediaName;
     bool hasReadableNames { false };
 
     ///\brief cache for containers while creating new layout
@@ -158,11 +159,12 @@ private:
 
     void readDir(const fs::path& location, AutoScanSetting& settings);
     void readFile(const fs::path& location);
-    void createContainers(int parentContainerId);
+    void createContainers(int parentContainerId, AutoScanSetting& settings);
     void createItems(AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
+    bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, AutoScanSetting& settings);
 
 public:
     ImportService(std::shared_ptr<Context> context);

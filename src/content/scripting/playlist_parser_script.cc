@@ -255,6 +255,8 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
         asSetting.recursive = false;
         asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
         asSetting.rescanResource = false;
+        asSetting.async = false;
+        asSetting.adir = content->findAutoscanDirectory(rootPath);
         asSetting.mergeOptions(config, loc);
 
         auto mainObj = content->addFile(dirEnt, rootPath, asSetting, false);
