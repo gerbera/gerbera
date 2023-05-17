@@ -141,6 +141,7 @@ private:
     fs::path rootPath;
     std::string noMediaName;
     bool hasReadableNames { false };
+    bool hasDefaultDate { true };
 
     ///\brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;

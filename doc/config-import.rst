@@ -42,6 +42,16 @@ This tag defines the import section.
 
     ::
 
+        default-date="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines that each imported item will get a default media date set based on the modification time in order to ensure that sorting by "dc:date" works on upnp requests.
+
+    ::
+
         nomedia-file=".skip"
 
     * Optional

@@ -119,6 +119,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     , database(this->context->getDatabase())
 {
     hasReadableNames = config->getBoolOption(CFG_IMPORT_READABLE_NAMES);
+    hasDefaultDate = config->getBoolOption(CFG_IMPORT_DEFAULT_DATE);
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
@@ -534,7 +535,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
 
 void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
 {
-    if (item->getMetaData(M_DATE).empty())
+    if (hasDefaultDate && item->getMetaData(M_DATE).empty())
         item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
     for (auto&& upnpPattern : upnpMap) {
         if (upnpPattern.isMatch(item, mimetype)) {
