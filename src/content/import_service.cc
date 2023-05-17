@@ -122,6 +122,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
+    noMediaName = config->getOption(CFG_IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
 
@@ -219,7 +220,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         readFile(location);
     }
 
-    createContainers(CDS_ID_FS_ROOT);
+    createContainers(CDS_ID_FS_ROOT, settings);
     createItems(settings);
     fillLayout(task);
 
@@ -244,11 +245,7 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting& settings)
     }
     for (auto&& dirEntry : dirIterator) {
         auto&& entryPath = dirEntry.path();
-        auto&& name = entryPath.filename().string();
-        if ((name[0] == '.' && !settings.hidden)
-            || (!settings.followSymlinks && dirEntry.is_symlink())
-            || config->getConfigFilename() == entryPath) {
-            contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
+        if (isHiddenFile(entryPath, true, dirEntry, settings)) {
             continue;
         }
         contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
@@ -281,7 +278,7 @@ void ImportService::readFile(const fs::path& location)
     }
 }
 
-void ImportService::createContainers(int parentContainerId)
+void ImportService::createContainers(int parentContainerId, AutoScanSetting& settings)
 {
     log_debug("start {} {}", rootPath.string(), parentContainerId);
     for (auto&& [contPath, stateEntry] : contentStateCache) {
@@ -289,6 +286,9 @@ void ImportService::createContainers(int parentContainerId)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
         if (dirEntry.exists(ec) && dirEntry.is_directory(ec)) {
+            if (isHiddenFile(contPath, true, dirEntry, settings)) {
+                continue;
+            }
             auto cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
 
             if (cdsObj) {
@@ -316,6 +316,32 @@ void ImportService::createContainers(int parentContainerId)
     log_debug("end {}", rootPath.string());
 }
 
+bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, AutoScanSetting& settings)
+{
+    auto&& name = entryPath.filename().string();
+    if ((name[0] == '.' && !settings.hidden)
+        || (!settings.followSymlinks && dirEntry.is_symlink())
+        || config->getConfigFilename() == entryPath) {
+        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
+        return true;
+    }
+    if (!noMediaName.empty()) {
+        auto noMediaFile = (isDirectory) ? entryPath / noMediaName : entryPath.parent_path() / noMediaName;
+        if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
+            return contentStateCache[entryPath]->getState() != ImportState::Broken; // broken means: file not found
+        } else {
+            auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
+            if (!noMediaEntry.exists(ec) || ec) {
+                contentStateCache[noMediaEntry] = std::make_shared<ContentState>(noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
+            } else {
+                // if file exists it will be automatically created
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void ImportService::createItems(AutoScanSetting& settings)
 {
     log_debug("start {}", rootPath.string());
@@ -330,6 +356,9 @@ void ImportService::createItems(AutoScanSetting& settings)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
         auto cdsObj = stateEntry->getObject();
+        if (isHiddenFile(itemPath, (cdsObj && cdsObj->isContainer()), dirEntry, settings)) {
+            continue;
+        }
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (contPath != "") {
@@ -542,8 +571,10 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         database->updateObject(container, nullptr);
     }
 
-    if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end())
+    if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end()) {
+        log_debug("Already assigned fanart {}", container->getID());
         return;
+    }
 
     auto fanart = container->getResource(CdsResource::Purpose::Thumbnail);
     if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
@@ -574,10 +605,12 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
                     fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart->getResId()));
                 }
                 container->addResource(fanart);
+                log_debug("fanart from ref {}", fanart != nullptr);
             }
             database->updateObject(container, nullptr);
         }
-        containersWithFanArt[container->getID()] = container;
+        if (fanart)
+            containersWithFanArt[container->getID()] = container;
     }
 }
 

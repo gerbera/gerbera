@@ -457,12 +457,14 @@ void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const 
 
 std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
 {
-    if (!asSetting.hidden && dirEnt.path().is_relative())
+    if (!asSetting.hidden && dirEnt.path().is_relative()) {
         return nullptr;
+    }
 
     // never add the server configuration file
-    if (config->getConfigFilename() == dirEnt.path())
+    if (config->getConfigFilename() == dirEnt.path()) {
         return nullptr;
+    }
 
     if (rootPath.empty() && task)
         rootPath = task->getRootPath();

@@ -42,6 +42,16 @@ This tag defines the import section.
 
     ::
 
+        nomedia-file=".skip"
+
+    * Optional
+
+    * Default: **.nomedia**
+
+    This attribute defines that a directory containing a file with this name is not imported into gerbera database. Only supported in "grb" import mode.
+
+    ::
+
         readable-names="yes|no"
 
     * Optional
