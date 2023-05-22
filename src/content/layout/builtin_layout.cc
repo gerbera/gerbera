@@ -162,7 +162,7 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
     }
 }
 
-void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
     auto id = chain["/Video/All Video"];
@@ -217,7 +217,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::pa
     getDir(obj, rootpath, "Video", "Video/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video)));
 }
 
-void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
     log_debug("add image file {}", obj->getLocation().string());
@@ -271,7 +271,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::pa
     getDir(obj, rootpath, "Photos", "Photos/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image)));
 }
 
-void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
 

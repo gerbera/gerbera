@@ -193,6 +193,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
+        // client specific properties
         if (quirks) {
             quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
@@ -200,6 +201,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
 
         auto metaGroups = obj->getMetaGroups();
 
+        // add metadata
         for (auto&& [key, group] : metaGroups) {
             if (mvMeta) {
                 for (auto&& val : group) {
@@ -224,10 +226,14 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             }
         }
         auto meta = obj->getMetaData();
+
+        // add thumbnail
         auto artAdded = renderItemImageURL(item);
         if (artAdded) {
             meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), artAdded.value());
         }
+
+        // add playback statistics
         auto playStatus = item->getPlayStatus();
         if (playStatus) {
             auxData["upnp:playbackCount"] = fmt::format("{}", playStatus->getPlayCount());
@@ -250,6 +256,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         if (childCount >= 0)
             result.append_attribute("childCount") = childCount;
 
+        // add metadata
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
@@ -268,6 +275,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             }
         }
     }
+
+    // make sure a date is set
     auto dateNode = result.child("dc:date");
     if (!dateNode) {
         auto fDate = fmt::format("{:%FT%T%z}", fmt::localtime(obj->getMTime().count()));
@@ -427,13 +436,30 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
         }
 
-        auto resObj = res.getAttribute(CdsResource::Attribute::FANART_OBJ_ID);
-        if (!resObj.empty()) {
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(resObj), URL_RESOURCE_ID, res.getAttribute(CdsResource::Attribute::FANART_RES_ID) });
-        }
-    }
+        auto resObjID = res.getAttribute(CdsResource::Attribute::FANART_OBJ_ID);
+        if (!resObjID.empty()) {
+            auto objID = stoiString(resObjID);
+            auto resID = stoiString(res.getAttribute(CdsResource::Attribute::FANART_RES_ID));
+            try {
+                auto resObj = (objID > 0 && objID != item.getID()) ? database->loadObject(objID) : nullptr;
+                while (resObj && resObj->isContainer()) {
+                    auto resRes = resObj->getResource(resID);
+                    auto subObjID = stoiString(resRes->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
+                    if (subObjID > 0 && subObjID != resObj->getID() && resRes->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+                        resObj = database->loadObject(subObjID);
+                        objID = subObjID;
+                        resID = stoiString(resRes->getAttribute(CdsResource::Attribute::FANART_RES_ID));
+                    } else {
+                        resObj = nullptr;
+                    }
+                }
+            } catch (const std::runtime_error& ex) {
+                log_error(" {}", ex.what());
+            }
 
-    if (item.isExternalItem()) {
+            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
+        }
+    } else if (item.isExternalItem()) {
         if (res.getPurpose() == CdsResource::Purpose::Content) {
             // Remote URL is just passed straight out
             // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!

@@ -54,8 +54,8 @@ public:
     void del(std::string_view tableName, const std::string& clause, const std::vector<int>& values) override
     {
         auto query = clause.empty() ?
-            fmt::format("DELETE FROM {}", identifier(tableName)) :
-            fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), clause);
+            fmt::format("DELETE FROM {}", identifier(std::string(tableName))) :
+            fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
         lastStatement = query;
     }
 

@@ -30,7 +30,7 @@
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
-const static auto res_names = std::map<CdsResource::Attribute, std::string_view> {
+const static auto res_names = std::map<CdsResource::Attribute, std::string> {
     std::pair(CdsResource::Attribute::SIZE, "R_SIZE"),
     std::pair(CdsResource::Attribute::DURATION, "R_DURATION"),
     std::pair(CdsResource::Attribute::BITRATE, "R_BITRATE"),

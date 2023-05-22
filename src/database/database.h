@@ -284,7 +284,7 @@ public:
     /// \param objectType pointer to an int; will be filled with the objectType of
     /// the removed object, if not NULL
     /// \return changed container ids
-    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) = 0;
 
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container

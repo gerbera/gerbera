@@ -436,7 +436,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
         getImportService(adir)->updateItemData(item, item->getMimeType());
     }
     if (processExisting || isNew) {
-        getImportService(adir)->fillSingleLayout(nullptr, obj, task);
+        getImportService(adir)->fillSingleLayout(nullptr, obj, nullptr, task);
     }
     return obj;
 }
@@ -448,7 +448,7 @@ void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const 
         if (metafileParserScript)
             metafileParserScript->processObject(obj, path);
     } catch (const std::runtime_error& e) {
-        log_error("{}", e.what());
+        log_error("{}: {}", path.string(), e.what());
     }
 #else
     log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
@@ -543,7 +543,7 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
     bool parentRemoved = false;
 
     if (rescanResource) {
-        if (obj && obj->hasResource(ContentHandler::RESOURCE)) {
+        if (obj->hasResource(ContentHandler::RESOURCE)) {
             auto parentPath = obj->getLocation().parent_path();
             parentRemoved = updateAttachedResources(adir, obj, parentPath, all);
         }
@@ -554,10 +554,11 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
     }
     // Removing a file can lead to virtual directories to drop empty and be removed
     // So current container cache must be invalidated
+    importService->clearCache();
     getImportService(adir)->clearCache();
 
     if (!parentRemoved) {
-        auto changedContainers = database->removeObject(objectID, all);
+        auto changedContainers = database->removeObject(objectID, obj->getLocation(), all);
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
@@ -565,7 +566,7 @@ std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDir
         }
     }
 
-    if (rescanResource && obj && parentRemoved)
+    if (rescanResource && parentRemoved)
         return { obj->getParentID() };
     return {};
 }

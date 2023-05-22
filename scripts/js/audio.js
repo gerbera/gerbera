@@ -21,12 +21,12 @@
 */
 
 // Create layout that has a slot for each initial of the album artist
-function importAudioInitial(obj, rootPath, autoscanId, containerType) {
+function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     object_autoscan_id = autoscanId;
-    addAudioInitial(obj, rootPath, containerType);
+    addAudioInitial(obj, cont, rootPath, containerType);
 }
 
-function addAudioInitial(obj, rootPath, containerType) {
+function addAudioInitial(obj, cont, rootPath, containerType) {
 
     // Note the difference between obj.title and obj.metaData[M_TITLE] -
     // while object.title will originally be set to the file name,
@@ -154,6 +154,7 @@ function addAudioInitial(obj, rootPath, containerType) {
     // objects - this information may be used by some renderers to
     // identify the type of the container and present the content in a
     // different manner.
+    const albumResource = cont.res;
     const chain = {
         audio: { title: 'Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allAudio: { title: 'All Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -164,14 +165,14 @@ function addAudioInitial(obj, rootPath, containerType) {
         allComposers: { title: 'Composers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allSongs: { title: 'All Songs', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        all000: { title: allTitle, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        all000: { title: allTitle, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
         abc: { title: 'ABC', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         init: { title: '_', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        artist: { title: aartist, location: aartist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        year: { title: date, objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        artist: { title: aartist, location: aartist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], aux: obj.aux, refID: cont.id },
+        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: containerType, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        year: { title: date, objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
     };
     const isAudioBook = obj.upnpclass === UPNP_CLASS_AUDIO_BOOK;
     chain.album.metaData[M_ARTIST] = [ aartist ];

@@ -139,7 +139,7 @@ public:
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
     std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override;
 
-    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override;
+    std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override;
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override;
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override;
@@ -206,7 +206,7 @@ public:
     void deleteAll(std::string_view tableName);
     template <typename T>
     void deleteRow(std::string_view tableName, std::string_view key, const T& value);
-    void deleteRows(std::string_view tableName, std::string_view key, const std::vector<int>& values);
+    void deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values);
 
 protected:
     explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime);
@@ -224,7 +224,7 @@ protected:
     void migrateResources(int objectId, const std::string& resourcesStr);
 
     /// \brief returns a fmt-printable identifier name
-    SQLIdentifier identifier(std::string_view name) const { return { name, table_quote_begin, table_quote_end }; }
+    SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     std::shared_ptr<Mime> mime;
 
@@ -315,7 +315,7 @@ private:
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID,
-        const std::vector<std::pair<std::string, std::string>>& itemMetadata);
+        const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources = {});
 
     static bool remapBool(const std::string& field) { return field == "1"; }
     static bool remapBool(int field) { return field == 1; }
@@ -328,13 +328,13 @@ private:
 template <typename T>
 void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value)
 {
-    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(tableName), fmt::join(values, ", "), identifier(key), quote(value)));
+    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(std::string(tableName)), fmt::join(values, ", "), identifier(std::string(key)), quote(value)));
 }
 
 template <typename T>
 void SQLDatabase::deleteRow(std::string_view tableName, std::string_view key, const T& value)
 {
-    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(tableName), identifier(key), quote(value)));
+    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(std::string(tableName)), identifier(std::string(key)), quote(value)));
 }
 
 class SqlWithTransactions {

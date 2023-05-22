@@ -20,7 +20,7 @@
   $Id$
 */
 
-function importPlaylist(obj, rootPath, autoscanId, containerType) {
+function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
     if (!obj || obj === undefined) {
         print("Playlist undefined");
     }
@@ -62,6 +62,9 @@ function importPlaylist(obj, rootPath, autoscanId, containerType) {
 }
 
 var playlist;
+var cont;
 // compatibility with older configurations
+if (!cont || cont === undefined)
+    cont = playlist;
 if (playlist && playlist !== undefined)
-    importPlaylist(playlist, "", -1, "");
+    importPlaylist(playlist, cont, "", -1, "");

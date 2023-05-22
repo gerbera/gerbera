@@ -20,7 +20,7 @@
   $Id$
 */
 
-function importMetadata(meta, rootPath, autoscanId, containerType) {
+function importMetadata(meta, cont, rootPath, autoscanId, containerType) {
     const arr = rootPath.split('.');
     print("Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
     switch (arr[arr.length-1].toLowerCase()) {
@@ -32,6 +32,9 @@ function importMetadata(meta, rootPath, autoscanId, containerType) {
 }
 
 var obj;
+var cont;
 // compatibility with older configurations
+if (!cont || cont === undefined)
+    cont = obj;
 if (obj && obj !== undefined)
-    importMetadata(obj, object_script_path, -1, "");
+    importMetadata(obj, cont, object_script_path, -1, "");

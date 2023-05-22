@@ -406,7 +406,7 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
     dukMockFunction(ctx, props);
     duk_put_global_string(ctx, objectName.c_str());
     // functionName(object, rootPath, autoScanId, containerType)
-std::string containerType;
+    std::string containerType;
     // Push function onto stack
     if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
         std::cerr << "javascript function not found: " << functionName << std::endl;
@@ -417,6 +417,10 @@ std::string containerType;
     int narg = 0;
 
     // Push obj structure onto stack
+    dukMockFunction(ctx, props);
+    narg++;
+
+    // Push obj structure onto stack (as container)
     dukMockFunction(ctx, props);
     narg++;
 

@@ -48,11 +48,12 @@ CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose, std::strin
     this->parameters = URLUtils::dictDecode(parameters);
 }
 
-CdsResource::CdsResource(ContentHandler handlerType,
+CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose,
     std::map<Attribute, std::string> attributes,
     std::map<std::string, std::string> parameters,
     std::map<std::string, std::string> options)
-    : handlerType(handlerType)
+    : purpose(purpose)
+    , handlerType(handlerType)
     , attributes(std::move(attributes))
     , parameters(std::move(parameters))
     , options(std::move(options))
@@ -196,7 +197,7 @@ bool CdsResource::equals(const std::shared_ptr<CdsResource>& other) const
 
 std::shared_ptr<CdsResource> CdsResource::clone()
 {
-    return std::make_shared<CdsResource>(handlerType, attributes, parameters, options);
+    return std::make_shared<CdsResource>(handlerType, purpose, attributes, parameters, options);
 }
 
 std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
@@ -224,7 +225,7 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size >= 4)
         opt = URLUtils::dictDecode(parts[3]);
 
-    return std::make_shared<CdsResource>(handlerType, std::move(attrParsed), std::move(par), std::move(opt));
+    return std::make_shared<CdsResource>(handlerType, handlerType == ContentHandler::DEFAULT ? Purpose::Content : Purpose::Thumbnail, std::move(attrParsed), std::move(par), std::move(opt));
 }
 
 std::string CdsResource::getAttributeName(Attribute attr)

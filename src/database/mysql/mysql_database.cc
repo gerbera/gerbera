@@ -316,8 +316,8 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
 void MySQLDatabase::del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids)
 {
     auto query = clause.empty() //
-        ? fmt::format("DELETE FROM {}", identifier(tableName)) //
-        : fmt::format("DELETE FROM {} WHERE {}", identifier(tableName), clause);
+        ? fmt::format("DELETE FROM {}", identifier(std::string(tableName))) //
+        : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
 #ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
     print_backtrace();
