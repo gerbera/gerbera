@@ -49,9 +49,9 @@ public:
     ImportScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
 #ifdef ONLINE_SERVICES
     void addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
 #endif
@@ -64,7 +64,7 @@ public:
     bool hasImportFunctions() const;
 
 private:
-    void callFunction(const std::shared_ptr<CdsObject>& obj, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    void callFunction(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap);
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__

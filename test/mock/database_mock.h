@@ -56,7 +56,7 @@ public:
     int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) override { return 0; }
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override { return {}; }
 
-    std::unique_ptr<ChangedContainers> removeObject(int objectID, bool all) override { return {}; }
+    std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override { return {}; }
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override { return {}; }
     std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override { return {}; }
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }

@@ -28,19 +28,19 @@
 #include <fmt/format.h>
 
 struct SQLIdentifier {
-    constexpr SQLIdentifier(std::string_view name, char quote_begin, char quote_end)
+    SQLIdentifier(const std::string& name, char quote_begin, char quote_end)
         : name(name)
         , quote_begin(quote_begin)
         , quote_end(quote_end)
     {
     }
-    std::string_view name;
+    std::string name;
     char quote_begin;
     char quote_end;
 };
 
 template <>
-struct fmt::formatter<SQLIdentifier> : formatter<std::string_view> {
+struct fmt::formatter<SQLIdentifier> : formatter<std::string> {
     template <typename FormatContext>
     auto format(const SQLIdentifier& tn, FormatContext& ctx) const -> decltype(ctx.out())
     {
@@ -59,7 +59,7 @@ struct ColumnUpdate {
 };
 
 template <>
-struct fmt::formatter<ColumnUpdate> : formatter<std::string_view> {
+struct fmt::formatter<ColumnUpdate> : formatter<std::string> {
     template <typename FormatContext>
     auto format(const ColumnUpdate& a, FormatContext& ctx) const -> decltype(ctx.out())
     {

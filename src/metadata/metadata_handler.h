@@ -49,7 +49,7 @@ class ContentManager;
 class IOHandler;
 
 // content handler Id's
-enum class ContentHandler {
+enum class ContentHandler : int {
     DEFAULT = 0,
     LIBEXIF = 1,
     ID3 = 2,

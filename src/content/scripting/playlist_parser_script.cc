@@ -361,7 +361,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
             execute(obj, rootPath);
         } else {
             auto playlistFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
-            call(obj, playlistFunction, rootPath, "");
+            call(obj, nullptr, playlistFunction, rootPath, "");
         }
     } catch (const std::runtime_error&) {
         if (scriptMode) {
@@ -440,7 +440,7 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
             execute(obj, path);
         } else {
             auto metafileFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
-            call(obj, metafileFunction, path, "");
+            call(obj, nullptr, metafileFunction, path, "");
         }
     } catch (const std::runtime_error&) {
         if (scriptMode) {

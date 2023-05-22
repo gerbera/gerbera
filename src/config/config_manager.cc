@@ -146,7 +146,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 
     // checking database driver options
-    bool mysqlEn = false;
+    [[maybe_unused]] bool mysqlEn = false;
     bool sqlite3En = false;
 
     co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE);

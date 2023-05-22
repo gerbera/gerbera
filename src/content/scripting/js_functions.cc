@@ -50,7 +50,7 @@ duk_ret_t js_print(duk_context* ctx)
     duk_push_string(ctx, " ");
     duk_insert(ctx, 0);
     duk_join(ctx, duk_get_top(ctx) - 1);
-    log_js("{}", duk_get_string(ctx, 0));
+    log_debug("{}", duk_get_string(ctx, 0));
     return 0;
 }
 
@@ -69,7 +69,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     auto self = Script::getContextScript(ctx);
 
     if (!duk_is_array(ctx, 0)) {
-        log_js("js_addContainerTree: No Array");
+        log_debug("js_addContainerTree: No Array");
         return 0;
     }
 
@@ -80,7 +80,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx);
-                log_js("js_addContainerTree: no object at {}", i);
+                log_debug("js_addContainerTree: no object at {}", i);
                 break;
             }
             duk_to_object(ctx, -1);
@@ -88,7 +88,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
             if (cdsObj) {
                 result.push_back(std::move(cdsObj));
             } else {
-                log_js("js_addContainerTree: no CdsObject at {}", i);
+                log_debug("js_addContainerTree: no CdsObject at {}", i);
             }
         }
         duk_pop(ctx);
@@ -112,8 +112,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 {
     auto* self = Script::getContextScript(ctx);
 
-    if (!duk_is_object(ctx, 0))
+    if (!duk_is_object(ctx, 0)) {
+        log_debug("js_addCdsObject: No object argument");
         return 0;
+    }
     duk_to_object(ctx, 0);
     // stack: js_cds_obj
     const char* containerId = duk_to_string(ctx, 1);
@@ -139,13 +141,16 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         auto origObject = self->dukObject2cdsObject(self->getProcessedObject());
-        if (!origObject)
+        if (!origObject) {
+            log_debug("js_addCdsObject: No global object");
             return 0;
+        }
 
         duk_swap_top(ctx, 0);
         // stack: js_orig_obj containerId js_cds_obj
         auto [cdsObj, pcdId] = self->createObject2cdsObject(origObject, rootPath);
         if (!cdsObj) {
+            log_debug("js_addCdsObject: No content object");
             return 0;
         }
 
@@ -158,6 +163,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
         cdsObj->setParentID(parentId);
         if (!self->setRefId(cdsObj, origObject, pcdId)) {
+            log_debug("js_addCdsObject: No ref object");
             return 0;
         }
 

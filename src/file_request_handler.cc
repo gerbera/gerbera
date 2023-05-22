@@ -108,7 +108,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     // If we get to here we can read the thing
     UpnpFileInfo_set_IsReadable(info, true);
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
-    UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
+    UpnpFileInfo_set_IsDirectory(info, (resource->getHandlerType() == ContentHandler::DEFAULT && S_ISDIR(statbuf.st_mode)));
 
     auto headers = Headers();
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -121,8 +121,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (!protocolInfo.empty()) {
             mimeType = getMTFromProtocolInfo(protocolInfo);
         }
-        if (mimeType.empty())
+        if (mimeType.empty()) {
             mimeType = metadataHandler->getMimeType();
+        }
 
         auto ioHandler = metadataHandler->serveContent(obj, resource);
 
@@ -195,9 +196,26 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("end: {}", filename);
 }
 
-std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) const
+std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const
 {
     auto resHandler = resource->getHandlerType();
+    if (resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+        auto objID = stoiString(resource->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
+        auto resID = stoiString(resource->getAttribute(CdsResource::Attribute::FANART_RES_ID));
+        try {
+            auto resObj = (objID > 0 && objID != obj->getID()) ? database->loadObject(objID) : nullptr;
+            if (resObj) {
+                auto resRes = resObj->getResource(resID);
+                if (resRes) {
+                    obj = resObj;
+                    resource = resRes;
+                    return getResourceMetadataHandler(obj, resource);
+                }
+            }
+        } catch (const std::runtime_error& ex) {
+            log_error(ex.what());
+        }
+    }
     return MetadataHandler::createHandler(context, content, resHandler);
 }
 

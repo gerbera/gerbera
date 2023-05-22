@@ -50,13 +50,13 @@ class MetadataHandler;
 
 class CdsResource {
 public:
-    enum class Purpose {
-        Content,
+    enum class Purpose : int {
+        Content = 0,
         Thumbnail,
         Subtitle,
         Transcode
     };
-    enum class Attribute {
+    enum class Attribute : int {
         SIZE = 0,
         DURATION,
         BITRATE,
@@ -81,9 +81,10 @@ public:
     ///
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
-    /// \param handler_type id of the associated handler
+    /// \param ContentHandler handlerType of the associated handler
+    /// \param Purpose purpose of the associated handler
     explicit CdsResource(ContentHandler handlerType, Purpose purpose, std::string_view options = {}, std::string_view parameters = {});
-    CdsResource(ContentHandler handlerType,
+    CdsResource(ContentHandler handlerType, Purpose purpose,
         std::map<Attribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);

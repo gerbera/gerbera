@@ -35,7 +35,7 @@
 #include "content/onlineservice/online_service.h"
 #endif // ONLINE_SERVICES
 
-void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     log_debug("Process CDS Object: {}", obj->getTitle());
     auto clone = CdsObject::createObject(obj->getObjectType());
@@ -51,15 +51,15 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::p
         auto objCls = std::static_pointer_cast<CdsItem>(obj)->getClass();
         if (contentType == CONTENT_TYPE_OGG) {
             if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-                addVideo(clone, rootpath, containerMap);
+                addVideo(clone, parent, rootpath, containerMap);
             else
-                addAudio(clone, rootpath, containerMap);
+                addAudio(clone, parent, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_VIDEO_ITEM)) {
-            addVideo(clone, rootpath, containerMap);
+            addVideo(clone, parent, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_IMAGE_ITEM)) {
-            addImage(clone, rootpath, containerMap);
+            addImage(clone, parent, rootpath, containerMap);
         } else if (startswith(objCls, UPNP_CLASS_AUDIO_ITEM) && contentType != CONTENT_TYPE_PLAYLIST) {
-            addAudio(clone, rootpath, containerMap);
+            addAudio(clone, parent, rootpath, containerMap);
         }
 
 #ifdef ONLINE_SERVICES

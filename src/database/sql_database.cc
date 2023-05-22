@@ -1311,7 +1311,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
-int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata)
+int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources)
 {
     // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
     // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
@@ -1362,6 +1362,42 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
         insertMultipleRows(METADATA_TABLE, mfields, valuesets);
         log_debug("Wrote metadata for cds_object {}", newId);
     }
+
+    if (!itemResources.empty()) {
+        const std::string newIdStr = fmt::to_string(newId);
+        int resId = 0;
+        for (auto&& resource : itemResources) {
+            auto rfields = std::vector {
+                identifier("item_id"),
+                identifier("res_id"),
+                identifier("handlerType"),
+                identifier("purpose"),
+            };
+            auto values = std::vector {
+                quote(newId),
+                quote(resId),
+                quote(to_underlying(resource->getHandlerType())),
+                quote(to_underlying(resource->getPurpose()))
+            };
+            auto&& options = resource->getOptions();
+            if (!options.empty()) {
+                rfields.push_back(identifier("options"));
+                values.push_back(quote(URLUtils::dictEncode(options)));
+            }
+            auto&& parameters = resource->getParameters();
+            if (!parameters.empty()) {
+                rfields.push_back(identifier("parameters"));
+                values.push_back(quote(URLUtils::dictEncode(parameters)));
+            }
+            for (auto&& [key, val] : resource->getAttributes()) {
+                rfields.push_back(identifier(CdsResource::getAttributeName(key)));
+                values.push_back(quote(val));
+            }
+            insert(RESOURCE_TABLE, rfields, values);
+            resId++;
+        }
+        log_debug("Wrote resources for cds_object {}", newId);
+    }
     commit("createContainer");
 
     return newId;
@@ -1370,7 +1406,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
 int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
 {
     assert(fields.size() == values.size());
-    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ","), fmt::join(values, ","));
+    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(values, ","));
     return exec(sql, getLastInsertId);
 }
 
@@ -1385,7 +1421,7 @@ void SQLDatabase::insertMultipleRows(std::string_view tableName, const std::vect
             assert(fields.size() == values.size());
             tuples.push_back(fmt::format("({})", fmt::join(values, ",")));
         }
-        auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(tableName), fmt::join(fields, ","), fmt::join(tuples, ","));
+        auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(tuples, ","));
         exec(tableName, sql, -1);
     }
 }
@@ -1395,7 +1431,7 @@ void SQLDatabase::deleteAll(std::string_view tableName)
     del(tableName, "", {});
 }
 
-void SQLDatabase::deleteRows(std::string_view tableName, std::string_view key, const std::vector<int>& values)
+void SQLDatabase::deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values)
 {
     del(tableName, fmt::format("{} IN ({})", identifier(key), fmt::join(values, ",")), values);
 }
@@ -1457,7 +1493,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     if (cont->getMetaData(M_DATE).empty())
         cont->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
 
-    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData());
+    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData(), cont->getResources());
     return true;
 }
 
@@ -1871,10 +1907,11 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     }
 
     deleteRows(CDS_OBJECT_TABLE, "id", objectIDs);
+    del(RESOURCE_TABLE, fmt::format("{} IN ('{}')", identifier(CdsResource::getAttributeName(CdsResource::Attribute::FANART_OBJ_ID)), fmt::join(objectIDs, "','")), objectIDs);
     commit("_removeObjects");
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, bool all)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, const fs::path& path, bool all)
 {
     auto res = select(fmt::format("SELECT {}, {} FROM {} WHERE {} = {} LIMIT 1",
         identifier("object_type"), identifier("ref_id"), identifier(CDS_OBJECT_TABLE), identifier("id"), objectID));
@@ -1904,6 +1941,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
         itemIds.push_back(objectID);
     }
     auto changedContainers = _recursiveRemove(itemIds, containerIds, all);
+    if (!path.empty())
+        del(RESOURCE_TABLE, fmt::format("{} = {}", identifier(CdsResource::getAttributeName(CdsResource::Attribute::RESOURCE_FILE)), quote(path.string())), {});
     return _purgeEmptyContainers(std::move(changedContainers));
 }
 

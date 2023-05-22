@@ -444,11 +444,13 @@ void Script::loadFolder(const fs::path& scriptFolder)
 #define GRB_CONTAINERTYPE_VIDEO "grb_container_type_video"
 #define OBJECT_SCRIPT_PATH "object_script_path"
 #define OBJECT_AUTOSCAN_ID "object_autoscan_id"
+#define CONT_NAME "cont"
 
 void Script::cleanup()
 {
     duk_push_global_object(ctx);
     duk_del_prop_string(ctx, -1, objectName.c_str());
+    duk_del_prop_string(ctx, -1, CONT_NAME);
     duk_del_prop_string(ctx, -1, OBJECT_SCRIPT_PATH);
     duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
     duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_AUDIO);
@@ -460,6 +462,10 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
 {
     cdsObject2dukObject(obj);
     duk_put_global_string(ctx, objectName.c_str());
+
+    auto par = database->loadObject(obj->getParentID());
+    cdsObject2dukObject(par);
+    duk_put_global_string(ctx, CONT_NAME);
 
     duk_push_string(ctx, rootPath.c_str());
     duk_put_global_string(ctx, OBJECT_SCRIPT_PATH);
@@ -496,7 +502,7 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
     duk_pop(ctx);
 }
 
-void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
+void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
 {
     // write global object used in callback functionss
     cdsObject2dukObject(obj);
@@ -515,6 +521,11 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::string& func
 
     // Push obj structure onto stack
     cdsObject2dukObject(obj);
+    narg++;
+
+    // Push cont structure onto stack
+    auto par = cont ? cont : (obj->getParentID() >= CDS_ID_ROOT ? database->loadObject(obj->getParentID()) : nullptr);
+    cdsObject2dukObject(par ? par : obj);
     narg++;
 
     // push rootPath onto stack
@@ -624,16 +635,18 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                     auto purpSym = fmt::format("{}:purpose", resCount);
                     int purpose = getIntProperty(purpSym, -1);
                     if (ht >= 0 && purpose >= 0) {
-                        obj->addResource(std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(ht), CdsResource::remapPurpose(purpose)));
+                        auto newRes = std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(ht), CdsResource::remapPurpose(purpose));
+                        obj->addResource(newRes);
+                        newRes->setResId(resCount);
                     }
                     resCount++;
                 }
             }
-            resCount = 0;
             for (auto&& res : obj->getResources()) {
-                // only attribute enumerated in res_keys is allowed
+                resCount = res->getResId();
+                // only attributes enumerated in res_names are allowed
                 for (auto&& [key, upnp] : res_names) {
-                    auto val = getProperty(resCount == 0 ? upnp.data() : fmt::format("{}-{}", resCount, upnp));
+                    auto val = getProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, CdsResource::getAttributeName(key)));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
@@ -655,7 +668,6 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                         res->addOption(key, val);
                     }
                 }
-                resCount++;
             }
         }
         duk_pop(ctx); // res
@@ -807,7 +819,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         handleObject2cdsContainer(ctx, pcd, cont);
         auto id = getIntProperty("updateID", -1);
-        if (id >= 0)
+        if (id >= CDS_ID_ROOT)
             cont->setUpdateID(id);
 
         int searchable = getBoolProperty("searchable");
@@ -938,15 +950,15 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     {
         duk_push_object(ctx);
         // stack: js res_js
-
+        setProperty("count", fmt::to_string(obj->getResourceCount()));
         if (obj->getResourceCount() > 0) {
-            int resCount = 0;
+            std::size_t resCount = 0;
             for (auto&& res : obj->getResources()) {
                 setProperty(fmt::format("{}:handlerType", resCount), fmt::to_string(to_underlying(res->getHandlerType())));
                 setProperty(fmt::format("{}:purpose", resCount), fmt::to_string(to_underlying(res->getPurpose())));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, attr] : attributes) {
-                    setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, key), attr);
+                    setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, CdsResource::getAttributeName(key)), attr);
                 }
                 auto parameters = res->getParameters();
                 for (auto&& [key, param] : parameters) {

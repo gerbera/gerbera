@@ -43,39 +43,39 @@ JSLayout::JSLayout(const std::shared_ptr<ContentManager>& content, const std::st
 {
 }
 
-void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return;
 
     if (import_script->hasImportFunctions())
-        Layout::processCdsObject(obj, rootpath, contentType, containerMap);
+        Layout::processCdsObject(obj, parent, rootpath, contentType, containerMap);
     else
         import_script->processCdsObject(obj, rootpath, containerMap);
 }
 
-void JSLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void JSLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return;
 
-    import_script->addAudio(obj, rootpath, containerMap);
+    import_script->addAudio(obj, parent, rootpath, containerMap);
 }
 
-void JSLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void JSLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return;
 
-    import_script->addVideo(obj, rootpath, containerMap);
+    import_script->addVideo(obj, parent, rootpath, containerMap);
 }
 
-void JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+void JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return;
 
-    import_script->addImage(obj, rootpath, containerMap);
+    import_script->addImage(obj, parent, rootpath, containerMap);
 }
 
 #ifdef ONLINE_SERVICES

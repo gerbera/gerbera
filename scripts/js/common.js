@@ -243,7 +243,7 @@ function mapGenre(genre) {
 }
 
 // doc-add-audio-begin
-function addAudio(obj, rootPath, containerType) {
+function addAudio(obj, cont, rootPath, containerType) {
     // Note the difference between obj.title and obj.metaData[M_TITLE] -
     // while object.title will originally be set to the file name,
     // obj.metaData[M_TITLE] will contain the parsed title - in this
@@ -357,6 +357,7 @@ function addAudio(obj, rootPath, containerType) {
     // Remember, the server will sort all items by ID3 track if the
     // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
 
+    const albumResource = cont.res;
     const chain = {
         audio: { title: 'Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
         allAudio: { title: 'All Audio', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -367,11 +368,11 @@ function addAudio(obj, rootPath, containerType) {
         allComposers: { title: 'Composers', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allSongs: { title: 'All Songs', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        artist: { searchable: false, title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        album: { searchable: false, title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        year: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        artist: { searchable: false, title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        album: { searchable: false, title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: containerType, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        year: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        composer: { title: composer, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
     };
 
     chain.audio.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_AUDIO_ITEM ];
@@ -468,7 +469,7 @@ function stringFromConfig(entry, defValue) {
 }
 // doc-map-string-config-end
 
-function addAudioStructured(obj, rootPath, containerType) {
+function addAudioStructured(obj, cont, rootPath, containerType) {
     // first gather data
     var title = obj.title;
     if (obj.metaData[M_TITLE] && obj.metaData[M_TITLE][0]) {
@@ -556,6 +557,7 @@ function addAudioStructured(obj, rootPath, containerType) {
         divChar: stringFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::div-char', '-'),
     };
     boxConfig.singleLetterBoxSize = 2 * boxConfig.divChar.length + 1;
+    const albumResource = cont.res;
 
     const chain = {
         allArtists: { title: '-Artist-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
@@ -566,11 +568,11 @@ function addAudioStructured(obj, rootPath, containerType) {
         allFull: { title: 'All - full name', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         abc: { title: abcbox(album, boxConfig.album, boxConfig.divChar), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         init: { title: mapInitial(album.charAt(0)), objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        artist: { title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        album_artist: { title: album_artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        artist: { title: artist[0], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        album_artist: { title: album_artist, objectType: OBJECT_TYPE_CONTAINER, upnpclass: containerType, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        album: { title: album, objectType: OBJECT_TYPE_CONTAINER, upnpclass: containerType, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
         entryAll: { title: '-all-', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
+        genre: { title: genre, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
         decade: { title: decade, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         date: { title: date, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }
     };
@@ -696,8 +698,9 @@ function addAudioStructured(obj, rootPath, containerType) {
 }
 
 // doc-add-video-begin
-function addVideo(obj, rootPath, containerType) {
+function addVideo(obj, cont, rootPath, containerType) {
     const dir = getRootPath(rootPath, obj.location);
+    const albumResource = cont.res;
     const chain = {
         video: { title: 'Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
         allVideo: { title: 'All Video', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
@@ -705,9 +708,9 @@ function addVideo(obj, rootPath, containerType) {
         allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
-        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
-        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
+        year: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        date: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
     };
     chain.video.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_VIDEO_ITEM ];
     var container = addContainerTree([chain.video, chain.allVideo]);
@@ -735,17 +738,18 @@ function addVideo(obj, rootPath, containerType) {
         }
         tree[tree.length-1].upnpclass = containerType;
         tree[tree.length-1].metaData = [];
-        tree[tree.length-1].res = obj.res;
+        tree[tree.length-1].res = albumResource;
         tree[tree.length-1].aux = obj.aux;
-        tree[tree.length-1].refID = obj.id;
+        tree[tree.length-1].refID = cont.id;
         addCdsObject(obj, addContainerTree(tree));
     }
 }
 // doc-add-video-end
 
 // doc-add-image-begin
-function addImage(obj, rootPath, containerType) {
+function addImage(obj, cont, rootPath, containerType) {
     const dir = getRootPath(rootPath, obj.location);
+    const albumResource = cont.res;
 
     const chain = {
         imageRoot: { title: 'Photos', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
@@ -755,9 +759,9 @@ function addImage(obj, rootPath, containerType) {
         allYears: { title: 'Year', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         allDates: { title: 'Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
 
-        year: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
-        month: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: obj.res, aux: obj.aux, refID: obj.id }
+        year: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER },
+        month: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
+        date: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [], res: albumResource, aux: obj.aux, refID: cont.id },
     };
     chain.imageRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_IMAGE_ITEM ];
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
@@ -784,9 +788,9 @@ function addImage(obj, rootPath, containerType) {
         }
         tree[tree.length-1].upnpclass = containerType;
         tree[tree.length-1].metaData = [];
-        tree[tree.length-1].res = obj.res;
+        tree[tree.length-1].res = albumResource;
         tree[tree.length-1].aux = obj.aux;
-        tree[tree.length-1].refID = obj.id;
+        tree[tree.length-1].refID = cont.id;
         addCdsObject(obj, addContainerTree(tree));
     }
 }
@@ -804,7 +808,7 @@ function addTrailer(obj) {
 
         relDate: { title: 'Release Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
         postDate: { title: 'Post Date', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
-        date: { title: 'Unbekannt', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
+        date: { title: 'Unknown', objectType: OBJECT_TYPE_CONTAINER, searchable: true, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
     };
     // First we will add the item to the 'All Trailers' container, so
     // that we get a nice long playlist:

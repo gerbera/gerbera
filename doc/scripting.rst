@@ -640,13 +640,13 @@ Each media type - audio, image and video is handled by a separate function.
 
 The entry point of each import function has the following synopsis
 
-.. js:function:: importFile(obj, rootPath, autoscanId, containerType)
+.. js:function:: importFile(obj, cont, rootPath, containerType)
 
     Create virtual layout for a specific file type
 
     :param object obj: Original object as created in PC Directory
+    :param object container: Container in PC Directory containing the original object
     :param string rootPath: Root folder of the autoscan directoy
-    :param int autoscanId: Id of the autoscan directoy
     :param string containerType: UPnP  type configured to create containers
     :returns: nothing
 
@@ -773,7 +773,7 @@ Adding Items
 
 We will first look at a helper function:
 
-.. js:function:: importPlaylist(obj, rootPath, autoscanId, containerType)
+.. js:function:: importPlaylist(obj, cont, rootPath, containerType)
 
 It is defined in playlists.js, it receives the location (path on disk or HTTP URL), the title and the desired position of the
 item in the database layout (remember the container chains used in the import script).
