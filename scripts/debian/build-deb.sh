@@ -152,7 +152,9 @@ else
     libduktape="libduktape202"
   elif [[ "$lsb_codename" == "buster" ]]; then
     libduktape="libduktape203"
-  elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:testing" ]]; then
+  elif [[ "$lsb_codename" == "trixie" || "${my_sys}" == "debian:testing" ]]; then
+    libduktape="libduktape207"
+  elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:stable" ]]; then
     libduktape="libduktape207"
   elif [[ "$lsb_codename" == "sid" || "$lsb_codename" == "jammy" || "$lsb_codename" == "kinetic" || "${my_sys}" == "debian:unstable" ]]; then
     libduktape="libduktape207"
