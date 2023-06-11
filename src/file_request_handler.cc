@@ -75,10 +75,12 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         throw_std_runtime_error("Requested object {} is not an item and has no resources", filename);
     }
 
-    if (resourceId >= obj->getResourceCount()) {
+    // for transcoded resources res_id will always be negative
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
+    if (resourceId >= obj->getResourceCount() && trProfile.empty()) {
         throw_std_runtime_error("Requested resource {} does not exist", resourceId);
     }
-    auto resource = obj->getResource(resourceId);
+    auto resource = trProfile.empty() ? obj->getResource(resourceId) : std::make_shared<CdsResource>(ContentHandler::TRANSCODE, CdsResource::Purpose::Transcode);
 
     fs::path path = obj->getLocation();
 
@@ -108,14 +110,11 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
     UpnpFileInfo_set_IsDirectory(info, S_ISDIR(statbuf.st_mode));
 
-    // for transcoded resources res_id will always be negative
-    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
-
     auto headers = Headers();
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     std::string mimeType = item ? item->getMimeType() : "";
 
-    if (resource->getHandlerType() != ContentHandler::DEFAULT) {
+    if (resource->getHandlerType() != ContentHandler::DEFAULT && resource->getHandlerType() != ContentHandler::TRANSCODE) {
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
 
         std::string protocolInfo = resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
@@ -215,8 +214,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
     auto obj = loadObject(params);
     auto resourceId = parseResourceInfo(params);
 
+    // Transcoding
+    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     // Serve metadata resources
-    if (obj->getResource(resourceId)->getHandlerType() != ContentHandler::DEFAULT) {
+    if (trProfile.empty() && obj->getResource(resourceId)->getHandlerType() != ContentHandler::DEFAULT) {
         auto resource = obj->getResource(resourceId);
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
         return metadataHandler->serveContent(obj, resource);
@@ -230,8 +231,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum U
         group = it->second;
     }
 
-    // Transcoding
-    std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!trProfile.empty()) {
         auto transcodingProfile = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
         if (!transcodingProfile)
