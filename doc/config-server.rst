@@ -755,6 +755,16 @@ This section defines the properties which are send to UPnP clients as part of th
 
         ::
 
+            literal-host-redirection="yes"
+
+        * Optional
+
+        * Default: **"no"**
+
+        Enable literal IP redirection.
+
+        ::
+
             search-result-separator=" : "
 
         * Optional

@@ -105,6 +105,8 @@
 
     <xs:element name="manufacturerURL" type="xs:string" default="http://mediatomb.cc/"/>
 
+    <xs:element name="virtualURL" type="xs:string"/>
+    <xs:element name="externalURL" type="xs:string"/>
     <xs:element name="presentationURL" default="/">
         <xs:complexType>
             <xs:simpleContent>
@@ -430,6 +432,7 @@
                 <xs:element ref="title-properties" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
+            <xs:attribute name="literal-host-redirection" type="boolean" default="no"/>
             <xs:attribute name="searchable-container-flag" type="boolean" default="no"/>
             <xs:attribute name="search-result-separator" type="xs:string" default=" - "/>
             <xs:attribute name="search-filename" type="boolean" default="no"/>
