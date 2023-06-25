@@ -98,6 +98,7 @@ protected:
 
     std::string ip;
     in_port_t port {};
+    std::vector<std::string> validHosts {};
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};
@@ -127,7 +128,8 @@ protected:
     /// The value is read from the configuration.
     int aliveAdvertisementInterval {};
 
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> upnpXmlBuilder;
+    std::shared_ptr<UpnpXMLBuilder> webXmlBuilder;
 
     /// \brief ContentDirectoryService instance.
     ///
@@ -211,7 +213,6 @@ protected:
     void writeBookmark(const std::string& addr);
     void emptyBookmark();
 
-    std::string getPresentationUrl() const;
     int startupInterface(const std::string& iface, in_port_t inPort);
 
     /// \brief Returns the content url of the server.
@@ -221,6 +222,8 @@ protected:
     /// that we actually get that port after startup. This function
     /// contains the port on which the server is actually running.
     std::string getVirtualUrl() const;
+    std::string getExternalUrl() const;
+    std::string getPresentationUrl() const;
 };
 
 #endif // __SERVER_H__
