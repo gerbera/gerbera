@@ -1180,6 +1180,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::user", "config-server.html#ui",
         ""),
 
+    std::make_shared<ConfigBoolSetup>(CFG_UPNP_LITERAL_HOST_REDIRECTION,
+        "/server/upnp/attribute::literal-host-redirection", "config-server.html#upnp",
+        NO),
     std::make_shared<ConfigBoolSetup>(CFG_UPNP_MULTI_VALUES_ENABLED,
         "/server/upnp/attribute::multi-value", "config-server.html#upnp",
         YES),
