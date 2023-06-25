@@ -182,10 +182,11 @@ void Server::run()
     std::string presentationURL = getPresentationUrl();
 
     log_debug("Creating UpnpXMLBuilder");
-    xmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
+    upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
+    webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl(), presentationURL);
 
     // register root device with the library
-    auto desc = xmlBuilder->renderDeviceDescription();
+    auto desc = upnpXmlBuilder->renderDeviceDescription();
     std::ostringstream buf;
     desc->print(buf, "", 0);
     std::string deviceDescription = buf.str();
@@ -213,41 +214,40 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(context, xmlBuilder, rootDeviceHandle,
+    cds = std::make_unique<ContentDirectoryService>(context, upnpXmlBuilder, rootDeviceHandle,
         config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(context, xmlBuilder, rootDeviceHandle);
+    cmgr = std::make_unique<ConnectionManagerService>(context, upnpXmlBuilder, rootDeviceHandle);
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(context, xmlBuilder, rootDeviceHandle);
+    mrreg = std::make_unique<MRRegistrarService>(context, upnpXmlBuilder, rootDeviceHandle);
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
-    log_info("Will send UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
+    log_debug("Will send UPnP Alive advertisements every {} seconds", (aliveAdvertisementInterval / 2) - 30);
     ret = UpnpSendAdvertisement(rootDeviceHandle, aliveAdvertisementInterval);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
+    // UpnpSetAllowLiteralHostRedirection(1);
+
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
             auto hostStr = std::string(host);
-            auto ip = std::string(UpnpGetServerIpAddress());
-            auto ip6 = std::string(UpnpGetServerIp6Address());
-            auto ip6gla = std::string(UpnpGetServerUlaGuaIp6Address());
-
-            if (hostStr.find(ip) != std::string::npos || hostStr.find(ip6) != std::string::npos || hostStr.find(ip6gla) != std::string::npos) {
-                return UPNP_E_SUCCESS;
+            for (auto&& name : static_cast<Server*>(cookie)->validHosts) {
+                if (hostStr.find(name) != std::string::npos) {
+                    return UPNP_E_SUCCESS;
+                } else if (name.find(hostStr) != std::string::npos) {
+                    return UPNP_E_SUCCESS;
+                }
             }
 
-            auto virtualURL = static_cast<Server*>(cookie)->getVirtualUrl();
-            if (!virtualURL.empty() && virtualURL.find(host) != std::string::npos) {
-                return UPNP_E_SUCCESS;
-            }
-            log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL: '{}'. "
+            log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL/externalURL: '{}'/'{}'. "
                         "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
-                host, static_cast<Server*>(cookie)->config->getOption(CFG_VIRTUAL_URL));
+                host, static_cast<Server*>(cookie)->config->getOption(CFG_VIRTUAL_URL),
+                static_cast<Server*>(cookie)->config->getOption(CFG_EXTERNAL_URL));
             return UPNP_E_BAD_HTTPMSG;
         },
         this);
@@ -255,6 +255,19 @@ void Server::run()
     std::string url = getVirtualUrl();
     writeBookmark(url);
     log_info("The Web UI can be reached by following this link: {}", url);
+
+    validHosts = std::vector<std::string> {
+        std::string(UpnpGetServerIpAddress()),
+        std::string(UpnpGetServerIp6Address()),
+        std::string(UpnpGetServerUlaGuaIp6Address()),
+    };
+    if (!url.empty()) {
+        validHosts.push_back(url);
+    }
+    url = getExternalUrl();
+    if (!url.empty()) {
+        validHosts.push_back(url);
+    }
 }
 
 int Server::startupInterface(const std::string& iface, in_port_t inPort)
@@ -296,14 +309,17 @@ std::string Server::getPresentationUrl() const
 {
     std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
     if (presentationURL.empty()) {
-        presentationURL = fmt::format("http://{}:{}/", ip, port);
+        presentationURL = fmt::format("http://{}/", GrbNet::renderWebUri(ip, port));
     } else {
         auto appendto = EnumOption<UrlAppendMode>::getEnumOption(config, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == UrlAppendMode::ip) {
-            presentationURL = fmt::format("http://{}:{}", ip, presentationURL);
+            presentationURL = fmt::format("{}/{}", GrbNet::renderWebUri(ip, 0), presentationURL);
         } else if (appendto == UrlAppendMode::port) {
-            presentationURL = fmt::format("http://{}:{}/{}", ip, port, presentationURL);
+            presentationURL = fmt::format("{}/{}", GrbNet::renderWebUri(ip, port), presentationURL);
         } // else appendto is none and we take the URL as it entered by user
+    }
+    if (!startswith(presentationURL, "http")) { // url does not start with http
+        presentationURL = fmt::format("http://{}", presentationURL);
     }
     return presentationURL;
 }
@@ -333,6 +349,23 @@ std::string Server::getVirtualUrl() const
     auto virtUrl = config->getOption(CFG_VIRTUAL_URL);
     if (virtUrl.empty()) {
         virtUrl = GrbNet::renderWebUri(ip, port);
+    }
+    if (!startswith(virtUrl, "http")) { // url does not start with http
+        virtUrl = fmt::format("http://{}", virtUrl);
+    }
+    if (virtUrl.back() == '/')
+        virtUrl.pop_back();
+    return virtUrl;
+}
+
+std::string Server::getExternalUrl() const
+{
+    auto virtUrl = config->getOption(CFG_EXTERNAL_URL);
+    if (virtUrl.empty()) {
+        virtUrl = config->getOption(CFG_VIRTUAL_URL);
+        if (virtUrl.empty()) {
+            virtUrl = GrbNet::renderWebUri(ip, port);
+        }
     }
     if (!startswith(virtUrl, "http")) { // url does not start with http
         virtUrl = fmt::format("http://{}", virtUrl);
@@ -415,7 +448,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(xmlBuilder, clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(upnpXmlBuilder, clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {
@@ -547,7 +580,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
-        return std::make_unique<FileRequestHandler>(content, xmlBuilder);
+        return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
@@ -558,11 +591,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return Web::createWebRequestHandler(context, content, xmlBuilder, rType);
+        return Web::createWebRequestHandler(context, content, webXmlBuilder, rType);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
-        return std::make_unique<DeviceDescriptionHandler>(content, xmlBuilder);
+        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder);
     }
 
 #if defined(HAVE_CURL)

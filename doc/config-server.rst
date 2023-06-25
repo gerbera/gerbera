@@ -106,8 +106,21 @@ to enable special features that otherwise are only active with the vendor implem
 * Optional
 * Default: unset
 
-This tag sets the virtual URL of Gerbera web UI, a custom setting may be necessary if you want to access the web page via a reverse proxy.
-The value defaults to `http://<ip>:port`.
+This tag sets the virtual URL of Gerbera content which is part of the browse response.
+The value defaults to `http://<ip>:<port>`.
+
+``externalURL``
+~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <externalURL>http://gerbera.io/</externalURL>
+
+* Optional
+* Default: unset
+
+This tag sets the external URL of Gerbera web UI, a custom setting may be necessary if you want to access the web page via a reverse proxy.
+The value defaults to virtualURL or `http://<ip>:<port>` if virtualURL is not set.
 
 ``modelName``
 ~~~~~~~~~~~~~
