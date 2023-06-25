@@ -115,7 +115,7 @@ We define ``vlcprof`` in the profiles section:
     <profile name="vlcprof" enabled="yes" type="external">
         <mimetype>video/mpeg</mimetype>
         <agent command="vlc"
-            arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc:quit"/>
+            arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit"/>
         <buffer size="10485760" chunk-size="131072" fill-size="2621440"/>
         <accept-url>yes</accept-url>
         <first-resource>yes</first-resource>
@@ -283,6 +283,37 @@ We also provide a way to specify that a profile should only process the Theora c
 .. code-block:: xml
 
     <accept-ogg-theora>yes</accept-ogg-theora>
+
+
+Complete Example
+----------------
+
+.. code-block:: xml
+
+    <transcoding enabled="yes">
+      <mimetype-profile-mappings>
+        <transcode mimetype="audio/x-flac" client-flags="TRANSCODING1" using="audio2mp3" />
+        <transcode mimetype="audio/flac" client-flags="TRANSCODING1" using="audio2mp3"  />
+      </mimetype-profile-mappings>
+      <profiles>
+        <profile name="audio2mp3" enabled="yes" type="external">
+          <mimetype>audio/mpeg</mimetype>
+          <dlna-profile>MP3</dlna-profile>
+          <accept-url>no</accept-url>
+          <first-resource>yes</first-resource>
+          <hide-original-resource>no</hide-original-resource>
+          <accept-ogg-theora>no</accept-ogg-theora>
+          <sample-frequency>44100</sample-frequency>
+          <audio-channels>2</audio-channels>
+          <agent command="ffmpeg" arguments="-loglevel error -vn -i %in -ab 320k -f mp3 -y %out" />
+          <thumbnail>yes</thumbnail>
+          <buffer size="1048576" chunk-size="131072" fill-size="262144" />
+        </profile>
+      </profiles>
+    </transcoding>
+    <clients enabled="yes">
+      <client ip="192.168.120.42" flags="TRANSCODING1"></client>
+    </clients>
 
 
 Testing And Troubleshooting

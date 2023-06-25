@@ -161,7 +161,9 @@ This section defines the various transcoding profiles.
 
         * Optional
 
-        If the flags match the ones defined in clients, the profile is selected for that client. Choose an unused flag, e.g. "0x100", to avoid collisions with other features.
+        If the flags match the ones defined in clients, the profile is selected for that client.
+        There are are ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or choose an unused flag,
+        e.g. ``0x10000``, to avoid collisions with other features.
 
         ::
 
