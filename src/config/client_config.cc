@@ -176,6 +176,9 @@ static constexpr auto quirkFlags = std::array {
     std::pair("PV_SUBTITLES", QUIRK_FLAG_PV_SUBTITLES),
     std::pair("PANASONIC", QUIRK_FLAG_PANASONIC),
     std::pair("STRICTXML", QUIRK_FLAG_STRICTXML),
+    std::pair("TRANSCODING1", QUIRK_FLAG_TRANSCODING1),
+    std::pair("TRANSCODING2", QUIRK_FLAG_TRANSCODING2),
+    std::pair("TRANSCODING3", QUIRK_FLAG_TRANSCODING3),
 };
 
 int ClientConfig::remapFlag(const std::string& flag)
