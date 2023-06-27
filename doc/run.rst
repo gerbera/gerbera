@@ -95,6 +95,12 @@ Nginx
 
 * Restart Nginx service
 
+Reverse proxies can also be used to handle really old devices and convert their request, e.g. to enable transcoding on http 1.0 protocol.
+The example only works in conjunction with the respective gerbera configuration and `iptables` settings.
+
+    .. literalinclude:: ../scripts/nginx/gerbera-transcode.conf
+
+
 .. index:: Sqlite
 
 Using Sqlite Database (Default)
