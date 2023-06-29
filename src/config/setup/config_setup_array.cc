@@ -137,11 +137,11 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
     std::vector<std::string> result;
     if (initArray) {
         if (!initArray(optValue, result, ConfigDefinition::mapConfigOption(nodeOption))) {
-            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
+            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue.name());
         }
     } else {
         if (!createOptionFromNode(optValue, result)) {
-            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue);
+            throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue.name());
         }
     }
     if (result.empty()) {
@@ -150,7 +150,7 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
         result = defaultEntries;
     }
     if (notEmpty && result.empty()) {
-        throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue);
+        throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue.name());
     }
     return result;
 }

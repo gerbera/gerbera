@@ -181,7 +181,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> ConfigVectorSetup:
 {
     std::vector<std::vector<std::pair<std::string, std::string>>> result;
     if (!createOptionFromNode(optValue, result) && required) {
-        throw_std_runtime_error("Init {} vector failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} vector failed '{}'", xpath, optValue.name());
     }
     if (result.empty()) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
@@ -189,7 +189,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> ConfigVectorSetup:
         result = defaultEntries;
     }
     if (notEmpty && result.empty()) {
-        throw_std_runtime_error("Invalid vector {} empty '{}'", xpath, optValue);
+        throw_std_runtime_error("Invalid vector {} empty '{}'", xpath, optValue.name());
     }
     return result;
 }
