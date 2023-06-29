@@ -257,7 +257,7 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
     auto result = std::make_shared<DirectoryConfigList>();
 
     if (!createOptionFromNode(optValue, result)) {
-        throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<DirectoryTweakOption>(result);
     return optionValue;

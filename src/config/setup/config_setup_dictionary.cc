@@ -163,11 +163,11 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
     std::map<std::string, std::string> result;
     if (initDict) {
         if (!initDict(optValue, result)) {
-            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
+            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue.name());
         }
     } else {
         if (!createOptionFromNode(optValue, result) && required) {
-            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue);
+            throw_std_runtime_error("Init {} dictionary failed '{}'", xpath, optValue.name());
         }
     }
     if (result.empty()) {
@@ -176,7 +176,7 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
         result = defaultEntries;
     }
     if (notEmpty && result.empty()) {
-        throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue);
+        throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue.name());
     }
     return result;
 }

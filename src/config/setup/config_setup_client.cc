@@ -183,7 +183,7 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     auto result = std::make_shared<ClientConfigList>();
 
     if (!createOptionFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
-        throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<ClientConfigListOption>(result);
     return optionValue;

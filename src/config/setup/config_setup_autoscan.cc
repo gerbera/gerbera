@@ -245,7 +245,7 @@ std::shared_ptr<ConfigOption> ConfigAutoscanSetup::newOption(const pugi::xml_nod
 {
     auto result = std::vector<AutoscanDirectory>();
     if (!createOptionFromNode(optValue, result)) {
-        throw_std_runtime_error("Init {} autoscan failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} autoscan failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<AutoscanListOption>(result);
     return optionValue;

@@ -501,7 +501,7 @@ std::shared_ptr<ConfigOption> ConfigTranscodingSetup::newOption(const pugi::xml_
     auto result = std::make_shared<TranscodingProfileList>();
 
     if (!createOptionFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
-        throw_std_runtime_error("Init {} transcoding failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} transcoding failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<TranscodingProfileListOption>(result);
     return optionValue;

@@ -192,7 +192,7 @@ std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::x
     auto result = std::make_shared<DynamicContentList>();
 
     if (!createOptionFromNode(optValue, result)) {
-        throw_std_runtime_error("Init {} DynamicContentList failed '{}'", xpath, optValue);
+        throw_std_runtime_error("Init {} DynamicContentList failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<DynamicContentListOption>(result);
     return optionValue;
