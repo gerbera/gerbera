@@ -416,6 +416,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     yt.push_back(container["Audio"]);
     yt.push_back(container["Year"]);
     yt.push_back(std::move(yearContainer));
+    id = content->addContainerTree(yt);
     add(obj, id);
 
     obj->setTitle(fmt::format("{}{}", temp, title));
