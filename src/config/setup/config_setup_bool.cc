@@ -27,7 +27,6 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/autoscan.h"
 
 #ifdef HAVE_INOTIFY
 #include "util/mt_inotify.h"

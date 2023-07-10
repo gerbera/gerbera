@@ -41,6 +41,7 @@ public:
     void generateDatabase();
     void generateImport(const fs::path& prefixDir, const fs::path& magicFile);
     void generateMappings();
+    void generateBoxlayout(config_option_t option);
     void generateOnlineContent();
     void generateTranscoding();
     void generateUdn();

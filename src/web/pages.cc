@@ -35,7 +35,6 @@
 #include "pages.h" // API
 
 #include "config/config_setup.h"
-#include "content/autoscan.h"
 #include "util/xml_to_json.h"
 
 namespace Web {

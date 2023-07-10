@@ -41,6 +41,7 @@
 #include "config/config.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
+#include "content/layout/box_layout.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -60,60 +61,65 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     , config(this->content->getContext()->getConfig())
     , genreMap(this->config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
-    container["Video"] = std::make_shared<CdsContainer>("Video");
+    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    for (auto&& bl : blOption->getArrayCopy()) {
+        container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
+    }
+
+    container["Video"] = container.at("Video/videoRoot");
     container["Video"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
-    container["All Video"] = std::make_shared<CdsContainer>("All Video");
+    container["All Video"] = container.at("Video/allVideo");
     chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] });
-    container["Video/Year"] = std::make_shared<CdsContainer>("Year");
+    container["Video/Year"] = container.at("Video/allYears");
     chain["/Video/Year"] = this->content->addContainerTree({ container["Video"], container["Video/Year"] });
-    container["Video/Date"] = std::make_shared<CdsContainer>("Date");
+    container["Video/Date"] = container.at("Video/allDates");
     chain["/Video/Date"] = this->content->addContainerTree({ container["Video"], container["Video/Date"] });
-    container["Video/Directories"] = std::make_shared<CdsContainer>("Directories");
+    container["Video/Directories"] = container.at("Video/allDirectories");
     chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] });
 
-    container["Photos"] = std::make_shared<CdsContainer>("Photos");
+    container["Photos"] = container.at("Image/imageRoot");
     container["Photos"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
-    container["All Photos"] = std::make_shared<CdsContainer>("All Photos");
+    container["All Photos"] = container.at("Image/allImages");
     chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] });
-    container["Photos/Year"] = std::make_shared<CdsContainer>("Year");
+    container["Photos/Year"] = container.at("Image/allYears");
     chain["/Photos/Year"] = this->content->addContainerTree({ container["Photos"], container["Photos/Year"] });
-    container["Photos/Date"] = std::make_shared<CdsContainer>("Date");
+    container["Photos/Date"] = container.at("Image/allDates");
     chain["/Photos/Date"] = this->content->addContainerTree({ container["Photos"], container["Photos/Date"] });
-    container["Photos/Directories"] = std::make_shared<CdsContainer>("Directories");
+    container["Photos/Directories"] = container.at("Image/allDirectories");
     chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] });
 
-    container["Audio"] = std::make_shared<CdsContainer>("Audio");
+    container["Audio"] = container.at("Audio/audioRoot");
     container["Audio"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
-    container["All Audio"] = std::make_shared<CdsContainer>("All Audio");
-    container["All Songs"] = std::make_shared<CdsContainer>("All Songs");
+    container["All Audio"] = container.at("Audio/allAudio");
+    container["All Songs"] = container.at("Audio/allSongs");
     chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] });
-    container["All - full name"] = std::make_shared<CdsContainer>("All - full name");
+    container["All - full name"] = container.at("Audio/allTracks");
     chain["/Audio/All - full name"] = this->content->addContainerTree({ container["Audio"], container["All - full name"] });
-    container["Albums"] = std::make_shared<CdsContainer>("Albums");
+    container["Albums"] = container.at("Audio/allAlbums");
     chain["/Audio/Albums"] = this->content->addContainerTree({ container["Audio"], container["Albums"] });
-    container["Artists"] = std::make_shared<CdsContainer>("Artists");
+    container["Artists"] = container.at("Audio/allArtists");
     chain["/Audio/Artists"] = this->content->addContainerTree({ container["Audio"], container["Artists"] });
-    container["Genres"] = std::make_shared<CdsContainer>("Genres");
+    container["Genres"] = container.at("Audio/allGenres");
     chain["/Audio/Genres"] = this->content->addContainerTree({ container["Audio"], container["Genres"] });
-    container["Composers"] = std::make_shared<CdsContainer>("Composers");
+    container["Composers"] = container.at("Audio/allComposers");
     chain["/Audio/Composers"] = this->content->addContainerTree({ container["Audio"], container["Composers"] });
-    container["Year"] = std::make_shared<CdsContainer>("Year");
+    container["Year"] = container.at("Audio/allYears");
     chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] });
-    container["Audio/Directories"] = std::make_shared<CdsContainer>("Directories");
+    container["Audio/Directories"] = container.at("Audio/allDirectories");
     chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
 
 #ifdef ONLINE_SERVICES
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
-        container["Online Services"] = std::make_shared<CdsContainer>("Online Services");
+        container["Online Services"] = container.at("Trailer/trailerRoot");
     }
 
 #ifdef ATRAILERS
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
-        container["Apple"] = std::make_shared<CdsContainer>("Apple Trailers");
-        container["Apple/All Trailers"] = std::make_shared<CdsContainer>("All Trailers");
-        container["Apple/Genres"] = std::make_shared<CdsContainer>("Genres");
-        container["Apple/Release Date"] = std::make_shared<CdsContainer>("Release Date");
-        container["Apple/Post Date"] = std::make_shared<CdsContainer>("Post Date");
+        container["Apple"] = container.at("Trailer/appleTrailers");
+        container["Apple/All Trailers"] = container.at("Trailer/allTrailers");
+        container["Apple/Genres"] = container.at("Trailer/allGenres");
+        container["Apple/Release Date"] = container.at("Trailer/relDate");
+        container["Apple/Post Date"] = container.at("Trailer/postDate");
         chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] });
         chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] });
         chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] });

@@ -66,48 +66,57 @@ add_library(libgerbera STATIC
         src/cds/cds_resource.cc
         src/cds/cds_resource.h
         src/common.h
-        src/config/client_config.h
         src/config/client_config.cc
-        src/config/config_definition.h
+        src/config/client_config.h
         src/config/config_definition.cc
-        src/config/config_generator.h
+        src/config/config_definition.h
         src/config/config_generator.cc
+        src/config/config_generator.h
         src/config/config_manager.cc
         src/config/config_manager.h
+        src/config/config_option_enum.h
         src/config/config_options.cc
         src/config/config_options.h
-        src/config/config_option_enum.h
-        src/config/setup/config_setup_array.cc
-        src/config/setup/config_setup_autoscan.cc
-        src/config/setup/config_setup_bool.cc
-        src/config/setup/config_setup_client.cc
-        src/config/setup/config_setup_dictionary.cc
-        src/config/setup/config_setup_dynamic.cc
-        src/config/setup/config_setup_int.cc
-        src/config/setup/config_setup_path.cc
-        src/config/setup/config_setup_string.cc
-        src/config/setup/config_setup_transcoding.cc
-        src/config/setup/config_setup_tweak.cc
-        src/config/setup/config_setup_vector.cc
         src/config/config_setup.cc
         src/config/config_setup.h
-        src/config/config_setup_enum.h
         src/config/directory_tweak.cc
         src/config/directory_tweak.h
         src/config/dynamic_content.cc
         src/config/dynamic_content.h
+        src/config/setup/config_setup_array.cc
+        src/config/setup/config_setup_autoscan.cc
+        src/config/setup/config_setup_autoscan.h
+        src/config/setup/config_setup_bool.cc
+        src/config/setup/config_setup_boxlayout.cc
+        src/config/setup/config_setup_boxlayout.h
+        src/config/setup/config_setup_client.cc
+        src/config/setup/config_setup_client.h
+        src/config/setup/config_setup_dictionary.cc
+        src/config/setup/config_setup_dynamic.cc
+        src/config/setup/config_setup_dynamic.h
+        src/config/setup/config_setup_enum.h
+        src/config/setup/config_setup_int.cc
+        src/config/setup/config_setup_path.cc
+        src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_transcoding.cc
+        src/config/setup/config_setup_transcoding.h
+        src/config/setup/config_setup_tweak.cc
+        src/config/setup/config_setup_tweak.h
+        src/config/setup/config_setup_vector.cc
         src/content/autoscan.cc
         src/content/autoscan.h
-        src/content/autoscan_list.cc
-        src/content/autoscan_list.h
         src/content/autoscan_inotify.cc
         src/content/autoscan_inotify.h
+        src/content/autoscan_list.cc
+        src/content/autoscan_list.h
         src/content/cm_task.cc
         src/content/cm_task.h
         src/content/content_manager.cc
         src/content/content_manager.h
         src/content/import_service.cc
         src/content/import_service.h
+        src/content/layout/box_layout.cc
+        src/content/layout/box_layout.h
         src/content/layout/builtin_layout.cc
         src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc
@@ -134,30 +143,30 @@ add_library(libgerbera STATIC
         src/content/scripting/js_functions.h
         src/content/scripting/playlist_parser_script.cc
         src/content/scripting/playlist_parser_script.h
-        src/content/scripting/scripting_runtime.cc
-        src/content/scripting/scripting_runtime.h
         src/content/scripting/script.cc
         src/content/scripting/script.h
         src/content/scripting/script_names.h
+        src/content/scripting/scripting_runtime.cc
+        src/content/scripting/scripting_runtime.h
         src/content/update_manager.cc
         src/content/update_manager.h
         src/context.cc
         src/context.h
         src/contrib/md5.c
         src/contrib/md5.h
+        src/database/database.cc
+        src/database/database.h
         src/database/mysql/mysql_database.cc
         src/database/mysql/mysql_database.h
-        src/database/sqlite3/sqlite_database.cc
-        src/database/sqlite3/sqlite_database.h
-        src/database/sqlite3/sl_task.cc
-        src/database/sqlite3/sl_task.h
+        src/database/search_handler.cc
+        src/database/search_handler.h
         src/database/sql_database.cc
         src/database/sql_database.h
         src/database/sql_format.h
-        src/database/database.cc
-        src/database/database.h
-        src/database/search_handler.cc
-        src/database/search_handler.h
+        src/database/sqlite3/sl_task.cc
+        src/database/sqlite3/sl_task.h
+        src/database/sqlite3/sqlite_database.cc
+        src/database/sqlite3/sqlite_database.h
         src/device_description_handler.cc
         src/device_description_handler.h
         src/exceptions.cc
@@ -170,12 +179,12 @@ add_library(libgerbera STATIC
         src/iohandler/curl_io_handler.h
         src/iohandler/file_io_handler.cc
         src/iohandler/file_io_handler.h
+        src/iohandler/io_handler.cc
+        src/iohandler/io_handler.h
         src/iohandler/io_handler_buffer_helper.cc
         src/iohandler/io_handler_buffer_helper.h
-        src/iohandler/io_handler.cc
         src/iohandler/io_handler_chainer.cc
         src/iohandler/io_handler_chainer.h
-        src/iohandler/io_handler.h
         src/iohandler/mem_io_handler.cc
         src/iohandler/mem_io_handler.h
         src/iohandler/process_io_handler.cc
@@ -235,8 +244,8 @@ add_library(libgerbera STATIC
         src/util/grb_time.cc
         src/util/grb_time.h
         src/util/jpeg_resolution.cc
-        src/util/logger.h
         src/util/logger.cc
+        src/util/logger.h
         src/util/mime.cc
         src/util/mime.h
         src/util/mt_inotify.cc
@@ -252,16 +261,16 @@ add_library(libgerbera STATIC
         src/util/timer.h
         src/util/tools.cc
         src/util/tools.h
-        src/util/upnp_clients.h
         src/util/upnp_clients.cc
-        src/util/upnp_headers.h
+        src/util/upnp_clients.h
         src/util/upnp_headers.cc
-        src/util/upnp_quirks.h
+        src/util/upnp_headers.h
         src/util/upnp_quirks.cc
+        src/util/upnp_quirks.h
         src/util/url.cc
         src/util/url.h
-        src/util/url_utils.h
         src/util/url_utils.cc
+        src/util/url_utils.h
         src/util/xml_to_json.cc
         src/util/xml_to_json.h
         src/web/action.cc
@@ -280,12 +289,12 @@ add_library(libgerbera STATIC
         src/web/pages.cc
         src/web/pages.h
         src/web/remove.cc
-        src/web/web_request_handler.cc
-        src/web/web_request_handler.h
         src/web/session_manager.cc
         src/web/session_manager.h
         src/web/tasks.cc
         src/web/web_autoscan.cc
+        src/web/web_request_handler.cc
+        src/web/web_request_handler.h
         src/web/web_update.cc
         )
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")

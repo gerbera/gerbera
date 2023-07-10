@@ -30,8 +30,8 @@
 #include "util/grb_fs.h"
 
 // forward declarations
-class AutoscanList;
 class AutoscanDirectory;
+class BoxLayoutList;
 class ClientConfigList;
 class ConfigOption;
 class Database;
@@ -155,10 +155,6 @@ enum config_option_t {
     CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER,
 
     CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS,
-    CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ALBUMBOX,
-    CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ARTISTBOX,
-    CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_GENREBOX,
-    CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_TRACKBOX,
     CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR,
 #endif // HAVE_JS
     CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
@@ -216,6 +212,7 @@ enum config_option_t {
     CFG_CLIENTS_LIST_ENABLED,
     CFG_CLIENTS_CACHE_THRESHOLD,
     CFG_CLIENTS_BOOKMARK_OFFSET,
+    CFG_BOXLAYOUT_BOX,
     CFG_IMPORT_LAYOUT_PARENT_PATH,
     CFG_IMPORT_LAYOUT_MAPPING,
     CFG_IMPORT_LIBOPTS_ENTRY_SEP,
@@ -349,6 +346,11 @@ enum config_option_t {
     ATTR_CLIENTS_CLIENT_IP,
     ATTR_CLIENTS_CLIENT_GROUP,
     ATTR_CLIENTS_CLIENT_USERAGENT,
+    ATTR_BOXLAYOUT_BOX_KEY,
+    ATTR_BOXLAYOUT_BOX_TITLE,
+    ATTR_BOXLAYOUT_BOX_CLASS,
+    ATTR_BOXLAYOUT_BOX_SIZE,
+    ATTR_BOXLAYOUT_BOX_ENABLED,
     ATTR_DIRECTORIES_TWEAK,
     ATTR_DIRECTORIES_TWEAK_LOCATION,
     ATTR_DIRECTORIES_TWEAK_INHERIT,
@@ -446,11 +448,15 @@ public:
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    virtual std::vector<AutoscanDirectory> getAutoscanListOption(config_option_t option) const = 0;
+    virtual std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
     virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const = 0;
+
+    /// \brief returns a config option of type BoxLayoutList
+    /// \param option to retrieve
+    virtual std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type DirectoryConfigList
     /// \param option to retrieve

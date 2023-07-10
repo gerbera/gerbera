@@ -29,7 +29,6 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/autoscan.h"
 
 /// \brief Creates an array of strings from an XML nodeset.
 /// \param element starting element of the nodeset.

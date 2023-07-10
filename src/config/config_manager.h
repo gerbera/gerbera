@@ -45,7 +45,7 @@
 
 // forward declaration
 class AutoscanDirectory;
-class AutoscanList;
+class BoxLayoutList;
 class ClientConfig;
 class ClientConfigList;
 class ConfigOption;
@@ -104,11 +104,15 @@ public:
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    std::vector<AutoscanDirectory> getAutoscanListOption(config_option_t option) const override;
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(config_option_t option) const override;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
     std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override;
+
+    /// \brief returns a config option of type BoxLayoutList
+    /// \param option to retrieve
+    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(config_option_t option) const override;
 
     /// \brief returns a config option of type DirectoryConfigList
     /// \param option to retrieve

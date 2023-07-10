@@ -42,8 +42,11 @@
 #include "cds/cds_item.h"
 #include "config/config_definition.h"
 #include "config/config_setup.h"
+#include "config/setup/config_setup_autoscan.h"
+#include "config/setup/config_setup_boxlayout.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
+#include "content/layout/box_layout.h"
 #include "database/database.h"
 #include "js_functions.h"
 #include "metadata/metadata_handler.h"
@@ -307,6 +310,24 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
         autoscanItemPath = ascs->getItemPath(ITEM_PATH_PREFIX); // prefix
     }
     duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
+
+    for (auto&& bcs : ConfigDefinition::getConfigSetupList<ConfigBoxLayoutSetup>()) {
+        duk_push_object(ctx); // box-layout
+        std::string boxLayoutItemPath;
+        auto boxLayoutList = bcs->getValue()->getBoxLayoutListOption();
+        for (std::size_t i = 0; i < boxLayoutList->size(); i++) {
+            duk_push_object(ctx);
+            auto boxLayout = boxLayoutList->get(i);
+            setIntProperty("id", boxLayout->getId());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
+            setIntProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
+            setProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
+            setProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
+            duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
+        }
+        boxLayoutItemPath = bcs->getItemPath(ITEM_PATH_PREFIX); // prefix
+        duk_put_prop_string(ctx, -2, boxLayoutItemPath.c_str()); // box-layout
+    }
 
     duk_put_global_string(ctx, "config");
 

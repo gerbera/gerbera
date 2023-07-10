@@ -25,7 +25,8 @@
 #ifndef __CONFIG_SETUP_ENUM_H__
 #define __CONFIG_SETUP_ENUM_H__
 
-#include "config_setup.h"
+#include "config/config_option_enum.h"
+#include "config/config_setup.h"
 
 template <class En>
 class ConfigEnumSetup : public ConfigSetup {

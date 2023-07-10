@@ -42,7 +42,7 @@
 
 // forward declaration
 class AutoscanDirectory;
-class AutoscanList;
+class BoxLayoutList;
 class ClientConfigList;
 class DirectoryConfigList;
 class DynamicContentList;
@@ -68,42 +68,47 @@ public:
 
     virtual std::map<std::string, std::string> getDictionaryOption(bool forEdit = false) const
     {
-        throw std::runtime_error("Wrong option type dictionary");
+        throw std::runtime_error("Wrong option type Dictionary");
     }
 
     virtual std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(bool forEdit = false) const
     {
-        throw std::runtime_error("Wrong option type array");
+        throw std::runtime_error("Wrong option type Vector");
     }
 
-    virtual std::vector<AutoscanDirectory> getAutoscanListOption() const
+    virtual std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption() const
     {
-        throw std::runtime_error("Wrong option type autoscan list");
+        throw std::runtime_error("Wrong option type Autoscan list");
     }
 
     virtual std::shared_ptr<ClientConfigList> getClientConfigListOption() const
     {
-        throw std::runtime_error("Wrong option type client list");
+        throw std::runtime_error("Wrong option type Client list");
+    }
+
+    virtual std::shared_ptr<BoxLayoutList> getBoxLayoutListOption() const
+    {
+        throw std::runtime_error("Wrong option type BoxLayout list");
     }
 
     virtual std::vector<std::string> getArrayOption(bool forEdit = false) const
     {
-        throw std::runtime_error("Wrong option type array");
+        throw std::runtime_error("Wrong option type Array");
     }
 
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption() const
     {
-        throw std::runtime_error("Wrong option type transcoding list");
+        throw std::runtime_error("Wrong option type Transcoding list");
     }
 
     virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption() const
     {
-        throw std::runtime_error("Wrong option type directory list");
+        throw std::runtime_error("Wrong option type Directory list");
     }
 
     virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption() const
     {
-        throw std::runtime_error("Wrong option type dynamic content list");
+        throw std::runtime_error("Wrong option type DynamicContent list");
     }
 };
 
@@ -236,15 +241,27 @@ private:
 
 class AutoscanListOption : public ConfigOption {
 public:
-    explicit AutoscanListOption(std::vector<AutoscanDirectory> autoscans_)
+    explicit AutoscanListOption(std::vector<std::shared_ptr<AutoscanDirectory>> autoscans_)
         : autoscans(std::move(autoscans_))
     {
     }
 
-    [[nodiscard]] std::vector<AutoscanDirectory> getAutoscanListOption() const override { return autoscans; }
+    [[nodiscard]] std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption() const override { return autoscans; }
 
 private:
-    std::vector<AutoscanDirectory> autoscans;
+    std::vector<std::shared_ptr<AutoscanDirectory>> autoscans;
+};
+
+class BoxLayoutListOption : public ConfigOption {
+public:
+    explicit BoxLayoutListOption(std::shared_ptr<BoxLayoutList> option)
+        : option(std::move(option))
+    {
+    }
+    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption() const override { return option; }
+
+private:
+    std::shared_ptr<BoxLayoutList> option;
 };
 
 class ClientConfigListOption : public ConfigOption {

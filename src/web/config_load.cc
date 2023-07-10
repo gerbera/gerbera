@@ -33,9 +33,10 @@
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
-#include "config/config_setup_enum.h"
 #include "config/directory_tweak.h"
 #include "config/dynamic_content.h"
+#include "config/setup/config_setup_autoscan.h"
+#include "config/setup/config_setup_enum.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
@@ -539,7 +540,7 @@ void Web::ConfigLoad::process()
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (std::size_t i = 0; i < autoscan.size(); i++) {
             auto&& entry = autoscan.at(i);
-            auto&& adir = content->getAutoscanDirectory(entry.getLocation());
+            auto&& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());

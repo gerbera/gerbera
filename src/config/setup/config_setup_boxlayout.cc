@@ -1,0 +1,195 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    config_setup_boxlayout.cc - this file is part of Gerbera.
+    Copyright (C) 2023 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+
+/// \file config_setup_boxlayout.cc
+
+#include "config/setup/config_setup_boxlayout.h" // API
+
+#include <numeric>
+
+#include "config/config_definition.h"
+#include "config/config_options.h"
+#include "content/layout/box_layout.h"
+
+/// \brief Creates an array of BoxLayout objects from a XML nodeset.
+/// \param element starting element of the nodeset.
+bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<BoxLayoutList>& result)
+{
+    if (!element)
+        return true;
+
+    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(option);
+    for (auto&& it : ccs->getXmlTree(element)) {
+        const pugi::xml_node& child = it.node();
+
+        auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
+        auto title = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
+        auto objClass = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
+        auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
+        auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+
+        auto box = std::make_shared<BoxLayout>(key, title, objClass, enabled, size);
+        try {
+            result->add(box);
+            log_debug("Created BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", key, title, objClass, enabled, size);
+        } catch (const std::runtime_error& e) {
+            throw_std_runtime_error("Could not add {} boxlayout: {}", key, e.what());
+        }
+    }
+
+    return true;
+}
+
+void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+{
+    newOption(getXmlElement(root));
+    setOption(config);
+}
+
+bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
+{
+    if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+        return true;
+    }
+    auto index = getItemPath(i, ATTR_BOXLAYOUT_BOX_KEY);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getKey());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
+            entry->setKey(optValue);
+            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getKey());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_TITLE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getTitle());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
+            entry->setTitle(optValue);
+            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getTitle());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_CLASS);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getClass());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
+            entry->setClass(optValue);
+            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getClass());
+            return true;
+        }
+    }
+    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_SIZE);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getSize());
+        entry->setSize(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
+        log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
+        return true;
+    }
+    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_ENABLED);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getEnabled());
+        entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
+        log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getEnabled());
+        return true;
+    }
+    return false;
+}
+
+bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+{
+    if (startswith(optItem, xpath) && optionValue) {
+        log_debug("Updating BoxLayout Detail {} {} {}", xpath, optItem, optValue);
+        auto value = std::dynamic_pointer_cast<BoxLayoutListOption>(optionValue);
+        auto list = value->getBoxLayoutListOption();
+        auto index = extractIndex(optItem);
+
+        if (index < std::numeric_limits<std::size_t>::max()) {
+            auto entry = list->get(index, true);
+            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+
+            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+                entry = std::make_shared<BoxLayout>();
+                list->add(entry, index);
+            }
+            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
+                list->remove(index, true);
+                return true;
+            }
+            if (entry && status == STATUS_RESET) {
+                list->add(entry, index);
+            }
+            if (entry && updateItem(index, optItem, config, entry, optValue, status)) {
+                return true;
+            }
+        }
+        for (std::size_t box = 0; box < list->size(); box++) {
+            auto entry = value->getBoxLayoutListOption()->get(box);
+            if (updateItem(box, optItem, config, entry, optValue)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(const pugi::xml_node& optValue)
+{
+    auto result = std::make_shared<BoxLayoutList>();
+
+    if (!createOptionFromNode(optValue, result)) {
+        throw_std_runtime_error("Init {} BoxLayout config failed '{}'", xpath, optValue.name());
+    }
+    if (result->size() == 0) {
+        log_debug("{} assigning {} default values", xpath, defaultEntries.size());
+        useDefault = true;
+        for (auto&& bl : defaultEntries) {
+            result->add(std::make_shared<BoxLayout>(bl));
+        }
+    }
+    optionValue = std::make_shared<BoxLayoutListOption>(result);
+    return optionValue;
+}
+
+std::string ConfigBoxLayoutSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+{
+    if (index == ITEM_PATH_PREFIX) {
+        return ConfigDefinition::mapConfigOption(option);
+    }
+    if (index == ITEM_PATH_ROOT) {
+        return ConfigDefinition::mapConfigOption(option);
+    }
+    if (index == ITEM_PATH_NEW) {
+        if (propOption != CFG_MAX) {
+            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(option), ConfigDefinition::ensureAttribute(propOption));
+        }
+        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(option));
+    }
+    if (propOption != CFG_MAX) {
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(option), index, ConfigDefinition::ensureAttribute(propOption));
+    }
+    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(option), index);
+}
