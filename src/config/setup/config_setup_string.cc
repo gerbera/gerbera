@@ -27,7 +27,6 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/autoscan.h"
 #include "util/string_converter.h"
 
 #include <array>

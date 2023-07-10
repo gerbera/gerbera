@@ -22,14 +22,13 @@
 
 /// \file config_setup_client.cc
 
-#include "config/config_setup.h" // API
+#include "config/setup/config_setup_client.h" // API
 
 #include <numeric>
 
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/autoscan.h"
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
@@ -134,7 +133,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getMultiValue());
-        entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
+        entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getMultiValue());
         return true;
     }

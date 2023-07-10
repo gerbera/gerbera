@@ -31,13 +31,19 @@
 #endif
 
 #include "client_config.h"
+#include "config/setup/config_setup_autoscan.h"
+#include "config/setup/config_setup_boxlayout.h"
+#include "config/setup/config_setup_client.h"
+#include "config/setup/config_setup_dynamic.h"
+#include "config/setup/config_setup_enum.h"
+#include "config/setup/config_setup_transcoding.h"
+#include "config/setup/config_setup_tweak.h"
 #include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "config_setup_enum.h"
 #include "content/autoscan.h"
-#include "content/autoscan_list.h"
 #include "content/content_manager.h"
+#include "content/layout/box_layout.h"
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
@@ -349,6 +355,49 @@ static const std::vector<std::string> virtualDirectoryKeys {
     "M_UPNP_DATE",
 };
 
+/// \brief default values for CFG_BOXLAYOUT_BOX
+static const std::vector<BoxLayout> boxLayoutDefaults {
+    BoxLayout("Audio/allAlbums", "Albums", "object.container"),
+    BoxLayout("Audio/allArtists", "Artists", "object.container"),
+    BoxLayout("Audio/allAudio", "All Audio", "object.container"),
+    BoxLayout("Audio/allComposers", "Composers", "object.container"),
+    BoxLayout("Audio/allDirectories", "Directories", "object.container"),
+    BoxLayout("Audio/allGenres", "Genres", "object.container"),
+    BoxLayout("Audio/allSongs", "All Songs", "object.container"),
+    BoxLayout("Audio/allTracks", "All - full name", "object.container"),
+    BoxLayout("Audio/allYears", "Year", "object.container"),
+    BoxLayout("Audio/audioRoot", "Audio", "object.container"),
+    BoxLayout("AudioInitial/abc", "ABC", "object.container"),
+    BoxLayout("AudioInitial/allArtistTracks", "000 All", "object.container"),
+    BoxLayout("AudioInitial/allBooks", "Books", "object.container"),
+    BoxLayout("AudioInitial/audioBookRoot", "AudioBooks", "object.container"),
+    BoxLayout("AudioStructured/allAlbums", "-Album-", "object.container", true, 6),
+    BoxLayout("AudioStructured/allArtistTracks", "all", "object.container"),
+    BoxLayout("AudioStructured/allArtists", "-Artist-", "object.container", true, 9),
+    BoxLayout("AudioStructured/allGenres", "-Genre-", "object.container", true, 6),
+    BoxLayout("AudioStructured/allTracks", "-Track-", "object.container", true, 6),
+    BoxLayout("AudioStructured/allYears", "-Year-", "object.container"),
+    BoxLayout("Video/allDates", "Date", "object.container"),
+    BoxLayout("Video/allDirectories", "Directories", "object.container"),
+    BoxLayout("Video/allVideo", "All Video", "object.container"),
+    BoxLayout("Video/allYears", "Year", "object.container"),
+    BoxLayout("Video/unknown", "Unknown", "object.container"),
+    BoxLayout("Video/videoRoot", "Video", "object.container"),
+    BoxLayout("Image/allDates", "Date", "object.container"),
+    BoxLayout("Image/allDirectories", "Directories", "object.container"),
+    BoxLayout("Image/allImages", "All Photos", "object.container"),
+    BoxLayout("Image/allYears", "Year", "object.container"),
+    BoxLayout("Image/imageRoot", "Photos", "object.container"),
+    BoxLayout("Image/unknown", "Unknown", "object.container"),
+    BoxLayout("Trailer/trailerRoot", "Online Services", "object.container"),
+    BoxLayout("Trailer/appleTrailers", "Apple Trailers", "object.container"),
+    BoxLayout("Trailer/allTrailers", "All Trailers", "object.container"),
+    BoxLayout("Trailer/allGenres", "Genres", "object.container"),
+    BoxLayout("Trailer/relDate", "Release Date", "object.container"),
+    BoxLayout("Trailer/postDate", "Post Date", "object.container"),
+    BoxLayout("Trailer/unknown", "Unknown", "object.container"),
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigIntSetup>(CFG_SERVER_PORT,
@@ -556,6 +605,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigIntSetup>(CFG_CLIENTS_BOOKMARK_OFFSET,
         "/clients/attribute::bookmark-offset", "config-clients.html#clients",
         10, 0, ConfigIntSetup::CheckMinValue),
+
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT,
         "/clients/client", "config-clients.html#clients",
         ""),
@@ -571,6 +621,25 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT,
         "userAgent", "config-clients.html#client",
         ""),
+
+    std::make_shared<ConfigBoxLayoutSetup>(CFG_BOXLAYOUT_BOX,
+        "/import/scripting/virtual-layout/boxlayout/box", "config-import.html#boxlayout",
+        boxLayoutDefaults),
+    std::make_shared<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_KEY,
+        "attribute::key", "config-import.html#boxlayout",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_TITLE,
+        "attribute::title", "config-import.html#boxlayout",
+        ""),
+    std::make_shared<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_CLASS,
+        "attribute::class", "config-import.html#boxlayout",
+        "object.container"),
+    std::make_shared<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE,
+        "attribute::size", "config-import.html#boxlayout",
+        1, 1, ConfigIntSetup::CheckMinValue),
+    std::make_shared<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED,
+        "attribute::enabled", "config-import.html#boxlayout",
+        YES),
 
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_HIDDEN_FILES,
         "/import/attribute::hidden-files", "config-import.html#import",
@@ -708,18 +777,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS,
         "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "config-import.html#scripting",
         ""),
-    std::make_shared<ConfigIntSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ALBUMBOX,
-        "/import/scripting/virtual-layout/structured-layout/attribute::album-box", "config-import.html#scripting",
-        6),
-    std::make_shared<ConfigIntSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_ARTISTBOX,
-        "/import/scripting/virtual-layout/structured-layout/attribute::artist-box", "config-import.html#scripting",
-        9),
-    std::make_shared<ConfigIntSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_GENREBOX,
-        "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "config-import.html#scripting",
-        6),
-    std::make_shared<ConfigIntSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_TRACKBOX,
-        "/import/scripting/virtual-layout/structured-layout/attribute::track-box", "config-import.html#scripting",
-        6),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR,
         "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#scripting",
         ""),

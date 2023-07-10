@@ -29,7 +29,6 @@
 #include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/autoscan.h"
 
 /// \brief Creates a vector from an XML nodeset.
 /// \param optValue starting element of the nodeset.

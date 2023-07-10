@@ -379,7 +379,7 @@ bool ConfigManager::validate()
 
     for (const auto& iDir : configInotifyList) {
         for (const auto& tDir : configTimedList) {
-            if (iDir.getLocation() == tDir.getLocation())
+            if (iDir->getLocation() == tDir->getLocation())
                 throw_std_runtime_error("Error in config file: same path used in both inotify and timed scan modes");
         }
     }
@@ -531,13 +531,22 @@ std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) c
     return optionValue->getArrayOption();
 }
 
-std::vector<AutoscanDirectory> ConfigManager::getAutoscanListOption(config_option_t option) const
+std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOption(config_option_t option) const
 {
     auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getAutoscanListOption();
+}
+
+std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(config_option_t option) const
+{
+    auto optionValue = options.at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getBoxLayoutListOption();
 }
 
 std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option) const

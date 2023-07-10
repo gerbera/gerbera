@@ -64,6 +64,17 @@ public:
         return duk_to_string(ctx, -1);
     }
 
+    static std::string invokeALLBOX(duk_context* ctx, const std::string& input, int boxType, const std::string& divChar)
+    {
+        duk_get_global_string(ctx, "allbox");
+        duk_push_string(ctx, input.c_str());
+        duk_push_int(ctx, boxType);
+        duk_push_string(ctx, divChar.c_str());
+
+        duk_pcall(ctx, 3);
+        return duk_to_string(ctx, -1);
+    }
+
     duk_context* ctx;
 };
 
@@ -252,6 +263,28 @@ TEST_F(CommonScriptTest, getRootPath_ReturnsArrayOfLastPathWhenRootIsEmpty)
     EXPECT_TRUE(duk_is_array(ctx, -1));
     std::string result = duk_to_string(ctx, -1);
     EXPECT_STREQ(result.c_str(), "path");
+}
+
+TEST_F(CommonScriptTest, allbox_BoxType1_Returns10)
+{
+    std::string divChar = "-";
+    auto boxTest = std::map<int, std::string> {
+        { 1, "------------all------------" },
+        { 2, "------all------" },
+        { 3, "---all---" },
+        { 4, "--all--" },
+        { 5, "--all--" },
+        { 6, "--all--" },
+        { 9, "-all-" },
+        { 13, "-all-" },
+        { 26, "-all-" },
+    };
+
+    for (auto&& [boxType, res] : boxTest) {
+        std::string result = this->invokeALLBOX(ctx, "all", boxType, divChar);
+
+        EXPECT_STREQ(result.c_str(), res.c_str());
+    }
 }
 
 TEST_F(CommonScriptTest, abcbox_BoxType1_ReturnsASingleBox)

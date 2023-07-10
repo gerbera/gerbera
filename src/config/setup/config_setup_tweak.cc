@@ -22,7 +22,7 @@
 
 /// \file config_setup_tweak.cc
 
-#include "config/config_setup.h" // API
+#include "config/setup/config_setup_tweak.h" // API
 
 #include <numeric>
 
@@ -30,7 +30,6 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/directory_tweak.h"
-#include "content/autoscan.h"
 
 /// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
 /// \param element starting element of the nodeset.

@@ -152,6 +152,45 @@ static duk_function_list_entry js_global_functions[] = {
     { nullptr, nullptr, 0 },
 };
 
+static const std::vector<boxConfig> audioBox {
+    { "Audio/allAlbums", "Albums", "object.container" },
+    { "Audio/allArtists", "Artists", "object.container" },
+    { "Audio/allAudio", "All Audio", "object.container" },
+    { "Audio/allComposers", "Composers", "object.container" },
+    { "Audio/allDirectories", "Directories", "object.container" },
+    { "Audio/allGenres", "Genres", "object.container" },
+    { "Audio/allSongs", "All Songs", "object.container" },
+    { "Audio/allTracks", "All - full name", "object.container" },
+    { "Audio/allYears", "Year", "object.container" },
+    { "Audio/audioRoot", "Audio", "object.container" },
+};
+static const std::vector<boxConfig> videoBox {
+    { "Video/allDates", "Date", "object.container" },
+    { "Video/allDirectories", "Directories", "object.container" },
+    { "Video/allVideo", "All Video", "object.container" },
+    { "Video/allYears", "Year", "object.container" },
+    { "Video/unknown", "Unknown", "object.container" },
+    { "Video/videoRoot", "Video", "object.container" },
+    { "Video/allDates", "Date", "object.container" },
+};
+static const std::vector<boxConfig> imageBox {
+    { "Image/allDates", "Date", "object.container" },
+    { "Image/allDirectories", "Directories", "object.container" },
+    { "Image/allImages", "All Photos", "object.container" },
+    { "Image/allYears", "Year", "object.container" },
+    { "Image/imageRoot", "Photos", "object.container" },
+    { "Image/unknown", "Unknown", "object.container" },
+};
+static const std::vector<boxConfig> trailerBox {
+    { "Trailer/trailerRoot", "Online Services", "object.container" },
+    { "Trailer/appleTrailers", "Apple Trailers", "object.container" },
+    { "Trailer/allTrailers", "All Trailers", "object.container" },
+    { "Trailer/allGenres", "Genres", "object.container" },
+    { "Trailer/relDate", "Release Date", "object.container" },
+    { "Trailer/postDate", "Post Date", "object.container" },
+    { "Trailer/unknown", "Unknown", "object.container" },
+};
+
 template <typename Map>
 bool mapCompare(Map const& lhs, Map const& rhs)
 {
@@ -262,7 +301,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
@@ -297,7 +336,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
@@ -347,7 +386,7 @@ TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Post Date", "2018-01"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "83", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, trailerBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
@@ -394,7 +433,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, imageBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
@@ -429,7 +468,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
@@ -523,7 +562,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }

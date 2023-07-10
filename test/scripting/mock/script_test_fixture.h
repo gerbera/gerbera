@@ -40,6 +40,14 @@ struct addCdsObjectParams {
     std::string objectType;
 };
 
+struct boxConfig {
+    std::string key;
+    std::string title;
+    std::string upnpClass;
+    bool enabled;
+    int size;
+};
+
 struct abcBoxParams {
     std::string inputValue;
     int boxType;
@@ -93,10 +101,10 @@ public:
     static void dukMockPlaylist(duk_context* ctx, const std::map<std::string, std::string>& props);
 
     // Add global Duktape methods to proxy into c++ layer
-    void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {});
+    void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {}, const std::vector<boxConfig>& boxDefaults = {});
 
     // Add config entries to global context
-    static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config);
+    static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults = {});
 
     // Access the global object(script) by name, and execute
     static void executeScript(duk_context* ctx);

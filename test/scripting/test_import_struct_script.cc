@@ -152,6 +152,14 @@ static duk_function_list_entry js_global_functions[] = {
     { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
 };
+static const std::vector<boxConfig> audioBox {
+    { "AudioStructured/allAlbums", "-Album-", "object.container", true, 6 },
+    { "AudioStructured/allArtistTracks", "all", "object.container" },
+    { "AudioStructured/allArtists", "-Artist-", "object.container", true, 9 },
+    { "AudioStructured/allGenres", "-Genre-", "object.container", true, 26 },
+    { "AudioStructured/allTracks", "-Track-", "object.container", true, 6 },
+    { "AudioStructured/allYears", "-Year-", "object.container" },
+};
 
 template <typename Map>
 bool mapCompare(Map const& lhs, Map const& rhs)
@@ -287,7 +295,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "Artist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "55", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::genre-box", "26" } });
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioBox);
 
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);

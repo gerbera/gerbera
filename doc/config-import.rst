@@ -291,7 +291,7 @@ Below are the available scripting options:
 
         ::
 
-            <structured-layout skip-chars="" album-box="6" artist-box="9" genre-box="6" track-box="6" div-char="-" />
+            <structured-layout skip-chars="" div-char="-" />
 
         * Optional
 
@@ -314,17 +314,53 @@ Below are the available scripting options:
 
             Special characters in the beginning of a title that are not used for building a box.
 
+        ::
+
+            <box-layout />
+                <box key=".." title=".." class=".." size=".." enabled=".." />
+            </box-layout>
+
             ::
 
-                album-box="6"
-                artist-box="9"
-                genre-box="6"
-                track-box="6"
+                key="Audio/audioRoot"
+
+            * Required
+
+            The key that is used in javascript and builtin layout to refer the the config.
+
+            ::
+
+                title="Music"
+
+            * Required
+
+            The title to use for the respective box.
+
+            ::
+
+                class="object.container.album.musicAlbum"
 
             * Optional
-            * Default: see above values
 
-            Type of the box. The following values are supported
+            Set the upnp class for the respective box.
+
+            ::
+
+                enabled="false"
+
+            * Optional
+            * Default: "true"
+
+            Disable the respective box. Not all boxes can be disabled.
+
+            ::
+
+                size="6"
+
+            * Optional
+            * Default: 1
+
+            Type of the box in structured layout. The following values are supported
 
             -  **1**: One large box
             -  **2**: Two boxes with 13 items each

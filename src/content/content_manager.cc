@@ -43,7 +43,6 @@
 #include "cds/cds_item.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
-#include "config/directory_tweak.h"
 #include "database/database.h"
 #include "import_service.h"
 #include "metadata/metadata_handler.h"
@@ -131,12 +130,12 @@ void ContentManager::run()
 
     autoscanList = database->getAutoscanList(AutoscanScanMode::Timed);
     for (auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST)) {
-        fs::path path = dir.getLocation();
+        fs::path path = dir->getLocation();
         if (fs::is_directory(path)) {
-            dir.setObjectID(ensurePathExistence(path));
+            dir->setObjectID(ensurePathExistence(path));
         }
         try {
-            autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
+            autoscanList->add(dir);
         } catch (const std::runtime_error& e) {
             // Work around existing config sourced autoscans that were stored to the DB for reasons
             log_warning(e.what());
@@ -164,12 +163,12 @@ void ContentManager::run()
             }
         }
         for (auto dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
-            fs::path path = dir.getLocation();
+            fs::path path = dir->getLocation();
             if (fs::is_directory(path)) {
-                dir.setObjectID(ensurePathExistence(path));
+                dir->setObjectID(ensurePathExistence(path));
             }
             try {
-                autoscanList->add(std::make_shared<AutoscanDirectory>(dir));
+                autoscanList->add(dir);
             } catch (const std::runtime_error& e) {
                 // Work around existing config sourced autoscans that were stored to the DB for reasons
                 log_warning(e.what());

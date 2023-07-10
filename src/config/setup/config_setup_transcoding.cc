@@ -22,7 +22,7 @@
 
 /// \file config_setup_transcoding.cc
 
-#include "config/config_setup.h" // API
+#include "config/setup/config_setup_transcoding.h" // API
 
 #include <numeric>
 
@@ -30,8 +30,7 @@
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
-#include "config/config_setup_enum.h"
-#include "content/autoscan.h"
+#include "config/setup/config_setup_enum.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 #include "transcoding/transcoding.h"

@@ -30,7 +30,9 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_setup.h"
+#include "config/setup/config_setup_boxlayout.h"
 #include "content/autoscan.h"
+#include "content/layout/box_layout.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
 
@@ -325,6 +327,7 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
     setValue(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
 
     generateMappings();
+    generateBoxlayout(CFG_BOXLAYOUT_BOX);
 #ifdef ONLINE_SERVICES
     generateOnlineContent();
 #endif
@@ -345,6 +348,24 @@ void ConfigGenerator::generateMappings()
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
     setVector(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+}
+
+void ConfigGenerator::generateBoxlayout(config_option_t option)
+{
+    auto cs = ConfigDefinition::findConfigSetup<ConfigBoxLayoutSetup>(option);
+
+    const auto boxTag = ConfigDefinition::mapConfigOption(option);
+
+    for (auto&& bl : cs->getDefault()) {
+        auto box = setValue(fmt::format("{}/", boxTag), "", true);
+        setValue(box, ATTR_BOXLAYOUT_BOX_KEY, bl.getKey());
+        setValue(box, ATTR_BOXLAYOUT_BOX_TITLE, bl.getTitle());
+        setValue(box, ATTR_BOXLAYOUT_BOX_CLASS, bl.getClass());
+        if (bl.getSize() != 1)
+            setValue(box, ATTR_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
+        if (!bl.getEnabled())
+            setValue(box, ATTR_BOXLAYOUT_BOX_ENABLED, fmt::to_string(bl.getEnabled()));
+    }
 }
 
 void ConfigGenerator::generateOnlineContent()

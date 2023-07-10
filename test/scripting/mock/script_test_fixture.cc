@@ -331,7 +331,7 @@ void ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::map<std::st
     }
 }
 
-void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config)
+void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults)
 {
 
     for (auto&&[meta,str]: MetadataHandler::mt_keys) {
@@ -358,9 +358,9 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
     }
 
     if (config.empty()) {
-        addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } });
+        addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } }, boxDefaults);
     } else {
-        addConfig(ctx, config);
+        addConfig(ctx, config, boxDefaults);
     }
 
     duk_push_int(ctx, 0);
@@ -379,13 +379,33 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
     duk_pop(ctx);
 }
 
-void ScriptTestFixture::addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config)
+void ScriptTestFixture::addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults)
 {
     duk_push_object(ctx); // config
     for (auto&& [key, value] : config) {
         duk_push_string(ctx, value.data());
         duk_put_prop_string(ctx, -2, key.data());
     }
+
+    duk_push_object(ctx); // box-layout
+    for (auto&& boxLayout : boxDefaults) {
+        duk_push_object(ctx);
+        auto bl = std::map<std::string, std::string> {
+            { "id", "-1" },
+            { "size", fmt::to_string(boxLayout.size) },
+            { "enabled", fmt::to_string(boxLayout.enabled) },
+            { "title", boxLayout.title },
+            { "class", boxLayout.upnpClass }
+        };
+
+        for (auto&& [key, value] : bl) {
+            duk_push_string(ctx, value.c_str());
+            duk_put_prop_string(ctx, -2, key.c_str());
+        }
+        duk_put_prop_string(ctx, -2, boxLayout.key.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "/import/scripting/virtual-layout/boxlayout/box"); // box-layout
+
     duk_put_global_string(ctx, "config");
 }
 

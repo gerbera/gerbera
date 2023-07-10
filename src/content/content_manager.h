@@ -62,6 +62,7 @@ class OnlineServiceList;
 enum class OnlineServiceType;
 #endif // ONLINE_SERVICES
 
+class AutoscanList;
 enum class AutoscanScanMode;
 class AutoScanSetting;
 class CdsContainer;
