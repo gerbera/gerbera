@@ -66,11 +66,14 @@ In order to compile Gerbera you will have to install the following packages:
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 | inotify             | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
 +---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
+| googletest_         | Optional      | Running tests              | WITH\_TESTS             | Disabled | install-googletest.sh        |
++---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
 
 .. _duktape: https://duktape.org
 .. _libexiv2: https://github.com/Exiv2/exiv2
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
+.. _googletest: https://github.com/google/googletest
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
 .. _libmatroska: https://github.com/Matroska-Org/libmatroska
 .. _libebml: https://github.com/Matroska-Org/libebml

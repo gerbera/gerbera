@@ -20,7 +20,15 @@ tgz_file="${script_dir}/gtest-${VERSION}.tgz"
 ##
 
 ## Download GoogleTest from GitHub
-wget https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz  -O "${tgz_file}"
+set +e
+wget https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz -O "${tgz_file}"
+if [ $? -eq 8 ]; then
+    set -e
+    wget https://github.com/google/googletest/archive/refs/tags/v${VERSION}.tar.gz -O "${tgz_file}"
+else
+    exit
+fi
+set -e
 
 if [ -d "${src_dir}" ]; then
   rm -r ${src_dir}

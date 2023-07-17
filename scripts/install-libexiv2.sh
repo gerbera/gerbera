@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 . $(dirname "${BASH_SOURCE[0]}")/versions.sh
 
-VERSION="${EXIV2-v0.27.5}"
+VERSION="${EXIV2-v0.27.7}"
 
 if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"

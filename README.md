@@ -2,7 +2,7 @@
 
 # Gerbera - UPnP Media Server
 
- [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/gerbera/gerbera/ci.yml?style=for-the-badge&branch=master)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=1.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
+[![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/gerbera/gerbera/ci.yml?style=for-the-badge&branch=master)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=1.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
 
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
@@ -46,29 +46,35 @@ sudo make install
 
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
-| libupnp             | 1.14.6      | 1.14.14     | 1.14.14       | XOR libnpupnp | [pupnp]                    |          |
+| libupnp             | 1.14.6      | 1.14.17     | 1.14.17       | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp           | 4.2.1       | 4.2.1       | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.13          | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 7.1.3       | 9.1.0         | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.8.5       | 1.11.0        | Required      | Runtime logging            |          |
+| [fmtlib]            | 7.1.3       | 9.1.0       | 10.0.0        | Required      | Fast string formatting     |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.12.0        | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |
-| [taglib]            | 1.12        | 1.12        | 1.13          | Optional      | Audio tag support          | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 1.13.1        | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |               | Optional      | File type detection        | Enabled  |
 | [wavpack]           | 5.1.0       | 5.4.0       | 5.6.0         | Optional      | WavPack metadata support   | Disabled |
 | [libmatroska]       |             | 1.6.3       | 1.7.1         | Optional      | MKV metadata               | Enabled  |
 | [libebml]           |             | 1.4.2       | 1.4.4         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
 | libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]          |             | v0.26       | v0.27.5       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [libexiv2]          | v0.26       | v0.27.7     | v0.27.7       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.0       | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |               | Optional      | Efficient file monitoring  | Enabled  |
+
+## Development Dependencies
+
+| Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
+|---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
+| [googletest]        | 1.10.0      | 1.10.0      | 1.13.1        | Optional      | Running tests              | Disabled |
 
 ## License
 
@@ -90,6 +96,7 @@ sudo make install
 [duktape]: https://duktape.org
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
+[googletest]: https://github.com/google/googletest
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [libebml]: https://github.com/Matroska-Org/libebml
 [libexiv2]: https://github.com/Exiv2/exiv2

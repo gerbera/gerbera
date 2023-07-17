@@ -12,6 +12,10 @@ a {
     color: #ff7f00;
 }
 
+.wy-nav-content {
+    max-width: 1200px;
+}
+
 .wy-nav-top {
     background-color: #ff7f00;
 }

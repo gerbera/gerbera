@@ -101,10 +101,10 @@ Attention! So far, Gerbera is not part of any repository that is maintained in C
 available for Fedora 28 which is not the base for CentOS 7!
 
 Debian
-~~~~~~~~~~~~~~~~~
+~~~~~~
 .. index:: Debian Linux
 
-Gerbera is included in `Buster <https://packages.debian.org/buster/gerbera>`_ and `Sid <https://packages.debian.org/sid/gerbera>`_.
+Gerbera is included in Buster_ and Sid_.
 
 .. code-block:: sh
 
@@ -112,10 +112,13 @@ Gerbera is included in `Buster <https://packages.debian.org/buster/gerbera>`_ an
 
 Due to the stable nature of Debian, these packages are likely to be some versions behind the current Gerbera release.
 
-`Deb-Multimedia.org <https://www.deb-multimedia.org/>`_ also provide builds for `Buster <http://www.deb-multimedia.org/dists/buster/main/binary-amd64/package/gerbera>`_ and `Sid <http://www.deb-multimedia.org/dists/sid/main/binary-amd64/package/gerbera>`_.
+`Deb-Multimedia.org <https://www.deb-multimedia.org/>`_ also provide builds for Buster_ and Sid_.
+
+.. _Buster: http://www.deb-multimedia.org/dists/buster/main/binary-amd64/package/gerbera
+.. _Sid: http://www.deb-multimedia.org/dists/sid/main/binary-amd64/package/gerbera
 
 openSUSE
-~~~~~~~~~~~~~~~~~
+~~~~~~~~
 .. index:: openSUSE Linux
 
 Gerbera is available on `software.opensuse.org <https://software.opensuse.org/package/gerbera>`_.
