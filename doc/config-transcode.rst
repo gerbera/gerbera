@@ -106,7 +106,8 @@ profile which is defined below.
 
     * Optional
 
-    If the flags match the ones defined in :ref:`clients <client>`, the profile is selected for that client. Choose an unused flag, e.g. "0x100", to avoid collisions with other features.
+    If the flags match the ones defined in :ref:`Supported Devices <supported-devices>`, the profile is selected for that client.
+    Choose ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or an unused flag, e.g. "0x100000", to avoid collisions with other features.
 
     ::
 

@@ -110,7 +110,7 @@ This tag sets the virtual URL of Gerbera content which is part of the browse res
 The value defaults to `http://<ip>:<port>`.
 
 ``externalURL``
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. code-block:: xml
 

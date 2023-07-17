@@ -20,6 +20,11 @@ if(COMMAND conan_basic_setup)
     conan_basic_setup(TARGETS)
 endif()
 
+# set(CMAKE_INSTALL_PREFIX /usr/local)
+set(CMAKE_INSTALL_BINDIR bin)
+set(CMAKE_INSTALL_DATADIR share/gerbera)
+set(CMAKE_INSTALL_MANDIR share/man/man1)
+
 set(WITH_NPUPNP            NO  CACHE BOOL "Use npupnp instead of libupnp")
 set(WITH_MAGIC             YES CACHE BOOL "Use libmagic to identify file mime types")
 set(WITH_MYSQL             NO  CACHE BOOL "Store media information in MySQL DB")
@@ -47,11 +52,11 @@ set(STATIC_LIBUPNP 0 CACHE BOOL "Link to libupnp statically")
 set(CMAKE_CXX_STANDARD 17)
 # Cygwin requires extensions for a lot of the networking stuff.
 if(CYGWIN)
-	set(CMAKE_CXX_STANDARD_REQUIRED NO)
-	set(CMAKE_CXX_EXTENSIONS YES)
+    set(CMAKE_CXX_STANDARD_REQUIRED NO)
+    set(CMAKE_CXX_EXTENSIONS YES)
 else(CYGWIN)
-	set(CMAKE_CXX_STANDARD_REQUIRED YES)
-	set(CMAKE_CXX_EXTENSIONS NO)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_EXTENSIONS NO)
 endif(CYGWIN)
 
 add_library(libgerbera STATIC
@@ -331,7 +336,7 @@ endif()
 message(STATUS "Gerbera Version: ${GERBERA_VERSION}")
 target_compile_definitions(libgerbera PUBLIC GERBERA_VERSION="${GERBERA_VERSION}")
 
-target_compile_definitions(gerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/share/gerbera")
+target_compile_definitions(gerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}")
 
 if (WITH_DEBUG)
     target_compile_definitions(libgerbera PUBLIC TOMBDEBUG)
@@ -465,6 +470,12 @@ endif()
 
 # Link to the socket library if it exists. This is something you need on Solaris/OmniOS/Joyent
 find_library(SOCKET_LIBRARY socket)
+if(SOCKET_LIBRARY)
+    target_link_libraries(libgerbera PUBLIC ${SOCKET_LIBRARY})
+endif()
+
+# Link to the network library if it exists. This is something you need on Haiku
+find_library(SOCKET_LIBRARY network)
 if(SOCKET_LIBRARY)
     target_link_libraries(libgerbera PUBLIC ${SOCKET_LIBRARY})
 endif()
@@ -620,15 +631,15 @@ if(WITH_TESTS)
     add_subdirectory(test)
 endif()
 
-INSTALL(TARGETS gerbera DESTINATION bin)
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION share/gerbera)
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION share/gerbera)
+INSTALL(TARGETS gerbera DESTINATION ${CMAKE_INSTALL_BINDIR})
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION ${CMAKE_INSTALL_DATADIR})
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION ${CMAKE_INSTALL_DATADIR})
 INSTALL(FILES
         src/database/mysql/mysql.sql
         src/database/mysql/mysql-upgrade.xml
         src/database/sqlite3/sqlite3.sql
         src/database/sqlite3/sqlite3-upgrade.xml
-        DESTINATION share/gerbera)
-INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION share/man/man1)
+        DESTINATION ${CMAKE_INSTALL_DATADIR})
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION ${CMAKE_INSTALL_MANDIR})
 
 include(packaging)

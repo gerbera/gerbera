@@ -1,5 +1,36 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## MAIN
+
+This release contains changes to some Javascript functions. If you created copies and modified that code to you purpose, you may have to update your code.
+If you activate the new javascript folder loading mechanism ensure that no older script are still in the script folders.
+
+This release also introduced the configuration of virtual layout, you can translate the container titles or hide containers you don't use.
+Of course such a change requires a rescan of the library. The options for structured audio layout have been redesigned, so you need to migrate
+them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get the default for the new section.
+
+### NEW Features
+
+- Case insensitive sorting for databases
+- Config options as command line arguments
+- Staged importing that allows updating the virtual layout instead of deleting and recreating it each time
+- Configuration of containers in virtual layout: title can be changed, some nodes can be disabled
+- New mode of loading Javascript plugins with cleanup of global variables
+- New config options for URL handling and host redirection
+- Use `.nomedia` to hide directory, incl. config option
+
+### FIXES
+
+- Docker: add JPEG and update description
+- Runtime issues in request handling
+- Configurable handling of HOME directory
+- Transcoding: parsing issue of requests
+
+### Code Improvements
+
+- Update Javascript libraries
+- Update versions of libexiv2, fmt, spdlog and taglib
+
 ## v1.12.1
 
 ### NEW Features
