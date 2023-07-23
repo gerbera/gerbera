@@ -588,7 +588,7 @@ function addAudio(obj, cont, rootPath, containerType) {
     if (boxSetup['Audio/artistChronology'].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
-        chain.album.title = date + " - " + album
+        chain.album.title = date + " - " + album;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
         addCdsObject(obj, container);
     }

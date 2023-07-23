@@ -303,7 +303,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout("Audio/allTracks", "All - full name", "object.container"),
     BoxLayout("Audio/allYears", "Year", "object.container"),
     BoxLayout("Audio/audioRoot", "Audio", "object.container"),
-    BoxLayout("Audio/artistChronology", "Audio", UPNP_CLASS_MUSIC_ARTIST),
+    BoxLayout("Audio/artistChronology", "Chronology", "object.container"),
     BoxLayout("AudioInitial/abc", "ABC", "object.container"),
     BoxLayout("AudioInitial/allArtistTracks", "000 All", "object.container"),
     BoxLayout("AudioInitial/allBooks", "Books", "object.container"),
