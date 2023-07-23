@@ -107,6 +107,8 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] });
     container["Audio/Directories"] = container.at("Audio/allDirectories");
     chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
+    container["Artist Chronology"] = container.at("Audio/artistChronology");
+
 
 #ifdef ONLINE_SERVICES
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
@@ -438,6 +440,9 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
 
     obj->setTitle(title);
     getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
+
+
+
 }
 
 #ifdef ONLINE_SERVICES
