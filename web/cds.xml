@@ -146,6 +146,26 @@
          </argumentList>
       </action>
       <action>
+        <name>GetFeatureList</name>
+        <argumentList>
+          <argument>
+            <name>FeatureList</name>
+            <direction>out</direction>
+            <relatedStateVariable>FeatureList</relatedStateVariable>
+          </argument>
+        </argumentList>
+      </action>
+      <action>
+        <name>GetSortExtensionCapabilities</name>
+        <argumentList>
+          <argument>
+            <name>SortExtensionCaps</name>
+            <direction>out</direction>
+            <relatedStateVariable>SortExtensionCapabilities</relatedStateVariable>
+          </argument>
+        </argumentList>
+      </action>
+      <action>
         <name>X_GetFeatureList</name>
         <argumentList>
           <argument>
@@ -275,27 +295,38 @@
          <dataType>string</dataType>
       </stateVariable>
       <stateVariable sendEvents="no">
+         <name>SortExtensionCapabilities</name>
+         <dataType>string</dataType>
+         <defaultValue>+,-</defaultValue>
+      </stateVariable>
+      <stateVariable sendEvents="no">
+         <name>FeatureList</name>
+         <dataType>string</dataType>
+         <defaultValue/>
+      </stateVariable>
+      <stateVariable sendEvents="no">
          <name>SearchCapabilities</name>
          <dataType>string</dataType>
+         <defaultValue/>
       </stateVariable>
       <stateVariable sendEvents="no">
          <name>A_ARG_TYPE_Filter</name>
          <dataType>string</dataType>
       </stateVariable>
       <stateVariable sendEvents="no">
-        <name>A_ARG_TYPE_CategoryType</name>
-        <dataType>ui4</dataType>
-        <defaultValue/>
+         <name>A_ARG_TYPE_CategoryType</name>
+         <dataType>ui4</dataType>
+         <defaultValue/>
       </stateVariable>
       <stateVariable sendEvents="no">
-        <name>A_ARG_TYPE_RID</name>
-        <dataType>ui4</dataType>
-        <defaultValue/>
+         <name>A_ARG_TYPE_RID</name>
+         <dataType>ui4</dataType>
+         <defaultValue/>
       </stateVariable>
       <stateVariable sendEvents="no">
-        <name>A_ARG_TYPE_Featurelist</name>
-        <dataType>string</dataType>
-        <defaultValue/>
+         <name>A_ARG_TYPE_Featurelist</name>
+         <dataType>string</dataType>
+         <defaultValue/>
       </stateVariable>
    </serviceStateTable>
 </scpd>

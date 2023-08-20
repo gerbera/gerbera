@@ -6,6 +6,9 @@ include(./common)
 build_type=Debug
 
 [options]
+pupnp:ipv6=True
+pupnp:reuseaddr=True
+pupnp:blocking-tcp=False
 # Use shared libraries for faster link time
 *:shared=True
 gerbera:debug_logging=True

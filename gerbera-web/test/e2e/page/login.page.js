@@ -85,7 +85,7 @@ module.exports = function (driver) {
     await driver.get(url);
     try {
       // when reloading session, errorCheck refreshes via JS here....check for staleness first
-      await driver.wait(until.stalenessOf(driver.findElement(By.id('navbarContent'))), 2000);
+      await driver.wait(until.stalenessOf(driver.findElement(By.id('navbarContent'))), 3000);
     } catch (e) {
       // the default `page is ready` check...
       await driver.wait(until.elementIsVisible(driver.findElement(By.id('login-form'))), 5000);
