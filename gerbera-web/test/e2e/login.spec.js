@@ -49,7 +49,7 @@ describe('Login Suite', () => {
       await loginPage.closeToast();
     });
 
-    it('when successful login show logout button, and show form on logout', async () => {
+    it('shows logout button, and shows form on logout when successful login', async () => {
       await loginPage.password('pwd');
       await loginPage.username('user');
       await loginPage.submitLogin();
@@ -80,7 +80,7 @@ describe('Login Suite', () => {
       expect(sid).to.be.null;
     });
 
-    it('when session expires reloads the page and lets user login again.', async () => {
+    it('reloads the page and lets user login again when session expires', async () => {
       await driver.sleep(1000); // allow fields to load
 
       const fields = await loginPage.loginFields();

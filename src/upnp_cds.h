@@ -90,6 +90,12 @@ private:
     ///
     /// GetSortCapabilities(string SortCaps)
     void doGetSortCapabilities(ActionRequest& request) const;
+    void doGetSortExtensionCapabilities(ActionRequest& request) const;
+
+    /// \brief GetFeatureListResponse
+    /// \param request Incoming ActionRequest.
+    ///
+    void doGetFeatureList(ActionRequest& request) const;
 
     /// \brief UPnP standard defined action: GetSystemUpdateID()
     /// \param request Incoming ActionRequest.

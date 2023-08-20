@@ -1,3 +1,8 @@
 # Common requirements for Gerbera
 [settings]
 compiler.cppstd=17
+
+[options]
+pupnp:ipv6=True
+pupnp:reuseaddr=True
+pupnp:blocking-tcp=False

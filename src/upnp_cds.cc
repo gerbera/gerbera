@@ -308,6 +308,35 @@ void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request) cons
     log_debug("end");
 }
 
+void ContentDirectoryService::doGetFeatureList(ActionRequest& request) const
+{
+    log_debug("start");
+
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    pugi::xml_document respRoot;
+    auto features = respRoot.append_child("Features");
+    features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
+    features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
+    features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
+    root.append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
+    request.setResponse(std::move(response));
+
+    log_debug("end");
+}
+
+void ContentDirectoryService::doGetSortExtensionCapabilities(ActionRequest& request) const
+{
+    log_debug("start");
+
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
+    auto root = response->document_element();
+    root.append_child("SortExtensionCaps").append_child(pugi::node_pcdata).set_value("+,-"); // TIME+, TIME-
+    request.setResponse(std::move(response));
+
+    log_debug("end");
+}
+
 void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request) const
 {
     log_debug("start");
@@ -368,6 +397,10 @@ void ContentDirectoryService::processActionRequest(ActionRequest& request)
         doGetSortCapabilities(request);
     } else if (request.getActionName() == "GetSystemUpdateID") {
         doGetSystemUpdateID(request);
+    } else if (request.getActionName() == "GetFeatureList") {
+        doGetFeatureList(request);
+    } else if (request.getActionName() == "GetSortExtensionCapabilities") {
+        doGetSortExtensionCapabilities(request);
     } else if (request.getActionName() == "Search") {
         doSearch(request);
     } else if (request.getActionName() == "X_SetBookmark") {
