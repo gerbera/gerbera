@@ -2347,24 +2347,46 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
 
 void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail)
 {
-    del(PLAYSTATUS_TABLE, fmt::format("{} = {} AND {} = {}", identifier("group"), quote(detail->getGroup()), identifier("item_id"), quote(detail->getItemId())), { detail->getItemId() });
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> where {
+        fmt::format("{} = {}", identifier("group"), quote(detail->getGroup())),
+        fmt::format("{} = {}", identifier("item_id"), quote(detail->getItemId())),
     };
-    auto values = std::vector {
-        quote(detail->getGroup()),
-        quote(detail->getItemId()),
-        quote(detail->getPlayCount()),
-        quote(detail->getLastPlayed().count()),
-        quote(detail->getLastPlayedPosition().count()),
-        quote(detail->getBookMarkPosition().count()),
-    };
-    insert(PLAYSTATUS_TABLE, fields, values);
+    auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
+        identifier(PLAYSTATUS_TABLE),
+        fmt::join(where, " AND ")));
+    auto doUpdate = (res && res->getNumRows() > 0) ? true : false;
+
+    if (doUpdate) {
+        std::vector<std::string> fields {
+            fmt::format("{} = {}", identifier("playCount"), quote(detail->getPlayCount())),
+            fmt::format("{} = {}", identifier("lastPlayed"), quote(detail->getLastPlayed().count())),
+            fmt::format("{} = {}", identifier("lastPlayedPosition"), quote(detail->getLastPlayedPosition().count())),
+            fmt::format("{} = {}", identifier("bookMarkPos"), quote(detail->getBookMarkPosition().count())),
+        };
+
+        exec(fmt::format("UPDATE {} SET {} WHERE {}",
+            identifier(PLAYSTATUS_TABLE),
+            fmt::join(fields, ", "),
+            fmt::join(where, " AND ")));
+    } else {
+        auto fields = std::vector {
+            identifier("group"),
+            identifier("item_id"),
+            identifier("playCount"),
+            identifier("lastPlayed"),
+            identifier("lastPlayedPosition"),
+            identifier("bookMarkPos"),
+        };
+        auto values = std::vector {
+            quote(detail->getGroup()),
+            quote(detail->getItemId()),
+            quote(detail->getPlayCount()),
+            quote(detail->getLastPlayed().count()),
+            quote(detail->getLastPlayedPosition().count()),
+            quote(detail->getBookMarkPosition().count()),
+        };
+        insert(PLAYSTATUS_TABLE, fields, values);
+    }
 }
 
 std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()
