@@ -214,6 +214,11 @@ std::string MySQLDatabase::quote(const std::string& value) const
 
 std::string MySQLDatabase::getError(MYSQL* db)
 {
+#ifdef MYSQL_SELECT_DEBUG
+    if (hasDebugging)
+        print_backtrace();
+#endif
+
     auto res = fmt::format("mysql_error ({}): \"{}\"", mysql_errno(db), mysql_error(db));
     log_debug("{}", res);
     return res;
@@ -260,8 +265,8 @@ void MySQLDatabaseWithTransactions::commit(std::string_view tName)
 
 std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::string& query)
 {
-#ifdef MYSQL_SELECT_DEBUG
     log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
     print_backtrace();
 #endif
 
@@ -295,6 +300,9 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
 std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
 {
     log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
+    print_backtrace();
+#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -318,8 +326,8 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
     auto query = clause.empty() //
         ? fmt::format("DELETE FROM {}", identifier(std::string(tableName))) //
         : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
-#ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
     print_backtrace();
 #endif
 
@@ -335,8 +343,8 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
 
 void MySQLDatabase::exec(std::string_view tableName, const std::string& query, int objId)
 {
-#ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
     print_backtrace();
 #endif
 
@@ -352,8 +360,8 @@ void MySQLDatabase::exec(std::string_view tableName, const std::string& query, i
 
 int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 {
-#ifdef MYSQL_EXEC_DEBUG
     log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
     print_backtrace();
 #endif
 
@@ -369,6 +377,22 @@ int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
     if (getLastInsertId)
         insertId = mysql_insert_id(&db);
     return insertId;
+}
+
+void MySQLDatabase::execOnly(const std::string& query)
+{
+    log_debug("{}", query);
+#ifdef MYSQL_EXEC_DEBUG
+    print_backtrace();
+#endif
+
+    checkMysqlThreadInit();
+    SqlAutoLock lock(sqlMutex);
+    auto res = mysql_real_query(&db, query.c_str(), query.size());
+    if (res) {
+        std::string myError = getError(&db);
+        log_error("{}\n{}", myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
+    }
 }
 
 void MySQLDatabase::shutdownDriver()

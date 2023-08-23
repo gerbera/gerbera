@@ -144,8 +144,9 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId)
-    : query(query.c_str())
+SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly)
+    : SLTask(!warnOnly)
+    , query(query.c_str())
     , getLastInsertIdFlag(getLastInsertId)
 {
 }

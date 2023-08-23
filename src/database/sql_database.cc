@@ -1403,10 +1403,15 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     return newId;
 }
 
-int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId)
+int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId, bool warnOnly)
 {
     assert(fields.size() == values.size());
     auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(values, ","));
+    if (warnOnly) {
+        execOnly(sql);
+        return -1;
+    }
+
     return exec(sql, getLastInsertId);
 }
 
@@ -2226,7 +2231,7 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
             quote(value),
             quote(status),
         };
-        insert(CONFIG_VALUE_TABLE, fields, values);
+        insert(CONFIG_VALUE_TABLE, fields, values, false, true);
         log_debug("inserted for {} as {} = {}", key, item, value);
     } else {
         auto updates = std::vector {
@@ -2289,7 +2294,7 @@ void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
             quote(client.last.count()),
             quote(client.age.count()),
         };
-        insert(CLIENTS_TABLE, fields, values);
+        insert(CLIENTS_TABLE, fields, values, false, true);
     }
 }
 
@@ -2347,6 +2352,8 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
 
 void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail)
 {
+    beginTransaction("savePlayStatus");
+
     std::vector<std::string> where {
         fmt::format("{} = {}", identifier("group"), quote(detail->getGroup())),
         fmt::format("{} = {}", identifier("item_id"), quote(detail->getItemId())),
@@ -2385,8 +2392,10 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
             quote(detail->getLastPlayedPosition().count()),
             quote(detail->getBookMarkPosition().count()),
         };
-        insert(PLAYSTATUS_TABLE, fields, values);
+        insert(PLAYSTATUS_TABLE, fields, values, false, true);
     }
+
+    commit("savePlayStatus");
 }
 
 std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()

@@ -126,6 +126,7 @@ public:
     virtual void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) = 0;
     virtual void exec(std::string_view tableName, const std::string& query, int objId) = 0;
     virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
+    virtual void execOnly(const std::string& query) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
     void addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
@@ -199,7 +200,7 @@ public:
 
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
-    int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false);
+    int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false, bool warnOnly = false);
     void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
     template <typename T>
     void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);

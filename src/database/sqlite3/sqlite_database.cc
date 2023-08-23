@@ -244,12 +244,20 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
         stask->waitForTask();
         return stask->getResult();
     } catch (const std::runtime_error& e) {
-        if (dbInitDone) {
-            log_error("prematurely shutting down.\n{}", e.what());
-            rollback("");
-            shutdown();
+        if (!shutdownFlag) {
+            if (dbInitDone) {
+                log_error("Prematurely shutting down.\n{}", e.what());
+                rollback("");
+                shutdown();
+            }
+            throw_std_runtime_error(e.what());
+        } else {
+            if (dbInitDone) {
+                log_error("Already shutting down.\n{}", e.what());
+                return {};
+            } else
+                throw_std_runtime_error(e.what());
         }
-        throw_std_runtime_error(e.what());
     }
 }
 
@@ -269,12 +277,19 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        if (dbInitDone) {
-            log_error("prematurely shutting down.");
-            rollback("");
-            shutdown();
+        if (!shutdownFlag) {
+            if (dbInitDone) {
+                log_error("Prematurely shutting down.\n{}", e.what());
+                rollback("");
+                shutdown();
+            }
+            throw_std_runtime_error(e.what());
+        } else {
+            if (dbInitDone)
+                log_error("Already shutting down.\n{}", e.what());
+            else
+                throw_std_runtime_error(e.what());
         }
-        throw_std_runtime_error(e.what());
     }
 }
 
@@ -287,12 +302,19 @@ void Sqlite3Database::exec(std::string_view tableName, const std::string& query,
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        if (dbInitDone) {
-            log_error("prematurely shutting down.");
-            rollback("");
-            shutdown();
+        if (!shutdownFlag) {
+            if (dbInitDone) {
+                log_error("Prematurely shutting down.\n{}", e.what());
+                rollback("");
+                shutdown();
+            }
+            throw_std_runtime_error(e.what());
+        } else {
+            if (dbInitDone)
+                log_error("Already shutting down.\n{}", e.what());
+            else
+                throw_std_runtime_error(e.what());
         }
-        throw_std_runtime_error(e.what());
     }
 }
 
@@ -305,12 +327,32 @@ int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
         etask->waitForTask();
         return getLastInsertId ? etask->getLastInsertId() : -1;
     } catch (const std::runtime_error& e) {
-        if (dbInitDone) {
-            log_error("prematurely shutting down.");
-            rollback("");
-            shutdown();
+        if (!shutdownFlag) {
+            if (dbInitDone) {
+                log_error("Prematurely shutting down.\n{}", e.what());
+                rollback("");
+                shutdown();
+            }
+            throw_std_runtime_error(e.what());
+        } else {
+            if (dbInitDone) {
+                log_error("Already shutting down.\n{}", e.what());
+                return -1;
+            } else
+                throw_std_runtime_error(e.what());
         }
-        throw_std_runtime_error(e.what());
+    }
+}
+
+void Sqlite3Database::execOnly(const std::string& query)
+{
+    try {
+        log_debug("Adding query to Queue: {}", query);
+        auto etask = std::make_shared<SLExecTask>(query, false, false);
+        addTask(etask);
+        etask->waitForTask();
+    } catch (const std::runtime_error& e) {
+        log_error("Failed to execute {}\n{}", query, e.what());
     }
 }
 
@@ -338,7 +380,7 @@ void Sqlite3Database::threadProc()
                 if (!task->checkKey(ent))
                     return false;
             }
-            return true;
+            return task->getThrowOnError();
         };
 
         while (!shutdownFlag) {
