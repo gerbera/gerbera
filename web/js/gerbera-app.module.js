@@ -228,6 +228,10 @@ export class App {
       data: data,
       async: false,
       accepts: 'application/json',
+      headers: {
+        Accept: "application/json; charset=utf-8",
+        "Content-Type": "application/json; charset=utf-8"
+      },
     });
   }
 

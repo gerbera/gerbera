@@ -1,5 +1,41 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+ - Add audio to year container
+ - Add option for external URL to be used in web page.
+ - Add Support for Configuration of Virtual Layout
+ - Add support for nomedia file / add options to block default M_DATE
+ - Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
+ - Allow overriding home in config
+ - buildfix: support fmtlib 10
+ - Bump engine.io and socket.io in /gerbera-web
+ - Bump socket.io-parser from 4.2.2 to 4.2.3 in /gerbera-web
+ - Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
+ - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
+ - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
+ - Database items sorting case insensitive
+ - DB rework playstatus save
+ - debian: bookworm is now stable
+ - Docker: Add JPEG libs
+ - Docker: git badge update
+ - Fix conan
+ - Fix handling transcoding requests
+ - Fully implement Thumbnail handling for grb mode
+ - Gerbera-Web: Update npm packages
+ - Import: Add staged import process
+ - Keep our unique_ptrs for the xml in scope until we are finished with …
+ - Quirks: Check for clientInfo
+ - README: fix CI badge
+ - Rework javascript mechanism
+ - Set defaults for autoscan settings
+ - Transcoding: Improve docs and examples
+ - Update README.Docker.md -Add docker volume section
+ - Update supported-devices.rst
+ - Update to latest npm packages
+ - Update versions of exiv2, fmt, spdlog, googletest and taglib
+ - Use new ffmpeg channel layout API
+ - WebUI: Update JS libs
+ - WebUI: Update popper to 2.11.6  / Update MD5 to 2.19.0
+
 ### v1.12.1
 
 - Actions: Update deprecated replace-string-action

@@ -290,7 +290,7 @@ Magic File
 
     --magic
 
-The magic file is set/overwritten. By default it is read from environment variables GERBERA_MAGIC_FILE or MEDIATOMB_MAGIC_FILE.
+The magic file is set/overwritten. By default it is read from environment variables ``GERBERA_MAGIC_FILE`` or ``MEDIATOMB_MAGIC_FILE``.
 
 Add Content
 -----------
@@ -302,34 +302,6 @@ Add Content
 Add the specified directory or file name to the database without UI interaction. The path must be absolute, if
 path is a directory then it will be added recursively. If path is a file, then only the given file will be imported.
 Can be supplied multiple times to add multiple paths
-
-Log To File
------------
-
-::
-
-    --logfile or -l
-
-Do not output log messages to stdout, but redirect everything to a specified file.
-
-Debug Output
-------------
-
-::
-
-    --debug or -D
-
-Enable debug log output.
-
-Check Config
-------------
-
-::
-
-    --check-config
-
-Check the current configuration and exit. Useful to check new settings before running gerbera as a service.
-Best use with --debug in case of problems.
 
 Set Option/Print Options
 -------------------------
@@ -347,15 +319,6 @@ with another use of --set-option. The syntax is OPT=VAL.
     --print-options
 
 Print all option numbers available for use with --set-option.
-
-Compile Info
-------------
-
-::
-
-    --compile-info
-
-Print the configuration summary (used libraries and enabled features) and exit.
 
 Offline
 ------------

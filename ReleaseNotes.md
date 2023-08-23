@@ -18,6 +18,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 - New mode of loading Javascript plugins with cleanup of global variables
 - New config options for URL handling and host redirection
 - Use `.nomedia` to hide directory, incl. config option
+- Support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
 
 ### FIXES
 
@@ -25,11 +26,12 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 - Runtime issues in request handling
 - Configurable handling of HOME directory
 - Transcoding: parsing issue of requests
+- Stability for sqlite database access
 
 ### Code Improvements
 
 - Update Javascript libraries
-- Update versions of libexiv2, fmt, spdlog and taglib
+- Update versions of libexiv2 (v0.27.7), fmt (10.1.0), spdlog (1.12.0) and taglib (1.13.1)
 
 ## v1.12.1
 
