@@ -41,6 +41,11 @@ class Sqlite3Result;
 /// \brief A virtual class that represents a task to be done by the sqlite3 thread.
 class SLTask {
 public:
+    SLTask(bool throwOnError = true)
+        : throwOnError(throwOnError)
+    {
+    }
+
     virtual ~SLTask() = default;
 
     /// \brief run the sqlite3 task
@@ -58,6 +63,7 @@ public:
 
     void waitForTask();
 
+    bool getThrowOnError() const { return throwOnError; }
     bool didContamination() const { return contamination; }
     bool didDecontamination() const { return decontamination; }
 
@@ -72,6 +78,7 @@ protected:
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running { true };
+    bool throwOnError { false };
 
     /// \brief true if this task has changed the db (in comparison to the backup)
     bool contamination {};
@@ -122,7 +129,7 @@ class SLExecTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
-    SLExecTask(const std::string& query, bool getLastInsertId);
+    SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly = false);
     SLExecTask(const std::string& query, const std::string& eKey);
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
