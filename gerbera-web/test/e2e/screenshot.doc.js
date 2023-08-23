@@ -191,13 +191,12 @@ suite(() => {
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Video');
       await homePage.editItem(0);
-      await driver.sleep(1000);
+      await driver.sleep(2000);
 
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, Jimp.AUTO);
-      image.crop(450, 40, 540, 900).write(fileName);
+      image.crop(600, 140, 530, 950).write(fileName);
     });
 
     it('for [edit item] from item list with details', async () => {
@@ -208,14 +207,13 @@ suite(() => {
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Video');
       await homePage.editItem(0);
-      await driver.sleep(1000);
+      await driver.sleep(2000);
       await homePage.showDetails();
 
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1440, Jimp.AUTO);
-      image.crop(130, 30, 1190, 920).write(fileName);
+      image.crop(280, 50, 1160, 1150).write(fileName);
     });
 
     it('for [trail operations]', async () => {

@@ -97,6 +97,7 @@ Contributions
 
    Install Gerbera            <install>
    Run Gerbera                <run>
+   Troubleshooting            <troubleshooting>
    Gerbera Daemon             <daemon>
    Gerbera UI                 <ui>
    Supported File Types       <supported-types>
