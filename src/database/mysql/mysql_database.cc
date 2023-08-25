@@ -258,7 +258,7 @@ void MySQLDatabaseWithTransactions::commit(std::string_view tName)
     SqlAutoLock lock(sqlMutex);
     if (use_transaction && inTransaction && mysql_commit(&db)) {
         std::string myError = getError(&db);
-        throw DatabaseException(myError, fmt::format("Mysql: error while commiting db: {}", myError));
+        throw DatabaseException(myError, fmt::format("Mysql: error while committing db: {}", myError));
     }
     inTransaction = false;
 }
