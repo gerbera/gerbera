@@ -17,6 +17,27 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
     <\/autoscan>/' -i /var/run/gerbera/config.xml
 fi
 
+if [ -e /dev/video10 ]; then
+  # Add permission to all users on /dev/video10 device
+  chmod 666 /dev/video10
+fi
+
+if [ -e /dev/video11 ]; then
+  # Add permission to all users on /dev/video11 device
+  chmod 666 /dev/video11
+fi
+
+if [ -e /dev/video12 ]; then
+  # Add permission to all users on /dev/video12 device
+  chmod 666 /dev/video12
+fi
+
+if [ -e /dev/dri ]; then
+  # Add permission to all users on /dev/dri device
+  chmod 666 /dev/dri
+fi
+
+
 # If we are root, chown home and drop privs
 if [ "$1" = 'gerbera' -a "$(id -u)" = '0' ]; then
     chown -R gerbera /var/run/gerbera
