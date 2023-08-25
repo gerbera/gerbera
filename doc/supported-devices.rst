@@ -33,7 +33,7 @@ The device flags have the following meaning
 
 -  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
 -  ``SAMSUNG_BOOKMARK_SEC``: 0x02, restore last played position when the media is played again (only for Samsung). Not applicable for transcoded media
--  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is recieved from the Samsung TV as msec
+-  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is received from the Samsung TV as msec
 -  ``SAMSUNG_FEATURES``: 0x10, activate Samsung features protocol (support for additional request like X_GetFeatureList, X_GetObjectIDfromIndex, X_GetIndexfromRID)
 -  ``SAMSUNG_HIDE_DYNAMIC``: 0x20, some Samsung devices do not work with dynamic folders on top level, so this flag hides them for those devices
 -  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
