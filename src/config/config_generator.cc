@@ -194,7 +194,7 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     )");
 
     generateServer(userHome, configDir, dataDir);
-    generateImport(dataDir, magicFile);
+    generateImport(dataDir, userHome / configDir, magicFile);
     generateTranscoding();
 
     std::ostringstream buf;
@@ -202,19 +202,76 @@ std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& 
     return buf.str();
 }
 
+void ConfigGenerator::generateOptions(const std::vector<std::pair<config_option_t, bool>>& options)
+{
+    for (auto&& [opt, isDefault] : options) {
+        if (isDefault || example)
+            setValue(opt);
+    }
+}
+
 void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
 {
     auto server = setValue("/server/");
     generateUi();
-    setValue(CFG_SERVER_NAME);
 
-    generateUdn();
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_SERVER_NAME, true },
+        { CFG_SERVER_UDN, true },
+        { CFG_SERVER_HOME, true },
+        { CFG_SERVER_WEBROOT, true },
+        { CFG_SERVER_PORT, false },
+        { CFG_SERVER_IP, false },
+        { CFG_SERVER_NETWORK_INTERFACE, false },
+        { CFG_SERVER_MANUFACTURER, false },
+        { CFG_SERVER_MANUFACTURER_URL, false },
+        { CFG_SERVER_MODEL_NAME, false },
+        { CFG_SERVER_MODEL_DESCRIPTION, false },
+        { CFG_SERVER_MODEL_NUMBER, false },
+        { CFG_SERVER_MODEL_URL, false },
+        { CFG_SERVER_SERIAL_NUMBER, false },
+        { CFG_SERVER_PRESENTATION_URL, false },
+        { CFG_SERVER_APPEND_PRESENTATION_URL_TO, false },
+        { CFG_SERVER_HOME_OVERRIDE, false },
+        { CFG_SERVER_TMPDIR, false },
+        { CFG_SERVER_HIDE_PC_DIRECTORY, false },
+        { CFG_SERVER_BOOKMARK_FILE, false },
+        { CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT, false },
+        { CFG_VIRTUAL_URL, false },
+        { CFG_EXTERNAL_URL, false },
+        { CFG_UPNP_LITERAL_HOST_REDIRECTION, false },
+        { CFG_UPNP_MULTI_VALUES_ENABLED, false },
+        { CFG_UPNP_SEARCH_SEPARATOR, false },
+        { CFG_UPNP_SEARCH_FILENAME, false },
+        { CFG_UPNP_SEARCH_ITEM_SEGMENTS, false },
+        { CFG_UPNP_SEARCH_CONTAINER_FLAG, false },
+        { CFG_UPNP_ALBUM_PROPERTIES, false },
+        { CFG_UPNP_ARTIST_PROPERTIES, false },
+        { CFG_UPNP_GENRE_PROPERTIES, false },
+        { CFG_UPNP_PLAYLIST_PROPERTIES, false },
+        { CFG_UPNP_TITLE_PROPERTIES, false },
+        { CFG_UPNP_ALBUM_NAMESPACES, false },
+        { CFG_UPNP_ARTIST_NAMESPACES, false },
+        { CFG_UPNP_GENRE_NAMESPACES, false },
+        { CFG_UPNP_PLAYLIST_NAMESPACES, false },
+        { CFG_UPNP_TITLE_NAMESPACES, false },
+        { CFG_UPNP_CAPTION_COUNT, false },
+#ifdef GRBDEBUG
+        { CFG_SERVER_DEBUG_MODE, false },
+#endif
+    };
 
-    fs::path homepath = userHome / configDir;
-    setValue(CFG_SERVER_HOME, homepath);
+    generateUdn(false);
 
-    fs::path webRoot = dataDir / DEFAULT_WEB_DIR;
-    setValue(CFG_SERVER_WEBROOT, webRoot);
+    {
+        auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
+        co->setDefaultValue(userHome / configDir);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_WEBROOT);
+        co->setDefaultValue(dataDir / DEFAULT_WEB_DIR);
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_MODEL_NUMBER);
+        co->setDefaultValue("42");
+    }
+    generateOptions(options);
 
     auto aliveinfo = server->append_child(pugi::node_comment);
     aliveinfo.set_value(fmt::format(R"(
@@ -230,24 +287,38 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
                             .c_str());
     setValue(CFG_SERVER_ALIVE_INTERVAL);
 
-    generateDatabase();
+    generateDatabase(dataDir);
     generateDynamics();
     generateExtendedRuntime();
 }
 
 void ConfigGenerator::generateUi()
 {
-    setValue(CFG_SERVER_UI_ENABLED);
-    setValue(CFG_SERVER_UI_SHOW_TOOLTIPS);
-    setValue(CFG_SERVER_UI_ACCOUNTS_ENABLED);
-    setValue(CFG_SERVER_UI_SESSION_TIMEOUT);
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_SERVER_UI_ENABLED, true },
+        { CFG_SERVER_UI_SHOW_TOOLTIPS, true },
+        { CFG_SERVER_UI_ACCOUNTS_ENABLED, true },
+        { CFG_SERVER_UI_SESSION_TIMEOUT, true },
+        { CFG_SERVER_UI_POLL_INTERVAL, false },
+        { CFG_SERVER_UI_POLL_WHEN_IDLE, false },
+        { CFG_SERVER_UI_ENABLE_NUMBERING, false },
+        { CFG_SERVER_UI_ENABLE_THUMBNAIL, false },
+        { CFG_SERVER_UI_ENABLE_VIDEO, false },
+        { CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE, false },
+        { CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN, false },
+    };
+    generateOptions(options);
     setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, DEFAULT_ACCOUNT_USER);
     setValue(CFG_SERVER_UI_ACCOUNT_LIST, ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD, DEFAULT_ACCOUNT_PASSWORD);
 }
 
 void ConfigGenerator::generateDynamics()
 {
-    setValue(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED);
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED, true },
+    };
+    generateOptions(options);
+
     setDictionary(CFG_SERVER_DYNAMIC_CONTENT_LIST);
 
     auto&& containersTag = ConfigDefinition::mapConfigOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
@@ -266,65 +337,231 @@ void ConfigGenerator::generateDynamics()
     setValue(container, ATTR_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
 }
 
-void ConfigGenerator::generateDatabase()
+void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
 {
-    setValue(CFG_SERVER_STORAGE_SQLITE_ENABLED);
-    setValue(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_SERVER_STORAGE_SQLITE_ENABLED, true },
+        { CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE, true },
+        { CFG_SERVER_STORAGE_USE_TRANSACTIONS, false },
+        { CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS, false },
+        { CFG_SERVER_STORAGE_SQLITE_JOURNALMODE, false },
+        { CFG_SERVER_STORAGE_SQLITE_RESTORE, false },
+        { CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE, false },
+        { CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, false },
 #ifdef SQLITE_BACKUP_ENABLED
-    setValue(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
-    setValue(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        { CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED, true },
+        { CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, true },
 #endif
+#ifdef HAVE_MYSQL
+        { CFG_SERVER_STORAGE_MYSQL_ENABLED, true },
+        { CFG_SERVER_STORAGE_MYSQL_HOST, true },
+        { CFG_SERVER_STORAGE_MYSQL_USERNAME, true },
+        { CFG_SERVER_STORAGE_MYSQL_DATABASE, true },
+        { CFG_SERVER_STORAGE_MYSQL_PORT, false },
+        { CFG_SERVER_STORAGE_MYSQL_SOCKET, false },
+        { CFG_SERVER_STORAGE_MYSQL_PASSWORD, false },
+        { CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE, false },
+        { CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, false },
+#endif
+    };
+    {
+        auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        co->setDefaultValue(prefixDir / "sqlite3.sql");
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+        co->setDefaultValue(prefixDir / "sqlite3-upgrade.xml");
+    }
 
 #ifdef HAVE_MYSQL
-    setValue(CFG_SERVER_STORAGE_MYSQL_ENABLED, NO);
-    setValue(CFG_SERVER_STORAGE_MYSQL_HOST);
-    setValue(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-    setValue(CFG_SERVER_STORAGE_MYSQL_DATABASE);
+    {
+        auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        co->setDefaultValue(prefixDir / "mysql.sql");
+        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+        co->setDefaultValue(prefixDir / "mysql-upgrade.xml");
+    }
 #endif
+
+    generateOptions(options);
 }
 
 void ConfigGenerator::generateExtendedRuntime()
 {
+    auto options = std::vector<std::pair<config_option_t, bool>>
+    {
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
-    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
-    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
-    setValue(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+        { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, true }, // clang does require additional indentation
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, true },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, true },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, true },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY, true },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED, false },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED, false },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, false },
+            { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, false },
 #endif
+            { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED, true },
+            { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, true },
+            { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, true },
+            { CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, true },
+#ifdef HAVE_LASTFMLIB
+            { CFG_SERVER_EXTOPTS_LASTFM_ENABLED, false },
+            { CFG_SERVER_EXTOPTS_LASTFM_USERNAME, false },
+            { CFG_SERVER_EXTOPTS_LASTFM_PASSWORD, false },
+#endif
+    };
+    generateOptions(options);
 
-    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
-    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
-    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND);
-    setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING);
     setValue(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& magicFile)
+void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
 {
-    setValue(CFG_IMPORT_HIDDEN_FILES);
-
+    // Simple Import options
+    auto options = std::vector<std::pair<config_option_t, bool>> {
 #ifdef HAVE_MAGIC
-    if (!magicFile.empty()) {
-        setValue(CFG_IMPORT_MAGIC_FILE, magicFile);
+        { CFG_IMPORT_MAGIC_FILE, true },
+#endif
+        { CFG_IMPORT_HIDDEN_FILES, true },
+        { CFG_IMPORT_FOLLOW_SYMLINKS, false },
+        { CFG_IMPORT_DEFAULT_DATE, false },
+        { CFG_IMPORT_LAYOUT_MODE, false },
+        { CFG_IMPORT_NOMEDIA_FILE, false },
+        { CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS, false },
+        { CFG_IMPORT_FILESYSTEM_CHARSET, false },
+        { CFG_IMPORT_METADATA_CHARSET, false },
+        { CFG_IMPORT_PLAYLIST_CHARSET, false },
+#ifdef HAVE_JS
+        { CFG_IMPORT_SCRIPTING_CHARSET, true },
+        { CFG_IMPORT_SCRIPTING_COMMON_FOLDER, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER, true },
+        { CFG_IMPORT_SCRIPTING_CUSTOM_FOLDER, false },
+        { CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS, false },
+        { CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS, false },
+        { CFG_IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR, false },
+#endif // HAVE_JS
+#ifdef HAVE_LIBEXIF
+        { CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_EXIF_CHARSET, false },
+#endif
+#ifdef HAVE_EXIV2
+        { CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_EXIV2_CHARSET, false },
+#endif
+#ifdef HAVE_TAGLIB
+        { CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_ID3_CHARSET, false },
+#endif
+#ifdef HAVE_FFMPEG
+        { CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, false },
+        { CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, false },
+#endif
+        { CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE, true },
+        { CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP, false },
+        { CFG_IMPORT_SYSTEM_DIRECTORIES, false },
+        { CFG_IMPORT_VISIBLE_DIRECTORIES, false },
+        { CFG_IMPORT_READABLE_NAMES, false },
+        { CFG_IMPORT_RESOURCES_ORDER, false },
+        { CFG_IMPORT_LAYOUT_PARENT_PATH, false },
+        { CFG_IMPORT_LAYOUT_MAPPING, false },
+        { CFG_IMPORT_LIBOPTS_ENTRY_SEP, false },
+        { CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, false },
+        { CFG_IMPORT_DIRECTORIES_LIST, false },
+        { CFG_IMPORT_RESOURCES_CASE_SENSITIVE, false },
+        { CFG_IMPORT_RESOURCES_FANART_FILE_LIST, false },
+        { CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, false },
+        { CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, false },
+        { CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, false },
+        { CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, false },
+        { CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION, false },
+        { CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT, false },
+        { CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH, false },
+        { CFG_IMPORT_RESOURCES_FANART_DIR_LIST, false },
+        { CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST, false },
+        { CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST, false },
+        { CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST, false },
+        { CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST, false },
+#ifdef HAVE_INOTIFY
+        { CFG_IMPORT_AUTOSCAN_USE_INOTIFY, false },
+#endif
+    };
+
+#ifdef HAVE_JS
+    // Set Script Folders
+    {
+        std::string scriptDir;
+        scriptDir = prefixDir / DEFAULT_JS_DIR;
+        auto co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
+        co->setDefaultValue(scriptDir);
+    }
+    {
+        std::string scriptDir;
+        scriptDir = configDir / DEFAULT_JS_DIR;
+        auto co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CUSTOM_FOLDER);
+        co->setDefaultValue(scriptDir);
     }
 #endif
 
-#ifdef HAVE_JS
-    setValue(CFG_IMPORT_SCRIPTING_CHARSET);
-
-    std::string scriptDir;
-    scriptDir = prefixDir / DEFAULT_JS_DIR;
-    setValue(CFG_IMPORT_SCRIPTING_COMMON_FOLDER, scriptDir);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE);
-    setValue(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER);
+#ifdef HAVE_MAGIC
+    if (!magicFile.empty()) {
+        auto co = ConfigDefinition::findConfigSetup(CFG_IMPORT_MAGIC_FILE);
+        co->setDefaultValue(magicFile);
+    }
 #endif
-    setValue(CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    if (example) {
+        // Generate Autoscan Example
+        auto&& directoryTag = ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY);
+#ifdef HAVE_INOTIFY
+        auto&& autoscanTag = ConfigDefinition::mapConfigOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), "", true);
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_LOCATION, "/media");
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_MODE, "inotify");
+#else
+        auto&& autoscanTag = ConfigDefinition::mapConfigOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
+        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), "", true);
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_LOCATION, "/media");
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_MODE, "timed");
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_INTERVAL, "1000");
+#endif
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE, "yes");
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES, "yes");
+        setValue(as, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE, "Any");
+    }
+    {
+        // Generate Charsets
+        auto co = ConfigDefinition::findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#ifdef HAVE_LIBEXIF
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_LIBOPTS_EXIF_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+#ifdef HAVE_EXIV2
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+#ifdef HAVE_TAGLIB
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_LIBOPTS_ID3_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+#ifdef HAVE_FFMPEG
+        co = ConfigDefinition::findConfigSetup(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+    }
+    generateOptions(options);
 
     generateMappings();
     generateBoxlayout(CFG_BOXLAYOUT_BOX);
@@ -348,6 +585,12 @@ void ConfigGenerator::generateMappings()
     setDictionary(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     setDictionary(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
     setVector(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE, false },
+        { CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS, false },
+    };
+    generateOptions(options);
 }
 
 void ConfigGenerator::generateBoxlayout(config_option_t option)
@@ -370,19 +613,34 @@ void ConfigGenerator::generateBoxlayout(config_option_t option)
 
 void ConfigGenerator::generateOnlineContent()
 {
+    auto options = std::vector<std::pair<config_option_t, bool>> {
 #ifdef ATRAILERS
-    setValue(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED);
-    setValue(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH);
-    setValue(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START);
-    setValue(CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION);
-#else
+        { CFG_ONLINE_CONTENT_ATRAILERS_ENABLED, true },
+        { CFG_ONLINE_CONTENT_ATRAILERS_REFRESH, true },
+        { CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START, true },
+        { CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION, true },
+        { CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER, false },
+#endif
+    };
+    generateOptions(options);
+
+#ifndef ATRAILERS
     setValue("/import/online-content/");
 #endif
 }
 
 void ConfigGenerator::generateTranscoding()
 {
-    setValue(CFG_TRANSCODING_TRANSCODING_ENABLED);
+    auto options = std::vector<std::pair<config_option_t, bool>> {
+        { CFG_TRANSCODING_TRANSCODING_ENABLED, true },
+        { CFG_TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED, false },
+        { CFG_TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED, false },
+#ifdef HAVE_CURL
+        { CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, false },
+        { CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE, false },
+#endif // HAVE_CURL
+    };
+    generateOptions(options);
     setDictionary(ATTR_TRANSCODING_MIMETYPE_PROF_MAP);
 
     const auto profileTag = ConfigDefinition::mapConfigOption(ATTR_TRANSCODING_PROFILES_PROFLE);
@@ -424,7 +682,10 @@ void ConfigGenerator::generateTranscoding()
     setValue(buffer, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
 }
 
-void ConfigGenerator::generateUdn()
+void ConfigGenerator::generateUdn(bool doExport)
 {
-    setValue(CFG_SERVER_UDN, fmt::format("uuid:{}", generateRandomId()));
+    auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_UDN);
+    co->setDefaultValue(fmt::format("uuid:{}", generateRandomId()));
+    if (doExport)
+        setValue(CFG_SERVER_UDN);
 }

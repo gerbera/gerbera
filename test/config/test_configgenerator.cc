@@ -36,7 +36,7 @@ public:
 
     void SetUp() override
     {
-        subject = new ConfigGenerator();
+        subject = new ConfigGenerator(false);
         subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";
@@ -78,7 +78,7 @@ TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 }
 #endif
 
-#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-config-minimal.xml");
@@ -171,7 +171,7 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-database-mysql.xml");
 
-    subject->generateDatabase();
+    subject->generateDatabase(prefixDir);
     auto server = subject->getNode("/server");
 
     std::ostringstream result;
@@ -186,7 +186,7 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-database-sqlite.xml");
 
-    subject->generateDatabase();
+    subject->generateDatabase(prefixDir);
     auto server = subject->getNode("/server");
 
     std::ostringstream result;
@@ -201,7 +201,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic.xml");
 
-    subject->generateImport(prefixDir, magicFile);
+    subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
 
     std::ostringstream result;
@@ -215,7 +215,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js.xml");
 
-    subject->generateImport(prefixDir, magicFile);
+    subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
 
     std::ostringstream result;
@@ -229,7 +229,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js-online.xml");
 
-    subject->generateImport(prefixDir, magicFile);
+    subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
 
     std::ostringstream result;
@@ -243,7 +243,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
 
-    subject->generateImport(prefixDir, magicFile);
+    subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
 
     std::ostringstream result;
@@ -304,3 +304,82 @@ TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID)
 
     EXPECT_THAT(result.str(), MatchesRegex("^uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"));
 }
+
+class ExampleConfigGeneratorTest : public ::testing::Test {
+
+public:
+    ExampleConfigGeneratorTest() = default;
+    ~ExampleConfigGeneratorTest() override = default;
+
+    void SetUp() override
+    {
+        subject = new ConfigGenerator(true);
+        subject->init();
+        homePath = "/tmp";
+        configDir = ".config/gerbera";
+        prefixDir = "/usr/local/share/gerbera";
+        magicFile = "magic.file";
+    }
+
+    void TearDown() override
+    {
+        delete subject;
+    }
+
+    static std::string mockConfigXml(const std::string& mockFile)
+    {
+        std::ifstream t(mockFile);
+        std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+        return str;
+    }
+
+    ConfigGenerator* subject;
+    std::string homePath;
+    std::string configDir;
+    std::string prefixDir;
+    std::string magicFile;
+};
+
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES) && defined(HAVE_EXIV2)
+TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions)
+{
+    std::string mockXml = mockConfigXml("fixtures/mock-example-exiv2-all.xml");
+
+    std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+
+    // remove UUID, for simple compare...TODO: mock UUID?
+    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+    result = std::regex_replace(result, reg, "<udn/>");
+
+    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+}
+#endif
+
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES) && !defined(HAVE_EXIV2)
+TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
+{
+    std::string mockXml = mockConfigXml("fixtures/mock-example-all.xml");
+
+    std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+
+    // remove UUID, for simple compare...TODO: mock UUID?
+    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+    result = std::regex_replace(result, reg, "<udn/>");
+
+    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+}
+#endif
+
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+TEST_F(ExampleConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
+{
+    std::string mockXml = mockConfigXml("fixtures/mock-example-minimal.xml");
+
+    std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+
+    // remove UUID, for simple compare...TODO: mock UUID?
+    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+    result = std::regex_replace(result, reg, "<udn/>");
+    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+}
+#endif

@@ -292,6 +292,7 @@ int main(int argc, char** argv, char** envp)
         ("v,version", "Print version info and exit") //
         ("compile-info", "Print compile info and exit") //
         ("create-config", "Print a default config.xml file and exit") //
+        ("create-example-config", "Print a example config.xml file and exit") //
         ("check-config", "Check config.xml file and exit") //
         ("print-options", "Print simple config options and exit") //
         ("offline", "Do not answer UPnP content requests") // good for initial scans
@@ -557,8 +558,8 @@ int main(int argc, char** argv, char** envp)
         if (!dataDir.has_value())
             dataDir = PACKAGE_DATADIR;
 
-        if (opts.count("create-config") > 0) {
-            ConfigGenerator configGenerator;
+        if (opts.count("create-config") > 0 || opts.count("create-example-config") > 0) {
+            ConfigGenerator configGenerator(opts.count("create-example-config") > 0);
             if (opts.count("cfgdir") == 0) {
                 confdir = "";
             }
@@ -610,6 +611,8 @@ int main(int argc, char** argv, char** envp)
             server->init(offline);
             server->run();
         } catch (const UpnpException& ue) {
+            log_error("{}", ue.what());
+
             sigemptyset(&maskSet);
             pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
 
