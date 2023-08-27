@@ -22,7 +22,13 @@ similar to the message below
 
   $ gerbera --create-config
 
-This command outputs the ``config.xml`` to the standard output.
+This command outputs the ``config.xml`` to the standard output with all mandatory settings.
+After upgrading you should run this as well to check for any new or changed options.
+
+You can also ``gerbera --create-example-config`` to get almost all options written to the output. You have to validate all generated settings and
+adjust them to your preferences. There are several empty options you have to fill in or remove before your configuration will work.
+
+You can use ``gerbera --check-config -c <file>`` to verify your settings before starting the service.
 
 * Run command to create configuration, storing in the ``/etc/gerbera`` directory.
 
@@ -37,7 +43,7 @@ You can start Gerbera with similar command as below:
   $ gerbera -c /etc/gerbera/config.xml
 
 
-**NOTE**
+**NOTES**
 
 * You might need to create the directory gerbera inside the `~/.config/` folder and change the owner to gerbera
     - `mkdir ~/.config/gerbera`
