@@ -31,7 +31,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 ### Code Improvements
 
 - Update Javascript libraries
-- Update versions of libexiv2 (v0.27.7), fmt (10.1.0), spdlog (1.12.0) and taglib (1.13.1)
+- Update versions of pupnp (1.14.18), libexiv2 (v0.27.7), fmt (10.1.0), spdlog (1.12.0) and taglib (1.13.1)
 
 ## v1.12.1
 

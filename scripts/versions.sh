@@ -41,7 +41,7 @@ else
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
     PUGIXML="1.13"
-    PUPNP="1.14.17"
+    PUPNP="1.14.18"
     SPDLOG="1.12.0"
     WAVPACK="5.6.0"
     TAGLIB="1.13.1"
