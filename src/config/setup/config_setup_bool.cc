@@ -79,20 +79,6 @@ std::shared_ptr<ConfigOption> ConfigBoolSetup::newOption(bool optValue)
     return optionValue;
 }
 
-bool ConfigBoolSetup::CheckSqlLiteRestoreValue(std::string& value)
-{
-    bool tmpBool = true;
-    if (value == "restore" || value == YES)
-        tmpBool = true;
-    else if (value == "fail" || value == NO)
-        tmpBool = false;
-    else
-        return false;
-
-    value.assign(tmpBool ? YES : NO);
-    return true;
-}
-
 bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
 {
     bool tempBool = false;

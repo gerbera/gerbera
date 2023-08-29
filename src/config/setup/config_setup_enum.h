@@ -111,7 +111,7 @@ public:
         if (!checkEnumValue(optValue, result)) {
             throw_std_runtime_error("Error in config file: {} unsupported Enum value '{}'", xpath, optValue);
         }
-        optionValue = std::make_shared<EnumOption<En>>(result);
+        optionValue = std::make_shared<EnumOption<En>>(result, mapEnumValue(result));
         return optionValue;
     }
 };

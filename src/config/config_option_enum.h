@@ -32,12 +32,13 @@
 template <class Enum>
 class EnumOption : public ConfigOption {
 public:
-    explicit EnumOption(Enum option)
+    explicit EnumOption(Enum option, const std::string& optionString)
         : option(option)
+        , optionString(optionString)
     {
     }
 
-    std::string getOption() const override { return fmt::format("{}", option); }
+    std::string getOption() const override { return optionString.length() == 0 ? fmt::format("{}", option) : optionString; }
 
     Enum getEnumOption() const { return option; }
 
@@ -53,6 +54,7 @@ public:
 
 private:
     Enum option;
+    std::string optionString;
 };
 
 #endif // __CONFIG_OPTION_ENUM_H__

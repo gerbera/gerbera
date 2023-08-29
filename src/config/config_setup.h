@@ -49,6 +49,7 @@ using ArrayItemCheckFunction = std::function<bool(const std::string& value)>;
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 using IntCheckFunction = std::function<bool(int value)>;
 using IntParseFunction = std::function<int(const std::string& value)>;
+using IntPrintFunction = std::function<std::string(int value)>;
 using IntMinFunction = std::function<bool(int value, int minValue)>;
 
 using ConfigOptionIterator = EnumIterator<config_option_t, config_option_t::CFG_MIN, config_option_t::CFG_MAX>;
@@ -194,7 +195,6 @@ public:
 
     std::shared_ptr<ConfigOption> newOption(const std::string& optValue);
 
-    static bool CheckSqlJournalMode(std::string& value);
     static bool CheckCharset(std::string& value);
 };
 
@@ -258,20 +258,19 @@ class ConfigIntSetup : public ConfigSetup {
 protected:
     IntCheckFunction valueCheck = nullptr;
     IntParseFunction parseValue = nullptr;
+    IntPrintFunction printValue = nullptr;
     IntMinFunction minCheck = nullptr;
     int minValue {};
 
 public:
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help)
         : ConfigSetup(option, xpath, help)
-
     {
         this->defaultValue = fmt::to_string(0);
     }
 
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue)
         : ConfigSetup(option, xpath, help)
-
     {
         this->defaultValue = fmt::to_string(defaultValue);
     }
@@ -279,23 +278,22 @@ public:
     ConfigIntSetup(config_option_t option, const char* xpath, const char* help, IntCheckFunction check)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
-
     {
         this->defaultValue = fmt::to_string(0);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntParseFunction parseValue)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntParseFunction parseValue, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , parseValue(std::move(parseValue))
-
+        , printValue(std::move(printValue))
     {
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, int defaultValue, IntCheckFunction check, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
-
+        , printValue(std::move(printValue))
     {
         this->defaultValue = fmt::to_string(defaultValue);
     }
@@ -308,17 +306,17 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
-
+        , printValue(std::move(printValue))
     {
         this->defaultValue = defaultValue;
     }
 
-    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check)
+    ConfigIntSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
-
+        , printValue(std::move(printValue))
     {
     }
 
@@ -334,9 +332,7 @@ public:
 
     int checkIntValue(std::string& sVal, const std::string& pathName = "") const;
 
-    std::string getCurrentValue() const override { return optionValue ? fmt::to_string(optionValue->getIntOption()) : ""; }
-
-    static bool CheckSqlLiteSyncValue(std::string& value);
+    std::string getCurrentValue() const override { return optionValue ? optionValue->getOption() : ""; }
 
     static bool CheckProfileNumberValue(std::string& value);
 
@@ -383,8 +379,6 @@ public:
     std::shared_ptr<ConfigOption> newOption(bool optValue);
 
     std::string getCurrentValue() const override { return optionValue ? fmt::to_string(optionValue->getBoolOption()) : ""; }
-
-    static bool CheckSqlLiteRestoreValue(std::string& value);
 
     static bool CheckInotifyValue(std::string& value);
 

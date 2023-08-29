@@ -98,30 +98,11 @@ std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
     if (minCheck && !minCheck(optValue, minValue)) {
         throw_std_runtime_error("Invalid {} value {}, must be at least {}", xpath, optValue, minValue);
     }
-    optionValue = std::make_shared<IntOption>(optValue);
-    return optionValue;
-}
-
-#define MT_SQLITE_SYNC_EXTRA 3
-#define MT_SQLITE_SYNC_FULL 2
-#define MT_SQLITE_SYNC_NORMAL 1
-#define MT_SQLITE_SYNC_OFF 0
-
-bool ConfigIntSetup::CheckSqlLiteSyncValue(std::string& value)
-{
-    auto tempInt = 0;
-    if (value == "off" || value == fmt::to_string(MT_SQLITE_SYNC_OFF))
-        tempInt = MT_SQLITE_SYNC_OFF;
-    else if (value == "normal" || value == fmt::to_string(MT_SQLITE_SYNC_NORMAL))
-        tempInt = MT_SQLITE_SYNC_NORMAL;
-    else if (value == "full" || value == fmt::to_string(MT_SQLITE_SYNC_FULL))
-        tempInt = MT_SQLITE_SYNC_FULL;
-    else if (value == "extra" || value == fmt::to_string(MT_SQLITE_SYNC_EXTRA))
-        tempInt = MT_SQLITE_SYNC_EXTRA;
+    if (printValue)
+        optionValue = std::make_shared<IntOption>(optValue, printValue(optValue));
     else
-        return false;
-    value.assign(fmt::to_string(tempInt));
-    return true;
+        optionValue = std::make_shared<IntOption>(optValue);
+    return optionValue;
 }
 
 bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
