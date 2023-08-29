@@ -228,7 +228,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
 
     // update currentContent
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
-        if (stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
+        if (stateEntry && stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
             auto entry = currentContent.find(stateEntry->getObject()->getID());
             if (entry != currentContent.end()) {
                 currentContent.erase(stateEntry->getObject()->getID());

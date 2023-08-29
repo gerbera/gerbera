@@ -44,6 +44,7 @@
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "content/layout/box_layout.h"
+#include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
@@ -523,13 +524,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "gerbera.db", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
         "/server/storage/sqlite3/synchronous", "config-server.html#storage",
-        "off", ConfigIntSetup::CheckSqlLiteSyncValue),
+        "off", SqliteConfig::CheckSqlLiteSyncValue, SqliteConfig::PrintSqlLiteSyncValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE_JOURNALMODE,
         "/server/storage/sqlite3/journal-mode", "config-server.html#storage",
-        "WAL", StringCheckFunction(ConfigStringSetup::CheckSqlJournalMode)),
+        "WAL", StringCheckFunction(SqliteConfig::CheckSqlJournalMode)),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_RESTORE,
         "/server/storage/sqlite3/on-error", "config-server.html#storage",
-        "restore", StringCheckFunction(ConfigBoolSetup::CheckSqlLiteRestoreValue)),
+        "restore", StringCheckFunction(SqliteConfig::CheckSqlLiteRestoreValue)),
 #ifdef SQLITE_BACKUP_ENABLED
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
@@ -591,7 +592,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef GRBDEBUG
     std::make_shared<ConfigIntSetup>(CFG_SERVER_DEBUG_MODE,
         "/server/attribute::debug-mode", "config-server.html#debug-mode",
-        0, GrbLogger::makeFacility),
+        0, GrbLogger::makeFacility, GrbLogger::printFacility),
 #endif
 
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST,
@@ -611,7 +612,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS,
         "flags", "config-clients.html#client",
-        0, ClientConfig::makeFlags),
+        0, ClientConfig::makeFlags, ClientConfig::mapFlags),
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP,
         "ip", "config-clients.html#client",
         ""),
@@ -1375,6 +1376,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "path", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION,
         "script-option", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_NAME,
+        "name", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE,
+        "value", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_GENRE,
         "genre", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_SYSTEM_DIR_ADD_PATH,

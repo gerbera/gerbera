@@ -65,6 +65,24 @@ int GrbLogger::remapFacility(const std::string& flag)
     return stoiString(flag, 0, 0);
 }
 
+std::string GrbLogger::printFacility(int facility)
+{
+    std::vector<std::string> myFlags;
+
+    for (auto [bit, label] : facilities) {
+        if (facility & (1 << to_underlying(bit))) {
+            myFlags.emplace_back(label.data());
+            facility &= ~(1 << to_underlying(bit));
+        }
+    }
+
+    if (facility) {
+        myFlags.push_back(fmt::format("{:#04x}", facility));
+    }
+
+    return fmt::format("{}", fmt::join(myFlags, " | "));
+}
+
 int GrbLogger::makeFacility(const std::string& optValue)
 {
     std::vector<std::string> flagsVector = splitString(optValue, '|', false);

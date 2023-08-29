@@ -104,6 +104,7 @@ public:
     {
         return GrbLogger::facilities[facility];
     }
+    static std::string printFacility(int facility);
     static int remapFacility(const std::string& optValue);
     static int makeFacility(const std::string& optValue);
 
