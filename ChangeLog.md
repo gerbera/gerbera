@@ -1,6 +1,7 @@
 ## Gerbera - UPnP AV Mediaserver.
 
  - Add audio to year container
+ - Add cleanup of missing entries to grb import mode
  - Add option for external URL to be used in web page.
  - Add Support for Configuration of Virtual Layout
  - Add support for nomedia file / add options to block default M_DATE
@@ -12,13 +13,18 @@
  - Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
  - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
+ - Config WebUI: Catch up with all config changes
+ - Config: Generate Example Configuration
  - Database items sorting case insensitive
  - DB rework playstatus save
+ - DB: Don't fail on uncritical operations.
  - debian: bookworm is now stable
  - Docker: Add JPEG libs
  - Docker: git badge update
  - Fix conan
  - Fix handling transcoding requests
+ - Fix spelling errors reported by lintian
+ - Fix troff warning
  - Fully implement Thumbnail handling for grb mode
  - Gerbera-Web: Update npm packages
  - Import: Add staged import process
@@ -28,6 +34,7 @@
  - Rework javascript mechanism
  - Set defaults for autoscan settings
  - Transcoding: Improve docs and examples
+ - Update Library Versions and Documentation
  - Update README.Docker.md -Add docker volume section
  - Update supported-devices.rst
  - Update to latest npm packages

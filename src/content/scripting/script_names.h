@@ -110,6 +110,8 @@ const static auto upnp_classes = std::map<const std::string_view, const std::str
 
     { UPNP_CLASS_PHOTO_ALBUM, "UPNP_CLASS_CONTAINER_ITEM_IMAGE" },
     { UPNP_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER" },
+
+    { UPNP_CLASS_DYNAMIC_CONTAINER, "UPNP_CLASS_DYNAMIC_CONTAINER" },
 };
 
 #endif

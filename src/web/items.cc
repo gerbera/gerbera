@@ -50,6 +50,7 @@ Web::Items::Items(const std::shared_ptr<ContentManager>& content, std::shared_pt
 /// \brief orocess request for item list in ui
 void Web::Items::process()
 {
+    log_debug("start process()");
     checkRequest();
 
     int parentID = intParam("parent_id");
@@ -83,8 +84,8 @@ void Web::Items::process()
     // items.append_attribute("returned") = arr->size();
     items.append_attribute("total_matches") = param.getTotalMatches();
 
-    bool protectContainer = false;
-    bool protectItems = false;
+    bool protectContainer = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
+    bool protectItems = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
     std::string autoscanMode = "none";
 
     auto parentDir = database->getAutoscanDirectory(parentID);
@@ -155,4 +156,5 @@ void Web::Items::process()
         }
         cnt++;
     }
+    log_debug("end process()");
 }
