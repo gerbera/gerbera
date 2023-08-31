@@ -63,6 +63,8 @@
 #define UPNP_CLASS_MUSIC_ORCHESTRA "object.container.person.musicOrchestra"
 #define UPNP_CLASS_PLAYLIST_CONTAINER "object.container.playlistContainer"
 
+#define UPNP_CLASS_DYNAMIC_CONTAINER "object.container.dynamicFolder"
+
 // transferMode
 #define UPNP_DLNA_TRANSFER_MODE_HEADER "transferMode.dlna.org"
 #define UPNP_DLNA_TRANSFER_MODE_STREAMING "Streaming"

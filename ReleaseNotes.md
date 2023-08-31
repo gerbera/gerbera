@@ -11,11 +11,12 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 
 ### NEW Features
 
-- Case insensitive sorting for databases
-- Config options as command line arguments
 - Staged importing that allows updating the virtual layout instead of deleting and recreating it each time
+- Config options as command line arguments
 - Configuration of containers in virtual layout: title can be changed, some nodes can be disabled
 - New mode of loading Javascript plugins with cleanup of global variables
+- Generation of example configuration via command line option
+- Case insensitive sorting for databases
 - New config options for URL handling and host redirection
 - Use `.nomedia` to hide directory, incl. config option
 - Support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
@@ -31,7 +32,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 ### Code Improvements
 
 - Update Javascript libraries
-- Update versions of pupnp (1.14.18), libexiv2 (v0.27.7), fmt (10.1.0), spdlog (1.12.0) and taglib (1.13.1)
+- Update versions of pupnp (1.14.18), libexiv2 (v0.27.7), fmt (10.1.1), spdlog (1.12.0) and taglib (1.13.1)
 
 ## v1.12.1
 
