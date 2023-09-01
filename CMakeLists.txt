@@ -103,6 +103,8 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_int.cc
         src/config/setup/config_setup_path.cc
         src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_time.cc
+        src/config/setup/config_setup_time.h
         src/config/setup/config_setup_transcoding.cc
         src/config/setup/config_setup_transcoding.h
         src/config/setup/config_setup_tweak.cc

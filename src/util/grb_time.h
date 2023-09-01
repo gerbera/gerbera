@@ -48,4 +48,6 @@ std::chrono::milliseconds currentTimeMS();
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
+bool parseTime(int& value, std::string& timeValue, bool seconds = true);
+
 #endif // __GRB_TIME_H__
