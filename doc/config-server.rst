@@ -410,7 +410,7 @@ Note:
     * Default: **2**
 
     The poll-interval is an integer value which specifies how often the UI will poll for tasks. The interval is
-    specified in seconds, only values greater than zero are allowed.
+    specified in seconds, only values greater than zero are allowed. The value can be given in a valid time format.
 
     ::
 
@@ -465,7 +465,7 @@ Note:
 
         The session-timeout attribute specifies the timeout interval in minutes. The server checks every
         five minutes for sessions that have timed out, therefore in the worst case the session times out
-        after session-timeout + 5 minutes.
+        after session-timeout + 5 minutes. The value can be given in a valid time format.
 
     Accounts can be defined as shown below:
 
@@ -619,7 +619,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
         .. code-block:: xml
 
-            <backup enabled="no" interval="6000"/>
+            <backup enabled="no" interval="15:00"/>
 
         * Optional
 
@@ -641,7 +641,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
                 * Optional
                 * Default: **600**
 
-                Defines the backup interval in seconds.
+                Defines the backup interval in seconds. The value can be given in a valid time format.
 
     **MySQL**
 

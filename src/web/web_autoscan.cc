@@ -112,7 +112,9 @@ void Web::Autoscan::process()
             // bool persistent = boolParam("persistent");
 
             AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
-            int interval = intParam("interval", 0);
+            int interval;
+            auto intervalParam = param("interval");
+            parseTime(interval, intervalParam);
             if (scanMode == AutoscanScanMode::Timed && interval <= 0)
                 throw_std_runtime_error("illegal interval given");
 
