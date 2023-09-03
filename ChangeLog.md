@@ -14,6 +14,7 @@
  - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
  - Config WebUI: Catch up with all config changes
+ - Config: Add support for time specifications
  - Config: Generate Example Configuration
  - Database items sorting case insensitive
  - DB rework playstatus save
@@ -40,6 +41,7 @@
  - Update to latest npm packages
  - Update versions of exiv2, fmt, spdlog, googletest and taglib
  - Use new ffmpeg channel layout API
+ - WebUI: Database View - don't allow deleting dynamic containers
  - WebUI: Update JS libs
  - WebUI: Update popper to 2.11.6  / Update MD5 to 2.19.0
 

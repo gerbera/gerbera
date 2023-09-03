@@ -596,7 +596,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
-            setValue(item, adir->getInterval());
+            setValue(item, adir->getInterval().count());
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
@@ -604,7 +604,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE);
-            setValue(item, adir->getMediaType());
+            setValue(item, AutoscanDirectory::mapMediaType(adir->getMediaType()));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
