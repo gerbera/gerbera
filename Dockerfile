@@ -102,6 +102,7 @@ COPY --from=builder /gerbera_build/scripts/docker/docker-entrypoint.sh /usr/loca
 
 RUN addgroup -S gerbera 2>/dev/null && \
     adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G gerbera -g gerbera gerbera 2>/dev/null && \
+    addgroup gerbera video && \
     mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
     mkdir /content && chmod 777 /content
 
