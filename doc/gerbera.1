@@ -26,6 +26,8 @@ gerbera \- UPnP MediaServer
 ] [
 \fB--create-config\fR
 ] [
+\fB--create-example-config\fR
+] [
 \fB--check-config\fR
 ] [
 \fB--print-options\fR
@@ -96,8 +98,8 @@ name and location of your choice. The file name must be absolute.
 .TP
 \*(T<\fB\-m\fR\*(T>, \*(T<\fB\-\-home\fR\*(T>
 Specify an alternative home directory. By default Gerbera will try to
-retrieve the users home directory from the environment (HOME), then it will look for a
-.config/gerbera directory in users home. If .config/gerbera was found we will try to find
+retrieve the users home directory from the environment (HOME), then it will look for
+the .config/gerbera directory in users home. If .config/gerbera was found we will try to find
 the default configuration file (config.xml).
 
 This option is useful in two cases: when the home directory cannot be
@@ -145,7 +147,8 @@ Daemonize after startup.
 Print the compilation configuration (defaults for used libraries and enabled features) and exit.
 .TP
 \*(T<\fB\-\-create\-config\fR\*(T>
-Output the default configuration to stdout and exit.
+\*(T<\fB\-\-create\-example\-config\fR\*(T>
+Output the default/example configuration to stdout and exit.
 Copy the output to your config.xml and adjust to your needs.
 .TP
 \*(T<\fB\-\-check\-config\fR\*(T>

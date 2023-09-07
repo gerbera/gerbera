@@ -220,3 +220,66 @@ TEST(ToolsTest, pathToMapTest)
     ASSERT_EQ(values.size(), 1);
     EXPECT_EQ(values[""], "meh");
 }
+
+TEST(ToolsTest, parseTimeTest)
+{
+    std::string value = "01:01:01:01";
+    int result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, 90061);
+    EXPECT_EQ(value, "90061");
+
+    value = "01:01:01";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, 3661);
+    EXPECT_EQ(value, "3661");
+
+    value = "51:01";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, 3061);
+    EXPECT_EQ(value, "3061");
+
+    value = "61:01";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, 3661);
+    EXPECT_EQ(value, "3661");
+
+    value = "10";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, 10);
+    EXPECT_EQ(value, "10");
+
+    value = "-10";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), true);
+    EXPECT_EQ(result, -10);
+    EXPECT_EQ(value, "-10");
+
+    value = "-51:01";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), false);
+    EXPECT_EQ(result, 0);
+    EXPECT_EQ(value, "-51:01");
+
+    value = "51:x";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), false);
+    EXPECT_EQ(result, 0);
+    EXPECT_EQ(value, "51:x");
+
+    value = "51:x1";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), false);
+    EXPECT_EQ(result, 0);
+    EXPECT_EQ(value, "51:x1");
+
+    value = "1x:1x";
+    result = -1;
+    ASSERT_EQ(parseTime(result, value), false);
+    EXPECT_EQ(result, 0);
+    EXPECT_EQ(value, "1x:1x");
+}

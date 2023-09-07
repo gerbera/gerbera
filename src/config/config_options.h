@@ -127,15 +127,18 @@ private:
 
 class IntOption : public ConfigOption {
 public:
-    explicit IntOption(int option)
+    explicit IntOption(int option, const std::string& optionString = "")
         : option(option)
+        , optionString(optionString)
     {
     }
 
+    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
     int getIntOption() const override { return option; }
 
 private:
     int option;
+    std::string optionString;
 };
 
 class BoolOption : public ConfigOption {

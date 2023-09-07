@@ -518,7 +518,7 @@ the removed directory if it becomes available/gets created again.
 
         * Required: **for ”timed” mode**
 
-        Scan interval in seconds.
+        Scan interval in seconds. The value can be given in a valid time format.
 
         ::
 

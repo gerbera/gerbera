@@ -32,27 +32,33 @@
 
 class ConfigGenerator {
 public:
+    ConfigGenerator(bool example)
+        : example(example)
+    {
+    }
     std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile);
 
     void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
     void generateUi();
     void generateExtendedRuntime();
     void generateDynamics();
-    void generateDatabase();
-    void generateImport(const fs::path& prefixDir, const fs::path& magicFile);
+    void generateDatabase(const fs::path& prefixDir);
+    void generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
     void generateMappings();
     void generateBoxlayout(config_option_t option);
     void generateOnlineContent();
     void generateTranscoding();
-    void generateUdn();
+    void generateUdn(bool doExport = true);
 
     std::shared_ptr<pugi::xml_node> init();
 
     std::shared_ptr<pugi::xml_node> getNode(const std::string& tag) const;
 
 protected:
+    bool example { false };
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     pugi::xml_document doc;
+    void generateOptions(const std::vector<std::pair<config_option_t, bool>>& options);
     std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
 
     std::shared_ptr<pugi::xml_node> setDictionary(config_option_t option);

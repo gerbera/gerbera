@@ -98,7 +98,7 @@ public:
 
     std::string createConfig() const
     {
-        ConfigGenerator configGenerator;
+        ConfigGenerator configGenerator(false);
         return configGenerator.generate(home, confdir, prefix, magic);
     }
 

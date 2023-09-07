@@ -50,14 +50,6 @@ std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& op
     return optionValue;
 }
 
-static constexpr auto sqliteJournalModes = std::array<std::string_view, 6> { "DELETE", "TRUNCATE", "PERSIST", "MEMORY", "WAL", "OFF" };
-
-bool ConfigStringSetup::CheckSqlJournalMode(std::string& value)
-{
-    value.assign(toUpper(value));
-    return std::find(sqliteJournalModes.begin(), sqliteJournalModes.end(), value) != sqliteJournalModes.end();
-}
-
 bool ConfigStringSetup::CheckCharset(std::string& value)
 {
     try {

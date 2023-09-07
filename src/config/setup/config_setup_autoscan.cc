@@ -31,6 +31,7 @@
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
 #include "config/setup/config_setup_enum.h"
+#include "config/setup/config_setup_time.h"
 #include "content/autoscan.h"
 #include "content/autoscan_list.h"
 
@@ -83,7 +84,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
 
         unsigned int interval = 0;
         if (mode == AutoscanScanMode::Timed) {
-            interval = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
+            interval = ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }
 
         bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
@@ -137,7 +138,7 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, fmt::to_string(entry->getInterval().count()));
-        entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkIntValue(optValue)));
+        entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkTimeValue(optValue)));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getInterval().count());
         return true;
     }

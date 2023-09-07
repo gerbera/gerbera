@@ -1,861 +1,1024 @@
 {
-	"config": [
-		{
-			"item": "/status",
-			"caption": "Status",
-			"type": "Element",
-			"editable": false,
-			"children": [
-				{
-					"item": "/status/attribute::totalCount",
-					"caption": "Total Media Files",
-					"editable": false,
-					"type": "Number"
-				},
-				{
-					"item": "/status/attribute::audioCount",
-					"caption": "Audio Files",
-					"editable": false,
-					"type": "Number"
-				},
-				{
-					"item": "/status/attribute::videoCount",
-					"caption": "Video Files",
-					"editable": false,
-					"type": "Number"
-				},
-				{
-					"item": "/status/attribute::imageCount",
-					"caption": "Image Files",
-					"editable": false,
-					"type": "Number"
-				}
-			]
-		},
-		{
-			"item": "/server",
-			"caption": "Server",
-			"type": "Element",
-			"editable": true,
-			"children": [
-				{
-					"item": "/server/name",
-					"caption": "Name",
-					"editable": false
-				},
-				{
-					"item": "/server/interface",
-					"caption": "Network Interface",
-					"editable": false
-				},
-				{
-					"item": "/server/port",
-					"caption": "Network Port",
-					"editable": false
-				},
-				{
-					"item": "/server/manufacturer",
-					"caption": "Manufacturer Name",
-					"editable": true
-				},
-				{
-					"item": "/server/manufacturerURL",
-					"caption": "Manufacturer Url",
-					"editable": true
-				},
-				{
-					"item": "/server/modelDescription",
-					"caption": "Model Description",
-					"editable": true
-				},
-				{
-					"item": "/server/modelName",
-					"caption": "Model Name",
-					"editable": true
-				},
-				{
-					"item": "/server/modelNumber",
-					"caption": "Model Number",
-					"editable": true
-				},
-				{
-					"item": "/server/serialNumber",
-					"caption": "Serial Number",
-					"editable": true
-				},
-				{
-					"item": "/server/presentationURL",
-					"caption": "Presentation Url",
-					"editable": true
-				},
-				{
-					"item": "/server/modelURL",
-					"caption": "Model Url",
-					"editable": true
-				},
-				{
-					"item": "/server/ip",
-					"caption": "IP Address",
-					"editable": false
-				},
-				{
-					"item": "/server/udn",
-					"caption": "UDN",
-					"editable": false
-				},
-				{
-					"item": "/server/home",
-					"caption": "Home",
-					"editable": false
-				},
-				{
-					"item": "/server/webroot",
-					"caption": "Web Root",
-					"editable": true
-				},
-				{
-					"item": "/server/tmpdir",
-					"caption": "Temporary Dir",
-					"editable": false
-				},
-				{
-					"item": "/server/alive",
-					"caption": "Alive Interval",
-					"editable": true
-				}
-			]
-		},
-		{
-			"item": "/server/storage",
-			"caption": "Storage",
-			"type": "Element",
-			"editable": true,
-			"children": [
-				{
-					"item": "/server/storage/driver",
-					"caption": "DB Driver",
-					"editable": false
-				},
-				{
-					"item": "/server/storage/sqlite3",
-					"caption": "SQLite",
-					"type": "Element",
-					"editable": true,
-					"children": [
-						{
-							"item": "/server/storage/sqlite3/attribute::enabled",
-							"caption": "SQLite enabled",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/sqlite3/database-file",
-							"caption": "SQLite database-file",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/sqlite3/on-error",
-							"caption": "SQLite restore",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/sqlite3/synchronous",
-							"caption": "SQLite synchronous",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/sqlite3/backup/attribute::enabled",
-							"caption": "SQLite backup",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/sqlite3/backup/attribute::interval",
-							"caption": "SQLite backup interval",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/server/storage/mysql",
-					"caption": "MySQL",
-					"type": "Element",
-					"editable": true,
-					"children": [
-						{
-							"item": "/server/storage/mysql/attribute::enabled",
-							"caption": "MySQL enabled",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/host",
-							"caption": "MySQL host",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/port",
-							"caption": "MySQL port",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/username",
-							"caption": "MySQL username",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/password",
-							"caption": "MySQL password",
-							"type": "Password",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/socket",
-							"caption": "MySQL socket",
-							"editable": false
-						},
-						{
-							"item": "/server/storage/mysql/database",
-							"caption": "MySQL database",
-							"editable": false
-						}
-					]
-				}
-			]
-		},
-		{
-			"item": "/server/ui",
-			"caption": "UI",
-			"type": "Element",
-			"editable": true,
-			"children": [
-				{
-					"item": "/server/ui/attribute::enabled",
-					"caption": "UI enabled",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/attribute::poll-interval",
-					"caption": "Poll Interval",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/attribute::show-tooltips",
-					"caption": "Show Tooltips",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/attribute::show-thumbnail",
-					"caption": "Show Thumbnail",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/attribute::show-numbering",
-					"caption": "Show Track Numbering",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/attribute::poll-when-idle",
-					"caption": "Poll When Idle",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/accounts/attribute::enabled",
-					"caption": "Accounts enabled",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/accounts/attribute::session-timeout",
-					"caption": "Accounts session-timeout",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/accounts",
-					"caption": "Accounts",
-					"type": "List",
-					"editable": true,
-					"children": [
-					]
-				},
-				{
-					"item": "/server/ui/items-per-page/attribute::default",
-					"caption": "Items Per Page Default",
-					"editable": true
-				},
-				{
-					"item": "/server/ui/items-per-page",
-					"caption": "Items Per Page",
-					"type": "List",
-					"editable": true,
-					"children": [
-					]
-				}
-			]
-		},
-		{
-			"item": "/import",
-			"caption": "Import",
-			"type": "Element",
-			"editable": true,
-			"children": [
-				{
-					"item": "/import/attribute::hidden-files",
-					"caption": "Import Hidden Files",
-					"editable": true
-				},
-				{
-					"item": "/import/attribute::follow-symlinks",
-					"caption": "Follow Symlinks",
-					"editable": true
-				},
-				{
-					"item": "/import/autoscan/attribute::use-inotify",
-					"caption": "Use Inotify",
-					"editable": true
-				},
-				{
-					"item": "/import/layout/attribute::parent-path",
-					"caption": "Create Parent in Path",
-					"editable": true
-				},
-				{
-					"item": "/import/autoscan/timed/directory",
-					"caption": "Timed Autoscan Directories",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/autoscan/timed/directory/attribute::location",
-							"caption": "Location",
-							"editable": true
-						},
-						{
-							"item": "/import/autoscan/timed/directory/attribute::mode",
-							"caption": "Mode",
-							"type": "String",
-							"value": "timed",
-							"editable": false
-						},
-						{
-							"item": "/import/autoscan/timed/directory/attribute::interval",
-							"caption": "Scan Interval",
-							"editable": true
-						},
-						{
-							"item": "/import/autoscan/timed/directory/attribute::recursive",
-							"caption": "Recursive",
-							"editable": true
-						},
-						{
-							"item": "/import/autoscan/timed/directory/attribute::media-type",
-							"caption": "Mediatype",
-							"editable": false
-						},
-						{
-							"item": "/import/autoscan/timed/directory/attribute::hidden-files",
-							"caption": "Import Hidden Files",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/autoscan/inotify/directory",
-					"caption": "INotify Autoscan Directories",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/autoscan/inotify/directory/attribute::location",
-							"caption": "Location",
-							"editable": true
-						},
-						{
-							"item": "/import/autoscan/inotify/directory/attribute::mode",
-							"caption": "Mode",
-							"value": "inotify",
-							"editable": false
-						},
-						{
-							"item": "/import/autoscan/inotify/directory/attribute::recursive",
-							"caption": "Recursive",
-							"editable": true
-						},
-						{
-							"item": "/import/autoscan/inotify/directory/attribute::media-type",
-							"caption": "Mediatype",
-							"editable": false
-						},
-						{
-							"item": "/import/autoscan/inotify/directory/attribute::hidden-files",
-							"caption": "Import Hidden Files",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/layout/path",
-					"caption": "Path Mappings",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/layout/path/attribute::from",
-							"caption": "From",
-							"editable": true
-						},
-						{
-							"item": "/import/layout/path/attribute::to",
-							"caption": "To",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/directories/tweak",
-					"caption": "Directory Tweaks",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/directories/tweak/attribute::location",
-							"caption": "Location",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::inherit",
-							"caption": "Inherit Settings",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::recursive",
-							"caption": "Recursive",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::hidden-files",
-							"caption": "Import Hidden Files",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::follow-symlinks",
-							"caption": "Follow Symlinks",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::case-sensitive",
-							"caption": "Case Sensitive Resources",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::meta-charset",
-							"caption": "Metadata Charset",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::fanart-file",
-							"caption": "FanArt Resource Pattern",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::subtitle-file",
-							"caption": "Subtitle Resource Pattern",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::metadata-file",
-							"caption": "Metadata Resource Pattern",
-							"editable": true
-						},
-						{
-							"item": "/import/directories/tweak/attribute::resource-file",
-							"caption": "Directory Resource Pattern",
-							"editable": true
-						}
-					]
-				}
-			]
-		},
-		{
-			"item": "/import/scripting",
-			"caption": "Scripting",
-			"type": "Element",
-			"editable": true,
-			"children": [
-				{
-					"item": "/import/scripting/custom-script",
-					"caption": "Custom Script",
-					"editable": true
-				},
-				{
-					"item": "/import/scripting/virtual-layout/attribute::type",
-					"caption": "Virtual Layout Type",
-					"editable": false
-				},
-				{
-					"item": "/import/scripting/playlist-script/attribute::create-link",
-					"caption": "Create Playlist Link",
-					"editable": false
-				},
-				{
-					"item": "/import/filesystem-charset",
-					"caption": "Filesystem Charset",
-					"editable": false
-				},
-				{
-					"item": "/import/metadata-charset",
-					"caption": "Metadata Charset",
-					"editable": false
-				},
-				{
-					"item": "/import/playlist-charset",
-					"caption": "Playlist Charset",
-					"editable": false
-				}
-			]
-		},
-		{
-			"item": "/import/resources",
-			"type": "Element",
-			"caption": "Resource Handling",
-			"editable": true,
-			"children": [
-				{
-					"item": "/import/resources/attribute::case-sensitive",
-					"caption": "Case Sensitive",
-					"editable": true
-				},
-				{
-					"item": "/import/resources/container",
-					"type": "Element",
-					"caption": "Container Images",
-					"editable": true,
-					"children": [
-						{
-							"item": "/import/resources/container/attribute::location",
-							"caption": "Path to images",
-							"editable": true
-						},
-						{
-							"item": "/import/resources/container/attribute::parentCount",
-							"caption": "Parents inheriting fanart",
-							"editable": true
-						},
-						{
-							"item": "/import/resources/container/attribute::minDepth",
-							"caption": "Minimum depth for fanart",
-							"editable": true
-						},
-						{
-							"item": "/import/resources/container/add-file",
-							"caption": "Images Patterns",
-							"type": "List",
-							"editable": true,
-							"children": [
-								{
-									"item": "/import/resources/container/add-file/attribute::name",
-									"caption": "File Name",
-									"editable": true
-								}
-							]
-						}
-					]
-				},
-				{
-					"item": "/import/resources/fanart/add-file",
-					"caption": "Fanart Files",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/resources/fanart/add-file/attribute::name",
-							"caption": "File Name",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/resources/subtitle/add-file",
-					"caption": "Subtitle Files",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/resources/subtitle/add-file/attribute::name",
-							"caption": "File Name",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/resources/metafile/add-file",
-					"caption": "Metadata Files",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/resources/metafile/add-file/attribute::name",
-							"caption": "File Name",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/resources/resource/add-file",
-					"caption": "Resource Files",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/resources/resource/add-file/attribute::name",
-							"caption": "File Name",
-							"editable": true
-						}
-					]
-				}
-			]
-		},
-		{
-			"item": "/import/library-options",
-			"type": "Element",
-			"caption": "Library Options",
-			"editable": true,
-			"children": [
-				{
-					"item": "/import/library-options/attribute::multi-value-separator",
-					"caption": "Multi Value Separator",
-					"editable": true
-				},
-				{
-					"item": "/import/library-options/attribute::legacy-value-separator",
-					"caption": "Legacy Value Separator",
-					"editable": true
-				},
-				{
-					"item": "/import/library-options/libexif/auxdata/add-data",
-					"caption": "libexif",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/libexif/metadata/add-data",
-					"caption": "libexif metadata",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/libexif/metadata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						},
-						{
-							"item": "/import/library-options/libexif/metadata/add-data/attribute::key",
-							"caption": "Upnp metadata entry",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/id3/auxdata/add-data",
-					"caption": "taglib",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/id3/metadata/add-data",
-					"caption": "taglib metadata",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/id3/metadata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						},
-						{
-							"item": "/import/library-options/id3/metadata/add-data/attribute::key",
-							"caption": "Upnp metadata entry",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/exiv2/auxdata/add-data",
-					"caption": "exiv2",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/exiv2/metadata/add-data",
-					"caption": "exiv2 metadata",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/exiv2/metadata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						},
-						{
-							"item": "/import/library-options/exiv2/metadata/add-data/attribute::key",
-							"caption": "Upnp metadata entry",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/ffmpeg/auxdata/add-data",
-					"caption": "ffmpeg",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						}
-					]
-				},
-				{
-					"item": "/import/library-options/ffmpeg/metadata/add-data",
-					"caption": "ffmpeg metadata",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/library-options/ffmpeg/metadata/add-data/attribute::tag",
-							"caption": "Tag Name",
-							"editable": false
-						},
-						{
-							"item": "/import/library-options/ffmpeg/metadata/add-data/attribute::key",
-							"caption": "Upnp metadata entry",
-							"editable": false
-						}
-					]
-				}
-			]
-		},
-		{
-			"item": "/import/mappings",
-			"type": "Element",
-			"caption": "Import Mappings",
-			"editable": true,
-			"children": [
-				{
-					"item": "/import/mappings/extension-mimetype/attribute::ignore-unknown",
-					"caption": "Ignore Unknown Extensions",
-					"editable": true
-				},
-				{
-					"item": "/import/mappings/extension-mimetype/attribute::case-sensitive",
-					"caption": "Extensions Case Sensitive",
-					"editable": true
-				},
-				{
-					"item": "/import/mappings/ignore-extensions/add-file",
-					"caption": "Ignored Extensions",
-					"type": "List",
-					"editable": true,
-					"children": [
-						{
-							"item": "/import/mappings/ignore-extensions/add-file/attribute::name",
-							"caption": "From",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/mappings/extension-mimetype/map",
-					"caption": "Extensions",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/mappings/extension-mimetype/map/attribute::from",
-							"caption": "From",
-							"editable": true
-						},
-						{
-							"item": "/import/mappings/extension-mimetype/map/attribute::to",
-							"caption": "To",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/mappings/mimetype-contenttype/treat",
-					"caption": "Content Types",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/mappings/mimetype-contenttype/treat/attribute::mimetype",
-							"caption": "Mimetype",
-							"editable": true
-						},
-						{
-							"item": "/import/mappings/mimetype-contenttype/treat/attribute::as",
-							"caption": "Treated as",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/mappings/mimetype-upnpclass/map",
-					"caption": "UPnP Classes",
-					"type": "List",
-					"editable": false,
-					"children": [
-						{
-							"item": "/import/mappings/mimetype-upnpclass/map/attribute::from",
-							"caption": "From",
-							"editable": true
-						},
-						{
-							"item": "/import/mappings/mimetype-upnpclass/map/attribute::to",
-							"caption": "To",
-							"editable": true
-						}
-					]
-				},
-				{
-					"item": "/import/mappings/contenttype-dlnaprofile/map",
-					"caption": "DLNA Profiles",
-					"type": "List",
-					"editable": true,
-					"children": [
-						{
-							"item": "/import/mappings/contenttype-dlnaprofile/map/attribute::from",
-							"caption": "From",
-							"editable": true
-						},
-						{
-							"item": "/import/mappings/contenttype-dlnaprofile/map/attribute::to",
-							"caption": "To",
-							"editable": true
-						}
-					]
-				}
-			]
-		}
-	],
-	"success": true
+  "config": [
+    {
+      "item": "/status",
+      "caption": "Status",
+      "type": "Element",
+      "editable": false,
+      "children": [
+        {
+          "item": "/status/attribute::totalCount",
+          "caption": "Total Media Files",
+          "editable": false,
+          "type": "Number"
+        },
+        {
+          "item": "/status/attribute::audioCount",
+          "caption": "Audio Files",
+          "editable": false,
+          "type": "Number"
+        },
+        {
+          "item": "/status/attribute::videoCount",
+          "caption": "Video Files",
+          "editable": false,
+          "type": "Number"
+        },
+        {
+          "item": "/status/attribute::imageCount",
+          "caption": "Image Files",
+          "editable": false,
+          "type": "Number"
+        }
+      ]
+    },
+    {
+      "item": "/server",
+      "caption": "Server",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/server/name",
+          "caption": "Name",
+          "editable": false
+        },
+        {
+          "item": "/server/interface",
+          "caption": "Network Interface",
+          "editable": false
+        },
+        {
+          "item": "/server/port",
+          "caption": "Network Port",
+          "editable": false
+        },
+        {
+          "item": "/server/manufacturer",
+          "caption": "Manufacturer Name",
+          "editable": true
+        },
+        {
+          "item": "/server/manufacturerURL",
+          "caption": "Manufacturer Url",
+          "editable": true
+        },
+        {
+          "item": "/server/modelDescription",
+          "caption": "Model Description",
+          "editable": true
+        },
+        {
+          "item": "/server/modelName",
+          "caption": "Model Name",
+          "editable": true
+        },
+        {
+          "item": "/server/modelNumber",
+          "caption": "Model Number",
+          "editable": true
+        },
+        {
+          "item": "/server/serialNumber",
+          "caption": "Serial Number",
+          "editable": true
+        },
+        {
+          "item": "/server/presentationURL",
+          "caption": "Presentation Url",
+          "editable": true
+        },
+        {
+          "item": "/server/modelURL",
+          "caption": "Model Url",
+          "editable": true
+        },
+        {
+          "item": "/server/ip",
+          "caption": "IP Address",
+          "editable": false
+        },
+        {
+          "item": "/server/udn",
+          "caption": "UDN",
+          "editable": false
+        },
+        {
+          "item": "/server/home",
+          "caption": "Home",
+          "editable": false
+        },
+        {
+          "item": "/server/webroot",
+          "caption": "Web Root",
+          "editable": true
+        },
+        {
+          "item": "/server/tmpdir",
+          "caption": "Temporary Dir",
+          "editable": false
+        },
+        {
+          "item": "/server/alive",
+          "caption": "Alive Interval",
+          "editable": true
+        },
+        {
+          "item": "/server/attribute::debug-mode",
+          "caption": "Debug Mode",
+          "type": "String",
+          "editable": false
+        }
+      ]
+    },
+    {
+      "item": "/server/storage",
+      "caption": "Storage",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/server/storage/driver",
+          "caption": "DB Driver",
+          "editable": false
+        },
+        {
+          "item": "/server/storage/sqlite3",
+          "caption": "SQLite",
+          "type": "Element",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/storage/sqlite3/attribute::enabled",
+              "caption": "SQLite enabled",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/database-file",
+              "caption": "SQLite database-file",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/on-error",
+              "caption": "SQLite restore",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/journal-mode",
+              "caption": "SQLite journal-mode",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/synchronous",
+              "caption": "SQLite synchronous",
+              "type": "String",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/backup/attribute::enabled",
+              "caption": "SQLite backup",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/sqlite3/backup/attribute::interval",
+              "caption": "SQLite backup interval",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/server/storage/mysql",
+          "caption": "MySQL",
+          "type": "Element",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/storage/mysql/attribute::enabled",
+              "caption": "MySQL enabled",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/host",
+              "caption": "MySQL host",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/port",
+              "caption": "MySQL port",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/username",
+              "caption": "MySQL username",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/password",
+              "caption": "MySQL password",
+              "type": "Password",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/socket",
+              "caption": "MySQL socket",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/database",
+              "caption": "MySQL database",
+              "editable": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/server/ui",
+      "caption": "UI",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/server/ui/attribute::enabled",
+          "caption": "UI enabled",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/attribute::poll-interval",
+          "caption": "Poll Interval",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/attribute::show-tooltips",
+          "caption": "Show Tooltips",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/attribute::show-thumbnail",
+          "caption": "Show Thumbnail",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/attribute::show-numbering",
+          "caption": "Show Track Numbering",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/attribute::poll-when-idle",
+          "caption": "Poll When Idle",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/accounts/attribute::enabled",
+          "caption": "Accounts enabled",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/accounts/attribute::session-timeout",
+          "caption": "Accounts session-timeout",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/accounts",
+          "caption": "Accounts",
+          "type": "List",
+          "editable": true,
+          "children": []
+        },
+        {
+          "item": "/server/ui/items-per-page/attribute::default",
+          "caption": "Items Per Page Default",
+          "editable": true
+        },
+        {
+          "item": "/server/ui/items-per-page",
+          "caption": "Items Per Page",
+          "type": "List",
+          "editable": true,
+          "children": []
+        }
+      ]
+    },
+    {
+      "item": "/import",
+      "caption": "Import",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/attribute::hidden-files",
+          "caption": "Import Hidden Files",
+          "editable": true
+        },
+        {
+          "item": "/import/attribute::import-mode",
+          "caption": "Import Mode",
+          "editable": true
+        },
+        {
+          "item": "/import/attribute::follow-symlinks",
+          "caption": "Follow Symlinks",
+          "editable": true
+        },
+        {
+          "item": "/import/autoscan/attribute::use-inotify",
+          "caption": "Use Inotify",
+          "editable": true
+        },
+        {
+          "item": "/import/autoscan/timed/directory",
+          "caption": "Timed Autoscan Directories",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/autoscan/timed/directory/attribute::location",
+              "caption": "Location",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/timed/directory/attribute::mode",
+              "caption": "Mode",
+              "type": "String",
+              "value": "timed",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/timed/directory/attribute::interval",
+              "caption": "Scan Interval",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/timed/directory/attribute::recursive",
+              "caption": "Recursive",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/timed/directory/attribute::media-type",
+              "caption": "Mediatype",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/timed/directory/attribute::hidden-files",
+              "caption": "Import Hidden Files",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/autoscan/inotify/directory",
+          "caption": "INotify Autoscan Directories",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::location",
+              "caption": "Location",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::mode",
+              "caption": "Mode",
+              "value": "inotify",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::recursive",
+              "caption": "Recursive",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::media-type",
+              "caption": "Mediatype",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::hidden-files",
+              "caption": "Import Hidden Files",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/directories/tweak",
+          "caption": "Directory Tweaks",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/directories/tweak/attribute::location",
+              "caption": "Location",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::inherit",
+              "caption": "Inherit Settings",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::recursive",
+              "caption": "Recursive",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::hidden-files",
+              "caption": "Import Hidden Files",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::follow-symlinks",
+              "caption": "Follow Symlinks",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::case-sensitive",
+              "caption": "Case Sensitive Resources",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::meta-charset",
+              "caption": "Metadata Charset",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::fanart-file",
+              "caption": "FanArt Resource Pattern",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::subtitle-file",
+              "caption": "Subtitle Resource Pattern",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::metadata-file",
+              "caption": "Metadata Resource Pattern",
+              "editable": true
+            },
+            {
+              "item": "/import/directories/tweak/attribute::resource-file",
+              "caption": "Directory Resource Pattern",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/import",
+      "caption": "Virtual Layout",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/scripting/virtual-layout/attribute::type",
+          "caption": "Virtual Layout Type",
+          "editable": true
+        },
+        {
+          "item": "/import/layout/attribute::parent-path",
+          "caption": "Create Parent in Path",
+          "editable": true
+        },
+        {
+          "item": "/import/layout/path",
+          "caption": "Path Mappings",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/layout/path/attribute::from",
+              "caption": "From",
+              "editable": true
+            },
+            {
+              "item": "/import/layout/path/attribute::to",
+              "caption": "To",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/scripting/virtual-layout/genre-map/genre",
+          "caption": "Genre Map",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/genre-map/genre/attribute::from",
+              "caption": "Name",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/genre-map/genre/attribute::to",
+              "caption": "Value",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/scripting/virtual-layout/boxlayout/box",
+          "caption": "Box Layout",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::key",
+              "caption": "Key",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::title",
+              "caption": "Title",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::class",
+              "caption": "Upnp Class",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::size",
+              "caption": "Box Size",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/import/scripting",
+      "caption": "Scripting",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/scripting/script-folder/custom",
+          "caption": "Custom Script folder",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/audio-file",
+          "caption": "Import Function for Audio File",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/video-file",
+          "caption": "Import Function for Video File",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/image-file",
+          "caption": "Import Function for Image File",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/playlist",
+          "caption": "Import Function for Playlist File",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/meta-file",
+          "caption": "Import Function for Meta Data File",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/trailer",
+          "caption": "Import Function for Trailer",
+          "editable": true
+        },
+        {
+          "item": "/import/scripting/import-function/playlist/attribute::create-link",
+          "caption": "Create Playlist Link",
+          "editable": false
+        },
+        {
+          "item": "/import/filesystem-charset",
+          "caption": "Filesystem Charset",
+          "editable": false
+        },
+        {
+          "item": "/import/metadata-charset",
+          "caption": "Metadata Charset",
+          "editable": false
+        },
+        {
+          "item": "/import/playlist-charset",
+          "caption": "Playlist Charset",
+          "editable": false
+        },
+        {
+          "item": "/import/scripting/virtual-layout/script-options/script-option",
+          "caption": "Script Options",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/script-options/script-option/attribute::name",
+              "caption": "Name",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/script-options/script-option/attribute::value",
+              "caption": "Value",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/scripting/virtual-layout/structured-layout",
+          "caption": "Structured Layout Settings",
+          "type": "Element",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars",
+              "caption": "Initial Characters to skip",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/structured-layout/attribute::div-char",
+              "caption": "Surrounding Char",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/import/resources",
+      "type": "Element",
+      "caption": "Resource Handling",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/resources/attribute::case-sensitive",
+          "caption": "Case Sensitive",
+          "editable": true
+        },
+        {
+          "item": "/import/resources/container",
+          "type": "Element",
+          "caption": "Container Images",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/resources/container/attribute::location",
+              "caption": "Path to images",
+              "editable": true
+            },
+            {
+              "item": "/import/resources/container/attribute::parentCount",
+              "caption": "Parents inheriting fanart",
+              "editable": true
+            },
+            {
+              "item": "/import/resources/container/attribute::minDepth",
+              "caption": "Minimum depth for fanart",
+              "editable": true
+            },
+            {
+              "item": "/import/resources/container/add-file",
+              "caption": "Images Patterns",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/resources/container/add-file/attribute::name",
+                  "caption": "File Name",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "item": "/import/resources/fanart/add-file",
+          "caption": "Fanart Files",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/resources/fanart/add-file/attribute::name",
+              "caption": "File Name",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/resources/subtitle/add-file",
+          "caption": "Subtitle Files",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/resources/subtitle/add-file/attribute::name",
+              "caption": "File Name",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/resources/metafile/add-file",
+          "caption": "Metadata Files",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/resources/metafile/add-file/attribute::name",
+              "caption": "File Name",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/resources/resource/add-file",
+          "caption": "Resource Files",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/resources/resource/add-file/attribute::name",
+              "caption": "File Name",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/import/library-options",
+      "type": "Element",
+      "caption": "Library Options",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/library-options/attribute::multi-value-separator",
+          "caption": "Multi Value Separator",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/attribute::legacy-value-separator",
+          "caption": "Legacy Value Separator",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/libexif/auxdata/add-data",
+          "caption": "libexif",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/libexif/metadata/add-data",
+          "caption": "libexif metadata",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/libexif/metadata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            },
+            {
+              "item": "/import/library-options/libexif/metadata/add-data/attribute::key",
+              "caption": "Upnp metadata entry",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/id3/auxdata/add-data",
+          "caption": "taglib",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/id3/metadata/add-data",
+          "caption": "taglib metadata",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/id3/metadata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            },
+            {
+              "item": "/import/library-options/id3/metadata/add-data/attribute::key",
+              "caption": "Upnp metadata entry",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/exiv2/auxdata/add-data",
+          "caption": "exiv2",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/exiv2/metadata/add-data",
+          "caption": "exiv2 metadata",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/exiv2/metadata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            },
+            {
+              "item": "/import/library-options/exiv2/metadata/add-data/attribute::key",
+              "caption": "Upnp metadata entry",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/ffmpeg/auxdata/add-data",
+          "caption": "ffmpeg",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/import/library-options/ffmpeg/metadata/add-data",
+          "caption": "ffmpeg metadata",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::tag",
+              "caption": "Tag Name",
+              "editable": false
+            },
+            {
+              "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::key",
+              "caption": "Upnp metadata entry",
+              "editable": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "item": "/import/mappings",
+      "type": "Element",
+      "caption": "Import Mappings",
+      "editable": true,
+      "children": [
+        {
+          "item": "/import/mappings/extension-mimetype/attribute::ignore-unknown",
+          "caption": "Ignore Unknown Extensions",
+          "editable": true
+        },
+        {
+          "item": "/import/mappings/extension-mimetype/attribute::case-sensitive",
+          "caption": "Extensions Case Sensitive",
+          "editable": true
+        },
+        {
+          "item": "/import/mappings/ignore-extensions/add-file",
+          "caption": "Ignored Extensions",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/mappings/ignore-extensions/add-file/attribute::name",
+              "caption": "From",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/mappings/extension-mimetype/map",
+          "caption": "Extensions",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/mappings/extension-mimetype/map/attribute::from",
+              "caption": "From",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/extension-mimetype/map/attribute::to",
+              "caption": "To",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/mappings/mimetype-contenttype/treat",
+          "caption": "Content Types",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/mappings/mimetype-contenttype/treat/attribute::mimetype",
+              "caption": "Mimetype",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/mimetype-contenttype/treat/attribute::as",
+              "caption": "Treated as",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/mappings/mimetype-upnpclass/map",
+          "caption": "UPnP Classes",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/mappings/mimetype-upnpclass/map/attribute::from",
+              "caption": "From",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/mimetype-upnpclass/map/attribute::to",
+              "caption": "To",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/mappings/mimetype-dlnatransfermode/map",
+          "caption": "transferMode.dlna.org",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/mappings/mimetype-dlnatransfermode/map/attribute::from",
+              "caption": "From",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/mimetype-dlnatransfermode/map/attribute::to",
+              "caption": "To",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/mappings/contenttype-dlnaprofile/map",
+          "caption": "DLNA Profiles",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::from",
+              "caption": "From",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::to",
+              "caption": "To",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::videoCodec",
+              "caption": "Video Codec",
+              "editable": true
+            },
+            {
+              "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::audioCodec",
+              "caption": "Audio Codec",
+              "editable": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "success": true
 }

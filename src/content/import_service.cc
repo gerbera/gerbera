@@ -200,7 +200,7 @@ void ImportService::clearCache()
 
 void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
 {
-    currentContent.clear();
+    log_debug("start {}", location.string());
     contentStateCache.clear();
 
     auto rootEntry = fs::directory_entry(location);
@@ -226,7 +226,16 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
     updateFanArt();
     fillLayout(task);
 
-    // ToDo: update currentContent
+    // update currentContent
+    for (auto&& [itemPath, stateEntry] : contentStateCache) {
+        if (stateEntry && stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
+            auto entry = currentContent.find(stateEntry->getObject()->getID());
+            if (entry != currentContent.end()) {
+                currentContent.erase(stateEntry->getObject()->getID());
+            }
+        }
+    }
+    log_debug("import of {} left {} item(s) to be deleted", location.c_str(), currentContent.size());
 }
 
 std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) const

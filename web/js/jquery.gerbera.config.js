@@ -135,6 +135,7 @@ $.widget('grb.config', {
       case 'String':
       case 'Password':
       case 'Path':
+      case 'Time':
       case 'Enum':
       case 'Number': {
         itemValue.value = itemValue.editor.val();
@@ -165,7 +166,8 @@ $.widget('grb.config', {
       }
       case 'String':
       case 'Password':
-      case 'Number': {
+      case 'Number':
+      case 'Time': {
         itemValue.value = itemValue.editor.val();
         break;
       }
@@ -498,7 +500,8 @@ $.widget('grb.config', {
               input.hide();
             }
             break;
-            case 'Number': {
+            case 'Number':
+            case 'Time': {
               input.attr('type', 'number');
               input.val(itemValue.value);
             }

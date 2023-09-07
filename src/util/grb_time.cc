@@ -23,6 +23,10 @@ Gerbera - https://gerbera.io/
 #include "grb_time.h" // API
 
 #include "common.h"
+#include "tools.h"
+
+#include <fmt/core.h>
+#include <regex>
 
 std::chrono::seconds currentTime()
 {
@@ -75,4 +79,33 @@ long long HMSFToMilliseconds(std::string_view time)
 
     log_warning("Could not parse time '{}'!", time);
     return 0;
+}
+
+static const auto secondsFactors = std::vector { 1, 60, 3600, 24 * 3600 };
+static const auto minutesFactors = std::vector { 1, 60, 24 * 60 };
+
+bool parseTime(int& value, std::string& timeValue, bool seconds)
+{
+    static auto re = std::regex("^([-0-9:]+)$");
+    auto factors = seconds ? secondsFactors : minutesFactors;
+    value = 0;
+    if (!std::regex_search(timeValue, re))
+        return false;
+    auto list = splitString(timeValue, ':');
+    std::reverse(list.begin(), list.end());
+    if (list.size() > factors.size())
+        return false;
+    int index = 0;
+    for (auto&& item : list) {
+        auto iVal = stoiString(item, -1);
+        if (iVal < 0 && list.size() > 1) {
+            value = 0;
+            return false;
+        }
+        value += iVal * factors[index];
+        index++;
+    }
+    if (list.size() > 0)
+        timeValue = fmt::to_string(value);
+    return list.size() > 0;
 }

@@ -46,6 +46,7 @@ This section defines the client behaviour additions.
     * Default: **10**
 
     This attribute sets the amount of seconds a playposition (Samsung bookmark) is reduced on resume to continue a bit before the last scene.
+    The value can be given in a valid time format.
 
 **Child tags:**
 

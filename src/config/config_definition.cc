@@ -36,6 +36,7 @@
 #include "config/setup/config_setup_client.h"
 #include "config/setup/config_setup_dynamic.h"
 #include "config/setup/config_setup_enum.h"
+#include "config/setup/config_setup_time.h"
 #include "config/setup/config_setup_transcoding.h"
 #include "config/setup/config_setup_tweak.h"
 #include "config_option_enum.h"
@@ -44,86 +45,21 @@
 #include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "content/layout/box_layout.h"
+#include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
-// device description defaults
-
-#define DESC_FRIENDLY_NAME "Gerbera"
-#define DESC_MANUFACTURER "Gerbera Contributors"
-#define DESC_MODEL_DESCRIPTION "Free UPnP AV MediaServer, GNU GPL"
-#define DESC_MODEL_NAME "Gerbera"
-#define DESC_MODEL_NUMBER GERBERA_VERSION
-#define DESC_SERIAL_NUMBER "1"
-
 // default values
-#define DEFAULT_JS_CHARSET "UTF-8"
 
-#define DEFAULT_TMPDIR "/tmp/"
-#define DEFAULT_UI_EN_VALUE YES
-#define DEFAULT_UI_SHOW_TOOLTIPS_VALUE YES
-#define DEFAULT_POLL_WHEN_IDLE_VALUE NO
-#define DEFAULT_POLL_INTERVAL 2
-#define DEFAULT_ACCOUNTS_EN_VALUE NO
-#define DEFAULT_ALIVE_INTERVAL 180 // seconds
-#define DEFAULT_BOOKMARK_FILE "gerbera.html"
-#define DEFAULT_IGNORE_UNKNOWN_EXTENSIONS NO
-#define DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS NO
-#define DEFAULT_IMPORT_LAYOUT_PARENT_PATH NO
-#define DEFAULT_PLAYLIST_CREATE_LINK YES
-#define DEFAULT_HIDDEN_FILES_VALUE NO
 #define DEFAULT_FOLLOW_SYMLINKS_VALUE YES
 #define DEFAULT_RESOURCES_CASE_SENSITIVE YES
 #define DEFAULT_UPNP_STRING_LIMIT (-1)
-#define DEFAULT_SESSION_TIMEOUT 30
-#define DEFAULT_ITEMS_PER_PAGE 25
-#define DEFAULT_HIDE_PC_DIRECTORY NO
-#define DEFAULT_CLIENTS_EN_VALUE NO
 
 #ifdef ATRAILERS
-#define DEFAULT_ATRAILERS_ENABLED NO
-#define DEFAULT_ATRAILERS_UPDATE_AT_START NO
 #define DEFAULT_ATRAILERS_REFRESH 43200
 #endif
 
-#define DEFAULT_TRANSCODING_ENABLED NO
-
-#ifdef HAVE_MYSQL
-#define DEFAULT_MYSQL_HOST "localhost"
-#define DEFAULT_MYSQL_DB "gerbera"
-#define DEFAULT_MYSQL_USER "gerbera"
-#define DEFAULT_MYSQL_ENABLED NO
-
-#else // HAVE_MYSQL
-#define DEFAULT_MYSQL_ENABLED NO
-#endif
-
 #define DEFAULT_LIBOPTS_ENTRY_SEPARATOR "; "
-
-#ifdef HAVE_CURL
-#define DEFAULT_CURL_BUFFER_SIZE 262144
-#define DEFAULT_CURL_INITIAL_FILL_SIZE 0
-#endif
-
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-#define DEFAULT_FFMPEGTHUMBNAILER_ENABLED YES
-#define DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE 160
-#define DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE 5
-#define DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY NO
-#define DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY 8
-#define DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED YES
-#define DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR ""
-#endif
-
-#if defined(HAVE_LASTFMLIB)
-#define DEFAULT_LASTFM_ENABLED NO
-#define DEFAULT_LASTFM_USERNAME "lastfmuser"
-#define DEFAULT_LASTFM_PASSWORD "lastfmpass"
-#endif
-
-#define DEFAULT_MARK_PLAYED_ITEMS_ENABLED NO
-#define DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES YES
-#define DEFAULT_MARK_PLAYED_ITEMS_STRING "*"
 
 /// \brief default values for CFG_IMPORT_SYSTEM_DIRECTORIES
 static const std::vector<std::string> excludesFullpath {
@@ -411,10 +347,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_NAME,
         "/server/name", "config-server.html#name",
-        DESC_FRIENDLY_NAME),
+        "Gerbera"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MANUFACTURER,
         "/server/manufacturer", "config-server.html#manufacturer",
-        DESC_MANUFACTURER),
+        "Gerbera Contributors"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MANUFACTURER_URL,
         "/server/manufacturerURL", "config-server.html#manufacturerurl",
         DESC_MANUFACTURER_URL),
@@ -426,19 +362,19 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MODEL_NAME,
         "/server/modelName", "config-server.html#modelname",
-        DESC_MODEL_NAME),
+        "Gerbera"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MODEL_DESCRIPTION,
         "/server/modelDescription", "config-server.html#modeldescription",
-        DESC_MODEL_DESCRIPTION),
+        "Free UPnP AV MediaServer, GNU GPL"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MODEL_NUMBER,
         "/server/modelNumber", "config-server.html#modelnumber",
-        DESC_MODEL_NUMBER),
+        GERBERA_VERSION),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_MODEL_URL,
         "/server/modelURL", "config-server.html#modelurl",
         ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_SERIAL_NUMBER,
         "/server/serialNumber", "config-server.html#serialnumber",
-        DESC_SERIAL_NUMBER),
+        "1"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_PRESENTATION_URL,
         "/server/presentationURL", "config-server.html#presentationurl", ""),
     std::make_shared<ConfigEnumSetup<UrlAppendMode>>(CFG_SERVER_APPEND_PRESENTATION_URL_TO,
@@ -454,18 +390,18 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         NO),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_TMPDIR,
         "/server/tmpdir", "config-server.html#tmpdir",
-        DEFAULT_TMPDIR),
+        "/tmp/"),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_WEBROOT,
         "/server/webroot", "config-server.html#webroot"),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_ALIVE_INTERVAL,
         "/server/alive", "config-server.html#alive",
-        DEFAULT_ALIVE_INTERVAL, ALIVE_INTERVAL_MIN, ConfigIntSetup::CheckMinValue),
+        180, ALIVE_INTERVAL_MIN, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_HIDE_PC_DIRECTORY,
         "/server/pc-directory/attribute::upnp-hide", "config-server.html#pc-directory",
-        DEFAULT_HIDE_PC_DIRECTORY),
+        NO),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_BOOKMARK_FILE,
         "/server/bookmark", "config-server.html#bookmark",
-        DEFAULT_BOOKMARK_FILE, ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
+        "gerbera.html", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT,
         "/server/upnp-string-limit", "config-server.html#upnp-string-limit",
         DEFAULT_UPNP_STRING_LIMIT, ConfigIntSetup::CheckUpnpStringLimitValue),
@@ -481,16 +417,16 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_MYSQL
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_MYSQL_ENABLED,
         "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
-        DEFAULT_MYSQL_ENABLED),
+        NO),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_HOST,
         "/server/storage/mysql/host", "config-server.html#storage",
-        DEFAULT_MYSQL_HOST),
+        "localhost"),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_MYSQL_PORT,
         "/server/storage/mysql/port", "config-server.html#storage",
         0, ConfigIntSetup::CheckPortValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_USERNAME,
         "/server/storage/mysql/username", "config-server.html#storage",
-        DEFAULT_MYSQL_USER),
+        "gerbera"),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_SOCKET,
         "/server/storage/mysql/socket", "config-server.html#storage",
         ""),
@@ -499,7 +435,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ""),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_MYSQL_DATABASE,
         "/server/storage/mysql/database", "config-server.html#storage",
-        DEFAULT_MYSQL_DB),
+        "gerbera"),
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE,
         "/server/storage/mysql/init-sql-file", "config-server.html#storage",
         "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty), // This should really be "dataDir / mysql.sql"
@@ -523,13 +459,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "gerbera.db", ConfigPathArguments::isFile | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS,
         "/server/storage/sqlite3/synchronous", "config-server.html#storage",
-        "off", ConfigIntSetup::CheckSqlLiteSyncValue),
+        "off", SqliteConfig::CheckSqlLiteSyncValue, SqliteConfig::PrintSqlLiteSyncValue),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_STORAGE_SQLITE_JOURNALMODE,
         "/server/storage/sqlite3/journal-mode", "config-server.html#storage",
-        "WAL", StringCheckFunction(ConfigStringSetup::CheckSqlJournalMode)),
+        "WAL", StringCheckFunction(SqliteConfig::CheckSqlJournalMode)),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_RESTORE,
         "/server/storage/sqlite3/on-error", "config-server.html#storage",
-        "restore", StringCheckFunction(ConfigBoolSetup::CheckSqlLiteRestoreValue)),
+        "restore", StringCheckFunction(SqliteConfig::CheckSqlLiteRestoreValue)),
 #ifdef SQLITE_BACKUP_ENABLED
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
@@ -539,9 +475,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
         NO),
 #endif
-    std::make_shared<ConfigIntSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
+    std::make_shared<ConfigTimeSetup>(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
         "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
-        600, 1, ConfigIntSetup::CheckMinValue),
+        ConfigTimeType::Seconds, 600, 1),
 
     std::make_shared<ConfigPathSetup>(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE,
         "/server/storage/sqlite3/init-sql-file", "config-server.html#storage",
@@ -552,13 +488,13 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLED,
         "/server/ui/attribute::enabled", "config-server.html#ui",
-        DEFAULT_UI_EN_VALUE),
-    std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_POLL_INTERVAL,
+        YES),
+    std::make_shared<ConfigTimeSetup>(CFG_SERVER_UI_POLL_INTERVAL,
         "/server/ui/attribute::poll-interval", "config-server.html#ui",
-        DEFAULT_POLL_INTERVAL, 1, ConfigIntSetup::CheckMinValue),
+        ConfigTimeType::Seconds, 2, 1),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_POLL_WHEN_IDLE,
         "/server/ui/attribute::poll-when-idle", "config-server.html#ui",
-        DEFAULT_POLL_WHEN_IDLE_VALUE),
+        NO),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ENABLE_NUMBERING,
         "/server/ui/attribute::show-numbering", "config-server.html#ui",
         YES),
@@ -570,48 +506,48 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         NO),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_ACCOUNTS_ENABLED,
         "/server/ui/accounts/attribute::enabled", "config-server.html#ui",
-        DEFAULT_ACCOUNTS_EN_VALUE),
+        NO),
     std::make_shared<ConfigDictionarySetup>(CFG_SERVER_UI_ACCOUNT_LIST,
         "/server/ui/accounts", "config-server.html#ui",
         ATTR_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ATTR_SERVER_UI_ACCOUNT_LIST_USER, ATTR_SERVER_UI_ACCOUNT_LIST_PASSWORD),
-    std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_SESSION_TIMEOUT,
+    std::make_shared<ConfigTimeSetup>(CFG_SERVER_UI_SESSION_TIMEOUT,
         "/server/ui/accounts/attribute::session-timeout", "config-server.html#ui",
-        DEFAULT_SESSION_TIMEOUT, 1, ConfigIntSetup::CheckMinValue),
+        ConfigTimeType::Minutes, 30, 1),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE,
         "/server/ui/items-per-page/attribute::default", "config-server.html#ui",
-        DEFAULT_ITEMS_PER_PAGE, 1, ConfigIntSetup::CheckMinValue),
+        25, 1, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigArraySetup>(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN,
         "/server/ui/items-per-page", "config-server.html#ui",
         ATTR_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION, ConfigArraySetup::InitItemsPerPage, true,
         defaultItemsPerPage),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_UI_SHOW_TOOLTIPS,
         "/server/ui/attribute::show-tooltips", "config-server.html#ui",
-        DEFAULT_UI_SHOW_TOOLTIPS_VALUE),
+        YES),
 
 #ifdef GRBDEBUG
     std::make_shared<ConfigIntSetup>(CFG_SERVER_DEBUG_MODE,
         "/server/attribute::debug-mode", "config-server.html#debug-mode",
-        0, GrbLogger::makeFacility),
+        0, GrbLogger::makeFacility, GrbLogger::printFacility),
 #endif
 
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST,
         "/clients", "config-clients.html#clients"),
     std::make_shared<ConfigBoolSetup>(CFG_CLIENTS_LIST_ENABLED,
         "/clients/attribute::enabled", "config-clients.html#clients",
-        DEFAULT_CLIENTS_EN_VALUE),
+        NO),
     std::make_shared<ConfigIntSetup>(CFG_CLIENTS_CACHE_THRESHOLD,
         "/clients/attribute::cache-threshold", "config-clients.html#clients",
         6, 1, ConfigIntSetup::CheckMinValue),
-    std::make_shared<ConfigIntSetup>(CFG_CLIENTS_BOOKMARK_OFFSET,
+    std::make_shared<ConfigTimeSetup>(CFG_CLIENTS_BOOKMARK_OFFSET,
         "/clients/attribute::bookmark-offset", "config-clients.html#clients",
-        10, 0, ConfigIntSetup::CheckMinValue),
+        ConfigTimeType::Seconds, 10, 0),
 
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT,
         "/clients/client", "config-clients.html#clients",
         ""),
     std::make_shared<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS,
         "flags", "config-clients.html#client",
-        0, ClientConfig::makeFlags),
+        0, ClientConfig::makeFlags, ClientConfig::mapFlags),
     std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP,
         "ip", "config-clients.html#client",
         ""),
@@ -643,7 +579,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_HIDDEN_FILES,
         "/import/attribute::hidden-files", "config-import.html#import",
-        DEFAULT_HIDDEN_FILES_VALUE),
+        NO),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_FOLLOW_SYMLINKS,
         "/import/attribute::follow-symlinks", "config-import.html#import",
         DEFAULT_FOLLOW_SYMLINKS_VALUE),
@@ -677,10 +613,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         false, false, true, extMtDefaults),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS,
         "/import/mappings/extension-mimetype/attribute::ignore-unknown", "config-import.html#extension-mimetype",
-        DEFAULT_IGNORE_UNKNOWN_EXTENSIONS),
+        NO),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE,
         "/import/mappings/extension-mimetype/attribute::case-sensitive", "config-import.html#extension-mimetype",
-        DEFAULT_CASE_SENSITIVE_EXTENSION_MAPPINGS),
+        NO),
     std::make_shared<ConfigDictionarySetup>(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
         "/import/mappings/mimetype-upnpclass", "config-import.html#mimetype-upnpclass",
         ATTR_IMPORT_MAPPINGS_MIMETYPE_MAP, ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM, ATTR_IMPORT_MAPPINGS_MIMETYPE_TO,
@@ -706,11 +642,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         ATTR_IMPORT_LAYOUT_MAPPING_PATH, ATTR_IMPORT_LAYOUT_MAPPING_FROM, ATTR_IMPORT_LAYOUT_MAPPING_TO),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LAYOUT_PARENT_PATH,
         "/import/layout/attribute::parent-path", "config-import.html#layout",
-        DEFAULT_IMPORT_LAYOUT_PARENT_PATH),
+        NO),
 #ifdef HAVE_JS
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_CHARSET,
         "/import/scripting/attribute::script-charset", "config-import.html#scripting",
-        DEFAULT_JS_CHARSET, ConfigStringSetup::CheckCharset),
+        "UTF-8", ConfigStringSetup::CheckCharset),
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT,
         "/import/scripting/common-script", "config-import.html#common-script",
         "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
@@ -753,7 +689,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "importPlaylist"),
     std::make_shared<ConfigBoolSetup>(CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS,
         "/import/scripting/import-function/playlist/attribute::create-link", "config-import.html#import-function",
-        DEFAULT_PLAYLIST_CREATE_LINK),
+        YES),
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE,
         "/import/scripting/import-function/meta-file", "config-import.html#import-function",
         "importMetadata"),
@@ -801,7 +737,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 
     std::make_shared<ConfigBoolSetup>(CFG_TRANSCODING_TRANSCODING_ENABLED,
         "/transcoding/attribute::enabled", "config-transcode.html#transcoding",
-        DEFAULT_TRANSCODING_ENABLED),
+        NO),
     std::make_shared<ConfigTranscodingSetup>(CFG_TRANSCODING_PROFILE_LIST,
         "/transcoding", "config-transcode.html#transcoding"),
 
@@ -877,7 +813,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
         "/server/extended-runtime-options/ffmpegthumbnailer/attribute::enabled", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_ENABLED),
+        YES),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED,
         "/server/extended-runtime-options/ffmpegthumbnailer/attribute::video-enabled", "config-extended.html#ffmpegthumbnailer",
         YES),
@@ -886,60 +822,60 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         YES),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE,
         "/server/extended-runtime-options/ffmpegthumbnailer/thumbnail-size", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_THUMBSIZE, 1, ConfigIntSetup::CheckMinValue),
+        160, 1, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE,
         "/server/extended-runtime-options/ffmpegthumbnailer/seek-percentage", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, 0, ConfigIntSetup::CheckMinValue),
+        5, 0, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY,
         "/server/extended-runtime-options/ffmpegthumbnailer/filmstrip-overlay", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY),
+        NO),
     std::make_shared<ConfigIntSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY,
         "/server/extended-runtime-options/ffmpegthumbnailer/image-quality", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_IMAGE_QUALITY, ConfigIntSetup::CheckImageQualityValue),
+        8, ConfigIntSetup::CheckImageQualityValue),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED,
         "/server/extended-runtime-options/ffmpegthumbnailer/cache-dir/attribute::enabled", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED),
+        YES),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, // ConfigPathSetup
         "/server/extended-runtime-options/ffmpegthumbnailer/cache-dir", "config-extended.html#ffmpegthumbnailer",
-        DEFAULT_FFMPEGTHUMBNAILER_CACHE_DIR),
+        ""),
 #endif
 
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED,
         "/server/extended-runtime-options/mark-played-items/attribute::enabled", "config-extended.html#extended-runtime-options",
-        DEFAULT_MARK_PLAYED_ITEMS_ENABLED),
+        NO),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND,
         "/server/extended-runtime-options/mark-played-items/string/attribute::mode", "config-extended.html#extended-runtime-options",
         DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, StringCheckFunction(ConfigBoolSetup::CheckMarkPlayedValue)),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING,
         "/server/extended-runtime-options/mark-played-items/string", "config-extended.html#extended-runtime-options",
-        false, DEFAULT_MARK_PLAYED_ITEMS_STRING, true),
+        false, "*", true),
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES,
         "/server/extended-runtime-options/mark-played-items/attribute::suppress-cds-updates", "config-extended.html#extended-runtime-options",
-        DEFAULT_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES),
+        YES),
     std::make_shared<ConfigArraySetup>(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST,
         "/server/extended-runtime-options/mark-played-items/mark", "config-extended.html#extended-runtime-options",
         ATTR_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, ConfigArraySetup::InitPlayedItemsMark),
 #ifdef HAVE_LASTFMLIB
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_LASTFM_ENABLED,
         "/server/extended-runtime-options/lastfm/attribute::enabled", "config-extended.html#lastfm",
-        DEFAULT_LASTFM_ENABLED),
+        NO),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_LASTFM_USERNAME,
         "/server/extended-runtime-options/lastfm/username", "config-extended.html#lastfm",
-        false, DEFAULT_LASTFM_USERNAME, true),
+        false, "lastfmuser", true),
     std::make_shared<ConfigStringSetup>(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD,
         "/server/extended-runtime-options/lastfm/password", "config-extended.html#lastfm",
-        false, DEFAULT_LASTFM_PASSWORD, true),
+        false, "lastfmpass", true),
 #endif
 #ifdef ATRAILERS
     std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED,
         "/import/online-content/AppleTrailers/attribute::enabled", "config-online.html#appletrailers",
-        DEFAULT_ATRAILERS_ENABLED),
+        NO),
     std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH,
         "/import/online-content/AppleTrailers/attribute::refresh", "config-online.html#appletrailers",
         DEFAULT_ATRAILERS_REFRESH),
     std::make_shared<ConfigBoolSetup>(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START,
         "/import/online-content/AppleTrailers/attribute::update-at-start", "config-online.html#appletrailers",
-        DEFAULT_ATRAILERS_UPDATE_AT_START),
+        NO),
     std::make_shared<ConfigIntSetup>(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER,
         "/import/online-content/AppleTrailers/attribute::purge-after", "config-online.html#appletrailers",
         DEFAULT_ATRAILERS_REFRESH),
@@ -969,9 +905,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE,
         "attribute::mode", "config-import.html#autoscan",
         std::map<std::string, AutoscanScanMode>({ { AUTOSCAN_TIMED, AutoscanScanMode::Timed }, { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify } })),
-    std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL,
+    std::make_shared<ConfigTimeSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL,
         "attribute::interval", "config-import.html#autoscan",
-        -1, 0, ConfigIntSetup::CheckMinValue),
+        ConfigTimeType::Seconds, -1, 0),
     std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE,
         "attribute::recursive", "config-import.html#autoscan",
         false, true),
@@ -990,10 +926,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
 #ifdef HAVE_CURL
     std::make_shared<ConfigIntSetup>(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
         "/transcoding/attribute::fetch-buffer-size", "config-transcode.html#transcoding",
-        DEFAULT_CURL_BUFFER_SIZE, CURL_MAX_WRITE_SIZE, ConfigIntSetup::CheckMinValue),
+        262144, CURL_MAX_WRITE_SIZE, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigIntSetup>(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
         "/transcoding/attribute::fetch-buffer-fill-size", "config-transcode.html#transcoding",
-        DEFAULT_CURL_INITIAL_FILL_SIZE, 0, ConfigIntSetup::CheckMinValue),
+        0, 0, ConfigIntSetup::CheckMinValue),
 #endif // HAVE_CURL
 #ifdef HAVE_LIBEXIF
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
@@ -1375,6 +1311,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "path", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION,
         "script-option", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_NAME,
+        "name", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE,
+        "value", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_LAYOUT_GENRE,
         "genre", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_SYSTEM_DIR_ADD_PATH,

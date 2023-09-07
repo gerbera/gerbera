@@ -49,7 +49,7 @@ Web::Containers::Containers(const std::shared_ptr<ContentManager>& content, std:
 
 void Web::Containers::process()
 {
-    log_debug(("containers.cc: containers::process()"));
+    log_debug("start process()");
     checkRequest();
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
@@ -69,8 +69,6 @@ void Web::Containers::process()
     auto browseParam = BrowseParam(database->loadObject(DEFAULT_CLIENT_GROUP, parentID), BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = database->browse(browseParam);
     for (auto&& obj : arr) {
-        // if (obj->isContainer())
-        //{
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = cont->getID();
@@ -97,6 +95,6 @@ void Web::Containers::process()
         }
         ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
         ce.append_attribute("title") = cont->getTitle().c_str();
-        //}
     }
+    log_debug("end process()");
 }

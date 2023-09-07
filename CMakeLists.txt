@@ -103,6 +103,8 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_int.cc
         src/config/setup/config_setup_path.cc
         src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_time.cc
+        src/config/setup/config_setup_time.h
         src/config/setup/config_setup_transcoding.cc
         src/config/setup/config_setup_transcoding.h
         src/config/setup/config_setup_tweak.cc
@@ -170,6 +172,8 @@ add_library(libgerbera STATIC
         src/database/sql_format.h
         src/database/sqlite3/sl_task.cc
         src/database/sqlite3/sl_task.h
+        src/database/sqlite3/sqlite_config.cc
+        src/database/sqlite3/sqlite_config.h
         src/database/sqlite3/sqlite_database.cc
         src/database/sqlite3/sqlite_database.h
         src/device_description_handler.cc

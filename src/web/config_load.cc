@@ -36,9 +36,11 @@
 #include "config/directory_tweak.h"
 #include "config/dynamic_content.h"
 #include "config/setup/config_setup_autoscan.h"
+#include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_enum.h"
 #include "content/autoscan.h"
 #include "content/content_manager.h"
+#include "content/layout/box_layout.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "transcoding/transcoding.h"
@@ -411,6 +413,49 @@ void Web::ConfigLoad::process()
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ATTR_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_MAXCOUNT));
     }
 
+    // write box layout content
+    cs = ConfigDefinition::findConfigSetup(CFG_BOXLAYOUT_BOX);
+    auto boxlayoutContent = cs->getValue()->getBoxLayoutListOption();
+    for (std::size_t i = 0; i < boxlayoutContent->size(); i++) {
+        auto cont = boxlayoutContent->get(i);
+
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_BOXLAYOUT_BOX_KEY), cs->option, ATTR_BOXLAYOUT_BOX_KEY);
+        setValue(item, cont->getKey());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_BOXLAYOUT_BOX_TITLE), cs->option, ATTR_BOXLAYOUT_BOX_TITLE);
+        setValue(item, cont->getTitle());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_BOXLAYOUT_BOX_CLASS), cs->option, ATTR_BOXLAYOUT_BOX_CLASS);
+        setValue(item, cont->getClass());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_BOXLAYOUT_BOX_SIZE), cs->option, ATTR_BOXLAYOUT_BOX_SIZE);
+        setValue(item, cont->getSize());
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(i, ATTR_BOXLAYOUT_BOX_ENABLED), cs->option, ATTR_BOXLAYOUT_BOX_ENABLED);
+        setValue(item, cont->getEnabled());
+    }
+    if (boxlayoutContent->size() == 0) {
+        auto item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_KEY), cs->option, ATTR_BOXLAYOUT_BOX_KEY, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_KEY));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_TITLE), cs->option, ATTR_BOXLAYOUT_BOX_TITLE, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_TITLE));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_CLASS), cs->option, ATTR_BOXLAYOUT_BOX_CLASS, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_CLASS));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_SIZE), cs->option, ATTR_BOXLAYOUT_BOX_SIZE, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_SIZE));
+
+        item = values.append_child("item");
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_ENABLED), cs->option, ATTR_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_ENABLED));
+    }
+
     // write transconding configuration
     cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
@@ -551,7 +596,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
-            setValue(item, adir->getInterval());
+            setValue(item, adir->getInterval().count());
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
@@ -559,7 +604,7 @@ void Web::ConfigLoad::process()
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE);
-            setValue(item, adir->getMediaType());
+            setValue(item, AutoscanDirectory::mapMediaType(adir->getMediaType()));
 
             item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
@@ -646,14 +691,22 @@ void Web::ConfigLoad::process()
     // write content of all vectors
     for (auto&& vcs : ConfigDefinition::getConfigSetupList<ConfigVectorSetup>()) {
         int i = 0;
-        auto vector = vcs->getValue()->getVectorOption(true);
-        for (auto&& value : vector) {
-            for (auto&& [key, val] : value) {
+        auto vectorOption = vcs->getValue()->getVectorOption(true);
+        std::vector<std::string> attrList;
+        for (auto& opt : vcs->optionList) {
+            attrList.push_back(ConfigDefinition::removeAttribute(opt));
+        }
+        for (auto&& vector : vectorOption) {
+            for (auto&& [key, val] : vector) {
                 auto item = values.append_child("item");
-                createItem(item, vcs->getItemPath(i, vcs->option) + key, vcs->option, vcs->optionList[0], vcs); // FIxME
+                int j = 0;
+                auto pos = std::find(attrList.begin(), attrList.end(), key);
+                if (pos != attrList.end())
+                    j = std::distance(attrList.begin(), pos);
+                createItem(item, vcs->getItemPath(i, key), vcs->option, vcs->optionList[j], vcs);
                 setValue(item, val);
-                i++;
             }
+            i++;
         }
     }
 
