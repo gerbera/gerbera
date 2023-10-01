@@ -36,6 +36,7 @@ class ConfigAutoscanSetup : public ConfigSetup {
 protected:
     AutoscanScanMode scanMode;
     bool hiddenFiles = false;
+    bool followSymlinks = false;
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.

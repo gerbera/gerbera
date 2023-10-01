@@ -44,7 +44,10 @@ pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 
 bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
 {
-    return root.select_node(cpath.c_str()).node() || root.select_node(xpath).node();
+    return root.select_node(cpath.c_str()).node()
+        || root.select_node(xpath).node()
+        || root.select_node(cpath.c_str()).attribute()
+        || root.select_node(xpath).attribute();
 }
 
 /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.

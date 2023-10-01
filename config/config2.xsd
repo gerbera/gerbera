@@ -779,6 +779,7 @@
             <xs:attribute name="interval" type="xs:string"/>
 
             <xs:attribute name="hidden-files" type="boolean"/>
+            <xs:attribute name="follow-symlinks" type="boolean"/>
             <xs:attribute name="recursive" type="boolean" use="required"/>
             <xs:attribute name="mediatype" type="xs:string"/>
             <xs:attribute name="container-type-audio" type="xs:string"/>

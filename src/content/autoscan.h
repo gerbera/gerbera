@@ -98,7 +98,7 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// zero means none.
-    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, int mediaType = -1,
+    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
@@ -119,6 +119,9 @@ public:
 
     void setHidden(bool hidden) { this->hidden = hidden; }
     bool getHidden() const { return hidden; }
+
+    void setFollowSymlinks(bool followSymlinks) { this->followSymlinks = followSymlinks; }
+    bool getFollowSymlinks() const { return followSymlinks; }
 
     void setScanContent(const std::map<std::string, bool>& scanContent) { this->scanContent = scanContent; }
     std::map<std::string, bool> getScanContent() const { return scanContent; }
@@ -153,8 +156,8 @@ public:
     void setObjectID(int id) { objectID = id; }
     int getObjectID() const { return objectID; }
 
-    void setPersistent(bool persistent_flag) { this->persistent_flag = persistent_flag; }
-    bool persistent() const { return persistent_flag; }
+    void setPersistent(bool persistentFlag) { this->persistentFlag = persistentFlag; }
+    bool persistent() const { return persistentFlag; }
 
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
@@ -215,7 +218,8 @@ protected:
     bool isOrig {};
     bool recursive {};
     bool hidden {};
-    bool persistent_flag {};
+    bool followSymlinks {};
+    bool persistentFlag {};
     std::chrono::seconds interval {};
     int taskCount {};
     int scanID { INVALID_SCAN_ID };

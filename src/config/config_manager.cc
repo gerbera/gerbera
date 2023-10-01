@@ -216,6 +216,7 @@ void ConfigManager::load(const fs::path& userHome)
     args.clear();
 
     setOption(root, CFG_IMPORT_HIDDEN_FILES);
+    setOption(root, CFG_IMPORT_FOLLOW_SYMLINKS);
     bool csens = setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
     args["tolower"] = fmt::to_string(!csens);
     setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
@@ -258,6 +259,7 @@ void ConfigManager::load(const fs::path& userHome)
 #endif
 
     args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";
+    args["followSymlinks"] = getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS) ? "true" : "false";
     setOption(root, CFG_IMPORT_AUTOSCAN_TIMED_LIST, &args);
 
 #ifdef HAVE_INOTIFY

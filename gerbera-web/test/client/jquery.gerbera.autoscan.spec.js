@@ -9,6 +9,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
   let autoscanPersistent;
   let autoscanRecursive;
   let autoscanHidden;
+  let autoscanFollowSymlinks;
   let autoscanInterval;
   let autoscanPersistentMsg;
   let autoscanSave;
@@ -35,6 +36,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     autoscanPersistent = $('#autoscanPersistent');
     autoscanRecursive = $('#autoscanRecursive');
     autoscanHidden = $('#autoscanHidden');
+    autoscanFollowSymlinks = $('#autoscanSymlinks');
     autoscanInterval = $('#autoscanInterval');
     autoscanPersistentMsg = $('#autoscan-persistent-msg');
     autoscanSave = $('#autoscanSave');
@@ -68,6 +70,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeTruthy();
       expect(autoscanHidden.is(':checked')).toBeTruthy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.val()).toBe('1800');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
@@ -92,6 +95,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanMode.is(':disabled')).toBeTruthy();
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
       expect(autoscanHidden.is(':disabled')).toBeTruthy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
       expect(autoscanPersistentMsg.css('display')).toBe('block');
       expect(autoscanSave.is(':disabled')).toBeTruthy();
@@ -126,6 +130,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeFalsy();
 
       expect(autoscanAudio.is(':disabled')).toBeFalsy();
@@ -149,6 +154,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
       expect(autoscanHidden.is(':disabled')).toBeTruthy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
 
       expect(autoscanAudio.is(':disabled')).toBeTruthy();
@@ -172,6 +178,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
       expect(autoscanHidden.is(':disabled')).toBeFalsy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.is(':disabled')).toBeTruthy();
 
       expect(autoscanAudio.is(':disabled')).toBeFalsy();
@@ -201,6 +208,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanPersistent.is(':checked')).toBeFalsy();
       expect(autoscanRecursive.is(':checked')).toBeFalsy();
       expect(autoscanHidden.is(':checked')).toBeFalsy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
       expect(autoscanInterval.val()).toBe('');
       expect(autoscanPersistentMsg.css('display')).toBe('none');
       expect(autoscanSave.is(':disabled')).toBeFalsy();
@@ -231,6 +239,8 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         from_fs: true,
         scan_mode: 'timed',
         recursive: true,
+        hidden: true,
+        followSymlinks: false,
         audio: true,
         audioMusic: true,
         audioBook: true,
@@ -241,7 +251,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         videoMovie: true,
         videoTV: true,
         videoMusicVideo: true,
-        hidden: true,
         ctAudio: '',
         ctImage: '',
         ctVideo: '',
@@ -262,6 +271,8 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         from_fs: true,
         scan_mode: 'inotify',
         recursive: true,
+        hidden: true,
+        followSymlinks: false,
         audio: true,
         audioMusic: true,
         audioBook: true,
@@ -272,10 +283,9 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         videoMovie: true,
         videoTV: true,
         videoMusicVideo: true,
-        hidden: true,
-          ctAudio: '',
-          ctImage: '',
-          ctVideo: '',
+        ctAudio: '',
+        ctImage: '',
+        ctVideo: '',
       });
 
       item.scan_mode = previousMode;

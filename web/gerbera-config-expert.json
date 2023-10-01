@@ -638,6 +638,11 @@
               "editable": true
             },
             {
+              "item": "/import/autoscan/timed/directory/attribute::follow-symlinks",
+              "caption": "Follow Symlinks",
+              "editable": true
+            },
+            {
               "item": "/import/autoscan/timed/directory/attribute::container-type-audio",
               "caption": "Container Type for Audio",
               "editable": true
@@ -700,6 +705,11 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::follow-symlinks",
+              "caption": "Follow Symlinks",
               "editable": true
             },
             {

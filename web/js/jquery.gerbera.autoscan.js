@@ -20,6 +20,7 @@
 
     $Id$
 */
+
 (function ($) {
   const loadItem = function (modal, itemData) {
     const item = itemData.item;
@@ -33,6 +34,7 @@
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
     const autoscanSave = modal.find('#autoscanSave');
     const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
@@ -82,6 +84,8 @@
       autoscanMode.val([item.scan_mode]);
       autoscanPersistent.prop('checked', item.persistent);
       autoscanRecursive.prop('checked', item.recursive);
+      autoscanSymlinks.prop('checked', item.followSymlinks);
+      autoscanHidden.prop('checked', item.hidden);
       autoscanAudio.prop('checked', item.audio);
       autoscanAudioMusic.prop('checked', item.audioMusic);
       autoscanAudioBook.prop('checked', item.audioBook);
@@ -92,7 +96,6 @@
       autoscanVideoMovie.prop('checked', item.videoMovie);
       autoscanVideoTV.prop('checked', item.videoTV);
       autoscanVideoMusicVideo.prop('checked', item.videoMusicVideo);
-      autoscanHidden.prop('checked', item.hidden);
       autoscanInterval.val(item.interval);
       autoscanCtAudio.val(item.ctAudio);
       autoscanCtImage.val(item.ctImage);
@@ -113,6 +116,7 @@
     const autoscanMode = modal.find('input[name=autoscanMode]:checked');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
     const autoscanPersistent = modal.find('#autoscanPersistent');
 
@@ -138,6 +142,8 @@
         autoscanRecursive.prop('disabled', false);
         autoscanHidden.closest('.form-group').removeClass('disabled').show();
         autoscanHidden.prop('disabled', false);
+        autoscanSymlinks.closest('.form-group').removeClass('disabled').show();
+        autoscanSymlinks.prop('disabled', false);
         autoscanInterval.closest('.form-group').removeClass('disabled').show();
         autoscanInterval.prop('disabled', false);
         mediaTypeItems.forEach((m) => {
@@ -150,12 +156,16 @@
         autoscanCtImage.prop('disabled', false);
         autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
         autoscanCtVideo.prop('disabled', false);
+        if ($("#detailAutoscanCol").is(":hidden"))
+            modal.find('#detailAutoscanButton').show();
         break;
       case 'inotify':
         autoscanRecursive.closest('.form-group').removeClass('disabled').show();
         autoscanRecursive.prop('disabled', false);
         autoscanHidden.closest('.form-group').removeClass('disabled').show();
         autoscanHidden.prop('disabled', false);
+        autoscanSymlinks.closest('.form-group').removeClass('disabled').show();
+        autoscanSymlinks.prop('disabled', false);
         autoscanInterval.closest('.form-group').hide();
         autoscanInterval.prop('disabled', true);
         mediaTypeItems.forEach((m) => {
@@ -168,12 +178,16 @@
         autoscanCtImage.prop('disabled', false);
         autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
         autoscanCtVideo.prop('disabled', false);
+        if ($("#detailAutoscanCol").is(":hidden"))
+          modal.find('#detailAutoscanButton').show();
         break;
       case 'none':
         autoscanRecursive.closest('.form-group').addClass('disabled').hide();
         autoscanRecursive.prop('disabled', true);
         autoscanHidden.closest('.form-group').addClass('disabled').hide();
         autoscanHidden.prop('disabled', true);
+        autoscanSymlinks.closest('.form-group').addClass('disabled').hide();
+        autoscanSymlinks.prop('disabled', true);
         autoscanInterval.closest('.form-group').addClass('disabled').hide();
         autoscanInterval.prop('disabled', true);
         mediaTypeItems.forEach((m) => {
@@ -186,6 +200,8 @@
         autoscanCtImage.prop('disabled', true);
         autoscanCtVideo.closest('.form-group').addClass('disabled').hide();
         autoscanCtVideo.prop('disabled', true);
+        hideDetails(modal);
+        modal.find('#detailAutoscanButton').hide();
         break;
     }
 
@@ -204,6 +220,7 @@
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
 
     const autoscanAudio = modal.find('#autoscanAudio');
@@ -237,10 +254,11 @@
     autoscanMode.val(['']);
     autoscanPersistent.prop('checked', false);
     autoscanRecursive.prop('checked', false);
+    autoscanSymlinks.prop('checked', false);
+    autoscanHidden.prop('checked', false);
     mediaTypeItems.forEach((m) => {
       m.prop('checked', false);
     });
-    autoscanHidden.prop('checked', false);
     autoscanInterval.val('');
     autoscanCtAudio.val('object.container.album.musicAlbum');
     autoscanCtImage.val('object.container.album.photoAlbum');
@@ -269,6 +287,7 @@
     const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
+    const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
 
     const autoscanAudio = modal.find('#autoscanAudio');
@@ -297,6 +316,7 @@
         item = $.extend({}, item, {
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
+          followSymlinks: autoscanSymlinks.is(':checked'),
           interval: autoscanInterval.val(),
 
           audio: autoscanAudio.is(':checked'),
@@ -319,6 +339,7 @@
         item = $.extend({}, item, {
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
+          followSymlinks: autoscanSymlinks.is(':checked'),
 
           audio: autoscanAudio.is(':checked'),
           audioMusic: autoscanAudioMusic.is(':checked'),

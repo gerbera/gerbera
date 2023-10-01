@@ -275,6 +275,10 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('autoscanHidden')).getAttribute('checked');
   };
 
+  this.getAutoscanFollowSymlink = async () => {
+    return await driver.findElement(By.id('autoscanSymlinks')).getAttribute('checked');
+  };
+
   this.getAutoscanIntervalValue = async () => {
     return await driver.findElement(By.id('autoscanInterval')).getAttribute('value');
   };
