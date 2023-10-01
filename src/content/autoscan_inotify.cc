@@ -100,8 +100,13 @@ void AutoscanInotify::threadProc()
             while (!unmonitorQueue.empty()) {
                 auto adir = std::move(unmonitorQueue.front());
                 unmonitorQueue.pop();
-
                 lock.unlock();
+
+                if (!adir) {
+                    log_debug("Empty autoscan");
+                    lock.lock();
+                    continue;
+                }
 
                 const fs::path& location = adir->getLocation();
                 if (location.empty()) {
@@ -113,7 +118,7 @@ void AutoscanInotify::threadProc()
 
                 if (adir->getRecursive()) {
                     log_debug("Removing recursive watch: {}", location.c_str());
-                    monitorUnmonitorRecursive(dirEnt, true, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                    monitorUnmonitorRecursive(dirEnt, true, adir, true, adir->getFollowSymlinks());
                 } else {
                     log_debug("Removing non-recursive watch: {}", location.c_str());
                     unmonitorDirectory(location, adir);
@@ -130,6 +135,7 @@ void AutoscanInotify::threadProc()
                 lock.unlock();
 
                 if (!adir) {
+                    log_debug("Empty autoscan");
                     lock.lock();
                     continue;
                 }
@@ -146,7 +152,7 @@ void AutoscanInotify::threadProc()
                     // handle dir recursively
                     if (adir->getRecursive()) {
                         log_debug("Adding recursive watch: {}", location.c_str());
-                        monitorUnmonitorRecursive(dirEnt, false, adir, true, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                        monitorUnmonitorRecursive(dirEnt, false, adir, true, adir->getFollowSymlinks());
                     } else {
                         log_debug("Adding non-recursive watch: {}", location.c_str());
                         monitorDirectory(location, adir, true);
@@ -210,7 +216,7 @@ void AutoscanInotify::threadProc()
                             log_debug("Detected new dir, adding to inotify: {}", path.c_str());
                             auto dirEnt = fs::directory_entry(path, ec);
                             if (!ec) {
-                                monitorUnmonitorRecursive(dirEnt, false, adir, false, config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS));
+                                monitorUnmonitorRecursive(dirEnt, false, adir, false, adir->getFollowSymlinks());
                             } else {
                                 log_error("Failed to read {}: {}", path.c_str(), ec.message());
                             }
@@ -248,7 +254,7 @@ void AutoscanInotify::threadProc()
                         if (!ec) {
                             AutoScanSetting asSetting;
                             asSetting.adir = adir;
-                            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                            asSetting.followSymlinks = adir->getFollowSymlinks();
                             asSetting.recursive = adir->getRecursive();
                             asSetting.hidden = adir->getHidden();
                             asSetting.rescanResource = true;

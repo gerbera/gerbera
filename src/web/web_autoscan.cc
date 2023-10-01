@@ -86,6 +86,7 @@ void Web::Autoscan::process()
             // add or update
             bool recursive = boolParam("recursive");
             bool hidden = boolParam("hidden");
+            bool followSymlinks = boolParam("followSymlinks");
 
             std::vector<std::string> mediaType;
             if (boolParam("audio"))
@@ -135,6 +136,7 @@ void Web::Autoscan::process()
                 false, // persistent
                 interval,
                 hidden,
+                followSymlinks,
                 mt);
             autoscan->setObjectID(objectID);
             content->setAutoscanDirectory(autoscan);
@@ -170,6 +172,7 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
         element.append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("followSymlinks").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("mediaType").append_child(pugi::node_pcdata).set_value("-1");
@@ -191,6 +194,7 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
         element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
         element.append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
+        element.append_child("followSymlinks").append_child(pugi::node_pcdata).set_value(adir->getFollowSymlinks() ? "1" : "0");
         element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
         element.append_child("mediaType").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getMediaType()).c_str());

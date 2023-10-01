@@ -916,6 +916,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         to_underlying(AutoscanDirectory::MediaType::Any), AutoscanDirectory::makeMediaType),
     std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES,
         "attribute::hidden-files", "config-import.html#autoscan"),
+    std::make_shared<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS,
+        "attribute::follow-symlinks", "config-import.html#autoscan"),
     std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT,
         "attribute::scan-count", "config-import.html#autoscan"),
     std::make_shared<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT,
@@ -1370,6 +1372,11 @@ const std::map<config_option_t, std::vector<config_option_t>> ConfigDefinition::
                                                CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                            } },
+    { ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
+#ifdef HAVE_INOTIFY
+                                                  CFG_IMPORT_AUTOSCAN_INOTIFY_LIST
+#endif
+                                              } },
     { ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT, { CFG_IMPORT_AUTOSCAN_TIMED_LIST,
 #ifdef HAVE_INOTIFY
                                              CFG_IMPORT_AUTOSCAN_INOTIFY_LIST

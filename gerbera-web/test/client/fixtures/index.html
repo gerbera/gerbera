@@ -190,7 +190,7 @@
               <div class="form-group" id="autoscan-persistent-msg">
                 <span>This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.</span>
               </div>
-              <div class="form-group row " hidden>
+              <div class="form-group row" hidden>
                   <div class="col-md-6">
                       <label for="autoscanId">ID:</label>
                   </div>
@@ -236,12 +236,26 @@
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanHidden" class="col-3 col-form-label">Include Hidden</label>
+                <div class="col-3">
+                  <label>Include Hidden</label>
+                </div>
                 <div class="col-9">
                   <div class="form-check">
                     <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input" aria-describedby="autoscanHiddenHelp"/>
-                    Include Hidden
+                    <label for="autoscanHidden" class="form-check-label">Include Hidden</label>
                     <small id="autoscanHiddenHelp" class="form-text text-muted">Include hidden files/directories</small>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group row no-gutters">
+                <div class="col-3">
+                  <label>Follow Symlinks</label>
+                </div>
+                <div class="col-9">
+                  <div class="form-check">
+                    <input type="checkbox" name="autoscanSymlinks" id="autoscanSymlinks" class="form-check-input" aria-describedby="autoscanSymlinksHelp"/>
+                    <label for="autoscanSymlinks" class="form-check-label">Follow Symbolic Links</label>
+                    <small id="autoscanSymlinksHelp" class="form-text text-muted">Follow symbolic links and import them.</small>
                   </div>
                 </div>
               </div>

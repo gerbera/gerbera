@@ -506,8 +506,8 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         AutoScanSetting asSetting;
         asSetting.adir = adir;
         adir->setCurrentLMT(parentPath, std::chrono::seconds(1));
-        asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-        asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+        asSetting.followSymlinks = adir->getFollowSymlinks();
+        asSetting.hidden = adir->getHidden();
         asSetting.recursive = true;
         asSetting.rescanResource = false;
         asSetting.async = true;
@@ -675,7 +675,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     AutoScanSetting asSetting;
     asSetting.adir = adir;
     asSetting.recursive = adir->getRecursive();
-    asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+    asSetting.followSymlinks = adir->getFollowSymlinks();
     asSetting.hidden = adir->getHidden();
     asSetting.mergeOptions(config, location);
 
@@ -729,7 +729,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             }
 
             asSetting.recursive = adir->getRecursive();
-            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+            asSetting.followSymlinks = adir->getFollowSymlinks();
             asSetting.hidden = adir->getHidden();
             asSetting.mergeOptions(config, location);
             auto lwt = toSeconds(dirEnt.last_write_time(ec));

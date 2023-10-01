@@ -48,12 +48,13 @@ const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypes
     { AutoscanMediaMode::Video, UPNP_CLASS_CONTAINER },
 };
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, int mediaType, const std::map<AutoscanMediaMode, std::string>& containerMap)
+AutoscanDirectory::AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, bool followSymlinks, int mediaType, const std::map<AutoscanMediaMode, std::string>& containerMap)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
     , hidden(hidden)
-    , persistent_flag(persistent)
+    , followSymlinks(followSymlinks)
+    , persistentFlag(persistent)
     , interval(interval)
     , scanID(INVALID_SCAN_ID)
     , containerMap(containerMap)
@@ -271,7 +272,8 @@ void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) c
     copy->mode = mode;
     copy->recursive = recursive;
     copy->hidden = hidden;
-    copy->persistent_flag = persistent_flag;
+    copy->followSymlinks = followSymlinks;
+    copy->persistentFlag = persistentFlag;
     copy->interval = interval;
     copy->taskCount = taskCount;
     copy->scanID = scanID;

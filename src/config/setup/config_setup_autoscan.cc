@@ -92,6 +92,8 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
+        cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+        bool follow = cs->hasXmlElement(child) ? cs->getXmlContent(child) : followSymlinks;
         auto ctAudio = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child);
         auto ctImage = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child);
         auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
@@ -100,7 +102,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             containerMap[AutoscanMediaMode::Audio] = ctAudio;
             containerMap[AutoscanMediaMode::Image] = ctImage;
             containerMap[AutoscanMediaMode::Video] = ctVideo;
-            result.push_back(std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, mt, containerMap));
+            result.push_back(std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap));
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
             return false;
@@ -158,6 +160,15 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
             config->setOrigValue(index, entry->getHidden());
         entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getHidden());
+        return true;
+    }
+
+    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getFollowSymlinks());
+        entry->setFollowSymlinks(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS)->checkValue(optValue));
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getFollowSymlinks());
         return true;
     }
 
@@ -237,6 +248,9 @@ void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shar
 {
     if (arguments && arguments->find("hiddenFiles") != arguments->end()) {
         hiddenFiles = arguments->at("hiddenFiles") == "true";
+    }
+    if (arguments && arguments->find("followSymlinks") != arguments->end()) {
+        followSymlinks = arguments->at("followSymlinks") == "true";
     }
     newOption(getXmlElement(root));
     setOption(config);

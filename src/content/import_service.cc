@@ -408,7 +408,7 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_debug("Searching Item {} in database", itemPath.string());
                 cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
             }
-            if (cdsObj && cdsObj->isItem() && stateEntry->getMTime() > cdsObj->getMTime()) {
+            if (cdsObj && cdsObj->isItem() && stateEntry->getMTime() != cdsObj->getMTime()) {
                 log_debug("Updating Item {} in database {}", itemPath.string(), cdsObj->getID());
                 auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
                 item->clearMetaData();
@@ -507,8 +507,9 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
 
 void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype)
 {
-    item->setMTime(toSeconds(dirEntry.last_write_time(ec)));
-    item->setUTime(toSeconds(dirEntry.last_write_time(ec)));
+    auto mTime = toSeconds(dirEntry.last_write_time(ec));
+    item->setMTime(mTime);
+    item->setUTime(mTime);
     item->setSizeOnDisk(getFileSize(dirEntry));
 
     MetadataHandler::extractMetaData(context, content, item, dirEntry);

@@ -156,6 +156,7 @@ enum class AutoscanColumn {
     CtImage,
     CtVideo,
     Hidden,
+    FollowSymlinks,
     Interval,
     LastModified,
     Persistent,
@@ -237,6 +238,7 @@ static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autos
     { AutoscanColumn::CtImage, { AUS_ALIAS, "ct_image" } },
     { AutoscanColumn::CtVideo, { AUS_ALIAS, "ct_video" } },
     { AutoscanColumn::Hidden, { AUS_ALIAS, "hidden" } },
+    { AutoscanColumn::FollowSymlinks, { AUS_ALIAS, "follow_symlinks" } },
     { AutoscanColumn::Interval, { AUS_ALIAS, "interval" } },
     { AutoscanColumn::LastModified, { AUS_ALIAS, "last_modified" } },
     { AutoscanColumn::Persistent, { AUS_ALIAS, "persistent" } },
@@ -281,6 +283,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "scan_mode", AutoscanColumn::ScanMode },
     { "recursive", AutoscanColumn::Recursive },
     { "hidden", AutoscanColumn::Hidden },
+    { "follow_symlinks", AutoscanColumn::FollowSymlinks },
     { "interval", AutoscanColumn::Interval },
     { "last_modified", AutoscanColumn::LastModified },
     { "persistent", AutoscanColumn::Persistent },
@@ -2528,6 +2531,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
     int mt = getColInt(row, AutoscanColumn::MediaType, 0);
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
+    bool followSymlinks = remapBool(getCol(row, AutoscanColumn::FollowSymlinks));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
     auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
     containerMap[AutoscanMediaMode::Audio] = getCol(row, AutoscanColumn::CtAudio);
@@ -2540,7 +2544,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 
     log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
 
-    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, mt, containerMap);
+    auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, followSymlinks, mt, containerMap);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setCurrentLMT("", lastModified);
@@ -2571,6 +2575,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         identifier("recursive"),
         identifier("media_type"),
         identifier("hidden"),
+        identifier("follow_symlinks"),
         identifier("ct_audio"),
         identifier("ct_image"),
         identifier("ct_video"),
@@ -2586,6 +2591,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         quote(adir->getRecursive()),
         quote(adir->getMediaType()),
         quote(adir->getHidden()),
+        quote(adir->getFollowSymlinks()),
         quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio)),
         quote(adir->getContainerTypes().at(AutoscanMediaMode::Image)),
         quote(adir->getContainerTypes().at(AutoscanMediaMode::Video)),
@@ -2619,6 +2625,7 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         ColumnUpdate(identifier("recursive"), quote(adir->getRecursive())),
         ColumnUpdate(identifier("media_type"), quote(adir->getMediaType())),
         ColumnUpdate(identifier("hidden"), quote(adir->getHidden())),
+        ColumnUpdate(identifier("follow_symlinks"), quote(adir->getFollowSymlinks())),
         ColumnUpdate(identifier("ct_audio"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio))),
         ColumnUpdate(identifier("ct_image"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Image))),
         ColumnUpdate(identifier("ct_video"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Video))),

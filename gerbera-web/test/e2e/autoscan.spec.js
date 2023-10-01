@@ -74,6 +74,9 @@ describe('Autoscan Suite', () => {
       result = await homePage.getAutoscanHidden();
       expect(result).to.equal('true');
 
+      result = await homePage.getAutoscanFollowSymlink();
+      expect(result).to.equal('true');
+
       await homePage.cancelAutoscan();
     });
 

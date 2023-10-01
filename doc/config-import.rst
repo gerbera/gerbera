@@ -27,8 +27,8 @@ This tag defines the import section.
 
     * Default: **no**
 
-    This attribute defines if files starting with a dot will be imported into the database (”yes”). Autoscan can
-    override this attribute on a per directory basis.
+    This attribute defines if files starting with a dot will be imported into the database (``yes``). Autoscan can
+    override this attribute on a per directory basis. Hidden directories can also be marked with the ``nomedia-file``.
 
     ::
 
@@ -38,7 +38,7 @@ This tag defines the import section.
 
     * Default: **yes**
 
-    This attribute defines if symbolic links should be treated as regular items and imported into the database (”yes”). This can cause duplicate entries if the link target is also scanned.
+    This attribute defines if symbolic links should be treated as regular items and imported into the database (``yes``). This can cause duplicate entries if the link target is also scanned.
 
     ::
 
@@ -535,7 +535,18 @@ the removed directory if it becomes available/gets created again.
         * Optional
         * Default: **value specified in <import hidden-files=””/>**
 
-        Allowed values: ``yes`` or ``no``, process hidden files, overrides the hidden-files value in the ``<import/>`` tag.
+        Allowed values: ``yes`` or ``no``, process hidden files, overrides the ``hidden-files`` value in the ``<import/>`` tag.
+
+        ::
+
+            follow-symlinks="yes|no"
+
+        * Optional
+        * Default: **value specified in <import follow-symlinks=””/>**
+
+        Allowed values: ``yes`` or ``no``, symbolic links should be treated as regular items and imported into the database (``yes``).
+        This can cause duplicate entries if the link target is also scanned
+        overrides the ``follow-symlinks`` value in the ``<import/>`` tag.
 
         ::
 

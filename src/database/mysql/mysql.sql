@@ -56,6 +56,7 @@ CREATE TABLE `mt_autoscan` (
   `recursive` tinyint(4) unsigned NOT NULL,
   `media_type` int(11) NOT NULL,
   `hidden` tinyint(4) unsigned NOT NULL,
+  `follow_symlinks` tinyint(4) unsigned NOT NULL,
   `interval` int(11) unsigned default NULL,
   `ct_audio` varchar(255) NOT NULL,
   `ct_image` varchar(255) NOT NULL,

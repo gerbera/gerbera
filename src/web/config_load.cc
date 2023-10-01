@@ -611,6 +611,10 @@ void Web::ConfigLoad::process()
             setValue(item, adir->getHidden());
 
             item = values.append_child("item");
+            createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS), ascs->option, ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+            setValue(item, adir->getFollowSymlinks());
+
+            item = values.append_child("item");
             createItem(item, ascs->getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Audio));
 
