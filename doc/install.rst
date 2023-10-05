@@ -6,6 +6,11 @@ Installing Gerbera
 We strongly advise using the packages provided by your distribution if available.
 Please see below for guides on how to install Gerbera on various distributions.
 
+Please try to follow the n-1 principle, i.e. do not install versions older that the previous release.
+Be aware that this page may not fully reflect latest changes in the respective distribution as well as
+Team Gerbera is not responsible for the way the packages are built by others.
+When installing older versions it is likely that options described in this documentation may not exist.
+
 Docker
 ~~~~~~~~~~~~~~~~~
 .. index:: Docker

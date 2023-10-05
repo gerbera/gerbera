@@ -13,6 +13,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 
 - Staged importing that allows updating the virtual layout instead of deleting and recreating it each time
 - Config options as command line arguments
+- Allow configuration of `follow-symlinks` per autoscan directory
 - Configuration of containers in virtual layout: title can be changed, some nodes can be disabled
 - New mode of loading Javascript plugins with cleanup of global variables
 - Generation of example configuration via command line option
@@ -20,6 +21,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 - New config options for URL handling and host redirection
 - Use `.nomedia` to hide directory, incl. config option
 - Support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
+- Build for Ubuntu 23.04
 
 ### FIXES
 
