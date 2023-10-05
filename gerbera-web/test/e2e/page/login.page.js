@@ -42,6 +42,11 @@ module.exports = function (driver) {
     return await driver.wait(until.elementIsVisible(stats), 5000);
   };
 
+  this.emptyVisible = async () => {
+    await driver.executeScript('return $(\'#server-empty\').show();')
+    await driver.executeScript('return $(\'#server-status\').hide();')
+  };
+
   this.logout = async () => {
     const logoutBtn = driver.findElement(By.id('logout'));
     await driver.wait(until.elementIsVisible(logoutBtn), 5000);

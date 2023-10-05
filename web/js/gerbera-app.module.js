@@ -248,27 +248,34 @@ export class App {
       if (cnt && cnt !== '') {
         $('#status-' + key + '-count').html(cnt);
         $('#status-' + key + '-size').html(this.getStatusValue(itemList, key + 'Size'));
+        return Number.parseInt(cnt);
       } else {
         $('#status-'+key).hide();
+        return 0;
       }
   }
 
   displayStatus (response) {
+    let cnt = 0;
     if (response.success && response.values) {
+      cnt += this.showStatus(response.values.item, 'total');
+      cnt += this.showStatus(response.values.item, 'audio');
+      cnt += this.showStatus(response.values.item, 'audioBook');
+      cnt += this.showStatus(response.values.item, 'audioMusic');
+      cnt += this.showStatus(response.values.item, 'audioBroadcast');
+      cnt += this.showStatus(response.values.item, 'video');
+      cnt += this.showStatus(response.values.item, 'videoMovie');
+      cnt += this.showStatus(response.values.item, 'videoBroadcast');
+      cnt += this.showStatus(response.values.item, 'videoMusicVideoClip');
+      cnt += this.showStatus(response.values.item, 'image');
+      cnt += this.showStatus(response.values.item, 'imagePhoto');
+      cnt += this.showStatus(response.values.item, 'text');
+      cnt += this.showStatus(response.values.item, 'item');
+    }
+    if (cnt == 0) {
+      $('#server-empty').show();
+    } else {
       $('#server-status').show();
-      this.showStatus(response.values.item, 'total');
-      this.showStatus(response.values.item, 'audio');
-      this.showStatus(response.values.item, 'audioBook');
-      this.showStatus(response.values.item, 'audioMusic');
-      this.showStatus(response.values.item, 'audioBroadcast');
-      this.showStatus(response.values.item, 'video');
-      this.showStatus(response.values.item, 'videoMovie');
-      this.showStatus(response.values.item, 'videoBroadcast');
-      this.showStatus(response.values.item, 'videoMusicVideoClip');
-      this.showStatus(response.values.item, 'image');
-      this.showStatus(response.values.item, 'imagePhoto');
-      this.showStatus(response.values.item, 'text');
-      this.showStatus(response.values.item, 'item');
     }
     return Promise.resolve();
   }
@@ -319,6 +326,8 @@ export class App {
   }
 
   displayLogin (loggedIn) {
+    $('#server-status').hide();
+    $('#server-empty').hide();
     if (loggedIn) {
       $('.login-field').hide();
       $('#login-submit').hide();
@@ -339,7 +348,6 @@ export class App {
         .then((response) => { return this.displayStatus(response); })
         .catch((error) => { this.error(error); });
     } else {
-      $('#server-status').hide();
       $('.login-field').show();
       $('#login-form').submit(function (event) {
         Auth.authenticate(event);

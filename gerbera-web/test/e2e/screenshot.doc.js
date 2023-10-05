@@ -54,6 +54,20 @@ suite(() => {
       image.crop(0, 0, 1280, 680).write(fileName);
     });
 
+    it('for [main view] with empty database', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'main-view-empty.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await loginPage.emptyVisible();
+
+      await loginPage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO)
+      image.crop(0, 0, 1280, 680).write(fileName);
+    });
+
     it('for [login] field entry', async () => {
       const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry.png';
       await loginPage.username('gerbera');

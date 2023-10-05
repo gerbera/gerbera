@@ -3,6 +3,7 @@
  - Add audio to year container
  - Add cleanup of missing entries to grb import mode
  - Add option for external URL to be used in web page.
+ - Add permissions on HV transcoding devices in docker container
  - Add Support for Configuration of Virtual Layout
  - Add support for nomedia file / add options to block default M_DATE
  - Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
@@ -14,6 +15,7 @@
  - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
  - Config WebUI: Catch up with all config changes
+ - Config: Add follow-symlinks for autoscan
  - Config: Add support for time specifications
  - Config: Generate Example Configuration
  - Database items sorting case insensitive
@@ -39,9 +41,11 @@
  - Update README.Docker.md -Add docker volume section
  - Update supported-devices.rst
  - Update to latest npm packages
+ - Update Ubuntu Version
  - Update versions of exiv2, fmt, spdlog, googletest and taglib
  - Use new ffmpeg channel layout API
  - WebUI: Database View - don't allow deleting dynamic containers
+ - WebUI: Fix display of time values
  - WebUI: Update JS libs
  - WebUI: Update popper to 2.11.6  / Update MD5 to 2.19.0
 

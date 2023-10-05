@@ -175,6 +175,26 @@
           </tr>
         </table>
       </div>
+      <div id="server-empty" class="col md-3">
+        <h4>Set up Gerbera with persistent content</h4>
+        <span class="text-muted">A bit more complicated but safer in the long run</span>
+        <ul>
+          <li>Add autoscan entry in config.xml (<a target="_blank" href="https://docs.gerbera.io/en/latest/config-import.html#autoscan">See documentation</a>)</li>
+          <li>Adjust further settings as required</li>
+          <li>Restart Gerbera service</li>
+          <li>Wait for import to complete</li>
+          <li>Check logs for error messages</li>
+        </ul>
+        <h4>Set up Gerbera with dymanic content</h4>
+        <span class="text-muted">Easier to create but all setup is lost when your database is deleted or corrupted</span>
+        <ul>
+          <li>Go to <i class="fa fa-folder-open"></i> <strong>File System</strong> view</li>
+          <li>Look for folders containing your media files</li>
+          <li>Click <i class="fa fa-history"></i> <strong>Add Autoscan Item</strong></li>
+          <li>Wait for import to complete</li>
+          <li>Check logs for error messages</li>
+        </ul>
+      </div>
     </div>
   </div>
 
