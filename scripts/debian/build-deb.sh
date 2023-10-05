@@ -144,22 +144,20 @@ else
   libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
   libmatroska="libebml-dev libmatroska-dev"
-  libduktape="libduktape205"
   ffmpegthumbnailer="libffmpegthumbnailer-dev"
   BuildType="Release"
   DoTests="OFF"
+
+  libduktape="libduktape207"
   if [[ "$lsb_codename" == "bionic" ]]; then
     libduktape="libduktape202"
   elif [[ "$lsb_codename" == "buster" ]]; then
     libduktape="libduktape203"
-  elif [[ "$lsb_codename" == "trixie" || "${my_sys}" == "debian:testing" ]]; then
-    libduktape="libduktape207"
-  elif [[ "$lsb_codename" == "bookworm" || "${my_sys}" == "debian:stable" ]]; then
-    libduktape="libduktape207"
-  elif [[ "$lsb_codename" == "sid" || "$lsb_codename" == "jammy" || "$lsb_codename" == "kinetic" || "${my_sys}" == "debian:unstable" ]]; then
-    libduktape="libduktape207"
+  elif [[ "$lsb_codename" == "focal" ]]; then
+    libduktape="libduktape205"
   fi
   libduktape="duktape-dev ${libduktape}"
+
   echo "Selecting $libduktape for $lsb_distro $lsb_codename"
 fi
 
