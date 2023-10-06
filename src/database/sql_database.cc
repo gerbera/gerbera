@@ -1846,6 +1846,28 @@ std::vector<std::pair<int, std::chrono::seconds>> SQLDatabase::getRefObjects(int
     return result;
 }
 
+std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
+{
+    auto colId = identifier("id");
+    auto table = identifier(CDS_OBJECT_TABLE);
+    auto colRefId = identifier("ref_id");
+
+    auto getSql = fmt::format("SELECT {} FROM {} WHERE {} IS NOT NULL AND {} NOT IN (SELECT {} FROM {})", colId, table, colRefId, colRefId, colId, table);
+    auto res = select(getSql);
+    if (!res)
+        throw_std_runtime_error("db error");
+
+    std::unordered_set<int> ret;
+    if (res->getNumRows() == 0)
+        return ret;
+
+    std::unique_ptr<SQLRow> row;
+    while ((row = res->nextRow())) {
+        ret.insert(row->col_int(0, INVALID_OBJECT_ID));
+    }
+    return ret;
+}
+
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const std::unordered_set<int>& list, bool all)
 {
     std::size_t count = list.size();

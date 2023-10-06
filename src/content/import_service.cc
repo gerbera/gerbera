@@ -549,7 +549,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                 for (auto&& origEntry : listOrig) {
                     auto newEntry = std::find_if(listResult.begin(), listResult.end(), [&](auto& entry) { return origEntry.first == entry.first && origEntry.second > entry.second; });
                     if (newEntry == listResult.end()) {
-                        log_debug("Deleting ophaned virtual item {}", origEntry.first);
+                        log_debug("Deleting orphaned virtual item {}", origEntry.first);
                         database->removeObject(origEntry.first, "", false);
                     }
                 }
