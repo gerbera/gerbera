@@ -139,6 +139,7 @@ public:
 
     std::unordered_set<int> getObjects(int parentID, bool withoutContainer) override;
     std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override;
+    std::unordered_set<int> getUnreferencedObjects() override;
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override;
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override;

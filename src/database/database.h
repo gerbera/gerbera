@@ -292,6 +292,7 @@ public:
     /// \return DBHash containing the objectID's - nullptr if there are none!
     virtual std::unordered_set<int> getObjects(int parentID, bool withoutContainer) = 0;
     virtual std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) = 0;
+    virtual std::unordered_set<int> getUnreferencedObjects() = 0;
 
     /// \brief Remove all objects found in list
     /// \param list a DBHash containing objectIDs that have to be removed

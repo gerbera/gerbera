@@ -826,7 +826,20 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     if (shutdownFlag || (task && !task->isValid())) {
         return;
     }
+    // Items not touched during import do not exist anymore and can be removed
     if (!list.empty()) {
+        log_debug("Deleting unreferenced physical objects {}", fmt::join(list, ","));
+        auto changedContainers = database->removeObjects(list);
+        if (changedContainers) {
+            session_manager->containerChangedUI(changedContainers->ui);
+            update_manager->containersChanged(changedContainers->upnp);
+        }
+    }
+    // Find all virtual items that do not have physical reps
+    list = database->getUnreferencedObjects();
+    if (!list.empty()) {
+        // DELETE FROM mt_cds_object WHERE ref_id is not null and ref_id not in (SELECT id FROM mt_cds_object)
+        log_debug("Deleting unreferenced virtual objects {}", fmt::join(list, ","));
         auto changedContainers = database->removeObjects(list);
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
