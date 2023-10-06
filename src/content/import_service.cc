@@ -265,9 +265,11 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting& settings)
                 readDir(entryPath, settings);
             } else {
                 contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
+                log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             }
         } else if (ec) {
             contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
+            log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
         }
     }
     log_debug("end {}", location.string());
@@ -282,7 +284,7 @@ void ImportService::readFile(const fs::path& location)
         dirEntry.assign(entryPath.parent_path(), ec);
         if (ec) {
             contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
-            log_error("Failed to navigate up {}, {}", entryPath.c_str(), ec.message());
+            log_error("ImportService::readFile {}: Failed to navigate up {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             break;
         }
         entryPath = dirEntry.path();

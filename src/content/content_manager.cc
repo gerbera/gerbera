@@ -817,7 +817,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 }
             }
             if (ec) {
-                log_error("_rescanDirectory: Failed to read {}, {}", newPath.c_str(), ec.message());
+                log_error("ContentManager::_rescanDirectory {}: Failed to read {}, {}", location.c_str(), newPath.c_str(), ec.message());
             }
         } // dIter
 

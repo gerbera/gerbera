@@ -497,7 +497,7 @@ void AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& start
         }
 
         if (ec) {
-            log_error("monitorUnmonitorRecursive: Failed to read {}, {}", dirEnt.path().c_str(), ec.message());
+            log_error("AutoscanInotify::monitorUnmonitorRecursive {}: Failed to read {}, {}", startPath.path().c_str(), dirEnt.path().c_str(), ec.message());
         }
     }
 }
