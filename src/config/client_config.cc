@@ -51,6 +51,18 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientInfo.captionInfoCount = captionInfoCount;
     clientInfo.stringLimit = stringLimit;
     clientInfo.multiValue = multiValue;
+    if (flags & QUIRK_FLAG_HIDE_RES_THUMBNAIL) {
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Thumbnail);
+        clientInfo.supportedResources.erase(res);
+    }
+    if (flags & QUIRK_FLAG_HIDE_RES_SUBTITLE) {
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Subtitle);
+        clientInfo.supportedResources.erase(res);
+    }
+    if (flags & QUIRK_FLAG_HIDE_RES_TRANSCODE) {
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Transcode);
+        clientInfo.supportedResources.erase(res);
+    }
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
     clientInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
@@ -176,6 +188,9 @@ static constexpr auto quirkFlags = std::array {
     std::pair("PV_SUBTITLES", QUIRK_FLAG_PV_SUBTITLES),
     std::pair("PANASONIC", QUIRK_FLAG_PANASONIC),
     std::pair("STRICTXML", QUIRK_FLAG_STRICTXML),
+    std::pair("HIDE_THUMBNAIL_RESOURCE", QUIRK_FLAG_HIDE_RES_THUMBNAIL),
+    std::pair("HIDE_SUBTITLE_RESOURCE", QUIRK_FLAG_HIDE_RES_SUBTITLE),
+    std::pair("HIDE_TRANSCODE_RESOURCE", QUIRK_FLAG_HIDE_RES_TRANSCODE),
     std::pair("TRANSCODING1", QUIRK_FLAG_TRANSCODING1),
     std::pair("TRANSCODING2", QUIRK_FLAG_TRANSCODING2),
     std::pair("TRANSCODING3", QUIRK_FLAG_TRANSCODING3),

@@ -14,6 +14,7 @@
  - Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
  - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
+ - Clean up unreferenced items
  - Config WebUI: Catch up with all config changes
  - Config: Add follow-symlinks for autoscan
  - Config: Add support for time specifications
@@ -22,6 +23,7 @@
  - DB rework playstatus save
  - DB: Don't fail on uncritical operations.
  - debian: bookworm is now stable
+ - Display message on home screen when database is empty
  - Docker: Add JPEG libs
  - Docker: git badge update
  - Fix conan

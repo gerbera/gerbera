@@ -243,6 +243,11 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
     request.setResponse(std::move(response));
 }
 
+bool Quirks::supportsResource(CdsResource::Purpose purpose) const
+{
+    return pClientInfo ? std::find(pClientInfo->supportedResources.begin(), pClientInfo->supportedResources.end(), purpose) != pClientInfo->supportedResources.end() : true;
+}
+
 bool Quirks::blockXmlDeclaration() const
 {
     return hasFlag(QUIRK_FLAG_IRADIO);
