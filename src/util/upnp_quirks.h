@@ -26,6 +26,7 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include "cds/cds_resource.h"
 #include "upnp_xml.h"
 #include <memory>
 #include <pugixml.hpp>
@@ -43,6 +44,9 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_PV_SUBTITLES 0x00000040
 #define QUIRK_FLAG_PANASONIC 0x00000080
 #define QUIRK_FLAG_STRICTXML 0x00000100
+#define QUIRK_FLAG_HIDE_RES_THUMBNAIL 0x00000200
+#define QUIRK_FLAG_HIDE_RES_SUBTITLE 0x00000400
+#define QUIRK_FLAG_HIDE_RES_TRANSCODE 0x00000800
 #define QUIRK_FLAG_TRANSCODING1 0x00010000
 #define QUIRK_FLAG_TRANSCODING2 0x00020000
 #define QUIRK_FLAG_TRANSCODING3 0x00040000
@@ -107,6 +111,13 @@ public:
      *
      */
     void getSamsungIndexfromRID(ActionRequest& request) const;
+
+    /** \brief Check whether clients support resource type
+     *
+     * \return bool
+     *
+     */
+    bool supportsResource(CdsResource::Purpose purpose) const;
 
     /** \brief block XML header in response for broken clients
      *

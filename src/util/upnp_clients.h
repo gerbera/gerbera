@@ -80,6 +80,7 @@ struct ClientInfo {
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };
+    std::vector<CdsResource::Purpose> supportedResources { CdsResource::Purpose::Content, CdsResource::Purpose::Thumbnail, CdsResource::Purpose::Subtitle, CdsResource::Purpose::Transcode };
 };
 
 struct ClientCacheEntry {

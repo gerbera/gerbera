@@ -886,6 +886,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     auto [hideOriginalResource, originalResource] = insertTempTranscodingResource(item, quirks, orderedResources, isExternalURL);
 
     for (auto&& res : orderedResources) {
+        auto purpose = res->getPurpose();
+        if (quirks && !quirks->supportsResource(purpose)) {
+            continue;
+        }
         std::map<std::string, std::string> clientSpecficAttrs;
         if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
             auto captionInfo = captionInfoEx[0];
@@ -894,7 +898,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         }
 
         // bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
-        bool transcoded = res->getPurpose() == CdsResource::Purpose::Transcode;
+        bool transcoded = purpose == CdsResource::Purpose::Transcode;
         auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
 
         buildProtocolInfo(*res, mimeMappings);
