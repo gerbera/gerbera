@@ -173,7 +173,7 @@ private:
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
-    void readDir(const fs::path& location, AutoScanSetting& settings);
+    void readDir(const fs::path& location, AutoScanSetting settings);
     void readFile(const fs::path& location);
     void createContainers(int parentContainerId, AutoScanSetting& settings);
     void createItems(AutoScanSetting& settings);

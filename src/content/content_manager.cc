@@ -682,7 +682,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     log_debug("Rescanning options {}: recursive={} hidden={} followSymlinks={}", location.c_str(), asSetting.recursive, asSetting.hidden, asSetting.followSymlinks);
 
     // request only items if non-recursive scan is wanted
-    auto list = database->getObjects(containerID, !asSetting.recursive);
+    auto list = std::unordered_set<int>();
+    database->getObjects(containerID, !asSetting.recursive, list, importMode == ImportMode::Gerbera);
 
     unsigned int thisTaskID;
     if (task) {
@@ -915,6 +916,8 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         adir->setCurrentLMT(subDir.path(), std::chrono::seconds::zero());
     }
 
+    auto list = std::unordered_set<int>();
+    database->getObjects(parentID, true, list, false);
     bool firstChild = true;
     std::shared_ptr<CdsObject> firstObject;
     for (auto&& subDirEnt : dIter) {
@@ -946,6 +949,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
                     lastModifiedNewMax = lwt;
                 }
                 if (obj->isItem()) {
+                    list.erase(obj->getID());
                     parentID = obj->getParentID();
                     if (!firstObject && obj->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                         firstObject = obj;
@@ -972,6 +976,15 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     }
     getImportService(adir)->finishScan(subDir.path(), parentContainer, lastModifiedNewMax, firstObject);
+    // Items not touched during import do not exist anymore and can be removed
+    if (!list.empty()) {
+        log_debug("Deleting unreferenced physical objects {}", fmt::join(list, ","));
+        auto changedContainers = database->removeObjects(list);
+        if (changedContainers) {
+            session_manager->containerChangedUI(changedContainers->ui);
+            update_manager->containersChanged(changedContainers->upnp);
+        }
+    }
 }
 
 template <typename T>

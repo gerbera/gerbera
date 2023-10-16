@@ -246,7 +246,7 @@ std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) co
     return {};
 }
 
-void ImportService::readDir(const fs::path& location, AutoScanSetting& settings)
+void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
 {
     log_debug("start {}", location.string());
     auto dirIterator = fs::directory_iterator(location, ec);
@@ -254,6 +254,7 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting& settings)
         log_error("Failed to iterate {}, {}", location.c_str(), ec.message());
         return;
     }
+    settings.mergeOptions(config, location);
     for (auto&& dirEntry : dirIterator) {
         auto&& entryPath = dirEntry.path();
         if (isHiddenFile(entryPath, true, dirEntry, settings)) {

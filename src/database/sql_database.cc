@@ -1798,28 +1798,29 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     return fmt::format("{}", fmt::join(rows, ","));
 }
 
-std::unordered_set<int> SQLDatabase::getObjects(int parentID, bool withoutContainer)
+std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full)
 {
     auto colId = identifier("id");
     auto table = identifier(CDS_OBJECT_TABLE);
     auto colParentId = identifier("parent_id");
+    auto colObjType = identifier("object_type");
 
-    auto getSql = withoutContainer //
-        ? fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} != {}", colId, table, colParentId, parentID, identifier("object_type"), OBJECT_TYPE_CONTAINER)
-        : fmt::format("SELECT {} FROM {} WHERE {} = {}", colId, table, colParentId, parentID);
+    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} = {}", colId, colObjType, table, colParentId, parentID);
     auto res = select(getSql);
     if (!res)
         throw_std_runtime_error("db error");
 
-    std::unordered_set<int> ret;
     if (res->getNumRows() == 0)
-        return ret;
+        return 0;
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        ret.insert(row->col_int(0, INVALID_OBJECT_ID));
+        if ((!withoutContainer && !full) || row->col_int(1, OBJECT_TYPE_CONTAINER) != OBJECT_TYPE_CONTAINER)
+            ret.insert(row->col_int(0, INVALID_OBJECT_ID));
+        else if (!withoutContainer && full)
+            getObjects(row->col_int(0, INVALID_OBJECT_ID), withoutContainer, ret, full);
     }
-    return ret;
+    return ret.size();
 }
 
 std::vector<std::pair<int, std::chrono::seconds>> SQLDatabase::getRefObjects(int objectId)
