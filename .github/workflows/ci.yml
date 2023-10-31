@@ -38,10 +38,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.x"
+          python-version: "3.11"
       - name: Install conan
         run: |
-          pip install -U --no-cache-dir conan==1.59
+          pip install -U --no-cache-dir conan==1.61
           conan profile new default --detect
           conan profile update settings.compiler.libcxx=libstdc++11 default
       - name: Cache conan dependencies
