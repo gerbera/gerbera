@@ -119,6 +119,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     try {
         if (arr.empty())
             arr = database->browse(param);
+        else
+            param.setTotalMatches(arr.size());
     } catch (const std::runtime_error& e) {
         log_error("No such object: {}", e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
