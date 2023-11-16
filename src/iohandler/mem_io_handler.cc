@@ -34,6 +34,8 @@
 
 #include "mem_io_handler.h" // API
 
+#include <algorithm>
+
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(new char[length])
     , length(length)

@@ -34,6 +34,7 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <vector>
