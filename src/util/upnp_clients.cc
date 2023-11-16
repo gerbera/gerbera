@@ -33,6 +33,8 @@
 
 #include <upnp.h>
 
+#include <algorithm>
+
 std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const
 {
     return std::make_shared<ClientStatusDetail>(group, itemId, playCount, lastPlayed.count(), lastPlayedPosition.count(), bookMarkPos.count());
