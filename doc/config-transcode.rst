@@ -90,7 +90,7 @@ profile which is defined below.
 
         mimetype=...
 
-    Selects the mime type of the source media that should be transcoded.
+    Selects the mime type of the source media that should be transcoded. Wildcards like ``video/*`` can be used to match all sub types.
 
     .. code-block:: xml
 
