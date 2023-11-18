@@ -694,8 +694,16 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (!filter)
                 throw_std_runtime_error("Invalid profile encountered");
             // check for mimetype and filter if no match
-            if (!filter->getMimeType().empty() && filter->getMimeType() != item->getMimeType()) {
-                continue;
+            auto fMime = filter->getMimeType();
+            if (!fMime.empty()) {
+                std::vector<std::string> parts = splitString(fMime, '/');
+                if (parts.size() == 2 && parts[1] == "*") {
+                    if (!startswith(item->getMimeType(), parts[0] + "/")) {
+                        continue;
+                    }
+                } else if (fMime != item->getMimeType()) {
+                    continue;
+                }
             }
             // check for client profile prop and filter if no match
             if (!filter->getSourceProfile().empty() && filter->getSourceProfile() != sourceProfile) {
