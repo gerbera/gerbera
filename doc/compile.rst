@@ -193,14 +193,15 @@ build and installed from the source:
   libsystemd-dev libtag1-dev ffmpeg
 
 
-Build and install libupnp with the ``--enable-ipv6`` and ``--enable-reuseaddr`` option and libfmt from sourcec
+Build and install libupnp with the ``--enable-ipv6``, ``--enable-reuseaddr`` and ``--disable-blocking-tcp-connections``
+options and libfmt from source
 
 ::
 
   wget "https://github.com/pupnp/pupnp/releases/download/release-1.14.10/libupnp-1.14.10.tar.bz2" -O libupnp-1.14.10.tar.bz2
   tar -xf libupnp-1.14.10.tar.bz2
   cd libupnp-1.14.10
-  ./configure --enable-ipv6 --enable-reuseaddr
+  ./configure --enable-ipv6 --enable-reuseaddr --disable-blocking-tcp-connections
   make
   sudo make install
   cd ..
