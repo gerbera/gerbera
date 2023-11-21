@@ -236,10 +236,19 @@ Now it's time to get the source of gerbera and compile it.
   sudo make install
 
 
+.. index:: Debian
+
+Build On Debian
+~~~~~~~~~~~~~~~
+
+Necessary dependencies will be installed automatically by
+``scripts/debian/build-deb.sh``.
+
+
 .. index:: Debian Buster
 
-Build On Debian Buster
-~~~~~~~~~~~~~~~~~~~~~~
+Build On Debian Buster (10)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This guide is based on buildinh Gerbera on Pogo Kirkwood Armel architecture boxes running Debian buster.
 
