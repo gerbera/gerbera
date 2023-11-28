@@ -250,7 +250,7 @@ Necessary dependencies will be installed automatically by
 Build On Debian Buster (10)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This guide is based on buildinh Gerbera on Pogo Kirkwood Armel architecture boxes running Debian buster.
+This guide is based on building Gerbera on Pogo Kirkwood Armel architecture boxes running Debian buster.
 
 1. Create a swapfile when using 128Mb devices (and probably 256MB too). Add a HD or SSD but not a USB stick because of the risk of hardware failure.
 
