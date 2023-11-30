@@ -849,6 +849,11 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     }
 }
 
+bool ContentManager::isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings)
+{
+    return getImportService(settings.adir)->isHiddenFile(dirEntry.path(), isDirectory, dirEntry, settings);
+}
+
 std::shared_ptr<AutoscanDirectory> ContentManager::findAutoscanDirectory(fs::path path) const
 {
     std::shared_ptr<AutoscanDirectory> autoscanDir;

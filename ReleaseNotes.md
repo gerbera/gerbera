@@ -30,11 +30,13 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 - Configurable handling of HOME directory
 - Transcoding: parsing issue of requests
 - Stability for sqlite database access
+- Browsing on Samsung devices
 
 ### Code Improvements
 
 - Update Javascript libraries
 - Update versions of pupnp (1.14.18), libexiv2 (v0.27.7), fmt (10.1.1), spdlog (1.12.0) and taglib (1.13.1)
+- Compatibility with gcc14
 
 ## v1.12.1
 
