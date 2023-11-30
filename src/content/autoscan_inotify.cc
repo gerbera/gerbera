@@ -199,7 +199,7 @@ void AutoscanInotify::threadProc()
                 if (!ec) {
                     isDir = isDir || dirEnt.is_directory(ec);
                 }
-                if(ec && !(mask & (IN_DELETE_SELF | IN_DELETE | IN_MOVED_FROM | IN_MOVE_SELF | IN_UNMOUNT))) {
+                if (ec && !(mask & (IN_DELETE_SELF | IN_DELETE | IN_MOVED_FROM | IN_MOVE_SELF | IN_UNMOUNT))) {
                     log_error("Failed to read {}: {}", path.c_str(), ec.message());
                 }
                 std::shared_ptr<AutoscanDirectory> adir;
@@ -524,6 +524,7 @@ int AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startP
             log_error("AutoscanInotify::monitorUnmonitorRecursive {}: Failed to read {}, {}", startPath.path().c_str(), dirEnt.path().c_str(), ec.message());
         }
     }
+    return result;
 }
 
 int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, const std::vector<std::string>* pathArray)
