@@ -106,27 +106,24 @@ private:
 
     class WatchAutoscan : public Watch {
     public:
-        WatchAutoscan(bool startPoint, std::shared_ptr<AutoscanDirectory> adir)
+        WatchAutoscan(bool isStartPoint, std::shared_ptr<AutoscanDirectory> adir)
             : Watch(WatchType::Autoscan)
             , adir(std::move(adir))
-            , startPoint(startPoint)
+            , isStartPoint(isStartPoint)
         {
         }
         std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() const { return adir; }
-        bool isStartPoint() const { return startPoint; }
-        std::vector<std::string> getNonexistingPathArray() const { return nonexistingPathArray; }
-        void setNonexistingPathArray(const std::vector<std::string>& nonexistingPathArray) { this->nonexistingPathArray = nonexistingPathArray; }
-        void addDescendant(int wd)
-        {
-            descendants.push_back(wd);
-        }
+        bool getIsStartPoint() const { return isStartPoint; }
+        fs::path getNonExistingPath() const { return nonExistingPath; }
+        void setNonExistingPath(const fs::path& nonExistingPath) { this->nonExistingPath = nonExistingPath; }
+        void addDescendant(int wd) { descendants.push_back(wd); }
         const std::vector<int>& getDescendants() const { return descendants; }
 
     private:
         std::shared_ptr<AutoscanDirectory> adir;
-        bool startPoint;
+        bool isStartPoint;
         std::vector<int> descendants;
-        std::vector<std::string> nonexistingPathArray;
+        fs::path nonExistingPath;
     };
 
     class WatchMove : public Watch {
@@ -168,8 +165,8 @@ private:
 
     std::unordered_map<int, std::shared_ptr<Wd>> watches;
 
-    int monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, bool followSymlinks);
-    int monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, const std::vector<std::string>* pathArray = nullptr);
+    int monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPath, bool followSymlinks);
+    int monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPath, bool hasNonExisting = false, const fs::path& nonExistingPath = {});
     void unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
 
     static std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir);
@@ -179,9 +176,9 @@ private:
     bool removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove);
 
     void monitorNonexisting(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
-    void recheckNonexistingMonitor(int curWd, const std::vector<std::string>& pathAr, const std::shared_ptr<AutoscanDirectory>& adir);
+    void recheckNonexistingMonitor(int curWd, const fs::path& pathAr, const std::shared_ptr<AutoscanDirectory>& adir);
     void recheckNonexistingMonitors(int wd, const std::shared_ptr<Wd>& wdObj);
-    void removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const std::vector<std::string>& pathAr);
+    void removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const fs::path& pathAr);
 
     int watchPathForMoves(const fs::path& path, int wd);
     int addMoveWatch(const fs::path& path, int removeWd, int parentWd);
