@@ -151,6 +151,7 @@ private:
         {
         }
         fs::path getPath() const { return path; }
+        void setPath(const fs::path& newPath) { path = newPath; }
         int getWd() const { return wd; }
         int getParentWd() const { return parentWd; }
         void setParentWd(int parentWd) { this->parentWd = parentWd; }
@@ -167,7 +168,7 @@ private:
 
     std::unordered_map<int, std::shared_ptr<Wd>> watches;
 
-    void monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, bool followSymlinks);
+    int monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, bool followSymlinks);
     int monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool startPoint, const std::vector<std::string>* pathArray = nullptr);
     void unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir);
 

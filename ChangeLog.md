@@ -1,5 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+ - Add #include to fix building with gcc 14
  - Add audio to year container
  - Add cleanup of missing entries to grb import mode
  - Add option for external URL to be used in web page.
@@ -9,12 +10,16 @@
  - Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
  - Allow overriding home in config
  - buildfix: support fmtlib 10
+ - Bump @babel/traverse from 7.23.0 to 7.23.2 in /gerbera-web
+ - Bump chromedriver from 117.0.3 to 119.0.1 in /gerbera-web
  - Bump engine.io and socket.io in /gerbera-web
  - Bump socket.io-parser from 4.2.2 to 4.2.3 in /gerbera-web
  - Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
  - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
+ - Clean up physical entries in subdirectories
  - Clean up unreferenced items
+ - Clients: Support hiding resource types
  - Config WebUI: Catch up with all config changes
  - Config: Add follow-symlinks for autoscan
  - Config: Add support for time specifications
@@ -24,8 +29,10 @@
  - DB: Don't fail on uncritical operations.
  - debian: bookworm is now stable
  - Display message on home screen when database is empty
+ - Doc: Compile libupnp --disable-blocking-tcp-connections
  - Docker: Add JPEG libs
  - Docker: git badge update
+ - Document dependency installation on Debian 12
  - Fix conan
  - Fix handling transcoding requests
  - Fix spelling errors reported by lintian
@@ -37,7 +44,9 @@
  - Quirks: Check for clientInfo
  - README: fix CI badge
  - Rework javascript mechanism
+ - Samsung: Handle browse for content class correctly
  - Set defaults for autoscan settings
+ - Transcode: Wildcards for mime type filter
  - Transcoding: Improve docs and examples
  - Update Library Versions and Documentation
  - Update README.Docker.md -Add docker volume section

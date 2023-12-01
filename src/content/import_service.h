@@ -181,7 +181,6 @@ private:
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void updateFanArt();
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
-    bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, AutoScanSetting& settings);
     void removeHidden(AutoScanSetting& settings);
 
 public:
@@ -197,6 +196,8 @@ public:
     std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEntry);
     std::shared_ptr<CdsContainer> createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass);
     void fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task);
+
+    bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings);
 
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);

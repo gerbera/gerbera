@@ -313,7 +313,7 @@ void ImportService::removeHidden(AutoScanSetting& settings)
     }
 }
 
-bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, AutoScanSetting& settings)
+bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings)
 {
     auto&& name = entryPath.filename().string();
     if ((name[0] == '.' && !settings.hidden)
