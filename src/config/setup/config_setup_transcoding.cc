@@ -66,6 +66,11 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING)->getXmlContent(child));
         filter->setSourceProfile(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA)->getXmlContent(child));
         filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
+        auto noTranscoding = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING)->getXmlContent(child);
+        std::vector<std::string> noTranscodingVector;
+        for (auto&& mime : splitString(noTranscoding, ','))
+            noTranscodingVector.push_back(trimString(mime));
+        filter->setNoTranscodingMimeTypes(noTranscodingVector);
         trFilters.push_back(filter);
         result->add(filter);
     }
@@ -287,6 +292,16 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getSourceProfile());
                 filter->setSourceProfile(optValue);
                 log_debug("New Transcoding Detail {} {}", index, filter->getSourceProfile());
+                return true;
+            }
+            index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING);
+            if (optItem == index) {
+                log_error("Cannot change profile name in Transcoding Detail {} {}", index, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
+                std::vector<std::string> noTranscodingVector;
+                for (auto&& mime : splitString(optValue, ','))
+                    noTranscodingVector.push_back(trimString(mime));
+                filter->setNoTranscodingMimeTypes(noTranscodingVector);
+                log_debug("New Transcoding Detail {} {}", index, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
                 return true;
             }
 

@@ -688,7 +688,8 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     auto filterList = tlist->getFilterList();
     if (!filterList.empty()) {
         auto mainResource = item->getResource(CdsResource::Purpose::Content);
-        std::string ct = getValueOrDefault(ctMappings, item->getMimeType());
+        auto itemMime = item->getMimeType();
+        std::string ct = getValueOrDefault(ctMappings, itemMime);
         auto sourceProfile = dlnaProfileString(*mainResource, ct, false);
         for (auto&& filter : filterList) {
             if (!filter)
@@ -698,10 +699,15 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (!fMime.empty()) {
                 std::vector<std::string> parts = splitString(fMime, '/');
                 if (parts.size() == 2 && parts[1] == "*") {
-                    if (!startswith(item->getMimeType(), parts[0] + "/")) {
+                    if (!startswith(itemMime, parts[0] + "/")) {
                         continue;
                     }
-                } else if (fMime != item->getMimeType()) {
+                    // check for mime types to skip
+                    auto noTranscodingFor = filter->getNoTranscodingMimeTypes();
+                    if (std::find(noTranscodingFor.begin(), noTranscodingFor.end(), itemMime) != noTranscodingFor.end()) {
+                        continue;
+                    }
+                } else if (fMime != itemMime) {
                     continue;
                 }
             }
@@ -709,18 +715,20 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
             if (!filter->getSourceProfile().empty() && filter->getSourceProfile() != sourceProfile) {
                 continue;
             }
-            // check for client profile prop and filter if no match
+            // check for client flags and filter if no match
             if (quirks && filter->getClientFlags() > 0 && quirks->checkFlags(filter->getClientFlags()) == 0) {
                 continue;
             }
-            // check for transcoding profile
-            if (filter && !filter->getTranscodingProfile())
-                continue;
 
             auto tp = filter->getTranscodingProfile();
             // check for transcoding profile
+            if (!tp)
+                continue;
+
+            // check for transcoding profile
             if (!tp->isEnabled())
                 continue;
+
             // check for client profile prop and filter if no match
             if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0) {
                 continue;

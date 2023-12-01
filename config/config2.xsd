@@ -1104,6 +1104,7 @@
             <xs:attribute name="mimetype" type="xs:string" use="required"/>
             <xs:attribute name="source-profile" type="xs:string"/>
             <xs:attribute name="client-flags" type="xs:string"/>
+            <xs:attribute name="no-transcoding" type="xs:string"/>
             <xs:attribute name="using" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
