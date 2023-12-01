@@ -89,8 +89,14 @@ profile which is defined below.
     ::
 
         mimetype=...
+        mimetype="video/*" no-transcoding="video/mpeg,video/mp4"
 
-    Selects the mime type of the source media that should be transcoded. Wildcards like ``video/*`` can be used to match all sub types.
+    Selects the mime type of the source media that should be transcoded.
+
+    Wildcards like ``video/*`` can be used to match all sub types. In that
+    case the attribute ``no-transcoding`` contains a comma separated list of
+    mime types that should be excluded. This is intended for devices that only
+    support a very limited number of media formats.
 
     .. code-block:: xml
 

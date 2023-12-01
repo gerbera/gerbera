@@ -221,15 +221,19 @@ class TranscodingFilter {
 public:
     TranscodingFilter(std::string mimeType, std::string transcoder);
 
-    /// \brief mimetype
+    /// \brief mimetype to search for
     std::string getMimeType() const { return mimeType; }
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
+
+    /// \brief mimetype not to be transcoded
+    const std::vector<std::string>& getNoTranscodingMimeTypes() const { return noTranscodingMimeTypes; }
+    void setNoTranscodingMimeTypes(const std::vector<std::string>& mimeTypes) { this->noTranscodingMimeTypes = mimeTypes; }
 
     /// \brief transcoding profile name
     std::string getTranscoderName() const { return transcoder; }
     void setTranscoderName(const std::string& transcoder) { this->transcoder = transcoder; }
 
-    /// \brief client flags
+    /// \brief client flags this filter is enabling
     int getClientFlags() const { return clientFlags; }
     void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
 
@@ -246,6 +250,7 @@ protected:
     std::string transcoder;
     std::string sourceProf;
     int clientFlags { 0 };
+    std::vector<std::string> noTranscodingMimeTypes;
     std::shared_ptr<TranscodingProfile> transcodingProfile;
 };
 
