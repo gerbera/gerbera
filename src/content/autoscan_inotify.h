@@ -86,6 +86,8 @@ private:
 
     // event mask with events to watch for (set by constructor);
     int events;
+    bool defFollowSymlinks;
+    bool defHidden;
 
     enum class WatchType {
         Autoscan,

@@ -46,6 +46,8 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<ContentManager>& content)
     , database(content->getContext()->getDatabase())
     , content(content)
 {
+    defFollowSymlinks = this->config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+    defHidden = this->config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {
         try {
@@ -219,9 +221,9 @@ void AutoscanInotify::threadProc()
                 }
                 AutoScanSetting asSetting;
                 asSetting.adir = adir;
-                asSetting.followSymlinks = adir->getFollowSymlinks();
-                asSetting.recursive = adir->getRecursive();
-                asSetting.hidden = adir->getHidden();
+                asSetting.followSymlinks = adir ? adir->getFollowSymlinks() : defFollowSymlinks;
+                asSetting.recursive = adir ? adir->getRecursive() : false;
+                asSetting.hidden = adir ? adir->getHidden() : defHidden;
                 asSetting.rescanResource = true;
                 asSetting.async = true;
                 asSetting.mergeOptions(config, path);
@@ -232,7 +234,7 @@ void AutoscanInotify::threadProc()
                         recheckNonexistingMonitors(wd, wdObj);
                     }
 
-                    if (adir && adir->getRecursive() && (mask & IN_CREATE)) {
+                    if (asSetting.recursive && (mask & IN_CREATE)) {
                         if (!content->isHiddenFile(dirEnt, isDir, asSetting)) {
                             log_debug("Detected new dir, adding to inotify: {}", path.c_str());
                             monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
@@ -412,7 +414,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                 auto watchToRemove = getStartPoint(wdToRemove);
                 if (watchToRemove) {
                     auto adir = watchToRemove->getAutoscanDirectory();
-                    if (adir->persistent()) {
+                    if (adir && adir->persistent()) {
                         monitorNonexisting(path, adir);
                         content->handlePeristentAutoscanRemove(adir);
                     }
@@ -489,9 +491,9 @@ int AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startP
 
         AutoScanSetting asSetting;
         asSetting.adir = adir;
-        asSetting.followSymlinks = adir->getFollowSymlinks();
-        asSetting.recursive = adir->getRecursive();
-        asSetting.hidden = adir->getHidden();
+        asSetting.followSymlinks = adir ? adir->getFollowSymlinks() : defFollowSymlinks;
+        asSetting.recursive = adir ? adir->getRecursive() : false;
+        asSetting.hidden = adir ? adir->getHidden() : defHidden;
         asSetting.rescanResource = true;
         asSetting.async = true;
         asSetting.mergeOptions(config, dirEnt.path());
@@ -501,7 +503,7 @@ int AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startP
             continue;
         }
 
-        if (dirEnt.is_directory(ec) && adir->getRecursive()) {
+        if (dirEnt.is_directory(ec) && asSetting.recursive) {
             monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
         }
 
@@ -516,7 +518,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 {
     int wd = inotify->addWatch(path, events);
     if (wd <= INOTIFY_ROOT) {
-        if (isStartPoint && adir->persistent()) {
+        if (isStartPoint && adir && adir->persistent()) {
             monitorNonexisting(path, adir);
         }
     } else {
@@ -549,7 +551,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
             }
             wdObj->addWatch(std::move(watch));
 
-            if (!isStartPoint) {
+            if (!isStartPoint && adir) {
                 int startPointWd = inotify->addWatch(adir->getLocation(), events);
                 log_debug("getting start point for {} -> {} wd={}", path.c_str(), adir->getLocation().c_str(), startPointWd);
                 if (wd > INOTIFY_ROOT)
