@@ -645,7 +645,7 @@ The entry point of each import function has the following synopsis
     Create virtual layout for a specific file type
 
     :param object obj: Original object as created in PC Directory
-    :param object container: Container in PC Directory containing the original object
+    :param object cont: Container in PC Directory containing the original object
     :param string rootPath: Root folder of the autoscan directoy
     :param string containerType: UPnP  type configured to create containers
     :returns: nothing
