@@ -426,7 +426,7 @@ void Script::load(const fs::path& scriptPath)
 void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-        log_error("Failed! to execute script {}: {}", scriptPath, duk_safe_to_stacktrace(ctx, -1));
+        log_error("Failed to execute script {}: {}", scriptPath, duk_safe_to_stacktrace(ctx, -1));
         throw_std_runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
