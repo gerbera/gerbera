@@ -30,15 +30,13 @@
 
 std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_t idx)
 {
-    duk_size_t i, n;
-    std::string val;
     std::vector<std::string> vctr;
 
     duk_to_object(ctx, idx);
-    n = duk_get_length(ctx, -1);
-    for (i = 0; i < n; i++) {
+    duk_size_t n = duk_get_length(ctx, -1);
+    for (duk_size_t i = 0; i < n; i++) {
         duk_get_prop_index(ctx, -1, i);
-        val = duk_to_string(ctx, -1);
+        std::string val = duk_to_string(ctx, -1);
         vctr.push_back(val);
         duk_pop(ctx);
     }
@@ -78,11 +76,10 @@ std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_id
 std::map<std::string, std::string> DukTestHelper::extractValues(duk_context* ctx, const std::vector<std::string>& keys, duk_idx_t idx)
 {
     std::map<std::string, std::string> objValues;
-    std::string val;
-    std::pair<std::string, std::string> complexValue;
     for (const auto& key : keys) {
+        std::string val;
         if (this->isArrayNotation(key)) {
-            complexValue = this->extractObjectValues(ctx, key, idx);
+            std::pair<std::string, std::string> complexValue = this->extractObjectValues(ctx, key, idx);
             val = std::get<1>(complexValue);
         } else {
             duk_get_prop_string(ctx, idx, key.c_str());

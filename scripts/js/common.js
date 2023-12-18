@@ -68,7 +68,7 @@ function getRootPath(rootpath, location) {
     {
         rootpath = rootpath.substring(0, rootpath.lastIndexOf('/'));
 
-        var dir = location.substring(rootpath.length,location.lastIndexOf('/'));
+        var dir = location.substring(rootpath.length, location.lastIndexOf('/'));
 
         if (dir.charAt(0) == '/')
             dir = dir.substring(1);
@@ -552,7 +552,9 @@ function addAudio(obj, cont, rootPath, containerType) {
     obj.title = track + title;
     chain.album.searchable = true;
     if (boxSetup['Audio/allAlbums'].enabled) {
+        chain.album.location = getRootPath(rootPath, obj.location).join('_');
         container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
+        chain.album.location = '';
         addCdsObject(obj, container);
     }
 

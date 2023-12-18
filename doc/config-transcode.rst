@@ -104,7 +104,8 @@ profile which is defined below.
 
     * Optional
 
-    Defines the DLNA profile string of the transcoding source. If set, only files with the DLNA profile are transcoded. See `Import section <https://docs.gerbera.io/en/stable/config-import.html?#contenttype-dlnaprofile>`_ how to determine the profile.
+    Defines the DLNA profile string of the transcoding source. If set, only files with the DLNA profile are transcoded.
+    See :ref:`Import section <contenttype-dlnaprofile>` how to determine the profile.
 
     ::
 

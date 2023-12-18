@@ -157,6 +157,14 @@ void ConfigPathSetup::makeOption(std::string optValue, const std::shared_ptr<Con
     setOption(config);
 }
 
+static inline void rtrimPath(std::string& s, unsigned char sep = '/')
+{
+    s.erase(std::find_if(s.rbegin(), s.rend() - 1, [&](unsigned char ch) {
+        return ch != sep;
+    }).base(),
+        s.end());
+}
+
 std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
@@ -167,6 +175,7 @@ std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
     } else if (!checkPathValue(optValue, pathValue)) {
         throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue);
     }
+    rtrimPath(pathValue);
     optionValue = std::make_shared<Option>(pathValue);
     return optionValue;
 }

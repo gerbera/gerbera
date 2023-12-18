@@ -3,7 +3,7 @@
 Compile Gerbera
 ===============
 
-Gerbera uses the excellent `CMake <https://cmake.org/>`_ build system.
+Gerbera uses the excellent `CMake <https://cmake.org/>`__ build system.
 
 When gerbera is already installed, running ``gerbera --compile-info`` will show the compilation options used.
 
@@ -358,7 +358,7 @@ Build On macOS
 `The following has been tested on macOS High Sierra 10.13.4`
 
 The Gerbera Team maintains a Homebrew Tap to build and install Gerbera Media Server. Take a look
-at the Homebrew formula to see an example of how to compile Gerbera on macOS: `homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`_
+at the Homebrew formula to see an example of how to compile Gerbera on macOS: `homebrew-gerbera/gerbera.rb <https://github.com/gerbera/homebrew-gerbera/blob/master/gerbera.rb>`__
 
 
 .. index:: Build Docker Container On Ubuntu
@@ -382,7 +382,7 @@ After successfull build you should get something like
 
   Successfully built a13ccc793373
 
-Afterwards start the container like described in the `Gerbera Docker <https://hub.docker.com/r/gerbera/gerbera>`_
+Afterwards start the container like described in the `Gerbera Docker <https://hub.docker.com/r/gerbera/gerbera>`__
 documentation while replacing "gerbera/gerbera:vX.X.X" with the unique ID reported at the end of the build.
 
 To change the compile options of Gerbera split up the process.
@@ -428,14 +428,14 @@ First Steps
 
 4. Push to your fork
 
-5. Submit a `pull request <https://github.com/gerbera/gerbera/compare>`_.
+5. Submit a `pull request <https://github.com/gerbera/gerbera/compare>`__.
 
 Some things that will increase the chance that your pull request is accepted:
 
-- Stick to `Webkit style <https://webkit.org/code-style-guidelines/>`_.
+- Stick to `Webkit style <https://webkit.org/code-style-guidelines/>`__.
 - Format your code with ``clang-format``.
 - Ensure your code works as expected by running it.
-- Write a `good commit message <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_.
+- Write a `good commit message <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`__.
 
 It is also a good idea to run cmake with ``-DWITH_TESTS -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_FLAGS="-Werror"``
 options for development.

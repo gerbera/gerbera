@@ -195,6 +195,11 @@ li.nav-item.active a {
     box-shadow: 0 0 0 0.1rem #888
 }
 
+ul.itemspager {
+    overflow-x: auto;
+    max-width: calc( 71vw - 320px );
+}
+
 ul.pagination {
     margin-bottom: 0px;
 }

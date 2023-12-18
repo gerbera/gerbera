@@ -135,3 +135,14 @@ Version Information
 
 Print version information and exit.
 
+
+Content
+~~~~~~~
+
+Duplicate Folders
+-----------------
+
+If you have albums with identical name it is likely that you get two or more folders under `Albums` with the same name or the one folder with the content mixed up.
+The default configuration expects ``AlbumArtist`` and ``Date`` to be available and unique.
+A solution to this is that you define the properties that identify one particular album by setting appropriate keys in :ref:`Virtual Directories <virtual-directories>`
+

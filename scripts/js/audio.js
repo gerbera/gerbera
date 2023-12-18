@@ -335,7 +335,9 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
         chain.all000.metaData[M_ALBUMARTIST] = [];
 
         if (!isAudioBook) {
+            chain.album.location = getRootPath(rootPath, obj.location).join('_');
             container = addContainerTree([chain.audio, chain.allAlbums, chain.all000, chain.album]);
+            chain.album.location = '';
             addCdsObject(obj, container);
         }
     }

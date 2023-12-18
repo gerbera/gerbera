@@ -15,7 +15,7 @@ Docker
 ~~~~~~~~~~~~~~~~~
 .. index:: Docker
 
-Docker images are provided on `Docker Hub <https://hub.docker.com/r/gerbera/gerbera>`_, we recommend running a tagged version.
+Docker images are provided on `Docker Hub <https://hub.docker.com/r/gerbera/gerbera>`__, we recommend running a tagged version.
 
 On Raspbian the container must be run with ``privileged: true`` to get time sync running.
 
@@ -28,7 +28,7 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-We maintain a `Ubuntu Repository <https://gerbera.jfrog.io/>`_.
+We maintain a `Ubuntu Repository <https://gerbera.jfrog.io/>`__.
 
 To install the latest tagged release (>=1.8.0):
 
@@ -44,7 +44,7 @@ Or for the latest code install git builds:
     curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
     sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian-git
 
-Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`_.
+Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`__.
 
 .. code-block:: sh
 
@@ -56,7 +56,7 @@ Gentoo
 ~~~~~~~~~~~~~~~~~
 .. index:: Gentoo
 
-The latest version and live ebuild are in `the main portage tree <https://packages.gentoo.org/packages/net-misc/gerbera>`_.
+The latest version and live ebuild are in `the main portage tree <https://packages.gentoo.org/packages/net-misc/gerbera>`__.
 
 .. code-block:: sh
 
@@ -66,7 +66,7 @@ Arch
 ~~~~~~~~~~~~~~~~~
 .. index:: Arch Linux
 
-Gerbera is available in AUR with both `stable <https://aur.archlinux.org/packages/gerbera/>`_ or `git versions <https://aur.archlinux.org/packages/gerbera-git/>`_.
+Gerbera is available in AUR with both `stable <https://aur.archlinux.org/packages/gerbera/>`__ or `git versions <https://aur.archlinux.org/packages/gerbera-git/>`__.
 
 Fedora
 ~~~~~~~~~~~~~~~~~
@@ -117,7 +117,7 @@ Gerbera is included in Buster_ and Sid_.
 
 Due to the stable nature of Debian, these packages are likely to be some versions behind the current Gerbera release.
 
-`Deb-Multimedia.org <https://www.deb-multimedia.org/>`_ also provide builds for Buster_ and Sid_.
+`Deb-Multimedia.org <https://www.deb-multimedia.org/>`__ also provide builds for Buster_ and Sid_.
 
 .. _Buster: http://www.deb-multimedia.org/dists/buster/main/binary-amd64/package/gerbera
 .. _Sid: http://www.deb-multimedia.org/dists/sid/main/binary-amd64/package/gerbera
@@ -126,25 +126,25 @@ openSUSE
 ~~~~~~~~
 .. index:: openSUSE Linux
 
-Gerbera is available on `software.opensuse.org <https://software.opensuse.org/package/gerbera>`_.
+Gerbera is available on `software.opensuse.org <https://software.opensuse.org/package/gerbera>`__.
 
 OpenWrt (OpenWrt)
 ~~~~~~~~~~~~~~~~~
 .. index:: OpenWrt
 
-Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`_ for your embedded device/router!
+Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`__ for your embedded device/router!
 
 
 Buildroot
 ~~~~~~~~~~~~~~~~~
 .. index:: Buildroot
 
-Gerbera is available in `Buildroot <https://git.buildroot.net/buildroot/tree/package/gerbera>`_.
+Gerbera is available in `Buildroot <https://git.buildroot.net/buildroot/tree/package/gerbera>`__.
 
 
 macOS
 ~~~~~
 .. index:: macOS
 
-Gerbera is available as the `Gerbera Homebrew Tap <https://github.com/gerbera/homebrew-gerbera/>`_ on macOS.
+Gerbera is available as the `Gerbera Homebrew Tap <https://github.com/gerbera/homebrew-gerbera/>`__ on macOS.
 
