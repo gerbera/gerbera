@@ -1,8 +1,7 @@
+.. index:: Configuration Overview
 
 Configuration
 =============
-
-.. index:: Configuration Overview
 
 Gerbera is highly configurable and allows the user to set various options and preferences that define the server's
 behavior. Rather than enforcing certain features upon the user, we prefer to offer a number of choices where possible.

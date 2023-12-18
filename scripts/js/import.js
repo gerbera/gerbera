@@ -64,10 +64,10 @@ function importItem(item, cont) {
             case "object.item.textItem":
             case "object.item.bookmarkItem":
             case "object.item.playlistItem":
-                print("Unable to handle upnp class " + item.upnpclass + " for " + obj.location);
+                print("Unable to handle upnp class '" + item.upnpclass + "' for " + obj.location);
                 break;
             default:
-                print("Unable to handle upnp class " + item.upnpclass + " for " + obj.location);
+                print("Unable to handle unknown upnp class '" + item.upnpclass + "' for " + obj.location);
                 if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
                     mime = 'trailer';
                 } else if (item.mimetype === 'application/ogg') {
@@ -94,7 +94,7 @@ function importItem(item, cont) {
                         addImage(obj, cont, object_script_path, grb_container_type_image);
                         break;
                     default:
-                        print("Unable to handle mime type " + item.mimetype + " for " + obj.location);
+                        print("Unable to handle mime type '" + item.mimetype + "' for " + obj.location);
                         break;
                 }
                 break;

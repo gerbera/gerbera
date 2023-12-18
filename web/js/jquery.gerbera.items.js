@@ -244,7 +244,7 @@ $.widget('grb.dataitems', {
     }
 
     if (pager && pager.pageCount && pager.itemsPerPage > 0) {
-      const list = $('<ul class="pagination" style="overflow-x:scroll; width: 55vw;"></ul>');
+      let list = $('<ul class="pagination"></ul>');
       const previous = $('<li class="page-item">' +
           '<a class="page-link" aria-label="Previous">' +
           '<span aria-hidden="true">&laquo;</span>' +
@@ -268,6 +268,7 @@ $.widget('grb.dataitems', {
         }
 
         list.append(previous);
+        grbPager.append(list);
         if (pager.onPrevious && pager.currentPage > 1) {
           const pageParams = {
             itemsPerPage: pager.itemsPerPage,
@@ -280,6 +281,7 @@ $.widget('grb.dataitems', {
           previous.addClass('disabled');
         }
 
+        list = $('<ul class="pagination itemspager"></ul>');
         for (let page = 1; page <= maxPages; page++) {
           const pageItem = $('<li class="page-item"></li>');
           const pageLink = $('<a class="page-link">' + page + '</a>');
@@ -302,6 +304,8 @@ $.widget('grb.dataitems', {
 
           list.append(pageItem);
         }
+        grbPager.append(list);
+        list = $('<ul class="pagination"></ul>');
         list.append(next);
         if (pager.currentPage >= maxPages) {
           next.addClass('disabled');

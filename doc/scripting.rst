@@ -67,7 +67,7 @@ In Gerbera we try to address this shortcoming by introducing the scriptable virt
 * robust and efficient
 
 We try to achieve these goals by embedding a scripting runtime environment that allows the execution of ECMAScript E5/5.1 conform
-scripts better known as JavaScript. Gerbera uses `duktape <http://duktape.org/>`_ scripting engine to run JavaScript.
+scripts better known as JavaScript. Gerbera uses `duktape <http://duktape.org/>`__ scripting engine to run JavaScript.
 
 Theory of Operation
 -------------------
@@ -275,7 +275,7 @@ object.
 
 
     Currently aux data can be gathered from **taglib, ffmpeg and libexif** (see the
-    `Import section <https://docs.gerbera.io/en/stable/config-import.html?#library-options>`_ in the main documentation for
+    :ref:`Import section <library-options>` in the main documentation for
     more details). So, this array will hold the tags that you specified in your config.xml, allowing
     you to create your virtual structure according to your liking.
 
@@ -287,7 +287,7 @@ object.
     resources. The names of the first resource (number 0) are stored as they are. Further resources are prepended with `<number>-`.
 
     Currently resources can be gathered during import process (see the
-    `Import section <https://docs.gerbera.io/en/stable/config-import.html?#library-options>`_ in the main documentation for
+    :ref:`Import section <library-options>` in the main documentation for
     more details). So, this array will hold further data, allowing you to adjust the virtual structure according to your liking.
 
 .. js:attribute:: orig.playlistOrder

@@ -25,7 +25,7 @@ It may also be necessary to set a DLNA profile in ``<contenttype-dlnaprofile>``
 
     <map from="avi" to="AVI"/>
 
-See `Import section <https://docs.gerbera.io/en/stable/config-import.html#mappings>`_ for the detailled description of these options.
+See :ref:`Import section <import-mappings>` for the detailled description of these options.
 
 
 Audio/Video/Image Files

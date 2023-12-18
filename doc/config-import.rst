@@ -3,7 +3,6 @@
 Configure Import
 ================
 
-
 The import settings define various options on how to aggregate the content.
 
 ``import``
@@ -895,6 +894,7 @@ A sample configuration would be:
       </resource>
   </resources>
 
+.. _import-mappings:
 
 ``mappings``
 ~~~~~~~~~~~~
@@ -1139,6 +1139,7 @@ The ``as`` attribute can have following values:
 |                                   |               |                                        |
 +-----------------------------------+---------------+----------------------------------------+
 
+.. _contenttype-dlnaprofile:
 
 ``contenttype-dlnaprofile``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1176,6 +1177,8 @@ Resource attributes can be seen in the details page for an item on the web UI. T
     <map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
 
 
+.. _virtual-directories:
+
 ``virtual-directories``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -1199,7 +1202,8 @@ are distiguished by their artist even if the displayed text is identical.
 
 * Optional
 
-Specifies the metadata fields to add for identification internally. For a list of valid metadata see `Server section <https://docs.gerbera.io/en/stable/config-server.html?#upnp>`_
+Specifies the metadata fields to add for identification internally. For a list of valid metadata see :ref:`Metadata <upnp-tags>`.
+In addition ``LOCATION`` references to the location property retreived from the layout script.
 
 * Example
 
@@ -1210,6 +1214,7 @@ Specifies the metadata fields to add for identification internally. For a list o
         <key metadata="M_UPNP_DATE"/>
     </virtual-directories>
 
+.. _library-options:
 
 ``library-options``
 ~~~~~~~~~~~~~~~~~~~
@@ -1369,7 +1374,7 @@ A sample configuration for the example described above would be:
 These options apply to id3lib or taglib libraries.
 
 The keywords are those defined in the specifications, e.g.
-`ID3v2.4 <https://id3.org/id3v2.4.0-frames>`_ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`_
+`ID3v2.4 <https://id3.org/id3v2.4.0-frames>`__ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`__
 We do not perform any extra checking, so you could try to use any string as a keyword - if it does not exist in the tag
 nothing bad will happen.
 
@@ -1384,7 +1389,7 @@ TOFN, TOLY, TOPE, TOWN, TPE4, TPOS, TPUB, TRSN, TRSO, TSOA, TSRC, TSSE, TXXX:Art
 
 ALBUMSORT, ARTISTS, CATALOGNUMBER, COMPOSERSORT, ENCODEDBY, LYRICIST, ORIGINALDATE, PRODUCER, RELEASETYPE, REMIXER, TITLESORT, WORK, ...
 
-* any other user defined keyword, for APEv2 or iTunes MP4, see e.g. `table of mapping <https://picard.musicbrainz.org/docs/mappings>`_ between various tagging formats at MusicBrainz.
+* any other user defined keyword, for APEv2 or iTunes MP4, see e.g. `table of mapping <https://picard.musicbrainz.org/docs/mappings>`__ between various tagging formats at MusicBrainz.
 
 A sample configuration for the example described above would be:
 
@@ -1413,7 +1418,7 @@ A sample configuration for the example described above would be:
 
 These options apply to ffmpeg libraries.
 
-`This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`_
+`This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`__
 documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
 
 A sample configuration for the example described above would be:
@@ -1444,7 +1449,7 @@ A sample configuration for the example described above would be:
 
 These options apply to exiv2 libraries.
 
-`This page <https://www.exiv2.org/metadata.html>`_
+`This page <https://www.exiv2.org/metadata.html>`__
 documents all of the metadata keys that exiv2 honors, depending on the format being encoded.
 
 A sample configuration for the example described above would be:

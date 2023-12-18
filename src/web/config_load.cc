@@ -475,6 +475,10 @@ void Web::ConfigLoad::process()
         setValue(item, filter->getSourceProfile());
 
         item = values.append_child("item");
+        createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING, cs);
+        setValue(item, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
+
+        item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, cs);
         setValue(item, ClientConfig::mapFlags(filter->getClientFlags()));
 

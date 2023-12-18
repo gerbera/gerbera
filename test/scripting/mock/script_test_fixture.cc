@@ -415,7 +415,11 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
     duk_get_global_string(ctx, "script_under_test");
     if (duk_is_function(ctx, -1)) {
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
+#if DUK_VERSION > 20399
+            std::cerr << "Failed to execute script: " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
+#else
             std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
+#endif
         }
         duk_pop(ctx); // script_under_test
     }
@@ -459,7 +463,11 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
     if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
+#if DUK_VERSION > 20399
+        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
+#else
         std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_string(ctx, -1) << std::endl;
+#endif
         duk_pop(ctx);
         return;
     }
@@ -544,15 +552,12 @@ std::vector<std::string> ScriptTestFixture::addContainerTree(duk_context* ctx, s
 
 addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const std::vector<std::string>& keys)
 {
-    std::string containerChain;
-    std::string objContainer;
-    std::map<std::string, std::string> dukObjValues;
     DukTestHelper dukHelper;
 
     // parameter list
-    dukObjValues = dukHelper.extractValues(ctx, keys, 0);
-    containerChain = duk_to_string(ctx, 1);
-    objContainer = duk_to_string(ctx, 2);
+    std::map<std::string, std::string> dukObjValues = dukHelper.extractValues(ctx, keys, 0);
+    std::string containerChain = duk_to_string(ctx, 1);
+    std::string objContainer = duk_to_string(ctx, 2);
 
     addCdsObjectParams params;
     params.objectValues = dukObjValues;
@@ -588,13 +593,9 @@ getCdsObjectParams ScriptTestFixture::getCdsObject(duk_context* ctx, const std::
 
 abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
 {
-    std::string inputValue;
-    int boxType;
-    std::string divChar;
-
-    inputValue = duk_to_string(ctx, 0);
-    boxType = duk_to_int32(ctx, 1);
-    divChar = duk_to_string(ctx, 2);
+    std::string inputValue = duk_to_string(ctx, 0);
+    int boxType = duk_to_int32(ctx, 1);
+    std::string divChar = duk_to_string(ctx, 2);
 
     abcBoxParams params;
     params.inputValue = inputValue;
@@ -607,28 +608,21 @@ abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
 
 getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
 {
-    duk_idx_t arrIdx;
-    std::string objScriptPath;
-    std::string objLocation;
-    std::string origObjLocation;
-
     // parameter list
-    objScriptPath = duk_to_string(ctx, 0);
-    origObjLocation = duk_to_string(ctx, 1);
-    objLocation = origObjLocation;
-
+    std::string objScriptPath = duk_to_string(ctx, 0);
+    std::string origObjLocation = duk_to_string(ctx, 1);
+    std::string objLocation = origObjLocation;
     size_t pos;
-    std::string token;
     std::string delimiter = "/";
     std::vector<std::string> dirs;
     while ((pos = objLocation.find(delimiter)) != std::string::npos) {
-        token = objLocation.substr(0, pos);
+        std::string token = objLocation.substr(0, pos);
         if (token.length() > 0)
             dirs.push_back(token);
         objLocation.erase(0, pos + delimiter.length());
     }
 
-    arrIdx = duk_push_array(ctx);
+    duk_idx_t arrIdx = duk_push_array(ctx);
     for (size_t i = 0; i < dirs.size(); i++) {
         std::string dir = dirs.at(i);
         duk_push_string(ctx, dir.c_str());

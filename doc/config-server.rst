@@ -894,6 +894,8 @@ This section defines the properties which are send to UPnP clients as part of th
 
     **Defaults:**
 
+.. _upnp-tags:
+
     * Album-Properties
 
     +----------------------+-------------------+

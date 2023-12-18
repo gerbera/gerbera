@@ -705,10 +705,18 @@ std::pair<int, bool> ImportService::addContainerTree(int parentContainerId, cons
             }
             auto dirKeyValues = std::vector<std::string>();
             for (auto&& field : dirKeys) {
-                auto metaField = MetadataHandler::remapMetaDataField(field);
-                auto keyValue = item->getMetaData(metaField);
-                if (!keyValue.empty())
-                    dirKeyValues.push_back(keyValue);
+                if (field == "LOCATION") {
+                    std::string location = item->getLocation().c_str();
+                    if (!location.empty()) {
+                        dirKeyValues.push_back(location);
+                        item->setLocation("");
+                    }
+                } else {
+                    auto metaField = MetadataHandler::remapMetaDataField(field);
+                    auto keyValue = item->getMetaData(metaField);
+                    if (!keyValue.empty())
+                        dirKeyValues.push_back(keyValue);
+                }
             }
             if (!dirKeyValues.empty()) {
                 subTree = fmt::format("{}@{}", tree, fmt::join(dirKeyValues, "@"));
