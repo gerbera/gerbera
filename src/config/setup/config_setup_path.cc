@@ -175,7 +175,8 @@ std::shared_ptr<ConfigOption> ConfigPathSetup::newOption(std::string& optValue)
     } else if (!checkPathValue(optValue, pathValue)) {
         throw_std_runtime_error("Invalid {} resolves to empty value '{}'", xpath, optValue);
     }
-    rtrimPath(pathValue);
+    if (!pathValue.empty())
+        rtrimPath(pathValue);
     optionValue = std::make_shared<Option>(pathValue);
     return optionValue;
 }
