@@ -60,6 +60,7 @@
           <box key="Audio/allTracks" title="All - full name" class="object.container" />
           <box key="Audio/allYears" title="Year" class="object.container" />
           <box key="Audio/audioRoot" title="Audio" class="object.container" />
+          <box key="Audio/artistChronology" title="Chronology" class="object.container" />
           <box key="AudioInitial/abc" title="ABC" class="object.container" />
           <box key="AudioInitial/allArtistTracks" title="000 All" class="object.container" />
           <box key="AudioInitial/allBooks" title="Books" class="object.container" />
