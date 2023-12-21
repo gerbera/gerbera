@@ -107,6 +107,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] });
     container["Audio/Directories"] = container.at("Audio/allDirectories");
     chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
+    container["Artist Chronology"] = container.at("Audio/artistChronology");
 
 #ifdef ONLINE_SERVICES
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
@@ -431,13 +432,23 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     std::vector<std::shared_ptr<CdsObject>> all;
     all.push_back(container["Audio"]);
     all.push_back(container["Artists"]);
-    all.push_back(std::move(artistContainer));
+    all.push_back(artistContainer);
     all.push_back(container["All - full name"]);
     id = content->addContainerTree(all);
     add(obj, id);
 
     obj->setTitle(title);
     getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
+
+    artistContainer->setSearchable(false);
+    std::vector<std::shared_ptr<CdsObject>> chronology;
+    chronology.push_back(container["Audio"]);
+    chronology.push_back(container["Artists"]);
+    chronology.push_back(std::move(artistContainer));
+    chronology.push_back(container["Artist Chronology"]);
+    chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
+    id = content->addContainerTree(chronology);
+    add(obj, id);
 }
 
 #ifdef ONLINE_SERVICES

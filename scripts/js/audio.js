@@ -201,6 +201,11 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             title: boxSetup['Audio/allTracks'].title,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: boxSetup['Audio/allTracks'].class },
+        artistChronology: {
+            id: boxSetup['Audio/artistChronology'].id,
+            title: boxSetup['Audio/artistChronology'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            upnpclass: boxSetup['Audio/artistChronology'].class },
         all000: {
             id: boxSetup['AudioInitial/allArtistTracks'].id,
             title: boxSetup['AudioInitial/allArtistTracks'].title,
@@ -446,6 +451,14 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
 
     if (boxSetup['Audio/allComposers'].enabled) {
         container = addContainerTree([chain.audio, chain.allComposers, chain.composer]);
+        addCdsObject(obj, container);
+    }
+
+    if (boxSetup['Audio/artistChronology'].enabled) {
+        chain.album.searchable = false;
+        chain.artist.searchable = false;
+        chain.album.title = date + " - " + album;
+        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
         addCdsObject(obj, container);
     }
 }

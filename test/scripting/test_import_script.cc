@@ -74,6 +74,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/All - full name", "44" },
         { "/Audio/Artists/Artist/All - full name", "45" },
         { "/Audio/Artists/Artist/Album", "46" },
+        { "/Audio/Artists/Artist/Album Chronology/2018 - Album", "462" },
         { "/Audio/Albums/Album", "47" },
         { "/Audio/Genres/Genre", "481" },
         { "/Audio/Genres/Genre2", "482" },
@@ -163,6 +164,7 @@ static const std::vector<boxConfig> audioBox {
     { "Audio/allTracks", "All - full name", "object.container" },
     { "Audio/allYears", "Year", "object.container" },
     { "Audio/audioRoot", "Audio", "object.container" },
+    { "Audio/artistChronology", "Album Chronology", "object.container" },
 };
 static const std::vector<boxConfig> videoBox {
     { "Video/allDates", "Date", "object.container" },
@@ -301,6 +303,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
@@ -563,6 +568,9 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
     dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
