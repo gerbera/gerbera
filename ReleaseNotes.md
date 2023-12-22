@@ -25,6 +25,7 @@ them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get th
 
 ### FIXES
 
+- Autoscan: Keep track of renamed directories
 - Docker: add JPEG and update description
 - Runtime issues in request handling
 - Configurable handling of HOME directory

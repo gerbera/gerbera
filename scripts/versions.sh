@@ -33,7 +33,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 else
 
     DUKTAPE="2.7.0"
-    EBML="1.4.4"
+    EBML="1.4.5"
     EXIV2="v0.27.7"
     FFMPEGTHUMBNAILER="2.2.2"
     FMT="10.1.1"

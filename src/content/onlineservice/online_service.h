@@ -132,8 +132,8 @@ protected:
     std::shared_ptr<ContentManager> content;
 
     int taskCount {};
-    std::chrono::seconds refresh_interval {};
-    std::chrono::seconds purge_interval {};
+    std::chrono::seconds refresh_interval = std::chrono::seconds::zero();
+    std::chrono::seconds purge_interval = std::chrono::seconds::zero();
     std::shared_ptr<Timer::Parameter> timer_parameter;
 };
 

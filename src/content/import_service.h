@@ -73,7 +73,7 @@ private:
     fs::directory_entry dirEntry;
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    std::chrono::seconds mtime {};
+    std::chrono::seconds mtime = std::chrono::seconds::zero();
     /// \brief CdsObject associated with the directory_entry
     std::shared_ptr<CdsObject> cdsObject;
     /// \brief CdsObject associated with the container (if cdsObject is a container)

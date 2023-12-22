@@ -277,15 +277,13 @@ void ContentManager::shutdown()
 {
     log_debug("start");
     auto lock = threadRunner->uniqueLock();
-    log_debug("updating last_modified data for autoscan in database...");
-    if (autoscanList)
-        autoscanList->updateLMinDB(*database);
 
     destroyLayout();
 #ifdef HAVE_JS
     destroyJS();
 #endif
 
+    log_debug("updating last_modified data for autoscan in database...");
     if (autoscanList) {
         // update modification time for database
         for (std::size_t i = 0; i < autoscanList->size(); i++) {
@@ -683,7 +681,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     // request only items if non-recursive scan is wanted
     auto list = std::unordered_set<int>();
-    database->getObjects(containerID, !asSetting.recursive, list, importMode == ImportMode::Gerbera);
+    database->getObjects(containerID, !asSetting.recursive || importMode != ImportMode::Gerbera, list, importMode == ImportMode::Gerbera);
 
     unsigned int thisTaskID;
     if (task) {
@@ -922,7 +920,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
     }
 
     auto list = std::unordered_set<int>();
-    database->getObjects(parentID, true, list, false);
+    database->getObjects(parentID, false, list, false);
     bool firstChild = true;
     std::shared_ptr<CdsObject> firstObject;
     for (auto&& subDirEnt : dIter) {
@@ -953,8 +951,8 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
                 if (lastModifiedCurrentMax < lwt && lwt <= currentTme) {
                     lastModifiedNewMax = lwt;
                 }
+                list.erase(obj->getID());
                 if (obj->isItem()) {
-                    list.erase(obj->getID());
                     parentID = obj->getParentID();
                     if (!firstObject && obj->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                         firstObject = obj;
@@ -1318,7 +1316,7 @@ void ContentManager::threadProc()
         currentTask = std::move(task);
         lock.unlock();
 
-        // log_debug("content manager Async START {}", task->getDescription());
+        log_debug("content manager Async START {}", currentTask->getDescription());
         try {
             if (currentTask->isValid())
                 currentTask->run();
@@ -1327,7 +1325,7 @@ void ContentManager::threadProc()
         } catch (const std::runtime_error& e) {
             log_error("Exception caught: {}", e.what());
         }
-        // log_debug("content manager ASYNC STOP  {}", task->getDescription());
+        log_debug("content manager ASYNC STOP  {}", currentTask->getDescription());
 
         if (!shutdownFlag) {
             lock.lock();
@@ -1404,7 +1402,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
         auto ids = database->getServiceObjectIDs(service->getDatabasePrefix());
 
         auto current = currentTime();
-        std::chrono::seconds last = {};
+        std::chrono::seconds last = std::chrono::seconds::zero();
         std::string temp;
 
         for (int objectId : ids) {
