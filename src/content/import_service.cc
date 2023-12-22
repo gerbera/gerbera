@@ -236,6 +236,11 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         }
     }
     log_debug("import of {} left {} item(s) to be deleted", location.c_str(), currentContent.size());
+
+    if (!task && autoscanDir && autoscanDir->updateLMT()) {
+        log_debug("Updating last_modified for autoscan directory {}", autoscanDir->getLocation().c_str());
+        database->updateAutoscanDirectory(autoscanDir);
+    }
 }
 
 std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) const
@@ -384,14 +389,14 @@ void ImportService::createItems(AutoScanSetting& settings)
     fs::path contPath;
 
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
-        if (stateEntry->getState() != ImportState::New)
-            continue;
-        auto dirEntry = stateEntry->getDirEntry();
         auto cdsObj = stateEntry->getObject();
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (contPath != "") {
                 contentStateCache[contPath]->setMTime(lastModifiedNewMax);
+                if (autoscanDir) {
+                    autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
+                }
             }
             parentContainer = container;
             contPath = itemPath;
@@ -400,7 +405,11 @@ void ImportService::createItems(AutoScanSetting& settings)
                 lastModifiedNewMax = lastModifiedCurrentMax;
                 autoscanDir->setCurrentLMT(contPath, std::chrono::seconds::zero());
             }
-        } else if (isRegularFile(dirEntry, ec)) { // item
+        }
+        if (stateEntry->getState() != ImportState::New)
+            continue;
+        auto dirEntry = stateEntry->getDirEntry();
+        if (isRegularFile(dirEntry, ec)) { // item
             auto contState = contentStateCache[itemPath.parent_path()];
             if (contState)
                 parentContainer = std::dynamic_pointer_cast<CdsContainer>(contState->getObject());
@@ -435,7 +444,7 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_debug("Creating Item {}", itemPath.string());
                 cdsObj = createSingleItem(dirEntry);
                 if (cdsObj) {
-                    if (contState && contState->getMTime() < cdsObj->getMTime()) {
+                    if (contState) {
                         contState->setMTime(cdsObj->getMTime());
                         if (lastModifiedNewMax < cdsObj->getMTime())
                             lastModifiedNewMax = cdsObj->getMTime();
@@ -638,17 +647,23 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         if (fanart)
             database->updateObject(container, nullptr);
     }
-    auto location = container->getLocation();
 
+    auto location = container->getLocation();
     if (refObj) {
         if (!fanart && (refObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
             fanart = refObj->getResource(CdsResource::Purpose::Thumbnail);
             if (fanart) {
+                auto fanArtObjId = refObj->getID() > CDS_ID_ROOT ? refObj->getID() : refObj->getRefID();
                 if (fanart->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
-                    fanart->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(refObj->getID() != INVALID_OBJECT_ID ? refObj->getID() : refObj->getRefID()));
-                    fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart->getResId()));
+                    if (fanArtObjId > CDS_ID_ROOT) {
+                        fanart->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
+                        fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart->getResId()));
+                    } else {
+                        fanart = nullptr;
+                    }
                 }
-                container->addResource(fanart);
+                if (fanart)
+                    container->addResource(fanart);
                 log_debug("fanart from ref {}", fanart != nullptr);
                 database->updateObject(container, nullptr);
             }

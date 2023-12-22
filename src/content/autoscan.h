@@ -220,13 +220,13 @@ protected:
     bool hidden {};
     bool followSymlinks {};
     bool persistentFlag {};
-    std::chrono::seconds interval {};
+    std::chrono::seconds interval = std::chrono::seconds::zero();
     int taskCount {};
     int scanID { INVALID_SCAN_ID };
     int objectID { INVALID_OBJECT_ID };
     int databaseID { INVALID_OBJECT_ID };
-    std::chrono::seconds last_mod_previous_scan {};
-    std::chrono::seconds last_mod_current_scan {};
+    std::chrono::seconds last_mod_previous_scan = std::chrono::seconds::zero();
+    std::chrono::seconds last_mod_current_scan = std::chrono::seconds::zero();
     std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};

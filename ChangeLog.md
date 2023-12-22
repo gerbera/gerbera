@@ -1,6 +1,7 @@
 ## Gerbera - UPnP AV Mediaserver.
 
  - Add #include to fix building with gcc 14
+ - Add artist chronology container
  - Add audio to year container
  - Add cleanup of missing entries to grb import mode
  - Add option for external URL to be used in web page.
@@ -9,6 +10,9 @@
  - Add support for nomedia file / add options to block default M_DATE
  - Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
  - Allow overriding home in config
+ - Autoscan: Fix inotify without autoscan
+ - Autoscan: Handle renamed directory
+ - Autoscan: Use path for handling of non-existing
  - buildfix: support fmtlib 10
  - Bump @babel/traverse from 7.23.0 to 7.23.2 in /gerbera-web
  - Bump chromedriver from 117.0.3 to 119.0.1 in /gerbera-web
@@ -34,7 +38,9 @@
  - Docker: git badge update
  - Document dependency installation on Debian 12
  - Fix conan
+ - Fix for empty path
  - Fix handling transcoding requests
+ - Fix import and documentation links
  - Fix spelling errors reported by lintian
  - Fix troff warning
  - Fully implement Thumbnail handling for grb mode
@@ -43,11 +49,16 @@
  - Keep our unique_ptrs for the xml in scope until we are finished with …
  - Quirks: Check for clientInfo
  - README: fix CI badge
+ - Restore duktape 2.3 support
  - Rework javascript mechanism
  - Samsung: Handle browse for content class correctly
+ - Scripting docs: Fix importFile parameter name
+ - Scripting: Log stacktrace on errors
+ - Scripting: Remove debugging leftover
  - Set defaults for autoscan settings
  - Transcode: Wildcards for mime type filter
  - Transcoding: Improve docs and examples
+ - Transcoding: option to filter mime types with wildcard
  - Update Library Versions and Documentation
  - Update README.Docker.md -Add docker volume section
  - Update supported-devices.rst

@@ -94,11 +94,11 @@ protected:
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
-    std::chrono::seconds mtime {};
+    std::chrono::seconds mtime = std::chrono::seconds::zero();
 
     /// \brief Last update time in database
     /// In seconds since UNIX epoch.
-    std::chrono::seconds utime {};
+    std::chrono::seconds utime = std::chrono::seconds::zero();
 
     /// \brief File size on disk (in bytes).
     std::uintmax_t sizeOnDisk {};

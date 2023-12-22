@@ -441,11 +441,11 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             auto objID = stoiString(resObjID);
             auto resID = stoiString(res.getAttribute(CdsResource::Attribute::FANART_RES_ID));
             try {
-                auto resObj = (objID > 0 && objID != item.getID()) ? database->loadObject(objID) : nullptr;
+                auto resObj = (objID > CDS_ID_ROOT && objID != item.getID()) ? database->loadObject(objID) : nullptr;
                 while (resObj && resObj->isContainer()) {
                     auto resRes = resObj->getResource(resID);
                     auto subObjID = stoiString(resRes->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
-                    if (subObjID > 0 && subObjID != resObj->getID() && resRes->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+                    if (subObjID > CDS_ID_ROOT && subObjID != resObj->getID() && resRes->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
                         resObj = database->loadObject(subObjID);
                         objID = subObjID;
                         resID = stoiString(resRes->getAttribute(CdsResource::Attribute::FANART_RES_ID));
@@ -456,7 +456,8 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             } catch (const std::runtime_error& ex) {
                 log_error(" {}", ex.what());
             }
-
+            if (objID <= CDS_ID_ROOT)
+                objID = item.getID();
             url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
         }
     } else if (item.isExternalItem()) {
@@ -537,10 +538,9 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
 std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const
 {
     auto orderedResources = getOrderedResources(*cont);
-    for (auto&& res : orderedResources) {
-        if (res->getPurpose() != CdsResource::Purpose::Thumbnail)
-            continue;
-        return renderResourceURL(*cont, *res, {});
+    auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(), [](auto&& res) { return res->getPurpose() == CdsResource::Purpose::Thumbnail; });
+    if (resFound != orderedResources.end()) {
+        return renderResourceURL(*cont, **resFound, {});
     }
     return {};
 }

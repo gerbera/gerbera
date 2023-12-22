@@ -22,6 +22,8 @@
 */
 
 /// \file cm_task.cc
+#define LOG_FAC log_facility_t::content
+
 #include "cm_task.h" // API
 
 #include "autoscan.h"

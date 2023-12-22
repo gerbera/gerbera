@@ -185,6 +185,7 @@ void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds 
             last_mod_current_scan = lmt;
         }
     }
+    log_debug("Update autoscan {}; location: {}; lmt: {}; last_modified: {}, activeScanCount {}, taskCount: {}", location.c_str(), loc.c_str(), lmt.count(), last_mod_current_scan.count(), activeScanCount, taskCount);
 }
 
 bool AutoscanDirectory::updateLMT()
@@ -193,8 +194,8 @@ bool AutoscanDirectory::updateLMT()
     if (result) {
         result = last_mod_previous_scan < last_mod_current_scan;
         last_mod_previous_scan = last_mod_current_scan;
-        log_debug("set autoscan lmt location: {}; last_modified: {}", location.c_str(), last_mod_current_scan.count());
     }
+    log_debug("Set autoscan {} lmt location: {}; prev_modified: {}; last_modified: {}, activeScanCount {}, taskCount: {}", result, location.c_str(), last_mod_previous_scan.count(), last_mod_current_scan.count(), activeScanCount, taskCount);
     return result;
 }
 
