@@ -273,6 +273,11 @@ bool Quirks::needsStrictXml() const
     return hasFlag(QUIRK_FLAG_STRICTXML);
 }
 
+bool Quirks::needsSimpleDate() const
+{
+    return hasFlag(QUIRK_FLAG_SIMPLE_DATE);
+}
+
 bool Quirks::getMultiValue() const
 {
     return pClientInfo ? pClientInfo->multiValue : true;

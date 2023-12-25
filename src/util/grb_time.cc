@@ -25,8 +25,11 @@ Gerbera - https://gerbera.io/
 #include "common.h"
 #include "tools.h"
 
+#include <fmt/chrono.h>
 #include <fmt/core.h>
+#include <iomanip>
 #include <regex>
+#include <sstream>
 
 std::chrono::seconds currentTime()
 {
@@ -83,6 +86,29 @@ long long HMSFToMilliseconds(std::string_view time)
 
 static const auto secondsFactors = std::vector { 1, 60, 3600, 24 * 3600 };
 static const auto minutesFactors = std::vector { 1, 60, 24 * 60 };
+
+std::string makeSimpleDate(std::string& s)
+{
+    std::string_view date_time_format { "%Y-%m-%dT%H:%M:%S" };
+    std::istringstream ss { s };
+    std::tm dt {};
+
+    ss >> std::get_time(&dt, date_time_format.data());
+    if (!ss.fail()) {
+        int tz;
+        ss >> tz;
+        dt.tm_isdst = -1;
+        dt.tm_hour -= tz / 100;
+        dt.tm_min -= tz % 100;
+        std::mktime(&dt);
+        log_debug("{} -> {:%FT%H:%M:%SZ}... {}-{}", s, dt, -tz / 100, -tz % 100);
+        return fmt::format("{:%FT%H:%M:%SZ}", dt);
+    }
+    log_debug("Failed to convert {}", s);
+    replaceAllString(s, "+0100", "Z");
+    replaceAllString(s, "+0200", "Z");
+    return s;
+}
 
 bool parseTime(int& value, std::string& timeValue, bool seconds)
 {

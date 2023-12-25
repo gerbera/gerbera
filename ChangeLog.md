@@ -13,6 +13,7 @@
  - Autoscan: Fix inotify without autoscan
  - Autoscan: Handle renamed directory
  - Autoscan: Use path for handling of non-existing
+ - Build for Ubuntu 23.10
  - buildfix: support fmtlib 10
  - Bump @babel/traverse from 7.23.0 to 7.23.2 in /gerbera-web
  - Bump chromedriver from 117.0.3 to 119.0.1 in /gerbera-web
@@ -46,6 +47,7 @@
  - Fully implement Thumbnail handling for grb mode
  - Gerbera-Web: Update npm packages
  - Import: Add staged import process
+ - Import: Fix LastModified for grb-mode
  - Keep our unique_ptrs for the xml in scope until we are finished with …
  - Quirks: Check for clientInfo
  - README: fix CI badge
