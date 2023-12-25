@@ -47,6 +47,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_HIDE_RES_THUMBNAIL 0x00000200
 #define QUIRK_FLAG_HIDE_RES_SUBTITLE 0x00000400
 #define QUIRK_FLAG_HIDE_RES_TRANSCODE 0x00000800
+#define QUIRK_FLAG_SIMPLE_DATE 0x00001000
 #define QUIRK_FLAG_TRANSCODING1 0x00010000
 #define QUIRK_FLAG_TRANSCODING2 0x00020000
 #define QUIRK_FLAG_TRANSCODING3 0x00040000
@@ -161,6 +162,13 @@ public:
      *
      */
     bool needsStrictXml() const;
+
+    /** \brief UPnP client needs simple dates
+     *
+     * \return bool
+     *
+     */
+    bool needsSimpleDate() const;
 
     /** \brief Get multi value upnp properties
      *

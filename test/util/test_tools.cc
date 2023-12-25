@@ -27,6 +27,24 @@
 
 #include <gtest/gtest.h>
 
+TEST(ToolsTest, simpleDate)
+{
+    std::string dt = "2009-08-22T18:51:40+0200";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-22T16:51:40Z");
+    dt = "2009-08-22T18:51:40-0100";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-22T19:51:40Z");
+    dt = "2009-08-22T18:51:40-0500";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-22T23:51:40Z");
+    dt = "2009-08-22T18:51:40-0900";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-23T03:51:40Z");
+    dt = "2009-08-22T18:51:40+0100";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-22T17:51:40Z");
+    dt = "2009-08-22T00:51:40+0930";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-21T15:21:40Z");
+    dt = "2009-08-22T00:01:41+0930";
+    EXPECT_EQ(makeSimpleDate(dt), "2009-08-21T14:31:41Z");
+}
+
 TEST(ToolsTest, millisecondsToHMSF)
 {
     EXPECT_EQ(millisecondsToHMSF(0), "0:00:00.000");

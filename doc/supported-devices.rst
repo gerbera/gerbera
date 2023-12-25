@@ -43,6 +43,8 @@ The device flags have the following meaning
 -  ``HIDE_THUMBNAIL_RESOURCE``: 0x200, hide thumbnail resource in UPnP data (only adds albumArtUri)
 -  ``HIDE_SUBTITLE_RESOURCE``: 0x400, hide subtitle resource in UPnP data (only add captionInfo)
 -  ``HIDE_TRANSCODE_RESOURCE``: 0x800, hide transcoded resources in UPnP data (only adds content stream resources)
+-  ``SIMPLE_DATE``: 0x1000, return ``dc:date`` without timezone as Zulu time.
+
 
 Manual Overrides
 ~~~~~~~~~~~~~~~~

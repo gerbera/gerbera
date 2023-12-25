@@ -77,7 +77,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-static std::string enocdeEscapes(std::string& s)
+static std::string encodeEscapes(std::string& s)
 {
     replaceAllString(s, "&", "&amp;");
     replaceAllString(s, "'", "&apos;");
@@ -104,7 +104,7 @@ static std::string formatXmlString(bool strictXml, std::size_t stringLimit, cons
     std::string s = input;
     // Do nothing if disabled
     if (strictXml)
-        s = enocdeEscapes(s);
+        s = encodeEscapes(s);
     // Do nothing if disabled
     if (stringLimit != std::string::npos)
         s = limitString(stringLimit, s);
@@ -189,6 +189,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
 
     auto auxData = obj->getAuxData();
     auto mvMeta = multiValue;
+    auto simpleDate = false;
 
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -197,6 +198,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         if (quirks) {
             quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
+            simpleDate = quirks->needsSimpleDate();
         }
 
         auto metaGroups = obj->getMetaGroups();
@@ -211,6 +213,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                    else if (simpleDate && key == MetadataHandler::getMetaFieldName(M_DATE))
+                        addField(result, key, makeSimpleDate(str));
                     else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                         addField(result, key, str);
                 }
@@ -221,6 +225,8 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                 else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
+                else if (simpleDate && key == MetadataHandler::getMetaFieldName(M_DATE))
+                    addField(result, key, makeSimpleDate(str));
                 else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
                     addField(result, key, str);
             }
