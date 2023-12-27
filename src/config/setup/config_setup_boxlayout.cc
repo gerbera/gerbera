@@ -37,6 +37,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     if (!element)
         return true;
 
+    std::vector<std::string> allKeys;
     auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(option);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
@@ -50,9 +51,18 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto box = std::make_shared<BoxLayout>(key, title, objClass, enabled, size);
         try {
             result->add(box);
+            allKeys.push_back(key);
             log_debug("Created BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", key, title, objClass, enabled, size);
         } catch (const std::runtime_error& e) {
             throw_std_runtime_error("Could not add {} boxlayout: {}", key, e.what());
+        }
+    }
+    for (auto&& defEntry : defaultEntries) {
+        if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
+            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            log_info("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            result->add(box);
+            allKeys.push_back(defEntry.getKey());
         }
     }
 
