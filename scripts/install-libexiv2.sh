@@ -17,6 +17,8 @@ tgz_file="${script_dir}/libexiv2-${VERSION}.tar.gz"
 
 BUILD_SHARED=YES
 BUILD_XMP=YES
+BUILD_BROTLI=YES
+BUILD_INIH=YES
 
 if [ $# -gt 0 ]; then
     if [ "$1" = "static" ]; then
@@ -24,6 +26,8 @@ if [ $# -gt 0 ]; then
     fi
     if [ "$1" = "head" -o "$2" = "head" ]; then
         BUILD_XMP=NO
+        BUILD_BROTLI=NO
+        BUILD_INIH=NO
     fi
 fi
 
@@ -46,7 +50,7 @@ fi
 mkdir build
 cd build
 
-cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DEXIV2_ENABLE_XMP=${BUILD_XMP}
+cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DEXIV2_ENABLE_XMP=${BUILD_XMP} -DEXIV2_ENABLE_BROTLI=${BUILD_BROTLI} -DEXIV2_ENABLE_INIH=${BUILD_INIH}
 
 if command -v nproc >/dev/null 2>&1; then
     make "-j$(nproc)"

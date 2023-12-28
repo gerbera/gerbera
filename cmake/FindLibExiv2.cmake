@@ -86,6 +86,13 @@ if(LibExiv2_FOUND AND NOT TARGET LibExiv2::LibExiv2)
         IMPORTED_LOCATION "${LibExiv2_LIBRARIES}"
         INTERFACE_INCLUDE_DIRECTORIES "${LibExiv2_INCLUDE_DIRS}"
     )
+    if (LibExiv2_VERSION VERSION_LESS 0.28.0)
+        # exiv2 0.27 or older still uses std::auto_ptr, which is no longer available
+        # by default when using newer C++ versions
+        set_target_properties(LibExiv2::LibExiv2 PROPERTIES
+            INTERFACE_COMPILE_DEFINITIONS "_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR=1;_HAS_AUTO_PTR_ETC=1"
+        )
+    endif()
 endif()
 
 include(FeatureSummary)
