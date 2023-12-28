@@ -27,6 +27,7 @@
  - Clients: Support hiding resource types
  - Config WebUI: Catch up with all config changes
  - Config: Add follow-symlinks for autoscan
+ - Config: Add required BoxLayout values from default
  - Config: Add support for time specifications
  - Config: Generate Example Configuration
  - Database items sorting case insensitive
@@ -61,12 +62,14 @@
  - Transcode: Wildcards for mime type filter
  - Transcoding: Improve docs and examples
  - Transcoding: option to filter mime types with wildcard
+ - Update build for libexiv2
  - Update Library Versions and Documentation
  - Update README.Docker.md -Add docker volume section
  - Update supported-devices.rst
  - Update to latest npm packages
  - Update Ubuntu Version
  - Update versions of exiv2, fmt, spdlog, googletest and taglib
+ - Upnp: Add client flag to send simple date only
  - Use new ffmpeg channel layout API
  - WebUI: Database View - don't allow deleting dynamic containers
  - WebUI: Fix display of time values

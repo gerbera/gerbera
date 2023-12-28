@@ -2,12 +2,21 @@
 
 ## MAIN
 
-This release contains changes to some Javascript functions. If you created copies and modified that code to you purpose, you may have to update your code.
-If you activate the new javascript folder loading mechanism ensure that no older script are still in the script folders.
+This release is close to a new major release and contains two noteworthy changes.
 
-This release also introduced the configuration of virtual layout, you can translate the container titles or hide containers you don't use.
+The JavaScript integration has be overhauled to simplify the process of providing additional layout scripts.
+If you created copies and modified that code to you purpose, you may have to update your code to the new interfaces for import functions.
+In case you activate the new JavaScript folder loading mechanism by setting the respective config options,
+ensure that no older scripts are still in the script folders.
+
+This release also introduces the configuration of virtual layout, you can translate the container titles or hide containers you don't use.
 Of course such a change requires a rescan of the library. The options for structured audio layout have been redesigned, so you need to migrate
-them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get the default for the new section.
+them to the new `<box-layout ../>`. Run gerbera with `--create-config` to get the defaults for the new section.
+
+The second major change is the new staged import mode (`grb`) which is not activated by default. The default import mode (`mt`) handles each file completely,
+i.e. the physical file is read and the virtual layout is created in one go. The new grb-mode first reads all files, second creates the phyiscal
+structure and finally runs the layout functions on the physical items. The benefit is that the after an update to the file the original object can be updated
+instead of deleted and recreated like before.
 
 ### NEW Features
 
