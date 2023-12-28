@@ -150,6 +150,7 @@ static constexpr auto clientTypes = std::array {
     std::pair("SamsungSeriesCDE", ClientType::SamsungSeriesCDE),
     std::pair("SamsungBDJ5500", ClientType::SamsungBDJ5500),
     std::pair("EC-IRadio", ClientType::IRadio),
+    std::pair("FSL", ClientType::FSL),
     std::pair("PanasonicTV", ClientType::PanasonicTV),
     std::pair("BoseSoundtouch", ClientType::BoseSoundtouch),
     std::pair("StandardUPnP", ClientType::StandardUPnP),

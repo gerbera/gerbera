@@ -164,6 +164,16 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
             "EC-IRADIO/1.0",
         },
 
+        // User-Agent: FSL DLNADOC/1.50 UPnP Stack/1.0
+        {
+            "Technisat DigitRadio 580",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::FSL,
+            QUIRK_FLAG_SIMPLE_DATE,
+            ClientMatchType::UserAgent,
+            "FSL DLNADOC/1.50",
+        },
+
         // User-Agent(actionReq): Panasonic MIL DLNA CP UPnP/1.0 DLNADOC/1.50
         {
             "Panasonic TV",

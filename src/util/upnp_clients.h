@@ -53,6 +53,7 @@ enum class ClientType {
     SamsungSeriesCDE,
     SamsungBDJ5500,
     IRadio,
+    FSL,
     PanasonicTV,
     BoseSoundtouch,
     StandardUPnP

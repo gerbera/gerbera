@@ -23,6 +23,7 @@ The automatic detection supports the following devices and software:
 - SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
+- FSL/Frontier Silicon/Frontier Smart (e.g. Technisat DigitRadio 580), setting device flags to ``SIMPLE_DATE``
 - PanasonicTV, setting device flags to ``PANASONIC``
 - BoseSoundtouch, setting device flags to ``STRICTXML``
 
@@ -328,6 +329,13 @@ Tangent
 ~~~~~~~
 
 -  Quattro MkII
+
+Technisat
+~~~~~~~~~
+
+- DigitRadio 580
+
+Is based on a FSL chipset and needs some quirks because of a parsing issue in ``dc:date``.
 
 Telegent
 ~~~~~~~~
