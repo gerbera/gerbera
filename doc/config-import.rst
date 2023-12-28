@@ -5,6 +5,102 @@ Configure Import
 
 The import settings define various options on how to aggregate the content.
 
+.. code-block:: xml
+   :caption: Overall structure of import section
+
+    <import>
+      <filesystem-charset/>
+      <metadata-charset/>
+      <scripting>
+        <script-folder>
+          <common/>
+          <custom/>
+        </script-folder>
+        <import-function/>
+        <virtual-layout>
+          <import-script/>
+          <script-options>
+            <script-option/>
+          </script-options>
+          <genre-map>
+            </genre>
+          </genre-map>
+          <strctured-layout/>
+          <boxlayout>
+            <box/>
+          </boxlayout>
+        </virtual-layout>
+        <common-script/>
+        <custom-script/>
+        <playlist-script/>
+        <metafile-script/>
+      </scripting>
+      <magic-file/>
+      <autoscan>
+        <directory/>
+      </autoscan>
+      <system-directories>
+        <add-path/>
+      </system-directories>
+      <visible-directories>
+        <add-path/>
+      </visible-directories>
+      <layout>
+        <path/>
+      </layout>
+      <resources>
+        <order/>
+        <fanart/>
+        <subtitle/>
+        <metafile/>
+        <resource/>
+        <container/>
+      </resources>
+      <mappings>
+        <ignore-extensions/>
+        <extension-mimetype/>
+        <mimetype-contenttype/>
+        <mimetype-upnpclass/>
+        <mimetype-dlnatransfermode/>
+        <contenttype-dlnaprofile/>
+      </mappings>
+      <library-options>
+        <libexif>
+          <auxdata>
+            <add-data/>
+          </auxdata>
+        </libexif>
+        <id3>
+          <auxdata>
+            <add-data/>
+          </auxdata>
+          <metadata>
+            <add-data/>
+          </metadata>
+        </id3>
+        <ffmpeg>
+          <auxdata>
+            <add-data/>
+          </auxdata>
+          <metadata>
+            <add-data/>
+          </metadata>
+        </ffmpeg>
+        <exiv2>
+          <auxdata>
+            <add-data/>
+          </auxdata>
+          <metadata>
+            <add-data/>
+          </metadata>
+        </exiv2>
+      </library-options>
+      <online-content>
+        ... see respective page
+      </online-content>
+    </import>
+
+
 ``import``
 ~~~~~~~~~~
 
@@ -111,6 +207,7 @@ should specify that here. The server uses UTF-8 internally, this import paramete
 
 Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif information, etc.)
 
+
 ``scripting``
 ~~~~~~~~~~~~~
 
@@ -132,7 +229,7 @@ Defines the scripting section.
 Below are the available scripting options:
 
 ``script-folder``
-~~~~~~~~~~~~~~~~~
+-----------------
 
     ::
 
@@ -145,8 +242,10 @@ Below are the available scripting options:
     If a function is defined in a common and a custom file the custom defintion overwrites the common defintion. No function should be duplicate in
     the same folder. Setting `script-folder` is the replacement for setting the various script files `common-script`.
 
+.. _import-function:
+
 ``import-function``
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
     ::
 
@@ -207,14 +306,23 @@ Below are the available scripting options:
 
         The virtual layout can be adjusted using an import script which is defined as follows:
 
+
+``import-script``
+-----------------
+
         ::
 
             <import-script>/path/to/my/import-script.js</import-script>
 
         * Required:  **if virtual layout type is ”js\ ”**
         * Default: ``${prefix}/share/gerbera/js/import.js``, **where ${prefix} is your installation prefix directory.**
+        * Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
-        Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`
+        Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`.
+
+
+``script-options``
+------------------
 
         ::
 
@@ -228,6 +336,9 @@ Below are the available scripting options:
 
 
         **Child tags:**
+
+``script-option``
+^^^^^^^^^^^^^^^^^
 
             ::
 
@@ -253,6 +364,9 @@ Below are the available scripting options:
 
                 Value of the option.
 
+``genre-map``
+-------------
+
         ::
 
             <genre-map></genre-map>
@@ -263,6 +377,9 @@ Below are the available scripting options:
 
 
         **Child tags:**
+
+``genre``
+^^^^^^^^^
 
             ::
 
@@ -287,6 +404,10 @@ Below are the available scripting options:
                 * Required
 
                 Target genre value.
+
+
+``structured-layout``
+---------------------
 
         ::
 
@@ -313,11 +434,26 @@ Below are the available scripting options:
 
             Special characters in the beginning of a title that are not used for building a box.
 
+
+``boxlayout``
+-------------
+
         ::
 
-            <box-layout />
+            <boxlayout></boxlayout>
+
+        **Child tags:**
+
+``box``
+^^^^^^^
+
+            ::
+
                 <box key=".." title=".." class=".." size=".." enabled=".." />
-            </box-layout>
+
+            * Optional
+
+            Configure Box `key`.
 
             ::
 
@@ -382,6 +518,7 @@ Below are the available scripting options:
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/common.js``, **where ${prefix} is your installation prefix directory.**
+* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
 Points to the so called common script - it is a shared library of js helper functions.
 For more details read :ref:`scripting <scripting>`
@@ -395,6 +532,7 @@ For more details read :ref:`scripting <scripting>`
 
 * Optional
 * Default: **empty**
+* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
 Points to the custom script - think of it as a custom library of js helper functions, functions added
 there can be used in your import and in your playlist scripts. Theses functions also overwrite functions from the common script.
@@ -409,6 +547,7 @@ For more details read :ref:`scripting <scripting>`
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/playlists.js``, **where ${prefix} is your installation prefix directory.**
+* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
 Points to the script that is parsing various playlists, by default parsing of pls, m3u and asx playlists is implemented,
 however the script can be adapted to parse almost any kind of text based playlist. For more details read :ref:`scripting <scripting>`
@@ -433,6 +572,7 @@ however the script can be adapted to parse almost any kind of text based playlis
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/metadata.js``, **where ${prefix} is your installation prefix directory.**
+* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
 Points to the main metadata parsing script which is invoked during the first import phase to gather metadata from additional files.
 Currently support for nfo files is implemented. (https://kodi.wiki/view/NFO_files/Templates)
@@ -451,6 +591,7 @@ The search pattern is set in resources section.
 * Default: **System default**
 
 Specifies an alternative file for filemagic, containing mime type information.
+
 
 ``autoscan``
 ~~~~~~~~~~~~
@@ -480,6 +621,9 @@ the removed directory if it becomes available/gets created again.
     Setting the option to 'no' will disable inotify even if it is available. Allowed values: "yes", "no", "auto"
 
     **Child tags:**
+
+``directory``
+-------------
 
     ::
 
@@ -612,6 +756,9 @@ If the element does not exists, the default list of system directories is set to
 
     **Child tags:**
 
+``add-path``
+------------
+
     ::
 
         <add-path name="/sys"/>
@@ -646,6 +793,9 @@ If the element exists it supercedes ``system-directories``, i.e. only visible di
 This is the more forward way of defining content but cannot be defaulted.
 
     **Child tags:**
+
+``add-path``
+------------
 
     ::
 
@@ -687,6 +837,9 @@ Defines various layout options for generated virtual layout.
         Values of ``yes`` or ``no`` are allowed, specifies if parent path is added to virtual layout. If set to``no`` "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" becomes "Action" otherwise "Videos/Action". Setting to ``yes`` produces the layout of gerbera before version 1.5.
 
     **Child tags:**
+
+``path``
+--------
 
         ::
 
@@ -737,6 +890,9 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
 **Child tags:**
 
+``order``
+---------
+
     ::
 
         <order>...</order>
@@ -747,6 +903,9 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     **Child tags:**
 
+``handler``
+^^^^^^^^^^^
+
         ::
 
             <handler name="Fanart"/>
@@ -755,6 +914,9 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         * Required
 
         Valid handler names are ``Default``, ``LibExif``, ``TagLib``, ``Transcode``, ``Fanart``, ``Exturl``, ``MP4``, ``FFmpegThumbnailer``, ``Flac``, ``Matroska``, ``Subtitle``, ``Resource``, ``ContainerArt``
+
+``container`` / ``fanart`` / ``subtitle`` / ``metafile`` / ``resource``
+-----------------------------------------------------------------------
 
     ::
 
@@ -774,10 +936,8 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     Each of these tags can contain multiple ``add-file`` or ``add-dir`` entries. ``container`` has additional attributes.
 
-**Child tags:**
-
 ``container``
--------------
+^^^^^^^^^^^^^
 
     ::
 
@@ -819,7 +979,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
 
 ``add-file``
-------------
+^^^^^^^^^^^^
 
     ::
 
@@ -844,9 +1004,8 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         - ``%title%``: Value of the title tag
         - ``%composer%``: Value of the composer tag
 
-
 ``add-dir``
-------------
+^^^^^^^^^^^
 
     ::
 
@@ -913,7 +1072,7 @@ It is also helpful if you want to override auto detected mime types or simply sk
 
 
 ``ignore-extensions``
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 ::
 
     <ignore-extensions>
@@ -925,7 +1084,7 @@ This section holds the file name extension to mime type mappings.
 **Child tags:**
 
 ``add-file``
-------------
+^^^^^^^^^^^^
 
 ::
 
@@ -943,7 +1102,8 @@ Note:
 
 
 ``extension-mimetype``
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
+
 ::
 
     <extension-mimetype ignore-unknown="no" case-sensitive="no">
@@ -975,7 +1135,7 @@ This section holds the file name extension to mime type mappings.
 **Child tags:**
 
 ``map``
--------
+^^^^^^^
 
 ::
 
@@ -994,7 +1154,7 @@ Note:
 
 
 ``mimetype-upnpclass``
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 ::
 
@@ -1008,7 +1168,7 @@ This section holds the mime type to upnp:class mappings.
 **Child tags:**
 
 ``map``
--------
+^^^^^^^
 
 ::
 
@@ -1039,7 +1199,7 @@ expanded to `if genre contains Book`.
 
 
 ``mimetype-dlnatransfermode``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 ::
 
@@ -1053,7 +1213,7 @@ This section holds the mime type to dlna transfer mode mappings. It is added to 
 **Child tags:**
 
 ``map``
--------
+^^^^^^^
 
 ::
 
@@ -1069,7 +1229,7 @@ entered explicitly "audio/mpeg" or using a wildcard after the slash ``audio/\*``
 attributes are case sensitive.
 
 ``mimetype-contenttype``
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 ::
 
@@ -1089,7 +1249,7 @@ Note:
 
 
 ``treat``
----------
+^^^^^^^^^
 
 ::
 
@@ -1142,7 +1302,7 @@ The ``as`` attribute can have following values:
 .. _contenttype-dlnaprofile:
 
 ``contenttype-dlnaprofile``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 ::
 
@@ -1156,7 +1316,7 @@ This section holds the content type to dlnaprofile mappings.
 **Child tags:**
 
 ``map``
--------
+^^^^^^^
 
 ::
 
@@ -1180,7 +1340,7 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 .. _virtual-directories:
 
 ``virtual-directories``
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 ::
 
@@ -1194,7 +1354,7 @@ are distiguished by their artist even if the displayed text is identical.
 **Child tags:**
 
 ``key``
--------
+^^^^^^^
 
 ::
 
@@ -1213,6 +1373,7 @@ In addition ``LOCATION`` references to the location property retreived from the 
         <key metadata="M_ALBUMARTIST"/>
         <key metadata="M_UPNP_DATE"/>
     </virtual-directories>
+
 
 .. _library-options:
 
@@ -1296,7 +1457,7 @@ Auxdata can be read by the import javascript to gain more control over the media
 **Child tags:**
 
 ``add-data``
-------------
+^^^^^^^^^^^^
 
   .. code-block:: xml
 
@@ -1323,7 +1484,7 @@ Metadata can be read by the import javascript as ``meta`` to gain more control o
 **Child tags:**
 
 ``add-data``
-------------
+^^^^^^^^^^^^
 
   .. code-block:: xml
 

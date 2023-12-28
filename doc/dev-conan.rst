@@ -15,7 +15,7 @@ Setting up Conan
 
 From `Conan installation instructions <https://docs.conan.io/en/latest/installation.html>`_:
 
-.. code-block:: bash
+.. code-block:: console
 
   # Install Conan
   $ pip3 install --user conan
@@ -29,7 +29,7 @@ From `Conan installation instructions <https://docs.conan.io/en/latest/installat
 Building Gerbera
 ----------------
 
-.. code-block:: bash
+.. code-block:: console
 
   # Get dependencies (building them if needed) and generate build files:
   # The commands generate build system in build/ subfolder
@@ -61,7 +61,7 @@ Tweaking
 Use Ninja
 :::::::::
 
-.. code-block:: bash
+.. code-block:: console
 
   $ conan config set general.cmake_generator=Ninja  
 
@@ -110,7 +110,7 @@ Also you may want to build dependencies with some specific flags, for example
 
 You need to run rebuild missing or all packages:
 
-.. code-block:: bash
+.. code-block:: console
 
   # Build only missing packages
   $ conan install --build=missing ...
@@ -142,7 +142,7 @@ To remove only packages use ``conan remove -f '*'``
 Searching for a package (or checking an update)
 :::::::::::::::::::::::::::::::::::::::::::::::
 
-.. code-block:: bash
+.. code-block:: console
 
   $ conan search "fmt" -r all
   
@@ -159,7 +159,7 @@ Building on FreeBSD
 
 Everything works almost out of the box, except that there are no prebuilt packages.
 
-.. code-block:: bash
+.. code-block:: console
 
   # Python for Conan
   $ pkg install python3 py37-pip py37-sqlite3
@@ -187,7 +187,7 @@ Cross-building
 
 This is an example for Raspberry Pi 3 on Ubuntu host.
 
-.. code-block:: bash
+.. code-block:: console
 
   $ apt install g++-10-aarch64-linux-gnu
   $ conan profile new raspberry-pi3
@@ -219,7 +219,7 @@ Populate file with content:
   compiler.version=10
   compiler.libcxx=libstdc++11
 
-.. code-block:: bash
+.. code-block:: console
 
   $ conan install -pr:b default -pr:h ./conan/release -pr:h ./conan/minimal -pr:h raspberry-pi3 --build missing -if build . && conan build --configure -bf build .
   $ cd build && make
@@ -228,7 +228,7 @@ Populate file with content:
   [100%] Built target gerbera
   build $ file gerbera 
   gerbera: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, BuildID[sha1]=7bfdb98dd51a1a5dda5101a0e9f090806fb35a41, for GNU/Linux 3.7.0, with debug_info, not stripped
-  $  aarch64-linux-gnu-strip -s -o gerbera-s gerbera 
+  $ aarch64-linux-gnu-strip -s -o gerbera-s gerbera
   $ du -hs gerbera-s 
   3.9M    gerbera-s
 
