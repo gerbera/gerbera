@@ -96,7 +96,7 @@ html_theme_options = {
     'logo_only': True,  # if we have a html_logo below, this shows /only/ the logo with no title text
     # 'collapse_navigation': False,  # Collapse navigation (False makes it tree-like)
     # 'display_version': True,  # Display the docs version
-    # 'navigation_depth': 4,  # Depth of the headers shown in the navigation bar
+    'navigation_depth': 5,  # Depth of the headers shown in the navigation bar
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
