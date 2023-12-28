@@ -129,7 +129,7 @@ fi
 echo "Running $0 ${my_sys}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
-  libexiv2="libexpat1-dev"
+  libexiv2="libexpat1-dev libbrotli-dev libinih-dev libinireader0"
   libduktape=""
   libmatroska=""
   libpugixml=""
