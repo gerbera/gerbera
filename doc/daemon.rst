@@ -13,7 +13,8 @@ Using systemd
 
 This outlines steps of how to add the Gerbera runtime
 as a system daemon using the **Systemd**.  The gerbera installation uses cmake to configure and install the
-systemd daemon for gerbera.  Default install path is ``/etc/systemd/system/gerbera.service``
+systemd daemon for gerbera.  Default install path is depending on the target distribution. Typical locations are
+``/etc/systemd/system/gerbera.service``, ``/lib/systemd/system/gerbera.service`` or ``/usr/lib/systemd/system/gerbera.service``
 
 
 Create a Gerbera System User
@@ -33,9 +34,7 @@ Verify that the ``gerbera`` user was created
 ::
 
   $ id -u gerbera
-
-
-| Returns the user id of the user
+  | Returns the user id of the user
 
 
 Set Gerbera Permissions
@@ -53,9 +52,10 @@ to the directory referenced as the gerbera home.  For example ``/etc/gerbera``
 Enable Systemd Daemon
 ---------------------
 
-The cmake installation adds ``/etc/systemd/system/gerbera.service`` service file by default.
+The cmake installation adds ``gerbera.service`` service file by default.
 
-| The installation does **not** enable the service daemon.
+Note:
+  The installation does **not** enable the service daemon.
 
 1. Notify ``systemd`` that a new gerbera.service file exists by executing the following command:
 
@@ -91,37 +91,36 @@ Check the status of gerbera.  You should see success similar to below
 Troubleshooting
 ---------------
 
-If for some reason the service fails to start.  You can troubleshoot the behavior
-by starting gerbera from the shell
+If for some reason the service fails to start.  You can troubleshoot the behaviour
+by starting gerbera from the shell.
 
 ::
 
   $ su gerbera
   Password:
-  bash-4.4$  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
+  bash$  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
 
-  2017-09-20 19:54:47    INFO: Gerbera UPnP Server version 1.1.0_alpha - http://gerbera.io/
-  2017-09-20 19:54:47    INFO: ===============================================================================
-  2017-09-20 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
-  2017-09-20 19:54:47    INFO: Copyright 2016-2017 Gerbera Contributors.
-  2017-09-20 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
-  2017-09-20 19:54:47    INFO: ===============================================================================
-  2017-09-20 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
-  2017-09-20 19:54:47    INFO: Checking configuration...
+  2023-09-20 19:54:47    INFO: Gerbera UPnP Server version 1.12.1_git - http://gerbera.io/
+  2023-09-20 19:54:47    INFO: ===============================================================================
+  2023-09-20 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
+  2023-09-20 19:54:47    INFO: Copyright 2016-2023 Gerbera Contributors.
+  2023-09-20 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
+  2023-09-20 19:54:47    INFO: ===============================================================================
+  2023-09-20 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
+  2023-09-20 19:54:47    INFO: Checking configuration...
 
 .. index:: Commandline options
 
 Using Commandline options
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 If your system uses an old style system V init, commandline options are available to start gerbera as a Daemon:
 
---daemon or -d:  daemonize after startup.
+``--daemon`` or ``-d``:  daemonize after startup.
 
---user or -u:    when started by root, try to change to user USER after startup. All UIDs, GIDs and supplementary Groups will be set.
+``--user`` or ``-u``:    when started by root, try to change to user USER after startup. All UIDs, GIDs and supplementary Groups will be set.
 
---pidfile or -P: write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
+``--pidfile`` or ``-P``: write a pidfile to the specified location. Full path is needed, e.g. /run/gerbera.pid.
 
 
 .. index:: Solaris
@@ -145,9 +144,9 @@ Using launchd
 Create new Launch Agent
 -----------------------
 
-Use the ``scripts/gerbera.io.plist`` as a starting point. Save to user's launch agent path -->
+Use the ``scripts/gerbera.io.plist`` as a starting point.
 
-``~/Library/LaunchAgents/gerbera.io.plist``
+Save to user's launch agent path --> ``~/Library/LaunchAgents/gerbera.io.plist``
 
 
 Load the Launch Agent
