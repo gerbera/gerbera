@@ -24,6 +24,7 @@
  - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
  - Clean up physical entries in subdirectories
  - Clean up unreferenced items
+ - Clients: Add detection for FSL radios
  - Clients: Support hiding resource types
  - Config WebUI: Catch up with all config changes
  - Config: Add follow-symlinks for autoscan
@@ -63,6 +64,7 @@
  - Transcoding: Improve docs and examples
  - Transcoding: option to filter mime types with wildcard
  - Update build for libexiv2
+ - Update Documentation
  - Update Library Versions and Documentation
  - Update README.Docker.md -Add docker volume section
  - Update supported-devices.rst

@@ -69,44 +69,44 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     container["Video"] = container.at("Video/videoRoot");
     container["Video"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
     container["All Video"] = container.at("Video/allVideo");
-    chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] });
+    chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] }, nullptr);
     container["Video/Year"] = container.at("Video/allYears");
-    chain["/Video/Year"] = this->content->addContainerTree({ container["Video"], container["Video/Year"] });
+    chain["/Video/Year"] = this->content->addContainerTree({ container["Video"], container["Video/Year"] }, nullptr);
     container["Video/Date"] = container.at("Video/allDates");
-    chain["/Video/Date"] = this->content->addContainerTree({ container["Video"], container["Video/Date"] });
+    chain["/Video/Date"] = this->content->addContainerTree({ container["Video"], container["Video/Date"] }, nullptr);
     container["Video/Directories"] = container.at("Video/allDirectories");
-    chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] });
+    chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] }, nullptr);
 
     container["Photos"] = container.at("Image/imageRoot");
     container["Photos"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
     container["All Photos"] = container.at("Image/allImages");
-    chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] });
+    chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] }, nullptr);
     container["Photos/Year"] = container.at("Image/allYears");
-    chain["/Photos/Year"] = this->content->addContainerTree({ container["Photos"], container["Photos/Year"] });
+    chain["/Photos/Year"] = this->content->addContainerTree({ container["Photos"], container["Photos/Year"] }, nullptr);
     container["Photos/Date"] = container.at("Image/allDates");
-    chain["/Photos/Date"] = this->content->addContainerTree({ container["Photos"], container["Photos/Date"] });
+    chain["/Photos/Date"] = this->content->addContainerTree({ container["Photos"], container["Photos/Date"] }, nullptr);
     container["Photos/Directories"] = container.at("Image/allDirectories");
-    chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] });
+    chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] }, nullptr);
 
     container["Audio"] = container.at("Audio/audioRoot");
     container["Audio"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
     container["All Audio"] = container.at("Audio/allAudio");
     container["All Songs"] = container.at("Audio/allSongs");
-    chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] });
+    chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] }, nullptr);
     container["All - full name"] = container.at("Audio/allTracks");
-    chain["/Audio/All - full name"] = this->content->addContainerTree({ container["Audio"], container["All - full name"] });
+    chain["/Audio/All - full name"] = this->content->addContainerTree({ container["Audio"], container["All - full name"] }, nullptr);
     container["Albums"] = container.at("Audio/allAlbums");
-    chain["/Audio/Albums"] = this->content->addContainerTree({ container["Audio"], container["Albums"] });
+    chain["/Audio/Albums"] = this->content->addContainerTree({ container["Audio"], container["Albums"] }, nullptr);
     container["Artists"] = container.at("Audio/allArtists");
-    chain["/Audio/Artists"] = this->content->addContainerTree({ container["Audio"], container["Artists"] });
+    chain["/Audio/Artists"] = this->content->addContainerTree({ container["Audio"], container["Artists"] }, nullptr);
     container["Genres"] = container.at("Audio/allGenres");
-    chain["/Audio/Genres"] = this->content->addContainerTree({ container["Audio"], container["Genres"] });
+    chain["/Audio/Genres"] = this->content->addContainerTree({ container["Audio"], container["Genres"] }, nullptr);
     container["Composers"] = container.at("Audio/allComposers");
-    chain["/Audio/Composers"] = this->content->addContainerTree({ container["Audio"], container["Composers"] });
+    chain["/Audio/Composers"] = this->content->addContainerTree({ container["Audio"], container["Composers"] }, nullptr);
     container["Year"] = container.at("Audio/allYears");
-    chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] });
+    chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] }, nullptr);
     container["Audio/Directories"] = container.at("Audio/allDirectories");
-    chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] });
+    chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] }, nullptr);
     container["Artist Chronology"] = container.at("Audio/artistChronology");
 
 #ifdef ONLINE_SERVICES
@@ -121,10 +121,10 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
         container["Apple/Genres"] = container.at("Trailer/allGenres");
         container["Apple/Release Date"] = container.at("Trailer/relDate");
         container["Apple/Post Date"] = container.at("Trailer/postDate");
-        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] });
-        chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] });
-        chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] });
-        chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] });
+        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] }, nullptr);
+        chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] }, nullptr);
+        chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] }, nullptr);
+        chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] }, nullptr);
     }
 #endif
 #endif
@@ -163,7 +163,7 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
             if (segment != "/" && segment != ".." && !segment.empty())
                 dirVect.push_back(std::make_shared<CdsContainer>(segment.string()));
         }
-        auto id = content->addContainerTree(dirVect);
+        auto id = content->addContainerTree(dirVect, obj);
         dirVect[dirVect.size() - 1]->setClass(upnpClass);
         add(obj, id);
     }
@@ -205,7 +205,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
             ct.push_back(container["Video/Year"]);
             ct.push_back(std::make_shared<CdsContainer>(year));
             ct.push_back(std::make_shared<CdsContainer>(month));
-            id = content->addContainerTree(ct);
+            id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
 
@@ -217,7 +217,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
         ct.push_back(container["Video"]);
         ct.push_back(container["Video/Date"]);
         ct.push_back(std::make_shared<CdsContainer>(date));
-        id = content->addContainerTree(ct);
+        id = content->addContainerTree(ct, obj);
         add(obj, id);
     }
 
@@ -259,7 +259,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
             ct.push_back(container["Photos/Year"]);
             ct.push_back(std::make_shared<CdsContainer>(year));
             ct.push_back(std::make_shared<CdsContainer>(month));
-            id = content->addContainerTree(ct);
+            id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
 
@@ -271,7 +271,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
         ct.push_back(container["Photos"]);
         ct.push_back(container["Photos/Date"]);
         ct.push_back(std::make_shared<CdsContainer>(date));
-        id = content->addContainerTree(ct);
+        id = content->addContainerTree(ct, obj);
         add(obj, id);
     }
 
@@ -367,7 +367,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     arc.push_back(container["Artists"]);
     arc.push_back(artistContainer);
     arc.push_back(container["All Songs"]);
-    id = content->addContainerTree(arc);
+    id = content->addContainerTree(arc, obj);
     add(obj, id);
 
     std::string temp;
@@ -390,7 +390,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     alc.push_back(container["Artists"]);
     alc.push_back(artistContainer);
     alc.push_back(albumContainer);
-    id = content->addContainerTree(alc);
+    id = content->addContainerTree(alc, obj);
     add(obj, id);
 
     albumContainer->setSearchable(true);
@@ -398,14 +398,14 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     allc.push_back(container["Audio"]);
     allc.push_back(container["Albums"]);
     allc.push_back(std::move(albumContainer));
-    id = content->addContainerTree(allc);
+    id = content->addContainerTree(allc, obj);
     add(obj, id);
 
     std::vector<std::shared_ptr<CdsObject>> ct;
     ct.push_back(container["Audio"]);
     ct.push_back(container["Genres"]);
     ct.push_back(std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE));
-    id = content->addContainerTree(ct);
+    id = content->addContainerTree(ct, obj);
     add(obj, id);
 
     auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
@@ -414,7 +414,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     cc.push_back(container["Audio"]);
     cc.push_back(container["Composers"]);
     cc.push_back(std::move(composerContainer));
-    id = content->addContainerTree(cc);
+    id = content->addContainerTree(cc, obj);
     add(obj, id);
 
     auto yearContainer = std::make_shared<CdsContainer>(date);
@@ -423,7 +423,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     yt.push_back(container["Audio"]);
     yt.push_back(container["Year"]);
     yt.push_back(std::move(yearContainer));
-    id = content->addContainerTree(yt);
+    id = content->addContainerTree(yt, obj);
     add(obj, id);
 
     obj->setTitle(fmt::format("{}{}", temp, title));
@@ -434,7 +434,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     all.push_back(container["Artists"]);
     all.push_back(artistContainer);
     all.push_back(container["All - full name"]);
-    id = content->addContainerTree(all);
+    id = content->addContainerTree(all, obj);
     add(obj, id);
 
     obj->setTitle(title);
@@ -447,7 +447,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     chronology.push_back(std::move(artistContainer));
     chronology.push_back(container["Artist Chronology"]);
     chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
-    id = content->addContainerTree(chronology);
+    id = content->addContainerTree(chronology, obj);
     add(obj, id);
 }
 
@@ -498,7 +498,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         ct.push_back(container["Apple"]);
         ct.push_back(container["Genres"]);
         ct.push_back(std::make_shared<CdsContainer>(genre));
-        auto id = content->addContainerTree(ct);
+        auto id = content->addContainerTree(ct, obj);
         add(obj, id);
     }
 
@@ -509,7 +509,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         ct.push_back(container["Apple"]);
         ct.push_back(container["Release Date"]);
         ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
-        auto id = content->addContainerTree(ct);
+        auto id = content->addContainerTree(ct, obj);
         add(obj, id);
     }
 
@@ -520,7 +520,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         ct.push_back(container["Apple"]);
         ct.push_back(container["Post Date"]);
         ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
-        auto id = content->addContainerTree(ct);
+        auto id = content->addContainerTree(ct, obj);
         add(obj, id);
     }
 }

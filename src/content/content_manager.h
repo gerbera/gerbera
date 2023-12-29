@@ -165,7 +165,7 @@ public:
 
     /// \brief Adds a virtual container chain specified by path.
     /// \return ID of the last container in the chain.
-    std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain);
+    std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem);
 
     /// \brief Adds a virtual container specified by parentID and title
     /// \param parentID the id of the parent.
@@ -276,8 +276,8 @@ protected:
     void scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI);
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
-    void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
+    void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, const std::shared_ptr<CdsContainer>& parentContainer, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 

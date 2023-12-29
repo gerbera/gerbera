@@ -406,6 +406,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
 
 std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     const fs::directory_entry& dirEnt,
+    const std::shared_ptr<CdsContainer>& parent,
     const fs::path& rootPath,
     bool followSymlinks,
     bool checkDatabase,
@@ -420,12 +421,14 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     if (!obj) {
         obj = createObjectFromFile(adir, dirEnt, followSymlinks);
         if (!obj) { // object ignored
-            log_debug("Link to file or directory ignored: {}", dirEnt.path().c_str());
+            log_debug("Hidden file or directory ignored: {}", dirEnt.path().c_str());
             return obj;
         }
         if (obj->isItem()) {
-            addObject(obj, firstChild);
+            addObject(obj, firstChild); // creates parent containers if necessary and sets parentID
             isNew = true;
+        } else {
+            // addObject(obj, false); // creates parent containers if necessary and sets parentID
         }
     } else if (obj->isItem() && processExisting) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -433,7 +436,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
         getImportService(adir)->updateItemData(item, item->getMimeType());
     }
     if (processExisting || isNew) {
-        getImportService(adir)->fillSingleLayout(nullptr, obj, nullptr, task);
+        getImportService(adir)->fillSingleLayout(nullptr, obj, parent, task);
     }
     return obj;
 }
@@ -473,12 +476,16 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& d
         return getImportService(asSetting.adir)->getObject(dirEnt.path());
     } else {
         // checkDatabase, don't process existing
-        auto obj = createSingleItem(dirEnt, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
+        std::shared_ptr<CdsContainer> parent;
+        auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), DbFileType::Directory);
+        if (parentObject->isContainer())
+            parent = std::dynamic_pointer_cast<CdsContainer>(parentObject);
+        auto obj = createSingleItem(dirEnt, parent, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
         if (!obj) // object ignored
             return obj;
 
         if (asSetting.recursive && obj->isContainer()) {
-            addRecursive(asSetting.adir, dirEnt, asSetting.followSymlinks, asSetting.hidden, task);
+            addRecursive(asSetting.adir, dirEnt, std::dynamic_pointer_cast<CdsContainer>(obj), asSetting.followSymlinks, asSetting.hidden, task);
         }
 
         if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
@@ -738,7 +745,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 if (newObject) {
                     list.erase(newObject->getID());
 
-                    // check modification time and update file if chagned
+                    // check modification time and update file if changed
                     if (lastModifiedCurrentMax < lwt) {
                         // re-add object - we have to do this in order to trigger
                         // layout
@@ -872,7 +879,13 @@ std::shared_ptr<AutoscanDirectory> ContentManager::findAutoscanDirectory(fs::pat
 }
 
 /* scans the given directory and adds everything recursively */
-void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task)
+void ContentManager::addRecursive(
+    std::shared_ptr<AutoscanDirectory>& adir,
+    const fs::directory_entry& subDir,
+    const std::shared_ptr<CdsContainer>& parentContainer,
+    bool followSymlinks,
+    bool hidden,
+    const std::shared_ptr<CMAddFileTask>& task)
 {
     auto f2i = StringConverter::f2i(config);
 
@@ -881,19 +894,11 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         throw_std_runtime_error("Could not list directory {}: {}", subDir.path().c_str(), ec.message());
     }
 
-    int parentID = database->findObjectIDByPath(subDir.path());
-    std::shared_ptr<CdsContainer> parentContainer;
+    int parentID = parentContainer->getID();
 
-    if (parentID != INVALID_OBJECT_ID) {
-        try {
-            std::shared_ptr<CdsObject> obj = database->loadObject(parentID);
-            if (!obj || !obj->isContainer()) {
-                throw_std_runtime_error("Item {} is not a container", parentID);
-            }
-            parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
-        } catch (const std::runtime_error& e) {
-            log_error("addRecursive: Failed to load parent container {}, {}", subDir.path().c_str(), e.what());
-        }
+    if (!parentContainer || !parentContainer->isContainer()) {
+        log_error("addRecursive: Failed to load parent container of {}", subDir.path().c_str());
+        return;
     }
 
     // abort loop if either:
@@ -943,7 +948,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         try {
             fs::path rootPath = task ? task->getRootPath() : "";
             // check database if parent, process existing
-            auto obj = createSingleItem(subDirEnt, rootPath, followSymlinks, (parentID > 0), true, firstChild, adir, task);
+            auto obj = createSingleItem(subDirEnt, parentContainer, rootPath, followSymlinks, (parentID > 0), true, firstChild, adir, task);
 
             if (obj) {
                 firstChild = false;
@@ -959,7 +964,7 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
                     }
                 }
                 if (obj->isContainer()) {
-                    addRecursive(adir, subDirEnt, followSymlinks, hidden, task);
+                    addRecursive(adir, subDirEnt, std::static_pointer_cast<CdsContainer>(obj), followSymlinks, hidden, task);
                 }
             }
         } catch (const std::runtime_error& ex) {
@@ -967,17 +972,6 @@ void ContentManager::addRecursive(std::shared_ptr<AutoscanDirectory>& adir, cons
         }
     } // dIter
 
-    if (parentID != INVALID_OBJECT_ID && !parentContainer) {
-        try {
-            std::shared_ptr<CdsObject> obj = database->loadObject(parentID);
-            if (!obj || !obj->isContainer()) {
-                throw_std_runtime_error("Item {} is not a container", parentID);
-            }
-            parentContainer = std::static_pointer_cast<CdsContainer>(obj);
-        } catch (const std::runtime_error& e) {
-            log_error("addRecursive: Failed to load parent container {}, {}", subDir.path().c_str(), e.what());
-        }
-    }
     getImportService(adir)->finishScan(subDir.path(), parentContainer, lastModifiedNewMax, firstObject);
     // Items not touched during import do not exist anymore and can be removed
     if (!list.empty()) {
@@ -1133,16 +1127,19 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
     log_debug("Adding: parent ID is {}", obj->getParentID());
 
     database->addObject(obj, &containerChanged);
-    log_debug("After adding: parent ID is {}", obj->getParentID());
+    int parentId = obj->getParentID();
+    log_debug("After adding: parent ID is {}", parentId);
 
+    if (obj->isContainer()) {
+        return;
+    }
     update_manager->containerChanged(containerChanged);
     session_manager->containerChangedUI(containerChanged);
-    int parentId = obj->getParentID();
     // this is the first entry, so the container is new also, send update for parent of parent
     if (firstChild) {
         firstChild = (database->getChildCount(parentId) == 1);
     }
-    if (parentId > -1) {
+    if (parentId >= CDS_ID_ROOT) {
         if (firstChild) {
             auto parent = database->loadObject(parentId);
             log_debug("Will update parent ID {}", parent->getParentID());
@@ -1163,11 +1160,11 @@ std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const s
     for (auto&& segment : cPath) {
         cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
     }
-    addContainerTree(cVec);
+    addContainerTree(cVec, nullptr);
     return importService->getContainer(cPath);
 }
 
-std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain)
+std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem)
 {
     if (chain.empty()) {
         log_error("Received empty chain");
@@ -1175,7 +1172,7 @@ std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::sha
     }
     std::vector<int> createdIds;
 
-    auto result = importService->addContainerTree(CDS_ID_ROOT, chain, createdIds);
+    auto result = importService->addContainerTree(CDS_ID_ROOT, chain, refItem, createdIds);
 
     if (!createdIds.empty()) {
         update_manager->containerChanged(result.first);
@@ -1217,17 +1214,7 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const std::share
     if (isRegularFile(dirEnt, ec) || (allowFifo && dirEnt.is_fifo(ec))) { // item
         obj = getImportService(adir)->createSingleItem(dirEnt);
     } else if (dirEnt.is_directory(ec)) {
-        obj = std::make_shared<CdsContainer>();
-        /* adding containers is done by Database now
-         * this exists only to inform the caller that
-         * this is a container
-         */
-        /*
-        cont->setMTime(dirEnt.last_write_time(ec));
-        cont->setLocation(path);
-        auto f2i = StringConverter::f2i();
-        obj->setTitle(f2i->convert(filename));
-        */
+        obj = getImportService(adir)->createSingleContainer(CDS_ID_FS_ROOT, dirEnt, UPNP_CLASS_CONTAINER);
     } else {
         // only regular files and directories are supported
         throw_std_runtime_error("ContentManager: skipping file {}", dirEnt.path().c_str());
