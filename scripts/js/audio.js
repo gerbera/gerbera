@@ -153,7 +153,10 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     // objects - this information may be used by some renderers to
     // identify the type of the container and present the content in a
     // different manner.
-    const containerResource = cont.res;
+    const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
+    const containerResource = parentCount > 1 ? cont.res : undefined;
+    const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
+
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
     const chain = {
         audio: {
@@ -211,7 +214,10 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             title: boxSetup['AudioInitial/allArtistTracks'].title,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: boxSetup['AudioInitial/allArtistTracks'].class,
-            metaData: [], res: containerResource, aux: obj.aux, refID: cont.id },
+            metaData: [],
+            res: parentCount > 0 ? cont.res : undefined,
+            aux: obj.aux,
+            refID: containerRefID },
         abc: {
             id: boxSetup['AudioInitial/abc'].id,
             title: boxSetup['AudioInitial/abc'].title,
@@ -228,16 +234,17 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
             metaData: [],
+            res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         album: {
             title: album,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: containerType,
             metaData: [],
-            res: containerResource,
+            res: parentCount > 0 ? cont.res : undefined,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         genre: {
             title: genre,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -245,7 +252,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         year: {
             title: date,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -254,7 +261,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         composer: {
             title: composer,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -263,7 +270,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
     };
     const isAudioBook = obj.upnpclass === UPNP_CLASS_AUDIO_BOOK;
     chain.album.metaData[M_ARTIST] = [ aartist ];

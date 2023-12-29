@@ -123,6 +123,9 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
     configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
+    containerImageParentCount = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
+    containerImageMinDepth = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
+    virutalDirKeys = config->getArrayOption(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS);
     noMediaName = config->getOption(CFG_IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
@@ -646,18 +649,33 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         fanart = container->getResource(CdsResource::Purpose::Thumbnail);
         if (fanart)
             database->updateObject(container, nullptr);
+        log_debug("fanart from dir {}", fanart != nullptr);
     }
 
     auto location = container->getLocation();
     if (refObj) {
-        if (!fanart && (refObj->isContainer() || (count < config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT) && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH)))) {
+        if (!fanart && (refObj->isContainer() || (count < containerImageParentCount && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > containerImageMinDepth))) {
             fanart = refObj->getResource(CdsResource::Purpose::Thumbnail);
             if (fanart) {
-                auto fanArtObjId = refObj->getID() > CDS_ID_ROOT ? refObj->getID() : refObj->getRefID();
+                auto fanArtObj = refObj;
+                auto fanArtObjId = refObj->getID();
+                auto fanArtResId = fanart->getResId();
+                if (refObj->getID() <= CDS_ID_ROOT) {
+                    fanArtObj = database->loadObject(refObj->getRefID());
+                    auto fanartRef = fanArtObj->getResource(CdsResource::Purpose::Thumbnail);
+                    fanArtResId = fanartRef->getResId();
+                }
+                if (fanArtObj->isItem() && fanArtResId == 0) {
+                    for (auto&& res : fanArtObj->getResources()) {
+                        if (res->getPurpose() == CdsResource::Purpose::Thumbnail)
+                            break;
+                        fanArtResId++;
+                    }
+                }
                 if (fanart->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
                     if (fanArtObjId > CDS_ID_ROOT) {
                         fanart->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
-                        fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanart->getResId()));
+                        fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanArtResId));
                     } else {
                         fanart = nullptr;
                     }
@@ -669,8 +687,9 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
             }
         }
     }
-    if (fanart)
+    if (fanart) {
         containersWithFanArt[container->getID()] = container;
+    }
 }
 
 std::shared_ptr<CdsContainer> ImportService::getContainer(const fs::path& location) const
@@ -687,7 +706,7 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(int parentCon
             cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
     }
     std::vector<int> createdIds;
-    addContainerTree(parentContainerId, cVec, createdIds);
+    addContainerTree(parentContainerId, cVec, nullptr, createdIds);
 
     if (containerMap.find(location) != containerMap.end()) {
         auto result = containerMap.at(location);
@@ -698,14 +717,17 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(int parentCon
 }
 
 /// \param createdIds used by messaging in ContentManager
-std::pair<int, bool> ImportService::addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds)
+std::pair<int, bool> ImportService::addContainerTree(
+    int parentContainerId,
+    const std::vector<std::shared_ptr<CdsObject>>& chain,
+    const std::shared_ptr<CdsObject>& refItem,
+    std::vector<int>& createdIds)
 {
     std::string tree; // accumulate path to container here
     int result = parentContainerId;
     bool isNew = false;
     bool isVirtual = parentContainerId != CDS_ID_FS_ROOT;
     int count = 0;
-    auto dirKeys = config->getArrayOption(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS);
     for (auto&& item : chain) {
         std::string subTree;
         if (item->getTitle().empty()) {
@@ -719,7 +741,7 @@ std::pair<int, bool> ImportService::addContainerTree(int parentContainerId, cons
                 tree = std::regex_replace(tree, std::regex(key), val);
             }
             auto dirKeyValues = std::vector<std::string>();
-            for (auto&& field : dirKeys) {
+            for (auto&& field : virutalDirKeys) {
                 if (field == "LOCATION") {
                     std::string location = item->getLocation().c_str();
                     if (!location.empty()) {
@@ -772,8 +794,8 @@ std::pair<int, bool> ImportService::addContainerTree(int parentContainerId, cons
             }
         }
         count++;
-        if (isVirtual)
-            assignFanArt(containerMap[subTree], item, chain.size() - count);
+        if (isVirtual) // && chain.size() - count < containerImageParentCount
+            assignFanArt(containerMap[subTree], refItem && count > containerImageMinDepth ? refItem : item, chain.size() - count);
     }
     return { result, isNew };
 }

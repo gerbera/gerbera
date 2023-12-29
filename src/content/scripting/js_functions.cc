@@ -69,34 +69,43 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     auto self = Script::getContextScript(ctx);
 
     if (!duk_is_array(ctx, 0)) {
-        log_debug("js_addContainerTree: No Array");
+        log_debug("No Array");
         return 0;
     }
 
-    std::vector<std::shared_ptr<CdsObject>> result;
+    std::vector<std::shared_ptr<CdsObject>> chain;
     auto length = duk_get_length(ctx, -1);
 
     for (duk_uarridx_t i = 0; i < length; i++) {
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx);
-                log_debug("js_addContainerTree: no object at {}", i);
+                log_debug("no object at {}", i);
                 break;
             }
             duk_to_object(ctx, -1);
             auto cdsObj = self->dukObject2cdsObject(nullptr);
             if (cdsObj) {
-                result.push_back(std::move(cdsObj));
+                chain.push_back(std::move(cdsObj));
             } else {
-                log_debug("js_addContainerTree: no CdsObject at {}", i);
+                log_debug("no CdsObject at {}", i);
             }
         }
         duk_pop(ctx);
     }
 
-    if (!result.empty()) {
+    if (!chain.empty()) {
+        auto lastItem = chain.at(chain.size() - 1);
+        if (lastItem->isContainer()) {
+            log_debug("lastContainer {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getRefID());
+            if (lastItem->getResourceCount() == 0 && lastItem->getRefID() >= CDS_ID_ROOT) {
+                lastItem = self->getDatabase()->loadObject(lastItem->getRefID());
+                log_debug("lastItem from RefID {}, resSize {}, loc {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getLocation().string());
+            }
+        } else
+            log_debug("lastItem {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getRefID());
         auto cm = self->getContent();
-        auto [containerId, containerStatus] = cm->addContainerTree(result);
+        auto [containerId, containerStatus] = cm->addContainerTree(chain, lastItem);
         if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
             auto tmp = fmt::to_string(containerId);

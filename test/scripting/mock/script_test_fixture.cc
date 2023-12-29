@@ -134,14 +134,14 @@ void ScriptTestFixture::dukMockItem(duk_context* ctx, const std::map<std::string
     duk_put_prop_string(ctx, origIdx, "metaData");
 
     // obj.res
-    if (!res.empty()) {
-        duk_idx_t resIdx = duk_push_object(ctx);
-        for (auto const& val : res) {
-            duk_push_string(ctx, val.second.c_str());
-            duk_put_prop_string(ctx, resIdx, val.first.c_str());
-        }
-        duk_put_prop_string(ctx, origIdx, "res");
+    duk_idx_t resIdx = duk_push_object(ctx);
+    duk_push_string(ctx, fmt::to_string(res.size()).c_str());
+    duk_put_prop_string(ctx, resIdx, "count");
+    for (auto const& val : res) {
+        duk_push_string(ctx, val.second.c_str());
+        duk_put_prop_string(ctx, resIdx, val.first.c_str());
     }
+    duk_put_prop_string(ctx, origIdx, "res");
 
     // obj.aux
     if (!aux.empty()) {
@@ -209,14 +209,14 @@ duk_ret_t ScriptTestFixture::dukMockItem(duk_context* ctx, const std::string& mi
     duk_put_prop_string(ctx, origIdx, "metaData");
 
     // obj.res
-    if (!res.empty()) {
-        duk_idx_t resIdx = duk_push_object(ctx);
-        for (auto const& val : res) {
-            duk_push_string(ctx, val.second.c_str());
-            duk_put_prop_string(ctx, resIdx, val.first.c_str());
-        }
-        duk_put_prop_string(ctx, origIdx, "res");
+    duk_idx_t resIdx = duk_push_object(ctx);
+    duk_push_string(ctx, fmt::to_string(res.size()).c_str());
+    duk_put_prop_string(ctx, resIdx, "count");
+    for (auto const& val : res) {
+        duk_push_string(ctx, val.second.c_str());
+        duk_put_prop_string(ctx, resIdx, val.first.c_str());
     }
+    duk_put_prop_string(ctx, origIdx, "res");
 
     // obj.aux
     if (!aux.empty()) {

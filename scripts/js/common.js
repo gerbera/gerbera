@@ -364,7 +364,7 @@ function addAudio(obj, cont, rootPath, containerType) {
     var track = '';
     if (obj.trackNumber > 0) {
         track = trackNumber;
-        if (track.length == 1) {
+        if (track.length === 1) {
             track = '0' + track;
         }
         track = track + ' ';
@@ -402,7 +402,9 @@ function addAudio(obj, cont, rootPath, containerType) {
     // Remember, the server will sort all items by ID3 track if the
     // container class is set to UPNP_CLASS_CONTAINER_MUSIC_ALBUM.
 
-    const containerResource = cont.res;
+    const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
+    const containerResource = parentCount > 1 ? cont.res : undefined;
+    const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
 
     const chain = {
@@ -410,7 +412,8 @@ function addAudio(obj, cont, rootPath, containerType) {
             id: boxSetup['Audio/audioRoot'].id,
             title: boxSetup['Audio/audioRoot'].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/audioRoot'].class, metaData: [] },
+            upnpclass: boxSetup['Audio/audioRoot'].class,
+            metaData: [] },
         allAudio: {
             id: boxSetup['Audio/allAudio'].id,
             title: boxSetup['Audio/allAudio'].title,
@@ -460,12 +463,13 @@ function addAudio(obj, cont, rootPath, containerType) {
         artist: {
             searchable: false,
             title: artist[0],
+            location: artist[0],
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         album: {
             searchable: false,
             title: album,
@@ -474,7 +478,7 @@ function addAudio(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         genre: {
             title: genre,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -482,7 +486,7 @@ function addAudio(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         year: {
             title: date,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -490,7 +494,7 @@ function addAudio(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         composer: {
             title: composer,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -498,7 +502,7 @@ function addAudio(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
     };
 
     chain.audio.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_AUDIO_ITEM ];
@@ -615,6 +619,38 @@ function stringFromConfig(entry, defValue) {
 }
 // doc-map-string-config-end
 
+function parseBool(entry) {
+    switch(entry){
+        case null:
+        case undefined:
+          return false;
+    }
+    switch(entry.toString().trim().toLowerCase()){
+        case "true":
+        case "yes":
+        case "1":
+          return true;
+
+        case "false":
+        case "no":
+        case "0":
+          return false;
+
+        default:
+          return JSON.parse(entry);
+    }
+}
+
+// doc-map-bool-config-begin
+function boolFromConfig(entry, defValue) {
+    if (entry in config) {
+        var value = config[entry];
+        return parseBool(value);
+    }
+    return defValue;
+}
+// doc-map-bool-config-end
+
 function addAudioStructured(obj, cont, rootPath, containerType) {
     // first gather data
     var title = obj.title;
@@ -700,7 +736,9 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     };
     boxConfig.singleLetterBoxSize = 2 * boxConfig.divChar.length + 1;
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
-    const containerResource = cont.res;
+    const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
+    const containerResource = parentCount > 1 ? cont.res : undefined;
+    const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
 
     const chain = {
         allArtists: {
@@ -754,9 +792,10 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
             title: artist[0],
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
-            metaData: [], res: containerResource,
+            metaData: [],
+            res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         album_artist: {
             title: album_artist,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -764,7 +803,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         album: {
             title: album,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -772,7 +811,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         genre: {
             title: genre,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -780,7 +819,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         decade: {
             title: decade,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -912,7 +951,9 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
 // doc-add-video-begin
 function addVideo(obj, cont, rootPath, containerType) {
     const dir = getRootPath(rootPath, obj.location);
-    const containerResource = cont.res;
+    const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
+    const containerResource = parentCount > 1 ? cont.res : undefined;
+    const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
     const chain = {
         video: {
@@ -954,7 +995,7 @@ function addVideo(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
         date: {
             title: boxSetup['Video/unknown'].title,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -963,7 +1004,7 @@ function addVideo(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
     };
     chain.video.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_VIDEO_ITEM ];
     var container = addContainerTree([chain.video, chain.allVideo]);
@@ -1001,7 +1042,7 @@ function addVideo(obj, cont, rootPath, containerType) {
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = containerResource;
         tree[tree.length-1].aux = obj.aux;
-        tree[tree.length-1].refID = cont.id;
+        tree[tree.length-1].refID = containerRefID;
         addCdsObject(obj, addContainerTree(tree));
     }
 }
@@ -1010,7 +1051,9 @@ function addVideo(obj, cont, rootPath, containerType) {
 // doc-add-image-begin
 function addImage(obj, cont, rootPath, containerType) {
     const dir = getRootPath(rootPath, obj.location);
-    const containerResource = cont.res;
+    const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
+    const containerResource = parentCount > 1 ? cont.res : undefined;
+    const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
 
     const chain = {
@@ -1053,7 +1096,7 @@ function addImage(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            efID: cont.id },
+            efID: containerRefID },
         date: {
             title: boxSetup['Image/unknown'].title,
             objectType: OBJECT_TYPE_CONTAINER,
@@ -1062,7 +1105,7 @@ function addImage(obj, cont, rootPath, containerType) {
             metaData: [],
             res: containerResource,
             aux: obj.aux,
-            refID: cont.id },
+            refID: containerRefID },
     };
     chain.imageRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_IMAGE_ITEM ];
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
@@ -1099,7 +1142,7 @@ function addImage(obj, cont, rootPath, containerType) {
         tree[tree.length-1].metaData = [];
         tree[tree.length-1].res = containerResource;
         tree[tree.length-1].aux = obj.aux;
-        tree[tree.length-1].refID = cont.id;
+        tree[tree.length-1].refID = containerRefID;
         addCdsObject(obj, addContainerTree(tree));
     }
 }
@@ -1141,17 +1184,17 @@ function addTrailer(obj) {
             upnpclass: boxSetup['Trailer/postDate'].class, metaData: [] },
 
         genre: {
-			title: boxSetup['Trailer/unknown'].title,
-			objectType: OBJECT_TYPE_CONTAINER,
-			searchable: true,
-			upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE,
-			metaData: [] },
+            title: boxSetup['Trailer/unknown'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            searchable: true,
+            upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE,
+            metaData: [] },
         date: {
-			title: boxSetup['Trailer/unknown'].title,
-			objectType: OBJECT_TYPE_CONTAINER,
-			searchable: true,
-			upnpclass: UPNP_CLASS_CONTAINER,
-			metaData: [] }
+            title: boxSetup['Trailer/unknown'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            searchable: true,
+            upnpclass: UPNP_CLASS_CONTAINER,
+            metaData: [] }
     };
     // First we will add the item to the 'All Trailers' container, so
     // that we get a nice long playlist:
@@ -1289,23 +1332,23 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
     var playlistOrder = 1;
 
     // Remove a BOM if there is one
-    if (line.charCodeAt(0) === 0xFEFF) {
+    if (line && line.charCodeAt(0) === 0xFEFF) {
         line = line.substr(1);
     }
 
     // Here is the do - while loop which will read the playlist line by line.
     do {
-        var matches = line.match(/^#EXTINF:(-?\d+),\s*(\S.*)$/i);
+        var matches = line ? line.match(/^#EXTINF:(-?\d+),\s*(\S.*)$/i) : undefined;
 
-        if (matches) {
+        if (matches && matches.length > 1) {
             // duration = matches[1]; // currently unused
             entry.title = matches[2];
             matches = line.match(/^#EXTINF:(-?\d+),\s*(\S.*),\s*(\S.*)$/i);
-            if (matches) {
+            if (matches && matches.length > 1) {
                 entry.title = matches[2];
                 entry.mimetype = matches[3];
             }
-        } else if (!line.match(/^(#|\s*$)/)) {
+        } else if (line && !line.match(/^(#|\s*$)/)) {
             entry.location = line;
             // Call the helper function to add the item once you gathered the data:
             var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);

@@ -946,6 +946,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
     * Optional
 
     Set up container images. The fanart of a media file is added automatically as a thumbnail to the container (e.g. the album container).
+    The setting depends on the chosen layout and is only fully respected if the layout script does not set own properties (which was the case in older javascript layouts).
 
         ::
 

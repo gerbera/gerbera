@@ -157,6 +157,9 @@ private:
     std::string noMediaName;
     bool hasReadableNames { false };
     bool hasDefaultDate { true };
+    int containerImageParentCount { 2 };
+    int containerImageMinDepth { 2 };
+    std::vector<std::string> virutalDirKeys {};
 
     ///\brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
@@ -200,7 +203,7 @@ public:
     bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings);
 
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
-    std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, std::vector<int>& createdIds);
+    std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem, std::vector<int>& createdIds);
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
 
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
