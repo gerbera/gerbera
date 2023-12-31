@@ -165,6 +165,12 @@ static duk_function_list_entry js_global_functions[] = {
     { nullptr, nullptr, 0 },
 };
 
+static const std::vector<boxConfig> playlistBox {
+    { "Playlist/playlistRoot", "Playlists", "object.container" },
+    { "Playlist/allPlaylists", "All Playlists", "object.container" },
+    { "Playlist/allDirectories", "Directories", "object.container" },
+};
+
 template <typename Map>
 bool mapCompare(Map const& lhs, Map const& rhs)
 {
@@ -216,7 +222,7 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlay
     EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/exampleâœ….mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u8"}, {"mimetype", "audio/x-mpegurl"}});
 }
 #endif
