@@ -171,6 +171,12 @@ static duk_function_list_entry js_global_functions[] = {
     { nullptr, nullptr, 0 },
 };
 
+static const std::vector<boxConfig> playlistBox {
+    { "Playlist/playlistRoot", "Playlists", "object.container" },
+    { "Playlist/allPlaylists", "All Playlists", "object.container" },
+    { "Playlist/allDirectories", "Directories", "object.container" },
+};
+
 template <typename Map>
 bool mapCompare(Map const& lhs, Map const& rhs)
 {
@@ -228,7 +234,7 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.asx"}, {"mimetype", MIME_TYPE_ASX_PLAYLIST}});
 }
 #endif

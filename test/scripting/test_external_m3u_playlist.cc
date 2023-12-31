@@ -139,6 +139,12 @@ static duk_function_list_entry js_global_functions[] = {
     { nullptr, nullptr, 0 },
 };
 
+static const std::vector<boxConfig> playlistBox {
+    { "Playlist/playlistRoot", "Playlists", "object.container" },
+    { "Playlist/allPlaylists", "All Playlists", "object.container" },
+    { "Playlist/allDirectories", "Directories", "object.container" },
+};
+
 template <typename Map>
 bool mapCompare(Map const& lhs, Map const& rhs)
 {
@@ -167,7 +173,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print(Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.m3u'"))).WillOnce(Return(1));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "no/type"}});
 }
 
@@ -212,7 +218,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
 
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
 }
@@ -258,7 +264,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions);
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
 }
 #endif

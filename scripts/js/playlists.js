@@ -32,13 +32,39 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
     var obj_title = obj.title;
     var last_path = getLastPath(obj.location);
 
-    const chain = {
-        objRoot: { title: 'Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] },
-        allPlaylists: { title: 'All Playlists', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
-        allDirectories: { title: 'Directories', objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER },
+    const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
 
-        title: { searchable: true, title: obj_title, refID: obj.id, objectType: OBJECT_TYPE_CONTAINER, mtime: obj.mtime, upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER, metaData: [] },
-        lastPath: { title: last_path, objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER, metaData: [] }
+    const chain = {
+        objRoot: {
+            id: boxSetup['Playlist/playlistRoot'].id,
+            title: boxSetup['Playlist/playlistRoot'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            upnpclass: UPNP_CLASS_CONTAINER,
+            metaData: [] },
+        allPlaylists: {
+            id: boxSetup['Playlist/allPlaylists'].id,
+            title: boxSetup['Playlist/allPlaylists'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            upnpclass: UPNP_CLASS_CONTAINER },
+        allDirectories: {
+            id: boxSetup['Playlist/allDirectories'].id,
+            title: boxSetup['Playlist/allDirectories'].title,
+            objectType: OBJECT_TYPE_CONTAINER,
+            upnpclass: UPNP_CLASS_CONTAINER },
+
+        title: {
+            searchable: true,
+            title: obj_title,
+            refID: obj.id,
+            objectType: OBJECT_TYPE_CONTAINER,
+            mtime: obj.mtime,
+            upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER,
+            metaData: [] },
+        lastPath: {
+            title: last_path,
+            objectType: OBJECT_TYPE_CONTAINER,
+            upnpclass: UPNP_CLASS_CONTAINER,
+            metaData: [] }
     };
     chain.objRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
 

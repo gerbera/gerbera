@@ -54,6 +54,9 @@
         <box key="Trailer/relDate" title="Release Date" class="object.container" />
         <box key="Trailer/postDate" title="Post Date" class="object.container" />
         <box key="Trailer/unknown" title="Unknown" class="object.container" />
+        <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
+        <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
+        <box key="Playlist/allDirectories" title="Directories" class="object.container" />
       </boxlayout>
     </virtual-layout>
   </scripting>

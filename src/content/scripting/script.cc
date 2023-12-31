@@ -575,7 +575,11 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<C
     if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
+#if DUK_VERSION > 20399
+        log_error("javascript runtime error: {}() - {}\n", functionName, duk_safe_to_stacktrace(ctx, -1));
+#else
         log_error("javascript runtime error: {}() - {}\n", functionName, duk_safe_to_string(ctx, -1));
+#endif
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");
     }
