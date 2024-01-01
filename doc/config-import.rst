@@ -1341,7 +1341,7 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 .. _virtual-directories:
 
 ``virtual-directories``
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
