@@ -510,9 +510,9 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
 
     auto f2i = StringConverter::f2i(config);
     auto title = objectPath.filename().string();
-    if (hasReadableNames && upnpClass != UPNP_CLASS_ITEM) {
+    if (hasReadableNames && title.length() > 1 && upnpClass != UPNP_CLASS_ITEM) {
         title = objectPath.stem().string();
-        std::replace(title.begin(), title.end(), '_', ' ');
+        std::replace(title.begin() + 1, title.end() - 1, '_', ' ');
     }
     item->setTitle(f2i->convert(title));
     updateSingleItem(dirEntry, item, mimetype);
@@ -644,12 +644,16 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
             fanart = nullptr;
         }
     }
-    if (!fanart) {
+    if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         MetadataHandler::createHandler(context, nullptr, ContentHandler::CONTAINERART)->fillMetadata(container);
-        fanart = container->getResource(CdsResource::Purpose::Thumbnail);
-        if (fanart)
+        auto containerart = container->getResource(CdsResource::Purpose::Thumbnail);
+        if (containerart) {
+            container->clearResources();
+            container->addResource(containerart); // overwrite all other resources by container art
             database->updateObject(container, nullptr);
-        log_debug("fanart from dir {}", fanart != nullptr);
+            fanart = containerart;
+        }
+        log_debug("fanart from dir {}", containerart != nullptr);
     }
 
     auto location = container->getLocation();

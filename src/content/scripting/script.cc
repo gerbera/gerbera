@@ -767,6 +767,19 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
     duk_pop(ctx); // metaData
 
+    fs::path location = getProperty("location");
+    if (!location.empty()) {
+        // location must not be touched by character conversion!
+        obj->setLocation(location);
+    }
+
+    auto description = getProperty("description");
+    if (!description.empty()) {
+        description = sc->convert(description);
+        obj->removeMetaData(M_DESCRIPTION);
+        obj->addMetaData(M_DESCRIPTION, description);
+    }
+
     // CdsItem
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -775,57 +788,39 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (pcd)
             pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
-        {
-            auto val = getProperty("mimetype");
-            if (!val.empty()) {
-                val = sc->convert(val);
-                item->setMimeType(val);
-            } else if (pcdItem) {
-                item->setMimeType(pcdItem->getMimeType());
-            }
+        auto mimetype = getProperty("mimetype");
+        if (!mimetype.empty()) {
+            mimetype = sc->convert(mimetype);
+            item->setMimeType(mimetype);
+        } else if (pcdItem) {
+            item->setMimeType(pcdItem->getMimeType());
         }
 
-        {
-            auto val = getProperty("serviceID");
-            if (!val.empty()) {
-                val = sc->convert(val);
-                item->setServiceID(val);
-            }
+        auto serviceID = getProperty("serviceID");
+        if (!serviceID.empty()) {
+            serviceID = sc->convert(serviceID);
+            item->setServiceID(serviceID);
         }
 
-        {
-            auto val = getProperty("description");
-            if (!val.empty()) {
-                val = sc->convert(val);
-                item->removeMetaData(M_DESCRIPTION);
-                item->addMetaData(M_DESCRIPTION, val);
-            } else if (pcdItem && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
-                item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
-            }
+        if (description.empty() && pcd && obj->getMetaData(M_DESCRIPTION).empty() && !obj->getMetaData(M_DESCRIPTION).empty()) {
+            obj->addMetaData(M_DESCRIPTION, obj->getMetaData(M_DESCRIPTION));
         }
-        handleObject2cdsItem(ctx, pcd, item);
 
-        // location must not be touched by character conversion!
-        fs::path location = getProperty("location");
-        if (!location.empty())
-            obj->setLocation(location);
-        else {
-            if (pcd)
-                obj->setLocation(pcd->getLocation());
+        if (location.empty() && pcd) {
+            obj->setLocation(pcd->getLocation());
         }
 
         if (obj->isExternalItem()) {
             std::string protocolInfo;
 
             obj->setRestricted(true);
-            {
-                auto val = getProperty("protocol");
-                if (!val.empty()) {
-                    val = sc->convert(val);
-                    protocolInfo = renderProtocolInfo(item->getMimeType(), val);
-                } else {
-                    protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
-                }
+
+            auto protocol = getProperty("protocol");
+            if (!protocol.empty()) {
+                protocol = sc->convert(protocol);
+                protocolInfo = renderProtocolInfo(item->getMimeType(), protocol);
+            } else {
+                protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
             }
 
             std::shared_ptr<CdsResource> resource;
@@ -841,12 +836,13 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(size));
             }
         }
+
+        handleObject2cdsItem(ctx, pcd, item);
     }
 
     // CdsDirectory
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        handleObject2cdsContainer(ctx, pcd, cont);
         auto id = getIntProperty("updateID", -1);
         if (id >= CDS_ID_ROOT)
             cont->setUpdateID(id);
@@ -854,6 +850,8 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         int searchable = getBoolProperty("searchable");
         if (searchable >= 0)
             cont->setSearchable(searchable);
+
+        handleObject2cdsContainer(ctx, pcd, cont);
     }
 
     return obj;

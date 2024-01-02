@@ -40,6 +40,7 @@
  - Docker: Add JPEG libs
  - Docker: git badge update
  - Document dependency installation on Debian 12
+ - Fix "virtual-directories" heading level in documentation
  - Fix conan
  - Fix for empty path
  - Fix handling transcoding requests
@@ -50,7 +51,9 @@
  - Gerbera-Web: Update npm packages
  - Import: Add staged import process
  - Import: Fix LastModified for grb-mode
+ - Import: Improve handling of thumbnails in mt-mode
  - Keep our unique_ptrs for the xml in scope until we are finished with …
+ - Playlist: Add support for boxlayout
  - Quirks: Check for clientInfo
  - README: fix CI badge
  - Restore duktape 2.3 support

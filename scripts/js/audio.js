@@ -239,6 +239,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
             refID: containerRefID },
         album: {
             title: album,
+            location: getRootPath(rootPath, obj.location).join('_'),
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: containerType,
             metaData: [],
