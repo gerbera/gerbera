@@ -1,5 +1,7 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v2.0.0
+
  - Add #include to fix building with gcc 14
  - Add artist chronology container
  - Add audio to year container
@@ -45,12 +47,15 @@
  - Fix for empty path
  - Fix handling transcoding requests
  - Fix import and documentation links
+ - Fix processing for M_DATE and M_CREATION_DATE on FFmpeg handler.
  - Fix spelling errors reported by lintian
  - Fix troff warning
  - Fully implement Thumbnail handling for grb mode
  - Gerbera-Web: Update npm packages
  - Import: Add staged import process
  - Import: Fix LastModified for grb-mode
+ - Import: Handle really short file names correctly
+ - Import: Icon handling and other leftovers
  - Import: Improve handling of thumbnails in mt-mode
  - Keep our unique_ptrs for the xml in scope until we are finished with …
  - Playlist: Add support for boxlayout
@@ -73,6 +78,7 @@
  - Update supported-devices.rst
  - Update to latest npm packages
  - Update Ubuntu Version
+ - Update version of libfmt
  - Update versions of exiv2, fmt, spdlog, googletest and taglib
  - Upnp: Add client flag to send simple date only
  - Use new ffmpeg channel layout API

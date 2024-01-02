@@ -1,8 +1,8 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## MAIN
+## v2.0.0
 
-This release is close to a new major release and contains two noteworthy changes.
+This release is a new major release and contains two noteworthy changes.
 
 The JavaScript integration has be overhauled to simplify the process of providing additional layout scripts.
 If you created copies and modified that code to you purpose, you may have to update your code to the new interfaces for import functions.
@@ -21,11 +21,11 @@ instead of deleted and recreated like before.
 ### NEW Features
 
 - Staged importing that allows updating the virtual layout instead of deleting and recreating it each time (`import-mode="grb"`)
-- Config options as command line arguments
+- Config options as command line arguments (`--set-option OPT=VAL` with `--print-options`)
 - Allow configuration of `follow-symlinks` per autoscan directory
 - Configuration of containers in virtual layout: title can be changed, some nodes can be disabled
 - New mode of loading Javascript plugins with cleanup of global variables
-- Generation of example configuration via command line option
+- Generation of example configuration via command line option `--create-example-config`
 - Case insensitive sorting for databases
 - New config options for URL handling and host redirection
 - Use `.nomedia` to hide directory, incl. config option
@@ -45,7 +45,7 @@ instead of deleted and recreated like before.
 ### Code Improvements
 
 - Update Javascript libraries
-- Update versions of googletest (1.14), pupnp (1.14.18), libexiv2 (v0.28.1), libebml (1.4.5), fmt (10.1.1), pugixml (1.14), spdlog (1.12.0) and taglib (1.13.1)
+- Update versions of googletest (1.14), pupnp (1.14.18), libexiv2 (v0.28.1), libebml (1.4.5), fmt (10.2.0), pugixml (1.14), spdlog (1.12.0) and taglib (1.13.1)
 - Compatibility with gcc14
 
 ## v1.12.1
