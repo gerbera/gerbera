@@ -1,4 +1,4 @@
-<img src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+<img style="background-color: rgb(248, 248, 248);" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
 
 # Gerbera - UPnP Media Server
 
@@ -53,7 +53,7 @@ sudo make install
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 9.1.0       | 10.1.1        | Required      | Fast string formatting     |          |
+| [fmtlib]            | 7.1.3       | 9.1.0       | 10.2.0        | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.12.0        | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
@@ -89,7 +89,7 @@ sudo make install
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2023
+    Copyright (C) 2016-2024
         Gerbera Contributors
 
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
