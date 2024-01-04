@@ -510,9 +510,10 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
 
     auto f2i = StringConverter::f2i(config);
     auto title = objectPath.filename().string();
-    if (hasReadableNames && title.length() > 1 && upnpClass != UPNP_CLASS_ITEM) {
+    if (hasReadableNames && upnpClass != UPNP_CLASS_ITEM) {
         title = objectPath.stem().string();
-        std::replace(title.begin() + 1, title.end() - 1, '_', ' ');
+        if (title.length() > 1)
+            std::replace(title.begin() + 1, title.end() - 1, '_', ' ');
     }
     item->setTitle(f2i->convert(title));
     updateSingleItem(dirEntry, item, mimetype);
