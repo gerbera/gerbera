@@ -137,14 +137,16 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                         tmWork = fmt::localtime(utcTime);
                     } else if (strptime(e->value, "%Y-%m-%d", &tmWork)) {
                         ; // use the value as is
-                    } else if (strptime(e->value, "%Y", &tmWork)) { 
+                    } else if (strptime(e->value, "%Y", &tmWork)) {
                         // convert the value to "XXXX-01-01"
                         tmWork.tm_mon = 0; // Month (0-11)
                         tmWork.tm_mday = 1; // Day of the month (1-31)
-                    } else continue;
+                    } else
+                        continue;
                     auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                     item->addMetaData(field, mDate);
-                } else item->addMetaData(field, sc->convert(trimString(value)));
+                } else
+                    item->addMetaData(field, sc->convert(trimString(value)));
             }
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
