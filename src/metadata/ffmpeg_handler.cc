@@ -126,15 +126,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             const auto field = pIt->first;
             if (emptyProperties[field]) {
-                if (field == M_DATE) {
-                    /// \todo parse possible ISO8601 timestamp
-                    if ((value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
-                        value.append("-01-01");
-                        log_debug("Identified metadata 'date': {}", value.c_str());
-                        item->addMetaData(field, value);
-                    }
-                } else if (field == M_CREATION_DATE) {
-                    log_debug("Identified metadata 'creation_time': {}", e->value);
+                if (field == M_DATE || field == M_CREATION_DATE) {
                     std::tm tmWork {};
                     if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
                         // convert creation_time to local time
@@ -143,9 +135,13 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                             continue;
                         }
                         tmWork = fmt::localtime(utcTime);
-                    } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
-                        continue;
-                    }
+                    } else if (strptime(e->value, "%Y-%m-%d", &tmWork)) {
+                        ; // use the value as is
+                    } else if (strptime(e->value, "%Y", &tmWork)) { 
+                        // convert the value to "XXXX-01-01"
+                        tmWork.tm_mon = 0; // Month (0-11)
+                        tmWork.tm_mday = 1; // Day of the month (1-31)
+                    } else continue;
                     auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                     item->addMetaData(field, mDate);
                 } else item->addMetaData(field, sc->convert(trimString(value)));
