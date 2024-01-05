@@ -125,39 +125,35 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         if (pIt != propertyMap.end()) {
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             const auto field = pIt->first;
-            if (emptyProperties[field])
-                item->addMetaData(field, sc->convert(trimString(value)));
+            if (emptyProperties[field]) {
+                if (field == M_DATE) {
+                    /// \todo parse possible ISO8601 timestamp
+                    if ((value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
+                        value.append("-01-01");
+                        log_debug("Identified metadata 'date': {}", value.c_str());
+                        item->addMetaData(field, value);
+                    }
+                } else if (field == M_CREATION_DATE) {
+                    log_debug("Identified metadata 'creation_time': {}", e->value);
+                    std::tm tmWork {};
+                    if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
+                        // convert creation_time to local time
+                        auto utcTime = timegm(&tmWork);
+                        if (utcTime == -1) {
+                            continue;
+                        }
+                        tmWork = fmt::localtime(utcTime);
+                    } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
+                        continue;
+                    }
+                    auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
+                    item->addMetaData(field, mDate);
+                } else item->addMetaData(field, sc->convert(trimString(value)));
+            }
             if (field == M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
             } else if (field == M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
-            }
-        } else if (key == "date") {
-            constexpr auto field = M_DATE;
-            /// \todo parse possible ISO8601 timestamp
-            if (emptyProperties[field] && (value.length() == 4) && std::all_of(value.begin(), value.end(), ::isdigit) && (std::stoi(value) > 0)) {
-                value.append("-01-01");
-                log_debug("Identified metadata 'date': {}", value.c_str());
-                item->addMetaData(field, value);
-            }
-        } else if (key == "creation_time") {
-            constexpr auto field = M_CREATION_DATE;
-            if (emptyProperties[field]) {
-                log_debug("Identified metadata 'creation_time': {}", e->value);
-                std::tm tmWork {};
-                if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
-                    // convert creation_time to local time
-                    auto utcTime = timegm(&tmWork);
-                    if (utcTime == -1) {
-                        continue;
-                    }
-                    tmWork = fmt::localtime(utcTime);
-                } else if (!strptime(e->value, "%Y-%m-%d", &tmWork)) { // use creation_time as is
-                    continue;
-                }
-
-                auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
-                item->addMetaData(field, mDate);
             }
         } else {
             log_debug("Unhandled metadata {} = '{}'", key, value);
