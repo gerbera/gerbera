@@ -75,6 +75,8 @@ private:
         std::pair(M_PARTNUMBER, "discnumber"),
         std::pair(M_ALBUMARTIST, "album_artist"),
         std::pair(M_COMPOSER, "composer"),
+        std::pair(M_DATE, "date"),
+        std::pair(M_CREATION_DATE, "creation_time"),
     };
 };
 
