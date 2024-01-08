@@ -4,7 +4,7 @@ Gerbera - https://gerbera.io/
 
     script_test_fixture.cc - this file is part of Gerbera.
 
-    Copyright (C) 2020-2023 Gerbera Contributors
+    Copyright (C) 2020-2024 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

@@ -3,7 +3,7 @@
 
     test_internal_m3u_playlist.cc - this file is part of Gerbera.
 
-    Copyright (C) 2016-2023 Gerbera Contributors
+    Copyright (C) 2016-2024 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

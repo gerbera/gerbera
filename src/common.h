@@ -11,7 +11,7 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
-    Copyright (C) 2016-2023 Gerbera Contributors
+    Copyright (C) 2016-2024 Gerbera Contributors
 
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -63,7 +63,7 @@ constexpr auto DIR_SEPARATOR = char('/');
 constexpr auto PROTOCOL = std::string_view("http-get");
 
 // device description defaults
-#define DESC_MANUFACTURER_URL "http://gerbera.io/"
+#define DESC_MANUFACTURER_URL "https://gerbera.io/"
 
 #define DEFAULT_INTERNAL_CHARSET "UTF-8"
 #define DEFAULT_CONFIG_HOME ".config/gerbera"

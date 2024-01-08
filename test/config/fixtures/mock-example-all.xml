@@ -19,7 +19,7 @@
     <ip></ip>
     <interface></interface>
     <manufacturer>Gerbera Contributors</manufacturer>
-    <manufacturerURL>http://gerbera.io/</manufacturerURL>
+    <manufacturerURL>https://gerbera.io/</manufacturerURL>
     <modelName>Gerbera</modelName>
     <modelDescription>Free UPnP AV MediaServer, GNU GPL</modelDescription>
     <modelNumber>42</modelNumber>
