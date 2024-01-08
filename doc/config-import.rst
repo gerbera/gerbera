@@ -1355,7 +1355,7 @@ are distiguished by their artist even if the displayed text is identical.
 **Child tags:**
 
 ``key``
-^^^^^^^
+-------
 
 ::
 
