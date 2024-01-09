@@ -47,7 +47,7 @@ sudo make install
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
 | libupnp             | 1.14.6      | 1.14.18     | 1.14.18       | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp           | 4.2.1       | 4.2.1       | 4.2.1         | XOR libupnp   | [npupnp]                   | Disabled |
+| libnpupnp           | 4.2.1       | 5.1.2       | 6.1.0         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.13          | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |

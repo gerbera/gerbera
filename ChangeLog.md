@@ -1,5 +1,10 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### MAIN
+
+- Correct two typos.
+- Gerbera welcomes 2024
+
 ### v2.0.0
 
  - Add #include to fix building with gcc 14

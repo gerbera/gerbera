@@ -3,9 +3,9 @@
 #  UPNP_FOUND - System has LibUPnP
 #  UPNP_INCLUDE_DIRS - The LibUPnP include directories
 #  UPNP_LIBRARIES - The libraries needed to use LibUPnP
-#  UPNP_VERSION_STRING - The version of LinUPnP found
-#  UPNP_HAS_IPV6 - If LinUPnP was built with IPv6 support
-#  UPNP_HAS_REUSEADDR - If LinUPnP was built with SO_REUSEADDR support
+#  UPNP_VERSION_STRING - The version of LibUPnP found
+#  UPNP_HAS_IPV6 - If LibUPnP was built with IPv6 support
+#  UPNP_HAS_REUSEADDR - If LibUPnP was built with SO_REUSEADDR support
 find_package(PkgConfig QUIET)
 pkg_search_module (PC_UPNP QUIET libupnp)
 

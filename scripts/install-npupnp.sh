@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# install-googletest.sh - this file is part of Gerbera.
+# install-npupnp.sh - this file is part of Gerbera.
 #
-# Copyright (C) 2018-2024 Gerbera Contributors
+# Copyright (C) 2024 Gerbera Contributors
 #
 # Gerbera is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
@@ -22,41 +22,35 @@ set -Eeuo pipefail
 
 . $(dirname "${BASH_SOURCE[0]}")/versions.sh
 
-VERSION="${GOOGLETEST-1.11.0}"
+VERSION="${NPUPNP-6.1.0}"
+UNAME=$(uname)
 
-if ! [ "$(id -u)" = 0 ]; then
+if [ "$(id -u)" != 0 ]; then
     echo "Please run this script with superuser access!"
     exit 1
 fi
-set -e
 
 script_dir=`pwd -P`
-src_dir="${script_dir}/gtest-${VERSION}"
-tgz_file="${script_dir}/gtest-${VERSION}.tgz"
+src_dir="${script_dir}/npupnp-${VERSION}"
+tgz_file="${script_dir}/npupnp-${VERSION}.tgz"
 
-##
-## Install the latest version of GoogleTest
-##
-
-## Download GoogleTest from GitHub
-set +e
-wget https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz -O "${tgz_file}"
-if [ $? -eq 8 ]; then
-    set -e
-    wget https://github.com/google/googletest/archive/refs/tags/v${VERSION}.tar.gz -O "${tgz_file}"
-else
-    exit
+if [ ! -f "${tgz_file}" ]; then
+    wget https://framagit.org/medoc92/npupnp/-/archive/libnpupnp-v${VERSION}/npupnp-libnpupnp-v${VERSION}.tar.gz -O "${tgz_file}"
 fi
-set -e
 
 if [ -d "${src_dir}" ]; then
-  rm -r ${src_dir}
+    rm -r ${src_dir}
 fi
 mkdir "${src_dir}"
-tar -xvf "${tgz_file}" --strip-components=1 -C "${src_dir}"
+tar -xzvf "${tgz_file}" --strip-components=1 -C "${src_dir}"
 cd "${src_dir}"
 
-## Build GoogleTest using CMake
+./autogen.sh
+if [ "${UNAME}" = 'FreeBSD' ]; then
+    extraFlags=""
+else
+    extraFlags="--prefix=/usr/local"
+fi
 
 if [ -d build ]; then
     rm -R build
@@ -64,13 +58,13 @@ fi
 mkdir build
 cd build
 
-cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-} -std=c++17" -DBUILD_GMOCK=1 ..
-
+../configure --srcdir=.. $extraFlags --enable-ipv6 --enable-reuseaddr --enable-tools --enable-static
 if command -v nproc >/dev/null 2>&1; then
     make "-j$(nproc)"
 else
     make
 fi
+
 make install
 
 if [ "$(uname)" != 'Darwin' ]; then

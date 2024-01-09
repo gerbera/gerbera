@@ -30,6 +30,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     MATROSKA="1.5.2"
     PUGIXML="1.10"
     PUPNP="1.14.6"
+    NPUPNP="4.2.1"
     SPDLOG="1.8.1"
     WAVPACK="5.1.0"
     TAGLIB="1.12"
@@ -46,6 +47,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     MATROSKA="1.5.2"
     PUGIXML="1.10"
     PUPNP="1.14.17"
+    NPUPNP="5.1.2"
     SPDLOG="1.11.0"
     WAVPACK="5.4.0"
     TAGLIB="1.12"
@@ -63,8 +65,8 @@ else
     PUGIXML="1.14"
     PUPNP="1.14.18"
     SPDLOG="1.12.0"
+    NPUPNP="6.1.0"
     WAVPACK="5.6.0"
     TAGLIB="1.13.1"
 
 fi
-

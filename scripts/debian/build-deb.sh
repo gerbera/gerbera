@@ -66,6 +66,12 @@ function install-googletest() {
   echo "::endgroup::"
 }
 
+function install-npupnp() {
+  echo "::group::Installing libnpupnp"
+  sudo bash "${ROOT_DIR}"scripts/install-npupnp.sh
+  echo "::endgroup::"
+}
+
 function install-pupnp() {
   echo "::group::Installing libupnp"
   sudo bash "${ROOT_DIR}"scripts/install-pupnp.sh
@@ -141,11 +147,15 @@ lsb_distro=$(lsb_release -i --short)
 install-gcc
 install-cmake
 my_sys=${lsb_codename}
+my_upnp=pupnp
 if [ $# -gt 0 ]; then
   my_sys=$1
 fi
+if [ $# -gt 1 ]; then
+  my_upnp=$2
+fi
 
-echo "Running $0 ${my_sys}"
+echo "Running $0 ${my_sys} ${my_upnp}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
   libexiv2="libexpat1-dev libbrotli-dev libinih-dev libinireader0"
@@ -188,6 +198,10 @@ if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" || "$lsb_coden
   libmysqlclient="libmysql++-dev"
 fi
 
+libupnp="libcurl4-openssl-dev"
+if [[ "${my_upnp}" == "npupnp" ]]; then
+  libupnp="libmicrohttpd-dev libexpat1-dev libcurl4-gnutls-dev"
+fi
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
 
@@ -201,10 +215,10 @@ if [[ ! -d build-deb ]]; then
       cmake \
       bsdmainutils \
       libavformat-dev \
-      libcurl4-openssl-dev \
       ${libduktape} \
       ${libmatroska} \
       ${libexiv2} \
+      ${libupnp} \
       libexif-dev \
       ${ffmpegthumbnailer} \
       libwavpack1 libwavpack-dev \
@@ -236,8 +250,16 @@ fi
 
 install-fmt
 install-spdlog
-install-pupnp
 install-taglib
+if [[ "${my_upnp}" == "npupnp" ]]; then
+  install-npupnp
+  UpnpOption="ON"
+  StaticUpnp="OFF"
+else
+  install-pupnp
+  UpnpOption="OFF"
+  StaticUpnp="ON"
+fi
 
 cd build-deb
 
@@ -257,6 +279,7 @@ deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake "${ROOT_DIR}" -DWITH_TESTS=${DoTests} \
+    -DWITH_NPUPNP=${UpnpOption} \
     -DWITH_MAGIC=ON \
     -DWITH_MYSQL=ON \
     -DWITH_CURL=ON \
@@ -270,7 +293,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     -DWITH_LASTFM=OFF \
     -DWITH_SYSTEMD=ON \
     -DWITH_DEBUG=ON \
-    -DSTATIC_LIBUPNP=ON \
+    -DSTATIC_LIBUPNP=${StaticUpnp} \
     -DCMAKE_BUILD_TYPE=${BuildType} \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
@@ -279,7 +302,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
   fi
 else
-  printf "Deb already built!\n"
+  printf "Deb ${deb_name} already built!\n"
 fi
 
 if [[ "${my_sys}" != "HEAD" ]]; then
