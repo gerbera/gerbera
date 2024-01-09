@@ -84,3 +84,26 @@ jobs:
       - name: Build and upload deb
         run: |
           bash scripts/debian/build-deb.sh HEAD
+
+  head-npupnp:
+    runs-on: ubuntu-latest
+    container:
+      image: "ubuntu:22.04"
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        TZ: Etc/UTC
+    steps:
+      - name: Install script pre-reqs
+        shell: bash
+        run: |
+          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+          apt-get update -y
+          apt-get install -y lsb-release sudo wget curl git
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # We need history/tags to generate version info
+
+      - name: Build and upload deb
+        run: |
+          bash scripts/debian/build-deb.sh HEAD npupnp

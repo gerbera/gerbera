@@ -231,8 +231,10 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
+#if !defined(USING_NPUPNP)
     if (config->getBoolOption(CFG_UPNP_LITERAL_HOST_REDIRECTION))
         UpnpSetAllowLiteralHostRedirection(1);
+#endif
 
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
