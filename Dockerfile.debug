@@ -14,6 +14,7 @@ RUN apk add --no-cache  \
     gdb \
     git \
     libexif-dev \
+    expat-dev brotli-dev inih-dev inih-inireader-dev \
     make \
     mariadb-connector-c-dev \
     pkgconf \
@@ -83,25 +84,16 @@ WORKDIR /duktape_build
 COPY scripts/install-duktape.sh scripts/versions.sh ./
 RUN ./install-duktape.sh
 
+# Build libexiv2
+WORKDIR /libexiv2_build
+COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+RUN ./install-libexiv2.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
-RUN cmake -S . -B build \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DWITH_MAGIC=YES \
-        -DWITH_MYSQL=YES \
-        -DWITH_CURL=YES \
-        -DWITH_JS=YES \
-        -DWITH_TAGLIB=YES \
-        -DWITH_AVCODEC=YES \
-        -DWITH_FFMPEGTHUMBNAILER=YES \
-        -DWITH_WAVPACK=YES \
-        -DWITH_EXIF=YES \
-        -DWITH_LASTFM=NO \
+RUN cmake -S . -B build --preset=develop \
         -DWITH_SYSTEMD=NO \
-        -DWITH_DEBUG=YES \
-        -DWITH_DEBUG_OPTIONS=YES \
-        -DWITH_TESTS=YES \
     && \
     cmake --build build -v -j$(nproc) && \
     cmake --build build -v -t test ARGS="--output-on-failure"
@@ -112,6 +104,7 @@ RUN apk add --no-cache \
     file \
     gdb \
     libexif \
+    expat brotli inih inih-inireader \
     mariadb-connector-c \
     sqlite \
     sqlite-libs \
@@ -144,6 +137,8 @@ COPY --from=builder /usr/local/lib/libfmt.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 # Copy duktape
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
+# Copy libexiv2
+COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

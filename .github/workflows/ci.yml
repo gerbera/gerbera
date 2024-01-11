@@ -81,7 +81,7 @@ jobs:
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
-      - name: Build and upload deb
+      - name: Build and test
         run: |
           bash scripts/debian/build-deb.sh HEAD
 
@@ -104,6 +104,6 @@ jobs:
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
-      - name: Build and upload deb
+      - name: Build and test
         run: |
           bash scripts/debian/build-deb.sh HEAD npupnp
