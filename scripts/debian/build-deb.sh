@@ -257,7 +257,7 @@ install-taglib
 if [[ "${my_upnp}" == "npupnp" ]]; then
   install-npupnp
 else
-  my_upnp="pupnp
+  my_upnp="pupnp"
   install-pupnp
 fi
 
