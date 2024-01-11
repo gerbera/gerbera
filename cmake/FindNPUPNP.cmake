@@ -10,22 +10,22 @@ find_package(PkgConfig QUIET)
 pkg_search_module (PC_NPUPNP libnpupnp QUIET)
 
 find_path(UPNP_INCLUDE_DIR upnp.h
-    HINTS ${PC_NPUPNP_INCLUDEDIR} ${PC_UPNP_INCLUDE_DIRS}
-    PATH_SUFFIXES npupnp)
+    HINTS ${PC_NPUPNP_INCLUDEDIR} ${PC_NPUPNP_INCLUDEDIR}/npupnp ${PC_UPNP_INCLUDE_DIRS})
+message(STATUS "found npupnp include at ${UPNP_INCLUDE_DIR}")
 
-#if (STATIC_LIBUPNP)
-#    set(OLD_SUFFIX ${CMAKE_FIND_LIBRARY_SUFFIXES})
-#    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
-#endif()
+if (STATIC_LIBUPNP)
+    set(OLD_SUFFIX ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+endif()
 
 find_library(NPUPNP_LIBRARY
     NAMES libnpupnp npupnp
     HINTS ${PC_NPUPNP_LIBDIR} ${PC_NPUPNP_LIBRARY_DIRS})
 
 # Restore
-#if (STATIC_LIBUPNP)
-#    set(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_SUFFIX})
-#endif()
+if (STATIC_LIBUPNP)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_SUFFIX})
+endif()
 
 if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
     file (STRINGS ${UPNP_INCLUDE_DIR}/upnpconfig.h upnp_ver_str REGEX "^#define[ \t]+NPUPNP_VERSION_STRING[ \t]+\".+\"")

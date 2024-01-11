@@ -16,6 +16,7 @@ class GerberaConan(ConanFile):
         "curl": [True, False],
         "taglib": [True, False],
         "exif": [True, False],
+        "exiv2": [True, False],
         "matroska": [True, False],
         "mysql": [True, False],
         "ffmpeg": [True, False],
@@ -29,6 +30,7 @@ class GerberaConan(ConanFile):
         "curl": True,
         "taglib": True,
         "exif": True,
+        "exiv2": True,
         "matroska": True,
         # The following are false in CMakeLists.txt, but almost always turned on.
         "mysql": True,
@@ -120,6 +122,16 @@ class GerberaConan(ConanFile):
                 }[pm]
             )
 
+        if self.options.exiv2:
+            installer.install(
+                {
+                    "apt": "libexiv2-dev",
+                    "pacman": "exiv2",
+                    "yum": "libexiv2-devel",
+                    "freebsd": "exiv2",
+                }[pm]
+            )
+
         if self.options.matroska:
             installer.install(
                 {
@@ -164,6 +176,7 @@ class GerberaConan(ConanFile):
         cmake.definitions["WITH_CURL"] = self.options.curl
         cmake.definitions["WITH_TAGLIB"] = self.options.taglib
         cmake.definitions["WITH_EXIF"] = self.options.exif
+        cmake.definitions["WITH_EXIV2"] = self.options.exiv2
         cmake.definitions["WITH_MATROSKA"] = self.options.matroska
         cmake.definitions["WITH_MYSQL"] = self.options.mysql
         cmake.definitions["WITH_AVCODEC"] = self.options.ffmpeg

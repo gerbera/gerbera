@@ -14,6 +14,7 @@ RUN apk add --no-cache  \
     gcc \
     git \
     libebml-dev \
+    expat-dev brotli-dev inih-dev inih-inireader-dev \
     libexif-dev \
     libmatroska-dev \
     wavpack wavpack-dev \
@@ -42,24 +43,18 @@ WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
 RUN ./install-pupnp.sh
 
+# Build libexiv2
+WORKDIR /libexiv2_build
+COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+RUN ./install-libexiv2.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
-RUN cmake -S . -B build \
+RUN cmake -S . -B build --preset=release-pupnp \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_CXX_FLAGS=-g1 \
-        -DWITH_MAGIC=YES \
-        -DWITH_MYSQL=YES \
-        -DWITH_CURL=YES \
-        -DWITH_JS=YES \
-        -DWITH_TAGLIB=YES \
-        -DWITH_AVCODEC=YES \
-        -DWITH_FFMPEGTHUMBNAILER=YES \
-        -DWITH_WAVPACK=YES \
-        -DWITH_EXIF=YES \
-        -DWITH_LASTFM=NO \
         -DWITH_SYSTEMD=NO \
-        -DWITH_DEBUG=YES \
     && \
     cmake --build build -v -j$(nproc)
 
@@ -73,6 +68,7 @@ RUN apk add --no-cache \
     fmt \
     libebml \
     libexif \
+    expat brotli inih inih-inireader \
     libmatroska \
     wavpack \
     mariadb-connector-c \
@@ -89,7 +85,8 @@ RUN apk add --no-cache \
 
 # Copy libupnp
 COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/libupnp.so* /usr/lib/
-
+# Copy libexiv2
+COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
 

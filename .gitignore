@@ -5,6 +5,7 @@
 *.swp
 *.orig
 
+CMakeUserPresets.json
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake

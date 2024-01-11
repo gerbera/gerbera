@@ -38,13 +38,19 @@ function install-gcc {
 
 function install-cmake() {
   echo "::group::Installing CMake"
-  if [[ "$lsb_codename" == "bionic" || "$lsb_codename" == "focal" ]]; then
-    sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
-    curl https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-    sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
-    sudo apt-get update -y
+  if [[ "$lsb_distro" != "Raspbian" ]]; then
+    if [[ "$lsb_codename" == "buster" || "$lsb_codename" == "bionic" || "$lsb_codename" == "focal" ]]; then
+      sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
+      curl https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+      sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
+      sudo apt-get update -y
+    fi
+    sudo apt-get install cmake -y
+  else
+    sudo apt-get install snapd -y
+    sudo snap install core
+    sudo snap install cmake --classic
   fi
-  sudo apt-get install cmake -y
   echo "::endgroup::"
 }
 
@@ -126,7 +132,9 @@ function upload_to_artifactory() {
 }
 
 # Fix time issues
-ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
+if [[ ! -f /etc/timezone ]]; then
+  ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
+fi
 
 # Pre reqs
 export DEBIAN_FRONTEND=noninteractive
@@ -167,15 +175,11 @@ if [[ "${my_sys}" == "HEAD" ]]; then
     libmatroska="libebml-dev libmatroska-dev"
     ffmpegthumbnailer="libffmpegthumbnailer-dev"
   fi
-  BuildType="Debug"
-  DoTests="ON"
 else
   libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
   libmatroska="libebml-dev libmatroska-dev"
   ffmpegthumbnailer="libffmpegthumbnailer-dev"
-  BuildType="Release"
-  DoTests="OFF"
 
   libduktape="libduktape207"
   if [[ "$lsb_codename" == "bionic" ]]; then
@@ -212,7 +216,6 @@ if [[ ! -d build-deb ]]; then
       systemd \
       build-essential shtool \
       wget autoconf libtool pkg-config \
-      cmake \
       bsdmainutils \
       libavformat-dev \
       ${libduktape} \
@@ -253,12 +256,8 @@ install-spdlog
 install-taglib
 if [[ "${my_upnp}" == "npupnp" ]]; then
   install-npupnp
-  UpnpOption="ON"
-  StaticUpnp="OFF"
 else
   install-pupnp
-  UpnpOption="OFF"
-  StaticUpnp="ON"
 fi
 
 cd build-deb
@@ -278,42 +277,39 @@ deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
-  cmake "${ROOT_DIR}" -DWITH_TESTS=${DoTests} \
-    -DWITH_NPUPNP=${UpnpOption} \
-    -DWITH_MAGIC=ON \
-    -DWITH_MYSQL=ON \
-    -DWITH_CURL=ON \
-    -DWITH_JS=ON \
-    -DWITH_TAGLIB=ON \
-    -DWITH_AVCODEC=ON \
-    -DWITH_FFMPEGTHUMBNAILER=ON \
-    -DWITH_EXIF=ON \
-    -DWITH_EXIV2=ON \
-    -DWITH_WAVPACK=ON \
-    -DWITH_LASTFM=OFF \
-    -DWITH_SYSTEMD=ON \
-    -DWITH_DEBUG=ON \
-    -DSTATIC_LIBUPNP=${StaticUpnp} \
-    -DCMAKE_BUILD_TYPE=${BuildType} \
+  cmake_preset="${my_sys}-${my_upnp}"
+  set +euEo pipefail
+  ex_preset=$(cmake "${ROOT_DIR}" --list-presets | grep -cs "${cmake_preset}")
+
+  if [[ ${ex_preset} -eq 0 ]]; then
+    cmake_preset="release-${my_upnp}"
+  fi
+  set -o pipefail
+
+  cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
-  if [[ "${my_sys}" != "HEAD" ]]; then
-    cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+  if [[ "${lsb_distro}" != "Raspbian" ]]; then
+    if [[ "${my_sys}" != "HEAD" ]]; then
+      cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+    fi
   fi
 else
   printf "Deb ${deb_name} already built!\n"
 fi
 
-if [[ "${my_sys}" != "HEAD" ]]; then
-  if [[ "${ART_API_KEY:-}" ]]; then
-    # Tags only for main repo
-    [[ $is_tag == 1 ]] && upload_to_artifactory debian
-    # Git builds go to git
-    upload_to_artifactory debian-git
+if [[ "${lsb_distro}" != "Raspbian" ]]; then
+  if [[ "${my_sys}" != "HEAD" ]]; then
+    if [[ "${ART_API_KEY:-}" ]]; then
+      # Tags only for main repo
+      [[ $is_tag == 1 ]] && upload_to_artifactory debian
+      # Git builds go to git
+      upload_to_artifactory debian-git
+    else
+      printf "Skipping upload due to missing ART_API_KEY"
+    fi
   else
-    printf "Skipping upload due to missing ART_API_KEY"
+    ctest --output-on-failure
   fi
-else
-  ctest --output-on-failure
 fi
