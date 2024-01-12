@@ -90,6 +90,8 @@ add_library(libgerbera STATIC
         src/config/result/directory_tweak.h
         src/config/result/dynamic_content.cc
         src/config/result/dynamic_content.h
+        src/config/result/transcoding.cc
+        src/config/result/transcoding.h
         src/config/setup/config_setup_array.cc
         src/config/setup/config_setup_autoscan.cc
         src/config/setup/config_setup_autoscan.h
@@ -234,8 +236,6 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_ext_handler.h
         src/transcoding/transcode_handler.cc
         src/transcoding/transcode_handler.h
-        src/transcoding/transcoding.cc
-        src/transcoding/transcoding.h
         src/upnp_cds.cc
         src/upnp_cds.h
         src/upnp_cm.cc

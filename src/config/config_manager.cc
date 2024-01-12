@@ -42,6 +42,7 @@
 #endif
 
 #include "config/result/client_config.h"
+#include "config/result/transcoding.h"
 #include "config/setup/config_setup_path.h"
 #include "config_definition.h"
 #include "config_option_enum.h"
@@ -49,7 +50,6 @@
 #include "config_setup.h"
 #include "content/autoscan.h"
 #include "database/database.h"
-#include "transcoding/transcoding.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

@@ -37,11 +37,11 @@
 
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
+#include "config/result/transcoding.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
-#include "transcoding/transcoding.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
 #include "util/url.h"

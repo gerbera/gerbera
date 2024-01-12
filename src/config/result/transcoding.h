@@ -41,9 +41,6 @@
 #include "cds/cds_resource.h"
 #include "util/grb_fs.h"
 
-#define SOURCE (-1)
-#define OFF 0
-
 enum class TranscodingType {
     None,
     External,
