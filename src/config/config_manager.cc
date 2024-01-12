@@ -41,7 +41,8 @@
 #include <langinfo.h>
 #endif
 
-#include "client_config.h"
+#include "config/result/client_config.h"
+#include "config/setup/config_setup_path.h"
 #include "config_definition.h"
 #include "config_option_enum.h"
 #include "config_options.h"

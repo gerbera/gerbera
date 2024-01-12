@@ -22,11 +22,10 @@
 
 /// \file config_setup_dictionary.cc
 
-#include "config/config_setup.h" // API
+#include "config_setup_dictionary.h" // API
 
 #include <numeric>
 
-#include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
 

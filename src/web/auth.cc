@@ -63,6 +63,7 @@ static bool checkToken(const std::string& token, const std::string& password, co
 Web::Auth::Auth(const std::shared_ptr<ContentManager>& content)
     : WebRequestHandler(content)
     , timeout(std::chrono::minutes(config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
+    , accountsEnabled(config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED))
 {
 }
 
@@ -78,7 +79,7 @@ void Web::Auth::process()
 
     if (action == "get_config") {
         auto cfg = root.append_child("config");
-        cfg.append_attribute("accounts") = accountsEnabled();
+        cfg.append_attribute("accounts") = accountsEnabled;
         cfg.append_attribute("enableNumbering") = config->getBoolOption(CFG_SERVER_UI_ENABLE_NUMBERING);
         cfg.append_attribute("enableThumbnail") = config->getBoolOption(CFG_SERVER_UI_ENABLE_THUMBNAIL);
         cfg.append_attribute("enableVideo") = config->getBoolOption(CFG_SERVER_UI_ENABLE_VIDEO);
@@ -126,7 +127,7 @@ void Web::Auth::process()
         }
         root.append_attribute(SID) = session->getID().c_str();
 
-        if (!session->isLoggedIn() && !accountsEnabled()) {
+        if (!session->isLoggedIn() && !accountsEnabled) {
             session->logIn();
             // throw SessionException("not logged in");
         }

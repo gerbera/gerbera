@@ -42,7 +42,7 @@
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
-#include "config/dynamic_content.h"
+#include "config/result/dynamic_content.h"
 #include "content/autoscan.h"
 #include "content/autoscan_list.h"
 #include "metadata/metadata_handler.h"

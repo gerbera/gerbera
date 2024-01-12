@@ -71,23 +71,25 @@ add_library(libgerbera STATIC
         src/cds/cds_resource.cc
         src/cds/cds_resource.h
         src/common.h
-        src/config/client_config.cc
-        src/config/client_config.h
         src/config/config_definition.cc
         src/config/config_definition.h
         src/config/config_generator.cc
         src/config/config_generator.h
         src/config/config_manager.cc
         src/config/config_manager.h
-        src/config/config_option_enum.h
         src/config/config_options.cc
         src/config/config_options.h
+        src/config/config_option_enum.h
         src/config/config_setup.cc
         src/config/config_setup.h
-        src/config/directory_tweak.cc
-        src/config/directory_tweak.h
-        src/config/dynamic_content.cc
-        src/config/dynamic_content.h
+        src/config/result/box_layout.cc
+        src/config/result/box_layout.h
+        src/config/result/client_config.cc
+        src/config/result/client_config.h
+        src/config/result/directory_tweak.cc
+        src/config/result/directory_tweak.h
+        src/config/result/dynamic_content.cc
+        src/config/result/dynamic_content.h
         src/config/setup/config_setup_array.cc
         src/config/setup/config_setup_autoscan.cc
         src/config/setup/config_setup_autoscan.h
@@ -102,6 +104,7 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_enum.h
         src/config/setup/config_setup_int.cc
         src/config/setup/config_setup_path.cc
+        src/config/setup/config_setup_path.h
         src/config/setup/config_setup_string.cc
         src/config/setup/config_setup_time.cc
         src/config/setup/config_setup_time.h
@@ -110,20 +113,21 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.cc
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
+        src/config/setup/config_setup_vector.h
         src/content/autoscan.cc
         src/content/autoscan.h
         src/content/autoscan_inotify.cc
         src/content/autoscan_inotify.h
         src/content/autoscan_list.cc
         src/content/autoscan_list.h
+        src/content/autoscan_setting.cc
+        src/content/autoscan_setting.h
         src/content/cm_task.cc
         src/content/cm_task.h
         src/content/content_manager.cc
         src/content/content_manager.h
         src/content/import_service.cc
         src/content/import_service.h
-        src/content/layout/box_layout.cc
-        src/content/layout/box_layout.h
         src/content/layout/builtin_layout.cc
         src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc

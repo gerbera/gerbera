@@ -26,10 +26,10 @@
 
 #include <numeric>
 
-#include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "config/dynamic_content.h"
+#include "config/result/dynamic_content.h"
+#include "config/setup/config_setup_path.h"
 
 /// \brief Creates an array of DynamicContent objects from a XML nodeset.
 /// \param element starting element of the nodeset.

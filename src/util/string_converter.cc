@@ -33,7 +33,7 @@
 
 #include "string_converter.h" // API
 
-#include "config/directory_tweak.h"
+#include "config/result/directory_tweak.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))

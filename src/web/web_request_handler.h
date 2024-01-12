@@ -37,7 +37,6 @@
 #include <pugixml.hpp>
 
 #include "common.h"
-#include "config/config_manager.h"
 #include "context.h"
 #include "request_handler.h"
 #include "util/generic_task.h"
@@ -116,10 +115,6 @@ protected:
     /// \param task the task to add to the given xml element
     /// \param parent the xml element to add the elements to
     static void appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node& parent);
-
-    /// \brief check if accounts are enabled in the config
-    /// \return true if accounts are enabled, false if not
-    bool accountsEnabled() const { return config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED); }
 
     static std::string_view mapAutoscanType(int type);
 

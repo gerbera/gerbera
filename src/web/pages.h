@@ -35,13 +35,16 @@
 #define __WEB_PAGES_H__
 
 #include "common.h"
+#include "config/config.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
 
 // forward declaration
+class AutoscanDirectory;
 class CdsItemExternalURL;
 class CdsItem;
 class Config;
+class ConfigSetup;
 class ConfigValue;
 class Database;
 class UpnpXMLBuilder;
@@ -55,6 +58,7 @@ class SessionManager;
 class Auth : public WebRequestHandler {
 protected:
     std::chrono::seconds timeout = std::chrono::seconds::zero();
+    bool accountsEnabled { false };
 
 public:
     explicit Auth(const std::shared_ptr<ContentManager>& content);
