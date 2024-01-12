@@ -119,10 +119,10 @@ void UpnpXMLBuilder::addPropertyList(bool strictXml, std::size_t stringLimit, pu
     }
     auto propertyMap = config->getDictionaryOption(itemProps);
     for (auto&& [tag, field] : propertyMap) {
-        auto metaField = MetadataHandler::remapMetaDataField(field);
+        auto metaField = MetaEnumMapper::remapMetaDataField(field);
         bool wasMeta = false;
         for (auto&& [mkey, mvalue] : meta) {
-            if ((metaField != M_MAX && mkey == MetadataHandler::getMetaFieldName(metaField)) || mkey == field) {
+            if ((metaField != MetadataFields::M_MAX && mkey == MetaEnumMapper::getMetaFieldName(metaField)) || mkey == field) {
                 addField(result, tag, formatXmlString(strictXml, stringLimit, mvalue));
                 wasMeta = true;
             }
@@ -148,7 +148,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     auto i = key.find('@');
     auto j = key.find('[', i + 1);
     if (i != std::string::npos && j != std::string::npos && key[key.length() - 1] == ']') {
-        // e.g. used for M_ALBUMARTIST
+        // e.g. used for MetadataFields::M_ALBUMARTIST
         // name@attr[val] => <name attr="val">
         std::string attrName = key.substr(i + 1, j - i - 1);
         std::string attrValue = key.substr(j + 1, key.length() - j - 2);
@@ -208,25 +208,25 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                 for (auto&& val : group) {
                     // Trim metadata value as needed
                     auto str = formatXmlString(strictXml, stringLimit, val);
-                    if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
+                    if (key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DESCRIPTION))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                    else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                    else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                    else if (simpleDate && key == MetadataHandler::getMetaFieldName(M_DATE))
+                    else if (simpleDate && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE))
                         addField(result, key, makeSimpleDate(str));
-                    else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
+                    else if (key != MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE))
                         addField(result, key, str);
                 }
             } else {
                 // Trim metadata value as needed
                 auto str = formatXmlString(strictXml, stringLimit, fmt::format("{}", fmt::join(group, entrySeparator)));
-                if (key == MetadataHandler::getMetaFieldName(M_DESCRIPTION))
+                if (key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DESCRIPTION))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetadataHandler::getMetaFieldName(M_TRACKNUMBER))
+                else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
-                else if (simpleDate && key == MetadataHandler::getMetaFieldName(M_DATE))
+                else if (simpleDate && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE))
                     addField(result, key, makeSimpleDate(str));
-                else if (key != MetadataHandler::getMetaFieldName(M_TITLE))
+                else if (key != MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE))
                     addField(result, key, str);
             }
         }
@@ -235,7 +235,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         // add thumbnail
         auto artAdded = renderItemImageURL(item);
         if (artAdded) {
-            meta.emplace_back(MetadataHandler::getMetaFieldName(M_ALBUMARTURI), artAdded.value());
+            meta.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI), artAdded.value());
         }
 
         // add playback statistics
@@ -276,7 +276,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
             if (url) {
-                result.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.value().c_str());
+                result.append_child(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.value().c_str());
             }
         }
     }
@@ -859,7 +859,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         // Set Album art if we have a thumbnail
         // Note we dont actually add these as res tags.
         if (purpose == ResourcePurpose::Thumbnail) {
-            auto aa = parent.append_child(MetadataHandler::getMetaFieldName(M_ALBUMARTURI).data());
+            auto aa = parent.append_child(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI).data());
             aa.append_child(pugi::node_pcdata).set_value(url.c_str());
 
             /// \todo clean this up, make sure to check the mimetype and

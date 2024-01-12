@@ -26,8 +26,8 @@
 #ifndef __SCRIPTING_SCRIPT_NAMES_H__
 #define __SCRIPTING_SCRIPT_NAMES_H__
 
-#include "cds/cds_resource.h"
-#include "metadata/metadata_handler.h"
+#include "cds/cds_enums.h"
+#include "metadata/metadata_enums.h"
 #include "upnp_common.h"
 
 const static auto res_names = std::map<ResourceAttribute, std::string> {
@@ -49,32 +49,32 @@ const static auto res_names = std::map<ResourceAttribute, std::string> {
     std::pair(ResourceAttribute::VIDEOCODEC, "R_VIDEOCODEC"),
 };
 
-const static auto mt_names = std::map<metadata_fields_t, std::string_view> {
-    std::pair(M_TITLE, "M_TITLE"),
-    std::pair(M_ARTIST, "M_ARTIST"),
-    std::pair(M_ALBUM, "M_ALBUM"),
-    std::pair(M_DATE, "M_DATE"),
-    std::pair(M_CREATION_DATE, "M_CREATION_DATE"),
-    std::pair(M_UPNP_DATE, "M_UPNP_DATE"),
-    std::pair(M_GENRE, "M_GENRE"),
-    std::pair(M_DESCRIPTION, "M_DESCRIPTION"),
-    std::pair(M_LONGDESCRIPTION, "M_LONGDESCRIPTION"),
-    std::pair(M_TRACKNUMBER, "M_TRACKNUMBER"),
-    std::pair(M_PARTNUMBER, "M_PARTNUMBER"),
-    std::pair(M_ALBUMARTURI, "M_ALBUMARTURI"),
-    std::pair(M_REGION, "M_REGION"),
-    std::pair(M_CREATOR, "M_CREATOR"),
-    std::pair(M_AUTHOR, "M_AUTHOR"),
-    std::pair(M_DIRECTOR, "M_DIRECTOR"),
-    std::pair(M_PUBLISHER, "M_PUBLISHER"),
-    std::pair(M_RATING, "M_RATING"),
-    std::pair(M_ACTOR, "M_ACTOR"),
-    std::pair(M_PRODUCER, "M_PRODUCER"),
-    std::pair(M_ALBUMARTIST, "M_ALBUMARTIST"),
-    std::pair(M_COMPOSER, "M_COMPOSER"),
-    std::pair(M_CONDUCTOR, "M_CONDUCTOR"),
-    std::pair(M_ORCHESTRA, "M_ORCHESTRA"),
-    std::pair(M_CONTENT_CLASS, "M_CONTENT_CLASS"),
+const static auto mt_names = std::map<MetadataFields, std::string_view> {
+    std::pair(MetadataFields::M_TITLE, "M_TITLE"),
+    std::pair(MetadataFields::M_ARTIST, "M_ARTIST"),
+    std::pair(MetadataFields::M_ALBUM, "M_ALBUM"),
+    std::pair(MetadataFields::M_DATE, "M_DATE"),
+    std::pair(MetadataFields::M_CREATION_DATE, "M_CREATION_DATE"),
+    std::pair(MetadataFields::M_UPNP_DATE, "M_UPNP_DATE"),
+    std::pair(MetadataFields::M_GENRE, "M_GENRE"),
+    std::pair(MetadataFields::M_DESCRIPTION, "M_DESCRIPTION"),
+    std::pair(MetadataFields::M_LONGDESCRIPTION, "M_LONGDESCRIPTION"),
+    std::pair(MetadataFields::M_TRACKNUMBER, "M_TRACKNUMBER"),
+    std::pair(MetadataFields::M_PARTNUMBER, "M_PARTNUMBER"),
+    std::pair(MetadataFields::M_ALBUMARTURI, "M_ALBUMARTURI"),
+    std::pair(MetadataFields::M_REGION, "M_REGION"),
+    std::pair(MetadataFields::M_CREATOR, "M_CREATOR"),
+    std::pair(MetadataFields::M_AUTHOR, "M_AUTHOR"),
+    std::pair(MetadataFields::M_DIRECTOR, "M_DIRECTOR"),
+    std::pair(MetadataFields::M_PUBLISHER, "M_PUBLISHER"),
+    std::pair(MetadataFields::M_RATING, "M_RATING"),
+    std::pair(MetadataFields::M_ACTOR, "M_ACTOR"),
+    std::pair(MetadataFields::M_PRODUCER, "M_PRODUCER"),
+    std::pair(MetadataFields::M_ALBUMARTIST, "M_ALBUMARTIST"),
+    std::pair(MetadataFields::M_COMPOSER, "M_COMPOSER"),
+    std::pair(MetadataFields::M_CONDUCTOR, "M_CONDUCTOR"),
+    std::pair(MetadataFields::M_ORCHESTRA, "M_ORCHESTRA"),
+    std::pair(MetadataFields::M_CONTENT_CLASS, "M_CONTENT_CLASS"),
 };
 
 const static auto ot_names = std::map<int, std::string_view> {

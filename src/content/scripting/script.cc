@@ -238,7 +238,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
 #endif // ONLINE_SERVICES
 
     // M_TITLE = "dc:title"
-    for (auto&& [field, sym] : MetadataHandler::mt_keys) {
+    for (auto&& [field, sym] : MetaEnumMapper::mt_keys) {
         auto s = getValueOrDefault(mt_names, field, { "" });
         if (!s.empty()) {
             duk_push_lstring(ctx, sym.data(), sym.size());
@@ -588,14 +588,14 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<C
 
 void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const
 {
-    if (sym == MetadataHandler::getMetaFieldName(M_TRACKNUMBER) && item) {
+    if (sym == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER) && item) {
         int j = stoiString(val, 0);
         if (j > 0) {
             item->addMetaData(sym, val);
             item->setTrackNumber(j);
         } else
             item->setTrackNumber(0);
-    } else if (sym == MetadataHandler::getMetaFieldName(M_PARTNUMBER) && item) {
+    } else if (sym == MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER) && item) {
         int j = stoiString(val, 0);
         if (j > 0) {
             item->addMetaData(sym, val);
@@ -776,8 +776,8 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     auto description = getProperty("description");
     if (!description.empty()) {
         description = sc->convert(description);
-        obj->removeMetaData(M_DESCRIPTION);
-        obj->addMetaData(M_DESCRIPTION, description);
+        obj->removeMetaData(MetadataFields::M_DESCRIPTION);
+        obj->addMetaData(MetadataFields::M_DESCRIPTION, description);
     }
 
     // CdsItem
@@ -806,10 +806,10 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             auto val = getProperty("description");
             if (!val.empty()) {
                 val = sc->convert(val);
-                item->removeMetaData(M_DESCRIPTION);
-                item->addMetaData(M_DESCRIPTION, val);
-            } else if (pcdItem && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
-                item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
+                item->removeMetaData(MetadataFields::M_DESCRIPTION);
+                item->addMetaData(MetadataFields::M_DESCRIPTION, val);
+            } else if (pcdItem && item->getMetaData(MetadataFields::M_DESCRIPTION).empty() && !pcdItem->getMetaData(MetadataFields::M_DESCRIPTION).empty()) {
+                item->addMetaData(MetadataFields::M_DESCRIPTION, pcdItem->getMetaData(MetadataFields::M_DESCRIPTION));
             }
         }
 
@@ -928,10 +928,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
             setProperty(key, fmt::format("{}", fmt::join(attr, entrySeparator)));
         }
         if (item && item->getTrackNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), fmt::to_string(item->getTrackNumber()));
+            setProperty(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), fmt::to_string(item->getTrackNumber()));
 
         if (item && item->getPartNumber() > 0)
-            setProperty(MetadataHandler::getMetaFieldName(M_PARTNUMBER), fmt::to_string(item->getPartNumber()));
+            setProperty(MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), fmt::to_string(item->getPartNumber()));
 
         duk_put_prop_string(ctx, -2, "meta");
         // stack: js
@@ -941,10 +941,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         duk_push_object(ctx);
         // stack: js meta_js
         if (item && item->getTrackNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_TRACKNUMBER)] = { fmt::to_string(item->getTrackNumber()) };
+            metaGroups[MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER)] = { fmt::to_string(item->getTrackNumber()) };
         }
         if (item && item->getPartNumber() > 0) {
-            metaGroups[MetadataHandler::getMetaFieldName(M_PARTNUMBER)] = { fmt::to_string(item->getPartNumber()) };
+            metaGroups[MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER)] = { fmt::to_string(item->getPartNumber()) };
         }
         for (auto&& [key, array] : metaGroups) {
             auto dukArray = duk_push_array(ctx);

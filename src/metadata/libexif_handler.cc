@@ -197,9 +197,9 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
                 // convert date to ISO 8601 as required in the UPnP spec
                 // from YYYY:MM:DD to YYYY-MM-DD
                 if (value.length() >= 19) {
-                    item->addMetaData(M_DATE, fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8)));
+                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8)));
                 } else if (value.length() >= 11) {
-                    item->addMetaData(M_DATE, fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2)));
+                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2)));
                 }
             }
             break;
@@ -208,7 +208,7 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             auto value = trimString(exif_egv(entry));
             log_debug("Found exif comment: {}", value);
             if (!value.empty()) {
-                item->addMetaData(M_DESCRIPTION, sc->convert(value));
+                item->addMetaData(MetadataFields::M_DESCRIPTION, sc->convert(value));
             }
             break;
         }

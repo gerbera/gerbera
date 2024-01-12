@@ -39,6 +39,7 @@
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "content/scripting/script_names.h"
+#include "metadata_enums.h"
 #include "util/tools.h"
 
 #ifdef HAVE_EXIV2
@@ -67,34 +68,6 @@
 
 #include "ffmpeg_thumbnailer_handler.h"
 #include "metadata/metacontent_handler.h"
-
-std::map<metadata_fields_t, std::string> MetadataHandler::mt_keys = std::map<metadata_fields_t, std::string> {
-    std::pair(M_TITLE, "dc:title"),
-    std::pair(M_ARTIST, "upnp:artist"),
-    std::pair(M_ALBUM, "upnp:album"),
-    std::pair(M_DATE, "dc:date"),
-    std::pair(M_CREATION_DATE, "dc:created"),
-    std::pair(M_UPNP_DATE, "upnp:date"),
-    std::pair(M_GENRE, "upnp:genre"),
-    std::pair(M_DESCRIPTION, "dc:description"),
-    std::pair(M_LONGDESCRIPTION, "upnp:longDescription"),
-    std::pair(M_PARTNUMBER, "upnp:episodeSeason"),
-    std::pair(M_TRACKNUMBER, "upnp:originalTrackNumber"),
-    std::pair(M_ALBUMARTURI, "upnp:albumArtURI"),
-    std::pair(M_REGION, "upnp:region"),
-    std::pair(M_CREATOR, "dc:creator"),
-    std::pair(M_AUTHOR, "upnp:author"),
-    std::pair(M_DIRECTOR, "upnp:director"),
-    std::pair(M_PUBLISHER, "dc:publisher"),
-    std::pair(M_RATING, "upnp:rating"),
-    std::pair(M_ACTOR, "upnp:actor"),
-    std::pair(M_PRODUCER, "upnp:producer"),
-    std::pair(M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]"),
-    std::pair(M_COMPOSER, "upnp:composer"),
-    std::pair(M_CONDUCTOR, "upnp:conductor"),
-    std::pair(M_ORCHESTRA, "upnp:orchestra"),
-    std::pair(M_CONTENT_CLASS, "upnp:contentClass"),
-};
 
 MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
@@ -191,11 +164,6 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     ResourceHandler(context).fillMetadata(item);
 }
 
-std::string MetadataHandler::getMetaFieldName(metadata_fields_t field)
-{
-    return getValueOrDefault(mt_keys, field, { "unknown" });
-}
-
 std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, ContentHandler handlerType)
 {
     switch (handlerType) {
@@ -252,19 +220,4 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
 std::string MetadataHandler::getMimeType() const
 {
     return MIMETYPE_DEFAULT;
-}
-
-metadata_fields_t MetadataHandler::remapMetaDataField(const std::string& fieldName)
-{
-    for (auto&& [f, s] : mt_names) {
-        if (s == fieldName) {
-            return f;
-        }
-    }
-    for (auto&& [f, s] : mt_keys) {
-        if (s == fieldName) {
-            return f;
-        }
-    }
-    return M_MAX;
 }

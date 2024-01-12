@@ -65,7 +65,7 @@ private:
     std::string legacyEntrySeparator;
     std::map<std::string, std::string> specialPropertyMap;
 
-    void addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
+    void addField(MetadataFields field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
     void addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
 
     static std::unique_ptr<TagLib::File> getOggFile(TagLib::IOStream& ioStream);

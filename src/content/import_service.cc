@@ -35,6 +35,8 @@
 #include "content_manager.h"
 #include "database/database.h"
 #include "layout/builtin_layout.h"
+#include "metadata/metadata_enums.h"
+#include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -79,7 +81,7 @@ bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& m
                 match = checkValue(op, stoiString(expect), item->getTrackNumber());
             } else if (root == "partnumber") {
                 match = checkValue(op, stoiString(expect), item->getPartNumber());
-            } else if (std::find_if(MetadataHandler::mt_keys.begin(), MetadataHandler::mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != MetadataHandler::mt_keys.end()) {
+            } else if (std::find_if(MetaEnumMapper::mt_keys.begin(), MetaEnumMapper::mt_keys.end(), [val = root](auto&& kvp) { return kvp.second == val; }) != MetaEnumMapper::mt_keys.end()) {
                 match = checkValue(op, expect, item->getMetaData(root));
             }
         }
@@ -590,8 +592,8 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
 
 void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
 {
-    if (hasDefaultDate && item->getMetaData(M_DATE).empty())
-        item->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
+    if (hasDefaultDate && item->getMetaData(MetadataFields::M_DATE).empty())
+        item->addMetaData(MetadataFields::M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(item->getMTime().count())));
     for (auto&& upnpPattern : upnpMap) {
         if (upnpPattern.isMatch(item, mimetype)) {
             item->setClass(upnpPattern.upnpClass);
@@ -754,7 +756,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                         item->setLocation("");
                     }
                 } else {
-                    auto metaField = MetadataHandler::remapMetaDataField(field);
+                    auto metaField = MetaEnumMapper::remapMetaDataField(field);
                     auto keyValue = item->getMetaData(metaField);
                     if (!keyValue.empty())
                         dirKeyValues.push_back(keyValue);
@@ -777,8 +779,8 @@ std::pair<int, bool> ImportService::addContainerTree(
             subTree = tree;
         }
         if (containerMap.find(subTree) == containerMap.end() || !containerMap[subTree]) {
-            item->removeMetaData(M_TITLE);
-            item->addMetaData(M_TITLE, item->getTitle());
+            item->removeMetaData(MetadataFields::M_TITLE);
+            item->addMetaData(MetadataFields::M_TITLE, item->getTitle());
             item->setParentID(result);
             auto cont = std::dynamic_pointer_cast<CdsContainer>(item);
             cont->setVirtual(isVirtual);

@@ -37,7 +37,6 @@
 #include "config_setup_int.h"
 #include "config_setup_path.h"
 #include "config_setup_string.h"
-#include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 
 /// \brief Creates an array of TranscodingProfile objects from an XML

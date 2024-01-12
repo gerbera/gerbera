@@ -37,7 +37,7 @@
 
 #include "cds_item.h"
 #include "config/config_manager.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 #include "util/tools.h"
 
 LastFm::LastFm(const std::shared_ptr<Context>& context)
@@ -74,8 +74,8 @@ void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
 
     currentTrackId = item->getID();
 
-    std::string artist = item->getMetaData(M_ARTIST);
-    std::string title = item->getMetaData(M_TITLE);
+    std::string artist = item->getMetaData(MetadataField::M_ARTIST);
+    std::string title = item->getMetaData(MetadataField::M_TITLE);
 
     log_debug("Artist:\t{}", artist);
     log_debug("Title:\t{}", title);
@@ -88,11 +88,11 @@ void LastFm::startedPlaying(const std::shared_ptr<CdsItem>& item)
 
     auto info = SubmissionInfo(artist, title);
 
-    std::string album = item->getMetaData(M_ALBUM);
+    std::string album = item->getMetaData(MetadataField::M_ALBUM);
     if (!album.empty())
         info.setAlbum(album);
 
-    std::string trackNr = item->getMetaData(M_TRACKNUMBER);
+    std::string trackNr = item->getMetaData(MetadataField::M_TRACKNUMBER);
     if (!trackNr.empty())
         info.setTrackNr(std::stoi(trackNr));
 

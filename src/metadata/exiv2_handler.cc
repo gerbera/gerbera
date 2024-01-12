@@ -82,11 +82,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
             if (value.length() >= 19) {
                 value = fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8));
                 log_debug("date: {}", value);
-                item->addMetaData(M_DATE, value);
+                item->addMetaData(MetadataFields::M_DATE, value);
             } else if (value.length() >= 11) {
                 value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
                 log_debug("date: {}", value);
-                item->addMetaData(M_DATE, value);
+                item->addMetaData(MetadataFields::M_DATE, value);
             }
         }
 
@@ -149,7 +149,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         }  */
 
         if (!comment.empty()) {
-            item->addMetaData(M_DESCRIPTION, sc->convert(comment));
+            item->addMetaData(MetadataFields::M_DESCRIPTION, sc->convert(comment));
         }
 
         // if there are any metadata tags that the user wants - add them

@@ -37,7 +37,6 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "content/content_manager.h"
-#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
@@ -61,7 +60,7 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
 
     std::string tmp = param("description");
     if (!tmp.empty()) {
-        item->addMetaData(M_DESCRIPTION, tmp);
+        item->addMetaData(MetadataFields::M_DESCRIPTION, tmp);
     }
 
     /// \todo is there a default setting? autoscan? import settings?
@@ -92,7 +91,7 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
 
     std::string tmp = param("description");
     if (!tmp.empty()) {
-        item->addMetaData(M_DESCRIPTION, tmp);
+        item->addMetaData(MetadataFields::M_DESCRIPTION, tmp);
     }
 
     /// \todo is there a default setting? autoscan? import settings?

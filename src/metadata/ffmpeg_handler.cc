@@ -99,7 +99,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
 
     // only use ffmpeg meta data if not found by other handler
-    auto emptyProperties = std::map<metadata_fields_t, bool>();
+    auto emptyProperties = std::map<MetadataFields, bool>();
     for (auto&& prop : propertyMap) {
         emptyProperties[prop.first] = item->getMetaData(prop.first).empty();
     }
@@ -126,7 +126,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
             log_debug("Identified default metadata '{}': {}", pIt->second, value);
             const auto field = pIt->first;
             if (emptyProperties[field]) {
-                if (field == M_DATE || field == M_CREATION_DATE) {
+                if (field == MetadataFields::M_DATE || field == MetadataFields::M_CREATION_DATE) {
                     std::tm tmWork {};
                     if (strptime(e->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
                         // convert creation_time to local time
@@ -148,9 +148,9 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                 } else
                     item->addMetaData(field, sc->convert(trimString(value)));
             }
-            if (field == M_TRACKNUMBER) {
+            if (field == MetadataFields::M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));
-            } else if (field == M_PARTNUMBER) {
+            } else if (field == MetadataFields::M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
             }
         } else {

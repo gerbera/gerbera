@@ -24,7 +24,7 @@
 #include <regex>
 
 #include "database/search_handler.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
 static decltype(auto) getAllTokens(const std::string& input)
@@ -259,7 +259,7 @@ enum class TestCol {
     LastUpdated,
 };
 
-std::string OTN = MetadataHandler::getMetaFieldName(M_TRACKNUMBER);
+std::string OTN = MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER);
 
 class ParserTest : public ::testing::Test {
 public:
@@ -273,13 +273,13 @@ public:
 
     void SetUp() override
     {
-        otn = MetadataHandler::getMetaFieldName(M_TRACKNUMBER);
+        otn = MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER);
 
         testSortMap = {
             { "id", TestCol::Id },
             { UPNP_SEARCH_ID, TestCol::ItemId },
-            { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), TestCol::Number1 },
-            { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), TestCol::Number2 },
+            { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), TestCol::Number1 },
+            { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), TestCol::Number2 },
             { "double_name", TestCol::PropertyName },
             { META_NAME, TestCol::PropertyName },
             { META_NAME, TestCol::PropertyName2 },
@@ -507,7 +507,7 @@ TEST_F(ParserTest, SortTrackNumber)
 {
     EXPECT_TRUE(OTN == "unknown" || OTN == "upnp:originalTrackNumber");
     EXPECT_EQ(otn, "upnp:originalTrackNumber");
-    EXPECT_EQ(MetadataHandler::getMetaFieldName(M_TRACKNUMBER), "upnp:originalTrackNumber");
+    EXPECT_EQ(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), "upnp:originalTrackNumber");
     EXPECT_TRUE(executeSortParserTest("+upnp:originalTrackNumber",
         "_t_._number1_ ASC, _t_._number2_ ASC"));
 }

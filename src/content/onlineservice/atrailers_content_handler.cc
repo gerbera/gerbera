@@ -39,7 +39,6 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
-#include "metadata/metadata_handler.h"
 #include "util/tools.h"
 
 void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
@@ -135,12 +134,12 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
     item->setClass("object.item.videoItem");
 
     auto propertyMap = std::array {
-        std::pair("rating", M_RATING),
-        std::pair("studio", M_PRODUCER),
-        std::pair("director", M_DIRECTOR),
-        std::pair("releasedate", M_DATE),
+        std::pair("rating", MetadataFields::M_RATING),
+        std::pair("studio", MetadataFields::M_PRODUCER),
+        std::pair("director", MetadataFields::M_DIRECTOR),
+        std::pair("releasedate", MetadataFields::M_DATE),
         /// \todo cut out a small part for the usual description
-        std::pair("description", M_LONGDESCRIPTION),
+        std::pair("description", MetadataFields::M_LONGDESCRIPTION),
     };
     for (auto&& [key, tag] : propertyMap) {
         temp = info.child(key).text().as_string();
@@ -163,7 +162,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
             temp = actor.text().as_string();
             if (!temp.empty()) {
-                item->addMetaData(M_ARTIST, temp);
+                item->addMetaData(MetadataFields::M_ARTIST, temp);
             }
         }
     }
@@ -178,7 +177,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
 
             temp = gn.text().as_string();
             if (!temp.empty()) {
-                item->addMetaData(M_GENRE, temp);
+                item->addMetaData(MetadataFields::M_GENRE, temp);
             }
         }
     }

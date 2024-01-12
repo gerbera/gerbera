@@ -26,7 +26,7 @@
 #include <gtest/gtest.h>
 
 #include "config/config.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 
 class ConfigMock : public Config {
 public:
