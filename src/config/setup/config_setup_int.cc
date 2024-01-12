@@ -22,7 +22,7 @@
 
 /// \file config_setup.cc
 
-#include "config/config_setup.h" // API
+#include "config_setup_int.h" // API
 
 #include "config/config_definition.h"
 #include "config/config_options.h"

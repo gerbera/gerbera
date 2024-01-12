@@ -95,9 +95,11 @@ add_library(libgerbera STATIC
         src/config/result/transcoding.cc
         src/config/result/transcoding.h
         src/config/setup/config_setup_array.cc
+        src/config/setup/config_setup_array.h
         src/config/setup/config_setup_autoscan.cc
         src/config/setup/config_setup_autoscan.h
         src/config/setup/config_setup_bool.cc
+        src/config/setup/config_setup_bool.h
         src/config/setup/config_setup_boxlayout.cc
         src/config/setup/config_setup_boxlayout.h
         src/config/setup/config_setup_client.cc
@@ -107,9 +109,11 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_dynamic.h
         src/config/setup/config_setup_enum.h
         src/config/setup/config_setup_int.cc
+        src/config/setup/config_setup_int.h
         src/config/setup/config_setup_path.cc
         src/config/setup/config_setup_path.h
         src/config/setup/config_setup_string.cc
+        src/config/setup/config_setup_string.h
         src/config/setup/config_setup_time.cc
         src/config/setup/config_setup_time.h
         src/config/setup/config_setup_transcoding.cc

@@ -38,6 +38,7 @@
 #include "config/result/directory_tweak.h"
 #include "config/result/dynamic_content.h"
 #include "config/result/transcoding.h"
+#include "config/setup/config_setup_array.h"
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
