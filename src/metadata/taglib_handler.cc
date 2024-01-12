@@ -57,6 +57,7 @@
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
 #include "iohandler/mem_io_handler.h"
+#include "metadata_enums.h"
 #include "util/grb_time.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -73,7 +74,7 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST);
 }
 
-void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::addField(MetadataFields field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
 {
     if (!tag || tag->isEmpty())
         return;
@@ -82,34 +83,34 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
 
     std::vector<std::string> value;
 
-    auto propertyMap = std::map<metadata_fields_t, std::string> {
-        { M_ARTIST, "ARTIST" },
-        { M_ALBUMARTIST, "ALBUMARTIST" },
-        { M_COMPOSER, "COMPOSER" },
-        { M_CONDUCTOR, "CONDUCTOR" },
-        { M_GENRE, "GENRE" },
-        { M_ORCHESTRA, "ORCHESTRA" },
+    auto propertyMap = std::map<MetadataFields, std::string> {
+        { MetadataFields::M_ARTIST, "ARTIST" },
+        { MetadataFields::M_ALBUMARTIST, "ALBUMARTIST" },
+        { MetadataFields::M_COMPOSER, "COMPOSER" },
+        { MetadataFields::M_CONDUCTOR, "CONDUCTOR" },
+        { MetadataFields::M_GENRE, "GENRE" },
+        { MetadataFields::M_ORCHESTRA, "ORCHESTRA" },
     };
 
     switch (field) {
-    case M_TITLE:
+    case MetadataFields::M_TITLE:
         value.push_back(tag->title().to8Bit(true));
         break;
-    case M_ALBUM:
+    case MetadataFields::M_ALBUM:
         value.push_back(tag->album().to8Bit(true));
         break;
-    case M_DATE:
-    case M_UPNP_DATE: {
+    case MetadataFields::M_DATE:
+    case MetadataFields::M_UPNP_DATE: {
         unsigned int i = tag->year();
         if (i == 0)
             return;
         value.push_back(fmt::format("{}-01-01", i));
         break;
     }
-    case M_DESCRIPTION:
+    case MetadataFields::M_DESCRIPTION:
         value.push_back(tag->comment().to8Bit(true));
         break;
-    case M_TRACKNUMBER: {
+    case MetadataFields::M_TRACKNUMBER: {
         std::uint32_t i = tag->track();
         if (i == 0 || i > std::uint32_t(std::numeric_limits<int>::max()))
             return;
@@ -117,7 +118,7 @@ void TagLibHandler::addField(metadata_fields_t field, const TagLib::File& file, 
         item->setTrackNumber(i);
         break;
     }
-    case M_PARTNUMBER: {
+    case MetadataFields::M_PARTNUMBER: {
         auto list = file.properties()["DISCNUMBER"];
         if (!list.isEmpty()) {
             value.push_back(list[0].to8Bit(true));
@@ -185,7 +186,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
         return;
 
     const TagLib::Tag* tag = file.tag();
-    for (auto&& [field, key] : mt_keys)
+    for (auto&& [field, key] : MetaEnumMapper::mt_keys)
         addField(field, file, tag, item);
 
     addSpecialFields(file, tag, item);

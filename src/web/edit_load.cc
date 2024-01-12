@@ -202,7 +202,7 @@ void Web::EditLoad::process()
     // write item meta info
     if (obj->isItem()) {
         auto description = item.append_child("description");
-        description.append_attribute("value") = objItem->getMetaData(M_DESCRIPTION).c_str();
+        description.append_attribute("value") = objItem->getMetaData(MetadataFields::M_DESCRIPTION).c_str();
         description.append_attribute("editable") = true;
 
         auto location = item.append_child("location");

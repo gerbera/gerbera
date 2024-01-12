@@ -256,7 +256,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
             }
             auto title = std::string(UTFstring(*titleEl).GetUTF8());
             log_debug("KaxTitle = {}", title);
-            item->addMetaData(M_TITLE, sc->convert(title));
+            item->addMetaData(MetadataFields::M_TITLE, sc->convert(title));
             activeFlag &= ~GRB_MATROSKA_TITLE;
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDateUTC::ClassInfos.GlobalId) {
             auto dateEl = dynamic_cast<LIBMATROSKA_NAMESPACE::KaxDateUTC*>(el);
@@ -267,8 +267,8 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
             auto fDate = fmt::format("{:%FT%T%z}", fmt::gmtime(dateEl->GetEpochDate()));
             if (!fDate.empty()) {
                 log_debug("KaxDateUTC = {}", fDate);
-                item->addMetaData(M_DATE, sc->convert(fDate));
-                item->addMetaData(M_CREATION_DATE, sc->convert(fDate));
+                item->addMetaData(MetadataFields::M_DATE, sc->convert(fDate));
+                item->addMetaData(MetadataFields::M_CREATION_DATE, sc->convert(fDate));
                 activeFlag &= ~GRB_MATROSKA_DATE;
             }
         } else if (EbmlId(*el) == LIBMATROSKA_NAMESPACE::KaxDuration::ClassInfos.GlobalId) {

@@ -45,6 +45,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
+#include "metadata/metadata_enums.h"
 #include "search_handler.h"
 #include "upnp_xml.h"
 #include "util/grb_net.h"
@@ -327,10 +328,10 @@ void SQLDatabase::init()
         throw_std_runtime_error("quote vars need to be overridden");
 
     browseSortMap = {
-        { MetadataHandler::getMetaFieldName(M_PARTNUMBER), BrowseCol::PartNumber },
-        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::PartNumber },
-        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), BrowseCol::TrackNumber },
-        { MetadataHandler::getMetaFieldName(M_TITLE), BrowseCol::DcTitle },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), BrowseCol::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::TrackNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseCol::DcTitle },
         { UPNP_SEARCH_CLASS, BrowseCol::UpnpClass },
         { UPNP_SEARCH_PATH, BrowseCol::Location },
         { UPNP_SEARCH_REFID, BrowseCol::RefId },
@@ -340,8 +341,8 @@ void SQLDatabase::init()
         { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::LastModified },
     };
     searchSortMap = {
-        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::PartNumber },
-        { MetadataHandler::getMetaFieldName(M_TRACKNUMBER), SearchCol::TrackNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::TrackNumber },
         { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
         { UPNP_SEARCH_PATH, SearchCol::Location },
         { UPNP_SEARCH_REFID, SearchCol::RefId },
@@ -385,7 +386,7 @@ void SQLDatabase::init()
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
     auto searchTagMap = searchSortMap;
     if (config->getBoolOption(CFG_UPNP_SEARCH_FILENAME)) {
-        searchTagMap.emplace_back(MetadataHandler::getMetaFieldName(M_TITLE), SearchCol::DcTitle);
+        searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::DcTitle);
     }
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
@@ -536,8 +537,8 @@ std::string SQLDatabase::getSortCapabilities()
             sortKeys.push_back(key);
         }
     }
-    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(ResourceAttribute::MAX));
-    for (auto&& [field, meta] : MetadataHandler::mt_keys) {
+    sortKeys.reserve(to_underlying(MetadataFields::M_MAX) + to_underlying(ResourceAttribute::MAX));
+    for (auto&& [field, meta] : MetaEnumMapper::mt_keys) {
         if (std::find(sortKeys.begin(), sortKeys.end(), meta) == sortKeys.end()) {
             sortKeys.emplace_back(meta);
         }
@@ -550,8 +551,8 @@ std::string SQLDatabase::getSearchCapabilities()
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
     };
-    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(ResourceAttribute::MAX));
-    for (auto&& [field, meta] : MetadataHandler::mt_keys) {
+    searchKeys.reserve(to_underlying(MetadataFields::M_MAX) + to_underlying(ResourceAttribute::MAX));
+    for (auto&& [field, meta] : MetaEnumMapper::mt_keys) {
         searchKeys.emplace_back(meta);
     }
     searchKeys.emplace_back("res");
@@ -877,7 +878,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass)
 {
     auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
-        fmt::format("{}=\"{}\"", MetadataHandler::getMetaFieldName(M_CONTENT_CLASS), contentClass),
+        fmt::format("{}=\"{}\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_CONTENT_CLASS), contentClass),
         "", 0, 1, false, DEFAULT_CLIENT_GROUP);
     int numMatches = 0;
     log_debug("Running content class search for '{}'", contentClass);
@@ -1309,7 +1310,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(MetadataHandler::getMetaFieldName(M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(toSeconds(fs::last_write_time(path)).count())));
+    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(toSeconds(fs::last_write_time(path)).count())));
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
@@ -1497,8 +1498,8 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     }
     commit("addContainer");
 
-    if (cont->getMetaData(M_DATE).empty())
-        cont->addMetaData(M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
+    if (cont->getMetaData(MetadataFields::M_DATE).empty())
+        cont->addMetaData(MetadataFields::M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
 
     *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData(), cont->getResources());
     return true;

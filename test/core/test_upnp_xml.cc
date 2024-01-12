@@ -82,12 +82,12 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
-    obj->addMetaData(M_ALBUMARTIST, "Creator");
-    obj->addMetaData(M_COMPOSER, "Composer");
-    obj->addMetaData(M_CONDUCTOR, "Conductor");
-    obj->addMetaData(M_ORCHESTRA, "Orchestra");
-    obj->addMetaData(M_UPNP_DATE, "2001-01-01");
-    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+    obj->addMetaData(MetadataFields::M_ALBUMARTIST, "Creator");
+    obj->addMetaData(MetadataFields::M_COMPOSER, "Composer");
+    obj->addMetaData(MetadataFields::M_CONDUCTOR, "Conductor");
+    obj->addMetaData(MetadataFields::M_ORCHESTRA, "Orchestra");
+    obj->addMetaData(MetadataFields::M_UPNP_DATE, "2001-01-01");
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     // albumArtURI
     auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
@@ -131,10 +131,10 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->addMetaData(M_DESCRIPTION, "Description");
-    obj->addMetaData(M_ALBUM, "Album");
-    obj->addMetaData(M_TRACKNUMBER, "10");
-    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+    obj->addMetaData(MetadataFields::M_DESCRIPTION, "Description");
+    obj->addMetaData(MetadataFields::M_ALBUM, "Album");
+    obj->addMetaData(MetadataFields::M_TRACKNUMBER, "10");
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -173,10 +173,10 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     obj->setRestricted(false);
     obj->setTitle("Title 'n Ticks");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->addMetaData(M_DESCRIPTION, "Description < Input");
-    obj->addMetaData(M_ALBUM, "Album & Test");
-    obj->addMetaData(M_TRACKNUMBER, "10");
-    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+    obj->addMetaData(MetadataFields::M_DESCRIPTION, "Description < Input");
+    obj->addMetaData(MetadataFields::M_ALBUM, "Album & Test");
+    obj->addMetaData(MetadataFields::M_TRACKNUMBER, "10");
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto clientConfig = std::make_shared<MyConfigMock>();
     auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
@@ -220,10 +220,10 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
     obj->setRestricted(false);
     obj->setTitle("Title 'n Ticks");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->addMetaData(M_DESCRIPTION, "Description < Input");
-    obj->addMetaData(M_ALBUM, "Album & Test");
-    obj->addMetaData(M_TRACKNUMBER, "10");
-    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+    obj->addMetaData(MetadataFields::M_DESCRIPTION, "Description < Input");
+    obj->addMetaData(MetadataFields::M_ALBUM, "Album & Test");
+    obj->addMetaData(MetadataFields::M_TRACKNUMBER, "10");
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto clientConfig = std::make_shared<MyConfigMock>();
     auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
@@ -267,11 +267,11 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_TRACK);
-    obj->addMetaData(M_DESCRIPTION, "Description");
-    obj->addMetaData(M_ALBUM, "Album");
-    obj->addMetaData(M_TRACKNUMBER, "7");
-    obj->addMetaData(M_UPNP_DATE, "2002-01-01");
-    obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
+    obj->addMetaData(MetadataFields::M_DESCRIPTION, "Description");
+    obj->addMetaData(MetadataFields::M_ALBUM, "Album");
+    obj->addMetaData(MetadataFields::M_TRACKNUMBER, "7");
+    obj->addMetaData(MetadataFields::M_UPNP_DATE, "2002-01-01");
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");

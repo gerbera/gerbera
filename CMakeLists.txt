@@ -222,6 +222,8 @@ add_library(libgerbera STATIC
         src/metadata/matroska_handler.h
         src/metadata/metacontent_handler.cc
         src/metadata/metacontent_handler.h
+        src/metadata/metadata_enums.cc
+        src/metadata/metadata_enums.h
         src/metadata/metadata_handler.cc
         src/metadata/metadata_handler.h
         src/metadata/resolution.cc

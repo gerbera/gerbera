@@ -38,7 +38,6 @@
 #include "cds/cds_objects.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "script.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

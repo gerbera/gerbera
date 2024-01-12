@@ -40,16 +40,16 @@ static const auto fileFormats = std::map<int, std::string_view> {
     { WP_FORMAT_DSF, "DSD" },
 };
 
-static const auto metaTags = std::map<std::string_view, metadata_fields_t> {
-    { "Title", M_TITLE },
-    { "Artist", M_ARTIST },
-    { "AlbumArtist", M_ALBUMARTIST },
-    { "Album", M_ALBUM },
-    { "Comment", M_DESCRIPTION },
-    { "Disc", M_PARTNUMBER },
-    { "Track", M_TRACKNUMBER },
-    { "Genre", M_GENRE },
-    { "Publisher", M_PRODUCER },
+static const auto metaTags = std::map<std::string_view, MetadataFields> {
+    { "Title", MetadataFields::M_TITLE },
+    { "Artist", MetadataFields::M_ARTIST },
+    { "AlbumArtist", MetadataFields::M_ALBUMARTIST },
+    { "Album", MetadataFields::M_ALBUM },
+    { "Comment", MetadataFields::M_DESCRIPTION },
+    { "Disc", MetadataFields::M_PARTNUMBER },
+    { "Track", MetadataFields::M_TRACKNUMBER },
+    { "Genre", MetadataFields::M_GENRE },
+    { "Publisher", MetadataFields::M_PRODUCER },
 };
 
 #define MAX_WV_TEXT_SIZE 256
@@ -234,8 +234,8 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
                     auto dateValue = std::string(value);
                     if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
                         log_debug("Identified metadata '{}': {}", tag, value);
-                        item->addMetaData(M_DATE, fmt::format("{}-01-01", value));
-                        item->addMetaData(M_UPNP_DATE, fmt::format("{}-01-01", value));
+                        item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", value));
+                        item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", value));
                     }
                 } else {
                     log_warning("file {}: wavpack tag {} unknown", item->getLocation().c_str(), tag);

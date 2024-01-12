@@ -318,8 +318,8 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
     duk_pop(ctx); // extra
 
     if (writeThrough > 0 && pcd) {
-        pcd->removeMetaData(M_TITLE);
-        setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), MetadataHandler::getMetaFieldName(M_TITLE), item->getTitle());
+        pcd->removeMetaData(MetadataFields::M_TITLE);
+        setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), item->getTitle());
         content->updateObject(pcd);
     }
 

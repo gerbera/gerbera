@@ -44,6 +44,7 @@
 #include <array>
 #include <optional>
 
+#include "metadata_enums.h"
 #include "metadata_handler.h"
 
 // forward declaration
@@ -66,17 +67,17 @@ private:
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
 
     static constexpr auto propertyMap = std::array {
-        std::pair(M_TITLE, "title"),
-        std::pair(M_ARTIST, "artist"),
-        std::pair(M_ALBUM, "album"),
-        std::pair(M_GENRE, "genre"),
-        std::pair(M_DESCRIPTION, "description"),
-        std::pair(M_TRACKNUMBER, "track"),
-        std::pair(M_PARTNUMBER, "discnumber"),
-        std::pair(M_ALBUMARTIST, "album_artist"),
-        std::pair(M_COMPOSER, "composer"),
-        std::pair(M_DATE, "date"),
-        std::pair(M_CREATION_DATE, "creation_time"),
+        std::pair(MetadataFields::M_TITLE, "title"),
+        std::pair(MetadataFields::M_ARTIST, "artist"),
+        std::pair(MetadataFields::M_ALBUM, "album"),
+        std::pair(MetadataFields::M_GENRE, "genre"),
+        std::pair(MetadataFields::M_DESCRIPTION, "description"),
+        std::pair(MetadataFields::M_TRACKNUMBER, "track"),
+        std::pair(MetadataFields::M_PARTNUMBER, "discnumber"),
+        std::pair(MetadataFields::M_ALBUMARTIST, "album_artist"),
+        std::pair(MetadataFields::M_COMPOSER, "composer"),
+        std::pair(MetadataFields::M_DATE, "date"),
+        std::pair(MetadataFields::M_CREATION_DATE, "creation_time"),
     };
 };
 

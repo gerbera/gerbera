@@ -200,7 +200,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     if (quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES))
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
     if (sortCriteria.empty()) {
-        sortCriteria = fmt::format("+{}", MetadataHandler::getMetaFieldName(M_TITLE));
+        sortCriteria = fmt::format("+{}", MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE));
     }
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
@@ -230,8 +230,8 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         if (!titleSegments.empty()) {
             std::vector<std::string> values;
             for (auto&& segment : titleSegments) {
-                auto mtField = MetadataHandler::remapMetaDataField(segment);
-                auto value = (mtField != M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
+                auto mtField = MetaEnumMapper::remapMetaDataField(segment);
+                auto value = (mtField != MetadataFields::M_MAX) ? cdsObject->getMetaData(mtField) : cdsObject->getMetaData(segment);
                 if (!value.empty())
                     values.push_back(value);
             }

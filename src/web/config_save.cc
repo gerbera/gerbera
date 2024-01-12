@@ -32,7 +32,6 @@
 #include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 

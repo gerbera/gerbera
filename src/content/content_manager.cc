@@ -1086,9 +1086,9 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
         resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
     }
 
-    clonedItem->removeMetaData(M_DESCRIPTION);
+    clonedItem->removeMetaData(MetadataFields::M_DESCRIPTION);
     if (!description.empty()) {
-        clonedItem->addMetaData(M_DESCRIPTION, description);
+        clonedItem->addMetaData(MetadataFields::M_DESCRIPTION, description);
     }
 
     log_debug("updateCdsObject: checking equality of item {}", item->getTitle());

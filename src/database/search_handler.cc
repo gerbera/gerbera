@@ -28,7 +28,7 @@
 #include <stack>
 
 #include "database/sql_database.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
 
@@ -681,7 +681,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         if (!colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
             std::string sortSql;
             for (auto&& metaId : MetadataIterator()) {
-                auto&& metaName = MetadataHandler::getMetaFieldName(metaId);
+                auto&& metaName = MetaEnumMapper::getMetaFieldName(metaId);
                 if (metaName == seg) {
                     sortSql = metaName;
                 }

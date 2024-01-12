@@ -41,7 +41,8 @@
 
 #include "cds_resource.h"
 #include "common.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
+#include "util/grb_fs.h"
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {
@@ -205,9 +206,9 @@ public:
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// \brief Query single metadata value.
-    std::string getMetaData(const metadata_fields_t key) const
+    std::string getMetaData(const MetadataFields key) const
     {
-        auto field = MetadataHandler::getMetaFieldName(key);
+        auto field = MetaEnumMapper::getMetaFieldName(key);
         auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
         return it != metaData.end() ? it->second : std::string();
     }
@@ -240,9 +241,9 @@ public:
     }
 
     /// \brief Add a single metadata value.
-    void addMetaData(const metadata_fields_t key, const std::string& value)
+    void addMetaData(const MetadataFields key, const std::string& value)
     {
-        metaData.emplace_back(MetadataHandler::getMetaFieldName(key), value);
+        metaData.emplace_back(MetaEnumMapper::getMetaFieldName(key), value);
     }
     /// \brief Add a single metadata value.
     void addMetaData(const std::string& key, const std::string& value)
@@ -251,9 +252,9 @@ public:
     }
 
     /// \brief Removes metadata with the given key
-    void removeMetaData(const metadata_fields_t key)
+    void removeMetaData(const MetadataFields key)
     {
-        metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = MetadataHandler::getMetaFieldName(key)](auto&& md) { return md.first == field; }), metaData.end());
+        metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = MetaEnumMapper::getMetaFieldName(key)](auto&& md) { return md.first == field; }), metaData.end());
     }
 
     /// \brief Removes metadata with the given key

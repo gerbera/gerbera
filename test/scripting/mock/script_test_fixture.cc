@@ -30,7 +30,7 @@ Gerbera - https://gerbera.io/
 #include "config/result/autoscan.h"
 #include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -283,11 +283,11 @@ duk_ret_t ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::string
         auto dukArray = duk_push_array(ctx);
         duk_push_string(ctx, fmt::to_string(10).c_str());
         duk_put_prop_index(ctx, dukArray, 0);
-        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_TRACKNUMBER).c_str());
+        duk_put_prop_string(ctx, -2, MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER).c_str());
         dukArray = duk_push_array(ctx);
         duk_push_string(ctx, fmt::to_string(0).c_str());
         duk_put_prop_index(ctx, dukArray, 0);
-        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_PARTNUMBER).c_str());
+        duk_put_prop_string(ctx, -2, MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER).c_str());
         dukArray = duk_push_array(ctx);
         duk_push_string(ctx, "done");
         duk_put_prop_index(ctx, dukArray, 0);
@@ -318,11 +318,11 @@ void ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::map<std::st
         auto dukArray = duk_push_array(ctx);
         duk_push_string(ctx, fmt::to_string(10).c_str());
         duk_put_prop_index(ctx, dukArray, 0);
-        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_TRACKNUMBER).c_str());
+        duk_put_prop_string(ctx, -2, MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER).c_str());
         dukArray = duk_push_array(ctx);
         duk_push_string(ctx, fmt::to_string(0).c_str());
         duk_put_prop_index(ctx, dukArray, 0);
-        duk_put_prop_string(ctx, -2, MetadataHandler::getMetaFieldName(M_PARTNUMBER).c_str());
+        duk_put_prop_string(ctx, -2, MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER).c_str());
         dukArray = duk_push_array(ctx);
         duk_push_string(ctx, "done");
         duk_put_prop_index(ctx, dukArray, 0);
@@ -334,7 +334,7 @@ void ScriptTestFixture::dukMockMetafile(duk_context* ctx, const std::map<std::st
 void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults)
 {
 
-    for (auto&&[meta,str]: MetadataHandler::mt_keys) {
+    for (auto&&[meta,str]: MetaEnumMapper::mt_keys) {
         duk_push_lstring(ctx, str.data(), str.size());
         auto sym = mt_names.at(meta);
         duk_put_global_lstring(ctx, sym.data(), sym.size());

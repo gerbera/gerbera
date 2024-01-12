@@ -42,7 +42,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "content/content_manager.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_enums.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -67,7 +67,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     }
 
     container["Video"] = container.at("Video/videoRoot");
-    container["Video"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
+    container["Video"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
     container["All Video"] = container.at("Video/allVideo");
     chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] }, nullptr);
     container["Video/Year"] = container.at("Video/allYears");
@@ -78,7 +78,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] }, nullptr);
 
     container["Photos"] = container.at("Image/imageRoot");
-    container["Photos"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
+    container["Photos"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
     container["All Photos"] = container.at("Image/allImages");
     chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] }, nullptr);
     container["Photos/Year"] = container.at("Image/allYears");
@@ -89,7 +89,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
     chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] }, nullptr);
 
     container["Audio"] = container.at("Audio/audioRoot");
-    container["Audio"]->addMetaData(M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
+    container["Audio"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
     container["All Audio"] = container.at("Audio/allAudio");
     container["All Songs"] = container.at("Audio/allSongs");
     chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] }, nullptr);
@@ -185,7 +185,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
 
     auto meta = obj->getMetaData();
 
-    std::string date = getValueOrDefault(meta, std::string { MetadataHandler::getMetaFieldName(M_CREATION_DATE) });
+    std::string date = getValueOrDefault(meta, std::string { MetaEnumMapper::getMetaFieldName(MetadataFields::M_CREATION_DATE) });
     if (!date.empty()) {
         std::string year, month;
         auto m = std::numeric_limits<std::size_t>::max();
@@ -240,7 +240,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
 
     auto meta = obj->getMetaData();
 
-    std::string date = getValueOrDefault(meta, std::string { MetadataHandler::getMetaFieldName(M_DATE) });
+    std::string date = getValueOrDefault(meta, std::string { MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE) });
     if (!date.empty()) {
         std::string year, month;
         auto m = std::numeric_limits<std::size_t>::max();
@@ -285,11 +285,11 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     std::string desc;
     log_debug("add audio file {}", obj->getLocation().string());
 
-    std::string title = obj->getMetaData(M_TITLE);
+    std::string title = obj->getMetaData(MetadataFields::M_TITLE);
     if (title.empty())
         title = obj->getTitle();
 
-    std::string artist = obj->getMetaData(M_ARTIST);
+    std::string artist = obj->getMetaData(MetadataFields::M_ARTIST);
     std::string artistFull;
     if (!artist.empty()) {
         artistFull = artist;
@@ -297,7 +297,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     } else
         artist = "Unknown";
 
-    std::string album = obj->getMetaData(M_ALBUM);
+    std::string album = obj->getMetaData(MetadataFields::M_ALBUM);
     std::string albumFull;
     if (!album.empty()) {
         desc = fmt::format("{}, {}", desc, album);
@@ -310,7 +310,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         desc = fmt::format("{}, ", desc);
     desc = fmt::format("{}{}", desc, title);
 
-    std::string date = obj->getMetaData(M_DATE);
+    std::string date = obj->getMetaData(MetadataFields::M_DATE);
     std::string albumDate;
     if (!date.empty()) {
         auto i = date.find('-');
@@ -323,10 +323,10 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         date = "Unknown";
         albumDate = "Unknown";
     }
-    obj->removeMetaData(M_UPNP_DATE);
-    obj->addMetaData(M_UPNP_DATE, albumDate);
+    obj->removeMetaData(MetadataFields::M_UPNP_DATE);
+    obj->addMetaData(MetadataFields::M_UPNP_DATE, albumDate);
 
-    std::string genre = obj->getMetaData(M_GENRE);
+    std::string genre = obj->getMetaData(MetadataFields::M_GENRE);
     if (!genre.empty()) {
         genre = mapGenre(genre);
         desc = fmt::format("{}, {}", desc, genre);
@@ -334,12 +334,12 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         genre = "Unknown";
     }
 
-    std::string description = obj->getMetaData(M_DESCRIPTION);
+    std::string description = obj->getMetaData(MetadataFields::M_DESCRIPTION);
     if (description.empty()) {
-        obj->addMetaData(M_DESCRIPTION, desc);
+        obj->addMetaData(MetadataFields::M_DESCRIPTION, desc);
     }
 
-    std::string composer = obj->getMetaData(M_COMPOSER);
+    std::string composer = obj->getMetaData(MetadataFields::M_COMPOSER);
     if (composer.empty())
         composer = "None";
 
@@ -485,7 +485,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 
     auto meta = obj->getMetaData();
 
-    std::string temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_GENRE));
+    std::string temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_GENRE));
     auto genreAr = splitString(temp, ',');
     for (auto&& genre : genreAr) {
         trimStringInPlace(genre);
@@ -502,7 +502,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
         add(obj, id);
     }
 
-    temp = getValueOrDefault(meta, MetadataHandler::getMetaFieldName(M_DATE));
+    temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE));
     if (temp.length() >= 7) {
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(container["Online Services"]);
