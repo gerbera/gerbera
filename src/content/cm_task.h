@@ -27,7 +27,7 @@
 
 #include "common.h"
 
-#include "config/directory_tweak.h"
+#include "autoscan_setting.h"
 #include "util/generic_task.h"
 #include "util/grb_fs.h"
 

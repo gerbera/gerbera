@@ -22,14 +22,14 @@
 
 /// \file config_setup_tweak.cc
 
-#include "config/setup/config_setup_tweak.h" // API
+#include "config_setup_tweak.h" // API
 
 #include <numeric>
 
-#include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "config/directory_tweak.h"
+#include "config/result/directory_tweak.h"
+#include "config/setup/config_setup_path.h"
 
 /// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
 /// \param element starting element of the nodeset.

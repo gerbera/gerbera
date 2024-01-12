@@ -30,26 +30,6 @@
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
 
-void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
-{
-    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(location);
-    if (!tweak)
-        return;
-
-    if (tweak->hasFollowSymlinks())
-        followSymlinks = tweak->getFollowSymlinks();
-    if (tweak->hasHidden())
-        hidden = tweak->getHidden();
-    if (tweak->hasRecursive())
-        recursive = tweak->getRecursive();
-    if (tweak->hasFanArtFile())
-        resourcePatterns.push_back(tweak->getFanArtFile());
-    if (tweak->hasSubTitleFile())
-        resourcePatterns.push_back(tweak->getSubTitleFile());
-    if (tweak->hasResourceFile())
-        resourcePatterns.push_back(tweak->getResourceFile());
-}
-
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {
     AutoLock lock(mutex);

@@ -32,7 +32,7 @@
 
 #include "cds/cds_objects.h"
 #include "config/config.h"
-#include "config/directory_tweak.h"
+#include "config/result/directory_tweak.h"
 #include "content/content_manager.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"

@@ -38,19 +38,6 @@ class AutoscanDirectory;
 class Config;
 class DirectoryTweak;
 
-class AutoScanSetting {
-public:
-    bool followSymlinks = false;
-    bool recursive = true;
-    bool hidden = false;
-    bool rescanResource = true;
-    bool async = true;
-    std::shared_ptr<AutoscanDirectory> adir;
-    std::vector<std::string> resourcePatterns;
-
-    void mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location);
-};
-
 class DirectoryConfigList {
 public:
     /// \brief Adds a new DirectoryTweak to the list.

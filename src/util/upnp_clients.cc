@@ -26,8 +26,9 @@
 #define LOG_FAC log_facility_t::clients
 
 #include "upnp_clients.h" // API
-#include "config/client_config.h"
+
 #include "config/config.h"
+#include "config/result/client_config.h"
 #include "database/database.h"
 #include "util/grb_net.h"
 

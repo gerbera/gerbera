@@ -22,13 +22,13 @@
 
 /// \file config_setup_boxlayout.cc
 
-#include "config/setup/config_setup_boxlayout.h" // API
+#include "config_setup_boxlayout.h" // API
 
 #include <numeric>
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
-#include "content/layout/box_layout.h"
+#include "config/result/box_layout.h"
 
 /// \brief Creates an array of BoxLayout objects from a XML nodeset.
 /// \param element starting element of the nodeset.

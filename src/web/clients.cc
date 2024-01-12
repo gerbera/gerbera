@@ -26,7 +26,7 @@
 
 #include "pages.h" // API
 
-#include "config/client_config.h"
+#include "config/result/client_config.h"
 #include "content/content_manager.h"
 #include "context.h"
 #include "database/database.h"

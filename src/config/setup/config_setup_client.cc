@@ -22,13 +22,14 @@
 
 /// \file config_setup_client.cc
 
-#include "config/setup/config_setup_client.h" // API
+#include "config_setup_client.h" // API
 
 #include <numeric>
 
-#include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/result/client_config.h"
+#include "config_setup_dictionary.h"
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.

@@ -26,7 +26,6 @@
 
 #include <numeric>
 
-#include "client_config.h"
 #include "config_definition.h"
 #include "config_options.h"
 

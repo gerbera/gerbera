@@ -22,15 +22,16 @@
 
 /// \file config_setup_transcoding.cc
 
-#include "config/setup/config_setup_transcoding.h" // API
+#include "config_setup_transcoding.h" // API
 
 #include <numeric>
 
-#include "config/client_config.h"
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_enum.h"
+#include "config/setup/config_setup_path.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 #include "transcoding/transcoding.h"
