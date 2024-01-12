@@ -34,7 +34,7 @@
 
 #include "pages.h" // API
 
-#include "content/autoscan.h"
+#include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "util/xml_to_json.h"

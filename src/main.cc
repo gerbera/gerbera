@@ -69,7 +69,6 @@
 #include "config/config_generator.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
-#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "contrib/cxxopts.hpp"
 #include "server.h"

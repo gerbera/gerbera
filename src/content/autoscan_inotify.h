@@ -40,12 +40,12 @@
 #include <unordered_map>
 #include <vector>
 
-#include "autoscan.h"
 #include "config/config.h"
 #include "context.h"
 #include "util/mt_inotify.h"
 
 // forward declaration
+class AutoscanDirectory;
 class ContentManager;
 
 #define INOTIFY_ROOT (-1)

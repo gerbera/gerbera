@@ -27,7 +27,7 @@ Gerbera - https://gerbera.io/
 #include <gtest/gtest.h>
 
 #include "cds/cds_objects.h"
-#include "content/autoscan.h"
+#include "config/result/autoscan.h"
 #include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"
 #include "metadata/metadata_handler.h"

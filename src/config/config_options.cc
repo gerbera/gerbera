@@ -25,8 +25,6 @@
 
 #include "config_options.h" // API
 
-#include "content/autoscan.h"
-
 #include <algorithm>
 #include <fmt/core.h>
 

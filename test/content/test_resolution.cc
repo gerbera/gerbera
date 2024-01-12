@@ -21,7 +21,7 @@
 */
 #include <gtest/gtest.h>
 
-#include "metadata//resolution.h"
+#include "metadata/resolution.h"
 
 TEST(ResolutionTest, parse) {
     auto res = Resolution("122586668x448448485");
