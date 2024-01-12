@@ -35,10 +35,10 @@
 #ifndef __CONFIG_OPTIONS_H__
 #define __CONFIG_OPTIONS_H__
 
+#include <fmt/format.h>
 #include <map>
+#include <memory>
 #include <vector>
-
-#include "transcoding/transcoding.h"
 
 // forward declaration
 class AutoscanDirectory;
@@ -46,6 +46,7 @@ class BoxLayoutList;
 class ClientConfigList;
 class DirectoryConfigList;
 class DynamicContentList;
+class TranscodingProfileList;
 
 class ConfigOption {
 public:

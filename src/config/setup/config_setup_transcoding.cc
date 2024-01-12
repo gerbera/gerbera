@@ -29,12 +29,12 @@
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/result/transcoding.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_enum.h"
 #include "config/setup/config_setup_path.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
-#include "transcoding/transcoding.h"
 
 /// \brief Creates an array of TranscodingProfile objects from an XML
 /// nodeset.

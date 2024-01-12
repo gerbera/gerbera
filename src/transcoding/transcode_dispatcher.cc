@@ -34,9 +34,9 @@
 
 #include "transcode_dispatcher.h" // API
 
+#include "config/result/transcoding.h"
 #include "iohandler/io_handler.h"
 #include "transcode_ext_handler.h"
-#include "transcoding.h"
 
 std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
     const fs::path& location,

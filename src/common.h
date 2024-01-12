@@ -36,6 +36,9 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
+#define SOURCE (-1)
+#define OFF 0
+
 // fixed CdsObjectIDs
 #define CDS_ID_ROOT (0)
 #define CDS_ID_FS_ROOT (1)

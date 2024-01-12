@@ -36,6 +36,7 @@
 #include "config/result/client_config.h"
 #include "config/result/directory_tweak.h"
 #include "config/result/dynamic_content.h"
+#include "config/result/transcoding.h"
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
@@ -45,7 +46,6 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
-#include "transcoding/transcoding.h"
 #include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 

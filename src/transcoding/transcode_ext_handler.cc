@@ -40,12 +40,12 @@
 
 #include "cds/cds_objects.h"
 #include "config/config_manager.h"
+#include "config/result/transcoding.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "iohandler/process_io_handler.h"
-#include "transcoding/transcoding.h"
 #include "util/process_executor.h"
 #include "util/tools.h"
 #include "web/session_manager.h"

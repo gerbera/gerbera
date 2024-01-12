@@ -42,10 +42,10 @@
 #include "cds/cds_item.h"
 #include "config/config_definition.h"
 #include "config/config_manager.h"
+#include "config/result//transcoding.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"
 #include "request_handler.h"
-#include "transcoding/transcoding.h"
 #include "util/upnp_clients.h"
 #include "util/url_utils.h"
 

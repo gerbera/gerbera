@@ -32,6 +32,7 @@
 
 #include "config/result/box_layout.h"
 #include "config/result/client_config.h"
+#include "config/result/transcoding.h"
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_client.h"
