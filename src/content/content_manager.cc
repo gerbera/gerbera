@@ -1077,13 +1077,13 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
         } else if (mimetype.empty() && !protocol.empty()) {
             protocolInfo = renderProtocolInfo(clonedItem->getMimeType(), protocol);
         } else if (!mimetype.empty()) {
-            std::vector<std::string> parts = splitString(resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO), ':');
+            std::vector<std::string> parts = splitString(resource->getAttribute(ResourceAttribute::PROTOCOLINFO), ':');
             protocol = parts[0];
             protocolInfo = renderProtocolInfo(mimetype, protocol);
         }
     }
     if (!protocolInfo.empty()) {
-        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
     }
 
     clonedItem->removeMetaData(M_DESCRIPTION);

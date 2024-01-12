@@ -26,7 +26,6 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include "cds/cds_resource.h"
 #include "upnp_xml.h"
 #include <memory>
 #include <pugixml.hpp>
@@ -57,6 +56,7 @@ class ActionRequest;
 class ContentManager;
 class Context;
 class CdsItem;
+enum class ResourcePurpose;
 class CdsObject;
 class GrbNet;
 class Headers;
@@ -118,7 +118,7 @@ public:
      * \return bool
      *
      */
-    bool supportsResource(CdsResource::Purpose purpose) const;
+    bool supportsResource(ResourcePurpose purpose) const;
 
     /** \brief block XML header in response for broken clients
      *

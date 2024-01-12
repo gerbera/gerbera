@@ -199,22 +199,22 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     // UPnP bitrate is in bytes/second
     int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITRATE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(temp));
     }
 
     temp = audioProps->lengthInMilliseconds();
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::DURATION, millisecondsToHMSF(temp));
+        res->addAttribute(ResourceAttribute::DURATION, millisecondsToHMSF(temp));
     }
 
     temp = audioProps->sampleRate();
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(temp));
     }
 
     temp = audioProps->channels();
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(temp));
     }
 }
 
@@ -301,8 +301,8 @@ void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, con
     log_debug("Found artwork of type {} in file {}", artMimetype.c_str(), item->getLocation().c_str());
 
     if (artMimetype != MIMETYPE_DEFAULT) {
-        auto resource = std::make_shared<CdsResource>(ContentHandler::ID3, CdsResource::Purpose::Thumbnail);
-        resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
+        auto resource = std::make_shared<CdsResource>(ContentHandler::ID3, ResourcePurpose::Thumbnail);
+        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
         item->addResource(resource);
     }
 }
@@ -609,7 +609,7 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     const TagLib::ASF::AttributeListMap& attrListMap = asf.tag()->attributeListMap();
@@ -648,7 +648,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_pt
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     if (flac.pictureList().isEmpty()) {
@@ -683,7 +683,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 
@@ -705,7 +705,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 
@@ -733,7 +733,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 
     if (mp4.tag()->contains("covr")) {
@@ -774,7 +774,7 @@ void TagLibHandler::extractAiff(TagLib::IOStream& roStream, const std::shared_pt
     auto temp = audioProps->bitsPerSample();
     auto res = item->getResource(ContentHandler::DEFAULT);
     if (temp > 0) {
-        res->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(temp));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(temp));
     }
 }
 

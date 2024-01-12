@@ -30,6 +30,7 @@
 #include <curl/curl.h>
 #endif
 
+#include "cds/cds_enums.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "config/result/client_config.h"
@@ -821,7 +822,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_RESOURCES_ORDER,
         "/import/resources/order", "config-import.html#resources-order",
         ATTR_IMPORT_RESOURCES_HANDLER, ATTR_IMPORT_RESOURCES_NAME,
-        MetadataHandler::checkContentHandler),
+        EnumMapper::checkContentHandler),
 
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_SYSTEM_DIRECTORIES,
         "/import/system-directories", "config-import.html#system-directories",

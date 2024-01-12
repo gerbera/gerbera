@@ -46,7 +46,6 @@
 #include "config/setup/config_setup_vector.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 
@@ -520,7 +519,7 @@ void Web::ConfigLoad::process()
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
-        setValue(item, entry->getAttributeOverride(CdsResource::Attribute::RESOLUTION));
+        setValue(item, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
 
         item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_ACCURL);

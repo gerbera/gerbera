@@ -183,12 +183,12 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     for (auto&& path : pathList) {
         if (!path.empty()) {
-            auto resource = std::make_shared<CdsResource>(ContentHandler::FANART, CdsResource::Purpose::Thumbnail);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
             std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
             obj->addResource(resource);
         }
     }
@@ -196,7 +196,7 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_FANART)[0];
     }
@@ -233,12 +233,12 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty()) {
             log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
             std::string mimeType = mime->getMimeType(path, fmt::format("image/{}", type));
 
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
             obj->addResource(resource);
         }
     }
@@ -246,7 +246,7 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION))[0];
         if (path.empty()) {
@@ -284,7 +284,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty()) {
             log_debug("Running subtitle handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
+            auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
             std::string type = path.extension().string().substr(1);
 
             std::string mimeType = mime->getMimeType(path, fmt::format("text/{}", type));
@@ -293,9 +293,9 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 mimeType = fmt::format("{}{}", mimeType.substr(0, pos), type);
             }
 
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());
-            resource->addAttribute(CdsResource::Attribute::TYPE, type);
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
+            resource->addAttribute(ResourceAttribute::TYPE, type);
             auto lang = path.stem().string();
             if (startswith(lang, objFilename)) {
                 replaceAllString(lang, objFilename, ""); // remove starting part with filename
@@ -304,7 +304,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 lang = lang.substr(1); // remove starting dot
             }
             if (!lang.empty())
-                resource->addAttribute(CdsResource::Attribute::LANGUAGE, lang); // assume file name is related to some language
+                resource->addAttribute(ResourceAttribute::LANGUAGE, lang); // assume file name is related to some language
             resource->addParameter("type", type);
             obj->addResource(resource);
         }
@@ -313,7 +313,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_SUBTITLE)[0];
     }
@@ -380,9 +380,9 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
             log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, CdsResource::Purpose::Thumbnail);
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("res"));
-            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, path.string());
+            auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
             obj->addResource(resource);
         }
     }
@@ -390,7 +390,7 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    fs::path path = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    fs::path path = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     if (path.empty()) {
         path = setup->getContentPath(obj, SETTING_RESOURCE)[0];
     }

@@ -43,34 +43,6 @@
 #include "common.h"
 #include "metadata/metadata_handler.h"
 
-// ATTENTION: These values need to be changed in web/js/items.js too.
-#define OBJECT_TYPE_CONTAINER 0x00000001u
-#define OBJECT_TYPE_ITEM 0x00000002u
-#define OBJECT_TYPE_ITEM_EXTERNAL_URL 0x00000008u
-
-#define STRING_OBJECT_TYPE_CONTAINER "container"
-#define STRING_OBJECT_TYPE_ITEM "item"
-#define STRING_OBJECT_TYPE_EXTERNAL_URL "external_url"
-
-static constexpr bool IS_CDS_CONTAINER(unsigned int type)
-{
-    return type & OBJECT_TYPE_CONTAINER;
-}
-static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type) { return type & OBJECT_TYPE_ITEM_EXTERNAL_URL; }
-
-#define OBJECT_FLAG_RESTRICTED 0x00000001u
-#define OBJECT_FLAG_SEARCHABLE 0x00000002u
-#define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004u
-#define OBJECT_FLAG_PERSISTENT_CONTAINER 0x00000008u
-#define OBJECT_FLAG_PLAYLIST_REF 0x00000010u
-#define OBJECT_FLAG_PROXY_URL 0x00000020u
-#define OBJECT_FLAG_ONLINE_SERVICE 0x00000040u
-#define OBJECT_FLAG_OGG_THEORA 0x00000080u
-
-#define OBJECT_AUTOSCAN_NONE 0u
-#define OBJECT_AUTOSCAN_UI 1u
-#define OBJECT_AUTOSCAN_CFG 2u
-
 /// \brief Generic object in the Content Directory.
 class CdsObject {
 protected:
@@ -357,7 +329,7 @@ public:
     }
 
     /// \brief Query resource tag with the given purpose
-    std::shared_ptr<CdsResource> getResource(CdsResource::Purpose purpose) const
+    std::shared_ptr<CdsResource> getResource(ResourcePurpose purpose) const
     {
         auto it = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return purpose == res->getPurpose(); });
         if (it != resources.end()) {

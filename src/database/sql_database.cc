@@ -45,7 +45,6 @@
 #include "config/result/autoscan.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
-#include "metadata/metadata_handler.h"
 #include "search_handler.h"
 #include "upnp_xml.h"
 #include "util/grb_net.h"
@@ -377,7 +376,7 @@ void SQLDatabase::init()
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "purpose", "options", "parameters" } },
     };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto attrName = CdsResource::getAttributeName(resAttrId);
+        auto attrName = EnumMapper::getAttributeName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId));
         resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), std::pair(RES_ALIAS, attrName));
         tableColumnOrder[RESOURCE_TABLE].push_back(std::move(attrName));
@@ -537,7 +536,7 @@ std::string SQLDatabase::getSortCapabilities()
             sortKeys.push_back(key);
         }
     }
-    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
+    sortKeys.reserve(to_underlying(M_MAX) + to_underlying(ResourceAttribute::MAX));
     for (auto&& [field, meta] : MetadataHandler::mt_keys) {
         if (std::find(sortKeys.begin(), sortKeys.end(), meta) == sortKeys.end()) {
             sortKeys.emplace_back(meta);
@@ -551,13 +550,13 @@ std::string SQLDatabase::getSearchCapabilities()
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
     };
-    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(CdsResource::Attribute::MAX));
+    searchKeys.reserve(to_underlying(M_MAX) + to_underlying(ResourceAttribute::MAX));
     for (auto&& [field, meta] : MetadataHandler::mt_keys) {
         searchKeys.emplace_back(meta);
     }
     searchKeys.emplace_back("res");
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto attrName = CdsResource::getAttributeName(resAttrId);
+        auto attrName = EnumMapper::getAttributeName(resAttrId);
         searchKeys.push_back(fmt::format("res@{}", attrName));
     }
     return fmt::format("{}", fmt::join(searchKeys, ","));
@@ -1052,11 +1051,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         auto image = dynConfig->getImage();
                         std::error_code ec;
                         if (!image.empty() && isRegularFile(image, ec)) {
-                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
+                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
                             std::string type = image.extension().string().substr(1);
                             std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
-                            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                            resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, image);
+                            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+                            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, image);
                             dynFolder->addResource(resource);
                         }
                         dynamicContainers.emplace(dynId, std::move(dynFolder));
@@ -1393,7 +1392,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
                 values.push_back(quote(URLUtils::dictEncode(parameters)));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
-                rfields.push_back(identifier(CdsResource::getAttributeName(key)));
+                rfields.push_back(identifier(EnumMapper::getAttributeName(key)));
                 values.push_back(quote(val));
             }
             insert(RESOURCE_TABLE, rfields, values);
@@ -1938,7 +1937,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
     }
 
     deleteRows(CDS_OBJECT_TABLE, "id", objectIDs);
-    del(RESOURCE_TABLE, fmt::format("{} IN ('{}')", identifier(CdsResource::getAttributeName(CdsResource::Attribute::FANART_OBJ_ID)), fmt::join(objectIDs, "','")), objectIDs);
+    del(RESOURCE_TABLE, fmt::format("{} IN ('{}')", identifier(EnumMapper::getAttributeName(ResourceAttribute::FANART_OBJ_ID)), fmt::join(objectIDs, "','")), objectIDs);
     commit("_removeObjects");
 }
 
@@ -1973,7 +1972,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     }
     auto changedContainers = _recursiveRemove(itemIds, containerIds, all);
     if (!path.empty())
-        del(RESOURCE_TABLE, fmt::format("{} = {}", identifier(CdsResource::getAttributeName(CdsResource::Attribute::RESOURCE_FILE)), quote(path.string())), {});
+        del(RESOURCE_TABLE, fmt::format("{} = {}", identifier(EnumMapper::getAttributeName(ResourceAttribute::RESOURCE_FILE)), quote(path.string())), {});
     return _purgeEmptyContainers(std::move(changedContainers));
 }
 
@@ -2847,8 +2846,8 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(
-            MetadataHandler::remapContentHandler(std::stoi(getCol(row, ResourceCol::HandlerType))),
-            CdsResource::remapPurpose(std::stoi(getCol(row, ResourceCol::Purpose))),
+            EnumMapper::remapContentHandler(std::stoi(getCol(row, ResourceCol::HandlerType))),
+            EnumMapper::remapPurpose(std::stoi(getCol(row, ResourceCol::Purpose))),
             getCol(row, ResourceCol::Options),
             getCol(row, ResourceCol::Parameters));
         resource->setResId(resources.size());
@@ -2886,7 +2885,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[CdsResource::getAttributeName(key)] = quote(val);
+                resourceSql[EnumMapper::getAttributeName(key)] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
             resId++;
@@ -2910,7 +2909,7 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
                 resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
             }
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[CdsResource::getAttributeName(key)] = quote(val);
+                resourceSql[EnumMapper::getAttributeName(key)] = quote(val);
             }
             operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
             resId++;
@@ -3073,7 +3072,7 @@ void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;
     for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto&& resAttrib = CdsResource::getAttributeName(resAttrId);
+        auto&& resAttrib = EnumMapper::getAttributeName(resAttrId);
         if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
             _exec(fmt::format(addColumnCmd, resAttrib));
             log_info("'{}': Adding column '{}'", RESOURCE_TABLE, resAttrib);
@@ -3134,7 +3133,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             std::map<std::string, std::string> resourceSQLVals;
             auto&& resource = CdsResource::decode(resString);
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSQLVals[CdsResource::getAttributeName(key)] = quote(val);
+                resourceSQLVals[EnumMapper::getAttributeName(key)] = quote(val);
             }
             auto fields = std::vector {
                 identifier("item_id"),

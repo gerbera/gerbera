@@ -143,11 +143,11 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
 {
     auto resource = item->getResource(ContentHandler::DEFAULT);
     auto nrChannels = WavpackGetNumChannels(context);
-    resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, fmt::to_string(nrChannels));
+    resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(nrChannels));
     auto sampleRate = WavpackGetSampleRate(context);
-    resource->addAttribute(CdsResource::Attribute::SAMPLEFREQUENCY, fmt::to_string(sampleRate));
+    resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(sampleRate));
     auto bitsPerSample = WavpackGetBitsPerSample(context);
-    resource->addAttribute(CdsResource::Attribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
+    resource->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
     /*
     int WavpackGetFileFormat (WavpackContext *wpc);
         Return the file format specified in the call to WavpackSetFileInformation() when the file
@@ -160,9 +160,9 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
         - WP_FORMAT_DSF: Sony DSD format
     */
     auto fileFormat = WavpackGetFileFormat(context);
-    resource->addAttribute(CdsResource::Attribute::FORMAT, fileFormats.at(fileFormat).data());
+    resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat).data());
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
-    resource->addAttribute(CdsResource::Attribute::BITRATE, fmt::to_string(avgBitrate));
+    resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
 }
 
 std::string WavPackHandler::getContentTypeFromByteVector(const char* data, int size) const
@@ -201,8 +201,8 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
                 auto artMimetype = getContentTypeFromByteVector(value + strlen(value) + 1, size - strlen(value) - 1);
                 if (artMimetype != MIMETYPE_DEFAULT) {
                     log_debug("Adding resource '{}'", renderProtocolInfo(artMimetype));
-                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, CdsResource::Purpose::Thumbnail);
-                    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
+                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Thumbnail);
+                    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     resource->addOption(ALBUMART_OPTION, tag);
                     item->addResource(resource);
                 }

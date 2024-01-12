@@ -38,7 +38,6 @@
 
 #include "cds_container.h"
 #include "cds_item.h"
-#include "cds_resource.h"
 #include "database/database.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"

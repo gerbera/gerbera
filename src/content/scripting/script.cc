@@ -50,7 +50,6 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "js_functions.h"
-#include "metadata/metadata_handler.h"
 #include "script_names.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
@@ -249,7 +248,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
 
     // R_SIZE = "size"
     for (auto&& [field, sym] : res_names) {
-        duk_push_string(ctx, CdsResource::getAttributeName(field).c_str());
+        duk_push_string(ctx, EnumMapper::getAttributeName(field).c_str());
         duk_put_global_lstring(ctx, sym.data(), sym.length());
     }
 
@@ -665,7 +664,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                     auto purpSym = fmt::format("{}:purpose", resCount);
                     int purpose = getIntProperty(purpSym, -1);
                     if (ht >= 0 && purpose >= 0) {
-                        auto newRes = std::make_shared<CdsResource>(MetadataHandler::remapContentHandler(ht), CdsResource::remapPurpose(purpose));
+                        auto newRes = std::make_shared<CdsResource>(EnumMapper::remapContentHandler(ht), EnumMapper::remapPurpose(purpose));
                         obj->addResource(newRes);
                         newRes->setResId(resCount);
                     }
@@ -676,7 +675,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                 resCount = res->getResId();
                 // only attributes enumerated in res_names are allowed
                 for (auto&& [key, upnp] : res_names) {
-                    auto val = getProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, CdsResource::getAttributeName(key)));
+                    auto val = getProperty(resCount == 0 ? EnumMapper::getAttributeName(key) : fmt::format("{}-{}", resCount, EnumMapper::getAttributeName(key)));
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
@@ -803,8 +802,15 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setServiceID(serviceID);
         }
 
-        if (description.empty() && pcd && obj->getMetaData(M_DESCRIPTION).empty() && !obj->getMetaData(M_DESCRIPTION).empty()) {
-            obj->addMetaData(M_DESCRIPTION, obj->getMetaData(M_DESCRIPTION));
+        {
+            auto val = getProperty("description");
+            if (!val.empty()) {
+                val = sc->convert(val);
+                item->removeMetaData(M_DESCRIPTION);
+                item->addMetaData(M_DESCRIPTION, val);
+            } else if (pcdItem && item->getMetaData(M_DESCRIPTION).empty() && !pcdItem->getMetaData(M_DESCRIPTION).empty()) {
+                item->addMetaData(M_DESCRIPTION, pcdItem->getMetaData(M_DESCRIPTION));
+            }
         }
 
         if (location.empty() && pcd) {
@@ -826,15 +832,15 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
             std::shared_ptr<CdsResource> resource;
             if (item->getResourceCount() == 0) {
-                resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
+                resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
                 item->addResource(resource);
             } else {
                 resource = item->getResource(ContentHandler::DEFAULT);
             }
-            resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
             int size = getIntProperty("size", -1);
             if (size > -1) {
-                resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(size));
+                resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(size));
             }
         }
 
@@ -986,7 +992,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
                 setProperty(fmt::format("{}:purpose", resCount), fmt::to_string(to_underlying(res->getPurpose())));
                 auto attributes = res->getAttributes();
                 for (auto&& [key, attr] : attributes) {
-                    setProperty(resCount == 0 ? CdsResource::getAttributeName(key) : fmt::format("{}-{}", resCount, CdsResource::getAttributeName(key)), attr);
+                    setProperty(resCount == 0 ? EnumMapper::getAttributeName(key) : fmt::format("{}-{}", resCount, EnumMapper::getAttributeName(key)), attr);
                 }
                 auto parameters = res->getParameters();
                 for (auto&& [key, param] : parameters) {

@@ -105,7 +105,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             if (!param.empty()) {
                 try {
                     auto res = Resolution(param);
-                    prof->setAttributeOverride(CdsResource::Attribute::RESOLUTION, res.string());
+                    prof->setAttributeOverride(ResourceAttribute::RESOLUTION, res.string());
                 } catch (const std::runtime_error& e) {
                     log_info("Config setup for resolution {} is invalid", param);
                 }
@@ -362,9 +362,9 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_RES);
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
-                    config->setOrigValue(index, entry->getAttributeOverride(CdsResource::Attribute::RESOLUTION));
-                    entry->setAttributeOverride(CdsResource::Attribute::RESOLUTION, optValue);
-                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributeOverride(CdsResource::Attribute::RESOLUTION));
+                    config->setOrigValue(index, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
+                    entry->setAttributeOverride(ResourceAttribute::RESOLUTION, optValue);
+                    log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributeOverride(ResourceAttribute::RESOLUTION));
                     return true;
                 }
             }

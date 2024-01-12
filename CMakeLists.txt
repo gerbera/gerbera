@@ -64,6 +64,8 @@ add_library(libgerbera STATIC
         src/action_request.h
         src/cds/cds_container.cc
         src/cds/cds_container.h
+        src/cds/cds_enums.h
+        src/cds/cds_enums.cc
         src/cds/cds_item.cc
         src/cds/cds_item.h
         src/cds/cds_objects.cc

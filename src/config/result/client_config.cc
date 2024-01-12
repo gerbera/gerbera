@@ -29,6 +29,7 @@
 #include <array>
 #include <numeric>
 
+#include "cds/cds_enums.h"
 #include "util/tools.h"
 #include "util/upnp_clients.h"
 #include "util/upnp_quirks.h"
@@ -52,15 +53,15 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientInfo.stringLimit = stringLimit;
     clientInfo.multiValue = multiValue;
     if (flags & QUIRK_FLAG_HIDE_RES_THUMBNAIL) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Thumbnail);
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Thumbnail);
         clientInfo.supportedResources.erase(res);
     }
     if (flags & QUIRK_FLAG_HIDE_RES_SUBTITLE) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Subtitle);
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Subtitle);
         clientInfo.supportedResources.erase(res);
     }
     if (flags & QUIRK_FLAG_HIDE_RES_TRANSCODE) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), CdsResource::Purpose::Transcode);
+        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Transcode);
         clientInfo.supportedResources.erase(res);
     }
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);

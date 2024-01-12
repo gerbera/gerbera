@@ -85,7 +85,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
 {
     auto item = std::make_shared<CdsItemExternalURL>();
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     item->addResource(resource);
 
     auto info = trailer.child("info");
@@ -99,7 +99,7 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         item->setTitle(temp);
 
     item->setMimeType(trailer_mimetype);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(trailer_mimetype));
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(trailer_mimetype));
 
     item->setAuxData(ONLINE_SERVICE_AUX_ID, fmt::to_string(to_underlying(OnlineServiceType::OS_ATrailers)));
 

@@ -30,23 +30,23 @@
 #include "metadata/metadata_handler.h"
 #include "upnp_common.h"
 
-const static auto res_names = std::map<CdsResource::Attribute, std::string> {
-    std::pair(CdsResource::Attribute::SIZE, "R_SIZE"),
-    std::pair(CdsResource::Attribute::DURATION, "R_DURATION"),
-    std::pair(CdsResource::Attribute::BITRATE, "R_BITRATE"),
-    std::pair(CdsResource::Attribute::SAMPLEFREQUENCY, "R_SAMPLEFREQUENCY"),
-    std::pair(CdsResource::Attribute::NRAUDIOCHANNELS, "R_NRAUDIOCHANNELS"),
-    std::pair(CdsResource::Attribute::RESOLUTION, "R_RESOLUTION"),
-    std::pair(CdsResource::Attribute::COLORDEPTH, "R_COLORDEPTH"),
-    std::pair(CdsResource::Attribute::PROTOCOLINFO, "R_PROTOCOLINFO"),
-    std::pair(CdsResource::Attribute::RESOURCE_FILE, "R_RESOURCE_FILE"),
-    std::pair(CdsResource::Attribute::BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE"),
-    std::pair(CdsResource::Attribute::TYPE, "R_TYPE"),
-    std::pair(CdsResource::Attribute::FANART_OBJ_ID, "R_FANART_OBJ_ID"),
-    std::pair(CdsResource::Attribute::FANART_RES_ID, "R_FANART_RES_ID"),
-    std::pair(CdsResource::Attribute::LANGUAGE, "R_LANGUAGE"),
-    std::pair(CdsResource::Attribute::AUDIOCODEC, "R_AUDIOCODEC"),
-    std::pair(CdsResource::Attribute::VIDEOCODEC, "R_VIDEOCODEC"),
+const static auto res_names = std::map<ResourceAttribute, std::string> {
+    std::pair(ResourceAttribute::SIZE, "R_SIZE"),
+    std::pair(ResourceAttribute::DURATION, "R_DURATION"),
+    std::pair(ResourceAttribute::BITRATE, "R_BITRATE"),
+    std::pair(ResourceAttribute::SAMPLEFREQUENCY, "R_SAMPLEFREQUENCY"),
+    std::pair(ResourceAttribute::NRAUDIOCHANNELS, "R_NRAUDIOCHANNELS"),
+    std::pair(ResourceAttribute::RESOLUTION, "R_RESOLUTION"),
+    std::pair(ResourceAttribute::COLORDEPTH, "R_COLORDEPTH"),
+    std::pair(ResourceAttribute::PROTOCOLINFO, "R_PROTOCOLINFO"),
+    std::pair(ResourceAttribute::RESOURCE_FILE, "R_RESOURCE_FILE"),
+    std::pair(ResourceAttribute::BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE"),
+    std::pair(ResourceAttribute::TYPE, "R_TYPE"),
+    std::pair(ResourceAttribute::FANART_OBJ_ID, "R_FANART_OBJ_ID"),
+    std::pair(ResourceAttribute::FANART_RES_ID, "R_FANART_RES_ID"),
+    std::pair(ResourceAttribute::LANGUAGE, "R_LANGUAGE"),
+    std::pair(ResourceAttribute::AUDIOCODEC, "R_AUDIOCODEC"),
+    std::pair(ResourceAttribute::VIDEOCODEC, "R_VIDEOCODEC"),
 };
 
 const static auto mt_names = std::map<metadata_fields_t, std::string_view> {

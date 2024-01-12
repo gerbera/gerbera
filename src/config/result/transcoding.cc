@@ -56,12 +56,12 @@ void TranscodingProfile::setBufferOptions(std::size_t bs, std::size_t cs, std::s
     initialFillSize = ifs;
 }
 
-void TranscodingProfile::setAttributeOverride(CdsResource::Attribute attribute, const std::string& value)
+void TranscodingProfile::setAttributeOverride(ResourceAttribute attribute, const std::string& value)
 {
     attributeOverrides[attribute] = value;
 }
 
-std::string TranscodingProfile::getAttributeOverride(CdsResource::Attribute attribute) const
+std::string TranscodingProfile::getAttributeOverride(ResourceAttribute attribute) const
 {
     auto it = attributeOverrides.find(attribute);
     if (it != attributeOverrides.end()) {
@@ -70,7 +70,7 @@ std::string TranscodingProfile::getAttributeOverride(CdsResource::Attribute attr
     return {};
 }
 
-std::map<CdsResource::Attribute, std::string> TranscodingProfile::getAttributeOverrides() const
+std::map<ResourceAttribute, std::string> TranscodingProfile::getAttributeOverrides() const
 {
     return attributeOverrides;
 }
