@@ -36,7 +36,7 @@
 #include "import_script.h" // API
 
 #include "cds/cds_objects.h"
-#include "content/autoscan.h"
+#include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "js_functions.h"
 #include "util/string_converter.h"

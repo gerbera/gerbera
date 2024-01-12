@@ -37,12 +37,12 @@
 #include <fmt/chrono.h>
 #include <regex>
 
-#include "autoscan.h"
 #include "autoscan_list.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/result/autoscan.h"
 #include "database/database.h"
 #include "import_service.h"
 #include "metadata/metadata_handler.h"

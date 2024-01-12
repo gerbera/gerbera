@@ -82,6 +82,8 @@ add_library(libgerbera STATIC
         src/config/config_option_enum.h
         src/config/config_setup.cc
         src/config/config_setup.h
+        src/config/result/autoscan.cc
+        src/config/result/autoscan.h
         src/config/result/box_layout.cc
         src/config/result/box_layout.h
         src/config/result/client_config.cc
@@ -116,8 +118,6 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
         src/config/setup/config_setup_vector.h
-        src/content/autoscan.cc
-        src/content/autoscan.h
         src/content/autoscan_inotify.cc
         src/content/autoscan_inotify.h
         src/content/autoscan_list.cc

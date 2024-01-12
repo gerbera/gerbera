@@ -26,7 +26,7 @@
 
 #include "cm_task.h" // API
 
-#include "autoscan.h"
+#include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
 

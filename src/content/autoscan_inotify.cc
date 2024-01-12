@@ -35,6 +35,7 @@
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h" // API
 
+#include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
 #include "util/tools.h"

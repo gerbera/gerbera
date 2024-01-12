@@ -26,7 +26,7 @@
 
 #include "autoscan_list.h"
 
-#include "autoscan.h"
+#include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
 #include "util/timer.h"

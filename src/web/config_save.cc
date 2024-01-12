@@ -29,7 +29,7 @@
 #include "config/config.h"
 #include "config/config_definition.h"
 #include "config/config_setup.h"
-#include "content/autoscan.h"
+#include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "metadata/metadata_handler.h"

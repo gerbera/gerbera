@@ -30,6 +30,7 @@
 #include <curl/curl.h>
 #endif
 
+#include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
@@ -47,7 +48,6 @@
 #include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "content/autoscan.h"
 #include "content/content_manager.h"
 #include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_handler.h"

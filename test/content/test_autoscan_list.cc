@@ -21,8 +21,8 @@
 */
 #include <gtest/gtest.h>
 
+#include "config/result/autoscan.h"
 #include "content/autoscan_list.h"
-#include "content/autoscan.h"
 
 TEST(AutoscanListTest, create)
 {

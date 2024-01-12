@@ -35,7 +35,7 @@
 #include "pages.h" // API
 
 #include "cds/cds_item.h"
-#include "content/autoscan.h"
+#include "config/result/autoscan.h"
 #include "database/database.h"
 #include "server.h"
 #include "upnp_xml.h"
