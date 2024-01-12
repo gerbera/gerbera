@@ -22,7 +22,7 @@
 
 /// \file config_setup_bool.cc
 
-#include "config/config_setup.h" // API
+#include "config_setup_bool.h" // API
 
 #include "config/config_definition.h"
 #include "config/config_options.h"

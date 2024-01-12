@@ -29,6 +29,9 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/result/box_layout.h"
+#include "config_setup_bool.h"
+#include "config_setup_int.h"
+#include "config_setup_string.h"
 
 /// \brief Creates an array of BoxLayout objects from a XML nodeset.
 /// \param element starting element of the nodeset.

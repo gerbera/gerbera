@@ -43,6 +43,7 @@
 #include "config/config_definition.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
+#include "config/setup/config_setup_array.h"
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
