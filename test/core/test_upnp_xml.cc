@@ -90,9 +90,9 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
     // albumArtURI
-    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, CdsResource::Purpose::Thumbnail);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
-    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
+    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     obj->addResource(resource);
 
     std::ostringstream expectedXml;
@@ -273,32 +273,32 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addMetaData(M_UPNP_DATE, "2002-01-01");
     obj->addMetaData(M_DATE, "2022-04-01T00:00:00");
 
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
-    resource->addAttribute(CdsResource::Attribute::BITRATE, "16044");
-    resource->addAttribute(CdsResource::Attribute::DURATION, "123456");
-    resource->addAttribute(CdsResource::Attribute::NRAUDIOCHANNELS, "2");
-    resource->addAttribute(CdsResource::Attribute::SIZE, "4711");
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
+    resource->addAttribute(ResourceAttribute::BITRATE, "16044");
+    resource->addAttribute(ResourceAttribute::DURATION, "123456");
+    resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, "2");
+    resource->addAttribute(ResourceAttribute::SIZE, "4711");
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
+    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
     std::string type = "srt";
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
-    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
     resource->addParameter("type", type);
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, CdsResource::Purpose::Subtitle);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
-    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
-    resource->addAttribute(CdsResource::Attribute::LANGUAGE, "fr");
+    resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("text/" + type));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/subtitle.srt");
+    resource->addAttribute(ResourceAttribute::LANGUAGE, "fr");
     resource->addParameter("type", type);
     obj->addResource(resource);
 
-    resource = std::make_shared<CdsResource>(ContentHandler::FANART, CdsResource::Purpose::Thumbnail);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
-    resource->addAttribute(CdsResource::Attribute::RESOURCE_FILE, "/home/resource/cover.jpg");
-    resource->addAttribute(CdsResource::Attribute::RESOLUTION, "200x200");
+    resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/cover.jpg");
+    resource->addAttribute(ResourceAttribute::RESOLUTION, "200x200");
     obj->addResource(resource);
 
     std::ostringstream expectedXml;

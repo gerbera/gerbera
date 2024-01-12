@@ -122,7 +122,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         return;
 
     try {
-        std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::RESOLUTION);
+        std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::RESOLUTION);
         if (videoResolution.empty())
             return;
         auto resolution = Resolution(videoResolution);
@@ -131,12 +131,12 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto it = mappings.find(CONTENT_TYPE_JPG);
         std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
 
-        auto thumbResource = std::make_shared<CdsResource>(ContentHandler::FFTH, CdsResource::Purpose::Thumbnail);
-        thumbResource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
+        auto thumbResource = std::make_shared<CdsResource>(ContentHandler::FFTH, ResourcePurpose::Thumbnail);
+        thumbResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
         auto y = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * resolution.y() / resolution.x();
         auto x = config->getIntOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-        thumbResource->addAttribute(CdsResource::Attribute::RESOLUTION, fmt::format("{}x{}", x, y));
+        thumbResource->addAttribute(ResourceAttribute::RESOLUTION, fmt::format("{}x{}", x, y));
         item->addResource(thumbResource);
         log_debug("Adding resource for video thumbnail");
 

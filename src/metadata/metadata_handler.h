@@ -47,25 +47,7 @@ class CdsObject;
 class CdsResource;
 class ContentManager;
 class IOHandler;
-
-// content handler Id's
-enum class ContentHandler : int {
-    DEFAULT = 0,
-    LIBEXIF = 1,
-    ID3 = 2,
-    TRANSCODE = 3,
-    EXTURL = 4,
-    MP4 = 5,
-    FFTH = 6,
-    FLAC = 7,
-    FANART = 8,
-    MATROSKA = 9,
-    SUBTITLE = 10,
-    CONTAINERART = 11,
-    WAVPACK = 12,
-    METAFILE = 13,
-    RESOURCE = 20,
-};
+enum class ContentHandler;
 
 #define CONTENT_TYPE_AIFF "aiff"
 #define CONTENT_TYPE_APE "ape"
@@ -122,6 +104,33 @@ enum metadata_fields_t {
     M_MAX
 };
 
+const static auto mt_single = std::map<metadata_fields_t, bool> {
+    std::pair(M_TITLE, true),
+    std::pair(M_ARTIST, false),
+    std::pair(M_ALBUM, true),
+    std::pair(M_DATE, true),
+    std::pair(M_CREATION_DATE, true),
+    std::pair(M_UPNP_DATE, true),
+    std::pair(M_GENRE, false),
+    std::pair(M_DESCRIPTION, false),
+    std::pair(M_LONGDESCRIPTION, false),
+    std::pair(M_PARTNUMBER, true),
+    std::pair(M_TRACKNUMBER, true),
+    std::pair(M_ALBUMARTURI, false),
+    std::pair(M_REGION, false),
+    std::pair(M_CREATOR, false),
+    std::pair(M_AUTHOR, false),
+    std::pair(M_DIRECTOR, false),
+    std::pair(M_PUBLISHER, false),
+    std::pair(M_RATING, true),
+    std::pair(M_ACTOR, false),
+    std::pair(M_PRODUCER, false),
+    std::pair(M_ALBUMARTIST, false),
+    std::pair(M_COMPOSER, false),
+    std::pair(M_CONDUCTOR, false),
+    std::pair(M_ORCHESTRA, false),
+    std::pair(M_CONTENT_CLASS, true),
+};
 using MetadataIterator = EnumIterator<metadata_fields_t, metadata_fields_t::M_TITLE, metadata_fields_t::M_MAX>;
 
 /// \brief This class is responsible for providing access to metadata information
@@ -132,8 +141,8 @@ protected:
     std::shared_ptr<Mime> mime;
 
 public:
-    static std::map<metadata_fields_t, std::string> mt_keys;
     /// \brief Definition of the supported metadata fields.
+    static std::map<metadata_fields_t, std::string> mt_keys;
 
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler() = default;
@@ -152,11 +161,6 @@ public:
     /// \return iohandler to stream to client
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) = 0;
     virtual std::string getMimeType() const;
-
-    static std::string mapContentHandler2String(ContentHandler ch);
-    static bool checkContentHandler(const std::string& contHandler);
-    static ContentHandler remapContentHandler(const std::string& contHandler);
-    static ContentHandler remapContentHandler(int ch);
 
     static metadata_fields_t remapMetaDataField(const std::string& fieldName);
 };

@@ -39,7 +39,6 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "database/database.h"
-#include "metadata/metadata_handler.h"
 #include "server.h"
 #include "upnp_xml.h"
 #include "util/tools.h"
@@ -147,18 +146,18 @@ void Web::EditLoad::process()
 
         resEntry = resources.append_child("resources");
         resEntry.append_attribute("resname") = "handlerType";
-        resEntry.append_attribute("resvalue") = MetadataHandler::mapContentHandler2String(resItem->getHandlerType()).c_str();
+        resEntry.append_attribute("resvalue") = EnumMapper::mapContentHandler2String(resItem->getHandlerType()).c_str();
         resEntry.append_attribute("editable") = false;
 
         resEntry = resources.append_child("resources");
         resEntry.append_attribute("resname") = "purpose";
-        resEntry.append_attribute("resvalue") = CdsResource::getPurposeDisplay(resItem->getPurpose()).c_str();
+        resEntry.append_attribute("resvalue") = EnumMapper::getPurposeDisplay(resItem->getPurpose()).c_str();
         resEntry.append_attribute("editable") = false;
 
         // write resource content
         if (objItem) {
             std::string url = xmlBuilder->renderResourceURL(*objItem, *resItem, {});
-            if (resItem->getPurpose() == CdsResource::Purpose::Thumbnail) {
+            if (resItem->getPurpose() == ResourcePurpose::Thumbnail) {
                 auto image = resources.append_child("resources");
                 image.append_attribute("resname") = "image";
                 image.append_attribute("resvalue") = url.c_str();
@@ -183,7 +182,7 @@ void Web::EditLoad::process()
             auto val = resItem->getAttribute(attr);
             if (!val.empty()) {
                 auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = CdsResource::getAttributeDisplay(attr).c_str();
+                resEntry.append_attribute("resname") = EnumMapper::getAttributeDisplay(attr).c_str();
                 auto aVal = resItem->getAttributeValue(attr);
                 if (aVal != val)
                     resEntry.append_attribute("rawvalue") = val.c_str();
@@ -249,7 +248,7 @@ void Web::EditLoad::process()
 
         if (obj->isExternalItem()) {
             auto protocol = item.append_child("protocol");
-            protocol.append_attribute("value") = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(CdsResource::Attribute::PROTOCOLINFO)).data();
+            protocol.append_attribute("value") = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::PROTOCOLINFO)).data();
             protocol.append_attribute("editable") = true;
         }
     }

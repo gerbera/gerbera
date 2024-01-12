@@ -33,14 +33,13 @@
 
 #include "cds_resource.h" // API
 
-#include "metadata/metadata_handler.h"
 #include "metadata/resolution.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
 
 #define RESOURCE_PART_SEP '~'
 
-CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose, std::string_view options, std::string_view parameters)
+CdsResource::CdsResource(ContentHandler handlerType, ResourcePurpose purpose, std::string_view options, std::string_view parameters)
     : purpose(purpose)
     , handlerType(handlerType)
 {
@@ -48,8 +47,8 @@ CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose, std::strin
     this->parameters = URLUtils::dictDecode(parameters);
 }
 
-CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose,
-    std::map<Attribute, std::string> attributes,
+CdsResource::CdsResource(ContentHandler handlerType, ResourcePurpose purpose,
+    std::map<ResourceAttribute, std::string> attributes,
     std::map<std::string, std::string> parameters,
     std::map<std::string, std::string> options)
     : purpose(purpose)
@@ -60,12 +59,12 @@ CdsResource::CdsResource(ContentHandler handlerType, Purpose purpose,
 {
 }
 
-void CdsResource::addAttribute(Attribute res, std::string value)
+void CdsResource::addAttribute(ResourceAttribute res, std::string value)
 {
     attributes[res] = std::move(value);
 }
 
-void CdsResource::mergeAttributes(const std::map<Attribute, std::string>& additional)
+void CdsResource::mergeAttributes(const std::map<ResourceAttribute, std::string>& additional)
 {
     for (auto&& [key, val] : additional) {
         attributes[key] = val;
@@ -83,7 +82,7 @@ void CdsResource::addOption(std::string name, std::string value)
 }
 
 // deprecated
-const std::map<CdsResource::Attribute, std::string>& CdsResource::getAttributes() const
+const std::map<ResourceAttribute, std::string>& CdsResource::getAttributes() const
 {
     return attributes;
 }
@@ -98,7 +97,7 @@ const std::map<std::string, std::string>& CdsResource::getOptions() const
     return options;
 }
 
-std::string CdsResource::getAttribute(CdsResource::Attribute attr) const
+std::string CdsResource::getAttribute(ResourceAttribute attr) const
 {
     return getValueOrDefault(attributes, attr, { "" });
 }
@@ -131,17 +130,17 @@ std::string CdsResource::formatSizeValue(double value)
     return result;
 }
 
-std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
+std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
 {
     auto result = getValueOrDefault(attributes, attr, { "" });
     if (result.empty())
         return result;
     switch (attr) {
-    case Attribute::BITRATE:
+    case ResourceAttribute::BITRATE:
         // UPNP is silly and Bitrate is actually Bytes/Sec
         result = fmt::format("{} Kbps", stoulString(result) * 8 / 1000);
         break;
-    case Attribute::SAMPLEFREQUENCY: {
+    case ResourceAttribute::SAMPLEFREQUENCY: {
         double size = stoulString(result);
         result = fmt::format("{} Hz", size);
         for (auto&& unit : freqUnits) {
@@ -152,11 +151,11 @@ std::string CdsResource::getAttributeValue(CdsResource::Attribute attr) const
         }
         break;
     }
-    case Attribute::SIZE: {
+    case ResourceAttribute::SIZE: {
         result = formatSizeValue(stoulString(result));
         break;
     }
-    case Attribute::RESOLUTION: {
+    case ResourceAttribute::RESOLUTION: {
         try {
             auto res = Resolution(result);
             for (auto&& [val, mx, my] : resSteps) {
@@ -207,16 +206,16 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size < 2 || size > 4)
         throw_std_runtime_error("Could not parse resources");
 
-    auto handlerType = MetadataHandler::remapContentHandler(std::stoi(parts[0]));
+    auto handlerType = EnumMapper::remapContentHandler(std::stoi(parts[0]));
 
     std::map<std::string, std::string> attr;
     std::map<std::string, std::string> par;
     std::map<std::string, std::string> opt;
 
     attr = URLUtils::dictDecode(parts[1]);
-    std::map<CdsResource::Attribute, std::string> attrParsed;
+    std::map<ResourceAttribute, std::string> attrParsed;
     for (auto [k, v] : attr) {
-        attrParsed[CdsResource::mapAttributeName(k)] = v;
+        attrParsed[EnumMapper::mapAttributeName(k)] = v;
     }
 
     if (size >= 3)
@@ -225,30 +224,5 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
     if (size >= 4)
         opt = URLUtils::dictDecode(parts[3]);
 
-    return std::make_shared<CdsResource>(handlerType, handlerType == ContentHandler::DEFAULT ? Purpose::Content : Purpose::Thumbnail, std::move(attrParsed), std::move(par), std::move(opt));
-}
-
-std::string CdsResource::getAttributeName(Attribute attr)
-{
-    return attrToName.at(attr);
-}
-
-std::string CdsResource::getAttributeDisplay(Attribute attr)
-{
-    return attrToDisplay.at(attr);
-}
-
-CdsResource::Attribute CdsResource::mapAttributeName(const std::string& name)
-{
-    for (auto&& [attr, n] : attrToName) {
-        if (n == name) {
-            return attr;
-        }
-    }
-    throw std::out_of_range { fmt::format("Could not map {}", name) };
-}
-
-std::string CdsResource::getPurposeDisplay(CdsResource::Purpose purpose)
-{
-    return purposeToDisplay.at(purpose);
+    return std::make_shared<CdsResource>(handlerType, handlerType == ContentHandler::DEFAULT ? ResourcePurpose::Content : ResourcePurpose::Thumbnail, std::move(attrParsed), std::move(par), std::move(opt));
 }

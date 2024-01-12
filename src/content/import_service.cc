@@ -632,10 +632,10 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         return;
     }
 
-    auto fanart = container->getResource(CdsResource::Purpose::Thumbnail);
+    auto fanart = container->getResource(ResourcePurpose::Thumbnail);
     if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         // remove stale references
-        auto fanartObjId = stoiString(fanart->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
+        auto fanartObjId = stoiString(fanart->getAttribute(ResourceAttribute::FANART_OBJ_ID));
         try {
             if (fanartObjId > CDS_ID_ROOT) {
                 database->loadObject(fanartObjId);
@@ -647,7 +647,7 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
     }
     if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         MetadataHandler::createHandler(context, nullptr, ContentHandler::CONTAINERART)->fillMetadata(container);
-        auto containerart = container->getResource(CdsResource::Purpose::Thumbnail);
+        auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
             container->clearResources();
             container->addResource(containerart); // overwrite all other resources by container art
@@ -660,27 +660,27 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
     auto location = container->getLocation();
     if (refObj) {
         if (!fanart && (refObj->isContainer() || (count < containerImageParentCount && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > containerImageMinDepth))) {
-            fanart = refObj->getResource(CdsResource::Purpose::Thumbnail);
+            fanart = refObj->getResource(ResourcePurpose::Thumbnail);
             if (fanart) {
                 auto fanArtObj = refObj;
                 auto fanArtObjId = refObj->getID();
                 auto fanArtResId = fanart->getResId();
                 if (refObj->getID() <= CDS_ID_ROOT) {
                     fanArtObj = database->loadObject(refObj->getRefID());
-                    auto fanartRef = fanArtObj->getResource(CdsResource::Purpose::Thumbnail);
+                    auto fanartRef = fanArtObj->getResource(ResourcePurpose::Thumbnail);
                     fanArtResId = fanartRef->getResId();
                 }
                 if (fanArtObj->isItem() && fanArtResId == 0) {
                     for (auto&& res : fanArtObj->getResources()) {
-                        if (res->getPurpose() == CdsResource::Purpose::Thumbnail)
+                        if (res->getPurpose() == ResourcePurpose::Thumbnail)
                             break;
                         fanArtResId++;
                     }
                 }
-                if (fanart->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
+                if (fanart->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
                     if (fanArtObjId > CDS_ID_ROOT) {
-                        fanart->addAttribute(CdsResource::Attribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
-                        fanart->addAttribute(CdsResource::Attribute::FANART_RES_ID, fmt::to_string(fanArtResId));
+                        fanart->addAttribute(ResourceAttribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
+                        fanart->addAttribute(ResourceAttribute::FANART_RES_ID, fmt::to_string(fanArtResId));
                     } else {
                         fanart = nullptr;
                     }

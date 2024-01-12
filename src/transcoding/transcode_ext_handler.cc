@@ -71,8 +71,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
-            std::string freq = res->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY));
-            std::string nrch = res->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS));
+            std::string freq = res->getAttribute(ResourceAttribute::SAMPLEFREQUENCY));
+            std::string nrch = res->getAttribute(ResourceAttribute::NRAUDIOCHANNELS));
 
             if (!freq.empty())
                 mimeType = mimeType + ";rate=" + freq;

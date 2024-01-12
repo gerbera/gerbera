@@ -37,6 +37,7 @@
 #include <map>
 #include <memory>
 
+#include "cds_enums.h"
 #include "common.h"
 #include "util/enum_iterator.h"
 
@@ -45,47 +46,17 @@
 #define RESOURCE_OPTION_URL "url"
 #define RESOURCE_OPTION_FOURCC "4cc"
 
-enum class ContentHandler;
-class MetadataHandler;
-
 class CdsResource {
 public:
-    enum class Purpose : int {
-        Content = 0,
-        Thumbnail,
-        Subtitle,
-        Transcode
-    };
-    enum class Attribute : int {
-        SIZE = 0,
-        DURATION,
-        BITRATE,
-        SAMPLEFREQUENCY,
-        NRAUDIOCHANNELS,
-        RESOLUTION,
-        COLORDEPTH,
-        PROTOCOLINFO,
-        RESOURCE_FILE,
-        TYPE,
-        FANART_OBJ_ID,
-        FANART_RES_ID,
-        BITS_PER_SAMPLE,
-        LANGUAGE,
-        AUDIOCODEC,
-        VIDEOCODEC,
-        FORMAT,
-        MAX
-    };
-
     /// \brief creates a new resource object.
     ///
     /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
     ///
     /// \param ContentHandler handlerType of the associated handler
     /// \param Purpose purpose of the associated handler
-    explicit CdsResource(ContentHandler handlerType, Purpose purpose, std::string_view options = {}, std::string_view parameters = {});
-    CdsResource(ContentHandler handlerType, Purpose purpose,
-        std::map<Attribute, std::string> attributes,
+    explicit CdsResource(ContentHandler handlerType, ResourcePurpose purpose, std::string_view options = {}, std::string_view parameters = {});
+    CdsResource(ContentHandler handlerType, ResourcePurpose purpose,
+        std::map<ResourceAttribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);
 
@@ -97,10 +68,10 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void addAttribute(Attribute res, std::string value);
+    void addAttribute(ResourceAttribute res, std::string value);
 
     /// \brief Merge existing attributes with new ones
-    void mergeAttributes(const std::map<Attribute, std::string>& additional);
+    void mergeAttributes(const std::map<ResourceAttribute, std::string>& additional);
 
     /// \brief Adds a parameter (will be appended to the URL)
     ///
@@ -122,18 +93,15 @@ public:
     /// \brief Type of resource handler
     ContentHandler getHandlerType() const { return handlerType; }
 
-    const std::map<Attribute, std::string>& getAttributes() const;
+    const std::map<ResourceAttribute, std::string>& getAttributes() const;
     const std::map<std::string, std::string>& getParameters() const;
     const std::map<std::string, std::string>& getOptions() const;
-    std::string getAttribute(Attribute attr) const;
-    std::string getAttributeValue(Attribute attr) const;
+    std::string getAttribute(ResourceAttribute attr) const;
+    std::string getAttributeValue(ResourceAttribute attr) const;
     std::string getParameter(const std::string& name) const;
     std::string getOption(const std::string& name) const;
-
-    static Purpose remapPurpose(int ip) { return static_cast<Purpose>(ip); }
-    static std::string getPurposeDisplay(Purpose purpose);
-    Purpose getPurpose() const { return purpose; }
-    void setPurpose(Purpose purpose) { this->purpose = purpose; }
+    ResourcePurpose getPurpose() const { return purpose; }
+    void setPurpose(ResourcePurpose purpose) { this->purpose = purpose; }
 
     bool equals(const std::shared_ptr<CdsResource>& other) const;
     std::shared_ptr<CdsResource> clone();
@@ -141,79 +109,30 @@ public:
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
 
     // FIXME Move out interval values to somewhere else? Options?
-    static bool isPrivateAttribute(CdsResource::Attribute attribute)
+    static bool isPrivateAttribute(ResourceAttribute attribute)
     {
         switch (attribute) {
-        case Attribute::RESOURCE_FILE:
-        case Attribute::FANART_OBJ_ID:
-        case Attribute::FANART_RES_ID:
-        case Attribute::TYPE:
-        case Attribute::FORMAT:
+        case ResourceAttribute::RESOURCE_FILE:
+        case ResourceAttribute::FANART_OBJ_ID:
+        case ResourceAttribute::FANART_RES_ID:
+        case ResourceAttribute::TYPE:
+        case ResourceAttribute::FORMAT:
             return true;
         default:
             return false;
         }
     }
-
-    static std::string getAttributeName(Attribute attr);
-    static std::string getAttributeDisplay(Attribute attr);
     static std::string formatSizeValue(double value);
-    static Attribute mapAttributeName(const std::string& name);
 
 protected:
-    Purpose purpose { Purpose::Content };
+    ResourcePurpose purpose { ResourcePurpose::Content };
     ContentHandler handlerType;
     int resId { -1 };
-    std::map<Attribute, std::string> attributes;
+    std::map<ResourceAttribute, std::string> attributes;
     std::map<std::string, std::string> parameters;
     std::map<std::string, std::string> options;
-
-    inline static const std::map<Attribute, std::string> attrToName {
-        { CdsResource::Attribute::SIZE, "size" },
-        { CdsResource::Attribute::DURATION, "duration" },
-        { CdsResource::Attribute::BITRATE, "bitrate" },
-        { CdsResource::Attribute::SAMPLEFREQUENCY, "sampleFrequency" },
-        { CdsResource::Attribute::NRAUDIOCHANNELS, "nrAudioChannels" },
-        { CdsResource::Attribute::RESOLUTION, "resolution" },
-        { CdsResource::Attribute::COLORDEPTH, "colorDepth" },
-        { CdsResource::Attribute::PROTOCOLINFO, "protocolInfo" },
-        { CdsResource::Attribute::RESOURCE_FILE, "resFile" },
-        { CdsResource::Attribute::FANART_OBJ_ID, "fanArtObject" },
-        { CdsResource::Attribute::FANART_RES_ID, "fanArtResource" },
-        { CdsResource::Attribute::BITS_PER_SAMPLE, "bitsPerSample" },
-        { CdsResource::Attribute::LANGUAGE, "dc:language" },
-        { CdsResource::Attribute::AUDIOCODEC, "sec:acodec" },
-        { CdsResource::Attribute::VIDEOCODEC, "sec:vcodec" },
-        { CdsResource::Attribute::FORMAT, "format" },
-        { CdsResource::Attribute::TYPE, "type" },
-    };
-    inline static const std::map<Attribute, std::string> attrToDisplay {
-        { CdsResource::Attribute::SIZE, "size" },
-        { CdsResource::Attribute::DURATION, "duration" },
-        { CdsResource::Attribute::BITRATE, "bitrate" },
-        { CdsResource::Attribute::SAMPLEFREQUENCY, "sampleFrequency" },
-        { CdsResource::Attribute::NRAUDIOCHANNELS, "nrAudioChannels" },
-        { CdsResource::Attribute::RESOLUTION, "resolution" },
-        { CdsResource::Attribute::COLORDEPTH, "colorDepth" },
-        { CdsResource::Attribute::PROTOCOLINFO, "protocolInfo" },
-        { CdsResource::Attribute::RESOURCE_FILE, "resFile" },
-        { CdsResource::Attribute::FANART_OBJ_ID, "fanArtObject" },
-        { CdsResource::Attribute::FANART_RES_ID, "fanArtResource" },
-        { CdsResource::Attribute::BITS_PER_SAMPLE, "bitsPerSample" },
-        { CdsResource::Attribute::LANGUAGE, "language" },
-        { CdsResource::Attribute::AUDIOCODEC, "audioCodec" },
-        { CdsResource::Attribute::VIDEOCODEC, "videoCodec" },
-        { CdsResource::Attribute::FORMAT, "format" },
-        { CdsResource::Attribute::TYPE, "type" },
-    };
-    inline static const std::map<Purpose, std::string> purposeToDisplay {
-        { CdsResource::Purpose::Content, "Content" },
-        { CdsResource::Purpose::Thumbnail, "Thumbnail" },
-        { CdsResource::Purpose::Subtitle, "Subtitle" },
-        { CdsResource::Purpose::Transcode, "Transcode" },
-    };
 };
 
-using ResourceAttributeIterator = EnumIterator<CdsResource::Attribute, CdsResource::Attribute::SIZE, CdsResource::Attribute::MAX>;
+using ResourceAttributeIterator = EnumIterator<ResourceAttribute, ResourceAttribute::SIZE, ResourceAttribute::MAX>;
 
 #endif // __CDS_RESOURCE_H__

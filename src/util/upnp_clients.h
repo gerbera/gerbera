@@ -34,6 +34,7 @@
 #include <sys/socket.h>
 #include <vector>
 
+#include "cds/cds_enums.h"
 #include "common.h"
 #include "util/grb_time.h"
 #include "util/upnp_quirks.h"
@@ -81,7 +82,7 @@ struct ClientInfo {
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };
-    std::vector<CdsResource::Purpose> supportedResources { CdsResource::Purpose::Content, CdsResource::Purpose::Thumbnail, CdsResource::Purpose::Subtitle, CdsResource::Purpose::Transcode };
+    std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
 };
 
 struct ClientCacheEntry {

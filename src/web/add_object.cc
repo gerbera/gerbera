@@ -114,8 +114,8 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
     } else
         protocolInfo = renderProtocolInfo(tmp);
 
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, protocolInfo);
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
     item->addResource(resource);
 
     return item;

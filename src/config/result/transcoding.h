@@ -128,10 +128,10 @@ public:
     ///
     /// \param name attribute name
     /// \param value attribute value
-    void setAttributeOverride(CdsResource::Attribute attribute, const std::string& value);
-    std::string getAttributeOverride(CdsResource::Attribute attribute) const;
+    void setAttributeOverride(ResourceAttribute attribute, const std::string& value);
+    std::string getAttributeOverride(ResourceAttribute attribute) const;
 
-    std::map<CdsResource::Attribute, std::string> getAttributeOverrides() const;
+    std::map<ResourceAttribute, std::string> getAttributeOverrides() const;
 
     /// \brief Override for theora content.
     ///
@@ -206,7 +206,7 @@ protected:
     TranscodingType trType { TranscodingType::None };
     int numberOfChannels { SOURCE };
     int sampleFrequency { SOURCE };
-    std::map<CdsResource::Attribute, std::string> attributeOverrides;
+    std::map<ResourceAttribute, std::string> attributeOverrides;
     std::map<std::string, std::string> environment;
     std::vector<std::string> fourccList;
     AviFourccListmode fourccMode { AviFourccListmode::None };

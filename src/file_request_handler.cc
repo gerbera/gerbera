@@ -80,14 +80,14 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (resourceId >= obj->getResourceCount() && trProfile.empty()) {
         throw_std_runtime_error("Requested resource {} does not exist", resourceId);
     }
-    auto resource = trProfile.empty() ? obj->getResource(resourceId) : std::make_shared<CdsResource>(ContentHandler::TRANSCODE, CdsResource::Purpose::Transcode);
+    auto resource = trProfile.empty() ? obj->getResource(resourceId) : std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
 
     fs::path path = obj->getLocation();
 
     // Check if the resource is actually another external file, and if it exists
     bool isResourceFile = false;
 
-    auto resPath = resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE);
+    auto resPath = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     isResourceFile = !resPath.empty() && resPath != obj->getLocation();
     if (isResourceFile) {
         log_debug("Resource is file: {}", path.string());
@@ -117,7 +117,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (resource->getHandlerType() != ContentHandler::DEFAULT && resource->getHandlerType() != ContentHandler::TRANSCODE) {
         auto metadataHandler = getResourceMetadataHandler(obj, resource);
 
-        std::string protocolInfo = resource->getAttribute(CdsResource::Attribute::PROTOCOLINFO);
+        std::string protocolInfo = resource->getAttribute(ResourceAttribute::PROTOCOLINFO);
         if (!protocolInfo.empty()) {
             mimeType = getMTFromProtocolInfo(protocolInfo);
         }
@@ -148,8 +148,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
-            std::string freq = res->getAttribute(CdsResource::Attribute::SAMPLEFREQUENCY);
-            std::string nrch = res->getAttribute(CdsResource::Attribute::NRAUDIOCHANNELS);
+            std::string freq = res->getAttribute(ResourceAttribute::SAMPLEFREQUENCY);
+            std::string nrch = res->getAttribute(ResourceAttribute::NRAUDIOCHANNELS);
             if (!freq.empty())
                 mimeType += fmt::format(";rate={}", freq);
             if (!nrch.empty())
@@ -199,9 +199,9 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const
 {
     auto resHandler = resource->getHandlerType();
-    if (resource->getAttribute(CdsResource::Attribute::RESOURCE_FILE).empty()) {
-        auto objID = stoiString(resource->getAttribute(CdsResource::Attribute::FANART_OBJ_ID));
-        auto resID = stoiString(resource->getAttribute(CdsResource::Attribute::FANART_RES_ID));
+    if (resource->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
+        auto objID = stoiString(resource->getAttribute(ResourceAttribute::FANART_OBJ_ID));
+        auto resID = stoiString(resource->getAttribute(ResourceAttribute::FANART_RES_ID));
         try {
             auto resObj = (objID > 0 && objID != obj->getID()) ? database->loadObject(objID) : nullptr;
             if (resObj) {

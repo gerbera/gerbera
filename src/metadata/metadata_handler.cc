@@ -111,9 +111,9 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
     std::string mimetype = item->getMimeType();
 
-    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, CdsResource::Purpose::Content);
-    resource->addAttribute(CdsResource::Attribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
-    resource->addAttribute(CdsResource::Attribute::SIZE, fmt::to_string(filesize));
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
+    resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(filesize));
 
     item->addResource(resource);
     item->clearMetaData();
@@ -252,63 +252,6 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
 std::string MetadataHandler::getMimeType() const
 {
     return MIMETYPE_DEFAULT;
-}
-
-static constexpr std::array chKeys = {
-    std::pair(ContentHandler::DEFAULT, "Default"),
-#ifdef HAVE_LIBEXIF
-    std::pair(ContentHandler::LIBEXIF, "LibExif"),
-#endif
-#ifdef HAVE_TAGLIB
-    std::pair(ContentHandler::ID3, "TagLib"),
-#endif
-    std::pair(ContentHandler::TRANSCODE, "Transcode"),
-    std::pair(ContentHandler::EXTURL, "Exturl"),
-    std::pair(ContentHandler::MP4, "MP4"),
-#ifdef HAVE_FFMPEGTHUMBNAILER
-    std::pair(ContentHandler::FFTH, "FFmpegThumbnailer"),
-#endif
-    std::pair(ContentHandler::FLAC, "Flac"),
-    std::pair(ContentHandler::FANART, "Fanart"),
-    std::pair(ContentHandler::CONTAINERART, "ContainerArt"),
-#ifdef HAVE_MATROSKA
-    std::pair(ContentHandler::MATROSKA, "Matroska"),
-#endif
-#ifdef HAVE_WAVPACK
-    std::pair(ContentHandler::WAVPACK, "WavPack"),
-#endif
-    std::pair(ContentHandler::SUBTITLE, "Subtitle"),
-    std::pair(ContentHandler::METAFILE, "MetaFile"),
-    std::pair(ContentHandler::RESOURCE, "Resource"),
-};
-
-bool MetadataHandler::checkContentHandler(const std::string& contHandler)
-{
-    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    return chEntry != chKeys.end();
-}
-
-ContentHandler MetadataHandler::remapContentHandler(const std::string& contHandler)
-{
-    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    if (chEntry != chKeys.end()) {
-        return chEntry->first;
-    }
-    throw_std_runtime_error("Invalid content handler value {}", contHandler);
-}
-
-ContentHandler MetadataHandler::remapContentHandler(int ch)
-{
-    return static_cast<ContentHandler>(ch);
-}
-
-std::string MetadataHandler::mapContentHandler2String(ContentHandler ch)
-{
-    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [ch](auto&& entry) { return ch == entry.first; });
-    if (chEntry != chKeys.end()) {
-        return chEntry->second;
-    }
-    throw_std_runtime_error("Invalid content handler value {}", ch);
 }
 
 metadata_fields_t MetadataHandler::remapMetaDataField(const std::string& fieldName)
