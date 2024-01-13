@@ -478,7 +478,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& d
         // checkDatabase, don't process existing
         std::shared_ptr<CdsContainer> parent;
         auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), DbFileType::Directory);
-        if (parentObject->isContainer())
+        if (parentObject && parentObject->isContainer())
             parent = std::dynamic_pointer_cast<CdsContainer>(parentObject);
         auto obj = createSingleItem(dirEnt, parent, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
         if (!obj) // object ignored
