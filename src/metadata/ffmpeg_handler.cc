@@ -56,7 +56,7 @@ extern "C" {
 
 #include "cds/cds_item.h"
 #include "iohandler/io_handler.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 #include "util/grb_time.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

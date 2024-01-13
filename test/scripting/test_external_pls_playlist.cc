@@ -27,7 +27,7 @@
 #include <memory>
 
 #include "cds/cds_objects.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 #include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"

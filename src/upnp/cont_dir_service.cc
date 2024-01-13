@@ -32,7 +32,7 @@
 /// \file upnp_cds.cc
 #define LOG_FAC log_facility_t::cds
 
-#include "upnp_cds.h" // API
+#include "cont_dir_service.h" // API
 
 #include <vector>
 
@@ -43,10 +43,10 @@
 #include "database/database.h"
 #include "database/sql_database.h"
 #include "subscription_request.h"
-#include "upnp_xml.h"
+#include "upnp/clients.h"
+#include "upnp/quirks.h"
+#include "upnp/xml_builder.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)

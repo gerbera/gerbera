@@ -24,7 +24,7 @@
 
 #include "config/result/client_config.h"
 #include "util/grb_net.h"
-#include "util/upnp_clients.h"
+#include "upnp/clients.h"
 
 #include "../mock/config_mock.h"
 

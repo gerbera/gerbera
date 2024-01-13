@@ -26,7 +26,7 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include "upnp_xml.h"
+#include <map>
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
@@ -53,14 +53,16 @@ using QuirkFlags = std::uint32_t;
 
 // forward declaration
 class ActionRequest;
+class ClientManager;
 class ContentManager;
 class Context;
 class CdsItem;
-enum class ResourcePurpose;
 class CdsObject;
+class Database;
 class GrbNet;
 class Headers;
 class UpnpXMLBuilder;
+enum class ResourcePurpose;
 struct ClientInfo;
 
 class Quirks {

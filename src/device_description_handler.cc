@@ -27,6 +27,8 @@
 #include <sstream>
 
 #include "iohandler/mem_io_handler.h"
+#include "upnp/quirks.h"
+#include "upnp/xml_builder.h"
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content)

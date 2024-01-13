@@ -42,7 +42,7 @@
 #include "database/database.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
-#include "upnp_xml.h"
+#include "upnp/xml_builder.h"
 #include "util/tools.h"
 #include "util/url.h"
 #include "util/url_utils.h"

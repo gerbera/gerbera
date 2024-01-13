@@ -244,14 +244,21 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_ext_handler.h
         src/transcoding/transcode_handler.cc
         src/transcoding/transcode_handler.h
-        src/upnp_cds.cc
-        src/upnp_cds.h
-        src/upnp_cm.cc
-        src/upnp_cm.h
-        src/upnp_mrreg.cc
-        src/upnp_mrreg.h
-        src/upnp_xml.cc
-        src/upnp_xml.h
+        src/upnp/cont_dir_service.cc
+        src/upnp/cont_dir_service.h
+        src/upnp/conn_mgr_service.cc
+        src/upnp/conn_mgr_service.h
+        src/upnp/mr_reg_service.cc
+        src/upnp/mr_reg_service.h
+        src/upnp/clients.cc
+        src/upnp/clients.h
+        src/upnp/upnp_common.h
+        src/upnp/headers.cc
+        src/upnp/headers.h
+        src/upnp/quirks.cc
+        src/upnp/quirks.h
+        src/upnp/xml_builder.cc
+        src/upnp/xml_builder.h
         src/url_request_handler.cc
         src/url_request_handler.h
         src/util/enum_iterator.h
@@ -282,12 +289,6 @@ add_library(libgerbera STATIC
         src/util/timer.h
         src/util/tools.cc
         src/util/tools.h
-        src/util/upnp_clients.cc
-        src/util/upnp_clients.h
-        src/util/upnp_headers.cc
-        src/util/upnp_headers.h
-        src/util/upnp_quirks.cc
-        src/util/upnp_quirks.h
         src/util/url.cc
         src/util/url.h
         src/util/url_utils.cc

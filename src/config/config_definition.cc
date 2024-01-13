@@ -56,7 +56,7 @@
 #include "content/content_manager.h"
 #include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_enums.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 
 // default values
 

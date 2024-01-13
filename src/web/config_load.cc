@@ -46,7 +46,6 @@
 #include "config/setup/config_setup_vector.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 
 Web::ConfigLoad::ConfigLoad(const std::shared_ptr<ContentManager>& content)

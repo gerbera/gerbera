@@ -38,7 +38,7 @@
 #include "config/result/autoscan.h"
 #include "database/database.h"
 #include "server.h"
-#include "upnp_xml.h"
+#include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
 Web::Containers::Containers(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)

@@ -30,9 +30,9 @@
 #include "content/content_manager.h"
 #include "context.h"
 #include "database/database.h"
-#include "upnp_xml.h"
+#include "upnp/clients.h"
+#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
-#include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 
 #include <fmt/chrono.h>

@@ -27,8 +27,7 @@
 
 #include "config/config.h"
 #include "content/content_manager.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
+#include "upnp/clients.h"
 
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {

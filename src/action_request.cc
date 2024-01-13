@@ -34,10 +34,11 @@
 
 #include "action_request.h" // API
 
-#include "upnp_common.h"
-#include "upnp_xml.h"
+#include "upnp/quirks.h"
+#include "upnp/upnp_common.h"
+#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
-#include "util/upnp_quirks.h"
+#include "util/tools.h"
 
 ActionRequest::ActionRequest(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<ClientManager> clients, UpnpActionRequest* upnpRequest)
     : upnp_request(upnpRequest)

@@ -36,8 +36,8 @@
 
 #include "cds/cds_enums.h"
 #include "common.h"
+#include "upnp/quirks.h"
 #include "util/grb_time.h"
-#include "util/upnp_quirks.h"
 
 // forward declaration
 class Config;

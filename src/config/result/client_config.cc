@@ -31,8 +31,6 @@
 
 #include "cds/cds_enums.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
 
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, int captionInfoCount, int stringLimit, bool multiValue)
 {

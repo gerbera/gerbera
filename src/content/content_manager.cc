@@ -47,11 +47,11 @@
 #include "import_service.h"
 #include "metadata/metadata_handler.h"
 #include "update_manager.h"
+#include "upnp/clients.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
 #include "web/session_manager.h"
 
 #ifdef HAVE_JS

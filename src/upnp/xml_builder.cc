@@ -32,7 +32,7 @@
 /// \file upnp_xml.cc
 #define LOG_FAC log_facility_t::xml
 
-#include "upnp_xml.h" // API
+#include "xml_builder.h" // API
 
 #include <array>
 #include <fmt/chrono.h>
@@ -45,7 +45,7 @@
 #include "config/result/transcoding.h"
 #include "database/database.h"
 #include "request_handler.h"
-#include "util/upnp_clients.h"
+#include "upnp/clients.h"
 #include "util/url_utils.h"
 
 #define URL_FILE_EXTENSION "ext"
