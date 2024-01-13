@@ -26,6 +26,7 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include <cinttypes>
 #include <map>
 #include <memory>
 #include <pugixml.hpp>
