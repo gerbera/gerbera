@@ -32,9 +32,9 @@ Gerbera - https://gerbera.io/
 #include <array>
 #include <numeric>
 
-#include "upnp_common.h"
+#include "upnp/clients.h"
+#include "upnp/upnp_common.h"
 #include "util/grb_time.h"
-#include "util/upnp_clients.h"
 
 CdsItem::CdsItem()
 {

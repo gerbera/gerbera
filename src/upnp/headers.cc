@@ -23,7 +23,7 @@
 
 /// \file upnp_headers.cc
 
-#include "upnp_headers.h" // API
+#include "headers.h" // API
 
 #if !defined(USING_NPUPNP)
 #include <UpnpExtraHeaders.h>

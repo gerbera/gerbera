@@ -32,7 +32,7 @@
 #include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
-#include "util/upnp_clients.h"
+#include "upnp/clients.h"
 #include "util/xml_to_json.h"
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content)

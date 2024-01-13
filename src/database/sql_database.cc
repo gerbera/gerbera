@@ -47,12 +47,12 @@
 #include "content/autoscan_list.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
-#include "upnp_xml.h"
+#include "upnp/clients.h"
+#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
 #include "util/url_utils.h"
 
 #define MAX_REMOVE_SIZE 1000

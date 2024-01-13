@@ -37,7 +37,7 @@
 #include "layout/builtin_layout.h"
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

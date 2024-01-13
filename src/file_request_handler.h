@@ -35,8 +35,10 @@
 #define __FILE_REQUEST_HANDLER_H__
 
 #include "request_handler.h"
-#include "upnp_xml.h"
+
 #include <memory>
+
+#include "upnp/xml_builder.h"
 
 class CdsResource;
 class MetadataHandler;

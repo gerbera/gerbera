@@ -28,7 +28,7 @@
 
 #include "cds/cds_enums.h"
 #include "metadata/metadata_enums.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 
 const static auto res_names = std::map<ResourceAttribute, std::string> {
     std::pair(ResourceAttribute::SIZE, "R_SIZE"),

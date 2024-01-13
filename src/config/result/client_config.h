@@ -31,8 +31,7 @@
 #include <mutex>
 #include <vector>
 
-#include "util/upnp_clients.h"
-#include "util/upnp_quirks.h"
+#include "upnp/clients.h"
 
 // forward declaration
 class ClientConfig;

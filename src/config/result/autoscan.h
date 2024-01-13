@@ -37,7 +37,7 @@
 
 #include <mutex>
 
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 #include "util/timer.h"
 
 // forward declarations

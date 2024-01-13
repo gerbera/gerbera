@@ -72,9 +72,9 @@
 #include "content/content_manager.h"
 #include "contrib/cxxopts.hpp"
 #include "server.h"
-#include "upnp_cds.h"
-#include "upnp_cm.h"
-#include "upnp_mrreg.h"
+#include "upnp/conn_mgr_service.h"
+#include "upnp/cont_dir_service.h"
+#include "upnp/mr_reg_service.h"
 
 static constexpr auto gitBranch = std::string_view(GIT_BRANCH);
 static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);

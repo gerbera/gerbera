@@ -28,7 +28,7 @@
 #include "layout.h" // API
 
 #include "cds/cds_item.h"
-#include "upnp_common.h"
+#include "upnp/upnp_common.h"
 #include "util/tools.h"
 
 #ifdef ONLINE_SERVICES

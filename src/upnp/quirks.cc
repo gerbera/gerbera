@@ -24,7 +24,7 @@
 /// \file upnp_quirks.cc
 #define LOG_FAC log_facility_t::clients
 
-#include "upnp_quirks.h" // API
+#include "quirks.h" // API
 
 #include <array>
 #include <utility>
@@ -34,11 +34,12 @@
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "server.h"
-#include "upnp_common.h"
+#include "upnp/clients.h"
+#include "upnp/headers.h"
+#include "upnp/upnp_common.h"
+#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
-#include "util/upnp_headers.h"
 
 Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
     : xmlBuilder(std::move(xmlBuilder))

@@ -38,7 +38,7 @@
 #include "content/content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "session_manager.h"
-#include "util/upnp_headers.h"
+#include "upnp/headers.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
 #include "web/pages.h"

@@ -27,7 +27,7 @@ Gerbera - https://gerbera.io/
 #include "config/result/autoscan.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "sqlite_config_fake.h"
-#include "upnp_xml.h"
+#include "upnp/xml_builder.h"
 #include "util/tools.h"
 
 #if HAVE_MYSQL

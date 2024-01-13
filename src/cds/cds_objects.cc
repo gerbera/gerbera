@@ -39,8 +39,8 @@
 #include "cds_container.h"
 #include "cds_item.h"
 #include "database/database.h"
+#include "upnp/clients.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
 
 static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }

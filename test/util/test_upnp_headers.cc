@@ -21,7 +21,7 @@
 */
 #include <gtest/gtest.h>
 
-#include "util/upnp_headers.h"
+#include "upnp/headers.h"
 
 class HeadersHelperTest : public ::testing::Test {
 

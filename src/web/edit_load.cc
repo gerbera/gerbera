@@ -40,9 +40,9 @@
 #include "cds/cds_item.h"
 #include "database/database.h"
 #include "server.h"
-#include "upnp_xml.h"
+#include "upnp/clients.h"
+#include "upnp/xml_builder.h"
 #include "util/tools.h"
-#include "util/upnp_clients.h"
 #include "util/xml_to_json.h"
 
 Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)

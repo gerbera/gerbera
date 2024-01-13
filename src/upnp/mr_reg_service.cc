@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_cm.cc - this file is part of MediaTomb.
+    upnp_mrreg.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,35 +29,34 @@
     $Id$
 */
 
-/// \file upnp_cm.cc
-#define LOG_FAC log_facility_t::connmgr
+/// \file upnp_mrreg.cc
+#define LOG_FAC log_facility_t::mrregistrar
 
-#include "upnp_cm.h" // API
+#include "mr_reg_service.h" // API
 
 #include "action_request.h"
 #include "config/config_manager.h"
 #include "database/database.h"
 #include "subscription_request.h"
-#include "upnp_common.h"
-#include "upnp_xml.h"
+#include "upnp/upnp_common.h"
+#include "upnp/xml_builder.h"
 #include "util/tools.h"
 
-ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,
+MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle)
     : config(context->getConfig())
-    , database(context->getDatabase())
     , xmlBuilder(std::move(xmlBuilder))
     , deviceHandle(deviceHandle)
 {
 }
 
-void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request) const
+void MRRegistrarService::doIsAuthorized(ActionRequest& request) const
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
-    root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request.setResponse(std::move(response));
     request.setErrorCode(UPNP_E_SUCCESS);
@@ -65,25 +64,22 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
     log_debug("end");
 }
 
-void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request) const
+void MRRegistrarService::doRegisterDevice(ActionRequest& request) const
 {
     log_debug("start");
 
     request.setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("doGetCurrentConnectionInfo: end");
+    log_debug("upnpActionGetCurrentConnectionInfo: end");
 }
 
-void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
+void MRRegistrarService::doIsValidated(ActionRequest& request) const
 {
     log_debug("start");
 
-    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
-    auto csv = mimeTypesToCsv(database->getMimeTypes());
+    auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
     auto root = response->document_element();
-
-    root.append_child("Source").append_child(pugi::node_pcdata).set_value(csv.c_str());
-    root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
+    root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request.setResponse(std::move(response));
     request.setErrorCode(UPNP_E_SUCCESS);
@@ -91,42 +87,41 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
     log_debug("end");
 }
 
-void ConnectionManagerService::processActionRequest(ActionRequest& request) const
+void MRRegistrarService::processActionRequest(ActionRequest& request)
 {
     log_debug("start");
 
-    if (request.getActionName() == "GetCurrentConnectionIDs") {
-        doGetCurrentConnectionIDs(request);
-    } else if (request.getActionName() == "GetCurrentConnectionInfo") {
-        doGetCurrentConnectionInfo(request);
-    } else if (request.getActionName() == "GetProtocolInfo") {
-        doGetProtocolInfo(request);
+    if (request.getActionName() == "IsAuthorized") {
+        doIsAuthorized(request);
+    } else if (request.getActionName() == "RegisterDevice") {
+        doRegisterDevice(request);
+    } else if (request.getActionName() == "IsValidated") {
+        doIsValidated(request);
     } else {
         // invalid or unsupported action
-        log_debug("unrecognized action {}", request.getActionName().c_str());
+        log_debug("unrecognized action {}", request.getActionName());
         request.setErrorCode(UPNP_E_INVALID_ACTION);
-        //        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
+        // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("end");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request) const
+void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
-    auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
-
-    property.append_child("CurrentConnectionIDs").append_child(pugi::node_pcdata).set_value("0");
-    property.append_child("SinkProtocolInfo").append_child(pugi::node_pcdata).set_value("");
-    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(csv.c_str());
+    property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
         deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, xml, request.getSubscriptionID().c_str());
+        UPNP_DESC_MRREG_SERVICE_ID, xml, request.getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -136,32 +131,33 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
     UpnpAcceptSubscriptionExt(deviceHandle,
         config->getOption(CFG_SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, event, request.getSubscriptionID().c_str());
+        UPNP_DESC_MRREG_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
 #endif
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
+// TODO: FIXME
+#if 0
+void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CSV)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
+    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-#if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
-#else
-    IXML_Document* event = nullptr;
+    IXML_Document *event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
+    if (err != IXML_SUCCESS)
+    {
         /// \todo add another error code
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, event);
+    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), serviceID.c_str(), event);
 
     ixmlDocument_free(event);
-#endif
 }
+#endif
