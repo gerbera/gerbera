@@ -215,7 +215,7 @@ function abcbox(stringtobox, boxtype, divchar) {
         charttl = charttl + boxwidth[cb];
     }
     if (charttl != 26) {
-        print("Error in box-definition, length is " + charttl + ". Check the file common.js" );
+        print2("Error", "In box-definition, total length is " + charttl + ". Check the file common.js" );
         // maybe an exit call here to stop processing the media ??
         return "???";
     }
@@ -1294,7 +1294,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
 
         var cds = getCdsObject(entry.location);
         if (!cds) {
-            print("Playlist " + playlist_title + " Skipping entry: " + entry.location);
+            print2("Warning", "Playlist '" + playlist_title + "' Skipping unknown entry: " + entry.location);
             return false;
         }
 
@@ -1307,7 +1307,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
 
         item.extra = entry.extra;
         item.writeThrough = entry.writeThrough;
-        // print("Playlist " + item.title + " Adding entry: " + item.playlistOrder + " " + item.location);
+        print2("Debug", "Playlist '" + item.title + "' Adding entry: " + item.playlistOrder + " " + item.location);
 
         addCdsObject(item, playlistChain);
     }

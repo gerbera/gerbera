@@ -27,6 +27,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
+#include <tuple>
 
 #include "util/string_converter.h"
 
@@ -132,6 +133,7 @@ public:
     // Mimics the print of text
     // Returns the string sent by the script to print
     static std::string print(duk_context* ctx);
+    static std::tuple<std::string, std::string> print2(duk_context* ctx);
 
     // Proxy the common.js script with `getYear`
     // Mimics the parsing of YYYY
@@ -175,5 +177,50 @@ public:
     duk_context* ctx;
 };
 
+class CommonScriptTestFixture : public ScriptTestFixture {
+public:
+    // As Duktape requires static methods, so must the mock expectations be
+    static std::unique_ptr<CommonScriptMock> commonScriptMock;
+
+    CommonScriptTestFixture()
+    {
+        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
+    }
+
+    ~CommonScriptTestFixture() override
+    {
+        commonScriptMock.reset();
+    }
+
+    static inline duk_ret_t js_print(duk_context* ctx)
+    {
+        std::string msg = ScriptTestFixture::print(ctx);
+        return CommonScriptTestFixture::commonScriptMock->print(msg);
+    }
+
+    static inline duk_ret_t js_print2(duk_context* ctx)
+    {
+        auto [mode, msg] = ScriptTestFixture::print2(ctx);
+        return CommonScriptTestFixture::commonScriptMock->print2(mode, msg);
+    }
+
+    static inline duk_ret_t js_getPlaylistType(duk_context* ctx)
+    {
+        std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
+        return CommonScriptTestFixture::commonScriptMock->getPlaylistType(playlistMimeType);
+    }
+
+    static inline duk_ret_t js_createContainerChain(duk_context* ctx)
+    {
+       std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
+       return CommonScriptTestFixture::commonScriptMock->createContainerChain(array);
+    }
+
+    static inline duk_ret_t js_getLastPath(duk_context* ctx)
+    {
+        std::string inputPath = ScriptTestFixture::getLastPath(ctx);
+        return CommonScriptTestFixture::commonScriptMock->getLastPath(inputPath);
+    }
+};
 #endif //GERBERA_SCRIPTTESTFIXTURE_H
 #endif //HAVE_JS

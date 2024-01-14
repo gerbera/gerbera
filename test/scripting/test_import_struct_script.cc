@@ -34,37 +34,14 @@
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
-class ImportStructuredScriptTest : public ScriptTestFixture {
+class ImportStructuredScriptTest : public CommonScriptTestFixture {
 public:
     ImportStructuredScriptTest()
     {
-        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "import.js";
         audioLayout = "Structured";
     }
-
-    ~ImportStructuredScriptTest() override
-    {
-        commonScriptMock.reset();
-    }
-
-    // As Duktape requires static methods, so must the mock expectations be
-    static std::unique_ptr<CommonScriptMock> commonScriptMock;
 };
-
-std::unique_ptr<CommonScriptMock> ImportStructuredScriptTest::commonScriptMock;
-
-static duk_ret_t print(duk_context* ctx)
-{
-    std::string msg = ScriptTestFixture::print(ctx);
-    return ImportStructuredScriptTest::commonScriptMock->print(msg);
-}
-
-static duk_ret_t getPlaylistType(duk_context* ctx)
-{
-    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
-    return ImportStructuredScriptTest::commonScriptMock->getPlaylistType(playlistMimeType);
-}
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
@@ -89,18 +66,6 @@ static duk_ret_t addContainerTree(duk_context* ctx)
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportStructuredScriptTest::commonScriptMock->addContainerTree(tree);
-}
-
-static duk_ret_t createContainerChain(duk_context* ctx)
-{
-    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
-    return ImportStructuredScriptTest::commonScriptMock->createContainerChain(array);
-}
-
-static duk_ret_t getLastPath(duk_context* ctx)
-{
-    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
-    return ImportStructuredScriptTest::commonScriptMock->getLastPath(inputPath);
 }
 
 static duk_ret_t addCdsObject(duk_context* ctx)
@@ -141,10 +106,11 @@ static duk_ret_t abcBox(duk_context* ctx)
 // that are called from the import.js script
 // * These are static methods, which makes mocking difficult.
 static duk_function_list_entry js_global_functions[] = {
-    { "print", print, DUK_VARARGS },
-    { "getPlaylistType", getPlaylistType, 1 },
-    { "createContainerChain", createContainerChain, 1 },
-    { "getLastPath", getLastPath, 1 },
+    { "print", CommonScriptTestFixture::js_print, DUK_VARARGS },
+    { "print2", CommonScriptTestFixture::js_print2, DUK_VARARGS },
+    { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
+    { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
+    { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "getYear", getYear, 1 },
     { "getRootPath", getRootPath, 2 },

@@ -39,38 +39,15 @@ Gerbera - https://gerbera.io/
 // Extends ScriptTestFixture to allow
 // for unique testing of the External URL Playlist
 // processing
-class ExternalUrlAsxPlaylistTest : public ScriptTestFixture {
+class ExternalUrlAsxPlaylistTest : public CommonScriptTestFixture {
 public:
-    // As Duktape requires static methods, so must the mock expectations be
-    static std::unique_ptr<CommonScriptMock> commonScriptMock;
-
     ExternalUrlAsxPlaylistTest()
     {
-        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "playlists.js";
         functionName = "importPlaylist";
         objectName = "playlist";
     }
-
-    ~ExternalUrlAsxPlaylistTest() override
-    {
-        commonScriptMock.reset();
-    }
 };
-
-std::unique_ptr<CommonScriptMock> ExternalUrlAsxPlaylistTest::commonScriptMock;
-
-static duk_ret_t getPlaylistType(duk_context* ctx)
-{
-    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
-}
-
-static duk_ret_t print(duk_context* ctx)
-{
-    std::string msg = ScriptTestFixture::print(ctx);
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->print(msg);
-}
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
@@ -81,18 +58,6 @@ static duk_ret_t addContainerTree(duk_context* ctx)
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ExternalUrlAsxPlaylistTest::commonScriptMock->addContainerTree(tree);
-}
-
-static duk_ret_t createContainerChain(duk_context* ctx)
-{
-    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->createContainerChain(array);
-}
-
-static duk_ret_t getLastPath(duk_context* ctx)
-{
-    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->getLastPath(inputPath);
 }
 
 static pugi::xml_node nullNode;
@@ -161,10 +126,11 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
 static duk_function_list_entry js_global_functions[] = {
-    { "print", print, DUK_VARARGS },
-    { "getPlaylistType", getPlaylistType, 1 },
-    { "createContainerChain", createContainerChain, 1 },
-    { "getLastPath", getLastPath, 1 },
+    { "print", CommonScriptTestFixture::js_print, DUK_VARARGS },
+    { "print2", CommonScriptTestFixture::js_print2, DUK_VARARGS },
+    { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
+    { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
+    { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "readXml", readXml, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
@@ -218,7 +184,7 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq(MIME_TYPE_ASX_PLAYLIST))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.asx"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.asx"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.asx"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));

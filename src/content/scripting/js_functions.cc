@@ -44,13 +44,34 @@
 
 // extern "C" {
 
+duk_ret_t js_print2(duk_context* ctx)
+{
+    std::string mode = toUpper(duk_get_string(ctx, 0));
+    duk_push_string(ctx, " ");
+    duk_replace(ctx, 0);
+    duk_join(ctx, duk_get_top(ctx) - 1);
+    std::string message = duk_get_string(ctx, 0);
+    if (mode == "ERROR")
+        log_error("{}", message);
+    else if (mode == "WARNING")
+        log_warning("{}", message);
+    else if (mode == "DEBUG")
+        log_debug("{}", message);
+    else
+        log_info("{}", message);
+    duk_push_string(ctx, fmt::format("{}: {}", mode, message).c_str());
+    return 1;
+}
+
 duk_ret_t js_print(duk_context* ctx)
 {
     duk_push_string(ctx, " ");
     duk_insert(ctx, 0);
     duk_join(ctx, duk_get_top(ctx) - 1);
-    log_debug("{}", duk_get_string(ctx, 0));
-    return 0;
+    auto message = duk_get_string(ctx, 0);
+    log_info("{}", message);
+    duk_push_string(ctx, message);
+    return 1;
 }
 
 duk_ret_t js_copyObject(duk_context* ctx)

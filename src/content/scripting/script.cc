@@ -64,6 +64,7 @@
 #endif
 
 static constexpr auto jsGlobalFunctions = std::array {
+    duk_function_list_entry { "print2", js_print2, DUK_VARARGS },
     duk_function_list_entry { "print", js_print, DUK_VARARGS },
     duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },
     duk_function_list_entry { "addContainerTree", js_addContainerTree, 1 },
@@ -337,7 +338,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
     std::string commonFdrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
 
     if (commonScrPath.empty() && commonFdrPath.empty()) {
-        log_js("Common script disabled in configuration");
+        log_warning("Common script disabled in configuration");
     } else if (commonScrPath.empty()) {
         loadFolder(commonFdrPath);
     } else {
@@ -345,7 +346,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
             _load(commonScrPath);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", commonScrPath, e.what());
+            log_error("Unable to load {}: {}", commonScrPath, e.what());
         }
     }
     std::string customScrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
@@ -355,7 +356,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
             _load(customScrPath);
             _execute();
         } catch (const std::runtime_error& e) {
-            log_js("Unable to load {}: {}", customScrPath, e.what());
+            log_error("Unable to load {}: {}", customScrPath, e.what());
         }
     } else if (!customFdrPath.empty()) {
         loadFolder(customFdrPath);

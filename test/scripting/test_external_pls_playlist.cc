@@ -37,11 +37,8 @@
 // Extends ScriptTestFixture to allow
 // for unique testing of the External URL Playlist
 // processing
-class ExternalUrlPLSPlaylistTest : public ScriptTestFixture {
+class ExternalUrlPLSPlaylistTest : public CommonScriptTestFixture {
 public:
-    // As Duktape requires static methods, so must the mock expectations be
-    static std::unique_ptr<CommonScriptMock> commonScriptMock;
-
     ExternalUrlPLSPlaylistTest()
     {
         commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
@@ -49,26 +46,7 @@ public:
         functionName = "importPlaylist";
         objectName = "playlist";
     }
-
-    ~ExternalUrlPLSPlaylistTest() override
-    {
-        commonScriptMock.reset();
-    }
 };
-
-std::unique_ptr<CommonScriptMock> ExternalUrlPLSPlaylistTest::commonScriptMock;
-
-static duk_ret_t getPlaylistType(duk_context* ctx)
-{
-    std::string playlistMimeType = ScriptTestFixture::getPlaylistType(ctx);
-    return ExternalUrlPLSPlaylistTest::commonScriptMock->getPlaylistType(playlistMimeType);
-}
-
-static duk_ret_t print(duk_context* ctx)
-{
-    std::string msg = ScriptTestFixture::print(ctx);
-    return ExternalUrlPLSPlaylistTest::commonScriptMock->print(msg);
-}
 
 static duk_ret_t addContainerTree(duk_context* ctx)
 {
@@ -79,18 +57,6 @@ static duk_ret_t addContainerTree(duk_context* ctx)
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ExternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
-}
-
-static duk_ret_t createContainerChain(duk_context* ctx)
-{
-    std::vector<std::string> array = ScriptTestFixture::createContainerChain(ctx);
-    return ExternalUrlPLSPlaylistTest::commonScriptMock->createContainerChain(array);
-}
-
-static duk_ret_t getLastPath(duk_context* ctx)
-{
-    std::string inputPath = ScriptTestFixture::getLastPath(ctx);
-    return ExternalUrlPLSPlaylistTest::commonScriptMock->getLastPath(inputPath);
 }
 
 // Proxy the Duktape script with `readln`
@@ -123,10 +89,11 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
 static duk_function_list_entry js_global_functions[] = {
-    { "print", print, DUK_VARARGS },
-    { "getPlaylistType", getPlaylistType, 1 },
-    { "createContainerChain", createContainerChain, 1 },
-    { "getLastPath", getLastPath, 1 },
+    { "print", CommonScriptTestFixture::js_print, DUK_VARARGS },
+    { "print2", CommonScriptTestFixture::js_print2, DUK_VARARGS },
+    { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
+    { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
+    { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "readln", readln, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
@@ -161,11 +128,11 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
 {
     // Expecting the common script calls..and will proxy through the mock objects
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("no/type"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.pls'"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Error"), Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.pls'"))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.pls"}, {"mimetype", "no/type"}});
@@ -190,7 +157,7 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
@@ -228,7 +195,7 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print(Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));

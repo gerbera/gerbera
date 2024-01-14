@@ -39,6 +39,8 @@ Gerbera - https://gerbera.io/
 #include "duk_helper.h"
 #include "script_test_fixture.h"
 
+std::unique_ptr<CommonScriptMock> CommonScriptTestFixture::commonScriptMock;
+
 void ScriptTestFixture::SetUp()
 {
     ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
@@ -520,6 +522,13 @@ std::string ScriptTestFixture::getPlaylistType(duk_context* ctx)
     }
     duk_push_string(ctx, type.c_str());
     return playlistMimeType;
+}
+
+std::tuple<std::string, std::string> ScriptTestFixture::print2(duk_context* ctx)
+{
+    std::string mode = duk_to_string(ctx, 0);
+    std::string result = duk_to_string(ctx, 1);
+    return {mode, result};
 }
 
 std::string ScriptTestFixture::print(duk_context* ctx)
