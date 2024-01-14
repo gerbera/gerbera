@@ -40,32 +40,15 @@
 // Extends ScriptTestFixture to allow
 // for unique testing of the External Metafile
 // processing
-class MetafileNfoTest : public ScriptTestFixture {
+class MetafileNfoTest : public CommonScriptTestFixture {
 public:
-    // As Duktape requires static methods, so must the mock expectations be
-    static std::unique_ptr<CommonScriptMock> commonScriptMock;
-
     MetafileNfoTest()
     {
-        commonScriptMock = std::make_unique<::testing::NiceMock<CommonScriptMock>>();
         scriptName = "metadata.js";
         functionName = "importMetadata";
         objectName = "obj";
     }
-
-    ~MetafileNfoTest() override
-    {
-        commonScriptMock.reset();
-    }
 };
-
-std::unique_ptr<CommonScriptMock> MetafileNfoTest::commonScriptMock;
-
-static duk_ret_t print(duk_context* ctx)
-{
-    std::string msg = ScriptTestFixture::print(ctx);
-    return MetafileNfoTest::commonScriptMock->print(msg);
-}
 
 static pugi::xml_node nullNode;
 static pugi::xml_document xmlDoc;
@@ -216,7 +199,8 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
 static duk_function_list_entry js_global_functions[] = {
-    { "print", print, DUK_VARARGS },
+    { "print", CommonScriptTestFixture::js_print, DUK_VARARGS },
+    { "print2", CommonScriptTestFixture::js_print2, DUK_VARARGS },
     { "readXml", readXml, 1 },
     { "updateCdsObject", updateCdsObject, 1 },
     { nullptr, nullptr, 0 },
@@ -271,7 +255,7 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
     };
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
-    EXPECT_CALL(*commonScriptMock, print(Eq(fmt::format("Processing metafile: {} for {} nfo", fileName, location)))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq(fmt::format("Processing metafile: {} for {} nfo", fileName, location)))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<movie ></movie>"))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq(fmt::format("<title >{}</title>", title)))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<originaltitle >It was MediaTomb</originaltitle>"))).WillOnce(Return(1));

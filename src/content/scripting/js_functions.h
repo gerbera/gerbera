@@ -39,6 +39,8 @@
 
 extern "C" {
 
+/// \brief Log output with log level.
+duk_ret_t js_print2(duk_context* ctx);
 /// \brief Log output.
 duk_ret_t js_print(duk_context* ctx);
 

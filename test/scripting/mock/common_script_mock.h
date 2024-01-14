@@ -34,6 +34,7 @@ public:
     virtual ~CommonScriptInterface() = default;
     virtual duk_ret_t getPlaylistType(std::string type) = 0;
     virtual duk_ret_t print(std::string text) = 0;
+    virtual duk_ret_t print2(std::string mode, std::string text) = 0;
     virtual duk_ret_t addContainerTree(std::vector<std::string> tree) = 0;
     virtual duk_ret_t createContainerChain(std::vector<std::string> chain) = 0;
     virtual duk_ret_t getLastPath(std::string path) = 0;
@@ -52,6 +53,7 @@ class CommonScriptMock : public CommonScriptInterface {
 public:
     MOCK_METHOD1(getPlaylistType, duk_ret_t(std::string type));
     MOCK_METHOD1(print, duk_ret_t(std::string text));
+    MOCK_METHOD2(print2, duk_ret_t(std::string mode, std::string text));
     MOCK_METHOD1(addContainerTree, duk_ret_t(std::vector<std::string> tree));
     MOCK_METHOD1(createContainerChain, duk_ret_t(std::vector<std::string> chain));
     MOCK_METHOD1(getLastPath, duk_ret_t(std::string path));

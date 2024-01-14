@@ -46,7 +46,6 @@
 #define log_info SPDLOG_INFO
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
-#define log_js SPDLOG_INFO
 
 enum class log_facility_t {
     thread,

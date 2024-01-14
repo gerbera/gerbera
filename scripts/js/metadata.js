@@ -22,7 +22,7 @@
 
 function importMetadata(meta, cont, rootPath, autoscanId, containerType) {
     const arr = rootPath.split('.');
-    print("Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
+    print2("Info", "Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
     switch (arr[arr.length-1].toLowerCase()) {
         case "nfo":
             parseNfo(meta, rootPath);

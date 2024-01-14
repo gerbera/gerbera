@@ -34,7 +34,7 @@ This section will give you some overview on how virtual objects work and on how 
 
 .. Note::
 
-    In order to use the import scripting feature you have to change the layout type from builtin to js in ``config.xml``
+    In order to use the import scripting feature you have to change the attribute ``<virtual-layout type=..`` from ``builtin`` to ``js`` in ``config.xml``
 
 .. Note::
 
@@ -309,10 +309,10 @@ transcoding are not available. The autoscan entry corresponding to the active ob
 
     .. code-block:: js
 
-        print(config['/server/name']);
-        print(config['/import/library-options/id3/auxdata/add-data'][0]);
-        print(config['/import/layout/path']['Directories']);
-        print(config['/import/autoscan/directory'][object_autoscan_id].location);
+        print2("Info", config['/server/name']);
+        print2("Error", "Empty setting", config['/import/library-options/id3/auxdata/add-data'][0]);
+        print2("Warning", "Active mapping for", config['/import/layout/path']['Directories']);
+        print2("Debug", "Checking", config['/import/autoscan/directory'][object_autoscan_id].location);
 
 
 Constants
@@ -427,38 +427,50 @@ within the import and/or the playlist script:
 
 .. js:function:: print(...)
 
-    This function is useful for debugging scripts, it simply
-    prints to the standard output.
+    This function is useful for debugging scripts, it simply prints an info message in the log.
+    It it recommended to use `print2` instead to set the message level. The function may be removed in the future.
 
-.. js:function:: f2i(string)
+.. js:function:: print2(level, ...)
+
+    This function is useful for debugging scripts, it prints a message in the log with the set level.
+
+    :param string level: Set the output message level.
+        The following case insensitive values for ``level`` are allowed:
+
+        #) ``error``: Print an error message
+        #) ``warning``: Print a warning message
+        #) ``info``: Print an info message
+        #) ``debug``: Print a debug message, which is only visible if running with `--debug` or setting `debug-mode="script"` in `server` section of the config file.
+
+.. js:function:: f2i(text)
 
     Converts filesystem charset to internal UTF-8.
 
-    :param string string:
+    :param string text:
 
     `The 'from' charsets can be defined in the server configuration`
 
-.. js:function:: m2i(string)
+.. js:function:: m2i(text)
 
     Converts metadata charset to internal UTF-8.
 
-    :param string string:
+    :param string text:
 
     `The 'from' charsets can be defined in the server configuration`
 
-.. js:function:: p2i(string)
+.. js:function:: p2i(text)
 
     Converts playlist charset to internal UTF-8.
 
-    :param string string:
+    :param string text:
 
     `The 'from' charsets can be defined in the server configuration`
 
-.. js:function:: j2i(string)
+.. js:function:: j2i(text)
 
     Converts js charset to internal UTF-8.
 
-    :param string string:
+    :param string text:
 
     `The 'from' charsets can be defined in the server configuration`
 
