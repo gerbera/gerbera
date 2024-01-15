@@ -519,8 +519,12 @@ function addAudio(obj, cont, rootPath, containerType) {
     chain.year.metaData[M_UPNP_DATE] = [ date ];
     chain.composer.metaData[M_COMPOSER] = [ composer ];
 
-    var container = addContainerTree([chain.audio, chain.allAudio]);
-    addCdsObject(obj, container);
+    var container;
+
+    if (boxSetup['Audio/allAudio'].enabled) {
+        container = addContainerTree([chain.audio, chain.allAudio]);
+        addCdsObject(obj, container);
+    }
 
     container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
     addCdsObject(obj, container);
