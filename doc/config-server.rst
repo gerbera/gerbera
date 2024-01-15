@@ -537,7 +537,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
     .. code-block:: xml
 
-        <sqlite enabled="yes">
+        <sqlite3 enabled="yes">
 
     Defines the SQLite storage driver section.
 
