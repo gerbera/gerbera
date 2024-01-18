@@ -53,7 +53,7 @@ public:
     std::string bufferToMimeType(const void* buffer, std::size_t length);
 #endif // HAVE_MAGIC
 
-    std::string getMimeType(const fs::path& path, const std::string& defval = "");
+    std::pair<bool, std::string> getMimeType(const fs::path& path, const std::string& defval = "");
 
 private:
     bool extension_map_case_sensitive;

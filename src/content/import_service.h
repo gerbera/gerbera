@@ -196,7 +196,7 @@ public:
     void doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task);
     void clearCache();
 
-    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEntry);
+    std::pair<bool, std::shared_ptr<CdsObject>> createSingleItem(const fs::directory_entry& dirEntry);
     std::shared_ptr<CdsContainer> createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass);
     void fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task);
 

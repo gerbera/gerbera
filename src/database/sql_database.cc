@@ -1054,9 +1054,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         if (!image.empty() && isRegularFile(image, ec)) {
                             auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
                             std::string type = image.extension().string().substr(1);
-                            std::string mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
-                            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, image);
+                            auto [skip, mimeType] = mime->getMimeType(image, fmt::format("image/{}", type));
+                            if (!mimeType.empty()) {
+                                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
+                                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, image);
+                            }
                             dynFolder->addResource(resource);
                         }
                         dynamicContainers.emplace(dynId, std::move(dynFolder));

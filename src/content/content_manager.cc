@@ -1211,11 +1211,15 @@ std::shared_ptr<CdsObject> ContentManager::createObjectFromFile(const std::share
         return nullptr;
 
     std::shared_ptr<CdsObject> obj;
+    bool skip = false;
     if (isRegularFile(dirEnt, ec) || (allowFifo && dirEnt.is_fifo(ec))) { // item
-        obj = getImportService(adir)->createSingleItem(dirEnt);
+        auto itemInfo = getImportService(adir)->createSingleItem(dirEnt);
+        skip = itemInfo.first;
+        obj = itemInfo.second;
     } else if (dirEnt.is_directory(ec)) {
         obj = getImportService(adir)->createSingleContainer(CDS_ID_FS_ROOT, dirEnt, UPNP_CLASS_CONTAINER);
-    } else {
+    }
+    if (!obj && !skip) {
         // only regular files and directories are supported
         throw_std_runtime_error("ContentManager: skipping file {}", dirEnt.path().c_str());
     }
