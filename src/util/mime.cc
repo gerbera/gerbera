@@ -86,7 +86,7 @@ std::string Mime::bufferToMimeType(const void* buffer, std::size_t length)
 }
 #endif
 
-std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
+std::pair<bool, std::string> Mime::getMimeType(const fs::path& path, const std::string& defval)
 {
     std::string extension = path.extension();
     if (!extension.empty())
@@ -96,7 +96,7 @@ std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
         extension = toLower(extension);
 
     if (std::find(ignoredExtensions.begin(), ignoredExtensions.end(), extension) != ignoredExtensions.end()) {
-        return {};
+        return { true, "" };
     }
     std::string mimeType = getValueOrDefault(extension_mimetype_map, extension, "");
     if (mimeType.empty() && !ignore_unknown_extensions) {
@@ -107,5 +107,5 @@ std::string Mime::getMimeType(const fs::path& path, const std::string& defval)
         mimeType = defval.empty() ? extension : defval;
 #endif
     }
-    return mimeType;
+    return { ignore_unknown_extensions, mimeType };
 }

@@ -447,8 +447,9 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_debug("Item found {} {}", itemPath.string(), cdsObj->getID());
             } else {
                 log_debug("Creating Item {}", itemPath.string());
-                cdsObj = createSingleItem(dirEntry);
-                if (cdsObj) {
+                auto [skip, newCdsObj] = createSingleItem(dirEntry);
+                if (newCdsObj) {
+                    cdsObj = newCdsObj;
                     if (contState) {
                         contState->setMTime(cdsObj->getMTime());
                         if (lastModifiedNewMax < cdsObj->getMTime())
@@ -460,7 +461,8 @@ void ImportService::createItems(AutoScanSetting& settings)
                 } else {
                     stateEntry->setObject(ImportState::Broken, cdsObj);
                     cdsObj = nullptr;
-                    log_error("Object not created for file {}", dirEntry.path().string());
+                    if (!skip)
+                        log_error("Object not created for file {}", dirEntry.path().string());
                 }
             }
             if (contState && cdsObj) {
@@ -477,15 +479,18 @@ void ImportService::createItems(AutoScanSetting& settings)
     log_debug("end {}", rootPath.string());
 }
 
-std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_entry& dirEntry) // ToDo: Use StateEntry here
+std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(const fs::directory_entry& dirEntry) // ToDo: Use StateEntry here
 {
     auto objectPath = dirEntry.path();
 
     /* retrieve information about item and decide if it should be included */
-    std::string mimetype = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
+    auto [skip, mimetype] = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
     if (mimetype.empty()) {
-        log_error("Mime not found for file {}", objectPath.c_str());
-        return nullptr;
+        if (skip)
+            log_debug("Mime set empty for file {}", objectPath.c_str());
+        else
+            log_error("Mime not found for file {}", objectPath.c_str());
+        return { skip, nullptr };
     }
     log_debug("Mime '{}' for file {}", mimetype, objectPath.c_str());
 
@@ -520,7 +525,7 @@ std::shared_ptr<CdsObject> ImportService::createSingleItem(const fs::directory_e
     item->setTitle(f2i->convert(title));
     updateSingleItem(dirEntry, item, mimetype);
 
-    return item;
+    return { skip, item };
 }
 
 void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype)
