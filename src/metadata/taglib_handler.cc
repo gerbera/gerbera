@@ -419,7 +419,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
         if (!f || !f->isValid() || !f->tag())
             throw_std_runtime_error("Could not open file {} as OGG", itemLocation);
 
-        const TagLib::List<TagLib::FLAC::Picture*> picList = reinterpret_cast<TagLib::Ogg::XiphComment*>(f->tag())->pictureList();
+        const auto picList = dynamic_cast<TagLib::Ogg::XiphComment*>(f->tag())->pictureList();
         if (picList.isEmpty())
             throw_std_runtime_error("OGG resource {} has empty picture information", itemLocation);
 
@@ -578,7 +578,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr
     // Vorbis uses the FLAC binary picture structure...
     // https://wiki.xiph.org/VorbisComment#Cover_art
     // The unofficial COVERART field is not supported.
-    const TagLib::List<TagLib::FLAC::Picture*> picList = reinterpret_cast<TagLib::Ogg::XiphComment*>(oggFile->tag())->pictureList();
+    const auto picList = dynamic_cast<TagLib::Ogg::XiphComment*>(oggFile->tag())->pictureList();
     if (picList.isEmpty())
         return;
 
