@@ -110,7 +110,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 
     content->triggerPlayHook(group, obj);
 
-    auto processIoHandler = std::make_unique<ProcessIOHandler>(std::move(content), std::move(fifoName), std::move(mainProc), std::move(procList));
+    auto processIoHandler = std::make_unique<ProcessIOHandler>(content, std::move(fifoName), std::move(mainProc), std::move(procList));
     return std::make_unique<BufferedIOHandler>(config, std::move(processIoHandler), profile->getBufferSize(), profile->getBufferChunkSize(), profile->getBufferInitialFillSize());
 }
 
@@ -164,7 +164,7 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
         auto cIoh = std::make_unique<CurlIOHandler>(config, url, nullptr,
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
-        auto pIoh = std::make_unique<ProcessIOHandler>(std::move(content), std::move(ret), nullptr);
+        auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
         auto ch = std::make_unique<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
         procList.push_back(std::make_unique<ProcListItem>(std::move(ch)));
     } catch (const std::runtime_error&) {

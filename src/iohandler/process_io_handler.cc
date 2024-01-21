@@ -105,12 +105,12 @@ void ProcessIOHandler::unregisterAll()
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(std::shared_ptr<ContentManager> content,
+ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<ContentManager>& content,
     fs::path filename,
     std::shared_ptr<Executor> mainProc,
     std::vector<std::unique_ptr<ProcListItem>> procList,
     bool ignoreSeek)
-    : content(std::move(content))
+    : content(content)
     , procList(std::move(procList))
     , mainProc(std::move(mainProc))
     , path(std::move(filename))
