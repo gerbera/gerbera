@@ -206,10 +206,15 @@ void ImportService::clearCache()
 void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start {}", location.string());
-    contentStateCache.clear();
+    if (activeScan.empty()) {
+        contentStateCache.clear();
+        activeScan = location;
+    } else {
+        log_debug("Additional scan {}, already active", location.c_str(), activeScan.c_str());
+    }
 
     auto rootEntry = fs::directory_entry(location);
-    contentStateCache[location] = std::make_shared<ContentState>(rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
+    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
         return;
@@ -246,10 +251,13 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         log_debug("Updating last_modified for autoscan directory {}", autoscanDir->getLocation().c_str());
         database->updateAutoscanDirectory(autoscanDir);
     }
+    if (activeScan == location)
+        activeScan = "";
 }
 
 std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) const
 {
+    log_debug("start {}", location.string());
     if (contentStateCache.find(location) != contentStateCache.end()) {
         return contentStateCache.at(location)->getObject();
     }
@@ -270,20 +278,35 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
         if (isHiddenFile(entryPath, true, dirEntry, settings)) {
             continue;
         }
-        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         if (dirEntry.is_directory(ec) && settings.recursive) {
             if (!ec) {
                 readDir(entryPath, settings);
             } else {
-                contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
+                cacheState(entryPath, dirEntry, ImportState::Broken);
                 log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             }
         } else if (ec) {
-            contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
+            cacheState(entryPath, dirEntry, ImportState::Broken);
             log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
         }
     }
     log_debug("end {}", location.string());
+}
+
+void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, std::shared_ptr<CdsObject> cdsObject)
+{
+    if (contentStateCache.find(entryPath) == contentStateCache.end()) {
+        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
+    } else {
+        state = contentStateCache[entryPath]->getState() < state ? state : contentStateCache[entryPath]->getState();
+        if (!cdsObject)
+            contentStateCache[entryPath]->setState(state);
+        else
+            contentStateCache[entryPath]->setObject(state, cdsObject);
+        if (mtime > std::chrono::seconds::zero())
+            contentStateCache[entryPath]->setMTime(mtime);
+    }
 }
 
 void ImportService::readFile(const fs::path& location)
@@ -291,10 +314,10 @@ void ImportService::readFile(const fs::path& location)
     auto dirEntry = fs::directory_entry(location.parent_path());
     auto entryPath = dirEntry.path();
     while (entryPath != "/" && entryPath != rootPath) {
-        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         dirEntry.assign(entryPath.parent_path(), ec);
         if (ec) {
-            contentStateCache[entryPath]->setObject(ImportState::Broken, nullptr);
+            cacheState(entryPath, dirEntry, ImportState::Broken);
             log_error("ImportService::readFile {}: Failed to navigate up {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             break;
         }
@@ -329,7 +352,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
     if ((name[0] == '.' && !settings.hidden)
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
-        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, ImportState::ToDelete);
+        cacheState(entryPath, dirEntry, ImportState::ToDelete);
         return true;
     }
     if (!noMediaName.empty()) {
@@ -339,7 +362,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
         } else {
             auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
             if (!noMediaEntry.exists(ec) || ec) {
-                contentStateCache[noMediaEntry] = std::make_shared<ContentState>(noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
+                cacheState(noMediaEntry, noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
             } else {
                 // if file exists it will be automatically created
                 return true;

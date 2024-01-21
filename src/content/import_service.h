@@ -115,6 +115,7 @@ public:
     std::chrono::seconds getMTime() const { return mtime; }
 
     ImportState getState() const { return state; }
+    void setState(ImportState newState) { state = newState; }
 };
 
 class UpnpMap {
@@ -173,6 +174,7 @@ private:
 
     std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
     std::error_code ec;
+    fs::path activeScan {};
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
 
@@ -185,6 +187,8 @@ private:
     void updateFanArt();
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
     void removeHidden(AutoScanSetting& settings);
+
+    void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), std::shared_ptr<CdsObject> cdsObject = nullptr);
 
 public:
     ImportService(std::shared_ptr<Context> context);
