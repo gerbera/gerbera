@@ -61,7 +61,7 @@ public:
     }
 };
 
-template <class En, class Under = typename std::underlying_type<En>::type>
+template <class En, class Under = std::underlying_type_t<En>>
 class FlagEnum {
 public:
     FlagEnum()
