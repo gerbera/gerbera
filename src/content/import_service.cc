@@ -238,7 +238,9 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
 
     // update currentContent
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
-        if (stateEntry && stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
+        if (!stateEntry)
+            continue;
+        if (stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
             auto entry = currentContent.find(stateEntry->getObject()->getID());
             if (entry != currentContent.end()) {
                 currentContent.erase(stateEntry->getObject()->getID());
@@ -329,6 +331,8 @@ void ImportService::removeHidden(AutoScanSetting& settings)
 {
     auto hiddenPaths = std::vector<fs::path>();
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
+        if (!stateEntry)
+            continue;
         auto dirEntry = stateEntry->getDirEntry();
         if (isHiddenFile(itemPath, dirEntry.is_directory(ec), dirEntry, settings)) {
             hiddenPaths.push_back(itemPath);
@@ -376,7 +380,7 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
 {
     log_debug("start {} {}", rootPath.string(), parentContainerId);
     for (auto&& [contPath, stateEntry] : contentStateCache) {
-        if (stateEntry->getState() != ImportState::New)
+        if (!stateEntry || stateEntry->getState() != ImportState::New)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
         if (dirEntry.exists(ec) && dirEntry.is_directory(ec)) {
@@ -417,6 +421,8 @@ void ImportService::createItems(AutoScanSetting& settings)
     fs::path contPath;
 
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
+        if (!stateEntry)
+            continue;
         auto cdsObj = stateEntry->getObject();
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
