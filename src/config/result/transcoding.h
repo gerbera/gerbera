@@ -39,6 +39,7 @@
 #include <vector>
 
 #include "cds/cds_resource.h"
+#include "upnp/quirks.h"
 #include "util/grb_fs.h"
 
 enum class TranscodingType {
@@ -58,8 +59,8 @@ class TranscodingProfile {
 public:
     TranscodingProfile(bool enabled, TranscodingType trType, std::string name);
 
-    int getClientFlags() const { return clientFlags; }
-    void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
+    QuirkFlags getClientFlags() const { return clientFlags; }
+    void setClientFlags(QuirkFlags clientFlags) { this->clientFlags = clientFlags; }
 
     /// \brief returns the transcoding type.
     TranscodingType getType() const { return trType; }
@@ -210,7 +211,7 @@ protected:
     std::map<std::string, std::string> environment;
     std::vector<std::string> fourccList;
     AviFourccListmode fourccMode { AviFourccListmode::None };
-    int clientFlags { 0 };
+    QuirkFlags clientFlags { 0 };
     std::string dlnaProf;
 };
 
@@ -231,8 +232,8 @@ public:
     void setTranscoderName(const std::string& transcoder) { this->transcoder = transcoder; }
 
     /// \brief client flags this filter is enabling
-    int getClientFlags() const { return clientFlags; }
-    void setClientFlags(int clientFlags) { this->clientFlags = clientFlags; }
+    QuirkFlags getClientFlags() const { return clientFlags; }
+    void setClientFlags(QuirkFlags clientFlags) { this->clientFlags = clientFlags; }
 
     /// \brief source dlna profile
     std::string getSourceProfile() const { return sourceProf; }
@@ -246,7 +247,7 @@ protected:
     std::string mimeType;
     std::string transcoder;
     std::string sourceProf;
-    int clientFlags { 0 };
+    QuirkFlags clientFlags { 0 };
     std::vector<std::string> noTranscodingMimeTypes;
     std::shared_ptr<TranscodingProfile> transcodingProfile;
 };

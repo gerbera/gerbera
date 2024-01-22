@@ -2,8 +2,16 @@
 
 ### MAIN
 
+- Add ctypes include
+- Avoid crash when parent was not created yet.
+- Bump follow-redirects from 1.15.3 to 1.15.4 in /gerbera-web
+- Build Support for NPUPNP
+- CMake: Use presets
 - Correct two typos.
+- Fix build-deb.sh for releases
 - Gerbera welcomes 2024
+- Refactor config and enums to reduce nesting
+- Scripting: print2 function with log level support
 
 ### v2.0.0
 

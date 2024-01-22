@@ -47,7 +47,9 @@ public:
         return {};
     }
     void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
-    int getIntOption(config_option_t option) const override { return 0; }
+    std::int32_t getIntOption(config_option_t option) const override { return 0; }
+    std::uint32_t getUIntOption(config_option_t option) const override { return 0; }
+    std::int64_t getLongOption(config_option_t option) const override { return 0; }
     std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override
     {
@@ -67,7 +69,9 @@ public:
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }
-    void setOrigValue(const std::string& item, int value) override { }
+    void setOrigValue(const std::string& item, std::int32_t value) override { }
+    void setOrigValue(const std::string& item, std::uint32_t value) override { }
+    void setOrigValue(const std::string& item, std::int64_t value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override { return nullptr; }
     std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const override { return nullptr; }

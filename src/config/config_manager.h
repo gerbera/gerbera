@@ -80,7 +80,9 @@ public:
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    int getIntOption(config_option_t option) const override;
+    IntOptionType getIntOption(config_option_t option) const override;
+    UIntOptionType getUIntOption(config_option_t option) const override;
+    LongOptionType getLongOption(config_option_t option) const override;
 
     /// \brief returns a config option of any type
     /// \param option option to retrieve.
@@ -138,7 +140,9 @@ public:
 
     void setOrigValue(const std::string& item, const std::string& value) override;
     void setOrigValue(const std::string& item, bool value) override;
-    void setOrigValue(const std::string& item, int value) override;
+    void setOrigValue(const std::string& item, IntOptionType value) override;
+    void setOrigValue(const std::string& item, UIntOptionType value) override;
+    void setOrigValue(const std::string& item, LongOptionType value) override;
 
     static bool isDebugLogging() { return debug; }
 

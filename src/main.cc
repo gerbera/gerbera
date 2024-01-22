@@ -589,7 +589,7 @@ int main(int argc, char** argv, char** envp)
             if (opts.count("check-config") > 0) {
                 std::exit(EXIT_SUCCESS);
             }
-            portnum = configManager->getIntOption(CFG_SERVER_PORT);
+            portnum = configManager->getUIntOption(CFG_SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
             std::exit(EXIT_FAILURE);
@@ -694,7 +694,7 @@ int main(int argc, char** argv, char** envp)
                         handleOptionArgs(opts, configManager);
                         handleAdditionalArgs(opts, additionalArgs, configManager);
                         configManager->validate();
-                        portnum = configManager->getIntOption(CFG_SERVER_PORT);
+                        portnum = configManager->getUIntOption(CFG_SERVER_PORT);
                     } catch (const ConfigParseException& ce) {
                         log_error("Error parsing config file '{}': {}", configFile.value_or("").c_str(), ce.what());
                         log_error("Could not restart Gerbera");

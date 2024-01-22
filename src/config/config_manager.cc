@@ -316,7 +316,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // read online content options
 #ifdef ATRAILERS
-    int atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
+    auto atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
     co = ConfigDefinition::findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
     co->makeOption(fmt::to_string(atrailersRefresh), self);
@@ -465,7 +465,17 @@ void ConfigManager::setOrigValue(const std::string& item, bool value)
     origValues.try_emplace(item, value ? "true" : "false");
 }
 
-void ConfigManager::setOrigValue(const std::string& item, int value)
+void ConfigManager::setOrigValue(const std::string& item, IntOptionType value)
+{
+    origValues.try_emplace(item, fmt::to_string(value));
+}
+
+void ConfigManager::setOrigValue(const std::string& item, UIntOptionType value)
+{
+    origValues.try_emplace(item, fmt::to_string(value));
+}
+
+void ConfigManager::setOrigValue(const std::string& item, LongOptionType value)
 {
     origValues.try_emplace(item, fmt::to_string(value));
 }
@@ -480,13 +490,31 @@ std::string ConfigManager::getOption(config_option_t option) const
     return optionValue->getOption();
 }
 
-int ConfigManager::getIntOption(config_option_t option) const
+IntOptionType ConfigManager::getIntOption(config_option_t option) const
 {
     auto optionValue = options.at(option);
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getIntOption();
+}
+
+UIntOptionType ConfigManager::getUIntOption(config_option_t option) const
+{
+    auto optionValue = options.at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getUIntOption();
+}
+
+LongOptionType ConfigManager::getLongOption(config_option_t option) const
+{
+    auto optionValue = options.at(option);
+    if (!optionValue) {
+        throw_std_runtime_error("option {} not set", option);
+    }
+    return optionValue->getLongOption();
 }
 
 std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(config_option_t option) const

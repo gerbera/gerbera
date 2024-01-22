@@ -151,7 +151,7 @@ void Server::run()
         throw_std_runtime_error("Invalid web server root directory {}", webRoot);
     }
 
-    auto configPort = in_port_t(config->getIntOption(CFG_SERVER_PORT));
+    auto configPort = in_port_t(config->getUIntOption(CFG_SERVER_PORT));
     auto ret = startupInterface(iface, configPort);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("UpnpInit failed {} {}", iface, port));

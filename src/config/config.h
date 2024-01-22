@@ -27,6 +27,7 @@
 #include <map>
 #include <vector>
 
+#include "config_int_types.h"
 #include "util/grb_fs.h"
 
 // forward declarations
@@ -411,7 +412,9 @@ public:
     virtual std::string getOrigValue(const std::string& item) const = 0;
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;
-    virtual void setOrigValue(const std::string& item, int value) = 0;
+    virtual void setOrigValue(const std::string& item, IntOptionType value) = 0;
+    virtual void setOrigValue(const std::string& item, UIntOptionType value) = 0;
+    virtual void setOrigValue(const std::string& item, LongOptionType value) = 0;
     virtual bool hasOrigValue(const std::string& item) const = 0;
 
     /// \brief Returns the path of the config file that was used to launch the server.
@@ -430,7 +433,9 @@ public:
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    virtual int getIntOption(config_option_t option) const = 0;
+    virtual IntOptionType getIntOption(config_option_t option) const = 0;
+    virtual UIntOptionType getUIntOption(config_option_t option) const = 0;
+    virtual LongOptionType getLongOption(config_option_t option) const = 0;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.

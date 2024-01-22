@@ -40,6 +40,8 @@
 #include <memory>
 #include <vector>
 
+#include "config_int_types.h"
+
 // forward declaration
 class AutoscanDirectory;
 class BoxLayoutList;
@@ -57,9 +59,17 @@ public:
         throw std::runtime_error("Wrong option type string");
     }
 
-    virtual int getIntOption() const
+    virtual IntOptionType getIntOption() const
     {
         throw std::runtime_error("Wrong option type int");
+    }
+    virtual UIntOptionType getUIntOption() const
+    {
+        throw std::runtime_error("Wrong option type uint");
+    }
+    virtual LongOptionType getLongOption() const
+    {
+        throw std::runtime_error("Wrong option type long");
     }
 
     virtual bool getBoolOption() const
@@ -128,17 +138,52 @@ private:
 
 class IntOption : public ConfigOption {
 public:
-    explicit IntOption(int option, const std::string& optionString = "")
+    explicit IntOption(IntOptionType option, const std::string& optionString = "")
         : option(option)
         , optionString(optionString)
     {
     }
 
     std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
-    int getIntOption() const override { return option; }
+
+    IntOptionType getIntOption() const override { return option; }
 
 private:
-    int option;
+    IntOptionType option;
+    std::string optionString;
+};
+
+class UIntOption : public ConfigOption {
+public:
+    explicit UIntOption(UIntOptionType option, const std::string& optionString = "")
+        : option(option)
+        , optionString(optionString)
+    {
+    }
+
+    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
+
+    UIntOptionType getUIntOption() const override { return option; }
+
+private:
+    UIntOptionType option;
+    std::string optionString;
+};
+
+class LongOption : public ConfigOption {
+public:
+    explicit LongOption(LongOptionType option, const std::string& optionString = "")
+        : option(option)
+        , optionString(optionString)
+    {
+    }
+
+    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
+
+    LongOptionType getLongOption() const override { return option; }
+
+private:
+    LongOptionType option;
     std::string optionString;
 };
 
