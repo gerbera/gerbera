@@ -234,7 +234,8 @@ std::string GrbNet::renderWebUri(std::string_view ip, in_port_t port)
             return fmt::format("[{}]", ip);
         }
         return fmt::format("{}", ip);
-    } else if (ip.find(':') != std::string_view::npos) {
+    }
+    if (ip.find(':') != std::string_view::npos) {
         return fmt::format("[{}]:{}", ip, port);
     }
     return fmt::format("{}:{}", ip, port);

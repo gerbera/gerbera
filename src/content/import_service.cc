@@ -359,14 +359,13 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
         auto noMediaFile = (isDirectory) ? entryPath / noMediaName : entryPath.parent_path() / noMediaName;
         if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
             return contentStateCache[entryPath]->getState() != ImportState::Broken; // broken means: file not found
+        }
+        auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
+        if (!noMediaEntry.exists(ec) || ec) {
+            cacheState(noMediaEntry, noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
         } else {
-            auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
-            if (!noMediaEntry.exists(ec) || ec) {
-                cacheState(noMediaEntry, noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
-            } else {
-                // if file exists it will be automatically created
-                return true;
-            }
+            // if file exists it will be automatically created
+            return true;
         }
     }
     return false;

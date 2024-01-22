@@ -243,7 +243,8 @@ void Server::run()
             for (auto&& name : static_cast<Server*>(cookie)->validHosts) {
                 if (hostStr.find(name) != std::string::npos) {
                     return UPNP_E_SUCCESS;
-                } else if (name.find(hostStr) != std::string::npos) {
+                }
+                if (name.find(hostStr) != std::string::npos) {
                     return UPNP_E_SUCCESS;
                 }
             }

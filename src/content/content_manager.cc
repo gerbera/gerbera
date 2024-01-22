@@ -474,27 +474,25 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& d
         getImportService(asSetting.adir)->doImport(dirEnt.path(), asSetting, currentContent, task);
 
         return getImportService(asSetting.adir)->getObject(dirEnt.path());
-    } else {
-        // checkDatabase, don't process existing
-        std::shared_ptr<CdsContainer> parent;
-        auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), DbFileType::Directory);
-        if (parentObject && parentObject->isContainer())
-            parent = std::dynamic_pointer_cast<CdsContainer>(parentObject);
-        auto obj = createSingleItem(dirEnt, parent, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
-        if (!obj) // object ignored
-            return obj;
-
-        if (asSetting.recursive && obj->isContainer()) {
-            addRecursive(asSetting.adir, dirEnt, std::dynamic_pointer_cast<CdsContainer>(obj), asSetting.followSymlinks, asSetting.hidden, task);
-        }
-
-        if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
-            std::string parentPath = dirEnt.path().parent_path();
-            updateAttachedResources(asSetting.adir, obj, parentPath, true);
-        }
-
-        return obj;
     }
+    // checkDatabase, don't process existing
+    std::shared_ptr<CdsContainer> parent;
+    auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), DbFileType::Directory);
+    if (parentObject && parentObject->isContainer())
+        parent = std::dynamic_pointer_cast<CdsContainer>(parentObject);
+    auto obj = createSingleItem(dirEnt, parent, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
+    if (!obj) // object ignored
+        return obj;
+
+    if (asSetting.recursive && obj->isContainer())
+        addRecursive(asSetting.adir, dirEnt, std::dynamic_pointer_cast<CdsContainer>(obj), asSetting.followSymlinks, asSetting.hidden, task);
+
+    if (asSetting.rescanResource && obj->hasResource(ContentHandler::RESOURCE)) {
+        std::string parentPath = dirEnt.path().parent_path();
+        updateAttachedResources(asSetting.adir, obj, parentPath, true);
+    }
+
+    return obj;
 }
 
 bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all)
