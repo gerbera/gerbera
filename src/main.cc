@@ -105,7 +105,7 @@ static void printOptions()
     fmt::print("Active Options\n");
     for (auto&& setup : setupList) {
         if (setup && setup->getTypeString() != "List" && setup->option < CFG_MAX) {
-            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
+            auto value = !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue();
             resultMap[setup->option] = fmt::format("[{}] : {} = {}", setup->getUniquePath(), setup->getTypeString(), value);
         }
     }
@@ -212,12 +212,12 @@ static void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<C
             auto setup = ConfigDefinition::findConfigSetup(option);
             if (!setup)
                 continue;
-            if (setup->getTypeString() == "Boolean" && valueList.size() < 1) {
+            if (setup->getTypeString() == "Boolean" && valueList.empty()) {
                 setup->makeOption("yes", configManager);
             } else if (valueList.size() >= 2) {
                 setup->makeOption(valueList[1], configManager);
             }
-            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
+            auto value = !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue();
             log_debug("set-option {} [{}] = {}", option, setup->getUniquePath(), value);
         }
     }
@@ -231,17 +231,17 @@ static void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<C
             auto setup = ConfigDefinition::findConfigSetup(addArg.option);
             if (!setup)
                 continue;
-            if (setup->getTypeString() == "Boolean" && valueList.size() < 1) {
+            if (setup->getTypeString() == "Boolean" && valueList.empty()) {
                 setup->makeOption("yes", configManager);
-            } else if (valueList.size() >= 1) {
+            } else if (!valueList.empty()) {
                 setup->makeOption(fmt::format("{}", fmt::join(valueList, ",")), configManager);
             }
-            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue());
         } else if (addArg.defaultValue) {
             auto setup = ConfigDefinition::findConfigSetup(addArg.option);
             setup->makeOption(addArg.defaultValue.value(), configManager);
-            auto value = setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue();
-            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), setup->getCurrentValue() != "" ? setup->getCurrentValue() : setup->getDefaultValue());
+            auto value = !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue();
+            log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue());
         }
     }
 }

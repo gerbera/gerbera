@@ -131,7 +131,7 @@ bool parseTime(int& value, std::string& timeValue, bool seconds)
         value += iVal * factors[index];
         index++;
     }
-    if (list.size() > 0)
+    if (!list.empty())
         timeValue = fmt::to_string(value);
-    return list.size() > 0;
+    return !list.empty();
 }
