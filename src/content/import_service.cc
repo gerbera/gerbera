@@ -210,7 +210,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         contentStateCache.clear();
         activeScan = location;
     } else {
-        log_debug("Additional scan {}, already active", location.c_str(), activeScan.c_str());
+        log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
     }
 
     auto rootEntry = fs::directory_entry(location);
