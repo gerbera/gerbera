@@ -33,7 +33,7 @@ public:
     fs::path getConfigFilename() const override { return {}; }
     MOCK_METHOD(std::string, getOption, (config_option_t option), (const override));
     void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
-    int getIntOption(config_option_t option) const override {
+    std::int32_t getIntOption(config_option_t option) const override {
         switch (option) {
         case CFG_UPNP_CAPTION_COUNT:
             return 1;
@@ -41,6 +41,8 @@ public:
             return 0;
         }
     }
+    std::uint32_t getUIntOption(config_option_t option) const override { return 0; }
+    std::int64_t getLongOption(config_option_t option) const override { return 0; }
     std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override { return false; }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override
@@ -125,7 +127,9 @@ public:
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
     void setOrigValue(const std::string& item, bool value) override { }
-    void setOrigValue(const std::string& item, int value) override { }
+    void setOrigValue(const std::string& item, std::int32_t value) override { }
+    void setOrigValue(const std::string& item, std::uint32_t value) override { }
+    void setOrigValue(const std::string& item, std::int64_t value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (const override));
     MOCK_METHOD(std::shared_ptr<DynamicContentList>, getDynamicContentListOption, (config_option_t option), (const override));

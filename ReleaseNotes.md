@@ -1,5 +1,12 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## MAIN
+
+### Code Improvements
+
+- Restructuring files
+- Update versions of fmt (10.2.1), spdlog (1.13.0)
+
 ## v2.0.0
 
 This release is a new major release and contains two noteworthy changes.

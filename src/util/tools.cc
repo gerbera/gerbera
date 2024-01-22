@@ -107,7 +107,7 @@ std::string toUpper(std::string str)
     return str;
 }
 
-int stoiString(const std::string& str, int def, int base)
+std::int32_t stoiString(const std::string& str, std::int32_t def, std::int32_t base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
@@ -121,7 +121,21 @@ int stoiString(const std::string& str, int def, int base)
     return def;
 }
 
-unsigned long stoulString(const std::string& str, int def, int base)
+std::int64_t stolString(const std::string& str, std::int64_t def, std::int64_t base)
+{
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
+        return def;
+
+    try {
+        std::size_t pos;
+        return std::stol(str, &pos, base);
+    } catch (const std::exception& ex) {
+        log_error("{} (input {})", ex.what(), str);
+    }
+    return def;
+}
+
+unsigned long stoulString(const std::string& str, unsigned long def, unsigned long base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;

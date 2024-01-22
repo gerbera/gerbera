@@ -27,37 +27,40 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 
-void ConfigIntSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+template <typename T, class OptionClass>
+void ConfigIntegerSetup<T, OptionClass>::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     newOption(getXmlContent(root));
     setOption(config);
 }
 
-void ConfigIntSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+template <typename T, class OptionClass>
+void ConfigIntegerSetup<T, OptionClass>::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (rawCheck) {
         if (!rawCheck(optValue)) {
             throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (valueCheck) {
-        if (!valueCheck(stoiString(optValue))) {
+        if (!valueCheck(converter(optValue, 0, 10))) {
             throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
         }
     } else if (minCheck) {
-        if (!minCheck(stoiString(optValue), minValue)) {
+        if (!minCheck(converter(optValue, 0, 10), minValue)) {
             throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue);
         }
     }
     try {
         auto intValue = (parseValue) ? parseValue(optValue) : std::stoi(optValue);
-        optionValue = std::make_shared<IntOption>(intValue);
+        optionValue = std::make_shared<OptionClass>(intValue);
         setOption(config);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue);
     }
 }
 
-int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName) const
+template <typename T, class OptionClass>
+T ConfigIntegerSetup<T, OptionClass>::checkIntValue(std::string& sVal, const std::string& pathName) const
 {
     try {
         if (rawCheck) {
@@ -65,31 +68,33 @@ int ConfigIntSetup::checkIntValue(std::string& sVal, const std::string& pathName
                 throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, sVal);
             }
         } else if (valueCheck) {
-            if (!valueCheck(stoiString(sVal))) {
+            if (!valueCheck(converter(sVal, 0, 10))) {
                 throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, sVal);
             }
         } else if (minCheck) {
-            if (!minCheck(stoiString(sVal), minValue)) {
+            if (!minCheck(converter(sVal, 0, 10), minValue)) {
                 throw_std_runtime_error("Invalid {}/{} value '{}', must be at least {}", pathName, xpath, sVal, minValue);
             }
         }
         if (parseValue)
             return parseValue(sVal);
 
-        return std::stoi(sVal);
+        return std::stol(sVal);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal);
     }
 }
 
-int ConfigIntSetup::getXmlContent(const pugi::xml_node& root)
+template <typename T, class OptionClass>
+T ConfigIntegerSetup<T, OptionClass>::getXmlContent(const pugi::xml_node& root)
 {
     std::string sVal = ConfigSetup::getXmlContent(root, true);
     log_debug("Config: option: '{}/{}' value: '{}'", root.path(), xpath, sVal);
     return checkIntValue(sVal, root.path());
 }
 
-std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
+template <typename T, class OptionClass>
+std::shared_ptr<ConfigOption> ConfigIntegerSetup<T, OptionClass>::newOption(T optValue)
 {
     if (valueCheck && !valueCheck(optValue)) {
         throw_std_runtime_error("Invalid {} value {}", xpath, optValue);
@@ -98,13 +103,13 @@ std::shared_ptr<ConfigOption> ConfigIntSetup::newOption(int optValue)
         throw_std_runtime_error("Invalid {} value {}, must be at least {}", xpath, optValue, minValue);
     }
     if (printValue)
-        optionValue = std::make_shared<IntOption>(optValue, printValue(optValue));
+        optionValue = std::make_shared<OptionClass>(optValue, printValue(optValue));
     else
-        optionValue = std::make_shared<IntOption>(optValue);
+        optionValue = std::make_shared<OptionClass>(optValue);
     return optionValue;
 }
 
-bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
+bool CheckProfileNumberValue(std::string& value)
 {
     auto tempInt = 0;
     if (value == "source" || value == fmt::to_string(SOURCE))
@@ -120,22 +125,36 @@ bool ConfigIntSetup::CheckProfileNumberValue(std::string& value)
     return true;
 }
 
-bool ConfigIntSetup::CheckMinValue(int value, int minValue)
+template <>
+ConfigIntSetup::ConvertFunction ConfigIntSetup::converter = stoiString;
+
+template <>
+ConfigUIntSetup::ConvertFunction ConfigUIntSetup::converter = stoulString;
+
+template <>
+ConfigLongSetup::ConvertFunction ConfigLongSetup::converter = stolString;
+
+template <typename T, class OptionClass>
+bool ConfigIntegerSetup<T, OptionClass>::CheckMinValue(T value, T minValue)
 {
     return value >= minValue;
 }
 
-bool ConfigIntSetup::CheckImageQualityValue(int value)
+bool CheckImageQualityValue(IntOptionType value)
 {
     return value >= 0 && value <= 10;
 }
 
-bool ConfigIntSetup::CheckUpnpStringLimitValue(int value)
+bool CheckUpnpStringLimitValue(IntOptionType value)
 {
     return value == -1 || value >= 4;
 }
 
-bool ConfigIntSetup::CheckPortValue(int value)
+bool CheckPortValue(UIntOptionType value)
 {
     return value >= 0 && value <= 65535;
 }
+
+template class ConfigIntegerSetup<IntOptionType, IntOption>;
+template class ConfigIntegerSetup<UIntOptionType, UIntOption>;
+template class ConfigIntegerSetup<LongOptionType, LongOption>;

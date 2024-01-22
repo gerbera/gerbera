@@ -143,7 +143,7 @@ public:
      * \return bitset of the flags
      *
      */
-    long checkFlags(long flags) const;
+    QuirkFlags checkFlags(QuirkFlags flags) const;
 
     /** \brief Get number of allow CaptionInfoEx entries
      *
@@ -198,7 +198,7 @@ private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientInfo* pClientInfo;
 
-    bool hasFlag(long flag) const;
+    bool hasFlag(QuirkFlags flag) const;
 };
 
 #endif // __UPNP_QUIRKS_H__

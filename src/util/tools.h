@@ -76,9 +76,10 @@ std::string toLower(std::string str);
 std::string& toLowerInPlace(std::string& str);
 
 /// \brief convert string to integer
-int stoiString(const std::string& str, int def = 0, int base = 10);
+std::int32_t stoiString(const std::string& str, std::int32_t def = 0, std::int32_t base = 10);
+std::int64_t stolString(const std::string& str, std::int64_t def = 0, std::int64_t base = 10);
 /// \brief convert string to unsigned long
-unsigned long stoulString(const std::string& str, int def = 0, int base = 10);
+unsigned long stoulString(const std::string& str, unsigned long def = 0, unsigned long base = 10);
 
 /// \brief  Used to replace potential multiple following //../ with single /
 void reduceString(std::string& str, char ch);

@@ -48,12 +48,12 @@ Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr
         pClientInfo = clientManager->getInfo(addr, userAgent);
 }
 
-long Quirks::checkFlags(long flags) const
+QuirkFlags Quirks::checkFlags(QuirkFlags flags) const
 {
     return pClientInfo ? pClientInfo->flags & flags : 0;
 }
 
-bool Quirks::hasFlag(long flag) const
+bool Quirks::hasFlag(QuirkFlags flag) const
 {
     return pClientInfo && (pClientInfo->flags & flag) == flag;
 }

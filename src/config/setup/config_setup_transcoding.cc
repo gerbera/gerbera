@@ -69,7 +69,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_MIMETYPE_PROF_MAP_USING)->getXmlContent(child));
         filter->setSourceProfile(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_SRCDLNA)->getXmlContent(child));
-        filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
+        filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
         auto noTranscoding = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING)->getXmlContent(child);
         std::vector<std::string> noTranscodingVector;
         for (auto&& mime : splitString(noTranscoding, ','))
@@ -95,7 +95,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ATTR_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
         prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
-        prof->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
+        prof->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
 
         pugi::xml_node sub;
         sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
@@ -287,7 +287,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getClientFlags());
-                filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
+                filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, filter->getClientFlags());
                 return true;
             }
@@ -332,7 +332,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
             if (optItem == index) {
                 config->setOrigValue(index, entry->getClientFlags());
-                entry->setClientFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
+                entry->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getClientFlags());
                 return true;
             }
