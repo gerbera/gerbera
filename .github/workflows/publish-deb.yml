@@ -23,12 +23,12 @@ jobs:
             arch: linux/arm/v7
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Build and upload deb
         run: |
@@ -49,7 +49,7 @@ jobs:
           string: '${{ matrix.os-ver }}:${{ matrix.arch }}'
           replace-with: $1-$2-$3$4.deb
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.replace.outputs.replaced }}
           path: build-deb/*.deb
