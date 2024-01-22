@@ -82,7 +82,7 @@ public:
     }
 
 protected:
-    const TokenType type;
+    TokenType type;
     std::string value;
 };
 
@@ -453,8 +453,8 @@ private:
     const char table_quote_end;
     std::string tableAlias;
     std::string tableName;
-    const std::vector<std::pair<std::string, En>> keyMap;
-    const std::map<En, std::pair<std::string, std::string>> colMap;
+    std::vector<std::pair<std::string, En>> keyMap;
+    std::map<En, std::pair<std::string, std::string>> colMap;
 };
 
 class SortParser {
