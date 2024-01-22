@@ -72,7 +72,7 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
         duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
 
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
+            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
         }
         duk_pop(ctx); // commonScript
     } else if (scriptName != "common.js") {
@@ -86,7 +86,7 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
                     duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
 
                     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-                        std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
+                        std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
                     }
                     duk_pop(ctx); // entryPath
                     log_debug("Loaded {}", entryPath.c_str());
@@ -418,9 +418,9 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
     if (duk_is_function(ctx, -1)) {
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
 #if DUK_VERSION > 20399
-            std::cerr << "Failed to execute script: " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
+            std::cerr << "Failed to execute script: " << duk_safe_to_stacktrace(ctx, -1) << '\n';
 #else
-            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << std::endl;
+            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
 #endif
         }
         duk_pop(ctx); // script_under_test
@@ -435,7 +435,7 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
     std::string containerType;
     // Push function onto stack
     if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
-        std::cerr << "javascript function not found: " << functionName << std::endl;
+        std::cerr << "javascript function not found: " << functionName << '\n';
         duk_pop(ctx);
         return;
     }
@@ -466,9 +466,9 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
 #if DUK_VERSION > 20399
-        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
+        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_stacktrace(ctx, -1) << '\n';
 #else
-        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_string(ctx, -1) << std::endl;
+        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_string(ctx, -1) << '\n';
 #endif
         duk_pop(ctx);
         return;

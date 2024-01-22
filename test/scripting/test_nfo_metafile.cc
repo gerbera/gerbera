@@ -145,13 +145,13 @@ duk_ret_t updateCdsObject(duk_context* ctx)
     std::map<std::string, std::string> result;
 
     if (duk_is_undefined(ctx, -1)) {
-        std::cerr << "Could not retrieve stack " << objectName << " object" << std::endl;
+        std::cerr << "Could not retrieve stack " << objectName << " object" << '\n';
         return 0;
     }
 
     duk_get_prop_string(ctx, -1, "title");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
-        std::cerr << "Could not retrieve stack " << objectName << ".title" << std::endl;
+        std::cerr << "Could not retrieve stack " << objectName << ".title" << '\n';
         duk_pop(ctx);
         return 0;
     }
@@ -160,7 +160,7 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 
     duk_get_prop_string(ctx, -1, "upnpclass");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
-        std::cerr << "Could not retrieve stack " << objectName << ".upnpclass" << std::endl;
+        std::cerr << "Could not retrieve stack " << objectName << ".upnpclass" << '\n';
         duk_pop(ctx);
         return 0;
     }
@@ -169,7 +169,7 @@ duk_ret_t updateCdsObject(duk_context* ctx)
 
     duk_get_prop_string(ctx, -1, "description");
     if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
-        std::cerr << "Could not retrieve stack " << objectName << ".description" << std::endl;
+        std::cerr << "Could not retrieve stack " << objectName << ".description" << '\n';
         duk_pop(ctx);
         return 0;
     }
