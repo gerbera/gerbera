@@ -245,20 +245,15 @@ std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
         stask->waitForTask();
         return stask->getResult();
     } catch (const std::runtime_error& e) {
-        if (!shutdownFlag) {
-            if (dbInitDone) {
-                log_error("Prematurely shutting down.\n{}", e.what());
-                rollback("");
-                shutdown();
-            }
+        if (!dbInitDone)
             throw_std_runtime_error(e.what());
-        } else {
-            if (dbInitDone) {
-                log_error("Already shutting down.\n{}", e.what());
-                return {};
-            } else
-                throw_std_runtime_error(e.what());
+        if (!shutdownFlag) {
+            log_error("Prematurely shutting down.\n{}", e.what());
+            rollback("");
+            shutdown();
         }
+        log_error("Already shutting down.\n{}", e.what());
+        return {};
     }
 }
 
@@ -278,19 +273,14 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        if (!shutdownFlag) {
-            if (dbInitDone) {
-                log_error("Prematurely shutting down.\n{}", e.what());
-                rollback("");
-                shutdown();
-            }
+        if (!dbInitDone)
             throw_std_runtime_error(e.what());
-        } else {
-            if (dbInitDone)
-                log_error("Already shutting down.\n{}", e.what());
-            else
-                throw_std_runtime_error(e.what());
+        if (!shutdownFlag) {
+            log_error("Prematurely shutting down.\n{}", e.what());
+            rollback("");
+            shutdown();
         }
+        log_error("Already shutting down.\n{}", e.what());
     }
 }
 
@@ -303,19 +293,14 @@ void Sqlite3Database::exec(std::string_view tableName, const std::string& query,
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        if (!shutdownFlag) {
-            if (dbInitDone) {
-                log_error("Prematurely shutting down.\n{}", e.what());
-                rollback("");
-                shutdown();
-            }
+        if (!dbInitDone)
             throw_std_runtime_error(e.what());
-        } else {
-            if (dbInitDone)
-                log_error("Already shutting down.\n{}", e.what());
-            else
-                throw_std_runtime_error(e.what());
+        if (!shutdownFlag) {
+            log_error("Prematurely shutting down.\n{}", e.what());
+            rollback("");
+            shutdown();
         }
+        log_error("Already shutting down.\n{}", e.what());
     }
 }
 
@@ -328,20 +313,15 @@ int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
         etask->waitForTask();
         return getLastInsertId ? etask->getLastInsertId() : -1;
     } catch (const std::runtime_error& e) {
-        if (!shutdownFlag) {
-            if (dbInitDone) {
-                log_error("Prematurely shutting down.\n{}", e.what());
-                rollback("");
-                shutdown();
-            }
+        if (!dbInitDone)
             throw_std_runtime_error(e.what());
-        } else {
-            if (dbInitDone) {
-                log_error("Already shutting down.\n{}", e.what());
-                return -1;
-            } else
-                throw_std_runtime_error(e.what());
+        if (!shutdownFlag) {
+            log_error("Prematurely shutting down.\n{}", e.what());
+            rollback("");
+            shutdown();
         }
+        log_error("Already shutting down.\n{}", e.what());
+        return -1;
     }
 }
 
