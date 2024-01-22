@@ -2389,7 +2389,7 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
         identifier(PLAYSTATUS_TABLE),
         fmt::join(where, " AND ")));
-    auto doUpdate = (res && res->getNumRows() > 0) ? true : false;
+    auto doUpdate = res && res->getNumRows() > 0;
 
     if (doUpdate) {
         std::vector<std::string> fields {

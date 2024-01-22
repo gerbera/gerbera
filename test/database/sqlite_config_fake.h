@@ -53,10 +53,7 @@ public:
     std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
     bool getBoolOption(config_option_t option) const override
     {
-        if (option == CFG_SERVER_STORAGE_SQLITE_RESTORE) {
-            return true;
-        }
-        return false;
+        return option == CFG_SERVER_STORAGE_SQLITE_RESTORE;
     }
     std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override { return {}; }
