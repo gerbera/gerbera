@@ -162,7 +162,7 @@ void ContentManager::run()
                 continue;
             }
         }
-        for (auto dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
+        for (const auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
             fs::path path = dir->getLocation();
             if (fs::is_directory(path)) {
                 dir->setObjectID(ensurePathExistence(path));
