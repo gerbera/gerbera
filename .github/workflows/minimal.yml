@@ -35,7 +35,7 @@ jobs:
             util-linux-dev \
             zlib-dev
 
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Build
         run: |
