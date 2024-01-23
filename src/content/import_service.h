@@ -182,13 +182,13 @@ private:
     void readFile(const fs::path& location);
     void createContainers(int parentContainerId, AutoScanSetting& settings);
     void createItems(AutoScanSetting& settings);
-    void updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype);
+    void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void updateFanArt();
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
     void removeHidden(AutoScanSetting& settings);
 
-    void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), std::shared_ptr<CdsObject> cdsObject = nullptr);
+    void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), const std::shared_ptr<CdsObject>& cdsObject = nullptr);
 
 public:
     ImportService(std::shared_ptr<Context> context);
