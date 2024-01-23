@@ -503,7 +503,7 @@ void ImportService::createItems(AutoScanSetting& settings)
 
 std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(const fs::directory_entry& dirEntry) // ToDo: Use StateEntry here
 {
-    auto objectPath = dirEntry.path();
+    const auto& objectPath = dirEntry.path();
 
     /* retrieve information about item and decide if it should be included */
     auto [skip, mimetype] = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
