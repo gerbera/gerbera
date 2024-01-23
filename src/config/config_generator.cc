@@ -161,11 +161,8 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(config_option_t optio
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
     for (auto&& value : cs->getXmlContent({})) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
-        std::size_t index = 0;
-        for (auto&& [key, val] : value) {
+        for (auto&& [key, val] : value)
             setValue(fmt::format("{}/{}/attribute::{}", cs->xpath, nodeKey, key), val);
-            ++index;
-        }
     }
     return generated[cs->xpath];
 }

@@ -46,6 +46,7 @@ bool ConfigVectorSetup::createOptionFromNode(const pugi::xml_node& optValue, std
     if (optValue) {
         const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
         std::vector<std::string> attrList;
+        attrList.reserve(optionList.size());
         for (auto& opt : optionList) {
             attrList.push_back(ConfigDefinition::removeAttribute(opt));
         }
