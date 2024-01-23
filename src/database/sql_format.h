@@ -28,8 +28,8 @@
 #include <fmt/format.h>
 
 struct SQLIdentifier {
-    SQLIdentifier(const std::string& name, char quote_begin, char quote_end)
-        : name(name)
+    SQLIdentifier(std::string name, char quote_begin, char quote_end)
+        : name(std::move(name))
         , quote_begin(quote_begin)
         , quote_end(quote_end)
     {
@@ -49,8 +49,8 @@ struct fmt::formatter<SQLIdentifier> : formatter<std::string> {
 };
 
 struct ColumnUpdate {
-    ColumnUpdate(const SQLIdentifier& column, std::string value)
-        : column(column)
+    ColumnUpdate(SQLIdentifier column, std::string value)
+        : column(std::move(column))
         , value(std::move(value))
     {
     }

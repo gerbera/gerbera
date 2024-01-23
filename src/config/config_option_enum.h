@@ -32,9 +32,9 @@
 template <class Enum>
 class EnumOption : public ConfigOption {
 public:
-    explicit EnumOption(Enum option, const std::string& optionString)
+    explicit EnumOption(Enum option, std::string optionString)
         : option(option)
-        , optionString(optionString)
+        , optionString(std::move(optionString))
     {
     }
 
@@ -42,7 +42,7 @@ public:
 
     Enum getEnumOption() const { return option; }
 
-    static Enum getEnumOption(const std::shared_ptr<Config> config, config_option_t option)
+    static Enum getEnumOption(const std::shared_ptr<Config>& config, config_option_t option)
     {
         auto optionValue = config->getConfigOption(option);
         auto optionEnumValue = std::dynamic_pointer_cast<EnumOption<Enum>>(optionValue);

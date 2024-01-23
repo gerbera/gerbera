@@ -130,7 +130,7 @@ public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
     SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly = false);
-    SLExecTask(const std::string& query, const std::string& eKey);
+    SLExecTask(const std::string& query, std::string eKey);
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
     bool checkKey(const std::string& key) const override { return key != eKey; }

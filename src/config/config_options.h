@@ -138,9 +138,9 @@ private:
 
 class IntOption : public ConfigOption {
 public:
-    explicit IntOption(IntOptionType option, const std::string& optionString = "")
+    explicit IntOption(IntOptionType option, std::string optionString = "")
         : option(option)
-        , optionString(optionString)
+        , optionString(std::move(optionString))
     {
     }
 
@@ -155,9 +155,9 @@ private:
 
 class UIntOption : public ConfigOption {
 public:
-    explicit UIntOption(UIntOptionType option, const std::string& optionString = "")
+    explicit UIntOption(UIntOptionType option, std::string optionString = "")
         : option(option)
-        , optionString(optionString)
+        , optionString(std::move(optionString))
     {
     }
 
@@ -172,9 +172,9 @@ private:
 
 class LongOption : public ConfigOption {
 public:
-    explicit LongOption(LongOptionType option, const std::string& optionString = "")
+    explicit LongOption(LongOptionType option, std::string optionString = "")
         : option(option)
-        , optionString(optionString)
+        , optionString(std::move(optionString))
     {
     }
 

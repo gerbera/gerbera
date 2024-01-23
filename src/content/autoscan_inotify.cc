@@ -356,7 +356,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 
         // add move watch
         auto watch = std::make_shared<WatchMove>(removeWd);
-        wdObj->addWatch(move(watch));
+        wdObj->addWatch(std::move(watch));
     }
     return wd;
 }

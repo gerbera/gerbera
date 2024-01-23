@@ -83,26 +83,26 @@ private:
     std::shared_ptr<CdsContainer> parentObject;
 
 public:
-    ContentState(const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), std::shared_ptr<CdsObject> cdsObject = nullptr)
+    ContentState(fs::directory_entry dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), std::shared_ptr<CdsObject> cdsObject = nullptr)
         : state(state)
-        , dirEntry(dirEntry)
+        , dirEntry(std::move(dirEntry))
         , mtime(mtime)
-        , cdsObject(cdsObject)
+        , cdsObject(std::move(cdsObject))
     {
     }
 
     void setObject(ImportState state, std::shared_ptr<CdsObject> cdsObject)
     {
         this->state = state;
-        this->cdsObject = cdsObject;
+        this->cdsObject = std::move(cdsObject);
     }
     void setFirstObject(std::shared_ptr<CdsObject> firstObject)
     {
-        this->firstObject = firstObject;
+        this->firstObject = std::move(firstObject);
     }
     void setParentObject(std::shared_ptr<CdsContainer> parentObject)
     {
-        this->parentObject = parentObject;
+        this->parentObject = std::move(parentObject);
     }
     std::shared_ptr<CdsObject> getObject() { return cdsObject; }
     std::shared_ptr<CdsObject> getFirstObject() { return firstObject; }
