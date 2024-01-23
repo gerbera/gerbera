@@ -67,7 +67,7 @@ protected:
     using AutoLock = std::scoped_lock<std::recursive_mutex>;
 
     std::vector<std::shared_ptr<BoxLayout>> list;
-    void _add(const std::shared_ptr<BoxLayout>& dir, std::size_t index);
+    void _add(const std::shared_ptr<BoxLayout>& layout, std::size_t index);
 };
 
 /// \brief Define properties of a tree entry in virtual layout

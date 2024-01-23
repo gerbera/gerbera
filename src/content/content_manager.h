@@ -189,7 +189,7 @@ public:
     /// \brief returns an array of all autoscan directories
     std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const;
 
-    std::shared_ptr<AutoscanDirectory> findAutoscanDirectory(fs::path dir) const;
+    std::shared_ptr<AutoscanDirectory> findAutoscanDirectory(fs::path path) const;
     bool isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings);
 
     /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.

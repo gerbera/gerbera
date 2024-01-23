@@ -42,7 +42,7 @@
 
 class Xml2Json {
 public:
-    std::string getJson(const pugi::xml_node& root);
+    std::string getJson(const pugi::xml_node& node);
 
     void setArrayName(const pugi::xml_node& node, std::string_view name) { asArray.insert_or_assign(node, name); }
     void setFieldType(const std::string& node, std::string_view type) { asType.insert_or_assign(node, type); }
