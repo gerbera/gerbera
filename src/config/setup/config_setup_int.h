@@ -30,7 +30,7 @@
 
 template <typename T, class OptionClass>
 class ConfigIntegerSetup : public ConfigSetup {
-    static_assert(std::is_integral<T>::value, "Integral required.");
+    static_assert(std::is_integral_v<T>, "Integral required.");
 
 public:
     using IntCheckFunction = std::function<bool(T value)>;
