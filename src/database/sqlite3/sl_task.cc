@@ -151,10 +151,10 @@ SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId, bool warn
 {
 }
 
-SLExecTask::SLExecTask(const std::string& query, const std::string& eKey)
+SLExecTask::SLExecTask(const std::string& query, std::string eKey)
     : query(query.c_str())
     , getLastInsertIdFlag(false)
-    , eKey(eKey)
+    , eKey(std::move(eKey))
 {
 }
 

@@ -67,12 +67,12 @@ void CMAddFileTask::run()
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-    std::shared_ptr<CdsObject> object, const fs::path& path, bool rescanResource, bool all)
+    std::shared_ptr<CdsObject> object, fs::path path, bool rescanResource, bool all)
     : GenericTask(ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
     , object(std::move(object))
-    , path(path)
+    , path(std::move(path))
     , all(all)
     , rescanResource(rescanResource)
 {

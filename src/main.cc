@@ -223,7 +223,7 @@ static void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<C
     }
 }
 
-static void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOptionArgs> additionalArgs, const std::shared_ptr<Config>& configManager)
+static void handleAdditionalArgs(cxxopts::ParseResult& opts, const std::vector<ConfigOptionArgs>& additionalArgs, const std::shared_ptr<Config>& configManager)
 {
     for (auto&& addArg : additionalArgs) {
         if (opts[addArg.optLong].count() > 0) {

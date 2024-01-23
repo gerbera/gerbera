@@ -137,7 +137,7 @@ void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr
     this->content = std::move(content);
     if (autoScan) {
         this->autoscanDir = std::move(autoScan);
-        this->rootPath = path;
+        this->rootPath = std::move(path);
     }
 }
 
@@ -574,7 +574,7 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
 /// \param object used to make code compatible with legacy scan
 void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task)
 {
-    std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : object;
+    std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : std::move(object);
 
     if (cdsObject && cdsObject->isItem() && layout) {
         try {
@@ -603,7 +603,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
 #ifdef HAVE_JS
             try {
                 if (playlistParserScript && contentType == CONTENT_TYPE_PLAYLIST)
-                    playlistParserScript->processPlaylistObject(cdsObject, std::move(task), rootPath);
+                    playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
             } catch (const std::runtime_error& e) {
                 log_error("{}", e.what());
             }

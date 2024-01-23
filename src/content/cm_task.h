@@ -68,7 +68,7 @@ protected:
 
 public:
     CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-        std::shared_ptr<CdsObject> object, const fs::path& path, bool rescanResource, bool all);
+        std::shared_ptr<CdsObject> object, fs::path path, bool rescanResource, bool all);
     void run() override;
 };
 
