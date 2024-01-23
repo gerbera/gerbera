@@ -112,7 +112,7 @@ void TagLibHandler::addField(MetadataFields field, const TagLib::File& file, con
         break;
     case MetadataFields::M_TRACKNUMBER: {
         std::uint32_t i = tag->track();
-        if (i == 0 || i > std::uint32_t(std::numeric_limits<int>::max()))
+        if (i == 0 || i > static_cast<std::uint32_t>(std::numeric_limits<int>::max()))
             return;
         value.push_back(fmt::to_string(i));
         item->setTrackNumber(i);

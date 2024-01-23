@@ -122,11 +122,11 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
         }
 
         // Store first two pre-read bytes.
-        data[0] = std::byte(lh);
-        data[1] = std::byte(ll);
+        data[0] = static_cast<std::byte>(lh);
+        data[1] = static_cast<std::byte>(ll);
 
-        auto got = ioh.read(data + 2, itemLen - 2);
-        if (got < 0 && got != int(itemLen - 2)) {
+        auto got = ioh.read(data + 2, static_cast<int>(itemLen) - 2);
+        if (got < 0 && got != static_cast<int>(itemLen) - 2) {
             throw_std_runtime_error("getJpegResolution: Premature end of file?");
         }
 

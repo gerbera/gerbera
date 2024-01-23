@@ -64,7 +64,7 @@ TEST(ToolsTest, readWriteBinaryFile)
 
     std::vector<std::byte> expected(source.size());
     std::transform(source.begin(), source.end(), expected.begin(),
-        [](char c) { return std::byte(c); });
+        [](char c) { return static_cast<std::byte>(c); });
 
     EXPECT_EQ(*result, expected);
     fs::remove(testFile);

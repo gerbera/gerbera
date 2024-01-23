@@ -268,7 +268,7 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
     }
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
-        fetchOnlineContent(OnlineServiceType(parameter->getID()));
+        fetchOnlineContent(static_cast<OnlineServiceType>(parameter->getID()));
     }
 #endif // ONLINE_SERVICES
 }

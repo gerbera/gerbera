@@ -217,7 +217,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
             if (!seekId || !seekPos)
                 continue;
             auto seekIdValue = EbmlId(seekId->GetBuffer(), seekId->GetSize());
-            auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + uint16(*seekPos);
+            auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + static_cast<uint16>(*seekPos);
             log_debug("parseHead: Seek ID {} at {}", seekIdValue.GetValue(), segmentPosition);
             if (seekIdValue == LIBMATROSKA_NAMESPACE::KaxAttachments::ClassInfos.GlobalId || seekIdValue == LIBMATROSKA_NAMESPACE::KaxInfo::ClassInfos.GlobalId) {
                 ebmlFile.setFilePointer(segmentPosition);
@@ -277,7 +277,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NA
                 log_error("Malformed MKV file; KaxDuration cast failed!");
                 continue;
             }
-            auto fDuration = millisecondsToHMSF(double(*static_cast<EbmlFloat*>(durationEl)));
+            auto fDuration = millisecondsToHMSF(static_cast<double>(*static_cast<EbmlFloat*>(durationEl)));
             log_debug("KaxDuration = {}", fDuration);
             if (item->getResourceCount() > 0) {
                 item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::DURATION, sc->convert(fDuration));

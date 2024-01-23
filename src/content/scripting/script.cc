@@ -573,7 +573,7 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<C
     duk_push_sprintf(ctx, "%s", containerType.c_str());
     narg++;
 
-    if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
+    if (duk_pcall(ctx, static_cast<duk_idx_t>(narg)) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
 #if DUK_VERSION > 20399
@@ -895,9 +895,9 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     if (!val.empty())
         setProperty("location", val);
 
-    setIntProperty("mtime", int(obj->getMTime().count()));
-    setIntProperty("utime", int(obj->getUTime().count()));
-    setIntProperty("sizeOnDisk", int(obj->getSizeOnDisk()));
+    setIntProperty("mtime", static_cast<int>(obj->getMTime().count()));
+    setIntProperty("utime", static_cast<int>(obj->getUTime().count()));
+    setIntProperty("sizeOnDisk", static_cast<int>(obj->getSizeOnDisk()));
     setIntProperty("flags", obj->getFlags());
 
     // TODO: boolean type
@@ -912,7 +912,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
         auto service = OnlineServiceType(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
-        setIntProperty("onlineservice", int(service));
+        setIntProperty("onlineservice", static_cast<int>(service));
     } else
 #endif
         setIntProperty("onlineservice", 0);
@@ -1013,8 +1013,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 
     // CdsItem
     if (obj->isItem() && item) {
-        setIntProperty("trackNumber", int(item->getTrackNumber()));
-        setIntProperty("partNumber", int(item->getPartNumber()));
+        setIntProperty("trackNumber", item->getTrackNumber());
+        setIntProperty("partNumber", item->getPartNumber());
         val = item->getMimeType();
         if (!val.empty())
             setProperty("mimetype", val);

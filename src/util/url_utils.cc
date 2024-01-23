@@ -95,7 +95,7 @@ std::string urlEscape(std::string_view str)
             cplen = 1;
 
         if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.') {
-            buf << char(c);
+            buf << static_cast<char>(c);
         } else {
             int hi = c >> 4;
             int lo = c & 15;
@@ -132,7 +132,7 @@ std::string urlUnescape(std::string_view str)
             int lo = pos ? pos - hexCharS2 : 0;
 
             int ascii = (hi << 4) | lo;
-            buf << char(ascii);
+            buf << static_cast<char>(ascii);
         } else if (c == '+') {
             buf << ' ';
         } else {
