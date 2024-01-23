@@ -140,7 +140,7 @@ void ClientConfigList::remove(std::size_t id, bool edit)
     }
 }
 
-static constexpr auto clientTypes = std::array {
+static constexpr std::array clientTypes {
     std::pair("None", ClientType::Unknown),
     std::pair("BubbleUPnP", ClientType::BubbleUPnP),
     std::pair("SamsungAllShare", ClientType::SamsungAllShare),
@@ -178,7 +178,7 @@ std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
     throw_std_runtime_error("illegal matchType given to mapMatchType()");
 }
 
-static constexpr auto quirkFlags = std::array {
+static constexpr std::array quirkFlags {
     std::pair("SAMSUNG", QUIRK_FLAG_SAMSUNG),
     std::pair("SAMSUNG_BOOKMARK_SEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC),
     std::pair("SAMSUNG_BOOKMARK_MSEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC),

@@ -325,7 +325,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    constexpr auto deviceProperties = std::array {
+    constexpr std::array deviceProperties {
         std::pair("friendlyName", CFG_SERVER_NAME),
         std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
         std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
@@ -339,7 +339,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     for (auto&& [tag, field] : deviceProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
-    const auto deviceStringProperties = std::array {
+    const std::array deviceStringProperties {
         std::pair("deviceType", UPNP_DESC_DEVICE_TYPE),
         std::pair("presentationURL", presentationURL.empty() ? "/" : presentationURL.c_str()),
         std::pair("sec:ProductCap", UPNP_DESC_PRODUCT_CAPS),
@@ -353,13 +353,13 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     {
         auto iconList = device.append_child("iconList");
 
-        constexpr auto iconDims = std::array {
+        constexpr std::array iconDims {
             std::pair("120", "24"),
             std::pair("48", "24"),
             std::pair("32", "8"),
         };
 
-        constexpr auto iconTypes = std::array {
+        constexpr std::array iconTypes {
             std::pair(UPNP_DESC_ICON_PNG_MIMETYPE, ".png"),
             std::pair(UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp"),
             std::pair(UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg"),
@@ -382,21 +382,20 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() co
     {
         auto serviceList = device.append_child("serviceList");
 
-        struct ServiceInfo {
+        constexpr struct ServiceInfo {
             const char* serviceType;
             const char* serviceId;
             const char* scpdurl;
             const char* controlURL;
             const char* eventSubURL;
-        };
-        constexpr auto services = std::array<ServiceInfo, 3> { {
+        } services[] = {
             // cm
             { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
             { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
             // media receiver registrar service for the Xbox 360
             { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
-        } };
+        };
 
         for (auto&& s : services) {
             auto service = serviceList.append_child("service");

@@ -63,7 +63,7 @@
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
 
-static constexpr auto jsGlobalFunctions = std::array {
+static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { "print2", js_print2, DUK_VARARGS },
     duk_function_list_entry { "print", js_print, DUK_VARARGS },
     duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },

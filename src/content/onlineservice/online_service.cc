@@ -42,7 +42,7 @@
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
-static constexpr auto servicePrefixes = std::array { '\0', 'Y', 'S', 'W', 'T', '\0' };
+static constexpr std::array servicePrefixes { '\0', 'Y', 'S', 'W', 'T', '\0' };
 
 void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& service)
 {

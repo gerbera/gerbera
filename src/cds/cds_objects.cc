@@ -141,7 +141,7 @@ std::string_view CdsObject::mapObjectType(unsigned int type)
     throw_std_runtime_error("illegal objectType: {}", type);
 }
 
-static constexpr auto upnpFlags = std::array {
+static constexpr std::array upnpFlags {
     std::pair("Restricted", OBJECT_FLAG_RESTRICTED),
     std::pair("Searchable", OBJECT_FLAG_SEARCHABLE),
     std::pair("UseResourceRef", OBJECT_FLAG_USE_RESOURCE_REF),

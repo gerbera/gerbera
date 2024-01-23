@@ -101,7 +101,7 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
     auto feature = features.append_child("Feature");
     feature.append_attribute("name") = "samsung.com_BASICVIEW";
     feature.append_attribute("version") = "1";
-    constexpr auto containers = std::array {
+    constexpr std::array containers {
         std::pair(UPNP_CLASS_AUDIO_ITEM, "A"),
         std::pair(UPNP_CLASS_VIDEO_ITEM, "V"),
         std::pair(UPNP_CLASS_IMAGE_ITEM, "I"),
