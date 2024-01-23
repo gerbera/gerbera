@@ -128,8 +128,8 @@ bool CheckProfileNumberValue(std::string& value);
 bool CheckImageQualityValue(IntOptionType value);
 bool CheckPortValue(UIntOptionType value);
 
-typedef ConfigIntegerSetup<IntOptionType, IntOption> ConfigIntSetup;
-typedef ConfigIntegerSetup<UIntOptionType, UIntOption> ConfigUIntSetup;
-typedef ConfigIntegerSetup<LongOptionType, LongOption> ConfigLongSetup;
+using ConfigIntSetup = ConfigIntegerSetup<IntOptionType, IntOption>;
+using ConfigUIntSetup = ConfigIntegerSetup<UIntOptionType, UIntOption>;
+using ConfigLongSetup = ConfigIntegerSetup<LongOptionType, LongOption>;
 
 #endif // __CONFIG_SETUP_INT_H__
