@@ -413,7 +413,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     bool processExisting,
     bool firstChild,
     const std::shared_ptr<AutoscanDirectory>& adir,
-    std::shared_ptr<CMAddFileTask> task)
+    const std::shared_ptr<CMAddFileTask>& task)
 {
     auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
     bool isNew = false;
@@ -529,7 +529,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
     return parentRemoved;
 }
 
-std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CdsObject> obj, const fs::path& path, bool rescanResource, bool all)
+std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool all)
 {
     if (!obj || obj->getID() == INVALID_OBJECT_ID)
         return {};
@@ -1451,7 +1451,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
 #endif
 }
 
-std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CdsObject> obj, const fs::path& path, bool rescanResource, bool async, bool all)
+std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async, bool all)
 {
     if (async) {
         auto self = shared_from_this();

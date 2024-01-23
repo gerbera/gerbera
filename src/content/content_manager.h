@@ -124,7 +124,7 @@ public:
         bool lowPriority = false, bool cancellable = true);
 
     int ensurePathExistence(const fs::path& path) const;
-    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CdsObject> obj, const fs::path& path, bool rescanResource, bool async = true, bool all = false);
+    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async = true, bool all = false);
 
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -270,14 +270,14 @@ protected:
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
     std::shared_ptr<ImportService> getImportService(const std::shared_ptr<AutoscanDirectory>& adir);
-    std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CdsObject> obj, const fs::path& path, bool rescanResource, bool all);
+    std::vector<int> _removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool all);
     void cleanupTasks(const fs::path& path);
 
     void scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI);
     void _rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task = nullptr);
     /* for recursive addition */
     void addRecursive(std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& subDir, const std::shared_ptr<CdsContainer>& parentContainer, bool followSymlinks, bool hidden, const std::shared_ptr<CMAddFileTask>& task);
-    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, std::shared_ptr<CMAddFileTask> task);
+    std::shared_ptr<CdsObject> createSingleItem(const fs::directory_entry& dirEnt, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootPath, bool followSymlinks, bool checkDatabase, bool processExisting, bool firstChild, const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CMAddFileTask>& task);
     bool updateAttachedResources(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& parentPath, bool all);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 

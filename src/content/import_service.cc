@@ -294,7 +294,7 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
     log_debug("end {}", location.string());
 }
 
-void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, std::shared_ptr<CdsObject> cdsObject)
+void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, const std::shared_ptr<CdsObject>& cdsObject)
 {
     if (contentStateCache.find(entryPath) == contentStateCache.end()) {
         contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
@@ -550,7 +550,7 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
     return { skip, item };
 }
 
-void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, std::shared_ptr<CdsItem> item, const std::string& mimetype)
+void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
 {
     auto mTime = toSeconds(dirEntry.last_write_time(ec));
     item->setMTime(mTime);
