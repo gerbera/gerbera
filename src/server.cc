@@ -337,7 +337,7 @@ void Server::writeBookmark(const std::string& addr)
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
-    GrbFile(std::move(path)).writeTextFile(data);
+    GrbFile(path).writeTextFile(data);
 }
 
 void Server::emptyBookmark()
@@ -346,7 +346,7 @@ void Server::emptyBookmark()
 
     fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
-    GrbFile(std::move(path)).writeTextFile(data);
+    GrbFile(path).writeTextFile(data);
 }
 
 std::string Server::getVirtualUrl() const
