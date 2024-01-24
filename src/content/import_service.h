@@ -186,7 +186,7 @@ private:
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void updateFanArt();
     void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
-    void removeHidden(AutoScanSetting& settings);
+    void removeHidden(const AutoScanSetting& settings);
 
     void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), const std::shared_ptr<CdsObject>& cdsObject = nullptr);
 
