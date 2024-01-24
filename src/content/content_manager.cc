@@ -1155,6 +1155,7 @@ std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const s
 {
     fs::path cPath = database->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
     std::vector<std::shared_ptr<CdsObject>> cVec;
+    cVec.reserve(std::distance(cPath.begin(), cPath.end()));
     for (auto&& segment : cPath) {
         cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
     }
