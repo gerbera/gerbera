@@ -81,8 +81,7 @@ void BufferedIOHandler::threadProc()
     do {
 #ifdef TOMBDEBUG
         if (firstLog || getDeltaMillis(lastLog) > std::chrono::milliseconds(100)) {
-            if (firstLog)
-                firstLog = false;
+            firstLog = false;
             lastLog = currentTimeMS();
             [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
