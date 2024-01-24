@@ -195,7 +195,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
             month = date.substr(y + 1);
             m = month.find('-');
             if (m != std::string::npos)
-                month = month.substr(0, m);
+                month.resize(m);
         }
 
         if ((y > 0) && (m > 0)) {
@@ -211,7 +211,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
 
         auto t = date.find('T');
         if (t != std::string::npos) {
-            date = date.substr(0, t);
+            date.resize(t);
         }
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(container["Video"]);
@@ -250,7 +250,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
             month = date.substr(y + 1);
             m = month.find('-');
             if (m != std::string::npos)
-                month = month.substr(0, m);
+                month.resize(m);
         }
 
         if ((y > 0) && (m > 0)) {
@@ -265,7 +265,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
 
         auto t = date.find('T');
         if (t != std::string::npos) {
-            date = date.substr(0, t);
+            date.resize(t);
         }
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(container["Photos"]);
@@ -315,7 +315,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     if (!date.empty()) {
         auto i = date.find('-');
         if (i != std::string::npos)
-            date = date.substr(0, i);
+            date.resize(i);
 
         desc = fmt::format("{}, {}", desc, date);
         albumDate = date;

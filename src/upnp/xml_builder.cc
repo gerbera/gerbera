@@ -935,7 +935,7 @@ std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource, const std::
 
     auto pos = mimeType.find(';');
     if (pos != std::string::npos) {
-        mimeType = mimeType.substr(0, pos);
+        mimeType.resize(pos);
     }
     for (auto&& [from, to] : mimeMappings) {
         replaceAllString(mimeType, from, to);
