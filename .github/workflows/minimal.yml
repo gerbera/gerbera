@@ -11,31 +11,30 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
-    container:
-      image: alpine:3.17
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: alpine.sh {0}
     steps:
-      - name: Install Dependencies
-        run: |
-          apk add --no-cache \
-            bash \
-            cmake \
-            duktape-dev \
-            fmt-dev \
-            g++ \
-            gcc \
-            git \
-            gtest-dev \
-            libupnp-dev \
-            ninja \
-            pkgconf \
-            pugixml-dev \
-            spdlog-dev \
-            sqlite-dev \
-            util-linux-dev \
-            zlib-dev
-
       - uses: actions/checkout@v4
+      - uses: jirutka/setup-alpine@v1
+        with:
+          branch: edge
+          packages: >
+            build-base
+            cmake
+            duktape-dev
+            fmt-dev
+            git
+            gtest-dev
+            libupnp-dev
+            ninja
+            pkgconf
+            pugixml-dev
+            spdlog-dev
+            sqlite-dev
+            util-linux-dev
+            zlib-dev
 
       - name: Build
         run: |
