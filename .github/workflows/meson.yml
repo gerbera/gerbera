@@ -1,0 +1,80 @@
+name: meson
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: true
+
+jobs:
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          python3 -m pip install meson ninja
+          brew install spdlog
+
+      - name: Compile and Test
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3
+          meson compile -C "${{github.workspace}}/build" --verbose
+  FreeBSD:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          prepare: |
+            pkg install -y curl meson ninja pkgconf fmt libmicrohttpd pugixml spdlog
+          run: |
+            meson setup "${{github.workspace}}/build" -Dwarning_level=3
+            meson compile -C "${{github.workspace}}/build" --verbose
+            meson test -C "${{github.workspace}}/build" --verbose
+  Alpine:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le', 'riscv64', 's390x']
+    defaults:
+      run:
+        shell: alpine.sh {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jirutka/setup-alpine@v1
+        with:
+          branch: edge
+          arch: ${{matrix.platform}}
+          packages: >
+            build-base
+            cmake
+            git
+            pkgconf
+            meson
+            samurai
+            curl-dev
+            duktape-dev
+            exiv2-dev
+            ffmpeg-dev
+            ffmpegthumbnailer-dev
+            fmt-dev
+            gtest-dev
+            libexif-dev
+            libmatroska-dev
+            libmicrohttpd-dev
+            libnpupnp-dev
+            magic-dev
+            mariadb-connector-c-dev
+            pugixml-dev
+            spdlog-dev
+            sqlite-dev
+            taglib-dev
+            util-linux-dev
+            wavpack-dev
+      - name: Compile and Test
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3
+          meson compile -C "${{github.workspace}}/build" --verbose
+          meson test -C "${{github.workspace}}/build" --verbose
