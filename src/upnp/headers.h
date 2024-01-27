@@ -36,7 +36,7 @@ public:
     void addHeader(const std::string& key, const std::string& value);
     void writeHeaders(UpnpFileInfo* fileInfo) const;
 
-    static std::map<std::string, std::string> readHeaders(UpnpFileInfo* fileInfo);
+    static std::map<std::string, std::string> readHeaders(const UpnpFileInfo* fileInfo);
 
 private:
     static std::string formatHeader(const std::pair<std::string, std::string>& header);

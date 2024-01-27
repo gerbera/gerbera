@@ -433,19 +433,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             bool setBuffer = false;
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
             if (optItem == index) {
-                config->setOrigValue(index, int(buffer));
+                config->setOrigValue(index, static_cast<int>(buffer));
                 buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
                 setBuffer = true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
             if (optItem == index) {
-                config->setOrigValue(index, int(chunk));
+                config->setOrigValue(index, static_cast<int>(chunk));
                 chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
                 setBuffer = true;
             }
             index = getItemPath(i, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER, ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
             if (optItem == index) {
-                config->setOrigValue(index, int(fill));
+                config->setOrigValue(index, static_cast<int>(fill));
                 fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
                 setBuffer = true;
             }

@@ -81,15 +81,14 @@ void BufferedIOHandler::threadProc()
     do {
 #ifdef TOMBDEBUG
         if (firstLog || getDeltaMillis(lastLog) > std::chrono::milliseconds(100)) {
-            if (firstLog)
-                firstLog = false;
+            firstLog = false;
             lastLog = currentTimeMS();
             [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
-                auto currentFillSize = int(b - a);
+                auto currentFillSize = static_cast<int>(b - a);
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
-                percentFillLevel = (float(currentFillSize) / float(bufSize)) * 100;
+                percentFillLevel = (static_cast<float>(currentFillSize) / static_cast<float>(bufSize)) * 100;
             }
             log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
         }
@@ -98,11 +97,11 @@ void BufferedIOHandler::threadProc()
             a = b = 0;
 
         if (doSeek && !empty && (seekWhence == SEEK_SET || (seekWhence == SEEK_CUR && seekOffset > 0))) {
-            auto currentFillSize = int(b - a);
+            auto currentFillSize = static_cast<int>(b - a);
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
 
-            auto relSeek = int(seekOffset);
+            auto relSeek = static_cast<int>(seekOffset);
             if (seekWhence == SEEK_SET)
                 relSeek -= posRead;
 
@@ -148,7 +147,7 @@ void BufferedIOHandler::threadProc()
         } else {
             lock.unlock();
             std::size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
-            readBytes = underlyingHandler->read(buffer + int(b), chunkSize);
+            readBytes = underlyingHandler->read(buffer + static_cast<int>(b), chunkSize);
             lock.lock();
             if (readBytes > 0) {
                 b += readBytes;
@@ -160,10 +159,10 @@ void BufferedIOHandler::threadProc()
                     threadRunner->notify();
                 }
                 if (waitForInitialFillSize) {
-                    auto currentFillSize = int(b - a);
+                    auto currentFillSize = static_cast<int>(b - a);
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
-                    if (std::size_t(currentFillSize) >= initialFillSize) {
+                    if (static_cast<std::size_t>(currentFillSize) >= initialFillSize) {
                         log_debug("buffer: initial fillsize reached");
                         waitForInitialFillSize = false;
                         threadRunner->notify();

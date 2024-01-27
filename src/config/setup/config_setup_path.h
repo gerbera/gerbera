@@ -66,7 +66,7 @@ public:
 
     ConfigPathSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue = "", ConfigPathArguments arguments = ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty)
         : ConfigSetup(option, xpath, help, false, defaultValue)
-        , arguments(ConfigPathArguments(arguments))
+        , arguments(arguments)
     {
     }
 

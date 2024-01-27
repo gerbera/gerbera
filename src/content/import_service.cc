@@ -327,7 +327,7 @@ void ImportService::readFile(const fs::path& location)
     }
 }
 
-void ImportService::removeHidden(AutoScanSetting& settings)
+void ImportService::removeHidden(const AutoScanSetting& settings)
 {
     auto hiddenPaths = std::vector<fs::path>();
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
@@ -596,7 +596,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                 // compare ref'd objects last mod time
                 auto listResult = state ? database->getRefObjects(cdsObject->getID()) : std::vector<std::pair<int, std::chrono::seconds>> {};
                 for (auto&& origEntry : listOrig) {
-                    auto newEntry = std::find_if(listResult.begin(), listResult.end(), [&](auto& entry) { return origEntry.first == entry.first && origEntry.second > entry.second; });
+                    auto newEntry = std::find_if(listResult.begin(), listResult.end(), [&](const auto& entry) { return origEntry.first == entry.first && origEntry.second > entry.second; });
                     if (newEntry == listResult.end()) {
                         log_debug("Deleting orphaned virtual item {}", origEntry.first);
                         database->removeObject(origEntry.first, "", false);

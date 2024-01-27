@@ -112,7 +112,7 @@ void TagLibHandler::addField(MetadataFields field, const TagLib::File& file, con
         break;
     case MetadataFields::M_TRACKNUMBER: {
         std::uint32_t i = tag->track();
-        if (i == 0 || i > std::uint32_t(std::numeric_limits<int>::max()))
+        if (i == 0 || i > static_cast<std::uint32_t>(std::numeric_limits<int>::max()))
             return;
         value.push_back(fmt::to_string(i));
         item->setTrackNumber(i);
@@ -326,7 +326,11 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
     if (contentType == CONTENT_TYPE_MP3) {
         // stream album art from MP3 file
+#if TAGLIB_MAJOR_VERSION >= 2
+        auto f = TagLib::MPEG::File(&roStream);
+#else
         auto f = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
+#endif
 
         if (!f.isValid())
             throw_std_runtime_error("Could not open file {} as MP3", itemLocation);
@@ -347,7 +351,11 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     }
     if (contentType == CONTENT_TYPE_FLAC) {
         // stream album art from FLAC file
+#if TAGLIB_MAJOR_VERSION >= 2
+        auto f = TagLib::FLAC::File(&roStream);
+#else
         auto f = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
+#endif
 
         if (!f.isValid())
             throw_std_runtime_error("Could not open file {} as flac", itemLocation);
@@ -434,7 +442,11 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 
 void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
+#if TAGLIB_MAJOR_VERSION >= 2
+    auto mp3 = TagLib::MPEG::File(&roStream);
+#else
     auto mp3 = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
+#endif
     if (!mp3.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid mp3 file", item->getLocation().c_str());
         return;
@@ -633,7 +645,11 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
 
 void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
+#if TAGLIB_MAJOR_VERSION >= 2
+    auto flac = TagLib::FLAC::File(&roStream);
+#else
     auto flac = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
+#endif
 
     if (!flac.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid flac file", item->getLocation().c_str());

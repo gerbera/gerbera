@@ -132,7 +132,7 @@ static void signalHandler(int signum)
     if (signum == SIGCHLD) {
         log_debug("Got a SIGCHLD!");
         int savedErrno = errno;
-        while (waitpid(pid_t(-1), nullptr, WNOHANG) > 0) { }
+        while (waitpid(static_cast<pid_t>(-1), nullptr, WNOHANG) > 0) { }
         errno = savedErrno;
         return;
     }
@@ -208,7 +208,7 @@ static void handleOptionArgs(cxxopts::ParseResult& opts, const std::shared_ptr<C
         auto setValueList = opts["set-option"].as<std::vector<std::string>>();
         for (auto&& valueString : setValueList) {
             auto valueList = splitString(valueString, '=');
-            auto option = (config_option_t)stoiString(valueList[0]);
+            auto option = static_cast<config_option_t>(stoiString(valueList[0]));
             auto setup = ConfigDefinition::findConfigSetup(option);
             if (!setup)
                 continue;
@@ -472,7 +472,7 @@ int main(int argc, char** argv, char** envp)
                 std::exit(EXIT_FAILURE);
             }
             // close open filedescriptors belonging to a tty
-            for (auto fd = int(sysconf(_SC_OPEN_MAX)); fd >= 0; fd--) {
+            for (auto fd = static_cast<int>(sysconf(_SC_OPEN_MAX)); fd >= 0; fd--) {
                 if (isatty(fd))
                     close(fd);
             }

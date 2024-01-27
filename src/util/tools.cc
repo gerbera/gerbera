@@ -317,7 +317,7 @@ std::string escape(std::string_view string, char escapeChar, char toEscape)
 
         if (next == std::string::npos)
             next = len;
-        auto cpLen = int(next - last);
+        auto cpLen = static_cast<int>(next - last);
         if (cpLen > 0) {
             buf.write(&string[last], cpLen);
         }
@@ -392,7 +392,7 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
     ssize_t pos = -1;
     auto len = str.length();
 
-    if ((len == 0) || (cutpos > ssize_t(len)))
+    if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
         return pos;
 
 #if 0

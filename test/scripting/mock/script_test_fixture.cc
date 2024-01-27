@@ -462,7 +462,7 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
     duk_push_sprintf(ctx, "%s", containerType.c_str());
     narg++;
 
-    if (duk_pcall(ctx, (duk_idx_t)narg) != DUK_EXEC_SUCCESS) {
+    if (duk_pcall(ctx, static_cast<duk_idx_t>(narg)) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
 #if DUK_VERSION > 20399

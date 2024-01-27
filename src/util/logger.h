@@ -83,7 +83,7 @@ enum class log_facility_t {
 template <typename E>
 constexpr auto to_underlying(E e) noexcept
 {
-    return std::underlying_type_t<E>(e);
+    return static_cast<std::underlying_type_t<E>>(e);
 }
 #else
 using std::to_underlying;
@@ -104,7 +104,7 @@ public:
         return GrbLogger::facilities[facility];
     }
     static std::string printFacility(int facility);
-    static int remapFacility(const std::string& optValue);
+    static int remapFacility(const std::string& flag);
     static int makeFacility(const std::string& optValue);
 
 private:

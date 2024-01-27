@@ -1039,7 +1039,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             for (std::size_t count = 0; count < dynContent->size(); count++) {
                 auto dynConfig = dynContent->get(count);
                 if (parent->getLocation() == dynConfig->getLocation().parent_path() || (parent->getLocation().empty() && dynConfig->getLocation().parent_path() == "/")) {
-                    auto dynId = std::int32_t(std::int64_t(-(parent->getID() + 1)) * 10000 - count);
+                    auto dynId = static_cast<std::int32_t>(static_cast<std::int64_t>(-(parent->getID() + 1)) * 10000 - count);
                     // create runtime container
                     if (dynamicContainers.find(dynId) == dynamicContainers.end()) {
                         auto dynFolder = std::make_shared<CdsContainer>();

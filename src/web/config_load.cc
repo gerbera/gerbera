@@ -702,7 +702,8 @@ void Web::ConfigLoad::process()
         int i = 0;
         auto vectorOption = vcs->getValue()->getVectorOption(true);
         std::vector<std::string> attrList;
-        for (auto& opt : vcs->optionList) {
+        attrList.reserve(vcs->optionList.size());
+        for (const auto& opt : vcs->optionList) {
             attrList.push_back(ConfigDefinition::removeAttribute(opt));
         }
         for (auto&& vector : vectorOption) {

@@ -68,7 +68,7 @@ void Web::Directories::process()
     auto&& excludesFullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
     auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
-    constexpr auto excludesDirname = std::array {
+    constexpr std::array excludesDirname {
         "lost+found",
     };
     bool excludeConfigDirs = true;

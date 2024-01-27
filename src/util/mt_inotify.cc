@@ -126,7 +126,7 @@ struct inotify_event* Inotify::nextEvent()
 
     // first_byte is index into event buffer
     if (firstByte != 0
-        && firstByte <= int(bytes - sizeof(struct inotify_event))) {
+        && firstByte <= static_cast<int>(bytes - sizeof(struct inotify_event))) {
         std::memcpy(ret, reinterpret_cast<char*>(event.data()) + firstByte, sizeof(inotify_event));
         firstByte += sizeof(struct inotify_event) + ret->len;
 
@@ -211,7 +211,7 @@ struct inotify_event* Inotify::nextEvent()
         bytes += thisBytes;
 
         ret = event.data();
-        firstByte = int(sizeof(struct inotify_event) + ret->len);
+        firstByte = static_cast<int>(sizeof(struct inotify_event) + ret->len);
         assert(firstByte <= bytes);
 
         if (firstByte == bytes) {

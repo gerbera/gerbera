@@ -67,7 +67,7 @@ bool ConfigVectorSetup::createOptionFromNode(const pugi::xml_node& optValue, std
                 }
             }
             if (itemNotEmpty) {
-                for (auto& attr : attrList) {
+                for (const auto& attr : attrList) {
                     std::string value = child.attribute(attr.c_str()).as_string();
                     if (value.empty()) {
                         return false;

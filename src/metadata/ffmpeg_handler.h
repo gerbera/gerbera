@@ -66,7 +66,7 @@ private:
     void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
 
-    static constexpr auto propertyMap = std::array {
+    static constexpr std::array propertyMap {
         std::pair(MetadataFields::M_TITLE, "title"),
         std::pair(MetadataFields::M_ARTIST, "artist"),
         std::pair(MetadataFields::M_ALBUM, "album"),

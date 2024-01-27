@@ -384,8 +384,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, const fs::path& nonEx
             }
             break;
         }
-        if (first)
-            first = false;
+        first = false;
     }
 }
 
