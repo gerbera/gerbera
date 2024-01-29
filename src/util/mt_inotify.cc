@@ -37,6 +37,7 @@
 */
 
 /// \file mt_inotify.cc
+#define LOG_FAC log_facility_t::autoscan
 
 #ifdef HAVE_INOTIFY
 #include "mt_inotify.h"
@@ -120,14 +121,14 @@ void Inotify::removeWatch(int wd) const
 struct inotify_event* Inotify::nextEvent()
 {
     static std::array<inotify_event, MAX_EVENTS> event;
-    static struct inotify_event* ret;
-    static int firstByte = 0;
-    static ssize_t bytes;
+    static struct inotify_event* ret = nullptr;
+    static ssize_t firstByte = 0;
+    static ssize_t bytes = 0;
 
-    // first_byte is index into event buffer
+    // firstByte is index into event buffer
     if (firstByte != 0
-        && firstByte <= static_cast<int>(bytes - sizeof(struct inotify_event))) {
-        std::memcpy(ret, reinterpret_cast<char*>(event.data()) + firstByte, sizeof(inotify_event));
+        && firstByte <= bytes - ssize_t(sizeof(struct inotify_event))) {
+        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(event.data()) + firstByte);
         firstByte += sizeof(struct inotify_event) + ret->len;
 
         // if the pointer to the next event exactly hits end of bytes read,
@@ -155,7 +156,7 @@ struct inotify_event* Inotify::nextEvent()
         bytes = 0;
     }
 
-    static unsigned int bytesToRead;
+    static ssize_t bytesToRead = 0;
     static int rc;
     static fd_set readFds;
 
@@ -170,8 +171,7 @@ struct inotify_event* Inotify::nextEvent()
     if (stop_fd_read > fdMax)
         fdMax = stop_fd_read;
 
-    rc = select(fdMax + 1, &readFds,
-        nullptr, nullptr, nullptr);
+    rc = select(fdMax + 1, &readFds, nullptr, nullptr, nullptr);
     if (rc < 0) {
         return nullptr;
     }
@@ -188,11 +188,11 @@ struct inotify_event* Inotify::nextEvent()
     }
 
     if (FD_ISSET(inotify_fd, &readFds)) {
-        static ssize_t thisBytes;
+        static ssize_t thisBytes = 0;
         // wait until we have enough bytes to read
         do {
             rc = ioctl(inotify_fd, FIONREAD, &bytesToRead);
-        } while (!rc && bytesToRead < sizeof(struct inotify_event));
+        } while (!rc && bytesToRead < ssize_t(sizeof(struct inotify_event)));
 
         if (rc == -1) {
             return nullptr;
@@ -211,7 +211,7 @@ struct inotify_event* Inotify::nextEvent()
         bytes += thisBytes;
 
         ret = event.data();
-        firstByte = static_cast<int>(sizeof(struct inotify_event) + ret->len);
+        firstByte = sizeof(struct inotify_event) + ret->len;
         assert(firstByte <= bytes);
 
         if (firstByte == bytes) {

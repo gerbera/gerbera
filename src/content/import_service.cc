@@ -45,6 +45,7 @@
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
 #include "scripting/import_script.h"
+#include "scripting/metafile_parser_script.h"
 #include "scripting/playlist_parser_script.h"
 #endif
 
@@ -167,6 +168,9 @@ void ImportService::initLayout(LayoutType layoutType)
     if (!playlistParserScript) {
         playlistParserScript = std::make_unique<PlaylistParserScript>(content, rootPath.string());
     }
+    if (!metafileParserScript) {
+        metafileParserScript = std::make_unique<MetafileParserScript>(content);
+    }
 #endif
 }
 
@@ -175,6 +179,7 @@ void ImportService::destroyLayout()
     layout = nullptr;
 #ifdef HAVE_JS
     playlistParserScript = nullptr;
+    metafileParserScript = nullptr;
 #endif
 }
 
@@ -621,6 +626,20 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
             log_error("{}", e.what());
         }
     }
+}
+
+void ImportService::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const
+{
+#ifdef HAVE_JS
+    try {
+        if (metafileParserScript)
+            metafileParserScript->processObject(obj, path);
+    } catch (const std::runtime_error& e) {
+        log_error("{}: {}", path.string(), e.what());
+    }
+#else
+    log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
+#endif // HAVE_JS
 }
 
 void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype)

@@ -47,11 +47,6 @@
 #include "util/timer.h"
 
 // forward declarations
-#ifdef HAVE_JS
-class PlaylistParserScript;
-class MetafileParserScript;
-#endif // HAVE_JS
-
 #ifdef HAVE_INOTIFY
 class AutoscanInotify;
 #endif
@@ -284,21 +279,12 @@ protected:
     void initLayout();
     void destroyLayout();
 
-#ifdef HAVE_JS
-    void initJS();
-    void destroyJS();
-#endif
-
     template <typename T>
     void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
 
 #ifdef ONLINE_SERVICES
     std::unique_ptr<OnlineServiceList> online_services;
 #endif // ONLINE_SERVICES
-
-#ifdef HAVE_JS
-    std::unique_ptr<MetafileParserScript> metafileParserScript;
-#endif
 
     ImportMode importMode = ImportMode::MediaTomb;
     bool layoutEnabled {};

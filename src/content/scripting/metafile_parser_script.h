@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    playlist_parser_script.h - this file is part of MediaTomb.
+    metafile_parser_script.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,24 +29,24 @@
     $Id$
 */
 
-/// \file playlist_parser_script.h
+/// \file metafile_parser_script.h
 
-#ifndef __PLAYLIST_PARSER_SCRIPT_H__
-#define __PLAYLIST_PARSER_SCRIPT_H__
+#ifndef __METAFILE_PARSER_SCRIPT_H__
+#define __METAFILE_PARSER_SCRIPT_H__
 
 #include "parser_script.h"
 
-class PlaylistParserScript : public ParserScript {
+class MetafileParserScript : public ParserScript {
 public:
-    PlaylistParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
-    void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath);
+    MetafileParserScript(const std::shared_ptr<ContentManager>& content);
+    void processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
 
 protected:
+    std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd) override;
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
-    void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
 };
 
-#endif // __PLAYLIST_PARSER_SCRIPT_H__
+#endif // __METAFILE_PARSER_SCRIPT_H__

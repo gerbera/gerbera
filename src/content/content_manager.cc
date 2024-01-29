@@ -57,6 +57,7 @@
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
 #include "scripting/import_script.h"
+#include "scripting/metafile_parser_script.h"
 #include "scripting/playlist_parser_script.h"
 #include "scripting/scripting_runtime.h"
 #endif
@@ -217,10 +218,6 @@ void ContentManager::run()
 
     initLayout();
 
-#ifdef HAVE_JS
-    initJS();
-#endif
-
     log_debug("autoscan_timed");
     autoscanList->notifyAll(this);
 #ifdef HAVE_INOTIFY
@@ -279,9 +276,6 @@ void ContentManager::shutdown()
     auto lock = threadRunner->uniqueLock();
 
     destroyLayout();
-#ifdef HAVE_JS
-    destroyJS();
-#endif
 
     log_debug("updating last_modified data for autoscan in database...");
     if (autoscanList) {
@@ -443,16 +437,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
 
 void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const
 {
-#ifdef HAVE_JS
-    try {
-        if (metafileParserScript)
-            metafileParserScript->processObject(obj, path);
-    } catch (const std::runtime_error& e) {
-        log_error("{}: {}", path.string(), e.what());
-    }
-#else
-    log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
-#endif // HAVE_JS
+    importService->parseMetafile(obj, path);
 }
 
 std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
@@ -1245,22 +1230,6 @@ void ContentManager::initLayout()
         }
     }
 }
-
-#ifdef HAVE_JS
-void ContentManager::initJS()
-{
-    auto self = shared_from_this();
-    if (!metafileParserScript) {
-        metafileParserScript = std::make_unique<MetafileParserScript>(self);
-    }
-}
-
-void ContentManager::destroyJS()
-{
-    metafileParserScript = nullptr;
-}
-
-#endif // HAVE_JS
 
 void ContentManager::destroyLayout()
 {
