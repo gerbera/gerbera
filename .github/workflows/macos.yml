@@ -24,32 +24,25 @@ jobs:
           brew install \
             cmake \
             duktape \
+            exiv2 \
+            fmt \
             ffmpeg \
             ffmpegthumbnailer \
+            googletest \
             libexif \
-            exiv2 \
             libmagic \
             libmatroska \
             libupnp \
-            lzlib \
             ossp-uuid \
+            ninja \
             pugixml \
+            spdlog \
             taglib
-          sudo bash scripts/install-fmt.sh static
-          sudo bash scripts/install-spdlog.sh static
-          sudo bash scripts/install-googletest.sh
 
       - name: Build
         run: |
-          mkdir build
-          cd build
-          cmake .. \
-            -DCMAKE_VERBOSE_MAKEFILE=ON \
-            -DCMAKE_FIND_FRAMEWORK=LAST \
-            -DCMAKE_CXX_FLAGS=\"-stdlib=libc++\"" \
-            -DCMAKE_CXX_COMPILER=/usr/bin/clang++" \
-            --preset=macos
-          make
+          cmake -S . -G Ninja -B build --preset=macos
+          cmake --build build -j$(nproc) --verbose
 
       - name: Test
         run: |
