@@ -170,6 +170,7 @@ private:
     std::shared_ptr<Layout> layout;
 #ifdef HAVE_JS
     std::unique_ptr<PlaylistParserScript> playlistParserScript;
+    std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
     std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
@@ -213,6 +214,9 @@ public:
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
     std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
     std::shared_ptr<Layout> getLayout() const { return layout; }
+
+    /// \brief parse a file containing metadata for object
+    void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const;
 };
 
 #endif
