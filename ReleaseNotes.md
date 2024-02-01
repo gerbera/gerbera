@@ -2,10 +2,20 @@
 
 ## MAIN
 
+### NEW Features
+
+- new JavaScript function `print2` to allow setting log type (info, debug, trace)
+
+### FIXES
+
+- Fix loading of playlists
+
 ### Code Improvements
 
 - Restructuring files
+- Updates to the build system: Use cmake presets
 - Update versions of fmt (10.2.1), spdlog (1.13.0)
+- Support build with NPUPNP
 
 ## v2.0.0
 

@@ -34,7 +34,7 @@ Gerbera - https://gerbera.io/
 
 #include "util/tools.h"
 
-void rtrimPath(std::string& s, unsigned char sep)
+std::string rtrimPath(std::string& s, unsigned char sep)
 {
     if (!s.empty()) {
         s.erase(std::find_if(s.rbegin(), s.rend() - 1, [&](unsigned char ch) {
@@ -42,12 +42,13 @@ void rtrimPath(std::string& s, unsigned char sep)
         }).base(),
             s.end());
     }
+    return s;
 }
 
-bool isSubDir(const fs::path& path, const fs::path& check)
+bool isSubDir(const fs::path& path, const fs::path& parent)
 {
     auto pathStr = fmt::format("{}/", path.string());
-    auto chkStr = fmt::format("{}/", check.string());
+    auto chkStr = fmt::format("{}/", parent.string());
     rtrimPath(pathStr);
     rtrimPath(chkStr);
     return startswith(pathStr, chkStr);

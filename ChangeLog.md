@@ -4,14 +4,24 @@
 
 - Add ctypes include
 - Avoid crash when parent was not created yet.
-- Bump follow-redirects from 1.15.3 to 1.15.4 in /gerbera-web
 - Build Support for NPUPNP
+- Bump follow-redirects from 1.15.3 to 1.15.4 in /gerbera-web
+- clang-tidy and cppcheck fixes
+- clang-tidy fixes
 - CMake: Use presets
+- Config: Refactor handling of integer types
 - Correct two typos.
 - Fix build-deb.sh for releases
 - Gerbera welcomes 2024
+- github workflows: make cmake stuff consistent
+- Import: Safely handle second scan
+- Import: Safely handle second scan - 2
 - Refactor config and enums to reduce nesting
+- Refactor parser files
+- Safely handle suppressed file types
 - Scripting: print2 function with log level support
+- some fixes
+- Update workflow actions
 
 ### v2.0.0
 

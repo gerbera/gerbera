@@ -846,18 +846,24 @@ std::shared_ptr<AutoscanDirectory> ContentManager::findAutoscanDirectory(fs::pat
 {
     std::shared_ptr<AutoscanDirectory> autoscanDir;
     path.remove_filename();
+    std::error_code ec;
+
     for (std::size_t i = 0; i < autoscanList->size(); i++) {
         auto dir = autoscanList->get(i);
         if (dir) {
             log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
-            if (isSubDir(dir->getLocation(), path) && fs::is_directory(dir->getLocation())) {
+            if (isSubDir(path, dir->getLocation()) && fs::is_directory(dir->getLocation(), ec)) {
                 autoscanDir = std::move(dir);
+            }
+            if (ec) {
+                log_warning("No AutoscanDir {} has problems '{}'", dir->getLocation().string(), ec.message());
             }
         }
     }
     if (!autoscanDir) {
         log_warning("No AutoscanDir found for {}", path.string());
     }
+
     return autoscanDir;
 }
 

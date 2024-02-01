@@ -98,6 +98,22 @@ TEST(ToolsTest, renderWebUriV6)
     EXPECT_EQ(GrbNet::renderWebUri("2001:0db8:85a3:0000:0000:8a2e:0370:7334", 7777), "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]:7777");
 }
 
+TEST(ToolsTest, pathTrimTest)
+{
+    std::string test = "/regular/path";
+    EXPECT_EQ(rtrimPath(test), test);
+    std::string test2 = "/regular/path//";
+    EXPECT_EQ(rtrimPath(test2), test);
+}
+
+TEST(ToolsTest, subdirTest)
+{
+    std::string test = "/regular/path";
+    std::string test2 = "/regular/path/sub/";
+    EXPECT_EQ(isSubDir(test, test2), false);
+    EXPECT_EQ(isSubDir(test2, test), true);
+}
+
 TEST(ToolsTest, splitStringTest)
 {
     auto parts = splitString("", ',');

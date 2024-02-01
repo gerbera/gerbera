@@ -49,7 +49,6 @@
 #include "action_request.h"
 #include "config/config_manager.h"
 #include "config/config_option_enum.h"
-#include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
@@ -69,10 +68,6 @@
 #include "util/xml_to_json.h"
 #include "web/pages.h"
 #include "web/session_manager.h"
-
-#ifdef HAVE_JS
-#include "content/scripting/playlist_parser_script.h"
-#endif
 
 #ifdef HAVE_CURL
 #include "url_request_handler.h"
