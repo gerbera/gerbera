@@ -44,18 +44,37 @@ Network Interface
 
 Interface to bind to, for example eth0, this can be specified instead of the IP address.
 
+.. _troubleshoot_port:
+
 Port
 ----
 
+In addition to UDP port ``1900`` (required by UPnP/SSDP), Gerbera uses a port in the range of ``49152``
+or above for serving media and for UPnP requests. 
 If multiple instances of Gerbera or other UPnP media servers are running at the same time the port may be blocked.
 
 ::
 
     --port or -p
 
-Specify the server port that will be used for the web user interface, for serving media and for UPnP requests,
-minimum allowed value is ``49152``. If this option is omitted a default port will be chosen, however, in
-this case it is possible that the port will change upon server restart.
+Specify the server port that will be used for the web user interface, for serving media and for UPnP requests.
+The minimum allowed value is ``49152``. This can also be specified in the config file.
+If this option is omitted a default port will be chosen, but in
+this case it is possible that the port will change upon server restart. 
+
+Gerbera's startup messages will tell you which server port it's actually using.
+
+Firewall
+--------
+
+If gerbera appears to be running but other devices on the network can't see it, ensure that your 
+firewall is not blocking UDP port ``1900`` or the server port that Gerbera is using
+(e.g. ``49152``, see the :ref:`Port <troubleshoot_port>` section above). 
+
+If you have opened only a single server port in your firewall for Gerbera to use, consider adding that port 
+to the command line or config file to prevent it from changing upon server restart.
+If multiple instances of Gerbera or other UPnP media servers are running at the same time you may need 
+to open multiple ports.
 
 Debugging
 ~~~~~~~~~

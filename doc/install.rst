@@ -78,6 +78,18 @@ Gerbera is available in Fedora 29 or later.
 
     sudo dnf install gerbera
 
+If you are running the Server edition of Fedora you will probably need to configure your firewall to
+open the ports Gerbera uses. In the default firewall configuration the following commands should do the 
+trick (change ``49152`` to the port Gerbera is actually using, see the
+:ref:`Port <troubleshoot_port>` section of the Troubleshooting page).
+If you are running the Workstation edition of Fedora, Gerbera should work with the default 
+firewall configuration and these commands won't be needed.
+
+.. code-block:: sh
+
+    sudo firewall-cmd --permanent --add-service=ssdp
+    sudo firewall-cmd --permanent --add-port=49152/tcp
+
 FreeBSD
 ~~~~~~~~~~~~~~~~~
 .. index:: FreeBSD
