@@ -35,7 +35,7 @@ e.g. `gerbera/gerbera:1.9.2-transcoding`. Includes tools such as ffmpeg and vlc.
 $ docker run \
     --name some-gerbera \
     --network=host \
-    -v /some/files:/content:ro \
+    -v /some/files:/mnt/content:ro \
      gerbera/gerbera:vX.X.X
 ```
 
@@ -51,14 +51,14 @@ services:
     network_mode: host
     volumes:
       - gerbera-config:/var/run/gerbera
-      - /some/files:/content:ro
+      - /some/files:/mnt/content:ro
 
 volumes:
   gerbera-config:
     external: false
 ```
 
-The directory `/content` is automatically scanned for content by default.
+The directory `/mnt/content` is automatically scanned for content by default.
 Host networking enables us to bypass issues with broadcast across docker bridges.
 
 ## Provide your own config file
@@ -66,7 +66,7 @@ Host networking enables us to bypass issues with broadcast across docker bridges
 $ docker run \
     --name another-gerbera \
     --network=host \
-    -v /some/files:/content:ro \
+    -v /some/files:/mnt/content:ro \
     -v /some/path/config.xml:/var/run/gerbera/config.xml \
      gerbera/gerbera:vX.X.X
 ```
