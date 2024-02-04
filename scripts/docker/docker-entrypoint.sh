@@ -34,6 +34,10 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
     <directory location="\/content" mode="inotify" \
     recursive="yes" hidden-files="no"\/>\n\
     <\/autoscan>/' -i /var/run/gerbera/config.xml
+
+  # Add directory for custom JavaScript scripts
+  sed 's/<\/common>/<\/common>\
+        <custom>\/mnt\/customization\/js<\/custom>/' -i /var/run/gerbera/config.xml
 fi
 
 if [ -e /dev/video10 ]; then

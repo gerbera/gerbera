@@ -59,6 +59,7 @@ volumes:
 ```
 
 The directory `/mnt/content` is automatically scanned for content by default.
+You can place custom JavaScript files in the directory `/mnt/customization/js`.
 Host networking enables us to bypass issues with broadcast across docker bridges.
 
 ## Provide your own config file
