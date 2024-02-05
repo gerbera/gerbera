@@ -102,7 +102,8 @@ RUN addgroup -S gerbera 2>/dev/null && \
     addgroup gerbera video && \
     mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
     mkdir /content && chmod 777 /content && ln -s /content /mnt/content && \
-    mkdir -p /mnt/customization/js && chmod -R 777 /mnt/customization
+    mkdir -p /mnt/customization/js && mkdir -p /mnt/customization/shell && \
+    chmod -R 777 /mnt/customization
 
 EXPOSE 49494
 EXPOSE 1900/udp
