@@ -38,6 +38,11 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
   # Add directory for custom JavaScript scripts
   sed 's/<\/common>/<\/common>\
         <custom>\/mnt\/customization\/js<\/custom>/' -i /var/run/gerbera/config.xml
+
+  # Allow customization of Gerbera configuration file
+  if [ -x /mnt/customization/shell/gerbera_config.sh ]; then
+    . /mnt/customization/shell/gerbera_config.sh
+  fi
 fi
 
 if [ -e /dev/video10 ]; then
