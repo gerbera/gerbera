@@ -29,15 +29,15 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
   gerbera --create-config --home /var/run/gerbera > /var/run/gerbera/config.xml
 
   # Automatically scan /content with inotify (for a volume mount)
-  sed 's/<import hidden-files="no">/<import hidden-files="no">\n\
+  sed 's|<import hidden-files="no">|<import hidden-files="no">\n\
     <autoscan use-inotify="yes">\n\
-    <directory location="\/content" mode="inotify" \
-    recursive="yes" hidden-files="no"\/>\n\
-    <\/autoscan>/' -i /var/run/gerbera/config.xml
+    <directory location="/mnt/content" mode="inotify" \
+               recursive="yes" hidden-files="no"/>\n\
+    </autoscan>|' -i /var/run/gerbera/config.xml
 
   # Add directory for custom JavaScript scripts
-  sed 's/<\/common>/<\/common>\
-        <custom>\/mnt\/customization\/js<\/custom>/' -i /var/run/gerbera/config.xml
+  sed 's|</common>|</common>\
+        <custom>/mnt/customization/js</custom>|' -i /var/run/gerbera/config.xml
 
   # Allow customization of Gerbera configuration file
   if [ -x /mnt/customization/shell/gerbera_config.sh ]; then
