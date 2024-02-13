@@ -1022,7 +1022,7 @@ function addVideo(obj, cont, rootPath, containerType) {
     }
 
     // Dates
-    if (boxSetup['Video/allYears'].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
+    if (boxSetup['Video/allDates'].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
         var date = obj.metaData[M_CREATION_DATE][0];
         var dateParts = date.split('T');
         if (dateParts.length > 1) {
