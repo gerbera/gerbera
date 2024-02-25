@@ -520,7 +520,6 @@ function addAudio(obj, cont, rootPath, containerType) {
     chain.composer.metaData[M_COMPOSER] = [ composer ];
 
     var container;
-
     if (boxSetup['Audio/allAudio'].enabled) {
         container = addContainerTree([chain.audio, chain.allAudio]);
         addCdsObject(obj, container);
@@ -548,10 +547,12 @@ function addAudio(obj, cont, rootPath, containerType) {
 
     const artCnt = artist.length;
     var i;
-    for (i = 0; i < artCnt; i++) {
-        chain.artist.title = artist[i];
-        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
-        addCdsObject(obj, container);
+    if (boxSetup['Audio/allTracks'].enabled) {
+        for (i = 0; i < artCnt; i++) {
+            chain.artist.title = artist[i];
+            container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
+            addCdsObject(obj, container);
+        }
     }
 
     obj.title = track + title;
