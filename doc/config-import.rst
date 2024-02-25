@@ -300,7 +300,7 @@ Below are the available scripting options:
         Specifies the virtual layout to be created:
 
         -  **Default**: `addAudio` is used to create the virtual layout
-        -  **Structured**: `addAudioStructured` is used to create the virtual layout
+        -  **Structured**: `addAudioStructured` is used to create the virtual layout (only in combination with javascript)
 
         `video-layout`, `image-layout` and `trailer-layout` are reserved for future use.
 
