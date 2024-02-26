@@ -64,7 +64,12 @@ public:
         mediaFile = file.open("rb");
     }
 
-    uint32 read(void* buffer, std::size_t size) override
+#if LIBMATROSKA_VERSION < 0x020000
+    uint32
+#else
+    std::size_t
+#endif
+    read(void* buffer, std::size_t size) override
     {
         assert(mediaFile);
         if (size == 0)
@@ -87,7 +92,7 @@ public:
         return 0;
     }
 
-    uint64 getFilePointer() override
+    std::uint64_t getFilePointer() override
     {
         assert(mediaFile);
         return ftello(mediaFile);
