@@ -31,8 +31,13 @@
 #include "metadata_handler.h"
 
 #include <ebml/EbmlStream.h>
+#include <matroska/KaxVersion.h>
+#if LIBMATROSKA_VERSION >= 0x010200
+#include <matroska/KaxSemantic.h>
+#else
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
+#endif
 
 // forward declaration
 class MemIOHandler;

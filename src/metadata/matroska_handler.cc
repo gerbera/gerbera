@@ -34,7 +34,9 @@
 #include <ebml/EbmlStream.h>
 #include <ebml/IOCallback.h>
 
+#if LIBMATROSKA_VERSION < 0x020000
 #include <matroska/KaxAttachments.h>
+#endif
 #include <matroska/KaxContexts.h>
 #include <matroska/KaxSeekHead.h>
 #include <matroska/KaxSegment.h>
