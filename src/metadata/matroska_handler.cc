@@ -48,6 +48,9 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+using namespace libebml;
+using namespace libmatroska;
+
 // file managment
 class FileIOCallback : public IOCallback {
 private:
