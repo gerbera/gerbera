@@ -173,15 +173,15 @@ void MatroskaHandler::parseLevel1Element(const std::shared_ptr<CdsItem>& item, I
         return;
     }
     log_debug("MatroskaHandler found {}", EbmlId(*master).GetValue());
-    log_debug("MatroskaHandler KaxSeekHead {}", KaxSeekHead::ClassInfos.GlobalId.GetValue());
-    log_debug("MatroskaHandler KaxInfo {}", KaxInfo::ClassInfos.GlobalId.GetValue());
-    log_debug("MatroskaHandler KaxAttachments {}", KaxAttachments::ClassInfos.GlobalId.GetValue());
-    if (EbmlId(*master) == KaxSeekHead::ClassInfos.GlobalId) {
+    log_debug("MatroskaHandler KaxSeekHead {}", EBML_ID(KaxSeekHead).GetValue());
+    log_debug("MatroskaHandler KaxInfo {}", EBML_ID(KaxInfo).GetValue());
+    log_debug("MatroskaHandler KaxAttachments {}", EBML_ID(KaxAttachments).GetValue());
+    if (EbmlId(*master) == EBML_ID(KaxSeekHead)) {
         parseHead(item, ebmlFile, ebmlStream, master, pIoHandler);
         activeFlag = 0; // If there is a head we assume that info and attachments are handled
-    } else if (EbmlId(*master) == KaxInfo::ClassInfos.GlobalId) {
+    } else if (EbmlId(*master) == EBML_ID(KaxInfo)) {
         parseInfo(item, ebmlStream, master);
-    } else if (EbmlId(*master) == KaxAttachments::ClassInfos.GlobalId) {
+    } else if (EbmlId(*master) == EBML_ID(KaxAttachments)) {
         parseAttachments(item, ebmlStream, master, pIoHandler);
     }
 }
@@ -209,7 +209,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
         log_debug("parseHead: Some mandatory elements ar missing !!!");
     }
     for (auto&& seekEl : *metaSeek) {
-        if (EbmlId(*seekEl) == KaxSeek::ClassInfos.GlobalId) {
+        if (EbmlId(*seekEl) == EBML_ID(KaxSeek)) {
             auto seekPoint = dynamic_cast<KaxSeek*>(seekEl);
             if (!seekPoint)
                 break;
@@ -217,9 +217,9 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
             KaxSeekID* seekId = nullptr;
             KaxSeekPosition* seekPos = nullptr;
             for (auto&& seekPtEl : *seekPoint) {
-                if (EbmlId(*seekPtEl) == KaxSeekID::ClassInfos.GlobalId) {
+                if (EbmlId(*seekPtEl) == EBML_ID(KaxSeekID)) {
                     seekId = dynamic_cast<KaxSeekID*>(seekPtEl);
-                } else if (EbmlId(*seekPtEl) == KaxSeekPosition::ClassInfos.GlobalId) {
+                } else if (EbmlId(*seekPtEl) == EBML_ID(KaxSeekPosition)) {
                     seekPos = dynamic_cast<KaxSeekPosition*>(seekPtEl);
                 }
             }
@@ -229,7 +229,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
             auto seekIdValue = EbmlId(seekId->GetBuffer(), seekId->GetSize());
             auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + static_cast<std::uint16_t>(*seekPos);
             log_debug("parseHead: Seek ID {} at {}", seekIdValue.GetValue(), segmentPosition);
-            if (seekIdValue == KaxAttachments::ClassInfos.GlobalId || seekIdValue == KaxInfo::ClassInfos.GlobalId) {
+            if (seekIdValue == EBML_ID(KaxAttachments) || seekIdValue == EBML_ID(KaxInfo)) {
                 ebmlFile.setFilePointer(segmentPosition);
                 auto attStream = EbmlStream(ebmlFile);
                 int upperLvlElement = 0;
@@ -258,7 +258,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
 
     auto sc = StringConverter::i2i(config); // sure is sure
     for (auto&& el : *info) {
-        if (EbmlId(*el) == KaxTitle::ClassInfos.GlobalId) {
+        if (EbmlId(*el) == EBML_ID(KaxTitle)) {
             auto titleEl = dynamic_cast<KaxTitle*>(el);
             if (!titleEl) {
                 log_error("Malformed MKV file; KaxTitle cast failed!");
@@ -268,7 +268,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             log_debug("KaxTitle = {}", title);
             item->addMetaData(MetadataFields::M_TITLE, sc->convert(title));
             activeFlag &= ~GRB_MATROSKA_TITLE;
-        } else if (EbmlId(*el) == KaxDateUTC::ClassInfos.GlobalId) {
+        } else if (EbmlId(*el) == EBML_ID(KaxDateUTC)) {
             auto dateEl = dynamic_cast<KaxDateUTC*>(el);
             if (!dateEl) {
                 log_error("Malformed MKV file; KaxDateUTC cast failed!");
@@ -281,7 +281,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
                 item->addMetaData(MetadataFields::M_CREATION_DATE, sc->convert(fDate));
                 activeFlag &= ~GRB_MATROSKA_DATE;
             }
-        } else if (EbmlId(*el) == KaxDuration::ClassInfos.GlobalId) {
+        } else if (EbmlId(*el) == EBML_ID(KaxDuration)) {
             auto durationEl = dynamic_cast<KaxDuration*>(el);
             if (!durationEl) {
                 log_error("Malformed MKV file; KaxDuration cast failed!");
