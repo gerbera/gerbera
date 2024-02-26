@@ -139,7 +139,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
     activeFlag = GRB_MATROSKA_INFO | GRB_MATROSKA_ARTWORK;
 
     int iUpperLevel = 0;
-    for (auto elL0 = ebmlStream.FindNextID(KaxSegment::ClassInfos, ~0);
+    for (auto elL0 = ebmlStream.FindNextID(EBML_INFO(KaxSegment), ~0);
          elL0;
          elL0 = ebmlStream.FindNextElement(EBML_CLASS_CONTEXT(KaxSegment), iUpperLevel, ~0, true)) {
         iUpperLevel = 0;
