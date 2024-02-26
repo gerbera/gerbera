@@ -141,7 +141,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
     int iUpperLevel = 0;
     for (auto elL0 = ebmlStream.FindNextID(KaxSegment::ClassInfos, ~0);
          elL0;
-         elL0 = ebmlStream.FindNextElement(KaxSegment_Context, iUpperLevel, ~0, true)) {
+         elL0 = ebmlStream.FindNextElement(EBML_CLASS_CONTEXT(KaxSegment), iUpperLevel, ~0, true)) {
         iUpperLevel = 0;
         EbmlElement* elL1;
         while ((elL1 = ebmlStream.FindNextElement(EBML_CONTEXT(elL0), iUpperLevel, ~0, true))) {
@@ -153,7 +153,7 @@ void MatroskaHandler::parseMKV(const std::shared_ptr<CdsItem>& item, std::unique
                 break;
         } // while elementLevel1
 
-        delete (elL0->SkipData(ebmlStream, KaxSegment_Context));
+        delete (elL0->SkipData(ebmlStream, EBML_CLASS_CONTEXT(KaxSegment)));
         delete elL0;
         if (activeFlag == 0) // terminate search
             break;
