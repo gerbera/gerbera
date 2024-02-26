@@ -227,7 +227,7 @@ void MatroskaHandler::parseHead(const std::shared_ptr<CdsItem>& item, IOCallback
             if (!seekId || !seekPos)
                 continue;
             auto seekIdValue = EbmlId(seekId->GetBuffer(), seekId->GetSize());
-            auto segmentPosition = ebmlHead->GetElementPosition() + ebmlHead->HeadSize() + static_cast<std::uint16_t>(*seekPos);
+            auto segmentPosition = static_cast<EbmlMaster*>(ebmlHead)->GetDataStart() + static_cast<std::uint16_t>(*seekPos);
             log_debug("parseHead: Seek ID {} at {}", seekIdValue.GetValue(), segmentPosition);
             if (seekIdValue == EBML_ID(KaxAttachments) || seekIdValue == EBML_ID(KaxInfo)) {
                 ebmlFile.setFilePointer(segmentPosition);
