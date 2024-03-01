@@ -36,7 +36,7 @@ jobs:
             --platform=${{ matrix.arch }} \
             -e TZ=Etc/UTC \
             -e ART_API_KEY=${{ secrets.ART_API_KEY }} \
-            -e GITHUB_ACTIONS \
+            -e GH_ACTIONS=y \
             -v "$(pwd):/build" \
             -w /build \
           ${{ matrix.os-ver }} \
