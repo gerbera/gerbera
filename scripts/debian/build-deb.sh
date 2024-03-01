@@ -142,7 +142,8 @@ apt-get update -y
 apt-get install -y lsb-release sudo wget curl git ca-certificates
 
 # Work around https://github.com/actions/checkout/issues/760
-if ${GITHUB_ACTIONS}; then
+GH_ACTIONS="${GH_ACTIONS-n}"
+if [[ "${GH_ACTIONS}" == "y" ]]; then
   git config --global --add safe.directory "$(pwd)"
 fi
 

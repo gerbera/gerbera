@@ -69,6 +69,7 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
+        GH_ACTIONS: y
     steps:
       - name: Install script pre-reqs
         shell: bash
@@ -92,6 +93,7 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
+        GH_ACTIONS: y
     steps:
       - name: Install script pre-reqs
         shell: bash
