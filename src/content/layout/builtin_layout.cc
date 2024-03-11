@@ -390,14 +390,14 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         add(obj, id);
     }
 
-    std::string temp;
+    std::string prefixTitle;
     if (!artistFull.empty())
-        temp = artistFull;
+        prefixTitle = artistFull;
 
     if (!albumFull.empty())
-        temp = fmt::format("{} - {} - ", temp, albumFull);
+        prefixTitle = fmt::format("{} - {} - ", prefixTitle, albumFull);
     else
-        temp = fmt::format("{} - ", temp);
+        prefixTitle = fmt::format("{} - ", prefixTitle);
 
     auto albumContainer = std::make_shared<CdsContainer>(album, UPNP_CLASS_MUSIC_ALBUM);
     albumContainer->setMetaData(obj->getMetaData());
@@ -475,7 +475,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     // Keep this last, since it's modifying the object title
     if(blOption->get("Audio/allTracks")->getEnabled()) {
         artistContainer->setSearchable(true);
-        obj->setTitle(fmt::format("{}{}", temp, title));
+        obj->setTitle(fmt::format("{}{}", prefixTitle, title));
         add(obj, chain["/Audio/All - full name"]);
 
         std::vector<std::shared_ptr<CdsObject>> all;
