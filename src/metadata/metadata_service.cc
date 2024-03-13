@@ -29,12 +29,10 @@
     $Id$
 */
 
-/// \file metadata_handler.cc
+/// \file metadata_service.cc
 #define LOG_FAC log_facility_t::metadata
 
-#include "metadata_handler.h" // API
-
-#include <array>
+#include "metadata_service.h" // API
 
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
@@ -48,7 +46,7 @@
 
 #ifdef HAVE_TAGLIB
 #include "metadata/taglib_handler.h"
-#endif // HAVE_TAGLIB
+#endif
 
 #ifdef HAVE_FFMPEG
 #include "metadata/ffmpeg_handler.h"
@@ -69,13 +67,46 @@
 #include "ffmpeg_thumbnailer_handler.h"
 #include "metadata/metacontent_handler.h"
 
-MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
-    : config(context->getConfig())
-    , mime(context->getMime())
+MetadataService::MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content)
+    : context(context)
+    , config(context->getConfig())
+    , content(content)
 {
+    mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+
+    handlers = std::map<MetadataType, std::shared_ptr<MetadataHandler>> {
+#ifdef HAVE_TAGLIB
+        { MetadataType::TagLib, std::make_shared<TagLibHandler>(context) },
+#endif
+#ifdef HAVE_EXIV2
+        { MetadataType::Exiv2, std::make_shared<Exiv2Handler>(context) },
+#endif
+#ifdef HAVE_LIBEXIF
+        { MetadataType::LibExif, std::make_shared<LibExifHandler>(context) },
+#endif
+#ifdef HAVE_MATROSKA
+        { MetadataType::Matroska, std::make_shared<MatroskaHandler>(context) },
+#endif
+#ifdef HAVE_WAVPACK
+        { MetadataType::WavPack, std::make_shared<WavPackHandler>(context) },
+#endif
+#ifdef HAVE_FFMPEG
+        { MetadataType::Ffmpeg, std::make_shared<FfmpegHandler>(context) },
+#endif
+#ifdef HAVE_FFMPEGTHUMBNAILER
+        { MetadataType::VideoThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED) },
+        { MetadataType::ImageThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED) },
+        { MetadataType::Thumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) },
+#endif
+        { MetadataType::FanArt, std::make_shared<FanArtHandler>(context) },
+        { MetadataType::ContainerArt, std::make_shared<ContainerArtHandler>(context) },
+        { MetadataType::Subtitle, std::make_shared<SubtitleHandler>(context) },
+        { MetadataType::Metafile, std::make_shared<MetafileHandler>(context, content) },
+        { MetadataType::ResourceFile, std::make_shared<ResourceHandler>(context) },
+    };
 }
 
-void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
+void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))
@@ -91,7 +122,6 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
     item->addResource(resource);
     item->clearMetaData();
 
-    auto mappings = context->getConfig()->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string contentType = getValueOrDefault(mappings, mimetype);
     auto itemCls = item->getClass();
 
@@ -101,37 +131,37 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 
 #ifdef HAVE_TAGLIB
     if ((contentType == CONTENT_TYPE_MP3) || ((contentType == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (contentType == CONTENT_TYPE_WMA) || (contentType == CONTENT_TYPE_WAVPACK) || (contentType == CONTENT_TYPE_FLAC) || (contentType == CONTENT_TYPE_PCM) || (contentType == CONTENT_TYPE_AIFF) || (contentType == CONTENT_TYPE_APE) || (contentType == CONTENT_TYPE_MP4)) {
-        TagLibHandler(context).fillMetadata(item);
+        handlers[MetadataType::TagLib]->fillMetadata(item);
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
     if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM)) {
-        Exiv2Handler(context).fillMetadata(item);
+        handlers[MetadataType::Exiv2]->fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_LIBEXIF
     if (contentType == CONTENT_TYPE_JPG) {
-        LibExifHandler(context).fillMetadata(item);
+        handlers[MetadataType::LibExif]->fillMetadata(item);
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_MATROSKA
     if (contentType == CONTENT_TYPE_MKV) {
-        MatroskaHandler(context).fillMetadata(item);
+        handlers[MetadataType::Matroska]->fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_WAVPACK
     if (contentType == CONTENT_TYPE_WAVPACK) {
-        WavPackHandler(context).fillMetadata(item);
+        handlers[MetadataType::WavPack]->fillMetadata(item);
     }
 #endif
 
 #ifdef HAVE_FFMPEG
     if (contentType != CONTENT_TYPE_PLAYLIST && (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))) {
-        FfmpegHandler(context).fillMetadata(item);
+        handlers[MetadataType::Ffmpeg]->fillMetadata(item);
     }
 #else
     if (contentType == CONTENT_TYPE_AVI) {
@@ -145,68 +175,68 @@ void MetadataHandler::extractMetaData(const std::shared_ptr<Context>& context, c
 #ifdef HAVE_FFMPEGTHUMBNAILER
     // Thumbnails for videos
     if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
-        FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED).fillMetadata(item);
+        handlers[MetadataType::VideoThumbnailer]->fillMetadata(item);
     else if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM))
-        FfmpegThumbnailerHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED).fillMetadata(item);
+        handlers[MetadataType::ImageThumbnailer]->fillMetadata(item);
 #endif
 
     // Fanart for audio and video
     if (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
-        FanArtHandler(context).fillMetadata(item);
+        handlers[MetadataType::FanArt]->fillMetadata(item);
 
     // Subtitles for videos
     if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
-        SubtitleHandler(context).fillMetadata(item);
+        handlers[MetadataType::Subtitle]->fillMetadata(item);
 
     // Metadata from text files
-    MetafileHandler(context, content).fillMetadata(item);
+    handlers[MetadataType::Metafile]->fillMetadata(item);
 
-    ResourceHandler(context).fillMetadata(item);
+    handlers[MetadataType::ResourceFile]->fillMetadata(item);
 }
 
-std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, ContentHandler handlerType)
+std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler handlerType)
 {
     switch (handlerType) {
     case ContentHandler::LIBEXIF:
 #ifdef HAVE_LIBEXIF
-        return std::make_unique<LibExifHandler>(context);
+        return handlers[MetadataType::LibExif];
 #else
         break;
 #endif
     case ContentHandler::ID3:
 #ifdef HAVE_TAGLIB
-        return std::make_unique<TagLibHandler>(context);
+        return handlers[MetadataType::TagLib];
 #else
         break;
 #endif
     case ContentHandler::MATROSKA:
 #ifdef HAVE_MATROSKA
-        return std::make_unique<MatroskaHandler>(context);
+        return handlers[MetadataType::Matroska];
 #else
         break;
 #endif
     case ContentHandler::WAVPACK:
 #ifdef HAVE_WAVPACK
-        return std::make_unique<WavPackHandler>(context);
+        return handlers[MetadataType::WavPack];
 #else
         break;
 #endif
     case ContentHandler::FFTH:
 #ifdef HAVE_FFMPEGTHUMBNAILER
-        return std::make_unique<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED);
+        return handlers[MetadataType::Thumbnailer];
 #else
         break;
 #endif
     case ContentHandler::FANART:
-        return std::make_unique<FanArtHandler>(context);
+        return handlers[MetadataType::FanArt];
     case ContentHandler::CONTAINERART:
-        return std::make_unique<ContainerArtHandler>(context);
+        return handlers[MetadataType::ContainerArt];
     case ContentHandler::SUBTITLE:
-        return std::make_unique<SubtitleHandler>(context);
+        return handlers[MetadataType::Subtitle];
     case ContentHandler::RESOURCE:
-        return std::make_unique<ResourceHandler>(context);
+        return handlers[MetadataType::ResourceFile];
     case ContentHandler::METAFILE:
-        return std::make_unique<MetafileHandler>(context, content);
+        return handlers[MetadataType::Metafile];
     case ContentHandler::DEFAULT:
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:
@@ -215,9 +245,4 @@ std::unique_ptr<MetadataHandler> MetadataHandler::createHandler(const std::share
         break;
     }
     throw_std_runtime_error("Unknown content handler ID: {}", handlerType);
-}
-
-std::string MetadataHandler::getMimeType() const
-{
-    return MIMETYPE_DEFAULT;
 }

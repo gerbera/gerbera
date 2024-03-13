@@ -45,7 +45,7 @@
 #include "config/result/autoscan.h"
 #include "database/database.h"
 #include "import_service.h"
-#include "metadata/metadata_handler.h"
+#include "metadata/metadata_service.h"
 #include "update_manager.h"
 #include "upnp/clients.h"
 #include "util/mime.h"
@@ -426,7 +426,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
         }
     } else if (obj->isItem() && processExisting) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        MetadataHandler::extractMetaData(context, shared_from_this(), item, dirEnt);
+        getImportService(adir)->getMetadataService()->extractMetaData(item, dirEnt);
         getImportService(adir)->updateItemData(item, item->getMimeType());
     }
     if (processExisting || isNew) {

@@ -34,8 +34,6 @@
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
-#include <set>
-
 #include "common.h"
 #include "context.h"
 #include "util/grb_fs.h"
@@ -57,11 +55,13 @@ protected:
     std::shared_ptr<Mime> mime;
 
 public:
-    explicit MetadataHandler(const std::shared_ptr<Context>& context);
-    virtual ~MetadataHandler() = default;
+    explicit MetadataHandler(const std::shared_ptr<Context>& context)
+    : config(context->getConfig())
+    , mime(context->getMime())
+    {
+    }
 
-    static void extractMetaData(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
-    static std::unique_ptr<MetadataHandler> createHandler(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content, ContentHandler handlerType);
+    virtual ~MetadataHandler() = default;
 
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle
@@ -72,7 +72,7 @@ public:
     /// \param resource the resource
     /// \return iohandler to stream to client
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) = 0;
-    virtual std::string getMimeType() const;
+    virtual std::string getMimeType() const { return MIMETYPE_DEFAULT; }
 };
 
 #endif // __METADATA_HANDLER_H__
