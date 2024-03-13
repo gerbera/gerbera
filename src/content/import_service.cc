@@ -37,6 +37,7 @@
 #include "layout/builtin_layout.h"
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"
+#include "metadata/metadata_service.h"
 #include "upnp/upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -136,6 +137,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
 void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> autoScan, fs::path path)
 {
     this->content = std::move(content);
+    metadataService = std::make_shared<MetadataService>(context, this->content);
     if (autoScan) {
         this->autoscanDir = std::move(autoScan);
         this->rootPath = std::move(path);
@@ -568,7 +570,7 @@ void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const 
     item->setUTime(mTime);
     item->setSizeOnDisk(getFileSize(dirEntry));
 
-    MetadataHandler::extractMetaData(context, content, item, dirEntry);
+    metadataService->extractMetaData(item, dirEntry);
     updateItemData(item, mimetype);
 }
 
@@ -700,7 +702,7 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         }
     }
     if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
-        MetadataHandler::createHandler(context, nullptr, ContentHandler::CONTAINERART)->fillMetadata(container);
+        metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container);
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
             container->clearResources();

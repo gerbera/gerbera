@@ -45,6 +45,7 @@ class GenericTask;
 class ImportService;
 class Layout;
 enum class LayoutType;
+class MetadataService;
 class Mime;
 class ScriptingRuntime;
 class UpnpMap;
@@ -147,6 +148,7 @@ private:
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
+    std::shared_ptr<MetadataService> metadataService;
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
     std::map<std::string, std::string> mimetypeUpnpclassMap;
@@ -214,6 +216,7 @@ public:
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
     std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
     std::shared_ptr<Layout> getLayout() const { return layout; }
+    std::shared_ptr<MetadataService> getMetadataService() const { return metadataService; }
 
     /// \brief parse a file containing metadata for object
     void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const;

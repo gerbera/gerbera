@@ -44,6 +44,7 @@
 #include "database/database.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
+#include "metadata/metadata_service.h"
 #include "transcoding/transcode_dispatcher.h"
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
@@ -57,6 +58,7 @@
 FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : RequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
+    , metadataService(std::make_shared<MetadataService>(content->getContext(), content))
 {
 }
 
@@ -196,7 +198,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     log_debug("end: {}", filename);
 }
 
-std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const
+std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const
 {
     auto resHandler = resource->getHandlerType();
     if (resource->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
@@ -216,7 +218,7 @@ std::unique_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(
             log_error(ex.what());
         }
     }
-    return MetadataHandler::createHandler(context, content, resHandler);
+    return metadataService->getHandler(resHandler);
 }
 
 std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)

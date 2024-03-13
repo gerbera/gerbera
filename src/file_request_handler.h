@@ -42,6 +42,7 @@
 
 class CdsResource;
 class MetadataHandler;
+class MetadataService;
 
 class FileRequestHandler : public RequestHandler {
 
@@ -57,7 +58,9 @@ protected:
 private:
     std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
     static std::size_t parseResourceInfo(const std::map<std::string, std::string>& params);
-    std::unique_ptr<MetadataHandler> getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const;
+    std::shared_ptr<MetadataHandler> getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const;
+
+    std::shared_ptr<MetadataService> metadataService;
 };
 
 #endif // __FILE_REQUEST_HANDLER_H__
