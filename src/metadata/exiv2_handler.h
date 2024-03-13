@@ -44,6 +44,10 @@ public:
     explicit Exiv2Handler(const std::shared_ptr<Context>& context);
     void fillMetadata(const std::shared_ptr<CdsObject>& item) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+
+private:
+    std::vector<std::string> auxTags;
+    std::map<std::string, std::string> metaTags;
 };
 
 #endif // __METADATA_EXIV2_H__
