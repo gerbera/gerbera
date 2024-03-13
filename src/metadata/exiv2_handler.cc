@@ -51,6 +51,8 @@ Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
 {
     // silence exiv2 messages without debug
     Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
+    metaTags = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
+    auxTags = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
 }
 
 void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
@@ -153,9 +155,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         }
 
         // if there are any metadata tags that the user wants - add them
-        const auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
-        if (!meta.empty()) {
-            for (auto&& [metatag, metakey] : meta) {
+        if (!metaTags.empty()) {
+            for (auto&& [metatag, metakey] : metaTags) {
                 std::string metaval;
                 log_debug("metatag: {} ", metatag.c_str());
                 if (startswith(metatag, "Exif")) {
@@ -167,8 +168,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                     if (xmpMd != xmpData.end())
                         metaval = trimString(xmpMd->toString());
                 } else {
-                    log_debug("Invalid meta Tag {}", metatag.c_str());
-                    break;
+                    log_warning("Invalid meta Tag {}", metatag.c_str());
+                    continue;
                 }
                 if (!metaval.empty()) {
                     metaval = sc->convert(metaval);
@@ -181,9 +182,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
         }
 
         // if there are any auxilary tags that the user wants - add them
-        const auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
-        if (!aux.empty()) {
-            for (auto&& auxtag : aux) {
+        if (!auxTags.empty()) {
+            for (auto&& auxtag : auxTags) {
                 std::string auxval;
                 log_debug("auxtag: {} ", auxtag.c_str());
                 if (startswith(auxtag, "Exif")) {
@@ -195,8 +195,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
                     if (xmpMd != xmpData.end())
                         auxval = trimString(xmpMd->toString());
                 } else {
-                    log_debug("Invalid Aux Tag {}", auxtag.c_str());
-                    break;
+                    log_warning("Invalid Aux Tag {}", auxtag.c_str());
+                    continue;
                 }
                 if (!auxval.empty()) {
                     auxval = sc->convert(auxval);

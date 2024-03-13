@@ -42,7 +42,6 @@
 class CdsItem;
 class CdsObject;
 class CdsResource;
-class ContentManager;
 class IOHandler;
 enum class ContentHandler;
 enum class MetadataFields;
@@ -56,8 +55,8 @@ protected:
 
 public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context)
-    : config(context->getConfig())
-    , mime(context->getMime())
+        : config(context->getConfig())
+        , mime(context->getMime())
     {
     }
 

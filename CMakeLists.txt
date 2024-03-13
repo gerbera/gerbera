@@ -229,8 +229,9 @@ add_library(libgerbera STATIC
         src/metadata/metacontent_handler.h
         src/metadata/metadata_enums.cc
         src/metadata/metadata_enums.h
-        src/metadata/metadata_handler.cc
         src/metadata/metadata_handler.h
+        src/metadata/metadata_service.cc
+        src/metadata/metadata_service.h
         src/metadata/resolution.cc
         src/metadata/resolution.h
         src/metadata/taglib_handler.cc
