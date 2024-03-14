@@ -20,7 +20,6 @@ Gerbera - https://gerbera.io/
 */
 
 #include <array>
-#include <common.h>
 #include <filesystem>
 #include <fstream>
 #include <gmock/gmock.h>
@@ -28,6 +27,7 @@ Gerbera - https://gerbera.io/
 #include <memory>
 #include <regex>
 
+#include "common.h"
 #include "util/tools.h"
 
 namespace fs = std::filesystem;

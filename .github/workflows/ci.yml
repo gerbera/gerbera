@@ -41,26 +41,25 @@ jobs:
           python-version: "3.11"
       - name: Install conan
         run: |
-          pip install -U --no-cache-dir conan==1.62
-          conan profile new default --detect
-          conan profile update settings.compiler.libcxx=libstdc++11 default
+          pip install -U --no-cache-dir conan
+          conan profile detect --name default
       - name: Cache conan dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.conan/data
-          key: ${{ runner.os }}-conan-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
+          path: ~/.conan2
+          key: ${{ runner.os }}-conan2-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
           restore-keys: |
-            - ${{ runner.os }}-conan-${{ matrix.compiler.name }}-
+            - ${{ runner.os }}-conan2-${{ matrix.compiler.name }}-
       - name: build and test
         run: |
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
-          conan remove 'gerbera/*' --force
-          conan create -pr ./conan/dev --build=missing . gerbera/dev@
+          conan remove 'gerbera/*' -c
+          conan create -pr ./conan/dev --build=missing --version dev .
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |
-          conan remove '*' --force --builds --system-reqs
+          conan remove '*' -c
 
   head-check:
     runs-on: ubuntu-latest

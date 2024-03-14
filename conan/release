@@ -10,5 +10,5 @@ build_type=RelWithDebInfo
 *:shared=False
 *:fPIC=False
 
-[env]
+[buildenv]
 CXXFLAGS=-O2 -Werror -Wall -flto

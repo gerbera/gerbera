@@ -10,10 +10,18 @@ add_executable(testcore
     test_url_utils.cc
 )
 
-target_link_libraries(testcore PRIVATE
-    libgerbera
-    GTest::GTest
-)
+if (NOT TARGET GTest::gmock)
+    target_link_libraries(testcore PRIVATE
+        libgerbera
+        GTest::GTest
+    )
+else()
+    target_link_libraries(testcore PRIVATE
+        libgerbera
+        GTest::gmock
+    )
+endif()
+
 add_custom_command(TARGET testcore POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
         DEPENDS fixtures/*

@@ -5,10 +5,19 @@ add_executable(testutil
     test_upnp_headers.cc
     test_jpeg_res.cc
 )
-target_link_libraries(testutil PRIVATE
-    libgerbera
-    GTest::GTest
-)
+
+if (NOT TARGET GTest::gmock)
+    target_link_libraries(testutil PRIVATE
+        libgerbera
+        GTest::GTest
+    )
+else()
+    target_link_libraries(testutil PRIVATE
+        libgerbera
+        GTest::gmock
+    )
+endif()
+
 add_custom_command(TARGET testutil POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testdata ${CMAKE_CURRENT_BINARY_DIR}/testdata
         DEPENDS testdata/*

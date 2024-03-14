@@ -13,10 +13,17 @@ add_custom_command(TARGET testdb POST_BUILD
     COMMENT "Copying Database Scripts"
 )
 
-target_link_libraries(testdb PUBLIC
-    libgerbera
-    GTest::GTest
-)
+if (NOT TARGET GTest::gmock)
+    target_link_libraries(testdb PRIVATE
+        libgerbera
+        GTest::GTest
+    )
+else()
+    target_link_libraries(testdb PRIVATE
+        libgerbera
+        GTest::gmock
+    )
+endif()
 
 include(GoogleTest)
 gtest_discover_tests(testdb DISCOVERY_TIMEOUT 60)
