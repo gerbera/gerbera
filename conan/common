@@ -2,7 +2,11 @@
 [settings]
 compiler.cppstd=17
 
+[conf]
+tools.system.package_manager:mode=install
+tools.system.package_manager:sudo=true
+
 [options]
-pupnp:ipv6=True
-pupnp:reuseaddr=True
-pupnp:blocking-tcp=False
+pupnp/*:ipv6=True
+pupnp/*:reuseaddr=True
+pupnp/*:blocking-tcp=False

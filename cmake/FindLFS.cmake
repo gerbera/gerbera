@@ -141,6 +141,8 @@ function(_lfs_check)
     set(LFS_FOUND ${LFS_FOUND} CACHE INTERNAL "Found LFS")
 endfunction()
 
+set(LFS_FOUND CACHE INTERNAL FALSE)
+
 if (NOT LFS_FOUND)
     _lfs_check()
 endif()
