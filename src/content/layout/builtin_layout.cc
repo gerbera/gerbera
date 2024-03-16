@@ -591,7 +591,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
             std::vector<std::shared_ptr<CdsObject>> ct;
             ct.push_back(container["Online Services"]);
             ct.push_back(container["Apple"]);
-            ct.push_back(container["Genres"]);
+            ct.push_back(container["Apple/Genres"]);
             ct.push_back(std::make_shared<CdsContainer>(genre));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
@@ -604,7 +604,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
             std::vector<std::shared_ptr<CdsObject>> ct;
             ct.push_back(container["Online Services"]);
             ct.push_back(container["Apple"]);
-            ct.push_back(container["Release Date"]);
+            ct.push_back(container["Apple/Release Date"]);
             ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
@@ -617,7 +617,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
             std::vector<std::shared_ptr<CdsObject>> ct;
             ct.push_back(container["Online Services"]);
             ct.push_back(container["Apple"]);
-            ct.push_back(container["Post Date"]);
+            ct.push_back(container["Apple/Post Date"]);
             ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
