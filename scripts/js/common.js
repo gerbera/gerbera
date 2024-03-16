@@ -525,8 +525,10 @@ function addAudio(obj, cont, rootPath, containerType) {
         addCdsObject(obj, container);
     }
 
-    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
-    addCdsObject(obj, container);
+    if (boxSetup['Audio/allSongs'].enabled && boxSetup['Audio/allArtists'].enabled) {
+        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
+        addCdsObject(obj, container);
+    }
 
     var i;
     const artCnt = artist.length;
@@ -547,10 +549,12 @@ function addAudio(obj, cont, rootPath, containerType) {
         container = addContainerTree([chain.audio, chain.allFull]);
         addCdsObject(obj, container);
 
-        for (i = 0; i < artCnt; i++) {
-            chain.artist.title = artist[i];
-            container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
-            addCdsObject(obj, container);
+        if (boxSetup['Audio/allArtists'].enabled) {
+            for (i = 0; i < artCnt; i++) {
+                chain.artist.title = artist[i];
+                container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
+                addCdsObject(obj, container);
+            }
         }
 
         obj.title = temp; // Restore the title
@@ -605,12 +609,14 @@ function addAudio(obj, cont, rootPath, containerType) {
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/artistChronology'].enabled) {
+    if (boxSetup['Audio/artistChronology'].enabled && boxSetup['Audio/allArtists'].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
         addCdsObject(obj, container);
+
+        chain.album.title = album; // Restore the title;
     }
 }
 // doc-add-audio-end
