@@ -435,7 +435,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     }
 
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
-    if (blOption->get(BoxKeys::audioAllSongs)->getEnabled()) {
+    if (blOption->get(BoxKeys::audioAllSongs)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> arc;
         arc.push_back(container["Audio"]);
         arc.push_back(container["Artists"]);
@@ -515,7 +515,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
     }
 
-    if (blOption->get(BoxKeys::audioArtistChronology)->getEnabled()) {
+    if (blOption->get(BoxKeys::audioArtistChronology)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
         artistContainer->setSearchable(false);
         std::vector<std::shared_ptr<CdsObject>> chronology;
         chronology.push_back(container["Audio"]);
