@@ -186,8 +186,8 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
             chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] }, nullptr);
         }
 #endif
-#endif
     }
+#endif
 }
 
 void BuiltinLayout::add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef)
