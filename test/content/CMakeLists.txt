@@ -1,12 +1,11 @@
 add_executable(testcontent
-    main.cc
     test_autoscan_list.cc
     test_resolution.cc
 )
 
 target_link_libraries(testcontent PRIVATE
     libgerbera
-    GTest::GTest
+    GTest::gmock_main
 )
 
 include(GoogleTest)

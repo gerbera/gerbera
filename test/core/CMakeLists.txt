@@ -2,7 +2,6 @@ include(GoogleTest)
 generate_compile_info()
 
 add_executable(testcore
-    main.cc
     test_searchhandler.cc
     test_server.cc
     test_upnp_xml.cc
@@ -12,7 +11,7 @@ add_executable(testcore
 
 target_link_libraries(testcore PRIVATE
     libgerbera
-    GTest::GTest
+    GTest::gmock_main
 )
 add_custom_command(TARGET testcore POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
