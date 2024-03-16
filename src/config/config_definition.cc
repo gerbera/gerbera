@@ -333,7 +333,7 @@ const std::string BoxKeys::videoUnknown = "Video/unknown";
 
 const std::string BoxKeys::imageAllDates = "Image/allDates";
 const std::string BoxKeys::imageAllDirectories = "Image/allDirectories";
-const std::string BoxKeys::imageAllImages = "Image/allImages";
+const std::string BoxKeys::imageAll = "Image/allImages";
 const std::string BoxKeys::imageAllYears = "Image/allYears";
 const std::string BoxKeys::imageRoot = "Image/imageRoot";
 const std::string BoxKeys::imageUnknown = "Image/unknown";
@@ -385,7 +385,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
 
     BoxLayout(BoxKeys::imageAllDates, "Date", "object.container"),
     BoxLayout(BoxKeys::imageAllDirectories, "Directories", "object.container"),
-    BoxLayout(BoxKeys::imageAllImages, "All Photos", "object.container"),
+    BoxLayout(BoxKeys::imageAll, "All Photos", "object.container"),
     BoxLayout(BoxKeys::imageAllYears, "Year", "object.container"),
     BoxLayout(BoxKeys::imageRoot, "Photos", "object.container"),
     BoxLayout(BoxKeys::imageUnknown, "Unknown", "object.container"),

@@ -440,7 +440,7 @@ public:
 
     static const std::string imageAllDates;
     static const std::string imageAllDirectories;
-    static const std::string imageAllImages;
+    static const std::string imageAll;
     static const std::string imageAllYears;
     static const std::string imageRoot;
     static const std::string imageUnknown;

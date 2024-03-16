@@ -63,128 +63,30 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
 {
     auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
     for (auto&& bl : blOption->getArrayCopy()) {
+        // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
         container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
     }
 
-    container["Video"] = container.at(BoxKeys::videoRoot);
-    container["Video"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
-
-    container["All Video"] = container.at(BoxKeys::videoAll);
-    chain["/Video/All Video"] = this->content->addContainerTree({ container["Video"], container["All Video"] }, nullptr);
-
-    if (blOption->get(BoxKeys::videoAllYears)->getEnabled()) {
-        container["Video/Year"] = container.at(BoxKeys::videoAllYears);
-        chain["/Video/Year"] = this->content->addContainerTree({ container["Video"], container["Video/Year"] }, nullptr);
-    }
-
-    if (blOption->get(BoxKeys::videoAllDates)->getEnabled()) {
-        container["Video/Date"] = container.at(BoxKeys::videoAllDates);
-        chain["/Video/Date"] = this->content->addContainerTree({ container["Video"], container["Video/Date"] }, nullptr);
-    }
-
-    if (blOption->get(BoxKeys::videoAllDirectories)->getEnabled()) {
-        container["Video/Directories"] = container.at(BoxKeys::videoAllDirectories);
-        chain["/Video/Directories"] = this->content->addContainerTree({ container["Video"], container["Video/Directories"] }, nullptr);
-    }
+    container[BoxKeys::videoRoot]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
+    chain["/Video/All Video"] = this->content->addContainerTree({ container[BoxKeys::videoRoot], container[BoxKeys::videoAll] }, nullptr);
 
     /*****************************************************************************/
 
-    container["Photos"] = container.at(BoxKeys::imageRoot);
-    container["Photos"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
-
-    container["All Photos"] = container.at(BoxKeys::imageAllImages);
-    chain["/Photos/All Photos"] = this->content->addContainerTree({ container["Photos"], container["All Photos"] }, nullptr);
-    // Not clear if it shall be possible to disable this container...
-    if (!blOption->get(BoxKeys::imageAllImages)->getEnabled()) {
-        log_warning("Box 'Image/allImages' cannot be disabled");
-    }
-
-    if (blOption->get(BoxKeys::imageAllYears)->getEnabled()) {
-        container["Photos/Year"] = container.at(BoxKeys::imageAllYears);
-        chain["/Photos/Year"] = this->content->addContainerTree({ container["Photos"], container["Photos/Year"] }, nullptr);
-    }
-
-    if (blOption->get(BoxKeys::imageAllDates)->getEnabled()) {
-        container["Photos/Date"] = container.at(BoxKeys::imageAllDates);
-        chain["/Photos/Date"] = this->content->addContainerTree({ container["Photos"], container["Photos/Date"] }, nullptr);
-    }
-
-    if (blOption->get(BoxKeys::imageAllDirectories)->getEnabled()) {
-        container["Photos/Directories"] = container.at(BoxKeys::imageAllDirectories);
-        chain["/Photos/Directories"] = this->content->addContainerTree({ container["Photos"], container["Photos/Directories"] }, nullptr);
-    }
+    container[BoxKeys::imageRoot]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_IMAGE_ITEM);
+    chain["/Photos/All Photos"] = this->content->addContainerTree({ container[BoxKeys::imageRoot], container[BoxKeys::imageAll] }, nullptr);
 
     /*****************************************************************************/
 
-    container["Audio"] = container.at(BoxKeys::audioRoot);
-    container["Audio"]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
-    container["All Audio"] = container.at(BoxKeys::audioAll);
-    chain["/Audio/All Audio"] = this->content->addContainerTree({ container["Audio"], container["All Audio"] }, nullptr);
-    // Not clear if it shall be possible to disable this container...
-    if (!blOption->get(BoxKeys::audioAll)->getEnabled()) {
-        log_warning("Box 'Audio/allAudio' cannot be disabled");
-    }
-
-    container["All Songs"] = container.at(BoxKeys::audioAllSongs);
-
-    container["All - full name"] = container.at(BoxKeys::audioAllTracks);
+    container[BoxKeys::audioRoot]->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
+    chain["/Audio/All Audio"] = this->content->addContainerTree({ container[BoxKeys::audioRoot], container[BoxKeys::audioAll] }, nullptr);
     if (blOption->get(BoxKeys::audioAllTracks)->getEnabled()) {
-        chain["/Audio/All - full name"] = this->content->addContainerTree({ container["Audio"], container["All - full name"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllAlbums)->getEnabled()) {
-        container["Albums"] = container.at(BoxKeys::audioAllAlbums);
-        chain["/Audio/Albums"] = this->content->addContainerTree({ container["Audio"], container["Albums"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
-        container["Artists"] = container.at(BoxKeys::audioAllArtists);
-        chain["/Audio/Artists"] = this->content->addContainerTree({ container["Audio"], container["Artists"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllGenres)->getEnabled()) {
-        container["Genres"] = container.at(BoxKeys::audioAllGenres);
-        chain["/Audio/Genres"] = this->content->addContainerTree({ container["Audio"], container["Genres"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllComposers)->getEnabled()) {
-        container["Composers"] = container.at(BoxKeys::audioAllComposers);
-        chain["/Audio/Composers"] = this->content->addContainerTree({ container["Audio"], container["Composers"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllYears)->getEnabled()) {
-        container["Year"] = container.at(BoxKeys::audioAllYears);
-        chain["/Audio/Year"] = this->content->addContainerTree({ container["Audio"], container["Year"] }, nullptr);
-    }
-    if (blOption->get(BoxKeys::audioAllDirectories)->getEnabled()) {
-        container["Audio/Directories"] = container.at(BoxKeys::audioAllDirectories);
-        chain["/Audio/Directories"] = this->content->addContainerTree({ container["Audio"], container["Audio/Directories"] }, nullptr);
-    }
-
-    if (blOption->get(BoxKeys::audioArtistChronology)->getEnabled()) {
-        container["Artist Chronology"] = container.at(BoxKeys::audioArtistChronology);
+        chain["/Audio/All - full name"] = this->content->addContainerTree({ container[BoxKeys::audioRoot], container[BoxKeys::audioAllTracks] }, nullptr);
     }
 
 #ifdef ONLINE_SERVICES
     if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
-        container["Online Services"] = container.at(BoxKeys::trailerRoot);
-
-        /*****************************************************************************/
-
 #ifdef ATRAILERS
-        container["Apple"] = container.at(BoxKeys::trailerApple);
-        container["Apple/All Trailers"] = container.at(BoxKeys::trailerAll);
-        container["Apple/Genres"] = container.at(BoxKeys::trailerAllGenres);
-        container["Apple/Release Date"] = container.at(BoxKeys::trailerRelDate);
-        container["Apple/Post Date"] = container.at(BoxKeys::trailerPostDate);
-        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/All Trailers"] }, nullptr);
-        if (!blOption->get(BoxKeys::trailerAll)->getEnabled()) {
-            log_warning("Box 'Trailer/allTrailers' cannot be disabled");
-        }
-        if (blOption->get(BoxKeys::trailerAllGenres)->getEnabled()) {
-            chain["/Online Services/Apple/Genres"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Genres"] }, nullptr);
-        }
-        if (blOption->get(BoxKeys::trailerRelDate)->getEnabled()) {
-            chain["/Online Services/Apple/Release Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Release Date"] }, nullptr);
-        }
-        if (blOption->get(BoxKeys::trailerPostDate)->getEnabled()) {
-            chain["/Online Services/Apple/Post Date"] = this->content->addContainerTree({ container["Online Services"], container["Apple"], container["Apple/Post Date"] }, nullptr);
-        }
+        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ container[BoxKeys::trailerRoot], container[BoxKeys::trailerApple], container[BoxKeys::trailerAll] }, nullptr);
 #endif
     }
 #endif
@@ -264,8 +166,8 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
             if ((y > 0) && (m > 0)) {
                 std::vector<std::shared_ptr<CdsObject>> ct;
                 ct.reserve(4);
-                ct.push_back(container["Video"]);
-                ct.push_back(container["Video/Year"]);
+                ct.push_back(container[BoxKeys::videoRoot]);
+                ct.push_back(container[BoxKeys::videoAllYears]);
                 ct.push_back(std::make_shared<CdsContainer>(year));
                 ct.push_back(std::make_shared<CdsContainer>(month));
                 id = content->addContainerTree(ct, obj);
@@ -279,15 +181,17 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
                 date.resize(t);
             }
             std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(container["Video"]);
-            ct.push_back(container["Video/Date"]);
+            ct.push_back(container[BoxKeys::videoRoot]);
+            ct.push_back(container[BoxKeys::videoAllDates]);
             ct.push_back(std::make_shared<CdsContainer>(date));
             id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
     }
 
-    getDir(obj, rootpath, "Video", "Video/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video)));
+    if (blOption->get(BoxKeys::videoAllDirectories)->getEnabled()) {
+        getDir(obj, rootpath, BoxKeys::videoRoot, BoxKeys::videoAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video)));
+    }
 }
 
 void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
@@ -324,8 +228,8 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
         if (blOption->get(BoxKeys::imageAllYears)->getEnabled()) {
             if ((y > 0) && (m > 0)) {
                 std::vector<std::shared_ptr<CdsObject>> ct;
-                ct.push_back(container["Photos"]);
-                ct.push_back(container["Photos/Year"]);
+                ct.push_back(container[BoxKeys::imageRoot]);
+                ct.push_back(container[BoxKeys::imageAllYears]);
                 ct.push_back(std::make_shared<CdsContainer>(year));
                 ct.push_back(std::make_shared<CdsContainer>(month));
                 id = content->addContainerTree(ct, obj);
@@ -339,15 +243,17 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
                 date.resize(t);
             }
             std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(container["Photos"]);
-            ct.push_back(container["Photos/Date"]);
+            ct.push_back(container[BoxKeys::imageRoot]);
+            ct.push_back(container[BoxKeys::imageAllDates]);
             ct.push_back(std::make_shared<CdsContainer>(date));
             id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
     }
 
-    getDir(obj, rootpath, "Photos", "Photos/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image)));
+    if (blOption->get(BoxKeys::imageAllDirectories)->getEnabled()) {
+        getDir(obj, rootpath, BoxKeys::imageRoot, BoxKeys::imageAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image)));
+    }
 }
 
 void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
@@ -437,10 +343,10 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
     if (blOption->get(BoxKeys::audioAllSongs)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> arc;
-        arc.push_back(container["Audio"]);
-        arc.push_back(container["Artists"]);
+        arc.push_back(container[BoxKeys::audioRoot]);
+        arc.push_back(container[BoxKeys::audioAllArtists]);
         arc.push_back(artistContainer);
-        arc.push_back(container["All Songs"]);
+        arc.push_back(container[BoxKeys::audioAllSongs]);
         id = content->addContainerTree(arc, obj);
         add(obj, id);
     }
@@ -462,8 +368,8 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
 
     if (blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> alc;
-        alc.push_back(container["Audio"]);
-        alc.push_back(container["Artists"]);
+        alc.push_back(container[BoxKeys::audioRoot]);
+        alc.push_back(container[BoxKeys::audioAllArtists]);
         alc.push_back(artistContainer);
         alc.push_back(albumContainer);
         id = content->addContainerTree(alc, obj);
@@ -473,8 +379,8 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
     albumContainer->setSearchable(true);
     if (blOption->get(BoxKeys::audioAllAlbums)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> allc;
-        allc.push_back(container["Audio"]);
-        allc.push_back(container["Albums"]);
+        allc.push_back(container[BoxKeys::audioRoot]);
+        allc.push_back(container[BoxKeys::audioAllAlbums]);
         allc.push_back(std::move(albumContainer));
         id = content->addContainerTree(allc, obj);
         add(obj, id);
@@ -482,8 +388,8 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
 
     if (blOption->get(BoxKeys::audioAllGenres)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> ct;
-        ct.push_back(container["Audio"]);
-        ct.push_back(container["Genres"]);
+        ct.push_back(container[BoxKeys::audioRoot]);
+        ct.push_back(container[BoxKeys::audioAllGenres]);
         ct.push_back(std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE));
         id = content->addContainerTree(ct, obj);
         add(obj, id);
@@ -493,8 +399,8 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
         composerContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> cc;
-        cc.push_back(container["Audio"]);
-        cc.push_back(container["Composers"]);
+        cc.push_back(container[BoxKeys::audioRoot]);
+        cc.push_back(container[BoxKeys::audioAllComposers]);
         cc.push_back(std::move(composerContainer));
         id = content->addContainerTree(cc, obj);
         add(obj, id);
@@ -504,24 +410,24 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         auto yearContainer = std::make_shared<CdsContainer>(date);
         yearContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> yt;
-        yt.push_back(container["Audio"]);
-        yt.push_back(container["Year"]);
+        yt.push_back(container[BoxKeys::audioRoot]);
+        yt.push_back(container[BoxKeys::audioAllYears]);
         yt.push_back(std::move(yearContainer));
         id = content->addContainerTree(yt, obj);
         add(obj, id);
     }
 
     if (blOption->get(BoxKeys::audioAllDirectories)->getEnabled()) {
-        getDir(obj, rootpath, "Audio", "Audio/Directories", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
+        getDir(obj, rootpath, BoxKeys::audioRoot, BoxKeys::audioAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)));
     }
 
     if (blOption->get(BoxKeys::audioArtistChronology)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
         artistContainer->setSearchable(false);
         std::vector<std::shared_ptr<CdsObject>> chronology;
-        chronology.push_back(container["Audio"]);
-        chronology.push_back(container["Artists"]);
+        chronology.push_back(container[BoxKeys::audioRoot]);
+        chronology.push_back(container[BoxKeys::audioAllArtists]);
         chronology.push_back(std::move(artistContainer));
-        chronology.push_back(container["Artist Chronology"]);
+        chronology.push_back(container[BoxKeys::audioArtistChronology]);
         chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
         id = content->addContainerTree(chronology, obj);
         add(obj, id);
@@ -533,13 +439,15 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         obj->setTitle(fmt::format("{}{}", prefixTitle, title));
         add(obj, chain["/Audio/All - full name"]);
 
-        std::vector<std::shared_ptr<CdsObject>> all;
-        all.push_back(container["Audio"]);
-        all.push_back(container["Artists"]);
-        all.push_back(artistContainer);
-        all.push_back(container["All - full name"]);
-        id = content->addContainerTree(all, obj);
-        add(obj, id);
+        if (blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
+            std::vector<std::shared_ptr<CdsObject>> all;
+            all.push_back(container[BoxKeys::audioRoot]);
+            all.push_back(container[BoxKeys::audioAllArtists]);
+            all.push_back(artistContainer);
+            all.push_back(container[BoxKeys::audioAllTracks]);
+            id = content->addContainerTree(all, obj);
+            add(obj, id);
+        }
     }
 }
 
@@ -579,7 +487,7 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 
     auto meta = obj->getMetaData();
 
-    if (blOption->get(BoxKeys::trailerAllGenres)->getEnabled()) {
+    if (blOption->get(BoxKeys::trailerAllGenres)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
         std::string temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_GENRE));
         auto genreAr = splitString(temp, ',');
         for (auto&& genre : genreAr) {
@@ -589,35 +497,35 @@ void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
                 continue;
 
             std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(container["Online Services"]);
-            ct.push_back(container["Apple"]);
-            ct.push_back(container["Apple/Genres"]);
+            ct.push_back(container[BoxKeys::trailerRoot]);
+            ct.push_back(container[BoxKeys::trailerApple]);
+            ct.push_back(container[BoxKeys::trailerAllGenres]);
             ct.push_back(std::make_shared<CdsContainer>(genre));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
     }
 
-    if (blOption->get(BoxKeys::trailerRelDate)->getEnabled()) {
+    if (blOption->get(BoxKeys::trailerRelDate)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
         std::string temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE));
         if (temp.length() >= 7) {
             std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(container["Online Services"]);
-            ct.push_back(container["Apple"]);
-            ct.push_back(container["Apple/Release Date"]);
+            ct.push_back(container[BoxKeys::trailerRoot]);
+            ct.push_back(container[BoxKeys::trailerApple]);
+            ct.push_back(container[BoxKeys::trailerRelDate]);
             ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
         }
     }
 
-    if (blOption->get(BoxKeys::trailerPostDate)->getEnabled()) {
+    if (blOption->get(BoxKeys::trailerPostDate)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
         std::string temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
         if (temp.length() >= 7) {
             std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(container["Online Services"]);
-            ct.push_back(container["Apple"]);
-            ct.push_back(container["Apple/Post Date"]);
+            ct.push_back(container[BoxKeys::trailerRoot]);
+            ct.push_back(container[BoxKeys::trailerApple]);
+            ct.push_back(container[BoxKeys::trailerPostDate]);
             ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
             auto id = content->addContainerTree(ct, obj);
             add(obj, id);
