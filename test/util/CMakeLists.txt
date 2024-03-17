@@ -1,5 +1,4 @@
 add_executable(testutil
-    main.cc
     test_tools.cc
     test_upnp_clients.cc
     test_upnp_headers.cc
@@ -7,7 +6,7 @@ add_executable(testutil
 )
 target_link_libraries(testutil PRIVATE
     libgerbera
-    GTest::GTest
+    GTest::gmock_main
 )
 add_custom_command(TARGET testutil POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/testdata ${CMAKE_CURRENT_BINARY_DIR}/testdata
