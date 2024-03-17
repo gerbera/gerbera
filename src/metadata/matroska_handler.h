@@ -31,8 +31,13 @@
 #include "metadata_handler.h"
 
 #include <ebml/EbmlStream.h>
+#include <matroska/KaxVersion.h>
+#if LIBMATROSKA_VERSION >= 0x010200
+#include <matroska/KaxSemantic.h>
+#else
 #include <matroska/KaxAttached.h>
 #include <matroska/KaxAttachments.h>
+#endif
 
 // forward declaration
 class MemIOHandler;
@@ -49,11 +54,11 @@ private:
     int activeFlag {};
 
     void parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseHead(const std::shared_ptr<CdsItem>& item, IOCallback& ebmlFile, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseInfo(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* info);
-    void parseAttachments(const std::shared_ptr<CdsItem>& item, LIBEBML_NAMESPACE::EbmlStream& ebmlStream, LIBEBML_NAMESPACE::EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler);
-    std::string getContentTypeFromByteVector(const LIBMATROSKA_NAMESPACE::KaxFileData& data) const;
+    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, libebml::IOCallback& ebmlFile, libebml::EbmlStream& ebmlStream, libebml::EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler);
+    void parseHead(const std::shared_ptr<CdsItem>& item, libebml::IOCallback& ebmlFile, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler);
+    void parseInfo(const std::shared_ptr<CdsItem>& item, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* info);
+    void parseAttachments(const std::shared_ptr<CdsItem>& item, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler);
+    std::string getContentTypeFromByteVector(const libmatroska::KaxFileData& data) const;
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
 };
 
