@@ -5,6 +5,12 @@ find_package(GTest REQUIRED)
 if (NOT "${GTest_LIBRARY_LIST}" MATCHES "gmock")
     find_package(GMock REQUIRED)
     set_property(TARGET GTest::GTest APPEND PROPERTY INTERFACE_LINK_LIBRARIES ${GMOCK_LIBRARIES})
+
+    # cmake 3.23 adds target GTest::gmock_main
+    # https://cmake.org/cmake/help/v3.23/module/FindGTest.html
+    if (CMAKE_VERSION VERSION_LESS "3.23.0")
+        add_library(GMock::gmock_main ALIAS GTest::gmock_main)
+    endif()
 endif()
 
 ## Add tests below
