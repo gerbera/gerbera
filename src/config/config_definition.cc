@@ -300,59 +300,109 @@ static const std::vector<std::string> virtualDirectoryKeys {
     "M_UPNP_DATE",
 };
 
+const std::string BoxKeys::audioAllAlbums = "Audio/allAlbums";
+const std::string BoxKeys::audioAllArtists = "Audio/allArtists";
+const std::string BoxKeys::audioAll = "Audio/allAudio";
+const std::string BoxKeys::audioAllComposers = "Audio/allComposers";
+const std::string BoxKeys::audioAllDirectories = "Audio/allDirectories";
+const std::string BoxKeys::audioAllGenres = "Audio/allGenres";
+const std::string BoxKeys::audioAllSongs = "Audio/allSongs";
+const std::string BoxKeys::audioAllTracks = "Audio/allTracks";
+const std::string BoxKeys::audioAllYears = "Audio/allYears";
+const std::string BoxKeys::audioArtistChronology = "Audio/artistChronology";
+const std::string BoxKeys::audioRoot = "Audio/audioRoot";
+
+const std::string BoxKeys::audioInitialAbc = "AudioInitial/abc";
+const std::string BoxKeys::audioInitialAllArtistTracks = "AudioInitial/allArtistTracks";
+const std::string BoxKeys::audioInitialAllBooks = "AudioInitial/allBooks";
+const std::string BoxKeys::audioInitialAudioBookRoot = "AudioInitial/audioBookRoot";
+
+const std::string BoxKeys::audioStructuredAllAlbums = "AudioStructured/allAlbums";
+const std::string BoxKeys::audioStructuredAllArtistTracks = "AudioStructured/allArtistTracks";
+const std::string BoxKeys::audioStructuredAllArtists = "AudioStructured/allArtists";
+const std::string BoxKeys::audioStructuredAllGenres = "AudioStructured/allGenres";
+const std::string BoxKeys::audioStructuredAllTracks = "AudioStructured/allTracks";
+const std::string BoxKeys::audioStructuredAllYears = "AudioStructured/allYears";
+
+const std::string BoxKeys::videoAllDates = "Video/allDates";
+const std::string BoxKeys::videoAllDirectories = "Video/allDirectories";
+const std::string BoxKeys::videoAll = "Video/allVideo";
+const std::string BoxKeys::videoAllYears = "Video/allYears";
+const std::string BoxKeys::videoRoot = "Video/videoRoot";
+const std::string BoxKeys::videoUnknown = "Video/unknown";
+
+const std::string BoxKeys::imageAllDates = "Image/allDates";
+const std::string BoxKeys::imageAllDirectories = "Image/allDirectories";
+const std::string BoxKeys::imageAll = "Image/allImages";
+const std::string BoxKeys::imageAllYears = "Image/allYears";
+const std::string BoxKeys::imageRoot = "Image/imageRoot";
+const std::string BoxKeys::imageUnknown = "Image/unknown";
+
+const std::string BoxKeys::trailerApple = "Trailer/appleTrailers";
+const std::string BoxKeys::trailerAllGenres = "Trailer/allGenres";
+const std::string BoxKeys::trailerAll = "Trailer/allTrailers";
+const std::string BoxKeys::trailerPostDate = "Trailer/postDate";
+const std::string BoxKeys::trailerRelDate = "Trailer/relDate";
+const std::string BoxKeys::trailerRoot = "Trailer/trailerRoot";
+const std::string BoxKeys::trailerUnknown = "Trailer/unknown";
+
+const std::string BoxKeys::playlistAll = "Playlist/allPlaylists";
+const std::string BoxKeys::playlistAllDirectories = "Playlist/allDirectories";
+const std::string BoxKeys::playlistRoot = "Playlist/playlistRoot";
+
 /// \brief default values for CFG_BOXLAYOUT_BOX
 static const std::vector<BoxLayout> boxLayoutDefaults
 {
-    BoxLayout("Audio/allAlbums", "Albums", "object.container"),
-        BoxLayout("Audio/allArtists", "Artists", "object.container"),
-        BoxLayout("Audio/allAudio", "All Audio", "object.container"),
-        BoxLayout("Audio/allComposers", "Composers", "object.container"),
-        BoxLayout("Audio/allDirectories", "Directories", "object.container"),
-        BoxLayout("Audio/allGenres", "Genres", "object.container"),
-        BoxLayout("Audio/allSongs", "All Songs", "object.container"),
-        BoxLayout("Audio/allTracks", "All - full name", "object.container"),
-        BoxLayout("Audio/allYears", "Year", "object.container"),
-        BoxLayout("Audio/audioRoot", "Audio", "object.container"),
-        BoxLayout("Audio/artistChronology", "Album Chronology", "object.container"),
+    BoxLayout(BoxKeys::audioAllAlbums, "Albums", "object.container"),
+        BoxLayout(BoxKeys::audioAllArtists, "Artists", "object.container"),
+        BoxLayout(BoxKeys::audioAll, "All Audio", "object.container"),
+        BoxLayout(BoxKeys::audioAllComposers, "Composers", "object.container"),
+        BoxLayout(BoxKeys::audioAllDirectories, "Directories", "object.container"),
+        BoxLayout(BoxKeys::audioAllGenres, "Genres", "object.container"),
+        BoxLayout(BoxKeys::audioAllSongs, "All Songs", "object.container"),
+        BoxLayout(BoxKeys::audioAllTracks, "All - full name", "object.container"),
+        BoxLayout(BoxKeys::audioAllYears, "Year", "object.container"),
+        BoxLayout(BoxKeys::audioRoot, "Audio", "object.container"),
+        BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology", "object.container"),
 
-        BoxLayout("AudioInitial/abc", "ABC", "object.container"),
-        BoxLayout("AudioInitial/allArtistTracks", "000 All", "object.container"),
-        BoxLayout("AudioInitial/allBooks", "Books", "object.container"),
-        BoxLayout("AudioInitial/audioBookRoot", "AudioBooks", "object.container"),
+        BoxLayout(BoxKeys::audioInitialAbc, "ABC", "object.container"),
+        BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All", "object.container"),
+        BoxLayout(BoxKeys::audioInitialAllBooks, "Books", "object.container"),
+        BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", "object.container"),
 
-        BoxLayout("AudioStructured/allAlbums", "-Album-", "object.container", true, 6),
-        BoxLayout("AudioStructured/allArtistTracks", "all", "object.container"),
-        BoxLayout("AudioStructured/allArtists", "-Artist-", "object.container", true, 9),
-        BoxLayout("AudioStructured/allGenres", "-Genre-", "object.container", true, 6),
-        BoxLayout("AudioStructured/allTracks", "-Track-", "object.container", true, 6),
-        BoxLayout("AudioStructured/allYears", "-Year-", "object.container"),
+        BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", "object.container", true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all", "object.container"),
+        BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", "object.container", true, 9),
+        BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", "object.container", true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", "object.container", true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-", "object.container"),
 
-        BoxLayout("Video/allDates", "Date", "object.container"),
-        BoxLayout("Video/allDirectories", "Directories", "object.container"),
-        BoxLayout("Video/allVideo", "All Video", "object.container"),
-        BoxLayout("Video/allYears", "Year", "object.container"),
-        BoxLayout("Video/unknown", "Unknown", "object.container"),
-        BoxLayout("Video/videoRoot", "Video", "object.container"),
+        BoxLayout(BoxKeys::videoAllDates, "Date", "object.container"),
+        BoxLayout(BoxKeys::videoAllDirectories, "Directories", "object.container"),
+        BoxLayout(BoxKeys::videoAll, "All Video", "object.container"),
+        BoxLayout(BoxKeys::videoAllYears, "Year", "object.container"),
+        BoxLayout(BoxKeys::videoUnknown, "Unknown", "object.container"),
+        BoxLayout(BoxKeys::videoRoot, "Video", "object.container"),
 
-        BoxLayout("Image/allDates", "Date", "object.container"),
-        BoxLayout("Image/allDirectories", "Directories", "object.container"),
-        BoxLayout("Image/allImages", "All Photos", "object.container"),
-        BoxLayout("Image/allYears", "Year", "object.container"),
-        BoxLayout("Image/imageRoot", "Photos", "object.container"),
-        BoxLayout("Image/unknown", "Unknown", "object.container"),
+        BoxLayout(BoxKeys::imageAllDates, "Date", "object.container"),
+        BoxLayout(BoxKeys::imageAllDirectories, "Directories", "object.container"),
+        BoxLayout(BoxKeys::imageAll, "All Photos", "object.container"),
+        BoxLayout(BoxKeys::imageAllYears, "Year", "object.container"),
+        BoxLayout(BoxKeys::imageRoot, "Photos", "object.container"),
+        BoxLayout(BoxKeys::imageUnknown, "Unknown", "object.container"),
 
-        BoxLayout("Trailer/trailerRoot", "Online Services", "object.container"),
-        BoxLayout("Trailer/appleTrailers", "Apple Trailers", "object.container"),
-        BoxLayout("Trailer/allTrailers", "All Trailers", "object.container"),
-        BoxLayout("Trailer/allGenres", "Genres", "object.container"),
-        BoxLayout("Trailer/relDate", "Release Date", "object.container"),
-        BoxLayout("Trailer/postDate", "Post Date", "object.container"),
-        BoxLayout("Trailer/unknown", "Unknown", "object.container"),
+        BoxLayout(BoxKeys::trailerRoot, "Online Services", "object.container"),
+        BoxLayout(BoxKeys::trailerApple, "Apple Trailers", "object.container"),
+        BoxLayout(BoxKeys::trailerAll, "All Trailers", "object.container"),
+        BoxLayout(BoxKeys::trailerAllGenres, "Genres", "object.container"),
+        BoxLayout(BoxKeys::trailerRelDate, "Release Date", "object.container"),
+        BoxLayout(BoxKeys::trailerPostDate, "Post Date", "object.container"),
+        BoxLayout(BoxKeys::trailerUnknown, "Unknown", "object.container"),
 
 #if HAVE_JS
-        BoxLayout("Playlist/playlistRoot", "Playlists", "object.container"),
-        BoxLayout("Playlist/allPlaylists", "All Playlists", "object.container"),
-        BoxLayout("Playlist/allDirectories", "Directories", "object.container"),
+        BoxLayout(BoxKeys::playlistRoot, "Playlists", "object.container"),
+        BoxLayout(BoxKeys::playlistAll, "All Playlists", "object.container"),
+        BoxLayout(BoxKeys::playlistAllDirectories, "Directories", "object.container"),
 #endif
 };
 

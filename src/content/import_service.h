@@ -162,7 +162,7 @@ private:
     bool hasDefaultDate { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
-    std::vector<std::string> virutalDirKeys {};
+    std::vector<std::string> virtualDirKeys {};
 
     ///\brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;

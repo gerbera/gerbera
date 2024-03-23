@@ -462,11 +462,13 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/artistChronology'].enabled) {
+    if (boxSetup['Audio/artistChronology'].enabled && boxSetup['Audio/allArtists'].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
         addCdsObject(obj, container);
+
+        chain.album.title = album; // Restore the title;
     }
 }

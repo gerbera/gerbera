@@ -51,6 +51,14 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
         auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
 
+        if (std::find_if(defaultEntries.cbegin(), defaultEntries.cend(), [&key](auto& box) { return key == box.getKey(); }) == defaultEntries.cend()) {
+            // Warn the user that his option will be ignored in built-in layout. But allow to use "unknown" options for js
+            log_warning("Box key={}, title={}, objClass={}, enabled={}, size={} will be ignored in built-in layout. Unknown Key '{}'", key, title, objClass, enabled, size, key);
+        } else if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
+            log_warning("Box '{}' cannot be disabled", key);
+            enabled = true;
+        }
+
         auto box = std::make_shared<BoxLayout>(key, title, objClass, enabled, size);
         try {
             result->add(box);

@@ -405,6 +405,59 @@ enum class AtrailerResolution {
     Hi
 };
 
+class BoxKeys {
+public:
+    static const std::string audioAllAlbums;
+    static const std::string audioAllArtists;
+    static const std::string audioAll;
+    static const std::string audioAllComposers;
+    static const std::string audioAllDirectories;
+    static const std::string audioAllGenres;
+    static const std::string audioAllSongs;
+    static const std::string audioAllTracks;
+    static const std::string audioAllYears;
+    static const std::string audioArtistChronology;
+    static const std::string audioRoot;
+
+    static const std::string audioInitialAbc;
+    static const std::string audioInitialAllArtistTracks;
+    static const std::string audioInitialAllBooks;
+    static const std::string audioInitialAudioBookRoot;
+
+    static const std::string audioStructuredAllAlbums;
+    static const std::string audioStructuredAllArtistTracks;
+    static const std::string audioStructuredAllArtists;
+    static const std::string audioStructuredAllGenres;
+    static const std::string audioStructuredAllTracks;
+    static const std::string audioStructuredAllYears;
+
+    static const std::string videoAllDates;
+    static const std::string videoAllDirectories;
+    static const std::string videoAll;
+    static const std::string videoAllYears;
+    static const std::string videoRoot;
+    static const std::string videoUnknown;
+
+    static const std::string imageAllDates;
+    static const std::string imageAllDirectories;
+    static const std::string imageAll;
+    static const std::string imageAllYears;
+    static const std::string imageRoot;
+    static const std::string imageUnknown;
+
+    static const std::string trailerApple;
+    static const std::string trailerAllGenres;
+    static const std::string trailerAll;
+    static const std::string trailerPostDate;
+    static const std::string trailerRelDate;
+    static const std::string trailerRoot;
+    static const std::string trailerUnknown;
+
+    static const std::string playlistAll;
+    static const std::string playlistAllDirectories;
+    static const std::string playlistRoot;
+};
+
 class Config {
 public:
     virtual ~Config() = default;

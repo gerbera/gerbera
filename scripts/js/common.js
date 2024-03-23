@@ -525,51 +525,66 @@ function addAudio(obj, cont, rootPath, containerType) {
         addCdsObject(obj, container);
     }
 
-    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
-    addCdsObject(obj, container);
-
-    var temp = '';
-    if (artist_full) {
-        temp = artist_full;
+    if (boxSetup['Audio/allSongs'].enabled && boxSetup['Audio/allArtists'].enabled) {
+        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
+        addCdsObject(obj, container);
     }
 
-    if (album_full) {
-        temp = temp + ' - ' + album_full + ' - ';
-    } else {
-        temp = temp + ' - ';
-    }
-
-    obj.title = temp + title;
+    var i;
+    const artCnt = artist.length;
     if (boxSetup['Audio/allTracks'].enabled) {
+        var temp = obj.title; //Backup the object title
+        var prefix = '';
+        if (artist_full) {
+            prefix = artist_full;
+        }
+
+        if (album_full) {
+            prefix = prefix + ' - ' + album_full + ' - ';
+        } else {
+            prefix = prefix + ' - ';
+        }
+
+        obj.title = prefix + title;
         container = addContainerTree([chain.audio, chain.allFull]);
         addCdsObject(obj, container);
+
+        if (boxSetup['Audio/allArtists'].enabled) {
+            for (i = 0; i < artCnt; i++) {
+                chain.artist.title = artist[i];
+                container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
+                addCdsObject(obj, container);
+            }
+        }
+
+        obj.title = temp; // Restore the title
     }
 
-    const artCnt = artist.length;
-    var i;
-    if (boxSetup['Audio/allTracks'].enabled) {
+    if (boxSetup['Audio/allArtists'].enabled) {
+        var temp = obj.title; //Backup the object title
+        obj.title = track + title;
+
         for (i = 0; i < artCnt; i++) {
             chain.artist.title = artist[i];
-            container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
+            chain.artist.searchable = true;
+            container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
             addCdsObject(obj, container);
         }
+
+        obj.title = temp; // Restore the title
     }
 
-    obj.title = track + title;
-    for (i = 0; i < artCnt; i++) {
-        chain.artist.title = artist[i];
-        chain.artist.searchable = true;
-        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
-        addCdsObject(obj, container);
-    }
-
-    obj.title = track + title;
-    chain.album.searchable = true;
     if (boxSetup['Audio/allAlbums'].enabled) {
+        chain.album.searchable = true;
+        var temp = obj.title; //Backup the object title
+        obj.title = track + title;
+
         chain.album.location = getRootPath(rootPath, obj.location).join('_');
         container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
         chain.album.location = '';
         addCdsObject(obj, container);
+
+        obj.title = temp; // Restore the title
     }
 
     if (boxSetup['Audio/allGenres'].enabled) {
@@ -594,12 +609,14 @@ function addAudio(obj, cont, rootPath, containerType) {
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/artistChronology'].enabled) {
+    if (boxSetup['Audio/artistChronology'].enabled && boxSetup['Audio/allArtists'].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
         addCdsObject(obj, container);
+
+        chain.album.title = album; // Restore the title;
     }
 }
 // doc-add-audio-end

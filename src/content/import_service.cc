@@ -129,7 +129,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
     containerImageParentCount = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
     containerImageMinDepth = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
-    virutalDirKeys = config->getArrayOption(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS);
+    virtualDirKeys = config->getArrayOption(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS);
     noMediaName = config->getOption(CFG_IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
@@ -802,7 +802,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                 tree = std::regex_replace(tree, std::regex(key), val);
             }
             auto dirKeyValues = std::vector<std::string>();
-            for (auto&& field : virutalDirKeys) {
+            for (auto&& field : virtualDirKeys) {
                 if (field == "LOCATION") {
                     std::string location = item->getLocation().c_str();
                     if (!location.empty()) {
