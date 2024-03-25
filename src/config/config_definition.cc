@@ -300,56 +300,6 @@ static const std::vector<std::string> virtualDirectoryKeys {
     "M_UPNP_DATE",
 };
 
-const std::string BoxKeys::audioAllAlbums = "Audio/allAlbums";
-const std::string BoxKeys::audioAllArtists = "Audio/allArtists";
-const std::string BoxKeys::audioAll = "Audio/allAudio";
-const std::string BoxKeys::audioAllComposers = "Audio/allComposers";
-const std::string BoxKeys::audioAllDirectories = "Audio/allDirectories";
-const std::string BoxKeys::audioAllGenres = "Audio/allGenres";
-const std::string BoxKeys::audioAllSongs = "Audio/allSongs";
-const std::string BoxKeys::audioAllTracks = "Audio/allTracks";
-const std::string BoxKeys::audioAllYears = "Audio/allYears";
-const std::string BoxKeys::audioArtistChronology = "Audio/artistChronology";
-const std::string BoxKeys::audioRoot = "Audio/audioRoot";
-
-const std::string BoxKeys::audioInitialAbc = "AudioInitial/abc";
-const std::string BoxKeys::audioInitialAllArtistTracks = "AudioInitial/allArtistTracks";
-const std::string BoxKeys::audioInitialAllBooks = "AudioInitial/allBooks";
-const std::string BoxKeys::audioInitialAudioBookRoot = "AudioInitial/audioBookRoot";
-
-const std::string BoxKeys::audioStructuredAllAlbums = "AudioStructured/allAlbums";
-const std::string BoxKeys::audioStructuredAllArtistTracks = "AudioStructured/allArtistTracks";
-const std::string BoxKeys::audioStructuredAllArtists = "AudioStructured/allArtists";
-const std::string BoxKeys::audioStructuredAllGenres = "AudioStructured/allGenres";
-const std::string BoxKeys::audioStructuredAllTracks = "AudioStructured/allTracks";
-const std::string BoxKeys::audioStructuredAllYears = "AudioStructured/allYears";
-
-const std::string BoxKeys::videoAllDates = "Video/allDates";
-const std::string BoxKeys::videoAllDirectories = "Video/allDirectories";
-const std::string BoxKeys::videoAll = "Video/allVideo";
-const std::string BoxKeys::videoAllYears = "Video/allYears";
-const std::string BoxKeys::videoRoot = "Video/videoRoot";
-const std::string BoxKeys::videoUnknown = "Video/unknown";
-
-const std::string BoxKeys::imageAllDates = "Image/allDates";
-const std::string BoxKeys::imageAllDirectories = "Image/allDirectories";
-const std::string BoxKeys::imageAll = "Image/allImages";
-const std::string BoxKeys::imageAllYears = "Image/allYears";
-const std::string BoxKeys::imageRoot = "Image/imageRoot";
-const std::string BoxKeys::imageUnknown = "Image/unknown";
-
-const std::string BoxKeys::trailerApple = "Trailer/appleTrailers";
-const std::string BoxKeys::trailerAllGenres = "Trailer/allGenres";
-const std::string BoxKeys::trailerAll = "Trailer/allTrailers";
-const std::string BoxKeys::trailerPostDate = "Trailer/postDate";
-const std::string BoxKeys::trailerRelDate = "Trailer/relDate";
-const std::string BoxKeys::trailerRoot = "Trailer/trailerRoot";
-const std::string BoxKeys::trailerUnknown = "Trailer/unknown";
-
-const std::string BoxKeys::playlistAll = "Playlist/allPlaylists";
-const std::string BoxKeys::playlistAllDirectories = "Playlist/allDirectories";
-const std::string BoxKeys::playlistRoot = "Playlist/playlistRoot";
-
 /// \brief default values for CFG_BOXLAYOUT_BOX
 static const std::vector<BoxLayout> boxLayoutDefaults
 {

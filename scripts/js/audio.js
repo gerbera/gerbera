@@ -160,69 +160,69 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
     const chain = {
         audio: {
-            id: boxSetup['Audio/audioRoot'].id,
-            title: boxSetup['Audio/audioRoot'].title,
+            id: boxSetup[BK_audioRoot].id,
+            title: boxSetup[BK_audioRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/audioRoot'].class },
+            upnpclass: boxSetup[BK_audioRoot].class },
         allAudio: {
-            id: boxSetup['Audio/allAudio'].id,
-            title: boxSetup['Audio/allAudio'].title,
+            id: boxSetup[BK_audioAll].id,
+            title: boxSetup[BK_audioAll].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allAudio'].class },
+            upnpclass: boxSetup[BK_audioAll].class },
         allArtists: {
-            id: boxSetup['Audio/allArtists'].id,
-            title: boxSetup['Audio/allArtists'].title,
+            id: boxSetup[BK_audioAllArtists].id,
+            title: boxSetup[BK_audioAllArtists].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allArtists'].class },
+            upnpclass: boxSetup[BK_audioAllArtists].class },
         allGenres: {
-            id: boxSetup['Audio/allGenres'].id,
-            title: boxSetup['Audio/allGenres'].title,
+            id: boxSetup[BK_audioAllGenres].id,
+            title: boxSetup[BK_audioAllGenres].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allGenres'].class },
+            upnpclass: boxSetup[BK_audioAllGenres].class },
         allAlbums: {
-            id: boxSetup['Audio/allAlbums'].id,
-            title: boxSetup['Audio/allAlbums'].title,
+            id: boxSetup[BK_audioAllAlbums].id,
+            title: boxSetup[BK_audioAllAlbums].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allAlbums'].class },
+            upnpclass: boxSetup[BK_audioAllAlbums].class },
         allYears: {
-            id: boxSetup['Audio/allYears'].id,
-            title: boxSetup['Audio/allYears'].title,
+            id: boxSetup[BK_audioAllYears].id,
+            title: boxSetup[BK_audioAllYears].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allYears'].class },
+            upnpclass: boxSetup[BK_audioAllYears].class },
         allComposers: {
-            id: boxSetup['Audio/allComposers'].id,
-            title: boxSetup['Audio/allComposers'].title,
+            id: boxSetup[BK_audioAllComposers].id,
+            title: boxSetup[BK_audioAllComposers].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allComposers'].class },
+            upnpclass: boxSetup[BK_audioAllComposers].class },
         allSongs: {
-            id: boxSetup['Audio/allSongs'].id,
-            title: boxSetup['Audio/allSongs'].title,
+            id: boxSetup[BK_audioAllSongs].id,
+            title: boxSetup[BK_audioAllSongs].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allSongs'].class },
+            upnpclass: boxSetup[BK_audioAllSongs].class },
         allFull: {
-            id: boxSetup['Audio/allTracks'].id,
-            title: boxSetup['Audio/allTracks'].title,
+            id: boxSetup[BK_audioAllTracks].id,
+            title: boxSetup[BK_audioAllTracks].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allTracks'].class },
+            upnpclass: boxSetup[BK_audioAllTracks].class },
         artistChronology: {
-            id: boxSetup['Audio/artistChronology'].id,
-            title: boxSetup['Audio/artistChronology'].title,
+            id: boxSetup[BK_audioArtistChronology].id,
+            title: boxSetup[BK_audioArtistChronology].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/artistChronology'].class },
+            upnpclass: boxSetup[BK_audioArtistChronology].class },
         all000: {
-            id: boxSetup['AudioInitial/allArtistTracks'].id,
-            title: boxSetup['AudioInitial/allArtistTracks'].title,
+            id: boxSetup[BK_audioInitialAllArtistTracks].id,
+            title: boxSetup[BK_audioInitialAllArtistTracks].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioInitial/allArtistTracks'].class,
+            upnpclass: boxSetup[BK_audioInitialAllArtistTracks].class,
             metaData: [],
             res: parentCount > 0 ? cont.res : undefined,
             aux: obj.aux,
             refID: containerRefID },
         abc: {
-            id: boxSetup['AudioInitial/abc'].id,
-            title: boxSetup['AudioInitial/abc'].title,
+            id: boxSetup[BK_audioInitialAbc].id,
+            title: boxSetup[BK_audioInitialAbc].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioInitial/abc'].class },
+            upnpclass: boxSetup[BK_audioInitialAbc].class },
 
         init: {
             title: '_',
@@ -291,15 +291,15 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     var container;
     if (isAudioBook) {
         chain.audio = {
-            id: boxSetup['AudioInitial/audioBookRoot'].id,
-            title: boxSetup['AudioInitial/audioBookRoot'].title,
+            id: boxSetup[BK_audioInitialAudioBookRoot].id,
+            title: boxSetup[BK_audioInitialAudioBookRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioInitial/audioBookRoot'].class };
+            upnpclass: boxSetup[BK_audioInitialAudioBookRoot].class };
         chain.allAlbums = {
-            id: boxSetup['AudioInitial/allBooks'].id,
-            title: boxSetup['AudioInitial/allBooks'].title,
+            id: boxSetup[BK_audioInitialAllBooks].id,
+            title: boxSetup[BK_audioInitialAllBooks].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioInitial/allBooks'].class };
+            upnpclass: boxSetup[BK_audioInitialAllBooks].class };
     } else {
         container = addContainerTree([chain.audio, chain.allAudio]);
         addCdsObject(obj, container);
@@ -320,7 +320,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
 
     if (!isAudioBook) {
         obj.title = temp + title;
-        if (boxSetup['Audio/allTracks'].enabled) {
+        if (boxSetup[BK_audioAllTracks].enabled) {
             container = addContainerTree([chain.audio, chain.allFull]);
             addCdsObject(obj, container);
             container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
@@ -331,7 +331,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
     addCdsObject(obj, container);
 
-    if (boxSetup['Audio/allAlbums'].enabled) {
+    if (boxSetup[BK_audioAllAlbums].enabled) {
         if (!isAudioBook) {
             obj.title = album + " - " + track + title;
             container = addContainerTree([chain.audio, chain.allAlbums, chain.artist, chain.all000]);
@@ -401,7 +401,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     }
     chain.album.title = album;
 
-    if (boxSetup['Audio/allGenres'].enabled) {
+    if (boxSetup[BK_audioAllGenres].enabled) {
         const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
         const genreNames = (genreConfig) ? Object.getOwnPropertyNames(genreConfig) : [];
 
@@ -452,17 +452,17 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
         }
     }
 
-    if (boxSetup['Audio/allYears'].enabled) {
+    if (boxSetup[BK_audioAllYears].enabled) {
         container = addContainerTree([chain.audio, chain.allYears, chain.year]);
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/allComposers'].enabled) {
+    if (boxSetup[BK_audioAllComposers].enabled) {
         container = addContainerTree([chain.audio, chain.allComposers, chain.composer]);
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/artistChronology'].enabled && boxSetup['Audio/allArtists'].enabled) {
+    if (boxSetup[BK_audioArtistChronology].enabled && boxSetup[BK_audioAllArtists].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;

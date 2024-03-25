@@ -322,6 +322,10 @@ Actually there are no such things as constants in JS, so those are actually pred
 engine initialization. Do not assign any values to them, otherwise following script invocation will be using wrong
 values.
 
+UPnP Classes
+^^^^^^^^^^^^
+
+Media and Container Classes:
     +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
     | Constant                              | Type    | Value                                | Notes                                         |
     +=======================================+=========+======================================+===============================================+
@@ -365,12 +369,145 @@ values.
     +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
     | ``UPNP_CLASS_IMAGE_PHOTO``            | string  | object.item.imageItem.photo          |                                               |
     +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-    | ``OBJECT_TYPE_CONTAINER``             | integer | 1                                    |                                               |
-    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-    | ``OBJECT_TYPE_ITEM``                  | integer | 2                                    |                                               |
-    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
-    | ``OBJECT_TYPE_ITEM_EXTERNAL_URL``     | integer | 8                                    |                                               |
-    +---------------------------------------+---------+--------------------------------------+-----------------------------------------------+
+
+Object Types:
+    +---------------------------------------+---------+-------+
+    | Constant                              | Type    | Value |
+    +=======================================+=========+=======+
+    | ``OBJECT_TYPE_CONTAINER``             | integer | 1     |
+    +---------------------------------------+---------+-------+
+    | ``OBJECT_TYPE_ITEM``                  | integer | 2     |
+    +---------------------------------------+---------+-------+
+    | ``OBJECT_TYPE_ITEM_EXTERNAL_URL``     | integer | 8     |
+    +---------------------------------------+---------+-------+
+
+Box Layout Keys
+^^^^^^^^^^^^^^^
+
+Provided for convenience in scripts to refer to predefined layout settings which have to be defined in ``config.xml``.
+
+For default Audio Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_audioAllAlbums``                 | Audio/allAlbums                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllArtists``                | Audio/allArtists                |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAll``                       | Audio/allAudio                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllComposers``              | Audio/allComposers              |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllDirectories``            | Audio/allDirectories            |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllGenres``                 | Audio/allGenres                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllSongs``                  | Audio/allSongs                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllTracks``                 | Audio/allTracks                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioAllYears``                  | Audio/allYears                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioArtistChronology``          | Audio/artistChronology          |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioRoot``                      | Audio/audioRoot                 |
+    +---------------------------------------+---------------------------------+
+
+For Audio Layout with initials:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_audioInitialAbc``                | AudioInitial/abc                |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioInitialAllArtistTracks``    | AudioInitial/allArtistTracks    |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioInitialAllBooks``           | AudioInitial/allBooks           |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioInitialAudioBookRoot``      | AudioInitial/audioBookRoot      |
+    +---------------------------------------+---------------------------------+
+
+For Structured Audio Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_audioStructuredAllAlbums``       | AudioStructured/allAlbums       |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioStructuredAllArtistTracks`` | AudioStructured/allArtistTracks |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioStructuredAllArtists``      | AudioStructured/allArtists      |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioStructuredAllGenres``       | AudioStructured/allGenres       |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioStructuredAllTracks``       | AudioStructured/allTracks       |
+    +---------------------------------------+---------------------------------+
+    | ``BK_audioStructuredAllYears``        | AudioStructured/allYears        |
+    +---------------------------------------+---------------------------------+
+
+For default Video Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_videoAllDates``                  | Video/allDates                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_videoAllDirectories``            | Video/allDirectories            |
+    +---------------------------------------+---------------------------------+
+    | ``BK_videoAll``                       | Video/allVideo                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_videoAllYears``                  | Video/allYears                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_videoRoot``                      | Video/videoRoot                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_videoUnknown``                   | Video/unknown                   |
+    +---------------------------------------+---------------------------------+
+
+For default Photo Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_imageAllDates``                  | Image/allDates                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_imageAllDirectories``            | Image/allDirectories            |
+    +---------------------------------------+---------------------------------+
+    | ``BK_imageAll``                       | Image/allImages                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_imageAllYears``                  | Image/allYears                  |
+    +---------------------------------------+---------------------------------+
+    | ``BK_imageRoot``                      | Image/imageRoot                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_imageUnknown``                   | Image/unknown                   |
+    +---------------------------------------+---------------------------------+
+
+
+For default Trailer Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_trailerApple``                   | Trailer/appleTrailers           |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerAllGenres``               | Trailer/allGenres               |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerAll``                     | Trailer/allTrailers             |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerPostDate``                | Trailer/postDate                |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerRelDate``                 | Trailer/relDate                 |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerRoot``                    | Trailer/trailerRoot             |
+    +---------------------------------------+---------------------------------+
+    | ``BK_trailerUnknown``                 | Trailer/unknown                 |
+    +---------------------------------------+---------------------------------+
+
+
+For default Playlist Layout:
+    +---------------------------------------+---------------------------------+
+    | Constant                              | Value                           |
+    +=======================================+=================================+
+    | ``BK_playlistAll``                    | Playlist/allPlaylists           |
+    +---------------------------------------+---------------------------------+
+    | ``BK_playlistAllDirectories``         | Playlist/allDirectories         |
+    +---------------------------------------+---------------------------------+
+    | ``BK_playlistRoot``                   | Playlist/playlistRoot           |
+    +---------------------------------------+---------------------------------+
 
 
 Functions
@@ -670,7 +807,7 @@ Each entry function is a wrapper around the common function that contains the lo
     :language: js
 
 Audio Content Handler
-:::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^
 
 The biggest one is the function that handles audio - the reason
 is simple: flac and mp3 files offer a lot of metadata like album,
@@ -693,7 +830,7 @@ renderer by musical works, their different interpretations, and the performing a
 
 
 Image Content Handler
-:::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^
 
 This function takes care of images. Currently it does very little sorting, but could easily be extended - photos made by
 digital cameras provide lots of information in the Exif tag, so you could easily add code to sort your pictures by camera model
@@ -714,7 +851,7 @@ Just like in the addAudio() function - we construct our container chain and add 
 
 
 Video Content Handler
-:::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^
 
 Not much to say here... I think libextractor is capable of retrieving some information from video files, however I seldom
 encountered any video files populated with metadata. You could also try ffmpeg to get more information, however by default we
@@ -733,7 +870,7 @@ keep it very simple - we just put everything into the 'All Video' container.
 
 
 Apple Trailers Content Handler
-::::::::::::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This function processes items that are imported via the Apple Trailers feature. We will organize the trailers by genre, post
 date and release date, additionally we will also add a container holding all trailers.
@@ -744,7 +881,7 @@ date and release date, additionally we will also add a container holding all tra
     :language: js
 
 Putting it all together
-:::::::::::::::::::::::
+^^^^^^^^^^^^^^^^^^^^^^^
 
 In the default configuration these functions are registered as entry points so that all parameters are supplied by the runtime
 
@@ -802,7 +939,7 @@ Below is the complete function with some comments:
     :language: js
 
 Main Parsing
-::::::::::::
+^^^^^^^^^^^^
 
 The actual parsing is done in the main part of the script. First, the type of the playlist is determined (based on the
 playlist mimetype), then the correct parser is chosen. The parsing itself is a loop, where each call to readln() returns

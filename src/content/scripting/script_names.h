@@ -27,6 +27,7 @@
 #define __SCRIPTING_SCRIPT_NAMES_H__
 
 #include "cds/cds_enums.h"
+#include "config/result/box_layout.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
 
@@ -112,6 +113,58 @@ const static auto upnp_classes = std::map<const std::string_view, const std::str
     { UPNP_CLASS_PLAYLIST_CONTAINER, "UPNP_CLASS_PLAYLIST_CONTAINER" },
 
     { UPNP_CLASS_DYNAMIC_CONTAINER, "UPNP_CLASS_DYNAMIC_CONTAINER" },
+};
+
+const static auto boxKeyNames = std::map<const std::string_view, const std::string_view> {
+    { "BK_audioAllAlbums", BoxKeys::audioAllAlbums },
+    { "BK_audioAllArtists", BoxKeys::audioAllArtists },
+    { "BK_audioAll", BoxKeys::audioAll },
+    { "BK_audioAllComposers", BoxKeys::audioAllComposers },
+    { "BK_audioAllDirectories", BoxKeys::audioAllDirectories },
+    { "BK_audioAllGenres", BoxKeys::audioAllGenres },
+    { "BK_audioAllSongs", BoxKeys::audioAllSongs },
+    { "BK_audioAllTracks", BoxKeys::audioAllTracks },
+    { "BK_audioAllYears", BoxKeys::audioAllYears },
+    { "BK_audioArtistChronology", BoxKeys::audioArtistChronology },
+    { "BK_audioRoot", BoxKeys::audioRoot },
+
+    { "BK_audioInitialAbc", BoxKeys::audioInitialAbc },
+    { "BK_audioInitialAllArtistTracks", BoxKeys::audioInitialAllArtistTracks },
+    { "BK_audioInitialAllBooks", BoxKeys::audioInitialAllBooks },
+    { "BK_audioInitialAudioBookRoot", BoxKeys::audioInitialAudioBookRoot },
+
+    { "BK_audioStructuredAllAlbums", BoxKeys::audioStructuredAllAlbums },
+    { "BK_audioStructuredAllArtistTracks", BoxKeys::audioStructuredAllArtistTracks },
+    { "BK_audioStructuredAllArtists", BoxKeys::audioStructuredAllArtists },
+    { "BK_audioStructuredAllGenres", BoxKeys::audioStructuredAllGenres },
+    { "BK_audioStructuredAllTracks", BoxKeys::audioStructuredAllTracks },
+    { "BK_audioStructuredAllYears", BoxKeys::audioStructuredAllYears },
+
+    { "BK_videoAllDates", BoxKeys::videoAllDates },
+    { "BK_videoAllDirectories", BoxKeys::videoAllDirectories },
+    { "BK_videoAll", BoxKeys::videoAll },
+    { "BK_videoAllYears", BoxKeys::videoAllYears },
+    { "BK_videoRoot", BoxKeys::videoRoot },
+    { "BK_videoUnknown", BoxKeys::videoUnknown },
+
+    { "BK_imageAllDates", BoxKeys::imageAllDates },
+    { "BK_imageAllDirectories", BoxKeys::imageAllDirectories },
+    { "BK_imageAll", BoxKeys::imageAll },
+    { "BK_imageAllYears", BoxKeys::imageAllYears },
+    { "BK_imageRoot", BoxKeys::imageRoot },
+    { "BK_imageUnknown", BoxKeys::imageUnknown },
+
+    { "BK_trailerApple", BoxKeys::trailerApple },
+    { "BK_trailerAllGenres", BoxKeys::trailerAllGenres },
+    { "BK_trailerAll", BoxKeys::trailerAll },
+    { "BK_trailerPostDate", BoxKeys::trailerPostDate },
+    { "BK_trailerRelDate", BoxKeys::trailerRelDate },
+    { "BK_trailerRoot", BoxKeys::trailerRoot },
+    { "BK_trailerUnknown", BoxKeys::trailerUnknown },
+
+    { "BK_playlistAll", BoxKeys::playlistAll },
+    { "BK_playlistAllDirectories", BoxKeys::playlistAllDirectories },
+    { "BK_playlistRoot", BoxKeys::playlistRoot },
 };
 
 #endif

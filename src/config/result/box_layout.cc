@@ -78,7 +78,7 @@ std::shared_ptr<BoxLayout> BoxLayoutList::get(std::size_t id, bool edit) const
     return nullptr;
 }
 
-std::shared_ptr<BoxLayout> BoxLayoutList::get(const std::string& key) const
+std::shared_ptr<BoxLayout> BoxLayoutList::get(const std::string_view& key) const
 {
     AutoLock lock(mutex);
     auto entry = std::find_if(list.begin(), list.end(), [&](auto&& d) { return d->getKey() == key; });
