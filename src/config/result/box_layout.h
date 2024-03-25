@@ -37,6 +37,59 @@
 // forward declaration
 class BoxLayout;
 
+class BoxKeys {
+public:
+    static constexpr std::string_view audioAllAlbums = "Audio/allAlbums";
+    static constexpr std::string_view audioAllArtists = "Audio/allArtists";
+    static constexpr std::string_view audioAll = "Audio/allAudio";
+    static constexpr std::string_view audioAllComposers = "Audio/allComposers";
+    static constexpr std::string_view audioAllDirectories = "Audio/allDirectories";
+    static constexpr std::string_view audioAllGenres = "Audio/allGenres";
+    static constexpr std::string_view audioAllSongs = "Audio/allSongs";
+    static constexpr std::string_view audioAllTracks = "Audio/allTracks";
+    static constexpr std::string_view audioAllYears = "Audio/allYears";
+    static constexpr std::string_view audioArtistChronology = "Audio/artistChronology";
+    static constexpr std::string_view audioRoot = "Audio/audioRoot";
+
+    static constexpr std::string_view audioInitialAbc = "AudioInitial/abc";
+    static constexpr std::string_view audioInitialAllArtistTracks = "AudioInitial/allArtistTracks";
+    static constexpr std::string_view audioInitialAllBooks = "AudioInitial/allBooks";
+    static constexpr std::string_view audioInitialAudioBookRoot = "AudioInitial/audioBookRoot";
+
+    static constexpr std::string_view audioStructuredAllAlbums = "AudioStructured/allAlbums";
+    static constexpr std::string_view audioStructuredAllArtistTracks = "AudioStructured/allArtistTracks";
+    static constexpr std::string_view audioStructuredAllArtists = "AudioStructured/allArtists";
+    static constexpr std::string_view audioStructuredAllGenres = "AudioStructured/allGenres";
+    static constexpr std::string_view audioStructuredAllTracks = "AudioStructured/allTracks";
+    static constexpr std::string_view audioStructuredAllYears = "AudioStructured/allYears";
+
+    static constexpr std::string_view videoAllDates = "Video/allDates";
+    static constexpr std::string_view videoAllDirectories = "Video/allDirectories";
+    static constexpr std::string_view videoAll = "Video/allVideo";
+    static constexpr std::string_view videoAllYears = "Video/allYears";
+    static constexpr std::string_view videoRoot = "Video/videoRoot";
+    static constexpr std::string_view videoUnknown = "Video/unknown";
+
+    static constexpr std::string_view imageAllDates = "Image/allDates";
+    static constexpr std::string_view imageAllDirectories = "Image/allDirectories";
+    static constexpr std::string_view imageAll = "Image/allImages";
+    static constexpr std::string_view imageAllYears = "Image/allYears";
+    static constexpr std::string_view imageRoot = "Image/imageRoot";
+    static constexpr std::string_view imageUnknown = "Image/unknown";
+
+    static constexpr std::string_view trailerApple = "Trailer/appleTrailers";
+    static constexpr std::string_view trailerAllGenres = "Trailer/allGenres";
+    static constexpr std::string_view trailerAll = "Trailer/allTrailers";
+    static constexpr std::string_view trailerPostDate = "Trailer/postDate";
+    static constexpr std::string_view trailerRelDate = "Trailer/relDate";
+    static constexpr std::string_view trailerRoot = "Trailer/trailerRoot";
+    static constexpr std::string_view trailerUnknown = "Trailer/unknown";
+
+    static constexpr std::string_view playlistAll = "Playlist/allPlaylists";
+    static constexpr std::string_view playlistAllDirectories = "Playlist/allDirectories";
+    static constexpr std::string_view playlistRoot = "Playlist/playlistRoot";
+};
+
 class BoxLayoutList {
 public:
     /// \brief Adds a new BoxLayout to the list.
@@ -47,7 +100,7 @@ public:
 
     std::shared_ptr<BoxLayout> get(std::size_t id, bool edit = false) const;
 
-    std::shared_ptr<BoxLayout> get(const std::string& key) const;
+    std::shared_ptr<BoxLayout> get(const std::string_view& key) const;
 
     std::size_t getEditSize() const;
 
@@ -74,8 +127,8 @@ protected:
 class BoxLayout {
 public:
     BoxLayout() = default;
-    explicit BoxLayout(std::string key, std::string title, std::string objClass, bool enabled = true, int size = 1)
-        : key(std::move(key))
+    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, bool enabled = true, int size = 1)
+        : key(key)
         , title(std::move(title))
         , objClass(std::move(objClass))
         , enabled(enabled)

@@ -409,56 +409,56 @@ function addAudio(obj, cont, rootPath, containerType) {
 
     const chain = {
         audio: {
-            id: boxSetup['Audio/audioRoot'].id,
-            title: boxSetup['Audio/audioRoot'].title,
+            id: boxSetup[BK_audioRoot].id,
+            title: boxSetup[BK_audioRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/audioRoot'].class,
+            upnpclass: boxSetup[BK_audioRoot].class,
             metaData: [] },
         allAudio: {
-            id: boxSetup['Audio/allAudio'].id,
-            title: boxSetup['Audio/allAudio'].title,
+            id: boxSetup[BK_audioAll].id,
+            title: boxSetup[BK_audioAll].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allAudio'].class },
+            upnpclass: boxSetup[BK_audioAll].class },
         allArtists: {
-            id: boxSetup['Audio/allArtists'].id,
-            title: boxSetup['Audio/allArtists'].title,
+            id: boxSetup[BK_audioAllArtists].id,
+            title: boxSetup[BK_audioAllArtists].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allArtists'].class },
+            upnpclass: boxSetup[BK_audioAllArtists].class },
         allGenres: {
-            id: boxSetup['Audio/allGenres'].id,
-            title: boxSetup['Audio/allGenres'].title,
+            id: boxSetup[BK_audioAllGenres].id,
+            title: boxSetup[BK_audioAllGenres].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allGenres'].class },
+            upnpclass: boxSetup[BK_audioAllGenres].class },
         allAlbums: {
-            id: boxSetup['Audio/allAlbums'].id,
-            title: boxSetup['Audio/allAlbums'].title,
+            id: boxSetup[BK_audioAllAlbums].id,
+            title: boxSetup[BK_audioAllAlbums].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allAlbums'].class },
+            upnpclass: boxSetup[BK_audioAllAlbums].class },
         allYears: {
-            id: boxSetup['Audio/allYears'].id,
-            title: boxSetup['Audio/allYears'].title,
+            id: boxSetup[BK_audioAllYears].id,
+            title: boxSetup[BK_audioAllYears].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allYears'].class },
+            upnpclass: boxSetup[BK_audioAllYears].class },
         allComposers: {
-            id: boxSetup['Audio/allComposers'].id,
-            title: boxSetup['Audio/allComposers'].title,
+            id: boxSetup[BK_audioAllComposers].id,
+            title: boxSetup[BK_audioAllComposers].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allComposers'].class },
+            upnpclass: boxSetup[BK_audioAllComposers].class },
         allSongs: {
-            id: boxSetup['Audio/allSongs'].id,
-            title: boxSetup['Audio/allSongs'].title,
+            id: boxSetup[BK_audioAllSongs].id,
+            title: boxSetup[BK_audioAllSongs].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allSongs'].class },
+            upnpclass: boxSetup[BK_audioAllSongs].class },
         allFull: {
-            id: boxSetup['Audio/allTracks'].id,
-            title: boxSetup['Audio/allTracks'].title,
+            id: boxSetup[BK_audioAllTracks].id,
+            title: boxSetup[BK_audioAllTracks].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/allTracks'].class },
+            upnpclass: boxSetup[BK_audioAllTracks].class },
         artistChronology: {
-            id: boxSetup['Audio/artistChronology'].id,
-            title: boxSetup['Audio/artistChronology'].title,
+            id: boxSetup[BK_audioArtistChronology].id,
+            title: boxSetup[BK_audioArtistChronology].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Audio/artistChronology'].class },
+            upnpclass: boxSetup[BK_audioArtistChronology].class },
 
         artist: {
             searchable: false,
@@ -520,19 +520,19 @@ function addAudio(obj, cont, rootPath, containerType) {
     chain.composer.metaData[M_COMPOSER] = [ composer ];
 
     var container;
-    if (boxSetup['Audio/allAudio'].enabled) {
+    if (boxSetup[BK_audioAll].enabled) {
         container = addContainerTree([chain.audio, chain.allAudio]);
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/allSongs'].enabled && boxSetup['Audio/allArtists'].enabled) {
+    if (boxSetup[BK_audioAllSongs].enabled && boxSetup[BK_audioAllArtists].enabled) {
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
         addCdsObject(obj, container);
     }
 
     var i;
     const artCnt = artist.length;
-    if (boxSetup['Audio/allTracks'].enabled) {
+    if (boxSetup[BK_audioAllTracks].enabled) {
         var temp = obj.title; //Backup the object title
         var prefix = '';
         if (artist_full) {
@@ -549,7 +549,7 @@ function addAudio(obj, cont, rootPath, containerType) {
         container = addContainerTree([chain.audio, chain.allFull]);
         addCdsObject(obj, container);
 
-        if (boxSetup['Audio/allArtists'].enabled) {
+        if (boxSetup[BK_audioAllArtists].enabled) {
             for (i = 0; i < artCnt; i++) {
                 chain.artist.title = artist[i];
                 container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
@@ -560,7 +560,7 @@ function addAudio(obj, cont, rootPath, containerType) {
         obj.title = temp; // Restore the title
     }
 
-    if (boxSetup['Audio/allArtists'].enabled) {
+    if (boxSetup[BK_audioAllArtists].enabled) {
         var temp = obj.title; //Backup the object title
         obj.title = track + title;
 
@@ -574,7 +574,7 @@ function addAudio(obj, cont, rootPath, containerType) {
         obj.title = temp; // Restore the title
     }
 
-    if (boxSetup['Audio/allAlbums'].enabled) {
+    if (boxSetup[BK_audioAllAlbums].enabled) {
         chain.album.searchable = true;
         var temp = obj.title; //Backup the object title
         obj.title = track + title;
@@ -587,7 +587,7 @@ function addAudio(obj, cont, rootPath, containerType) {
         obj.title = temp; // Restore the title
     }
 
-    if (boxSetup['Audio/allGenres'].enabled) {
+    if (boxSetup[BK_audioAllGenres].enabled) {
         chain.genre.searchable = true;
         if (obj.metaData[M_GENRE]) {
             for (var oneGenre in obj.metaData[M_GENRE]) {
@@ -599,17 +599,17 @@ function addAudio(obj, cont, rootPath, containerType) {
         }
     }
 
-    if (boxSetup['Audio/allYears'].enabled) {
+    if (boxSetup[BK_audioAllYears].enabled) {
         container = addContainerTree([chain.audio, chain.allYears, chain.year]);
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/allComposers'].enabled) {
+    if (boxSetup[BK_audioAllComposers].enabled) {
         container = addContainerTree([chain.audio, chain.allComposers, chain.composer]);
         addCdsObject(obj, container);
     }
 
-    if (boxSetup['Audio/artistChronology'].enabled && boxSetup['Audio/allArtists'].enabled) {
+    if (boxSetup[BK_audioArtistChronology].enabled && boxSetup[BK_audioAllArtists].enabled) {
         chain.album.searchable = false;
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;
@@ -764,46 +764,46 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
 
     const chain = {
         allArtists: {
-            id: boxSetup['AudioStructured/allArtists'].id,
-            title: boxSetup['AudioStructured/allArtists'].title,
+            id: boxSetup[BK_audioStructuredAllArtists].id,
+            title: boxSetup[BK_audioStructuredAllArtists].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioStructured/allArtists'].class,
+            upnpclass: boxSetup[BK_audioStructuredAllArtists].class,
             metaData: [] },
         allGenres: {
-            id: boxSetup['AudioStructured/allGenres'].id,
-            title: boxSetup['AudioStructured/allGenres'].title,
+            id: boxSetup[BK_audioStructuredAllGenres].id,
+            title: boxSetup[BK_audioStructuredAllGenres].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioStructured/allGenres'].class },
+            upnpclass: boxSetup[BK_audioStructuredAllGenres].class },
         allAlbums: {
-            id: boxSetup['AudioStructured/allAlbums'].id,
-            title: boxSetup['AudioStructured/allAlbums'].title,
+            id: boxSetup[BK_audioStructuredAllAlbums].id,
+            title: boxSetup[BK_audioStructuredAllAlbums].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioStructured/allAlbums'].class },
+            upnpclass: boxSetup[BK_audioStructuredAllAlbums].class },
         allYears: {
-            id: boxSetup['AudioStructured/allYears'].id,
-            title: boxSetup['AudioStructured/allYears'].title,
+            id: boxSetup[BK_audioStructuredAllYears].id,
+            title: boxSetup[BK_audioStructuredAllYears].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioStructured/allYears'].class },
+            upnpclass: boxSetup[BK_audioStructuredAllYears].class },
         allTracks: {
-            id: boxSetup['AudioStructured/allTracks'].id,
-            title: boxSetup['AudioStructured/allTracks'].title,
+            id: boxSetup[BK_audioStructuredAllTracks].id,
+            title: boxSetup[BK_audioStructuredAllTracks].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['AudioStructured/allTracks'].class },
+            upnpclass: boxSetup[BK_audioStructuredAllTracks].class },
         entryAllLevel1: {
-            title: allbox(boxSetup['AudioStructured/allArtistTracks'].title, 6, boxConfig.divChar),
+            title: allbox(boxSetup[BK_audioStructuredAllArtistTracks].title, 6, boxConfig.divChar),
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER },
         entryAllLevel2: {
-            title: allbox(boxSetup['AudioStructured/allArtistTracks'].title, 9, boxConfig.divChar),
+            title: allbox(boxSetup[BK_audioStructuredAllArtistTracks].title, 9, boxConfig.divChar),
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER },
         entryAllLevel3: {
-            title: allbox(boxSetup['AudioStructured/allArtistTracks'].title, 9, boxConfig.divChar),
+            title: allbox(boxSetup[BK_audioStructuredAllArtistTracks].title, 9, boxConfig.divChar),
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST },
 
         abc: {
-            title: abcbox(album, boxSetup['AudioStructured/allAlbums'].size, boxConfig.divChar),
+            title: abcbox(album, boxSetup[BK_audioStructuredAllAlbums].size, boxConfig.divChar),
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER },
         init: {
@@ -888,7 +888,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     chain.artist.searchable = false;
 
     for (i = 0; i < artCnt; i++) {
-        chain.abc.title = abcbox(artist[i], boxSetup['AudioStructured/allArtists'].size, boxConfig.divChar);
+        chain.abc.title = abcbox(artist[i], boxSetup[BK_audioStructuredAllArtists].size, boxConfig.divChar);
         isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
         container = addContainerTree([chain.allArtists, chain.abc, chain.entryAllLevel2, chain.artist]);
         addCdsObject(obj, container);
@@ -909,7 +909,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     chain.album.searchable = false;
 
     // Genre
-    if (boxSetup['AudioStructured/allGenres'].enabled) {
+    if (boxSetup[BK_audioStructuredAllGenres].enabled) {
         obj.title = title + ' - ' + artist_full;
         chain.entryAllLevel2.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_GENRE;
         if (obj.metaData[M_GENRE]) {
@@ -922,7 +922,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
         }
 
         for (i = 0; i < artCnt; i++) {
-            chain.abc.title = abcbox(artist[i], boxSetup['AudioStructured/allGenres'].size, boxConfig.divChar);
+            chain.abc.title = abcbox(artist[i], boxSetup[BK_audioStructuredAllGenres].size, boxConfig.divChar);
             isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
             chain.album_artist.searchable = true;
             if (obj.metaData[M_GENRE]) {
@@ -938,9 +938,9 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     chain.album_artist.searchable = false;
 
     // Tracks
-    if (boxSetup['AudioStructured/allTracks'].enabled) {
+    if (boxSetup[BK_audioStructuredAllTracks].enabled) {
         obj.title = title + ' - ' + artist.join(' / ') + ' (' + album + ', ' + date + ')';
-        chain.abc.title = abcbox(title, boxSetup['AudioStructured/allTracks'].size, boxConfig.divChar);
+        chain.abc.title = abcbox(title, boxSetup[BK_audioStructuredAllTracks].size, boxConfig.divChar);
         isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
         chain.init.title = mapInitial(title.charAt(0));
         chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
@@ -953,7 +953,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     }
 
     // Sort years into decades
-    if (boxSetup['AudioStructured/allYears'].enabled) {
+    if (boxSetup[BK_audioStructuredAllYears].enabled) {
         obj.title = title + ' - ' + artist_full;
 
         container = addContainerTree([chain.allYears, chain.decade, chain.entryAllLevel3]);
@@ -979,38 +979,38 @@ function addVideo(obj, cont, rootPath, containerType) {
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
     const chain = {
         video: {
-            id: boxSetup['Video/videoRoot'].id,
-            title: boxSetup['Video/videoRoot'].title,
+            id: boxSetup[BK_videoRoot].id,
+            title: boxSetup[BK_videoRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Video/videoRoot'].class, metaData: [] },
+            upnpclass: boxSetup[BK_videoRoot].class, metaData: [] },
         allVideo: {
-            id: boxSetup['Video/allVideo'].id,
-            title: boxSetup['Video/allVideo'].title,
+            id: boxSetup[BK_videoAll].id,
+            title: boxSetup[BK_videoAll].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Video/allVideo'].class, metaData: [] },
+            upnpclass: boxSetup[BK_videoAll].class, metaData: [] },
         allDirectories: {
-            id: boxSetup['Video/allDirectories'].id,
-            title: boxSetup['Video/allDirectories'].title,
+            id: boxSetup[BK_videoAllDirectories].id,
+            title: boxSetup[BK_videoAllDirectories].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Video/allDirectories'].class, metaData: [] },
+            upnpclass: boxSetup[BK_videoAllDirectories].class, metaData: [] },
         allYears: {
-            id: boxSetup['Video/allYears'].id,
-            title: boxSetup['Video/allYears'].title,
+            id: boxSetup[BK_videoAllYears].id,
+            title: boxSetup[BK_videoAllYears].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Video/allYears'].class, metaData: [] },
+            upnpclass: boxSetup[BK_videoAllYears].class, metaData: [] },
         allDates: {
-            id: boxSetup['Video/allDates'].id,
-            title: boxSetup['Video/allDates'].title,
+            id: boxSetup[BK_videoAllDates].id,
+            title: boxSetup[BK_videoAllDates].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Video/allDates'].class, metaData: [] },
+            upnpclass: boxSetup[BK_videoAllDates].class, metaData: [] },
 
         year: {
-            title: boxSetup['Video/unknown'].title,
+            title: boxSetup[BK_videoUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER },
         month: {
-            title: boxSetup['Video/unknown'].title,
+            title: boxSetup[BK_videoUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER,
@@ -1019,7 +1019,7 @@ function addVideo(obj, cont, rootPath, containerType) {
             aux: obj.aux,
             refID: containerRefID },
         date: {
-            title: boxSetup['Video/unknown'].title,
+            title: boxSetup[BK_videoUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER,
@@ -1033,7 +1033,7 @@ function addVideo(obj, cont, rootPath, containerType) {
     addCdsObject(obj, container);
 
     // Year
-    if (boxSetup['Video/allYears'].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
+    if (boxSetup[BK_videoAll].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
         var date = obj.metaData[M_CREATION_DATE][0];
         var dateParts = date.split('-');
         if (dateParts.length > 1) {
@@ -1044,7 +1044,7 @@ function addVideo(obj, cont, rootPath, containerType) {
     }
 
     // Dates
-    if (boxSetup['Video/allDates'].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
+    if (boxSetup[BK_videoAllDates].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
         var date = obj.metaData[M_CREATION_DATE][0];
         var dateParts = date.split('T');
         if (dateParts.length > 1) {
@@ -1055,7 +1055,7 @@ function addVideo(obj, cont, rootPath, containerType) {
     }
 
     // Directories
-    if (boxSetup['Video/allDirectories'].enabled && dir.length > 0) {
+    if (boxSetup[BK_videoAllDirectories].enabled && dir.length > 0) {
         var tree = [chain.video, chain.allDirectories];
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat({ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
@@ -1080,38 +1080,38 @@ function addImage(obj, cont, rootPath, containerType) {
 
     const chain = {
         imageRoot: {
-            id: boxSetup['Image/imageRoot'].id,
-            title: boxSetup['Image/imageRoot'].title,
+            id: boxSetup[BK_imageRoot].id,
+            title: boxSetup[BK_imageRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Image/imageRoot'].class, metaData: [] },
+            upnpclass: boxSetup[BK_imageRoot].class, metaData: [] },
         allImages: {
-            id: boxSetup['Image/allImages'].id,
-            title: boxSetup['Image/allImages'].title,
+            id: boxSetup[BK_imageAll].id,
+            title: boxSetup[BK_imageAll].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Image/allImages'].class, metaData: [] },
+            upnpclass: boxSetup[BK_imageAll].class, metaData: [] },
         allDirectories: {
-            id: boxSetup['Image/allDirectories'].id,
-            title: boxSetup['Image/allDirectories'].title,
+            id: boxSetup[BK_imageAllDirectories].id,
+            title: boxSetup[BK_imageAllDirectories].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Image/allDirectories'].class, metaData: [] },
+            upnpclass: boxSetup[BK_imageAllDirectories].class, metaData: [] },
         allYears: {
-            id: boxSetup['Image/allYears'].id,
-            title: boxSetup['Image/allYears'].title,
+            id: boxSetup[BK_imageAllYears].id,
+            title: boxSetup[BK_imageAllYears].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Image/allYears'].class, metaData: [] },
+            upnpclass: boxSetup[BK_imageAllYears].class, metaData: [] },
         allDates: {
-            id: boxSetup['Image/allDates'].id,
-            title: boxSetup['Image/allDates'].title,
+            id: boxSetup[BK_imageAllDates].id,
+            title: boxSetup[BK_imageAllDates].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Image/allDates'].class, metaData: [] },
+            upnpclass: boxSetup[BK_imageAllDates].class, metaData: [] },
 
         year: {
-            title: boxSetup['Image/unknown'].title,
+            title: boxSetup[BK_imageUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER },
         month: {
-            title: boxSetup['Image/unknown'].title,
+            title: boxSetup[BK_imageUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER,
@@ -1120,7 +1120,7 @@ function addImage(obj, cont, rootPath, containerType) {
             aux: obj.aux,
             efID: containerRefID },
         date: {
-            title: boxSetup['Image/unknown'].title,
+            title: boxSetup[BK_imageUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER,
@@ -1133,7 +1133,7 @@ function addImage(obj, cont, rootPath, containerType) {
     addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
 
     // Years
-    if (boxSetup['Image/allYears'].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
+    if (boxSetup[BK_imageAllYears].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
         var date = obj.metaData[M_DATE][0];
         var dateParts = date.split('-');
         if (dateParts.length > 1) {
@@ -1144,7 +1144,7 @@ function addImage(obj, cont, rootPath, containerType) {
     }
 
     // Dates
-    if (boxSetup['Image/allDates'].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
+    if (boxSetup[BK_imageAllDates].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
         var date = obj.metaData[M_DATE][0];
         var dateParts = date.split('T');
         if (dateParts.length > 1) {
@@ -1155,7 +1155,7 @@ function addImage(obj, cont, rootPath, containerType) {
     }
 
     // Directories
-    if (boxSetup['Image/allDirectories'].enabled && dir.length > 0) {
+    if (boxSetup[BK_imageAllDirectories].enabled && dir.length > 0) {
         var tree = [chain.imageRoot, chain.allDirectories];
         for (var i = 0; i < dir.length; i++) {
             tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
@@ -1175,44 +1175,44 @@ function addTrailer(obj) {
     const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
     const chain = {
         trailerRoot: {
-            id: boxSetup['Trailer/trailerRoot'].id,
-            title: boxSetup['Trailer/trailerRoot'].title,
+            id: boxSetup[BK_trailerRoot].id,
+            title: boxSetup[BK_trailerRoot].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/trailerRoot'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerRoot].class, metaData: [] },
         appleTrailers: {
-            id: boxSetup['Trailer/appleTrailers'].id,
-            title: boxSetup['Trailer/appleTrailers'].title,
+            id: boxSetup[BK_trailerApple].id,
+            title: boxSetup[BK_trailerApple].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/appleTrailers'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerApple].class, metaData: [] },
         allTrailers: {
-            id: boxSetup['Trailer/allTrailers'].id,
-            title: boxSetup['Trailer/allTrailers'].title,
+            id: boxSetup[BK_trailerAll].id,
+            title: boxSetup[BK_trailerAll].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/allTrailers'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerAll].class, metaData: [] },
         allGenres: {
-            id: boxSetup['Trailer/allGenres'].id,
-            title: boxSetup['Trailer/allGenres'].title,
+            id: boxSetup[BK_trailerAllGenres].id,
+            title: boxSetup[BK_trailerAllGenres].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/allGenres'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerAllGenres].class, metaData: [] },
         relDate: {
-            id: boxSetup['Trailer/relDate'].id,
-            title: boxSetup['Trailer/relDate'].title,
+            id: boxSetup[BK_trailerRelDate].id,
+            title: boxSetup[BK_trailerRelDate].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/relDate'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerRelDate].class, metaData: [] },
         postDate: {
-            id: boxSetup['Trailer/postDate'].id,
-            title: boxSetup['Trailer/postDate'].title,
+            id: boxSetup[BK_trailerPostDate].id,
+            title: boxSetup[BK_trailerPostDate].title,
             objectType: OBJECT_TYPE_CONTAINER,
-            upnpclass: boxSetup['Trailer/postDate'].class, metaData: [] },
+            upnpclass: boxSetup[BK_trailerPostDate].class, metaData: [] },
 
         genre: {
-            title: boxSetup['Trailer/unknown'].title,
+            title: boxSetup[BK_trailerUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE,
             metaData: [] },
         date: {
-            title: boxSetup['Trailer/unknown'].title,
+            title: boxSetup[BK_trailerUnknown].title,
             objectType: OBJECT_TYPE_CONTAINER,
             searchable: true,
             upnpclass: UPNP_CLASS_CONTAINER,
@@ -1229,7 +1229,7 @@ function addTrailer(obj) {
     // genres that will be returned as one string. We will split that
     // string and create individual genre containers.
 
-    if (boxSetup['Trailer/allGenres'].enabled && obj.metaData[M_GENRE] && obj.metaData[M_GENRE][0]) {
+    if (boxSetup[BK_trailerAllGenres].enabled && obj.metaData[M_GENRE] && obj.metaData[M_GENRE][0]) {
         var genre = obj.metaData[M_GENRE][0];
 
         // A genre string "Science Fiction, Thriller" will be split to
@@ -1247,7 +1247,7 @@ function addTrailer(obj) {
     // too much extra checking regading validity, however we only want
     // to group the trailers by year and month:
 
-    if (boxSetup['Trailer/relDate'].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
+    if (boxSetup[BK_trailerRelDate].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
         var reldate = obj.metaData[M_DATE][0];
         if (reldate.length >= 7) {
             chain.date.title = reldate.slice(0, 7);
@@ -1261,7 +1261,7 @@ function addTrailer(obj) {
     // originally posted, the post date is available via the aux
     // array. Similar to the release date, we will cut off the day and
     // create our containres in the YYYY-MM format.
-    if (boxSetup['Trailer/postDate'].enabled) {
+    if (boxSetup[BK_trailerPostDate].enabled) {
         var postdate = obj.aux[APPLE_TRAILERS_AUXDATA_POST_DATE];
         if (postdate && postdate.length >= 7) {
             chain.date.title = postdate.slice(0, 7);

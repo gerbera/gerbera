@@ -359,6 +359,11 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
+    for (auto&& [field, sym] : boxKeyNames) {
+        duk_push_lstring(ctx, sym.data(), sym.length());
+        duk_put_global_lstring(ctx, field.data(), field.length());
+    }
+
     if (config.empty()) {
         addConfig(ctx, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } }, boxDefaults);
     } else {

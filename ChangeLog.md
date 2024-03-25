@@ -4,23 +4,37 @@
 
 - Add ctypes include
 - Avoid crash when parent was not created yet.
+- BUGFIX: common.js boxSetup check Video/AllDates for Dates
 - Build Support for NPUPNP
 - Bump follow-redirects from 1.15.3 to 1.15.4 in /gerbera-web
+- Bump follow-redirects from 1.15.4 to 1.15.6 in /gerbera-web
+- Bump xml2js and parse-bmfont-xml in /gerbera-web
 - clang-tidy and cppcheck fixes
 - clang-tidy fixes
 - CMake: Use presets
 - Config: Refactor handling of integer types
 - Correct two typos.
+- debian12: fix script error
+- Docker image usability
+- Enhances default javascript files to check config file options
+- Expand firewall advice in docs
 - Fix build-deb.sh for releases
+- Fix findAutoscanDirectory
+- Fix findAutoscanDirectory
 - Gerbera welcomes 2024
+- Gerbera-web: update chromedriver for tests
 - github workflows: make cmake stuff consistent
 - Import: Safely handle second scan
 - Import: Safely handle second scan - 2
+- MetadataHandler: Refactor static methods
+- Minor fixes to RST documentation
 - Refactor config and enums to reduce nesting
 - Refactor parser files
 - Safely handle suppressed file types
 - Scripting: print2 function with log level support
 - some fixes
+- Take configuration into account when creating virtual-layout (built-in + JS)
+- Update Conan to v2
 - Update workflow actions
 
 ### v2.0.0

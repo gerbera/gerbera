@@ -259,6 +259,11 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
+    for (auto&& [field, sym] : boxKeyNames) {
+        duk_push_lstring(ctx, sym.data(), sym.length());
+        duk_put_global_lstring(ctx, field.data(), field.length());
+    }
+
     duk_push_object(ctx); // config
     for (auto&& i : ConfigOptionIterator()) {
         auto scs = ConfigDefinition::findConfigSetup(i, true);
