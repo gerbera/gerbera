@@ -286,4 +286,42 @@ TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
     auto actual = Headers::readHeaders(info);
     EXPECT_EQ(actual, expected);
 }
+
+TEST_F(HeadersHelperTest, DoesNotOverwriteWithAdd)
+{
+    // arrange
+    std::string key = "foo";
+    std::string value = "wombat";
+    std::string secondValue = "echidna";
+    std::map<std::string, std::string> expected;
+    expected[key] = value;
+
+    // act
+    subject.addHeader(key, value);
+    subject.addHeader(key, secondValue);
+    subject.writeHeaders(info);
+
+    // assert
+    auto actual = Headers::readHeaders(info);
+    EXPECT_EQ(actual, expected);
+}
+
+TEST_F(HeadersHelperTest, DoesOverwriteWithUpdate)
+{
+    // arrange
+    std::string key = "foo";
+    std::string value = "wombat";
+    std::string secondValue = "echidna";
+    std::map<std::string, std::string> expected;
+    expected[key] = secondValue;
+
+    // act
+    subject.addHeader(key, value);
+    subject.updateHeader(key, secondValue);
+    subject.writeHeaders(info);
+
+    // assert
+    auto actual = Headers::readHeaders(info);
+    EXPECT_EQ(actual, expected);
+}
 #endif

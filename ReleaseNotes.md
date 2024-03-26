@@ -5,6 +5,7 @@
 ### NEW Features
 
 - new JavaScript function `print2` to allow setting log type (info, debug, trace)
+- configuration of client specific headers (brings back old custom-headers in new place)
 
 ### FIXES
 
@@ -15,6 +16,7 @@
 - Restructuring files
 - Updates to the build system: Use cmake presets
 - Update versions of fmt (10.2.1), spdlog (1.13.0)
+- Update Conan to V2
 - Support build with NPUPNP
 
 ## v2.0.0

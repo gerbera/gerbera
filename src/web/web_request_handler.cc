@@ -39,6 +39,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "session_manager.h"
 #include "upnp/headers.h"
+#include "upnp/quirks.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
 #include "web/pages.h"
@@ -46,7 +47,7 @@
 namespace Web {
 
 WebRequestHandler::WebRequestHandler(const std::shared_ptr<ContentManager>& content)
-    : RequestHandler(content)
+    : RequestHandler(content, nullptr)
     , sessionManager(this->content->getContext()->getSessionManager())
 {
 }
@@ -113,6 +114,11 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     Headers headers;
     headers.addHeader("Cache-Control", "no-cache, must-revalidate");
     headers.addHeader("SameSite", "Lax");
+    headers.addHeader("Access-Control-Allow-Origin", "*");
+
+    auto quirks = getQuirks(info);
+    if (quirks)
+        quirks->updateHeaders(headers);
     headers.writeHeaders(info);
 }
 

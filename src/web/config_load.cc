@@ -133,104 +133,7 @@ void Web::ConfigLoad::process()
 
     log_debug("Sending Config to web!");
 
-    // write database status
-    {
-        {
-            StatsParam stats(StatsParam::StatsMode::Count, "", "", false);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::totalCount", CFG_MAX, CFG_MAX);
-            setValue(item, database->getFileStats(stats));
-        }
-        {
-            StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::totalSize", CFG_MAX, CFG_MAX);
-            setValue(item, CdsResource::formatSizeValue(database->getFileStats(stats)));
-        }
-        {
-            StatsParam stats(StatsParam::StatsMode::Count, "", "", true);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::virtual", CFG_MAX, CFG_MAX);
-            setValue(item, database->getFileStats(stats));
-        }
-
-        {
-            StatsParam stats(StatsParam::StatsMode::Count, "audio", "", true);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::audioVirtual", CFG_MAX, CFG_MAX);
-            setValue(item, database->getFileStats(stats));
-        }
-        {
-            StatsParam stats(StatsParam::StatsMode::Count, "video", "", true);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::videoVirtual", CFG_MAX, CFG_MAX);
-            setValue(item, database->getFileStats(stats));
-        }
-        {
-            StatsParam stats(StatsParam::StatsMode::Count, "image", "", true);
-            auto item = values.append_child("item");
-            createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
-            setValue(item, database->getFileStats(stats));
-        }
-
-        StatsParam statc(StatsParam::StatsMode::Count, "", "", false);
-        auto cnt = database->getGroupStats(statc);
-        StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
-        auto siz = database->getGroupStats(stats);
-
-        static std::map<std::string, std::string> statMapBase {
-            { UPNP_CLASS_ITEM, "item" },
-        };
-        for (auto&& [cls, attr] : statMapBase) {
-            if (cnt[cls] > 0) {
-                auto item = values.append_child("item");
-                createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
-                setValue(item, cnt[cls]);
-                auto item2 = values.append_child("item");
-                createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
-                setValue(item2, CdsResource::formatSizeValue(siz[cls]));
-                auto item3 = values.append_child("item");
-                createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
-                setValue(item3, siz[cls]);
-            }
-        }
-        static std::map<std::string, std::string> statMap {
-            { UPNP_CLASS_AUDIO_ITEM, "audio" },
-            { UPNP_CLASS_MUSIC_TRACK, "audioMusic" },
-            { UPNP_CLASS_AUDIO_BOOK, "audioBook" },
-            { UPNP_CLASS_AUDIO_BROADCAST, "audioBroadcast" },
-            { UPNP_CLASS_VIDEO_ITEM, "video" },
-            { UPNP_CLASS_VIDEO_MOVIE, "videoMovie" },
-            { UPNP_CLASS_VIDEO_BROADCAST, "videoBroadcast" },
-            { UPNP_CLASS_VIDEO_MUSICVIDEOCLIP, "videoMusicVideoClip" },
-            { UPNP_CLASS_IMAGE_ITEM, "image" },
-            { UPNP_CLASS_IMAGE_PHOTO, "imagePhoto" },
-            { UPNP_CLASS_TEXT_ITEM, "text" },
-        };
-        for (auto&& [cls, attr] : statMap) {
-            long long totalCnt = 0;
-            for (auto&& [cls2, valu] : cnt) {
-                if (startswith(cls2, cls))
-                    totalCnt += valu;
-            }
-            if (totalCnt > 0) {
-                long long totalSize = 0;
-                for (auto&& [cls2, valu] : siz) {
-                    if (startswith(cls2, cls))
-                        totalSize += valu;
-                }
-                auto item = values.append_child("item");
-                createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
-                setValue(item, totalCnt);
-                auto item2 = values.append_child("item");
-                createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
-                setValue(item2, CdsResource::formatSizeValue(totalSize));
-                auto item3 = values.append_child("item");
-                createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
-                setValue(item3, totalSize);
-            }
-        }
-    }
+    writeDatabaseStatus(values);
 
     if (action == "status")
         return;
@@ -242,7 +145,122 @@ void Web::ConfigLoad::process()
         addTypeMeta(meta, cs);
     }
 
-    // write all values with simple type (string, int, bool)
+    writeSimpleProperties(values);
+    writeClientConfig(values);
+    writeImportTweaks(values);
+    writeDynamicContent(values);
+    writeBoxLayout(values);
+    writeTransconding(values);
+    writeAutoscan(values);
+    writeDictionaries(values);
+    writeVectors(values);
+    writeArrays(values);
+    updateEntriesFromDatabase(root, values);
+}
+
+// \brief: write database status
+void Web::ConfigLoad::writeDatabaseStatus(pugi::xml_node& values)
+{
+    {
+        StatsParam stats(StatsParam::StatsMode::Count, "", "", false);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::totalCount", CFG_MAX, CFG_MAX);
+        setValue(item, database->getFileStats(stats));
+    }
+    {
+        StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::totalSize", CFG_MAX, CFG_MAX);
+        setValue(item, CdsResource::formatSizeValue(database->getFileStats(stats)));
+    }
+    {
+        StatsParam stats(StatsParam::StatsMode::Count, "", "", true);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::virtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getFileStats(stats));
+    }
+
+    {
+        StatsParam stats(StatsParam::StatsMode::Count, "audio", "", true);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::audioVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getFileStats(stats));
+    }
+    {
+        StatsParam stats(StatsParam::StatsMode::Count, "video", "", true);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::videoVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getFileStats(stats));
+    }
+    {
+        StatsParam stats(StatsParam::StatsMode::Count, "image", "", true);
+        auto item = values.append_child("item");
+        createItem(item, "/status/attribute::imageVirtual", CFG_MAX, CFG_MAX);
+        setValue(item, database->getFileStats(stats));
+    }
+
+    StatsParam statc(StatsParam::StatsMode::Count, "", "", false);
+    auto cnt = database->getGroupStats(statc);
+    StatsParam stats(StatsParam::StatsMode::Size, "", "", false);
+    auto siz = database->getGroupStats(stats);
+
+    static std::map<std::string, std::string> statMapBase {
+        { UPNP_CLASS_ITEM, "item" },
+    };
+    for (auto&& [cls, attr] : statMapBase) {
+        if (cnt[cls] > 0) {
+            auto item = values.append_child("item");
+            createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
+            setValue(item, cnt[cls]);
+            auto item2 = values.append_child("item");
+            createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
+            setValue(item2, CdsResource::formatSizeValue(siz[cls]));
+            auto item3 = values.append_child("item");
+            createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
+            setValue(item3, siz[cls]);
+        }
+    }
+    static std::map<std::string, std::string> statMap {
+        { UPNP_CLASS_AUDIO_ITEM, "audio" },
+        { UPNP_CLASS_MUSIC_TRACK, "audioMusic" },
+        { UPNP_CLASS_AUDIO_BOOK, "audioBook" },
+        { UPNP_CLASS_AUDIO_BROADCAST, "audioBroadcast" },
+        { UPNP_CLASS_VIDEO_ITEM, "video" },
+        { UPNP_CLASS_VIDEO_MOVIE, "videoMovie" },
+        { UPNP_CLASS_VIDEO_BROADCAST, "videoBroadcast" },
+        { UPNP_CLASS_VIDEO_MUSICVIDEOCLIP, "videoMusicVideoClip" },
+        { UPNP_CLASS_IMAGE_ITEM, "image" },
+        { UPNP_CLASS_IMAGE_PHOTO, "imagePhoto" },
+        { UPNP_CLASS_TEXT_ITEM, "text" },
+    };
+    for (auto&& [cls, attr] : statMap) {
+        long long totalCnt = 0;
+        for (auto&& [cls2, valu] : cnt) {
+            if (startswith(cls2, cls))
+                totalCnt += valu;
+        }
+        if (totalCnt > 0) {
+            long long totalSize = 0;
+            for (auto&& [cls2, valu] : siz) {
+                if (startswith(cls2, cls))
+                    totalSize += valu;
+            }
+            auto item = values.append_child("item");
+            createItem(item, fmt::format("/status/attribute::{}Count", attr), CFG_MAX, CFG_MAX);
+            setValue(item, totalCnt);
+            auto item2 = values.append_child("item");
+            createItem(item2, fmt::format("/status/attribute::{}Size", attr), CFG_MAX, CFG_MAX);
+            setValue(item2, CdsResource::formatSizeValue(totalSize));
+            auto item3 = values.append_child("item");
+            createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), CFG_MAX, CFG_MAX);
+            setValue(item3, totalSize);
+        }
+    }
+}
+
+// \brief: write all values with simple type (string, int, bool)
+void Web::ConfigLoad::writeSimpleProperties(pugi::xml_node& values)
+{
     for (auto&& option : ConfigOptionIterator()) {
         try {
             auto scs = ConfigDefinition::findConfigSetup(option);
@@ -255,8 +273,11 @@ void Web::ConfigLoad::process()
             log_warning("Option {:03d} {}", option, e.what());
         }
     }
+}
 
-    // write client configuration
+/// \brief: write client configuration
+void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
+{
     auto cs = ConfigDefinition::findConfigSetup(CFG_CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
     for (std::size_t i = 0; i < clientConfig->size(); i++) {
@@ -289,6 +310,9 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(i, ATTR_CLIENTS_UPNP_MULTI_VALUE), cs->option, ATTR_CLIENTS_UPNP_MULTI_VALUE, cs);
         setValue(item, client->getMultiValue());
+
+        // ToDo: Sub Dictionary ATTR_CLIENTS_UPNP_MAP_MIMETYPE
+        // ToDo: Sub Dictionary ATTR_CLIENTS_UPNP_HEADERS
     }
     if (clientConfig->size() == 0) {
         auto item = values.append_child("item");
@@ -312,9 +336,12 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_CLIENTS_UPNP_MULTI_VALUE), cs->option, ATTR_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_MULTI_VALUE));
     }
+}
 
-    // write import tweaks
-    cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
+/// \brief: write import tweaks
+void Web::ConfigLoad::writeImportTweaks(pugi::xml_node& values)
+{
+    auto cs = ConfigDefinition::findConfigSetup(CFG_IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
     for (std::size_t i = 0; i < directoryConfig->size(); i++) {
         auto dir = directoryConfig->get(i);
@@ -363,9 +390,12 @@ void Web::ConfigLoad::process()
         createItem(item, cs->getItemPath(i, ATTR_DIRECTORIES_TWEAK_METAFILE_FILE), cs->option, ATTR_DIRECTORIES_TWEAK_METAFILE_FILE);
         setValue(item, dir->hasMetafile() ? dir->getMetafile() : "");
     }
+}
 
-    // write dynamic content
-    cs = ConfigDefinition::findConfigSetup(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+/// \brief: write dynamic content
+void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
+{
+    auto cs = ConfigDefinition::findConfigSetup(CFG_SERVER_DYNAMIC_CONTENT_LIST);
     auto dynContent = cs->getValue()->getDynamicContentListOption();
     for (std::size_t i = 0; i < dynContent->size(); i++) {
         auto cont = dynContent->get(i);
@@ -413,9 +443,12 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ATTR_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ATTR_DYNAMIC_CONTAINER_MAXCOUNT));
     }
+}
 
-    // write box layout content
-    cs = ConfigDefinition::findConfigSetup(CFG_BOXLAYOUT_BOX);
+/// \brief: write box layout
+void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
+{
+    auto cs = ConfigDefinition::findConfigSetup(CFG_BOXLAYOUT_BOX);
     auto boxlayoutContent = cs->getValue()->getBoxLayoutListOption();
     for (std::size_t i = 0; i < boxlayoutContent->size(); i++) {
         auto cont = boxlayoutContent->get(i);
@@ -456,12 +489,16 @@ void Web::ConfigLoad::process()
         item = values.append_child("item");
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, ATTR_BOXLAYOUT_BOX_ENABLED), cs->option, ATTR_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ATTR_BOXLAYOUT_BOX_ENABLED));
     }
+}
 
-    // write transconding configuration
-    cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
+/// \brief: write transconding configuration
+void Web::ConfigLoad::writeTransconding(pugi::xml_node& values)
+{
+    auto cs = ConfigDefinition::findConfigSetup(CFG_TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     int pr = 0;
     std::map<std::string, std::shared_ptr<TranscodingProfile>> profiles;
+    // write filter list and collect required profiles
     for (auto&& filter : transcoding->getFilterList()) {
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_MIMETYPE_FILTER, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ATTR_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
@@ -490,6 +527,8 @@ void Web::ConfigLoad::process()
     }
 
     pr = 0;
+    // write profile list
+    // profiles can only be exported when linked to at least one filter
     for (auto&& [name, entry] : profiles) {
         auto item = values.append_child("item");
         createItem(item, cs->getItemPath(pr, ATTR_TRANSCODING_PROFILES_PROFLE, ATTR_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ATTR_TRANSCODING_PROFILES_PROFLE_NAME);
@@ -584,8 +623,11 @@ void Web::ConfigLoad::process()
         }
         pr++;
     }
+}
 
-    // write autoscan configuration
+/// \brief: write autoscan configuration
+void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
+{
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (std::size_t i = 0; i < autoscan.size(); i++) {
@@ -681,8 +723,11 @@ void Web::ConfigLoad::process()
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ATTR_AUTOSCAN_DIRECTORY_LMT), ascs->option, ATTR_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ATTR_AUTOSCAN_DIRECTORY_LMT));
         }
     }
+}
 
-    // write content of all dictionaries
+/// \brief: write content of all dictionaries
+void Web::ConfigLoad::writeDictionaries(pugi::xml_node& values)
+{
     for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
         int i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
@@ -697,7 +742,11 @@ void Web::ConfigLoad::process()
             i++;
         }
     }
-    // write content of all vectors
+}
+
+/// \brief: write content of all vectors
+void Web::ConfigLoad::writeVectors(pugi::xml_node& values)
+{
     for (auto&& vcs : ConfigDefinition::getConfigSetupList<ConfigVectorSetup>()) {
         int i = 0;
         auto vectorOption = vcs->getValue()->getVectorOption(true);
@@ -719,8 +768,11 @@ void Web::ConfigLoad::process()
             i++;
         }
     }
+}
 
-    // write content of all arrays
+/// \brief: write content of all arrays
+void Web::ConfigLoad::writeArrays(pugi::xml_node& values)
+{
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (std::size_t i = 0; i < array.size(); i++) {
@@ -730,8 +782,11 @@ void Web::ConfigLoad::process()
             setValue(item, entry);
         }
     }
+}
 
-    // update entries with datebase values
+/// \brief: update entries with datebase values
+void Web::ConfigLoad::updateEntriesFromDatabase(pugi::xml_node& root, pugi::xml_node& values)
+{
     for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {

@@ -52,11 +52,7 @@ public:
     void getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 
-protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
-
 private:
-    std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
     static std::size_t parseResourceInfo(const std::map<std::string, std::string>& params);
     std::shared_ptr<MetadataHandler> getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const;
 

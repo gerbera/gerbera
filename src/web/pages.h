@@ -206,6 +206,20 @@ protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, std::string> allItems;
     void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
+
+    void writeDatabaseStatus(pugi::xml_node& values);
+    void writeSimpleProperties(pugi::xml_node& values);
+    void writeClientConfig(pugi::xml_node& values);
+    void writeImportTweaks(pugi::xml_node& values);
+    void writeDynamicContent(pugi::xml_node& values);
+    void writeBoxLayout(pugi::xml_node& values);
+    void writeTransconding(pugi::xml_node& values);
+    void writeAutoscan(pugi::xml_node& values);
+    void writeDictionaries(pugi::xml_node& values);
+    void writeVectors(pugi::xml_node& values);
+    void writeArrays(pugi::xml_node& values);
+    void updateEntriesFromDatabase(pugi::xml_node& root, pugi::xml_node& values);
+
     template <typename T>
     static void setValue(pugi::xml_node& item, const T& value);
 

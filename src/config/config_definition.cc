@@ -1309,6 +1309,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE,
         "attribute::multi-value", "config-clients.html#multi-value",
         YES),
+    std::make_shared<ConfigDictionarySetup>(ATTR_CLIENTS_UPNP_HEADERS,
+        "/clients/client", "config-import.html#headers",
+        ATTR_CLIENTS_UPNP_HEADERS_HEADER, ATTR_CLIENTS_UPNP_HEADERS_KEY, ATTR_CLIENTS_UPNP_HEADERS_VALUE,
+        false, false, false),
 
     // simpleOptions
 
@@ -1350,6 +1354,12 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "container", ""),
     std::make_shared<ConfigSetup>(ATTR_IMPORT_RESOURCES_HANDLER,
         "handler", ""),
+    std::make_shared<ConfigSetup>(ATTR_CLIENTS_UPNP_HEADERS_HEADER,
+        "header", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_UPNP_HEADERS_KEY,
+        "attribute::key", "config-import.html#headers", ""),
+    std::make_shared<ConfigStringSetup>(ATTR_CLIENTS_UPNP_HEADERS_VALUE,
+        "attribute::value", "config-import.html#headers", ""),
 
     std::make_shared<ConfigSetup>(ATTR_UPNP_PROPERTIES_PROPERTY,
         "upnp-property", ""),
