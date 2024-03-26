@@ -600,7 +600,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
 
 #if defined(HAVE_CURL)
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER))) {
-        return std::make_unique<URLRequestHandler>(content);
+        return std::make_unique<URLRequestHandler>(content, upnpXmlBuilder);
     }
 #endif
 

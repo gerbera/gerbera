@@ -31,8 +31,7 @@
 #include "upnp/xml_builder.h"
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
-    : RequestHandler(content)
-    , xmlBuilder(xmlBuilder)
+    : RequestHandler(content, xmlBuilder)
 {
     auto desc = xmlBuilder->renderDeviceDescription();
 
@@ -52,7 +51,7 @@ void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
 std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode)
 {
-    log_debug("Device description requested");
+    log_debug("Device description requested {}", filename);
 
     auto ioHandler = std::make_unique<MemIOHandler>(deviceDescription);
     ioHandler->open(mode);

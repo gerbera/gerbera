@@ -55,6 +55,12 @@ bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& optValue,
             const pugi::xml_node child = it.node();
             std::string key = child.attribute(keyAttr.c_str()).as_string();
             std::string value = child.attribute(valAttr.c_str()).as_string();
+            if (key.empty()) {
+                log_debug("Empty or missing key '{}'", keyAttr);
+            }
+            if (value.empty()) {
+                log_debug("Empty or missing value '{}'", valAttr);
+            }
             if (!key.empty() && !value.empty()) {
                 if (tolower) {
                     toLowerInPlace(key);

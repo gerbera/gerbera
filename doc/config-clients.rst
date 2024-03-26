@@ -144,3 +144,11 @@ This section defines the client behaviour for one client.
     * Optional
 
     Map mimetype for client. Some clients require slightly different mimetype, e.g. for subtitles.
+
+    ::
+
+        <header key="X-User-Agent" value="redsonic"/>
+
+    * Optional
+
+    Add or overwrite header value sent by responses for UPnP single files and Web Page content

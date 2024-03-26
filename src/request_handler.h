@@ -53,11 +53,13 @@ class ContentManager;
 class Database;
 class IOHandler;
 class Mime;
+class Quirks;
 class Server;
+class UpnpXMLBuilder;
 
 class RequestHandler {
 public:
-    explicit RequestHandler(std::shared_ptr<ContentManager> content);
+    explicit RequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     virtual ~RequestHandler() = default;
 
     /// \brief Returns information about the requested content.
@@ -77,6 +79,9 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+
+    std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
 };
 
 #endif // __REQUEST_HANDLER_H__

@@ -38,7 +38,6 @@ public:
     std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
 
 protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     std::string deviceDescription;
 };
 

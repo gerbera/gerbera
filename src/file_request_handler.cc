@@ -56,8 +56,7 @@
 #include "web/session_manager.h"
 
 FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
-    : RequestHandler(content)
-    , xmlBuilder(std::move(xmlBuilder))
+    : RequestHandler(content, xmlBuilder)
     , metadataService(std::make_shared<MetadataService>(content->getContext(), content))
 {
 }
@@ -190,6 +189,8 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_ContentType(info, mimeType.c_str());
 #endif
 
+    if (quirks)
+        quirks->updateHeaders(headers);
     headers.writeHeaders(info);
 
     // log_debug("getInfo: Requested {}, ObjectID: {}, Location: {}, MimeType: {}",
@@ -282,12 +283,4 @@ std::size_t FileRequestHandler::parseResourceInfo(const std::map<std::string, st
     log_debug("Resource ID: {}", resourceId);
 
     return resourceId;
-}
-
-std::unique_ptr<Quirks> FileRequestHandler::getQuirks(const UpnpFileInfo* info) const
-{
-    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
-    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
-    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    return std::make_unique<Quirks>(xmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
 }

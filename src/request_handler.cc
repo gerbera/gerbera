@@ -36,17 +36,19 @@
 
 #include "content/content_manager.h"
 #include "database/database.h"
+#include "upnp/quirks.h"
 #include "util/grb_net.h"
 #include "util/tools.h"
 
 #include <fmt/core.h>
 
-RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content)
+RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : content(std::move(content))
     , context(this->content->getContext())
     , config(this->context->getConfig())
     , mime(this->context->getMime())
     , database(this->context->getDatabase())
+    , xmlBuilder(std::move(xmlBuilder))
 {
 }
 
@@ -64,4 +66,12 @@ std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string
     }
 
     return database->loadObject(group, objectID);
+}
+
+std::unique_ptr<Quirks> RequestHandler::getQuirks(const UpnpFileInfo* info) const
+{
+    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
+    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
+    return std::make_unique<Quirks>(xmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
 }

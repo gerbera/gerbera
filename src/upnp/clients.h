@@ -79,6 +79,7 @@ struct ClientInfo {
     ClientMatchType matchType { ClientMatchType::None };
     std::string match;
     std::map<std::string, std::string> mimeMappings {};
+    std::map<std::string, std::string> headers {};
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };

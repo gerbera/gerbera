@@ -288,3 +288,10 @@ std::map<std::string, std::string> Quirks::getMimeMappings() const
 {
     return pClientInfo ? pClientInfo->mimeMappings : std::map<std::string, std::string>();
 }
+
+void Quirks::updateHeaders(Headers& headers) const
+{
+    if (pClientInfo && !pClientInfo->headers.empty())
+        for (auto&& [key, value] : pClientInfo->headers)
+            headers.updateHeader(key, value);
+}

@@ -44,10 +44,10 @@ public:
     {
         config = std::make_shared<MyConfigMock>();
 
-        auto clientConfig = std::make_shared<ClientConfig>(123, "default", "192.168.1.100", "added by config", std::map<std::string, std::string>(), 1, -1, false);
+        auto clientConfig = std::make_shared<ClientConfig>(123, "default", "192.168.1.100", "added by config", std::map<std::string, std::string>(), std::map<std::string, std::string>(), 1, -1, false);
         config->list->add(clientConfig, 0);
 
-        auto rangeConfig = std::make_shared<ClientConfig>(456, "range", "192.168.2.0/24", "added by config", std::map<std::string, std::string>(), 1, -1, false);
+        auto rangeConfig = std::make_shared<ClientConfig>(456, "range", "192.168.2.0/24", "added by config", std::map<std::string, std::string>(), std::map<std::string, std::string>(), 1, -1, false);
         config->list->add(rangeConfig, 1);
 
         subject = new ClientManager(config, nullptr);

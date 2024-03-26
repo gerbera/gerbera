@@ -62,6 +62,22 @@ void Headers::addHeader(const std::string& key, const std::string& value)
     headers.try_emplace(cleanKey, cleanValue);
 }
 
+void Headers::updateHeader(const std::string& key, const std::string& value)
+{
+    if (key.empty() || value.empty()) {
+        return;
+    }
+
+    std::string cleanKey = stripInvalid(key);
+    std::string cleanValue = stripInvalid(value);
+    if (cleanKey.empty() || cleanValue.empty()) {
+        return;
+    }
+
+    log_debug("Adding header: '{}: {}'", cleanKey, cleanValue);
+    headers[cleanKey] = cleanValue;
+}
+
 std::string Headers::formatHeader(const std::pair<std::string, std::string>& header)
 {
     return fmt::format("{}: {}", header.first, header.second);

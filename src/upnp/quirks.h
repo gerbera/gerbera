@@ -194,6 +194,10 @@ public:
      */
     std::map<std::string, std::string> getMimeMappings() const;
 
+    /** \brief Update Headers with overwrites for client
+     */
+    void updateHeaders(Headers& headers) const;
+
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientInfo* pClientInfo;

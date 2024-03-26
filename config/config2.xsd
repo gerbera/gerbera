@@ -524,6 +524,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="header" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="ip" type="xs:string" minOccurs="0"/>
             <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
@@ -531,6 +532,13 @@
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
             <xs:attribute name="upnp-string-limit" default="-1"/>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="header">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
