@@ -105,13 +105,27 @@ export class App {
     this.writeLocalStorage();
   }
 
-  setGridMode(mode) {
-    this.pageInfo.gridMode = mode;
+  setGridMode(newValue) {
+    if (newValue === 3) {
+      if (this.pageInfo.viewItems !== 1)
+        this.pageInfo.viewItemsOld = this.pageInfo.viewItems;
+      this.pageInfo.viewItems = 1;
+    } else if (this.pageInfo.gridMode === 3) {
+      if (this.pageInfo.viewItemsOld)
+        this.pageInfo.viewItems = this.pageInfo.viewItemsOld;
+      else
+        this.pageInfo.viewItems = 25;
+    }
+
+    this.pageInfo.gridMode = newValue;
     this.writeLocalStorage();
+    return this.pageInfo.viewItems;
   }
 
-  setViewItems(mode) {
-    this.pageInfo.viewItems = mode;
+  setViewItems(items) {
+    if (this.pageInfo.viewItems !== items)
+        this.pageInfo.viewItemsOld = this.pageInfo.viewItems;
+    this.pageInfo.viewItems = items;
     this.writeLocalStorage();
   }
 

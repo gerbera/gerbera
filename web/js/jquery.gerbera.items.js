@@ -67,6 +67,9 @@ $.widget('grb.dataitems', {
           case 2:
             content = $('<div class="grb-item-grid grb-item-grid-large justify-content-center align-items-center"></div>');
             break;
+          case 3:
+            content = $('<div class="grb-item-grid grb-item-grid-item justify-content-center align-items-center"></div>');
+            break;
           default:
             content = $('<td></td>');
             row = $('<tr class="datagrid-row"></tr>');
@@ -106,7 +109,10 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
+          if (pager.gridMode === 3 && item.upnp_class.startsWith("object.item.imageItem"))
+            text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
+          else
+            text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
         } else {
           let icon = "fa-file-o";
           if (item.upnp_class) {
@@ -199,9 +205,10 @@ $.widget('grb.dataitems', {
     const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
     const grbPager = $('<nav class="grb-pager" style="display: flex"></nav>');
 
+    const itemsPerPage = pager.gridMode === 3 ? 1 : pager.itemsPerPage;
     if (pager && pager.onItemsPerPage && pager.ippOptions) {
       const list = $('<ul class="pagination"></ul>');
-      const ippSelect = $('<select name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
+      const ippSelect = $('<select '+ (pager.gridMode === 3 ? 'hidden ' : '') +'name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
 
       const ippOptions = pager.ippOptions;
       const pageParams = {
@@ -225,6 +232,7 @@ $.widget('grb.dataitems', {
         { id: 0, label: 'Table' },
         { id: 1, label: 'Grid' },
         { id: 2, label: 'Large Grid' },
+        { id: 3, label: 'Item' },
       ];
       const pageParams = {
         pageNumber: pager.currentPage,
@@ -243,7 +251,7 @@ $.widget('grb.dataitems', {
       grbPager.append(list);
     }
 
-    if (pager && pager.pageCount && pager.itemsPerPage > 0) {
+    if (pager && pager.pageCount && itemsPerPage > 0) {
       let list = $('<ul class="pagination"></ul>');
       const previous = $('<li class="page-item">' +
           '<a class="page-link" aria-label="Previous">' +
@@ -255,18 +263,34 @@ $.widget('grb.dataitems', {
         '<span aria-hidden="true">&raquo;</span>' +
         '<span class="sr-only">Next</span></a>' +
         '</li>');
-      const maxPages = Math.ceil(pager.totalMatches / pager.itemsPerPage);
+      const previous10 = $('<li class="page-item">' +
+          '<a class="page-link" aria-label="Previous">' +
+          '<span aria-hidden="true">&laquo;&laquo;</span>' +
+          '<span class="sr-only">Previous</span></a>' +
+          '</li>');
+      const next10 = $('<li class="page-item">' +
+        '<a class="page-link" aria-label="Next">' +
+        '<span aria-hidden="true">&raquo;&raquo; </span>' +
+        '<span class="sr-only">Next</span></a>' +
+        '</li>');
+      const maxPages = Math.ceil(pager.totalMatches / itemsPerPage);
+      const maxPages10 = Math.ceil(pager.totalMatches / itemsPerPage / 10);
       if (maxPages > 1) {
-        if (pager.onNext) {
-          const pageParams = {
-            itemsPerPage: pager.itemsPerPage,
-            gridMode: pager.gridMode,
-            totalMatches: pager.totalMatches,
-            parentId: pager.parentId
-          };
-          next.find('a').click(pageParams, pager.onNext);
+        if (maxPages10 > 1) {
+          list.append(previous10);
+          if (pager.onPrevious && pager.currentPage > 10) {
+            const pageParams = {
+              itemsPerPage: pager.itemsPerPage,
+              gridMode: pager.gridMode,
+              totalMatches: pager.totalMatches,
+              parentId: pager.parentId,
+              increment: 10
+            };
+            previous10.find('a').click(pageParams, pager.onPrevious);
+          } else {
+            previous10.addClass('disabled');
+          }
         }
-
         list.append(previous);
         grbPager.append(list);
         if (pager.onPrevious && pager.currentPage > 1) {
@@ -274,14 +298,15 @@ $.widget('grb.dataitems', {
             itemsPerPage: pager.itemsPerPage,
             gridMode: pager.gridMode,
             totalMatches: pager.totalMatches,
-            parentId: pager.parentId
+            parentId: pager.parentId,
+            increment: 1
           };
           previous.find('a').click(pageParams, pager.onPrevious);
         } else {
           previous.addClass('disabled');
         }
 
-        list = $('<ul class="pagination itemspager"></ul>');
+        list = $('<ul class="pagination ' + (maxPages10 > 1 ? 'itemspager10' : 'itemspager') + '"></ul>');
         for (let page = 1; page <= maxPages; page++) {
           const pageItem = $('<li class="page-item"></li>');
           const pageLink = $('<a class="page-link">' + page + '</a>');
@@ -305,8 +330,34 @@ $.widget('grb.dataitems', {
           list.append(pageItem);
         }
         grbPager.append(list);
+
         list = $('<ul class="pagination"></ul>');
+        if (pager.onNext) {
+          const pageParams = {
+            itemsPerPage: pager.itemsPerPage,
+            gridMode: pager.gridMode,
+            totalMatches: pager.totalMatches,
+            parentId: pager.parentId,
+            increment: 1
+          };
+          next.find('a').click(pageParams, pager.onNext);
+        }
         list.append(next);
+        if (maxPages10 > 1) {
+          list.append(next10);
+          if (pager.onNext && pager.currentPage < (maxPages10 - 1) * 10) {
+            const pageParams = {
+              itemsPerPage: pager.itemsPerPage,
+              gridMode: pager.gridMode,
+              totalMatches: pager.totalMatches,
+              parentId: pager.parentId,
+              increment: 10
+            };
+            next10.find('a').click(pageParams, pager.onNext);
+          } else {
+            next10.addClass('disabled');
+          }
+        }
         if (pager.currentPage >= maxPages) {
           next.addClass('disabled');
         }
