@@ -109,7 +109,7 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          if (pager.gridMode === 3 && item.upnp_class.startsWith("object.item.imageItem"))
+          if (pager && pager.gridMode === 3 && item.upnp_class.startsWith("object.item.imageItem"))
             text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
           else
             text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
@@ -205,7 +205,7 @@ $.widget('grb.dataitems', {
     const tfoot = $('<tfoot><tr><td></td></tr></tfoot>');
     const grbPager = $('<nav class="grb-pager" style="display: flex"></nav>');
 
-    const itemsPerPage = pager.gridMode === 3 ? 1 : pager.itemsPerPage;
+    const itemsPerPage = pager && pager.gridMode === 3 ? 1 : (pager && pager.itemsPerPage ? pager.itemsPerPage : 0);
     if (pager && pager.onItemsPerPage && pager.ippOptions) {
       const list = $('<ul class="pagination"></ul>');
       const ippSelect = $('<select '+ (pager.gridMode === 3 ? 'hidden ' : '') +'name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
