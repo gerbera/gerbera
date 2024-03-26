@@ -43,6 +43,7 @@ export class App {
       configMode: 'minimal',
       currentPage: 0,
       viewItems: 25,
+      viewItemsOld: 25,
       gridMode: 0,
       currentItem: {
         'home': [],

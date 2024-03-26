@@ -141,7 +141,7 @@ describe('The jQuery Items Datagrid', () => {
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
-    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(102);
+    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(104);
   });
 
   it('creates a pager with only page count pages', () => {
@@ -154,7 +154,7 @@ describe('The jQuery Items Datagrid', () => {
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
-    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(102);
+    expect($('#datagrid nav.grb-pager > ul > li').length).toBe(104);
   });
 
   it('creates a pager with only necessary amount of pages', () => {
@@ -229,7 +229,7 @@ describe('The jQuery Items Datagrid', () => {
       }
     });
 
-    $($('#datagrid nav.grb-pager > ul > li').get(1)).find('a').click();
+    $($('#datagrid nav.grb-pager > ul > li').get(2)).find('a').click();
 
     expect(clickSpy).toHaveBeenCalled();
   });
@@ -252,6 +252,29 @@ describe('The jQuery Items Datagrid', () => {
     });
 
     // the << previous directional
+    $($('#datagrid nav.grb-pager > ul > li').get(1)).find('a').click();
+
+    expect(previousSpy).toHaveBeenCalled();
+  });
+
+  it('creates a pager that goes to previous 10 page when clicked', () => {
+    const clickSpy = jasmine.createSpy('click');
+    const nextSpy = jasmine.createSpy('next');
+    const previousSpy = jasmine.createSpy('previous');
+    dataGrid.dataitems({
+      data: datagridData,
+      pager: {
+        currentPage: 20,
+        pageCount: 10,
+        onClick: clickSpy,
+        onNext: nextSpy,
+        onPrevious: previousSpy,
+        totalMatches: 1000,
+        itemsPerPage: 10
+      }
+    });
+
+    // the << << previous directional
     $($('#datagrid nav.grb-pager > ul > li').get(0)).find('a').click();
 
     expect(previousSpy).toHaveBeenCalled();
