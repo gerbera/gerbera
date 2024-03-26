@@ -119,8 +119,9 @@ const setPage = (pageNumber) => {
 
 const nextPage = (event) => {
   const pageItem = event.data;
-  const pageNumber = GerberaApp.currentPage() + 1;
-  const start = (pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
+  const pageNumber = GerberaApp.currentPage() + ((pageItem.increment) ? pageItem.increment : 1);
+  const itemsPerPage = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
+  const start = (pageNumber * itemsPerPage) - itemsPerPage;
   if (start < pageItem.totalMatches) {
     const pageEvent = {
       data: {
@@ -149,7 +150,7 @@ const changeItemsPerPage = (pageItem, newValue) => {
 };
 
 const changeGridMode = (pageItem, newValue) => {
-  GerberaApp.setGridMode(newValue);
+  pageItem.itemsPerPage = GerberaApp.setGridMode(newValue);
   const pageEvent = {
     data: {
       pageNumber: pageItem.pageNumber,
@@ -163,8 +164,9 @@ const changeGridMode = (pageItem, newValue) => {
 
 const previousPage = function (event) {
   const pageItem = event.data;
-  const pageNumber = GerberaApp.currentPage() - 1;
-  const start = (pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
+  const pageNumber = GerberaApp.currentPage() - ((pageItem.increment) ? pageItem.increment : 1);
+  const itemsPerPage = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
+  const start = (pageNumber * itemsPerPage) - itemsPerPage;
   if (start >= 0) {
     const pageEvent = {
       data: {
@@ -381,8 +383,9 @@ const transformFiles = (files) => {
 const retrieveItemsForPage = (event) => {
   const pageItem = event.data;
   const linkType = (GerberaApp.getType() === 'db') ? 'items' : 'files';
-  const start = (pageItem.pageNumber * pageItem.itemsPerPage) - pageItem.itemsPerPage;
-  return retrieveGerberaItems(linkType, pageItem.parentId, start, pageItem.itemsPerPage)
+  const itemsPerPage = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
+  const start = (pageItem.pageNumber * itemsPerPage) - itemsPerPage;
+  return retrieveGerberaItems(linkType, pageItem.parentId, start, itemsPerPage)
     .then((response) => loadItems(response))
     .then(() => {
       setPage(pageItem.pageNumber)

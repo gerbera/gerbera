@@ -200,6 +200,11 @@ ul.itemspager {
     max-width: calc( 71vw - 320px );
 }
 
+ul.itemspager10 {
+    overflow-x: auto;
+    max-width: calc( 71vw - 400px );
+}
+
 ul.pagination {
     margin-bottom: 0px;
 }
@@ -516,6 +521,15 @@ body,
     width: 48px;
 }
 
+.grb-image {
+    margin-right: 10px;
+    object-fit: contain;
+    background: #eee;
+    border: 1px solid #ddd;
+    height: calc( 100vh - 250px);
+    width: calc( 100vw - 650px);
+}
+
 .grb-item-grid {
     display: grid;
     align-content: center;
@@ -544,6 +558,16 @@ body,
 .grb-item-grid-large > div > a {
     font-size: x-small;
     width: 160px;
+}
+
+.grb-item-grid-item {
+    margin-right: 0;
+    max-height: calc( 100% - 200px );
+    max-width: calc( 100% - 50px );
+}
+.grb-item-grid-item > div > a {
+    font-size: x-small;
+    max-width: 100%;
 }
 
 .grb-item-grid:hover {
