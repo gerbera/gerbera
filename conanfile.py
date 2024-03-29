@@ -64,10 +64,6 @@ class GerberaConan(ConanFile):
 
     def configure(self):
         check_min_cppstd(self, "17")
-        if self.options.tests:
-            # We have our own main function,
-            # Moreover, if "shared" is True then main is an .so...
-            self.options["gtest"].no_main = True
 
     @property
     def _needs_system_uuid(self):
