@@ -190,25 +190,29 @@ void AutoscanInotify::threadProc()
 
                 fs::path path = wdObj->getPath();
                 // file is not gone
-                if (mask & IN_MOVE_SELF)
+                if (mask & IN_MOVE_SELF) {
+                    log_debug("MOVE_SELF {} -> {}", path.c_str(), (path.parent_path() / name).c_str());
                     path = path.parent_path() / name;
-                else if (!(mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) && !name.empty())
+                } else if (!(mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) && !name.empty()) {
                     path /= name;
+                    log_debug("!(IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT): {}", path.c_str());
+                } else {
+                    log_debug("processing {}", path.c_str());
+                }
 
                 auto dirEnt = fs::directory_entry(path, ec);
                 bool isDir = mask & IN_ISDIR;
                 if (!ec) {
                     isDir = isDir || dirEnt.is_directory(ec);
                 }
-                if (ec && !(mask & (IN_DELETE_SELF | IN_DELETE | IN_MOVED_FROM | IN_MOVE_SELF | IN_UNMOUNT))) {
-                    log_error("Failed to read {}: {}", path.c_str(), ec.message());
-                }
                 std::shared_ptr<AutoscanDirectory> adir;
                 auto watchAs = getAppropriateAutoscan(wdObj, path);
                 if (watchAs)
                     adir = watchAs->getAutoscanDirectory();
                 if (!watchAs || !adir) {
-                    log_debug("autoscan not found in watches? ({}, watchAs:{}, adir:{}, {})", wd, watchAs == nullptr, adir == nullptr, path.c_str());
+                    log_debug("autoscan not found in watches? ({}, watchAs:{}, adir:{}, {})", wd, watchAs != nullptr, adir != nullptr, path.c_str());
+                } else if (ec && !(mask & (IN_DELETE_SELF | IN_DELETE | IN_MOVED_FROM | IN_MOVE_SELF | IN_UNMOUNT))) {
+                    log_error("Failed to read {}: {}", path.c_str(), ec.message());
                 }
 
                 // file is renamed
