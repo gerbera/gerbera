@@ -38,7 +38,6 @@
 
 #include "common.h"
 #include "database/sql_database.h"
-#include <mutex>
 #include <mysql.h>
 #include <vector>
 

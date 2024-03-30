@@ -35,6 +35,7 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
+#include <mutex>
 #include <queue>
 #include <sqlite3.h>
 
@@ -90,7 +91,10 @@ private:
     /// \brief the tasks to be done by the sqlite3 thread
     std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen {};
-    std::vector<std::string> deletedEntries {};
+
+    mutable std::mutex del_mutex;
+    using DelAutoLock = std::scoped_lock<std::mutex>;
+    mutable std::vector<std::string> deletedEntries {};
     size_t maxDeleteCount { DELETE_CACHE_MAX_SIZE };
     std::chrono::seconds lastDelete;
 
