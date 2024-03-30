@@ -264,11 +264,14 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
         : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
     try {
         log_debug("Adding delete to Queue: {}", query);
-        maxDeleteCount = maxDeleteCount > ids.size() * 10 ? maxDeleteCount : ids.size() * 10;
-        for (auto&& id : ids) {
-            deletedEntries.push_back(fmt::format("{}_{}", tableName, id));
+        {
+            DelAutoLock del_lock(del_mutex);
+            maxDeleteCount = maxDeleteCount > ids.size() * 10 ? maxDeleteCount : ids.size() * 10;
+            for (auto&& id : ids) {
+                deletedEntries.push_back(fmt::format("{}_{}", tableName, id));
+            }
+            lastDelete = currentTime();
         }
-        lastDelete = currentTime();
         auto etask = std::make_shared<SLExecTask>(query, false);
         addTask(etask);
         etask->waitForTask();
@@ -386,11 +389,13 @@ void Sqlite3Database::threadProc()
             /* if nothing to do, sleep until awakened */
             auto now = currentTime();
             if (now.count() - lastDelete.count() > DELETE_CACHE_MAX_TIME) { // drop cache if last delete was more than 60 secs ago
+                DelAutoLock del_lock(del_mutex);
                 maxDeleteCount = DELETE_CACHE_MAX_SIZE;
                 deletedEntries.clear();
-            } else if (deletedEntries.size() > maxDeleteCount) // dynamically increase if large DELETESs happen
+            } else if (deletedEntries.size() > maxDeleteCount) { // dynamically increase if large DELETESs happen
+                DelAutoLock del_lock(del_mutex);
                 deletedEntries.erase(deletedEntries.begin(), deletedEntries.begin() + maxDeleteCount * DELETE_CACHE_RED_SIZE);
-
+            }
             threadRunner->wait(lock);
         }
         log_debug("Exiting");
@@ -411,8 +416,8 @@ void Sqlite3Database::threadProc()
             }
             db = nullptr;
         }
-    } catch (const std::runtime_error&) {
-        log_error("Aborting thread");
+    } catch (const std::runtime_error& e) {
+        log_error("Aborting thread {}", e.what());
     }
 }
 
