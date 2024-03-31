@@ -39,7 +39,7 @@
     "express": "^4.19.2",
     "jasmine-core": "^4.6.0",
     "jimp": "^0.22.10",
-    "jquery": "^3.7.0",
+    "jquery": "^3.7.1",
     "jquery-ui": "^1.13.2",
     "js-cookie": "^3.0.5",
     "karma": "^6.4.2",
