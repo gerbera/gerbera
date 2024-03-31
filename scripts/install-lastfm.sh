@@ -18,10 +18,6 @@
 # along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 # $Id$
-if [ "$(id -u)" != 0 ]; then
-    echo "Please run this script with superuser access!"
-    exit 1
-fi
 set -ex
 . $(dirname "${BASH_SOURCE[0]}")/versions.sh
 
@@ -30,12 +26,9 @@ wget "https://storage.googleapis.com/google-code-archive-downloads/v2/code.googl
 tar -xzvf "lastfmlib-${VERSION}.tar.gz"
 cd "lastfmlib-${VERSION}"
 ./configure --prefix=/usr/local
-make -j$(nproc) && \
-make install
 
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    if [ "$ID" != 'alpine' ]; then
-        ldconfig
-    fi
-fi
+makeInstall
+
+ldConfig
+
+exit 0

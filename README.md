@@ -47,9 +47,9 @@ sudo make install
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
 | libupnp             | 1.14.6      | 1.14.18     | 1.14.18       | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp           | 4.2.1       | 5.1.2       | 6.1.0         | XOR libupnp   | [npupnp]                   | Disabled |
+| libnpupnp           | 4.2.1       | 5.1.2       | 6.1.1         | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]           |             | 1.10        | 1.13          | Required      | XML file and data support  |          |
+| [pugixml]           |             | 1.10        | 1.14          | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
@@ -65,7 +65,7 @@ sudo make install
 | [libebml]           |             | 1.4.2       | 1.4.5         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
 | libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]          | v0.26       | v0.27.7     | v0.28.1       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [libexiv2]          | v0.26       | v0.27.7     | v0.28.2       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.0       | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |               | Optional      | Efficient file monitoring  | Enabled  |
