@@ -24,10 +24,6 @@ set -Eeuo pipefail
 
 VERSION="${GOOGLETEST-1.11.0}"
 
-if ! [ "$(id -u)" = 0 ]; then
-    echo "Please run this script with superuser access!"
-    exit 1
-fi
 set -e
 
 script_dir=`pwd -P`
@@ -66,24 +62,8 @@ cd build
 
 cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-} -std=c++17" -DBUILD_GMOCK=1 ..
 
-if command -v nproc >/dev/null 2>&1; then
-    make "-j$(nproc)"
-else
-    make
-fi
-make install
+makeInstall
 
-if [ "$(uname)" != 'Darwin' ]; then
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-    else
-        ID="Linux"
-    fi
-    if [ "${ID}" == "alpine" ]; then
-        ldconfig /
-    else
-        ldconfig
-    fi
-fi
+ldConfig
 
 exit 0
