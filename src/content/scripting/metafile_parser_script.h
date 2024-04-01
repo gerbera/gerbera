@@ -38,13 +38,15 @@
 
 class MetafileParserScript : public ParserScript {
 public:
-    MetafileParserScript(const std::shared_ptr<ContentManager>& content);
+    MetafileParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
     void processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
 
 protected:
+    std::string metafileFunction;
+
     std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd) override;
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
 };

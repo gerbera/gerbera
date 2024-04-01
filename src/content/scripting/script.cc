@@ -424,6 +424,7 @@ void Script::load(const fs::path& scriptPath)
 {
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     duk_push_thread_stash(ctx, ctx);
+    log_debug("Loading file {}", scriptPath.c_str());
     _load(scriptPath);
     duk_put_prop_string(ctx, -2, "script");
     duk_pop(ctx);
@@ -582,9 +583,9 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<C
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
 #if DUK_VERSION > 20399
-        log_error("javascript runtime error: {}() - {}\n", functionName, duk_safe_to_stacktrace(ctx, -1));
+        log_error("javascript {} runtime error: {}() - {}\n", contextName, functionName, duk_safe_to_stacktrace(ctx, -1));
 #else
-        log_error("javascript runtime error: {}() - {}\n", functionName, duk_safe_to_string(ctx, -1));
+        log_error("javascript {} runtime error: {}() - {}\n", contextName, functionName, duk_safe_to_string(ctx, -1));
 #endif
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");

@@ -171,7 +171,7 @@ void ImportService::initLayout(LayoutType layoutType)
         playlistParserScript = std::make_unique<PlaylistParserScript>(content, rootPath.string());
     }
     if (!metafileParserScript) {
-        metafileParserScript = std::make_unique<MetafileParserScript>(content);
+        metafileParserScript = std::make_unique<MetafileParserScript>(content, rootPath.string());
     }
 #endif
 }

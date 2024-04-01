@@ -51,6 +51,8 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>
     if (!scriptPath.empty()) {
         load(scriptPath);
         scriptMode = true;
+    } else {
+        playlistFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
     }
 }
 
@@ -155,7 +157,7 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
 
 void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath)
 {
-    if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
+    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
         throw_std_runtime_error("Recursion in playlists not allowed");
     }
 
@@ -186,7 +188,6 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
         if (scriptMode) {
             execute(obj, rootPath);
         } else {
-            auto playlistFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
             call(obj, nullptr, playlistFunction, rootPath, "");
         }
     } catch (const std::runtime_error&) {
