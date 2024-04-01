@@ -15,7 +15,7 @@
 
 - Restructuring files
 - Updates to the build system: Use cmake presets
-- Update versions of fmt (10.2.1), spdlog (1.13.0)
+- Update versions of fmt (10.2.1), spdlog (1.13.0), libexiv2 (0.28.2), npupnp (6.1.1), pugixml (1.14), wavpack (5.7.0)
 - Update Conan to V2
 - Support build with NPUPNP
 

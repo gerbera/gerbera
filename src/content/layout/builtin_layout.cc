@@ -426,7 +426,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
         std::vector<std::shared_ptr<CdsObject>> chronology;
         chronology.push_back(containerAt(BoxKeys::audioRoot));
         chronology.push_back(containerAt(BoxKeys::audioAllArtists));
-        chronology.push_back(std::move(artistContainer));
+        chronology.push_back(artistContainer);
         chronology.push_back(containerAt(BoxKeys::audioArtistChronology));
         chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
         id = content->addContainerTree(chronology, obj);
@@ -443,7 +443,7 @@ void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::s
             std::vector<std::shared_ptr<CdsObject>> all;
             all.push_back(containerAt(BoxKeys::audioRoot));
             all.push_back(containerAt(BoxKeys::audioAllArtists));
-            all.push_back(artistContainer);
+            all.push_back(std::move(artistContainer));
             all.push_back(containerAt(BoxKeys::audioAllTracks));
             id = content->addContainerTree(all, obj);
             add(obj, id);
