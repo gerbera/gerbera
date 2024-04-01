@@ -41,21 +41,23 @@
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 
-MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content)
-    : ParserScript(content, "", "metafile", "obj")
+MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent)
+    : ParserScript(content, parent, "metafile", "obj")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 1);
     if (!scriptPath.empty()) {
         load(scriptPath);
         scriptMode = true;
+    } else {
+        metafileFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
     }
 }
 
 void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
 {
-    if ((currentObjectID != INVALID_OBJECT_ID) || currentHandle || currentLine) {
-        throw_std_runtime_error("Recursion in playlists not allowed");
+    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
+        throw_std_runtime_error("Recursion in metafiles is not allowed");
     }
 
     if (!obj->isPureItem()) {
@@ -81,7 +83,6 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
         if (scriptMode) {
             execute(obj, path);
         } else {
-            auto metafileFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
             call(obj, nullptr, metafileFunction, path, "");
         }
     } catch (const std::runtime_error&) {

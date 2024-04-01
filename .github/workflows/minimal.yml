@@ -14,7 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le', 'riscv64']
+        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le']
+        branch: ['latest-stable']
+        include:
+          - platform: 'riscv64'
+            branch: 'edge'
     defaults:
       run:
         shell: alpine.sh {0}
@@ -22,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: jirutka/setup-alpine@v1
         with:
-          branch: edge
+          branch: ${{matrix.branch}}
           arch: ${{matrix.platform}}
           packages: >
             build-base
