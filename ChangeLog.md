@@ -3,9 +3,12 @@
 ### MAIN
 
 - Add ctypes include
+- Autoscan: avoid errors from parent directories
 - Avoid crash when parent was not created yet.
+- Bring back custom headers as client specific headers
 - BUGFIX: common.js boxSetup check Video/AllDates for Dates
 - Build Support for NPUPNP
+- Bump express from 4.18.2 to 4.19.2 in /gerbera-web
 - Bump follow-redirects from 1.15.3 to 1.15.4 in /gerbera-web
 - Bump follow-redirects from 1.15.4 to 1.15.6 in /gerbera-web
 - Bump xml2js and parse-bmfont-xml in /gerbera-web
@@ -20,22 +23,28 @@
 - Expand firewall advice in docs
 - Fix build-deb.sh for releases
 - Fix findAutoscanDirectory
-- Fix findAutoscanDirectory
 - Gerbera welcomes 2024
 - Gerbera-web: update chromedriver for tests
 - github workflows: make cmake stuff consistent
 - Import: Safely handle second scan
 - Import: Safely handle second scan - 2
+- matroska_handler: update API calls to work with libebml/libmatroska 2.0
 - MetadataHandler: Refactor static methods
+- Metafile: handle instance
 - Minor fixes to RST documentation
+- Provide BoxKeys also for scripts
 - Refactor config and enums to reduce nesting
 - Refactor parser files
 - Safely handle suppressed file types
 - Scripting: print2 function with log level support
 - some fixes
+- Sqlite: Harden delete
 - Take configuration into account when creating virtual-layout (built-in + JS)
 - Update Conan to v2
+- Update various library versions
 - Update workflow actions
+- WebUI: Add Item View
+- Webui: update vendor libraries
 
 ### v2.0.0
 
