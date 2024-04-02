@@ -143,6 +143,14 @@ The large grid view is designed to display previews on items like images. To avo
    :alt: Database view with large grid
    :target: _static/database-largegrid-view.png
 
+Single Item View
+----------------
+The single item view is designed to display images. To avoid critical clicks, delete and edit actions are hidden.
+
+.. image:: _static/database-single-view.png
+   :alt: Database view with single item
+   :target: _static/database-single-view.png
+
 
 Clients View
 ~~~~~~~~~~~~

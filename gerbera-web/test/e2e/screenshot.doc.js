@@ -139,6 +139,21 @@ suite(() => {
       image.crop(0, 0, 1280, 700).write(fileName);
     });
 
+    it('for [database single view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'database-single-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-db');
+      await homePage.clickTree('Photos');
+      await homePage.setSelectValue('gridSelect', 3);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
     it('for [filesystem view]', async () => {
       const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png';
       await loginPage.username('user');
