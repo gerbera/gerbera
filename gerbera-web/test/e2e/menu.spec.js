@@ -76,7 +76,7 @@ describe('Menu Suite', () => {
     it('shows the version in the menu', async () => {
       const version = await homePage.getVersion();
       const text = await version.getText();
-      expect(text).to.equal('1.12.1');
+      expect(text).to.equal('2.1.0');
     });
 
     it('loads the parent database container list when clicking Database Icon', async () => {

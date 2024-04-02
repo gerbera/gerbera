@@ -2,28 +2,35 @@
 
 ## MAIN
 
+This release started out as a mere bugfix release but gathered some nice features along the way.
+This includes the full build support for NPUPNP, the update of the conan build system to V2 and the return of
+custom headers for particular clients.
+
 ### NEW Features
 
 - new JavaScript function `print2` to allow setting log type (info, debug, trace)
 - configuration of client specific headers (brings back old custom-headers in new place)
+- wider use of `box-layout` settings in javascript and builtin layout
 
 ### FIXES
 
 - Fix loading of playlists
+- Fix multiple crashes
 
 ### Code Improvements
 
 - Restructuring files
-- Updates to the build system: Use cmake presets
 - Update versions of fmt (10.2.1), spdlog (1.13.0), libexiv2 (0.28.2), npupnp (6.1.1), pugixml (1.14), wavpack (5.7.0)
-- Update Conan to V2
-- Support build with NPUPNP
+- WebUI: Update versions of jquery (3.7.1) and tether (2.0.0)
+- Build System: Use cmake presets
+- Build System: Update Conan to V2
+- Build System: Support build with NPUPNP
 
 ## v2.0.0
 
 This release is a new major release and contains two noteworthy changes.
 
-The JavaScript integration has be overhauled to simplify the process of providing additional layout scripts.
+The JavaScript integration has been overhauled to simplify the process of providing additional layout scripts.
 If you created copies and modified that code to you purpose, you may have to update your code to the new interfaces for import functions.
 In case you activate the new JavaScript folder loading mechanism by setting the respective config options,
 ensure that no older scripts are still in the script folders.

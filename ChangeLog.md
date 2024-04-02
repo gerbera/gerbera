@@ -14,6 +14,7 @@
 - Bump xml2js and parse-bmfont-xml in /gerbera-web
 - clang-tidy and cppcheck fixes
 - clang-tidy fixes
+- Cleanup FileRequestHandler
 - CMake: Use presets
 - Config: Refactor handling of integer types
 - Correct two typos.
