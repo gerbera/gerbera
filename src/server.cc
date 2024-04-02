@@ -54,6 +54,7 @@
 #include "device_description_handler.h"
 #include "file_request_handler.h"
 #include "iohandler/io_handler.h"
+#include "metadata/metadata_service.h"
 #include "subscription_request.h"
 #include "upnp/clients.h"
 #include "upnp/conn_mgr_service.h"
@@ -110,10 +111,11 @@ void Server::init(bool offln)
     config->updateConfigFromDatabase(database);
 
     clientManager = std::make_shared<ClientManager>(config, database);
-    session_manager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clientManager, mime, database, session_manager);
+    sessionManager = std::make_shared<Web::SessionManager>(config, timer);
+    context = std::make_shared<Context>(config, clientManager, mime, database, sessionManager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
+    metadataService = std::make_shared<MetadataService>(context, content);
 }
 
 void Server::run()
@@ -411,7 +413,7 @@ void Server::shutdown()
         content = nullptr;
     }
 
-    session_manager = nullptr;
+    sessionManager = nullptr;
 
     if (database->threadCleanupRequired()) {
         try {
@@ -580,7 +582,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
-        return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder);
+        return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder, metadataService);
     }
 
     if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {

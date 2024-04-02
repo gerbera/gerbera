@@ -45,6 +45,7 @@ class ConnectionManagerService;
 class ContentDirectoryService;
 class ContentManager;
 class Context;
+class MetadataService;
 class MRRegistrarService;
 class RequestHandler;
 class SubscriptionRequest;
@@ -92,11 +93,12 @@ protected:
     std::shared_ptr<ClientManager> clientManager;
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
-    std::shared_ptr<Web::SessionManager> session_manager;
+    std::shared_ptr<Web::SessionManager> sessionManager;
     std::shared_ptr<Context> context;
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<ContentManager> content;
+    std::shared_ptr<MetadataService> metadataService;
 
     std::string ip;
     in_port_t port {};
