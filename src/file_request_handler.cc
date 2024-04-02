@@ -55,9 +55,9 @@
 #include "util/url_utils.h"
 #include "web/session_manager.h"
 
-FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService)
     : RequestHandler(content, xmlBuilder)
-    , metadataService(std::make_shared<MetadataService>(content->getContext(), content))
+    , metadataService(std::move(metadataService))
 {
 }
 
