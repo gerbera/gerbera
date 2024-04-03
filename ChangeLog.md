@@ -20,6 +20,7 @@
 - Correct two typos.
 - debian12: fix script error
 - Docker image usability
+- Docker: update alpine version
 - Enhances default javascript files to check config file options
 - Expand firewall advice in docs
 - Fix build-deb.sh for releases
@@ -42,6 +43,7 @@
 - Sqlite: Harden delete
 - Take configuration into account when creating virtual-layout (built-in + JS)
 - Update Conan to v2
+- Update screenshots to latest version
 - Update various library versions
 - Update workflow actions
 - WebUI: Add Item View

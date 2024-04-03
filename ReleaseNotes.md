@@ -19,9 +19,10 @@ custom headers for particular clients.
 
 ### Code Improvements
 
-- Restructuring files
+- Restructuring files and refactoring classes
 - Update versions of fmt (10.2.1), spdlog (1.13.0), libexiv2 (0.28.2), npupnp (6.1.1), pugixml (1.14), wavpack (5.7.0)
 - WebUI: Update versions of jquery (3.7.1) and tether (2.0.0)
+- Docker: Update Alpine version (3.19)
 - Build System: Use cmake presets
 - Build System: Update Conan to V2
 - Build System: Support build with NPUPNP
