@@ -62,7 +62,10 @@ FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
     curl \
     duktape \
-    ffmpeg4 \
+    ffmpeg4-libavutil \
+    ffmpeg4-libavformat \
+    ffmpeg4-libavcodec \
+    ffmpeg4-libavfilter \
     libjpeg \
     file \
     fmt \

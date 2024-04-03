@@ -24,7 +24,6 @@ set -Eeuo pipefail
 
 VERSION="${MATROSKA-1.6.3}"
 
-#script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 script_dir=`pwd -P`
 src_dir="${script_dir}/libmatroska-${VERSION}"
 tgz_file="${script_dir}/libmatroska-${VERSION}.tar.gz"
@@ -32,7 +31,7 @@ tgz_file="${script_dir}/libmatroska-${VERSION}.tar.gz"
 BUILD_SHARED=YES
 
 if [ $# -gt 0 ]; then
-    if [ "$1" = "static" ]; then
+    if [ "${1}" = "static" ]; then
         BUILD_SHARED=NO
     fi
 fi

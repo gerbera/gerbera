@@ -80,12 +80,23 @@ fi
 
 function downloadSource()
 {
-    if [ ! -f "${tgz_file}" ]; then
-            wget ${1} -O "${tgz_file}"
+    if [[ ! -f "${tgz_file}" ]]; then
+        if [[ $# -gt 1 ]]; then
+            set +e
+        fi
+        wget ${1} -O "${tgz_file}"
+        if [[ $? -eq 8 && $# -gt 1 ]]; then
+            set -e
+            wget ${2} -O "${tgz_file}"
+        elif [[ $# -gt 1 ]]; then
+            exit $?
+        fi
+        set -e
     fi
 
-    if [ -d "${src_dir}" ]; then
-        rm -r ${src_dir}
+    if [[ -d "${src_dir}" ]]; then
+#        exit
+        rm -r "${src_dir}"
     fi
     mkdir "${src_dir}"
 
@@ -93,7 +104,7 @@ function downloadSource()
 
     cd "${src_dir}"
 
-    if [ -d build ]; then
+    if [[ -d build ]]; then
         rm -R build
     fi
     mkdir build
@@ -125,4 +136,3 @@ function ldConfig()
         fi
     fi
 }
-
