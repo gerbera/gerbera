@@ -31,6 +31,7 @@ RUN apk add --no-cache  \
     autoconf \
     automake \
     libtool \
+    wget \
     file
 
 # Build ffmpegthumbnailer

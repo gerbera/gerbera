@@ -181,5 +181,6 @@ class GerberaConan(ConanFile):
         if envvars.get("CONAN_RUN_TESTS", True):
             env.define("CTEST_OUTPUT_ON_FAILURE", "1")
             with envvars.apply():
-                cmake.test()
+                cmake_args = "ARGS=\"--output-on-failure\""
+                cmake.test(cli_args=[cmake_args])
 
