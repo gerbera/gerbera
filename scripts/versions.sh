@@ -85,9 +85,9 @@ function downloadSource()
             set +e
         fi
         wget ${1} -O "${tgz_file}"
-        if [[ $? -eq 8 && $# -gt 1 ]]; then
+        if [[ ! -f "${tgz_file}" || ($? -eq 8 && $# -gt 1) ]]; then
             set -e
-            wget ${2} -O "${tgz_file}"
+            wget ${2} --no-hsts --no-check-certificate -O "${tgz_file}"
         elif [[ $# -gt 1 ]]; then
             exit $?
         fi

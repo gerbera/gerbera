@@ -27,6 +27,7 @@ RUN apk add --no-cache  \
     autoconf \
     automake \
     libtool \
+    wget \
     file
 
 # Build fmt
@@ -92,13 +93,12 @@ RUN ./install-libexiv2.sh
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
-# Building with test somehow broken (missing GMock)
 RUN cmake -S . -B build --preset=develop \
         -DWITH_SYSTEMD=NO \
-        -DWITH_TESTS=NO \
+        -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=NO \
     && \
     cmake --build build -v -j$(nproc) && \
-    # cmake --build build -v -t test ARGS="--output-on-failure"
+    cmake --build build -v -t test ARGS="--output-on-failure"
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
