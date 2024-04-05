@@ -221,7 +221,6 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
     }
 
     auto rootEntry = fs::directory_entry(location);
-    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
         return;
@@ -233,8 +232,11 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
     }
 
     if (isDir) {
+        cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
         readDir(location, settings);
     } else {
+        rootEntry = fs::directory_entry(location.parent_path());
+        cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
         readFile(location);
     }
     removeHidden(settings);
