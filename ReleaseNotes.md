@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## MAIN
+## 2.1.0
 
 This release started out as a mere bugfix release but gathered some nice features along the way.
 This includes the full build support for NPUPNP, the update of the conan build system to V2 and the return of
