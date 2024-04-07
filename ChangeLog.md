@@ -1,8 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### MAIN
+### 2.1.0
 
 - Add ctypes include
+- Add issue template
 - Autoscan: avoid errors from parent directories
 - Avoid crash when parent was not created yet.
 - Bring back custom headers as client specific headers
