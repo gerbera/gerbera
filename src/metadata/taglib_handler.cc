@@ -47,12 +47,17 @@
 #include <oggflacfile.h>
 #include <opusfile.h>
 #include <speexfile.h>
+#include <tdebuglistener.h>
 #include <textidentificationframe.h>
 #include <tfilestream.h>
 #include <tiostream.h>
 #include <tpropertymap.h>
 #include <vorbisfile.h>
 #include <wavpackfile.h>
+
+#if TAGLIB_MAJOR_VERSION >= 2
+#include <mp4itemfactory.h>
+#endif
 
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
@@ -62,6 +67,24 @@
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+
+class GerberaTagLibDebugListener : public TagLib::DebugListener {
+private:
+    GerberaTagLibDebugListener()
+    {
+        // Install listener.
+        TagLib::setDebugListener(this);
+    }
+
+    virtual void printMessage(const TagLib::String& msg) override
+    {
+        // Remove trailing newlines.
+        log_debug("{}", msg.stripWhiteSpace().to8Bit(true));
+    }
+    static GerberaTagLibDebugListener grbListener;
+};
+
+GerberaTagLibDebugListener GerberaTagLibDebugListener::grbListener;
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
@@ -327,7 +350,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     if (contentType == CONTENT_TYPE_MP3) {
         // stream album art from MP3 file
 #if TAGLIB_MAJOR_VERSION >= 2
-        auto f = TagLib::MPEG::File(&roStream);
+        auto f = TagLib::MPEG::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
 #else
         auto f = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 #endif
@@ -352,7 +375,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     if (contentType == CONTENT_TYPE_FLAC) {
         // stream album art from FLAC file
 #if TAGLIB_MAJOR_VERSION >= 2
-        auto f = TagLib::FLAC::File(&roStream);
+        auto f = TagLib::FLAC::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
 #else
         auto f = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 #endif
@@ -443,7 +466,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
 void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
 #if TAGLIB_MAJOR_VERSION >= 2
-    auto mp3 = TagLib::MPEG::File(&roStream);
+    auto mp3 = TagLib::MPEG::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
 #else
     auto mp3 = TagLib::MPEG::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 #endif
@@ -646,7 +669,7 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
 void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
 #if TAGLIB_MAJOR_VERSION >= 2
-    auto flac = TagLib::FLAC::File(&roStream);
+    auto flac = TagLib::FLAC::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
 #else
     auto flac = TagLib::FLAC::File(&roStream, TagLib::ID3v2::FrameFactory::instance());
 #endif
@@ -728,7 +751,11 @@ void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared
 
 void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
 {
+#if TAGLIB_MAJOR_VERSION >= 2
+    auto mp4 = TagLib::MP4::File(&roStream, true, TagLib::MP4::Properties::Average, TagLib::MP4::ItemFactory::instance());
+#else
     auto mp4 = TagLib::MP4::File(&roStream);
+#endif
 
     if (!mp4.isValid()) {
         log_info("TagLibHandler {}: does not appear to be a valid mp4 file", item->getLocation().c_str());
