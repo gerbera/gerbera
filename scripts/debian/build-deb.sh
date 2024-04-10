@@ -121,14 +121,25 @@ function install-matroska() {
   echo "::endgroup::"
 }
 
-function upload_to_artifactory() {
+function upload_to_repo() {
+  echo "::group::Uploading package"
+  sudo apt-get install -y ruby gpg
+  sudo gem install deb-s3
 
-  target_path="pool/main/g/gerbera/$deb_name"
-  bintray_url="https://gerbera.jfrog.io/artifactory/$1/$target_path;deb.distribution=$lsb_codename;deb.component=main;deb.architecture=$deb_arch"
+  echo "${PKG_SIGNING_KEY}" | gpg --import
 
-  printf "Uploading %s to %s...\n" "$target_path" "$bintray_url"
-
-  curl -H "X-JFrog-Art-Api:$ART_API_KEY" -XPUT  -T "$deb_name" -uian@gerbera.io:"${ART_API_KEY}" "$bintray_url"
+  deb-s3 upload \
+    --bucket=gerbera \
+    --prefix="${1}" \
+    --codename="${lsb_codename}" \
+    --arch="${deb_arch}" \
+    --lock \
+    --sign="${PKG_SIGNING_KEY_ID}" \
+    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+    --endpoint="${DEB_UPLOAD_ENDPOINT}" \
+    "${deb_name}"
+  echo "::endgroup::"
 }
 
 # Fix time issues
@@ -153,8 +164,6 @@ if [[ "${lsb_codename}" == "n/a" ]]; then
 fi
 lsb_distro=$(lsb_release -i --short)
 
-install-gcc
-install-cmake
 my_sys=${lsb_codename}
 my_upnp=pupnp
 if [ $# -gt 0 ]; then
@@ -210,6 +219,9 @@ fi
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
 
+  install-gcc
+  install-cmake
+
   echo "::group::Installing dependencies"
   sudo apt-get update
   sudo apt-get install -y \
@@ -233,33 +245,33 @@ if [[ ! -d build-deb ]]; then
       uuid-dev
   sudo apt-get clean
   echo "::endgroup::"
-fi
 
-if [[ "$lsb_codename" == "bionic" ]]; then
-  # dpkg-dev pulls g++ which changes your GCC symlinks because ubuntu knows better than you
-  sudo update-alternatives --set gcc /usr/bin/gcc-8
-  sudo update-alternatives --set cpp /usr/bin/cpp-8
-fi
-
-if [[ "${my_sys}" == "HEAD" ]]; then
-  install-googletest
-  install-libexiv2 head
-  install-pugixml
-  install-duktape
-  if [[ "$lsb_codename" != "jammy" ]]; then
-    install-matroska
-    install-ffmpegthumbnailer
+  if [[ "$lsb_codename" == "bionic" ]]; then
+    # dpkg-dev pulls g++ which changes your GCC symlinks because ubuntu knows better than you
+    sudo update-alternatives --set gcc /usr/bin/gcc-8
+    sudo update-alternatives --set cpp /usr/bin/cpp-8
   fi
-fi
 
-install-fmt
-install-spdlog
-install-taglib
-if [[ "${my_upnp}" == "npupnp" ]]; then
-  install-npupnp
-else
-  my_upnp="pupnp"
-  install-pupnp
+  if [[ "${my_sys}" == "HEAD" ]]; then
+    install-googletest
+    install-libexiv2 head
+    install-pugixml
+    install-duktape
+    if [[ "$lsb_codename" != "jammy" ]]; then
+      install-matroska
+      install-ffmpegthumbnailer
+    fi
+  fi
+
+  install-fmt
+  install-spdlog
+  install-taglib
+  if [[ "${my_upnp}" == "npupnp" ]]; then
+    install-npupnp
+  else
+    my_upnp="pupnp"
+    install-pupnp
+  fi
 fi
 
 cd build-deb
@@ -303,13 +315,13 @@ fi
 
 if [[ "${lsb_distro}" != "Raspbian" ]]; then
   if [[ "${my_sys}" != "HEAD" ]]; then
-    if [[ "${ART_API_KEY:-}" ]]; then
+    if [[ "${DEB_UPLOAD_ENDPOINT:-}" ]]; then
       # Tags only for main repo
-      [[ $is_tag == 1 ]] && upload_to_artifactory debian
+      [[ $is_tag == 1 ]] && upload_to_repo debian
       # Git builds go to git
-      upload_to_artifactory debian-git
+      upload_to_repo debian-git
     else
-      printf "Skipping upload due to missing ART_API_KEY"
+      printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"
     fi
   else
     ctest --output-on-failure
