@@ -28,21 +28,26 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-We maintain a `Ubuntu Repository <https://gerbera.jfrog.io/>`__.
+We maintain a `Ubuntu Repository <https://pkg.gerbera.io/>`__.
 
-To install the latest tagged release (>=1.8.0):
+To install the latest tagged release (>=2.1.0):
 
 .. code-block:: sh
 
-    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
-    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian
+    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    sudo apt-get update
+    sudo apt-get install gerbera
 
 Or for the latest code install git builds:
 
 .. code-block:: sh
 
-    curl -fsSL https://gerbera.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
-    sudo apt-add-repository https://gerbera.jfrog.io/artifactory/debian-git
+    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian-git/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    sudo apt-get update
+    sudo apt-get install gerbera
+
 
 Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`__.
 
@@ -128,6 +133,27 @@ Gerbera is included in Buster_ and Sid_.
     sudo apt install gerbera
 
 Due to the stable nature of Debian, these packages are likely to be some versions behind the current Gerbera release.
+
+We maintain a `Debian Repository <https://pkg.gerbera.io/>`__.
+
+To install the latest tagged release (>=2.1.0):
+
+.. code-block:: sh
+
+    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    sudo apt-get update
+    sudo apt-get install gerbera
+
+Or for the latest code install git builds:
+
+.. code-block:: sh
+
+    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian-git/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    sudo apt-get update
+    sudo apt-get install gerbera
+
 
 `Deb-Multimedia.org <https://www.deb-multimedia.org/>`__ also provide builds for Buster_ and Sid_.
 
