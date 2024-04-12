@@ -71,7 +71,13 @@ Arch
 ~~~~~~~~~~~~~~~~~
 .. index:: Arch Linux
 
-Gerbera is available in AUR with both `stable <https://aur.archlinux.org/packages/gerbera/>`__ or `git versions <https://aur.archlinux.org/packages/gerbera-git/>`__.
+Gerbera is `packaged for Arch <https://archlinux.org/packages/?name=gerbera>`__.
+
+.. code-block:: sh
+
+    pacman -S gerbera
+
+AUR has `git versions <https://aur.archlinux.org/packages/gerbera-git/>`__.
 
 Fedora
 ~~~~~~~~~~~~~~~~~
