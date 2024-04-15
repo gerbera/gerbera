@@ -27,6 +27,7 @@ Gerbera - https://gerbera.io/
 
 #include "util/tools.h"
 
+#include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
 class CommonScriptTest : public ::testing::Test {
@@ -39,11 +40,14 @@ public:
     {
         ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
 
-        fs::path ss = fs::path(SCRIPTS_DIR) / "js" / "common.js";
-        std::string script = GrbFile(ss).readTextFile();
-        duk_push_string(ctx, ss.c_str());
-        duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
-        duk_call(ctx, 0);
+        fs::path scriptPath = fs::path(SCRIPTS_DIR) / "js" / "common.js";
+        std::string script = GrbFile(scriptPath).readTextFile();
+        duk_push_string(ctx, scriptPath.c_str());
+        if (duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length()) != 0) {
+            DukTestHelper::printError(ctx, "Failed to load script ", scriptPath);
+        } else {
+            duk_call(ctx, 0);
+        }
     }
 
     void TearDown() override
@@ -232,6 +236,64 @@ TEST_F(CommonScriptTest, getLastPath_ReturnsEmptyWhenNotPath)
     std::string result = duk_to_string(ctx, -1);
 
     EXPECT_STREQ(result.c_str(), "");
+}
+
+TEST_F(CommonScriptTest, getLastPath2_ReturnsLastPathFromSlash)
+{
+    duk_get_global_string(ctx, "getLastPath2");
+    duk_push_string(ctx, "/location/last/element/");
+    duk_push_int(ctx, 1);
+
+    duk_pcall(ctx, 2);
+    duk_size_t arSize = duk_get_length(ctx, -1);
+
+    EXPECT_EQ(1, arSize);
+    EXPECT_TRUE(duk_is_array(ctx, -1));
+    std::string result = duk_to_string(ctx, -1);
+    EXPECT_STREQ(result.c_str(), "element");
+}
+
+TEST_F(CommonScriptTest, getLastPath2_ReturnsLast2PathFromSlash)
+{
+    duk_get_global_string(ctx, "getLastPath2");
+    duk_push_string(ctx, "/location/last/element/file.ext");
+    duk_push_int(ctx, 2);
+
+    duk_pcall(ctx, 2);
+    duk_size_t arSize = duk_get_length(ctx, -1);
+
+    EXPECT_EQ(2, arSize);
+    EXPECT_TRUE(duk_is_array(ctx, -1));
+    std::string result = duk_to_string(ctx, -1);
+    EXPECT_STREQ(result.c_str(), "last,element");
+}
+
+TEST_F(CommonScriptTest, getLastPath2_ReturnsLast2PathFromFolder)
+{
+    duk_get_global_string(ctx, "getLastPath2");
+    duk_push_string(ctx, "/home/location/with/last/element/folder/");
+    duk_push_int(ctx, -3);
+
+    duk_pcall(ctx, 2);
+    duk_size_t arSize = duk_get_length(ctx, -1);
+
+    EXPECT_EQ(3, arSize);
+    EXPECT_TRUE(duk_is_array(ctx, -1));
+    std::string result = duk_to_string(ctx, -1);
+    EXPECT_STREQ(result.c_str(), "with,last,element");
+}
+
+TEST_F(CommonScriptTest, getLastPath2_ReturnsEmptyWhenNotPath)
+{
+    duk_get_global_string(ctx, "getLastPath2");
+    duk_push_string(ctx, "not-a-path");
+    duk_push_int(ctx, 1);
+
+    duk_pcall(ctx, 2);
+    duk_size_t arSize = duk_get_length(ctx, -1);
+
+    EXPECT_EQ(0, arSize);
+    EXPECT_TRUE(duk_is_array(ctx, -1));
 }
 
 TEST_F(CommonScriptTest, getRootPath_ReturnsArrayOfRootPath)

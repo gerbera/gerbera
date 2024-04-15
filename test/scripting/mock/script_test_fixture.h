@@ -108,7 +108,7 @@ public:
     static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults = {});
 
     // Access the global object(script) by name, and execute
-    static void executeScript(duk_context* ctx);
+    void executeScript(duk_context* ctx);
     void callFunction(duk_context* ctx, void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props), const std::map<std::string, std::string>& props, const std::string& rootPath = "");
 
     // Proxy the common.js script with `createContainerChain`
@@ -120,6 +120,7 @@ public:
     // Mimics finding the last path of the item
     // Pushes the last path value to the Duktape stack
     // Returns the inputPath parameter sent by the script
+    static std::pair<std::string, int> getLastPath2(duk_context* ctx);
     static std::string getLastPath(duk_context* ctx);
 
     // Proxy the common.js script with `getPlaylistType`
@@ -220,6 +221,12 @@ public:
     {
         std::string inputPath = ScriptTestFixture::getLastPath(ctx);
         return CommonScriptTestFixture::commonScriptMock->getLastPath(inputPath);
+    }
+
+    static inline duk_ret_t js_getLastPath2(duk_context* ctx)
+    {
+        auto [inputPath, length] = ScriptTestFixture::getLastPath2(ctx);
+        return CommonScriptTestFixture::commonScriptMock->getLastPath2(inputPath, length);
     }
 };
 #endif //GERBERA_SCRIPTTESTFIXTURE_H

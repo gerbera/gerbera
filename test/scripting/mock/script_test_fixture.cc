@@ -52,7 +52,10 @@ void ScriptTestFixture::SetUp()
         std::string scriptContent = GrbFile(scriptFile).readTextFile();
         duk_push_thread_stash(ctx, ctx);
         duk_push_string(ctx, scriptFile.c_str());
-        duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length());
+        if (duk_pcompile_lstring_filename(ctx, 0, scriptContent.c_str(), scriptContent.length()) != DUK_EXEC_SUCCESS) {
+            DukTestHelper::printError(ctx, "Failed to load script ", scriptFile);
+            return;
+        }
         duk_put_global_string(ctx, "script_under_test");
         duk_pop(ctx);
     }
@@ -69,10 +72,14 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
         fs::path commonScript = fs::path(SCRIPTS_DIR) / "js" / "common.js";
         std::string script = GrbFile(commonScript).readTextFile();
         duk_push_string(ctx, commonScript.c_str());
-        duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
 
+        if (duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length())) {
+            DukTestHelper::printError(ctx, "Failed to load script ", commonScript);
+            return;
+        }
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
+            DukTestHelper::printError(ctx, "Failed to execute script ", commonScript);
+            return;
         }
         duk_pop(ctx); // commonScript
     } else if (scriptName != "common.js") {
@@ -83,15 +90,17 @@ void ScriptTestFixture::loadCommon(duk_context* ctx) const
                 try {
                     std::string script = GrbFile(entryPath).readTextFile();
                     duk_push_string(ctx, entryPath.c_str());
-                    duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length());
-
+                    if (duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length())) {
+                        DukTestHelper::printError(ctx, "Failed to load script ", entryPath);
+                        return;
+                    }
                     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-                        std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
+                        DukTestHelper::printError(ctx, "Failed to execute script ", entryPath);
+                        return;
                     }
                     duk_pop(ctx); // entryPath
-                    log_debug("Loaded {}", entryPath.c_str());
                 } catch (const std::runtime_error& e) {
-                    log_error("Unable to load {}: {}", entryPath.c_str(), e.what());
+                    std::cerr << "Unable to load  " << entryPath << ": " << e.what() << std::endl;
                 }
             }
         }
@@ -422,11 +431,7 @@ void ScriptTestFixture::executeScript(duk_context* ctx)
     duk_get_global_string(ctx, "script_under_test");
     if (duk_is_function(ctx, -1)) {
         if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-#if DUK_VERSION > 20399
-            std::cerr << "Failed to execute script: " << duk_safe_to_stacktrace(ctx, -1) << '\n';
-#else
-            std::cerr << "Failed to execute script: " << duk_safe_to_string(ctx, -1) << '\n';
-#endif
+            DukTestHelper::printError(ctx, "Failed to execute script ", scriptName);
         }
         duk_pop(ctx); // script_under_test
     }
@@ -470,11 +475,7 @@ void ScriptTestFixture::callFunction(duk_context* ctx, void(dukMockFunction)(duk
     if (duk_pcall(ctx, static_cast<duk_idx_t>(narg)) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
-#if DUK_VERSION > 20399
-        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_stacktrace(ctx, -1) << '\n';
-#else
-        std::cerr << "javascript runtime error: " << functionName << " " << duk_safe_to_string(ctx, -1) << '\n';
-#endif
+        DukTestHelper::printError(ctx, "JavaScript runtime error ", functionName);
         duk_pop(ctx);
         return;
     }
@@ -491,6 +492,29 @@ std::vector<std::string> ScriptTestFixture::createContainerChain(duk_context* ct
     }
     duk_push_string(ctx, path.c_str());
     return array;
+}
+
+std::pair<std::string, int> ScriptTestFixture::getLastPath2(duk_context* ctx)
+{
+    std::string inputPath = duk_to_string(ctx, 0);
+    int length = duk_to_int(ctx, 1);
+    length = length <= 0 ? 1 : length;
+    fs::path path = inputPath;
+    path = path.remove_filename();
+
+    int pos = 0;
+    int idx = 0;
+    int psize = std::distance(path.begin(), path.end()) - 1;
+    auto dukArray = duk_push_array(ctx);
+    for (auto&& i = path.begin(); i != path.end(); i++) {
+        if (pos > 0 && psize - length <= pos && pos < psize) {
+            duk_push_string(ctx, (*i).c_str());
+            duk_put_prop_index(ctx, dukArray, idx);
+	    idx++;
+        }
+	pos++;
+    }
+    return {inputPath, length};
 }
 
 std::string ScriptTestFixture::getLastPath(duk_context* ctx)

@@ -54,6 +54,9 @@ public:
     // Adds a new object to the duk_context with meta data
     static void createObject(duk_context* ctx, const std::map<std::string, std::string>& objectProps, const std::map<std::string, std::string>& metaProps);
 
+    // Print error message based on duktape
+    static void printError(duk_context* ctx, const std::string& message, const std::string& item);
+
 private:
     // Extracts the property value given a complex associative array key
     // Example: key = `meta['dc:title']`

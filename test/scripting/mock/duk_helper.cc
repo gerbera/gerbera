@@ -26,6 +26,7 @@
 #include <duktape.h>
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <iostream>
 #include <regex>
 
 std::vector<std::string> DukTestHelper::arrayToVector(duk_context* ctx, duk_idx_t idx)
@@ -185,5 +186,14 @@ void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, s
         }
         duk_put_prop_string(ctx, -2, "metaData");
     }
+}
+
+void DukTestHelper::printError(duk_context* ctx, const std::string& message, const std::string& item)
+{
+#if DUK_VERSION > 20399
+    std::cerr << message << item << ": " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
+#else
+    std::cerr << message << item << ": " << duk_safe_to_string(ctx, -1) << std::endl;
+#endif
 }
 #endif //HAVE_JS

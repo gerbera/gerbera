@@ -99,6 +99,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
+    { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
     { "readln", readln, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
@@ -135,7 +136,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("no/type"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.m3u"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u"), Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Error"), Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.m3u'"))).WillOnce(Return(1));
 
@@ -175,7 +176,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-mpegurl"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.m3u"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u"), Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:-1,(#1 - 177/750) : Ibiza Global Radio :"))).WillOnce(Return(1));
@@ -221,7 +222,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-mpegurl"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.m3u"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u"), Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:-1,(#1 - 177/750) : Ibiza Tourism Video :,video/mp4"))).WillOnce(Return(1));
