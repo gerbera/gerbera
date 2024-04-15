@@ -123,6 +123,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
+    { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
     { "readln", readln, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "copyObject", copyObject, 1 },
@@ -178,7 +179,7 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlay
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.m3u8"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Debug"), Eq("Playlist 'example\xE2\x9C\x85.mp3' Adding entry: 1 /home/gerbera/example\xE2\x9C\x85.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.m3u8"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u8"),Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:123, Example Artist, Thumbs Up Inc. ðŸ‘"))).WillOnce(Return(1));

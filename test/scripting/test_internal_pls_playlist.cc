@@ -51,7 +51,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
     std::map<std::string, std::string> map {
         { "", "0" },
         { "/Playlists/All Playlists/Playlist Title", "42" },
-        { "/Playlists/Directories/of/Playlist Title", "43" },
+        { "/Playlists/Directories/of/my/Playlist Title", "43" },
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return InternalUrlPLSPlaylistTest::commonScriptMock->addContainerTree(tree);
@@ -126,6 +126,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
+    { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
     { "readln", readln, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "copyObject", copyObject, 1 },
@@ -137,7 +138,7 @@ static duk_function_list_entry js_global_functions[] = {
 static const std::vector<boxConfig> playlistBox {
     { "Playlist/playlistRoot", "Playlists", "object.container" },
     { "Playlist/allPlaylists", "All Playlists", "object.container" },
-    { "Playlist/allDirectories", "Directories", "object.container" },
+    { "Playlist/allDirectories", "Directories", "object.container", true, 2 },
 };
 
 template <typename Map>
@@ -171,11 +172,11 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlayl
     // and will proxy through the mock objects
     // for verification.
     EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/x-scpls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.pls"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/my/playlist.pls"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Debug"), Eq("Playlist 'Song from Playlist Title' Adding entry: 1 /home/gerbera/example.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath(Eq("/location/of/playlist.pls"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/my/playlist.pls"), Eq(2))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "my", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("[playlist]"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq(""))).Times(2).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("File1=/home/gerbera/example.mp3"))).WillOnce(Return(1));
@@ -190,6 +191,6 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.pls"}, {"mimetype", "audio/x-scpls"}});
+    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/my/playlist.pls"}, {"mimetype", "audio/x-scpls"}});
 }
 #endif

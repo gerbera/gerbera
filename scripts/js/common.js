@@ -53,33 +53,45 @@ function getPlaylistType(mimetype) {
     return '';
 }
 
-function getLastPath(location) {
-    var path = location.split('/');
-    if ((path.length > 1) && (path[path.length - 2]))
+function getLastPath(fileLocation) {
+    const path = fileLocation.split('/');
+    if (path.length > 1 && path[path.length - 2])
         return path[path.length - 2];
     else
         return '';
 }
 
-function getRootPath(rootpath, location) {
+function getLastPath2(fileLocation, length) {
+    var avoidDouble = false;
+    if (!length) length = 1;
+    if (length < 0) { length = -length + 1; avoidDouble = true; }
+    var path = fileLocation ? fileLocation.split('/') : [];
+    if (path.length > length) {
+        path.splice(-1); // remove fileName
+        path.splice(0, path.length - length);
+    } else if (path.length <= 1) {
+        return [];
+    }
+    if (avoidDouble && path.length > 0)
+        path.splice(-1); // remove folder
+    return path;
+}
+
+function getRootPath(rootpath, fileLocation) {
     var path = new Array();
 
-    if (rootpath && rootpath.length !== 0)
-    {
+    if (rootpath && rootpath.length !== 0) {
         rootpath = rootpath.substring(0, rootpath.lastIndexOf('/'));
 
-        var dir = location.substring(rootpath.length, location.lastIndexOf('/'));
+        var dir = fileLocation.substring(rootpath.length, fileLocation.lastIndexOf('/'));
 
-        if (dir.charAt(0) == '/')
+        if (dir.charAt(0) === '/')
             dir = dir.substring(1);
 
         path = dir.split('/');
-    }
-    else
-    {
-        dir = getLastPath(location);
-        if (dir != '')
-        {
+    } else {
+        dir = getLastPath2(fileLocation, 1).join('/');
+        if (dir !== '') {
             dir = escapeSlash(dir);
             path.push(dir);
         }

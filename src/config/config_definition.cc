@@ -352,7 +352,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults
 #if HAVE_JS
         BoxLayout(BoxKeys::playlistRoot, "Playlists", "object.container"),
         BoxLayout(BoxKeys::playlistAll, "All Playlists", "object.container"),
-        BoxLayout(BoxKeys::playlistAllDirectories, "Directories", "object.container"),
+        BoxLayout(BoxKeys::playlistAllDirectories, "Directories", "object.container", true, 1),
 #endif
 };
 
@@ -594,7 +594,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "object.container"),
     std::make_shared<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE,
         "attribute::size", "config-import.html#boxlayout",
-        1, 1, ConfigIntSetup::CheckMinValue),
+        1, -10, ConfigIntSetup::CheckMinValue),
     std::make_shared<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED,
         "attribute::enabled", "config-import.html#boxlayout",
         YES),
