@@ -102,6 +102,7 @@ Contributions
    Gerbera UI                 <ui>
    Supported File Types       <supported-types>
    Supported Devices          <supported-devices>
+   Layout                     <layout>
    Transcoding                <transcoding>
    Scripting                  <scripting>
    Configuration              <config-overview>

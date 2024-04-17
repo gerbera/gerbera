@@ -260,7 +260,9 @@ Below are the available scripting options:
 
     Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
     the layout type in `virtual-layout`. The entry points are directly called for Gerbera code and must have a defined synopsis.
-    For further details see :ref:`scripting <scripting>`.
+    For further details see :ref:`Scripting <scripting>`.
+
+.. _virtual-layout:
 
 ``virtual-layout``
 ~~~~~~~~~~~~~~~~~~
@@ -434,6 +436,8 @@ Below are the available scripting options:
 
             Special characters in the beginning of a title that are not used for building a box.
 
+
+.. _boxlayout:
 
 ``boxlayout``
 -------------
