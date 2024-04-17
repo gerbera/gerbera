@@ -30,7 +30,7 @@ Gerbera supports a playlist parsing feature, which is also handled by scripting.
 How It Works
 ~~~~~~~~~~~~
 
-This section will give you some overview on how virtual objects work and on how they are related to scripting.
+This section will give you some overview on how virtual objects related to scripting. For more details see :ref:`Layout <layout>`.
 
 .. Note::
 
@@ -41,25 +41,10 @@ This section will give you some overview on how virtual objects work and on how 
     The sorting of Video and Photo items using the ``rootpath`` object is still somewhat experimental and not
     described here.
 
-Understanding Virtual Objects
------------------------------
+UPnP servers usually sort files by artist, album, some servers may just present a view similar to the file system and so on.
+Most servers have strong limitations on the structure of the virtual containers, they usually offer a predefined layout of data
+and the user has to live with it.
 
-When you add a file or directory to the database via the web
-interface several things happen.
-
-1. The object is inserted into the PC Directory. PC Directory is simply a special non-removable container.
-   Any media file added will have an entry inside the PC Directory tree. PC Directory's hierarchy reflects the file
-   system hierarchy, all objects inside the PC Directory including itself are NON-VIRTUAL objects. All virtual objects
-   may have a different title, description, etc., but they are still references to objects in the PC-Directory.
-   That's why it is not possible to change a location of a virtual object - the only exceptions are URL items.
-
-2. Once an item is added to the PC Directory it is forwarded to the virtual object engine. The virtual object engine's
-   mission is to organize and present the media database in a logical hierarchy based on the available metadata of the
-   items.
-
-Each UPnP server implements this so called virtual object hierarchy in a different way. Audio files are usually sorted by
-artist, album, some servers may just present a view similar to the file system and so on. Most servers have strong limitations
-on the structure of the virtual containers, they usually offer a predefined layout of data and the user has to live with it.
 In Gerbera we try to address this shortcoming by introducing the scriptable virtual object engine. It is designed to be:
 
 * maximally flexible
@@ -69,14 +54,11 @@ In Gerbera we try to address this shortcoming by introducing the scriptable virt
 We try to achieve these goals by embedding a scripting runtime environment that allows the execution of ECMAScript E5/5.1 conform
 scripts better known as JavaScript. Gerbera uses `duktape <http://duktape.org/>`__ scripting engine to run JavaScript.
 
-Theory of Operation
--------------------
-
 After an item is added to the PC Directory it is automatically fed as input to the import script. The script then creates one
 or more virtual items for the given original item. Items created from scripts are always marked virtual.
 
-When the virtual object engine gets notified of an added item, following happens: a javascript object is created mirroring the
-properties of the item. The object is introduced to the script environment and bound to the predefined variable 'orig'. This
+When the virtual object engine gets notified, the following happens: a javascript object is created mirroring the
+properties of the item. The object is introduced to the function arguments (script environment) and bound to the (predefined) variable ``orig``. This
 way a variable orig is always defined for every script invocation and represents the original data of the added item.
 Then the script is invoked.
 
@@ -84,12 +66,6 @@ Then the script is invoked.
 
     In the current implementation, if you modify the script then you will have to restart the server for the new logic to take
     effect.
-
-The script is only triggered when new objects are added to the database, also note that the script
-does not modify any objects that already exist in the database - it only processes new objects that are being added.
-
-When a playlist item is encountered, it is automatically fed as input to the playlist script. The playlist script
-attempts to parse the playlist and adds new item to the database, the item is then processed by the import script.
 
 
 Global Variables And Constants
