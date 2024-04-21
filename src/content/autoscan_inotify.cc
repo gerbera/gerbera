@@ -35,6 +35,7 @@
 #ifdef HAVE_INOTIFY
 #include "autoscan_inotify.h" // API
 
+#include "config/config_option_enum.h"
 #include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
@@ -93,6 +94,7 @@ void AutoscanInotify::run()
 void AutoscanInotify::threadProc()
 {
     std::error_code ec;
+    auto importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);
@@ -253,8 +255,6 @@ void AutoscanInotify::threadProc()
                 if (adir && (mask & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_UNMOUNT | IN_CREATE))) {
                     // not new
                     if (!(mask & (IN_MOVED_TO | IN_CREATE))) {
-                        log_debug("deleting {}", path.c_str());
-
                         // deleted
                         if (mask & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT)) {
                             if (!(mask & IN_MOVE_SELF)) {
@@ -268,9 +268,13 @@ void AutoscanInotify::threadProc()
                             }
                         }
 
-                        auto object = database->findObjectByPath(path, !(mask & IN_ISDIR) ? DbFileType::File : DbFileType::Directory);
-                        if (object)
-                            content->removeObject(adir, object, path, !(mask & IN_MOVED_TO));
+                        if (!(mask & IN_CLOSE_WRITE) || importMode != ImportMode::Gerbera) {
+                            auto object = database->findObjectByPath(path, !(mask & IN_ISDIR) ? DbFileType::File : DbFileType::Directory);
+                            if (object) {
+                                log_debug("deleting {}", path.c_str());
+                                content->removeObject(adir, object, path, !(mask & IN_MOVED_TO));
+                            }
+                        }
                     }
                     // new file
                     if (mask & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_CREATE)) {
