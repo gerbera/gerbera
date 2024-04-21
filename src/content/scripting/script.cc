@@ -415,7 +415,11 @@ void Script::_load(const fs::path& scriptPath)
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
-        log_error("Failed to load script: {}", duk_safe_to_string(ctx, -1));
+#if DUK_VERSION > 20399
+        log_error("Failed to load script {}: {}", scriptPath.c_str(), duk_safe_to_stacktrace(ctx, -1));
+#else
+        log_error("Failed to load script {}: {}", scriptPath.c_str(), duk_safe_to_string(ctx, -1));
+#endif
         throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
     }
 }
@@ -434,9 +438,9 @@ void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
 #if DUK_VERSION > 20399
-        log_error("Failed to execute script {}: {}", scriptPath, duk_safe_to_stacktrace(ctx, -1));
+        log_error("Failed to execute script {}: {}", scriptPath.c_str(), duk_safe_to_stacktrace(ctx, -1));
 #else
-        log_error("Failed to execute script {}: {}", scriptPath, duk_safe_to_string(ctx, -1));
+        log_error("Failed to execute script {}: {}", scriptPath.c_str(), duk_safe_to_string(ctx, -1));
 #endif
         throw_std_runtime_error("Script: failed to execute script");
     }

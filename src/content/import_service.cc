@@ -220,6 +220,10 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
     }
 
+    if (!this->rootPath.empty()) {
+        auto rootDirEntry = fs::directory_entry(this->rootPath);
+        cacheState(this->rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
+    }
     auto rootEntry = fs::directory_entry(location);
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
@@ -231,12 +235,10 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         return;
     }
 
+    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
     if (isDir) {
-        cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
         readDir(location, settings);
     } else {
-        rootEntry = fs::directory_entry(location.parent_path());
-        cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
         readFile(location);
     }
     removeHidden(settings);
@@ -323,16 +325,18 @@ void ImportService::cacheState(const fs::path& entryPath, const fs::directory_en
 void ImportService::readFile(const fs::path& location)
 {
     auto dirEntry = fs::directory_entry(location.parent_path());
-    auto entryPath = dirEntry.path();
+    cacheState(location.parent_path(), dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+
+    auto entryPath = dirEntry.path().parent_path();
     while (entryPath != "/" && entryPath != rootPath) {
-        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
-        dirEntry.assign(entryPath.parent_path(), ec);
+        dirEntry.assign(entryPath, ec);
         if (ec) {
             cacheState(entryPath, dirEntry, ImportState::Broken);
             log_error("ImportService::readFile {}: Failed to navigate up {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             break;
         }
-        entryPath = dirEntry.path();
+        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        entryPath = entryPath.parent_path();
     }
 }
 
@@ -429,8 +433,10 @@ void ImportService::createItems(AutoScanSetting& settings)
     fs::path contPath;
 
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
-        if (!stateEntry)
+        if (!stateEntry) {
+            log_debug("broken entry {}", itemPath.string());
             continue;
+        }
         auto cdsObj = stateEntry->getObject();
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
@@ -448,8 +454,10 @@ void ImportService::createItems(AutoScanSetting& settings)
                 autoscanDir->setCurrentLMT(contPath, std::chrono::seconds::zero());
             }
         }
-        if (stateEntry->getState() != ImportState::New)
+        if (stateEntry->getState() != ImportState::New) {
+            log_debug("wrong state entry {}", itemPath.string());
             continue;
+        }
         auto dirEntry = stateEntry->getDirEntry();
         if (isRegularFile(dirEntry, ec)) { // item
             auto contState = contentStateCache[itemPath.parent_path()];
@@ -508,6 +516,8 @@ void ImportService::createItems(AutoScanSetting& settings)
             if (parentContainer) {
                 stateEntry->setParentObject(parentContainer);
             }
+        } else {
+            log_debug("Not a file {}", itemPath.string());
         }
     }
     if (autoscanDir && contPath != "") {
