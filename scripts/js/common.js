@@ -325,7 +325,7 @@ function addAudio(obj, cont, rootPath, containerType) {
     }
 
   
-    var albumArtist = artist[0];
+    var albumArtist = artist;
     if (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) {
         albumArtist = obj.metaData[M_ALBUMARTIST];
     }
