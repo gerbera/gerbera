@@ -324,6 +324,13 @@ function addAudio(obj, cont, rootPath, containerType) {
         desc = artist_full;
     }
 
+  
+    var albumArtist = artist[0];
+    if (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) {
+        albumArtist = obj.metaData[M_ALBUMARTIST];
+    }
+
+
     var album = 'Unknown';
     var album_full = null;
     if (obj.metaData[M_ALBUM] && obj.metaData[M_ALBUM][0]) {
@@ -519,13 +526,13 @@ function addAudio(obj, cont, rootPath, containerType) {
 
     chain.audio.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_AUDIO_ITEM ];
     chain.album.metaData[M_ARTIST] = artist;
-    chain.album.metaData[M_ALBUMARTIST] = artist;
+    chain.album.metaData[M_ALBUMARTIST] = albumArtist;
     chain.album.metaData[M_GENRE] = [ genre ];
     chain.album.metaData[M_DATE] = obj.metaData[M_DATE];
     chain.album.metaData[M_UPNP_DATE] = obj.metaData[M_UPNP_DATE];
     chain.album.metaData[M_ALBUM] = [ album ];
     chain.artist.metaData[M_ARTIST] = artist;
-    chain.artist.metaData[M_ALBUMARTIST] = artist;
+    chain.artist.metaData[M_ALBUMARTIST] = albumArtist;
     chain.genre.metaData[M_GENRE] = [ genre ];
     chain.year.metaData[M_DATE] = [ date ];
     chain.year.metaData[M_UPNP_DATE] = [ date ];
