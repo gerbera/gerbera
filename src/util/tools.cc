@@ -218,7 +218,7 @@ std::string hexMd5(const void* data, std::size_t length)
 
     md5_state_t ctx;
     md5_init(&ctx);
-    md5_append(&ctx, static_cast<unsigned char*>(const_cast<void*>(data)), length);
+    md5_append(&ctx, const_cast<unsigned char*>(static_cast<const unsigned char*>(data)), length);
     md5_finish(&ctx, reinterpret_cast<unsigned char*>(md5buf));
 
     return hexEncode(md5buf, 16);

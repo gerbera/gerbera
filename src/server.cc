@@ -450,12 +450,12 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_CONTROL_ACTION_REQUEST:
         log_debug("UPNP_CONTROL_ACTION_REQUEST");
         try {
-            auto request = ActionRequest(upnpXmlBuilder, clientManager, static_cast<UpnpActionRequest*>(const_cast<void*>(event)));
+            auto request = ActionRequest(upnpXmlBuilder, clientManager, const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)));
             routeActionRequest(request);
             request.update();
         } catch (const UpnpException& upnpE) {
             ret = upnpE.getErrorCode();
-            UpnpActionRequest_set_ErrCode(static_cast<UpnpActionRequest*>(const_cast<void*>(event)), ret);
+            UpnpActionRequest_set_ErrCode(const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)), ret);
         } catch (const std::runtime_error& e) {
             log_info("Exception: {}", e.what());
         }
@@ -464,7 +464,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
     case UPNP_EVENT_SUBSCRIPTION_REQUEST:
         log_debug("UPNP_EVENT_SUBSCRIPTION_REQUEST");
         try {
-            auto request = SubscriptionRequest(static_cast<UpnpSubscriptionRequest*>(const_cast<void*>(event)));
+            auto request = SubscriptionRequest(const_cast<UpnpSubscriptionRequest*>(static_cast<const UpnpSubscriptionRequest*>(event)));
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnpE) {
             log_warning("Subscription exception: {}", upnpE.what());
