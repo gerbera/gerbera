@@ -23,6 +23,7 @@ Gerbera - https://gerbera.io/
 
 #ifndef GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
 #define GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
+#ifdef HAVE_FFMPEGTHUMBNAILER
 
 #include <memory>
 
@@ -52,4 +53,5 @@ private:
     void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
 };
 
+#endif // HAVE_FFMPEGTHUMBNAILER
 #endif // GERBERA_FFMPEG_THUMBNAILER_HANDLER_H

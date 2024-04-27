@@ -38,15 +38,29 @@ enum class ContentHandler;
 class MetadataHandler;
 
 enum class MetadataType {
+#ifdef HAVE_TAGLIB
     TagLib,
+#endif
+#ifdef HAVE_EXIV2
     Exiv2,
+#endif
+#ifdef HAVE_LIBEXIF
     LibExif,
+#endif
+#ifdef HAVE_MATROSKA
     Matroska,
+#endif
+#ifdef HAVE_WAVPACK
     WavPack,
+#endif
+#ifdef HAVE_FFMPEG
     Ffmpeg,
+#endif
+#ifdef HAVE_FFMPEGTHUMBNAILER
     Thumbnailer,
     VideoThumbnailer,
     ImageThumbnailer,
+#endif
     FanArt,
     ContainerArt,
     Subtitle,

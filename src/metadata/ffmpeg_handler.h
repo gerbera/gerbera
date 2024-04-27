@@ -37,9 +37,9 @@
 /// \brief Definition of the FfmpegHandler class - getting metadata via
 /// ffmpeg library calls.
 
-#ifdef HAVE_FFMPEG
 #ifndef __FFMPEG_HANDLER_H__
 #define __FFMPEG_HANDLER_H__
+#ifdef HAVE_FFMPEG
 
 #include <array>
 #include <optional>
@@ -81,5 +81,5 @@ private:
     };
 };
 
-#endif //__FFMPEG_HANDLER_H__
 #endif // HAVE_FFMPEG
+#endif //__FFMPEG_HANDLER_H__
