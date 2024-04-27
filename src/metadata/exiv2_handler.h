@@ -29,12 +29,12 @@
     $Id$
 */
 
-#ifdef HAVE_EXIV2
-
 /// \file exiv2_handler.h
 /// \brief Definition of the Exiv2Handler class.
 #ifndef __METADATA_EXIV2_H__
 #define __METADATA_EXIV2_H__
+
+#ifdef HAVE_EXIV2
 
 #include "metadata_handler.h"
 
@@ -50,5 +50,5 @@ private:
     std::map<std::string, std::string> metaTags;
 };
 
-#endif // __METADATA_EXIV2_H__
 #endif // HAVE_EXIV2
+#endif // __METADATA_EXIV2_H__

@@ -301,58 +301,57 @@ static const std::vector<std::string> virtualDirectoryKeys {
 };
 
 /// \brief default values for CFG_BOXLAYOUT_BOX
-static const std::vector<BoxLayout> boxLayoutDefaults
-{
+static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::audioAllAlbums, "Albums", "object.container"),
-        BoxLayout(BoxKeys::audioAllArtists, "Artists", "object.container"),
-        BoxLayout(BoxKeys::audioAll, "All Audio", "object.container"),
-        BoxLayout(BoxKeys::audioAllComposers, "Composers", "object.container"),
-        BoxLayout(BoxKeys::audioAllDirectories, "Directories", "object.container"),
-        BoxLayout(BoxKeys::audioAllGenres, "Genres", "object.container"),
-        BoxLayout(BoxKeys::audioAllSongs, "All Songs", "object.container"),
-        BoxLayout(BoxKeys::audioAllTracks, "All - full name", "object.container"),
-        BoxLayout(BoxKeys::audioAllYears, "Year", "object.container"),
-        BoxLayout(BoxKeys::audioRoot, "Audio", "object.container"),
-        BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology", "object.container"),
+    BoxLayout(BoxKeys::audioAllArtists, "Artists", "object.container"),
+    BoxLayout(BoxKeys::audioAll, "All Audio", "object.container"),
+    BoxLayout(BoxKeys::audioAllComposers, "Composers", "object.container"),
+    BoxLayout(BoxKeys::audioAllDirectories, "Directories", "object.container"),
+    BoxLayout(BoxKeys::audioAllGenres, "Genres", "object.container"),
+    BoxLayout(BoxKeys::audioAllSongs, "All Songs", "object.container"),
+    BoxLayout(BoxKeys::audioAllTracks, "All - full name", "object.container"),
+    BoxLayout(BoxKeys::audioAllYears, "Year", "object.container"),
+    BoxLayout(BoxKeys::audioRoot, "Audio", "object.container"),
+    BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology", "object.container"),
 
-        BoxLayout(BoxKeys::audioInitialAbc, "ABC", "object.container"),
-        BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All", "object.container"),
-        BoxLayout(BoxKeys::audioInitialAllBooks, "Books", "object.container"),
-        BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", "object.container"),
+    BoxLayout(BoxKeys::audioInitialAbc, "ABC", "object.container"),
+    BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All", "object.container"),
+    BoxLayout(BoxKeys::audioInitialAllBooks, "Books", "object.container"),
+    BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", "object.container"),
 
-        BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", "object.container", true, 6),
-        BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all", "object.container"),
-        BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", "object.container", true, 9),
-        BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", "object.container", true, 6),
-        BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", "object.container", true, 6),
-        BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-", "object.container"),
+    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", "object.container", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all", "object.container"),
+    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", "object.container", true, 9),
+    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", "object.container", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", "object.container", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-", "object.container"),
 
-        BoxLayout(BoxKeys::videoAllDates, "Date", "object.container"),
-        BoxLayout(BoxKeys::videoAllDirectories, "Directories", "object.container"),
-        BoxLayout(BoxKeys::videoAll, "All Video", "object.container"),
-        BoxLayout(BoxKeys::videoAllYears, "Year", "object.container"),
-        BoxLayout(BoxKeys::videoUnknown, "Unknown", "object.container"),
-        BoxLayout(BoxKeys::videoRoot, "Video", "object.container"),
+    BoxLayout(BoxKeys::videoAllDates, "Date", "object.container"),
+    BoxLayout(BoxKeys::videoAllDirectories, "Directories", "object.container"),
+    BoxLayout(BoxKeys::videoAll, "All Video", "object.container"),
+    BoxLayout(BoxKeys::videoAllYears, "Year", "object.container"),
+    BoxLayout(BoxKeys::videoUnknown, "Unknown", "object.container"),
+    BoxLayout(BoxKeys::videoRoot, "Video", "object.container"),
 
-        BoxLayout(BoxKeys::imageAllDates, "Date", "object.container"),
-        BoxLayout(BoxKeys::imageAllDirectories, "Directories", "object.container"),
-        BoxLayout(BoxKeys::imageAll, "All Photos", "object.container"),
-        BoxLayout(BoxKeys::imageAllYears, "Year", "object.container"),
-        BoxLayout(BoxKeys::imageRoot, "Photos", "object.container"),
-        BoxLayout(BoxKeys::imageUnknown, "Unknown", "object.container"),
+    BoxLayout(BoxKeys::imageAllDates, "Date", "object.container"),
+    BoxLayout(BoxKeys::imageAllDirectories, "Directories", "object.container"),
+    BoxLayout(BoxKeys::imageAll, "All Photos", "object.container"),
+    BoxLayout(BoxKeys::imageAllYears, "Year", "object.container"),
+    BoxLayout(BoxKeys::imageRoot, "Photos", "object.container"),
+    BoxLayout(BoxKeys::imageUnknown, "Unknown", "object.container"),
 
-        BoxLayout(BoxKeys::trailerRoot, "Online Services", "object.container"),
-        BoxLayout(BoxKeys::trailerApple, "Apple Trailers", "object.container"),
-        BoxLayout(BoxKeys::trailerAll, "All Trailers", "object.container"),
-        BoxLayout(BoxKeys::trailerAllGenres, "Genres", "object.container"),
-        BoxLayout(BoxKeys::trailerRelDate, "Release Date", "object.container"),
-        BoxLayout(BoxKeys::trailerPostDate, "Post Date", "object.container"),
-        BoxLayout(BoxKeys::trailerUnknown, "Unknown", "object.container"),
+    BoxLayout(BoxKeys::trailerRoot, "Online Services", "object.container"),
+    BoxLayout(BoxKeys::trailerApple, "Apple Trailers", "object.container"),
+    BoxLayout(BoxKeys::trailerAll, "All Trailers", "object.container"),
+    BoxLayout(BoxKeys::trailerAllGenres, "Genres", "object.container"),
+    BoxLayout(BoxKeys::trailerRelDate, "Release Date", "object.container"),
+    BoxLayout(BoxKeys::trailerPostDate, "Post Date", "object.container"),
+    BoxLayout(BoxKeys::trailerUnknown, "Unknown", "object.container"),
 
-#if HAVE_JS
-        BoxLayout(BoxKeys::playlistRoot, "Playlists", "object.container"),
-        BoxLayout(BoxKeys::playlistAll, "All Playlists", "object.container"),
-        BoxLayout(BoxKeys::playlistAllDirectories, "Directories", "object.container", true, 1),
+#ifdef HAVE_JS
+    BoxLayout(BoxKeys::playlistRoot, "Playlists", "object.container"),
+    BoxLayout(BoxKeys::playlistAll, "All Playlists", "object.container"),
+    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", "object.container", true, 1),
 #endif
 };
 
@@ -832,7 +831,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/visible-directories", "config-import.html#visible-directories",
         ATTR_IMPORT_SYSTEM_DIR_ADD_PATH, ATTR_IMPORT_RESOURCES_NAME, false, false),
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+#ifdef HAVE_FFMPEGTHUMBNAILER
     std::make_shared<ConfigBoolSetup>(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
         "/server/extended-runtime-options/ffmpegthumbnailer/attribute::enabled", "config-extended.html#ffmpegthumbnailer",
         YES),
@@ -1493,7 +1492,7 @@ const std::map<config_option_t, config_option_t> ConfigDefinition::dependencyMap
     { CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, CFG_TRANSCODING_TRANSCODING_ENABLED },
     { CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE, CFG_TRANSCODING_TRANSCODING_ENABLED },
 #endif
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+#ifdef HAVE_FFMPEGTHUMBNAILER
     { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
     { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
     { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
@@ -1501,7 +1500,7 @@ const std::map<config_option_t, config_option_t> ConfigDefinition::dependencyMap
     { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
     { CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
 #endif
-#if defined(HAVE_LASTFMLIB)
+#ifdef HAVE_LASTFMLIB
     { CFG_SERVER_EXTOPTS_LASTFM_USERNAME, CFG_SERVER_EXTOPTS_LASTFM_ENABLED },
     { CFG_SERVER_EXTOPTS_LASTFM_PASSWORD, CFG_SERVER_EXTOPTS_LASTFM_ENABLED },
 #endif
