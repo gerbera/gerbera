@@ -111,9 +111,7 @@ describe('Gerbera Menu', () => {
 
     it('hides login fields when called', () => {
       Menu.hideLogin();
-
-      expect($('.login-field').is(':visible')).toBeFalsy();
-      expect($('#login-submit').is(':visible')).toBeFalsy();
+      expect($('#login').is(':visible')).toBeFalsy();
       expect($('#logout').is(':visible')).toBeFalsy();
     });
   });

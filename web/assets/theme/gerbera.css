@@ -117,12 +117,14 @@ li.nav-item.active a {
     color: white;
 }
 
-.modal-footer .btn-primary {
+.modal-footer .btn-primary,
+#login .btn-primary {
     background-color: #ff7f00;
     border-color: #e57200;
 }
 
-.modal-footer .btn-primary:hover {
+.modal-footer .btn-primary:hover,
+#login .btn-primary:hover {
     background-color: #e57200;
     border-color: #CC6500;
 }
@@ -227,6 +229,7 @@ body,
     height: 100vh;
     overflow: hidden;
     color: rgb(51, 51, 51);
+    background-color: rgb(248, 248, 248);
 }
 
 #container {
@@ -258,6 +261,32 @@ body,
     flex-grow: 2;
     background-color: rgb(248, 248, 248);
     border-right: 1px solid #e9ecef;
+}
+
+.card-style {
+    background-color: white;
+    border: 1px solid #e9ecef;
+}
+
+.card-style-bottom {
+    border-bottom: 1px solid #e9ecef;
+}
+
+#login {
+    background-color: rgb(248, 248, 248);
+}
+
+#login-form {
+    border: 1px solid #e9ecef;
+}
+
+.flowers {
+    background: linear-gradient(
+            rgba(60, 60, 60, 0.85),
+            rgba(60, 60, 60, 0.85)
+    ), url("home-bg.jpg") no-repeat center;
+    /*background-repeat: no-repeat;*/
+    background-size: cover;
 }
 
 #tree {
@@ -688,22 +717,10 @@ body,
     font-weight: normal;
 }
 
-#home {
-    height: 100%;
-    width: 100%;
-    overflow-y: auto;
-}
-
 #homeintro {
     padding-top: 8vh;
     padding-bottom: 4vh;
-    background-color: rgb(248, 248, 248);
     border-bottom: rgb(231, 231, 231) 1px solid;
-}
-
-#homelinks {
-    height: calc(100% - 12vh - 4rem - 24px);
-    overflow-y: auto;
 }
 
 .sublink:hover {
@@ -714,28 +731,21 @@ body,
     text-decoration: none;
 }
 
-#home a > h4, #home h4 {
-    margin-top: 2em;
-}
-
 .status-head {
-    font-style: italic;
-    text-align: center;
     background-color: rgb(248, 248, 248);
 }
-.status-line {
-    text-align: center;
-}
+
 #status-total {
     font-weight: bold;
+}
+
+.stat-value {
+    text-align: end;
 }
 
 @media (max-height: 600px) {
     #homeintro {
         padding-top: 4vh;
         padding-bottom: 1vh;
-    }
-    #homelinks {
-        height: calc(100% - 5vh - 4rem - 24px);
     }
 }

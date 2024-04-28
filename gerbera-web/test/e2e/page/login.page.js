@@ -22,11 +22,7 @@ module.exports = function (driver) {
   };
 
   this.loginForm = async () => {
-    return await driver.findElement(By.id('login-form'));
-  };
-
-  this.loginFields = async () => {
-    return await driver.findElements(By.css('.login-field'));
+    return await driver.findElement(By.id('login'));
   };
 
   this.loginButtonIsDisplayed = async () => {
@@ -93,7 +89,7 @@ module.exports = function (driver) {
       await driver.wait(until.stalenessOf(driver.findElement(By.id('navbarContent'))), 3000);
     } catch (e) {
       // the default `page is ready` check...
-      await driver.wait(until.elementIsVisible(driver.findElement(By.id('login-form'))), 5000);
+      await driver.wait(until.elementIsVisible(driver.findElement(By.id('homeintro'))), 5000);
     }
     await driver.executeScript('$(\'body\').toggleClass(\'notransition\');');
     return await driver.wait(until.elementIsVisible(driver.findElement(By.id('navbarContent'))), 2000);

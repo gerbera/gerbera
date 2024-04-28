@@ -39,8 +39,7 @@ const disable = () => {
 };
 
 const hideLogin = () => {
-  $('.login-field').hide();
-  $('#login-submit').hide();
+  $('#login').hide();
   $('#logout').hide();
 };
 
