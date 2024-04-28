@@ -125,6 +125,7 @@ const submitLogin = (response) => {
 
 const checkLogin = (response) => {
   if (response.success) {
+    $('#login').hide();
     $('.login-field').hide();
     $('#login-submit').hide();
     if (GerberaApp.serverConfig.accounts) {

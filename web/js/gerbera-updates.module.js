@@ -166,10 +166,9 @@ const isPolling = () => {
   return POLLING_INTERVAL;
 };
 
-const clearAll = (response) => {
-  Updates.clearUiTimer(response);
-  Updates.clearTaskInterval(response);
-
+const clearAll = async (response) => {
+  await Updates.clearUiTimer(response);
+  await Updates.clearTaskInterval(response);
 };
 
 const updateTreeByIds = (response) => {

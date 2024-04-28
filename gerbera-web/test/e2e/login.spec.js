@@ -23,12 +23,9 @@ describe('Login Suite', () => {
     });
 
     it('hides the login form when no authentication is required', async () => {
-      const fields = await loginPage.loginFields();
-      for (let i = 0; i < fields.length; i++) {
-        const field = fields[i];
-        const style = await field.getAttribute('style');
-        expect(style).to.equal('display: none;');
-      }
+      const form = await loginPage.loginForm();
+      const style = await form.getAttribute('style');
+      expect(style).to.equal('display: none;');
     });
 
     it('shows the login form when no session exists yet and accounts is required', async () => {
@@ -69,7 +66,7 @@ describe('Login Suite', () => {
       const style = await result.getAttribute('style');
       expect(style).to.equal('display: none;');
 
-      const fields = await loginPage.loginFields();
+      const fields = await loginPage.loginForm();
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
         const style = await field.getAttribute('style');
@@ -83,7 +80,7 @@ describe('Login Suite', () => {
     it('reloads the page and lets user login again when session expires', async () => {
       await driver.sleep(1000); // allow fields to load
 
-      const fields = await loginPage.loginFields();
+      const fields = await loginPage.loginForm();
       for (let i = 0; i < fields.length; i++) {
         const field = fields[i];
         const style = await field.getAttribute('style');

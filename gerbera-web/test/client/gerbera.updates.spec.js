@@ -325,9 +325,9 @@ describe('Gerbera Updates', function () {
       updateSpy = spyOn(Updates, 'getUpdates');
     });
 
-    beforeEach(() => {
-      updateSpy.calls.reset();
-      Updates.clearAll();
+    beforeEach(async () => {
+      await updateSpy.calls.reset();
+      await Updates.clearAll();
     });
 
     it('sets a recurring interval based on the poll-interval configuration', (done) => {

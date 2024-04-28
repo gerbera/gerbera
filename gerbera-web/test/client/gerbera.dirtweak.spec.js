@@ -206,7 +206,7 @@ describe('Gerbera DirTweaks', () => {
       $('#dirTweakModal').remove();
     });
 
-    it('collects all the form data from the dirtweak modal to call the server', () => {
+    it('collects submit form data from the dirtweak modal to call the server', async () => {
       Tweaks.loadNewDirTweak(dirTweakItem, '/home/gerbera/Music');
       $('#dirTweakHidden').prop('checked', false);
       Tweaks.submitDirTweak();
@@ -233,7 +233,7 @@ describe('Gerbera DirTweaks', () => {
       spyOn(Updates, 'clearAll');
     });
 
-    it('collects all the form data from the dirtweak modal to call the server', async () => {
+    it('collects delete data from the dirtweak modal to call the server', async () => {
       Tweaks.loadNewDirTweak(dirTweakItem, '/home/gerbera/Music');
       expect(dirTweakDeleteButton.prop('hidden')).toBeFalsy();
       await dirTweakDeleteButton.click();

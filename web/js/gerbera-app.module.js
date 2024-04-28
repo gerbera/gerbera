@@ -343,9 +343,9 @@ export class App {
   displayLogin (loggedIn) {
     $('#server-status').hide();
     $('#server-empty').hide();
+    $('#homelinks').hide();
     if (loggedIn) {
-      $('.login-field').hide();
-      $('#login-submit').hide();
+      $('#login').hide();
       if (this.serverConfig.accounts) {
         $('#logout').show().click(Auth.logout);
       }
@@ -363,7 +363,7 @@ export class App {
         .then((response) => { return this.displayStatus(response); })
         .catch((error) => { this.error(error); });
     } else {
-      $('.login-field').show();
+      $('#login').show();
       $('#login-form').submit(function (event) {
         Auth.authenticate(event);
         event.preventDefault();
