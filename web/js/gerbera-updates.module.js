@@ -38,9 +38,9 @@ const errorCheck = (event, xhr) => {
   if (response && !response.success) {
     if (response.error) {
       showMessage(response.error.text, undefined, 'danger', 'fa-exclamation-triangle');
-      if(response.error.code === '900') {
+      if(response.error.code === 900) {
         GerberaApp.disable();
-      } else if(response.error.code === '400') {
+      } else if(response.error.code === 400) {
         Auth.handleLogout();
       }
     }
