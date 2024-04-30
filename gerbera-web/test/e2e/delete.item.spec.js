@@ -35,7 +35,7 @@ describe('Delete Item Suite', () => {
       expect(result.length).to.equal(10);
 
       result = await homePage.getToastMessage();
-      expect(result).to.equal('Successfully removed item');
+      expect(result, "Toast message is shown").to.equal('Successfully removed item');
 
       await homePage.closeToast();
     });

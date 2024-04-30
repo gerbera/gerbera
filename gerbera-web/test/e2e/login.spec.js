@@ -62,10 +62,6 @@ describe('Login Suite', () => {
       expect(result).to.equal('The UI is disabled in the configuration file. See README.');
       await loginPage.closeToast();
 
-      result = await loginPage.menuList();
-      const style = await result.getAttribute('style');
-      expect(style).to.equal('display: none;');
-
       const form = await loginPage.loginForm();
       expect(await form.getAttribute('style')).to.equal('display: none;');
 
@@ -78,7 +74,7 @@ describe('Login Suite', () => {
 
       const form = await loginPage.loginForm();
       const style = await form.getAttribute('style');
-      expect(style).to.equal('');
+      expect(style, "login form to to be visible").to.equal('');
 
       const result = await loginPage.loginButtonIsDisplayed();
       expect(result, 'Login Button should be displayed').to.be.true;

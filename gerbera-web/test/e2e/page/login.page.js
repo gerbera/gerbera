@@ -29,10 +29,6 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('login-submit')).isDisplayed();
   };
 
-  this.menuList = async () => {
-    return await driver.findElement(By.css('ul.navbar-nav'));
-  };
-
   this.statsVisible = async () => {
     const stats = await driver.findElement(By.id('server-status'));
     return await driver.wait(until.elementIsVisible(stats), 5000);
@@ -57,20 +53,16 @@ module.exports = function (driver) {
   };
 
   this.getToastMessage = async () => {
-    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
-    return await driver.findElement(By.css('#grb-toast-msg')).getText();
-  };
-
-  this.waitForToastClose = async () => {
-    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000);
-    return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
+    let toastMsg = await driver.findElement(By.id('grb-toast-msg'));
+    await driver.wait(until.elementIsVisible(toastMsg), 5000);
+    return await toastMsg.getText();
   };
 
   this.closeToast = async () => {
     await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
     await driver.findElement(By.css('#toast button.close')).click();
     return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 2000);
-  };
+  }
 
   this.getCookie = async (cookie) => {
     let result;

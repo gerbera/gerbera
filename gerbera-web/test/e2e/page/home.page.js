@@ -311,8 +311,9 @@ module.exports = function (driver) {
   };
 
   this.getToastMessage = async () => {
-    await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
-    return await driver.findElement(By.css('#grb-toast-msg')).getText();
+    let toastMsg = await driver.findElement(By.id('grb-toast-msg'));
+    await driver.wait(until.elementIsVisible(toastMsg), 5000);
+    return await toastMsg.getText();
   };
 
   this.getToastElement = async () => {
@@ -323,11 +324,6 @@ module.exports = function (driver) {
   this.getToastElementWidth = async () => {
     await driver.wait(until.elementIsVisible(driver.findElement(By.id('toast'))), 5000);
     return await driver.executeScript('return $(\'#toast\').width()');
-  };
-
-  this.waitForToastClose = async () => {
-    await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 6000);
-    return await driver.findElement(By.css('#grb-toast-msg')).isDisplayed();
   };
 
   this.closeToast = async () => {
