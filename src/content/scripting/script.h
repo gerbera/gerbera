@@ -121,6 +121,7 @@ protected:
     std::unique_ptr<StringConverter> sc;
 
 private:
+    bool hasCaseSensitiveNames;
     std::string entrySeparator;
     std::string contextName;
     std::string objectName;

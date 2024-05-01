@@ -316,6 +316,11 @@
           "editable": true
         },
         {
+          "item": "/import/attribute::case-sensitive-tags",
+          "caption": "Handle Media Tags Case Sensitive",
+          "editable": true
+        },
+        {
           "item": "/import/attribute::follow-symlinks",
           "caption": "Follow Symlinks",
           "editable": true

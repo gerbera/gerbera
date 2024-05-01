@@ -1,5 +1,20 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Adding consistent album artist support
+- Build: Allow build of ffmpegthumbnailer without ffmpeg
+- CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
+- CI: Pass publish-deb secrets via env instead
+- CI: Upload debs to pkg.gerbera.io
+- clang-tidy: don't cast through void
+- docs: Update Arch Linux installs
+- Docs: Update Ubuntu/Debian repo instructions
+- Import: fix single file update
+- Playlist: Allow configuration of directory depth
+- TagLib: Use DebugListener to suppress messages
+- UI: Tidy up login and homepage
+
 ### 2.1.0
 
 - Add ctypes include

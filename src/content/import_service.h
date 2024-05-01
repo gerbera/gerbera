@@ -159,6 +159,7 @@ private:
     fs::path rootPath;
     std::string noMediaName;
     bool hasReadableNames { false };
+    bool hasCaseSensitiveNames { true };
     bool hasDefaultDate { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };

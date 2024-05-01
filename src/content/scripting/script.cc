@@ -184,6 +184,7 @@ Script::Script(const std::shared_ptr<ContentManager>& content, const std::string
     , contextName(fmt::format("{}_{}", name, parent))
     , objectName(std::move(objName))
 {
+    hasCaseSensitiveNames = config->getBoolOption(CFG_IMPORT_CASE_SENSITIVE_TAGS);
     entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
@@ -778,7 +779,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
     duk_pop(ctx); // metaData
 
-    fs::path location = getProperty("location");
+    fs::path location = !hasCaseSensitiveNames && obj->isContainer() ? toLower(getProperty("location")) : getProperty("location");
     if (!location.empty()) {
         // location must not be touched by character conversion!
         obj->setLocation(location);

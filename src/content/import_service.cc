@@ -123,6 +123,7 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     , database(this->context->getDatabase())
 {
     hasReadableNames = config->getBoolOption(CFG_IMPORT_READABLE_NAMES);
+    hasCaseSensitiveNames = config->getBoolOption(CFG_IMPORT_CASE_SENSITIVE_TAGS);
     hasDefaultDate = config->getBoolOption(CFG_IMPORT_DEFAULT_DATE);
     mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
@@ -212,7 +213,7 @@ void ImportService::clearCache()
 
 void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
 {
-    log_debug("start {}", location.string());
+    log_debug("start {} root '{}'", location.string(), rootPath.string());
     if (activeScan.empty()) {
         contentStateCache.clear();
         activeScan = location;
@@ -220,9 +221,9 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
     }
 
-    if (!this->rootPath.empty()) {
-        auto rootDirEntry = fs::directory_entry(this->rootPath);
-        cacheState(this->rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
+    if (!rootPath.empty()) {
+        auto rootDirEntry = fs::directory_entry(rootPath);
+        cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
     }
     auto rootEntry = fs::directory_entry(location);
     if (ec) {
@@ -714,25 +715,25 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         }
     }
     if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
+        if (fanart) {
+            container->clearResources();
+        }
         metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container);
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
-            container->clearResources();
-            container->addResource(containerart); // overwrite all other resources by container art
-            database->updateObject(container, nullptr);
             fanart = containerart;
         }
         log_debug("fanart from dir {}", containerart != nullptr);
     }
 
-    auto location = container->getLocation();
-    if (refObj) {
-        if (!fanart && (refObj->isContainer() || (count < containerImageParentCount && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > containerImageMinDepth))) {
-            fanart = refObj->getResource(ResourcePurpose::Thumbnail);
-            if (fanart) {
+    if (refObj && !fanart) {
+        auto location = container->getLocation();
+        if (refObj->isContainer() || (count < containerImageParentCount && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > containerImageMinDepth)) {
+            auto refFanArt = refObj->getResource(ResourcePurpose::Thumbnail);
+            if (refFanArt) {
                 auto fanArtObj = refObj;
                 auto fanArtObjId = refObj->getID();
-                auto fanArtResId = fanart->getResId();
+                auto fanArtResId = refFanArt->getResId();
                 if (refObj->getID() <= CDS_ID_ROOT) {
                     fanArtObj = database->loadObject(refObj->getRefID());
                     auto fanartRef = fanArtObj->getResource(ResourcePurpose::Thumbnail);
@@ -745,22 +746,23 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
                         fanArtResId++;
                     }
                 }
-                if (fanart->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
+                if (refFanArt->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
                     if (fanArtObjId > CDS_ID_ROOT) {
-                        fanart->addAttribute(ResourceAttribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
-                        fanart->addAttribute(ResourceAttribute::FANART_RES_ID, fmt::to_string(fanArtResId));
-                    } else {
-                        fanart = nullptr;
+                        refFanArt->addAttribute(ResourceAttribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
+                        refFanArt->addAttribute(ResourceAttribute::FANART_RES_ID, fmt::to_string(fanArtResId));
+                        fanart = refFanArt;
                     }
+                } else {
+                    fanart = refFanArt;
                 }
-                if (fanart)
-                    container->addResource(fanart);
                 log_debug("fanart from ref {}", fanart != nullptr);
-                database->updateObject(container, nullptr);
             }
         }
     }
     if (fanart) {
+        container->clearResources();
+        container->addResource(fanart); // overwrite all other resources
+        database->updateObject(container, nullptr);
         containersWithFanArt[container->getID()] = container;
     }
 }
@@ -832,6 +834,9 @@ std::pair<int, bool> ImportService::addContainerTree(
                 subTree = fmt::format("{}@{}", tree, fmt::join(dirKeyValues, "@"));
             } else {
                 subTree = tree;
+            }
+            if (!hasCaseSensitiveNames) {
+                subTree = toLower(subTree);
             }
             if (containerMap.find(subTree) == containerMap.end() || !containerMap[subTree]) {
                 auto cont = database->findObjectByPath(subTree, DbFileType::Virtual);

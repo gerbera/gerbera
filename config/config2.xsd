@@ -568,6 +568,7 @@
             <xs:attribute name="default-date" type="boolean" default="yes"/>
             <xs:attribute name="nomedia-file" type="xs:string" default=".nomedia"/>
             <xs:attribute name="readable-names" type="boolean" default="yes"/>
+            <xs:attribute name="case-sensitive-tags" type="boolean" default="yes"/>
             <xs:attribute name="import-mode" default="mt">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
