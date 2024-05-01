@@ -65,7 +65,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO)
-      image.crop(0, 0, 1280, 680).write(fileName);
+      image.crop(0, 0, 1280, 780);
+      image.write(fileName);
     });
 
     it('for [login] field entry', async () => {
@@ -75,7 +76,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(650, 0, 780, 100).write(fileName);
+      image.crop(420, 100, 600, 470);
+      image.write(fileName);
     });
 
     it('for [menu bar]', async () => {
@@ -102,7 +104,9 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 700);
+      image.write(fileName);
     });
 
     it('for [database small grid view]', async () => {
@@ -119,7 +123,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO);
-      image.crop(0, 0, 1280, 500).write(fileName);
+      image.crop(0, 0, 1280, 450);
+      image.write(fileName);
     });
 
     it('for [database large grid view]', async () => {
@@ -136,7 +141,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO);
-      image.crop(0, 0, 1280, 700).write(fileName);
+      image.crop(0, 0, 1280, 500);
+      image.write(fileName);
     });
 
     it('for [database single view]', async () => {

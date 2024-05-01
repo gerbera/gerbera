@@ -10,6 +10,7 @@
 - clang-tidy: don't cast through void
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
+- Import: Add option case sensitive tags
 - Import: fix single file update
 - Playlist: Allow configuration of directory depth
 - TagLib: Use DebugListener to suppress messages
