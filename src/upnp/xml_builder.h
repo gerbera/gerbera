@@ -56,7 +56,7 @@ class Quirks;
 
 class UpnpXMLBuilder {
 public:
-    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context, std::string virtualUrl, std::string presentationURL);
+    explicit UpnpXMLBuilder(const std::shared_ptr<Context>& context, std::string virtualUrl);
 
     /// \brief Renders XML for the action response header.
     /// \param actionName Name of the action.
@@ -79,13 +79,6 @@ public:
     /// \brief Renders XML for the event property set.
     /// \return pugi::xml_document representing the newly created XML.
     std::unique_ptr<pugi::xml_document> createEventPropertySet() const;
-
-    /// \brief Renders the device description XML.
-    /// \return pugi::xml_document representing the newly created device description.
-    ///
-    /// Some elements are statically defined in common.h, others are loaded
-    /// from the config with the help of the ConfigManager.
-    std::unique_ptr<pugi::xml_document> renderDeviceDescription() const;
 
     /// \brief Renders a resource tag (part of DIDL-Lite XML)
     /// \param obj Object containing this resource
@@ -120,7 +113,6 @@ protected:
     std::vector<ContentHandler> orderedHandler;
 
     std::string virtualURL;
-    std::string presentationURL;
     std::string entrySeparator;
     bool multiValue {};
     std::map<std::string, std::string> ctMappings;

@@ -69,7 +69,7 @@ describe('Gerbera UI App', () => {
       };
       data[Auth.SID] = 'A_MOCK_SID';
 
-      expect(ajaxSpy.calls.first().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.first().args[0]['url']).toEqual('interface');
       expect(ajaxSpy.calls.first().args[0]['data']).toEqual(data);
 
       expect(GerberaApp.serverConfig).toEqual(convertedConfig.config);

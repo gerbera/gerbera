@@ -67,7 +67,7 @@ describe('Gerbera Updates', function () {
       };
       data[Auth.SID] = 'SESSION_ID';
 
-      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('interface');
       expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 
@@ -87,7 +87,7 @@ describe('Gerbera Updates', function () {
       };
       data[Auth.SID] = 'SESSION_ID';
 
-      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('content/interface');
+      expect(ajaxSpy.calls.mostRecent().args[0]['url']).toEqual('interface');
       expect(ajaxSpy.calls.mostRecent().args[0]['data']).toEqual(data);
     });
 

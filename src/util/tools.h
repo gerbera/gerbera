@@ -57,12 +57,22 @@ void trimStringInPlace(std::string& str);
 std::string trimString(std::string str);
 
 /// \brief returns true if str starts with check
-constexpr bool startswith(std::string_view str, std::string_view check)
+constexpr bool startswith(std::string_view str, std::string_view prefix)
 {
 #if __cpp_lib_starts_ends_with
-    return str.starts_with(check);
+    return str.starts_with(prefix);
 #else
-    return str.rfind(check, 0) == 0;
+    return str.rfind(prefix, 0) == 0;
+#endif
+}
+
+/// \brief returns true if str starts with check
+constexpr bool endswith(std::string_view str, std::string_view suffix)
+{
+#if __cpp_lib_starts_ends_with
+    return str.ends_with(check);
+#else
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 #endif
 }
 

@@ -16,7 +16,7 @@ const removeMock = new MockResponder('remove');
 const voidMock = new MockResponder('void');
 
 module.exports = function (app) {
-  app.get('/content/interface', (req, res) => {
+  app.get('/interface', (req, res) => {
     switch (req.query.req_type) {
       case 'add':
         res.send(require(addMock.getResponse(req.query.object_id)));

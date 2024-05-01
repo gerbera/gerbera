@@ -56,12 +56,14 @@
 #include "iohandler/io_handler.h"
 #include "metadata/metadata_service.h"
 #include "subscription_request.h"
+#include "ui_handler.h"
 #include "upnp/clients.h"
 #include "upnp/conn_mgr_service.h"
 #include "upnp/cont_dir_service.h"
 #include "upnp/mr_reg_service.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
+#include "upnp_desc_handler.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/tools.h"
@@ -82,7 +84,7 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
-constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view("description.xml");
+constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view("/upnp/description.xml");
 
 Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
@@ -91,7 +93,6 @@ Server::Server(std::shared_ptr<Config> config)
 
 void Server::init(bool offln)
 {
-    virtual_directory = SERVER_VIRTUAL_DIR;
     offline = offln;
 
     serverUDN = config->getOption(CFG_SERVER_UDN);
@@ -158,44 +159,29 @@ void Server::run()
         throw UpnpException(ret, fmt::format("LibUPnP failed to bind to request port! Bound to {}, requested: {}", port, configPort));
     }
 
-    ret = UpnpSetWebServerRootDir(webRoot.c_str());
-    if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("UpnpSetWebServerRootDir failed {}", webRoot));
-    }
-
     log_debug("webroot: {}", webRoot);
-    log_debug("Setting virtual dir to: {}", virtual_directory);
-
-    ret = UpnpAddVirtualDir(virtual_directory.c_str(), this, nullptr);
+    log_debug("Adding root virtual dir");
+    ret = UpnpAddVirtualDir("/", this, nullptr);
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("run: UpnpAddVirtualDir failed {}", virtual_directory));
+        throw UpnpException(ret, "run: UpnpAddVirtualDir failed!");
     }
 
     ret = registerVirtualDirCallbacks();
-
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, "run: UpnpSetVirtualDirCallbacks failed");
     }
 
-    std::string presentationURL = getPresentationUrl();
+    log_debug("Creating UpnpXMLBuilders");
+    upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl());
+    webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
 
-    log_debug("Creating UpnpXMLBuilder");
-    upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl(), presentationURL);
-    webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl(), presentationURL);
-
-    // register root device with the library
-    auto desc = upnpXmlBuilder->renderDeviceDescription();
-    std::ostringstream buf;
-    desc->print(buf, "", 0);
-    std::string deviceDescription = buf.str();
-    // log_debug("Device Description: {}", deviceDescription.c_str());
-
-    log_debug("Registering with UPnP...");
+    auto descUrl = fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH);
+    log_debug("Registering with UPnP... ({})", descUrl.c_str());
     ret = UpnpRegisterRootDevice2(
-        UPNPREG_BUF_DESC,
-        deviceDescription.c_str(),
-        deviceDescription.length() + 1,
-        true,
+        UPNPREG_URL_DESC,
+        descUrl.c_str(),
+        -1,
+        false,
         [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
         &rootDeviceHandle);
@@ -305,25 +291,6 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
 
     return ret;
-}
-
-std::string Server::getPresentationUrl() const
-{
-    std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
-    if (presentationURL.empty()) {
-        presentationURL = fmt::format("http://{}/", GrbNet::renderWebUri(ip, port));
-    } else {
-        auto appendto = EnumOption<UrlAppendMode>::getEnumOption(config, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
-        if (appendto == UrlAppendMode::ip) {
-            presentationURL = fmt::format("{}/{}", GrbNet::renderWebUri(ip, 0), presentationURL);
-        } else if (appendto == UrlAppendMode::port) {
-            presentationURL = fmt::format("{}/{}", GrbNet::renderWebUri(ip, port), presentationURL);
-        } // else appendto is none and we take the URL as it entered by user
-    }
-    if (!startswith(presentationURL, "http")) { // url does not start with http
-        presentationURL = fmt::format("http://{}", presentationURL);
-    }
-    return presentationURL;
 }
 
 void Server::writeBookmark(const std::string& addr)
@@ -581,11 +548,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     std::string link = URLUtils::urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
-    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER))) {
+    if (startswith(link, fmt::format("/{}", CONTENT_MEDIA_HANDLER))) {
         return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder, metadataService);
     }
 
-    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER))) {
+    if (startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER))) {
         auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
 
         auto params = URLUtils::dictDecode(parameters);
@@ -596,12 +563,27 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         return Web::createWebRequestHandler(context, content, webXmlBuilder, rType);
     }
 
-    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, DEVICE_DESCRIPTION_PATH))) {
-        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder);
+    if (startswith(link, DEVICE_DESCRIPTION_PATH)) {
+        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, ip, port);
+    }
+
+    if (startswith(link, "/upnp") || startswith(link, "/cds.xml") || startswith(link, "/cm.xml") || startswith(link, "/mr_reg.xml")) {
+        return std::make_unique<UpnpDescHandler>(content, upnpXmlBuilder);
+    }
+
+    if (link == "/" || startswith(link, "/index.html")
+        || startswith(link, "/favicon.ico")
+        || startswith(link, "/assets")
+        || startswith(link, "/vendor")
+        || startswith(link, "/js")
+        || startswith(link, "/css")
+        || startswith(link, "/icons")
+        || startswith(link, "/gerbera-config-")) {
+        return std::make_unique<UIHandler>(content, upnpXmlBuilder);
     }
 
 #if defined(HAVE_CURL)
-    if (startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER))) {
+    if (startswith(link, fmt::format("/{}", CONTENT_ONLINE_HANDLER))) {
         return std::make_unique<URLRequestHandler>(content, upnpXmlBuilder);
     }
 #endif
@@ -616,7 +598,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
-            reqHandler->getInfo(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
+            reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
             return 0;
         } catch (const ServerShutdownException&) {
             return -1;
@@ -636,7 +618,7 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
-            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}/{}", SERVER_VIRTUAL_DIR, CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
+            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
             if (ioHandler) {
                 ioHandler->open(mode);
                 return ioHandler.release();

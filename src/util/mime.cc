@@ -72,6 +72,7 @@ Mime::~Mime()
 #ifdef HAVE_MAGIC
 std::string Mime::fileToMimeType(const fs::path& path, const std::string& defval)
 {
+    const std::lock_guard<std::mutex> lock(mime_mutex);
     const char* mimeType = magic_file(magicCookie, path.c_str());
     if (!mimeType || mimeType[0] == '\0') {
         return defval;

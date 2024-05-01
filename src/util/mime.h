@@ -27,6 +27,7 @@
 #define __MIME_H__
 
 #include <map>
+#include <mutex>
 
 #include "util/grb_fs.h"
 
@@ -51,6 +52,7 @@ public:
 
     /// \brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, std::size_t length);
+    std::mutex mime_mutex;
 #endif // HAVE_MAGIC
 
     std::pair<bool, std::string> getMimeType(const fs::path& path, const std::string& defval = "");
