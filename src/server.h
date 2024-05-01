@@ -119,14 +119,6 @@ protected:
     /// persistent over reboots.
     std::string serverUDN;
 
-    /// \brief Name of the virtual web server directory.
-    ///
-    /// All requests going to /content/ will be handled by our web
-    /// callback functions.
-    /// \todo Is there any need that this is a variable? A constant
-    /// should be sufficient here.
-    std::string virtual_directory;
-
     /// \brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
@@ -227,7 +219,6 @@ protected:
     /// contains the port on which the server is actually running.
     std::string getVirtualUrl() const;
     std::string getExternalUrl() const;
-    std::string getPresentationUrl() const;
 };
 
 #endif // __SERVER_H__

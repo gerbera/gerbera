@@ -64,8 +64,8 @@ add_library(libgerbera STATIC
         src/action_request.h
         src/cds/cds_container.cc
         src/cds/cds_container.h
-        src/cds/cds_enums.h
         src/cds/cds_enums.cc
+        src/cds/cds_enums.h
         src/cds/cds_item.cc
         src/cds/cds_item.h
         src/cds/cds_objects.cc
@@ -80,9 +80,9 @@ add_library(libgerbera STATIC
         src/config/config_int_types.h
         src/config/config_manager.cc
         src/config/config_manager.h
+        src/config/config_option_enum.h
         src/config/config_options.cc
         src/config/config_options.h
-        src/config/config_option_enum.h
         src/config/config_setup.cc
         src/config/config_setup.h
         src/config/result/autoscan.cc
@@ -250,19 +250,23 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_ext_handler.h
         src/transcoding/transcode_handler.cc
         src/transcoding/transcode_handler.h
-        src/upnp/cont_dir_service.cc
-        src/upnp/cont_dir_service.h
-        src/upnp/conn_mgr_service.cc
-        src/upnp/conn_mgr_service.h
-        src/upnp/mr_reg_service.cc
-        src/upnp/mr_reg_service.h
+        src/ui_handler.cc
+        src/ui_handler.h
+        src/upnp_desc_handler.cc
+        src/upnp_desc_handler.h
         src/upnp/clients.cc
         src/upnp/clients.h
-        src/upnp/upnp_common.h
+        src/upnp/conn_mgr_service.cc
+        src/upnp/conn_mgr_service.h
+        src/upnp/cont_dir_service.cc
+        src/upnp/cont_dir_service.h
         src/upnp/headers.cc
         src/upnp/headers.h
+        src/upnp/mr_reg_service.cc
+        src/upnp/mr_reg_service.h
         src/upnp/quirks.cc
         src/upnp/quirks.h
+        src/upnp/upnp_common.h
         src/upnp/xml_builder.cc
         src/upnp/xml_builder.h
         src/url_request_handler.cc

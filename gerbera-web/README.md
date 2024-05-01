@@ -128,7 +128,7 @@ Test output looks similar to below:
 
 This command launches 2 simultaneous processes.
 
-1. A **mock** web server for the server side `/content/interface` API data
+1. A **mock** web server for the server side `/interface` API data
 2. A Selenium suite to exercise the user interface
 
 ### Debugging the Mock API

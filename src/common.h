@@ -51,7 +51,6 @@ static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT;
 #define URL_RESOURCE_ID "res_id"
 constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 #define URL_UI_PARAM_SEPARATOR '?'
-#define SERVER_VIRTUAL_DIR "content"
 
 // SEPARATOR
 #define FS_ROOT_DIRECTORY "/"
@@ -85,7 +84,7 @@ static constexpr auto CLIENT_GROUP_TAG = "group";
 #define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
 #define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
 
-#define LINK_FILE_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_MEDIA_HANDLER "/"
-#define LINK_URL_REQUEST_HANDLER "/" SERVER_VIRTUAL_DIR "/" CONTENT_ONLINE_HANDLER "/"
+#define LINK_FILE_REQUEST_HANDLER "/" CONTENT_MEDIA_HANDLER "/"
+#define LINK_URL_REQUEST_HANDLER "/" CONTENT_ONLINE_HANDLER "/"
 
 #endif // __COMMON_H__

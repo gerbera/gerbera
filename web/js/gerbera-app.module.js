@@ -412,7 +412,7 @@ export class App {
 }
 
 const defaultClientConfig = {
-  api: 'content/interface'
+  api: 'interface'
 };
 
 const defaultServerConfig = {};

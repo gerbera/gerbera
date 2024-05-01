@@ -66,12 +66,8 @@ describe('Login Suite', () => {
       const style = await result.getAttribute('style');
       expect(style).to.equal('display: none;');
 
-      const fields = await loginPage.loginForm();
-      for (let i = 0; i < fields.length; i++) {
-        const field = fields[i];
-        const style = await field.getAttribute('style');
-        expect(style).to.equal('display: none;');
-      }
+      const form = await loginPage.loginForm();
+      expect(await form.getAttribute('style')).to.equal('display: none;');
 
       const sid = await loginPage.getCookie('GerberaSID');
       expect(sid).to.be.null;
@@ -80,12 +76,9 @@ describe('Login Suite', () => {
     it('reloads the page and lets user login again when session expires', async () => {
       await driver.sleep(1000); // allow fields to load
 
-      const fields = await loginPage.loginForm();
-      for (let i = 0; i < fields.length; i++) {
-        const field = fields[i];
-        const style = await field.getAttribute('style');
-        expect(style).to.equal('');
-      }
+      const form = await loginPage.loginForm();
+      const style = await form.getAttribute('style');
+      expect(style).to.equal('');
 
       const result = await loginPage.loginButtonIsDisplayed();
       expect(result, 'Login Button should be displayed').to.be.true;

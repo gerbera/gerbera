@@ -44,6 +44,7 @@
 #include "config/config_manager.h"
 #include "config/result/transcoding.h"
 #include "database/database.h"
+#include "device_description_handler.h"
 #include "request_handler.h"
 #include "upnp/clients.h"
 #include "util/url_utils.h"
@@ -51,11 +52,10 @@
 #define URL_FILE_EXTENSION "ext"
 
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
-    std::string virtualUrl, std::string presentationURL)
+    std::string virtualUrl)
     : config(context->getConfig())
     , database(context->getDatabase())
     , virtualURL(std::move(virtualUrl))
-    , presentationURL(std::move(presentationURL))
 {
     for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
         orderedHandler.push_back(EnumMapper::remapContentHandler(entry));
@@ -302,114 +302,6 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() con
     return doc;
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::renderDeviceDescription() const
-{
-    auto doc = std::make_unique<pugi::xml_document>();
-
-    auto decl = doc->prepend_child(pugi::node_declaration);
-    decl.append_attribute("version") = "1.0";
-    decl.append_attribute("encoding") = "UTF-8";
-
-    auto root = doc->append_child("root");
-    root.append_attribute("xmlns") = UPNP_DESC_DEVICE_NAMESPACE;
-    root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
-
-    auto specVersion = root.append_child("specVersion");
-    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MAJOR);
-    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MINOR);
-
-    auto device = root.append_child("device");
-
-    auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
-    dlnaDoc.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
-    dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
-    // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
-
-    constexpr std::array deviceProperties {
-        std::pair("friendlyName", CFG_SERVER_NAME),
-        std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
-        std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
-        std::pair("modelDescription", CFG_SERVER_MODEL_DESCRIPTION),
-        std::pair("modelName", CFG_SERVER_MODEL_NAME),
-        std::pair("modelNumber", CFG_SERVER_MODEL_NUMBER),
-        std::pair("modelURL", CFG_SERVER_MODEL_URL),
-        std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
-        std::pair("UDN", CFG_SERVER_UDN),
-    };
-    for (auto&& [tag, field] : deviceProperties) {
-        device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
-    }
-    const std::array deviceStringProperties {
-        std::pair("deviceType", UPNP_DESC_DEVICE_TYPE),
-        std::pair("presentationURL", presentationURL.empty() ? "/" : presentationURL.c_str()),
-        std::pair("sec:ProductCap", UPNP_DESC_PRODUCT_CAPS),
-        std::pair("sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS), // used by SAMSUNG
-    };
-    for (auto&& [tag, value] : deviceStringProperties) {
-        device.append_child(tag).append_child(pugi::node_pcdata).set_value(value);
-    }
-
-    // add icons
-    {
-        auto iconList = device.append_child("iconList");
-
-        constexpr std::array iconDims {
-            std::pair("120", "24"),
-            std::pair("48", "24"),
-            std::pair("32", "8"),
-        };
-
-        constexpr std::array iconTypes {
-            std::pair(UPNP_DESC_ICON_PNG_MIMETYPE, ".png"),
-            std::pair(UPNP_DESC_ICON_BMP_MIMETYPE, ".bmp"),
-            std::pair(UPNP_DESC_ICON_JPG_MIMETYPE, ".jpg"),
-        };
-
-        for (auto&& [dim, depth] : iconDims) {
-            for (auto&& [mimetype, ext] : iconTypes) {
-                auto icon = iconList.append_child("icon");
-                icon.append_child("mimetype").append_child(pugi::node_pcdata).set_value(mimetype);
-                icon.append_child("width").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("height").append_child(pugi::node_pcdata).set_value(dim);
-                icon.append_child("depth").append_child(pugi::node_pcdata).set_value(depth);
-                std::string url = fmt::format("/icons/mt-icon{}{}", dim, ext);
-                icon.append_child("url").append_child(pugi::node_pcdata).set_value(url.c_str());
-            }
-        }
-    }
-
-    // add services
-    {
-        auto serviceList = device.append_child("serviceList");
-
-        constexpr struct ServiceInfo {
-            const char* serviceType;
-            const char* serviceId;
-            const char* scpdurl;
-            const char* controlURL;
-            const char* eventSubURL;
-        } services[] = {
-            // cm
-            { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
-            // cds
-            { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
-            // media receiver registrar service for the Xbox 360
-            { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
-        };
-
-        for (auto&& s : services) {
-            auto service = serviceList.append_child("service");
-            service.append_child("serviceType").append_child(pugi::node_pcdata).set_value(s.serviceType);
-            service.append_child("serviceId").append_child(pugi::node_pcdata).set_value(s.serviceId);
-            service.append_child("SCPDURL").append_child(pugi::node_pcdata).set_value(s.scpdurl);
-            service.append_child("controlURL").append_child(pugi::node_pcdata).set_value(s.controlURL);
-            service.append_child("eventSubURL").append_child(pugi::node_pcdata).set_value(s.eventSubURL);
-        }
-    }
-
-    return doc;
-}
-
 void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const
 {
     auto res = parent.append_child("res");
@@ -437,7 +329,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     if (item.isContainer()) {
         auto resFile = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
         if (!resFile.empty()) {
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
         }
 
         auto resObjID = res.getAttribute(ResourceAttribute::FANART_OBJ_ID);
@@ -462,7 +354,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             }
             if (objID <= CDS_ID_ROOT)
                 objID = item.getID();
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
+            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
         }
     } else if (item.isExternalItem()) {
         if (res.getPurpose() == ResourcePurpose::Content) {
@@ -474,11 +366,11 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
 
             // Proxied remote URL
             if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
-                url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+                url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
             }
         } else if (res.getPurpose() == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+            url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
         }
     }
 
@@ -493,9 +385,9 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     if (url.empty()) {
         if (res.getPurpose() == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
         } else {
-            url = virtualURL + URLUtils::joinUrl({ SERVER_VIRTUAL_DIR, CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
         }
     }
 
