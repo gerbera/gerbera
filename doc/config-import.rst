@@ -104,6 +104,11 @@ The import settings define various options on how to aggregate the content.
 ``import``
 ~~~~~~~~~~
 
+.. Note::
+
+    Whenever config entries in this section are changed, it is recommended to clear the database and restart a full import again. Otherwise the virtual layout can be broken or in some
+    mixed state.
+
 ::
 
     <import hidden-files="no" follow-symlinks="no">
@@ -164,6 +169,17 @@ This tag defines the import section.
     * Default: **yes**
 
     This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed. This changes the title of the entry if no metadata is available
+
+    ::
+
+        case-sensitive-tags="yes|no"
+
+    * Optional
+
+    * Default: **yes**
+
+    This attribute defines that virtual paths are case sensitive, e.g. artist names like `Ace Of Grace` and `Ace of Grace` are treated as different (``yes``) or identical (``no``).
+    This changes the location property of created virtual entries.
 
     ::
 

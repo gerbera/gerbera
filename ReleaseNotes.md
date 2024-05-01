@@ -1,5 +1,23 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+This is a really small update that brings better logging for TagLib and a new repository for ubuntu and debian getting rid of jfrog.
+
+### NEW Features
+
+- TagLib messages are logged with gerbera now. They also show up with `debug-mode="taglib"`.
+- Configuration for case sensitive media tags (allow making them insensitive)
+- Configuration options for playlist layout
+- WebUI: New design for home page and login screen
+
+### FIXES
+
+- Album artist handling in default js layout
+- Build with ffmpegthumbnailer but without ffmpeg
+- Changed repository for ubuntu and debian to https://pkg.gerbera.io/
+
+
 ## 2.1.0
 
 This release started out as a mere bugfix release but gathered some nice features along the way.
