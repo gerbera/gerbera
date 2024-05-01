@@ -107,7 +107,7 @@ Each box allows to disable it by setting the attribute ``enabled="false"``. If a
 Boxes in ``AudioStructured`` support setting the size which means the number of initials in that box.
 
 The following table lists the settings that are handled by the respective layout.
-The codes in `js layout` column refer to the `Code`column above.
+The codes in *js layout* column refer to the *Code* column above.
 
 +---------------------------------+------------------+-----------+----------------+
 | Box                             | Default Caption  | js layout | builtin layout |

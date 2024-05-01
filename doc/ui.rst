@@ -60,20 +60,24 @@ The menu is activated with successful login and you can choose from the followin
    :alt: Menubar
    :target: _static/menubar.png
 
+The main view offers the same links to the sub pages as the menu. It also displays the statistics of the server's contents.
+
 .. image:: _static/main-view.png
    :alt: Gerbera Home Page
    :target: _static/main-view.png
 
-* Home
-    *Clears the view*
-* Database
-    *Loads the Gerbera database*
-* Filesystem
-    *Loads the local filesystem tree*
-* Client
-    *Shows all connected clients*
-* Config
+* Home (Gerbera logo or server name)
+    *Returns to the start page*
+* Database // Browse indexed files
+    *Browse the contents of the database without UPnP client*
+* Filesystem // Add some files
+    *Show the filesystem tree of the server to add further contents*
+* Clients // Show connected clients
+    *Shows all connected clients with details*
+* Config // Edit Configuration
     *View and update Gerbera settings*
+* Documentation
+    *Entry point to these pages*
 * Report an Issue
     *Opens URL to Gerbera's GitHub Issues*
 
@@ -172,9 +176,10 @@ The config view is accessible through the `Config` menu item.  The view contains
    :alt: Config view
    :target: _static/config-view.png
 
-You can switch between three different levels of details. Only `expert´ mode gives you all config values and modification options.
+You can switch between three different levels of details. Only *expert* mode gives you all configuration values and modification options.
 Be careful when changing values you do not fully understand. The server may fail to restart or become inaccessible.
-The new values are stored in Gerbera database and overwrite values from `config.xml`.
+The new values are stored in Gerbera database and overwrite values from ``config.xml``. If you have broken Gerbera you have to clear the database
+or at least clear all entries from the table ``grb_config_value``.
 
 
 Item Operations

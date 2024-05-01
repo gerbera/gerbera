@@ -178,7 +178,7 @@
 			"status": "unchanged",
 			"origValue": "",
 			"source": "config.xml",
-			"value": "2.1.0"
+			"value": "2.2.0"
 		},
 		{
 			"item": "/server/modelURL",

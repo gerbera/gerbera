@@ -2,7 +2,7 @@
 
 ## HEAD
 
-This is a really small update that brings better logging for TagLib and a new repository for ubuntu and debian getting rid of jfrog.
+This update brings a new design for the start page, better logging for TagLib and a new repository for ubuntu and debian getting rid of jfrog.
 
 ### NEW Features
 
@@ -17,6 +17,9 @@ This is a really small update that brings better logging for TagLib and a new re
 - Build with ffmpegthumbnailer but without ffmpeg
 - Changed repository for ubuntu and debian to https://pkg.gerbera.io/
 
+### Code Improvements
+
+- Update versions of pupnp (1.14.19), spdlog (1.14.1)
 
 ## 2.1.0
 

@@ -46,15 +46,15 @@ sudo make install
 
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
-| libupnp             | 1.14.6      | 1.14.18     | 1.14.18       | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp           | 4.2.1       | 5.1.2       | 6.1.1         | XOR libupnp   | [npupnp]                   | Disabled |
+| libupnp             | 1.14.6      | 1.14.18     | 1.14.19       | XOR libnpupnp | [pupnp]                    |          |
 | libuuid             |             |             |               | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.14          | Required      | XML file and data support  |          |
 | libiconv            |             |             |               | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0        | Required      | Database storage           |          |
 | zlib                |             |             |               | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 9.1.0       | 10.2.1        | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.13.0        | Required      | Runtime logging            |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.14.1        | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0         | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |               | Optional      | Enables web services       | Enabled  |

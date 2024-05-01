@@ -165,3 +165,9 @@ If you have albums with identical name it is likely that you get two or more fol
 The default configuration expects ``AlbumArtist`` and ``Date`` to be available and unique.
 A solution to this is that you define the properties that identify one particular album by setting appropriate keys in :ref:`Virtual Directories <virtual-directories>`
 
+
+Configuration
+-------------
+
+If you have broken Gerbera by modifying values on the config page, have to clear the database or at least remove all entries from the table ``grb_config_value``.
+
