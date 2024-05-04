@@ -39,6 +39,9 @@
 #include <map>
 #include <spdlog/spdlog.h>
 #include <type_traits>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
 
 #define log_debug SPDLOG_TRACE
 #define log_dbg SPDLOG_TRACE
