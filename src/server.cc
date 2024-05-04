@@ -563,11 +563,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         return Web::createWebRequestHandler(context, content, webXmlBuilder, rType);
     }
 
-    if (startswith(link, DEVICE_DESCRIPTION_PATH)) {
+    if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, "/description.xml")) {
         return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, ip, port);
     }
 
-    if (startswith(link, "/upnp") || startswith(link, "/cds.xml") || startswith(link, "/cm.xml") || startswith(link, "/mr_reg.xml")) {
+    if (startswith(link, "/upnp") || endswith(link, "/cds.xml") || endswith(link, "/cm.xml") || endswith(link, "/mr_reg.xml")) {
         return std::make_unique<UpnpDescHandler>(content, upnpXmlBuilder);
     }
 
