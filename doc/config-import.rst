@@ -94,6 +94,8 @@ The import settings define various options on how to aggregate the content.
             <add-data/>
           </metadata>
         </exiv2>
+        <mkv/>
+        <wavpack/>
       </library-options>
       <online-content>
         ... see respective page
@@ -1259,8 +1261,7 @@ attributes are case sensitive.
 * Optional
 
 This section makes sure that the server knows about remapped mimetypes and still extracts the metadata correctly.
-For example, we know that id3lib can only handle mp3 files, the default mimetype of mp3 content is audio/mpeg.
-If the user remaps mp3 files to a different mimetype, we must know about it so we can still pass this item to id3lib
+If the user remaps mp3 files to a different mimetype, we must know about it so we can still pass this item to taglib
 for metadata extraction.
 
 Note:
@@ -1292,8 +1293,8 @@ The ``as`` attribute can have following values:
 | mimetype                          | as            | Note                                   |
 +===================================+===============+========================================+
 | | audio/mpeg                      | mp3           | | The content is an mp3 file and should|
-|                                   |               | | be processed by either id3lib or     |
-|                                   |               | | taglib (if available).               |
+|                                   |               | | be processed by taglib               |
+|                                   |               | | (if available).                      |
 +-----------------------------------+---------------+----------------------------------------+
 | | application/ogg                 | ogg           | | The content is an ogg file and should|
 |                                   |               | | be processed by taglib               |
@@ -1416,7 +1417,7 @@ Here is some information on the auxdata: UPnP defines certain tags to pass along
 (like title, artist, year, etc.), however some media provides more metadata and exceeds the scope of UPnP.
 This additional metadata can be used to fine tune the server layout, it allows the user to create a more
 complex container structure using a customized import script. The metadata that can be extracted depends on the
-library, currently we support **taglib** (or id3lib if absent), **ffmpeg and libexif** and **libexiv2** (if compiled with WITH_EXIV2 enabled) which provide a default set of keys
+library, currently we support **taglib**, **ffmpeg** and **libexif**, **mkv**, **wavpack** and **exiv2** (if compiled with respective library enabled) which provide a default set of keys
 that can be passed in the options below. The data according to those keys will the be extracted from the media and imported
 into the database along with the item. When processing the item, the import script will have full access to the gathered
 metadata, thus allowing the user to organize the data with the use of the extracted information. A practical example would be:
@@ -1460,7 +1461,27 @@ Gerbera imports a set of common tags by default in order to populate UPnP conten
 * auxdata : Read the value in order to use it in an import script
 * metadata : Read value into in order to send it as UPnP property
 
-The following library sections can contain both of these entries:
+The following library sections can contain both of these entries as well as
+a ``charset`` and a ``enabled`` attribute:
+
+**Attributes:**
+
+``charset``
+-----------
+
+* Optional
+
+Overwrite the ``metadata-charset`` for the respective type of file.
+
+``enabled``
+-----------
+
+* Optional
+
+Exclude the metadata parser from the import process.
+
+* Default: **yes**
+
 
 **Tags:**
 
@@ -1525,7 +1546,7 @@ The attribute ``key`` sets the UPnP meta property and is only accepted inside a 
 
 .. code-block:: xml
 
-  <libexif>
+  <libexif> </libexif>
 
 * Optional
 
@@ -1549,11 +1570,11 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <id3>
+  <id3> </id3>
 
 * Optional
 
-These options apply to id3lib or taglib libraries.
+These options apply to taglib library.
 
 The keywords are those defined in the specifications, e.g.
 `ID3v2.4 <https://id3.org/id3v2.4.0-frames>`__ or `Vorbis comments. <https://www.xiph.org/vorbis/doc/v-comment.htm>`__
@@ -1594,11 +1615,11 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <ffmpeg>
+  <ffmpeg> </ffmpeg>
 
 * Optional
 
-These options apply to ffmpeg libraries.
+These options apply to ffmpeg library.
 
 `This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`__
 documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
@@ -1625,11 +1646,11 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <exiv2>
+  <exiv2> </exiv2>
 
 * Optional
 
-These options apply to exiv2 libraries.
+These options apply to exiv2 library.
 
 `This page <https://www.exiv2.org/metadata.html>`__
 documents all of the metadata keys that exiv2 honors, depending on the format being encoded.
@@ -1648,3 +1669,26 @@ A sample configuration for the example described above would be:
           <add-data tag="Xmp.dc.subject"/>
       </auxdata>
   </exiv2>
+
+``mkv``
+----------
+
+.. code-block:: xml
+
+  <mkv/>
+
+* Optional
+
+These options apply to mkv library.
+
+
+``wavpack``
+----------
+
+.. code-block:: xml
+
+  <wavpack/>
+
+* Optional
+
+These options apply to wavpack library.

@@ -47,22 +47,14 @@ class StringConverter;
 
 /// \brief This class is responsible for reading exif header metadata via the
 /// libexif library
-class LibExifHandler : public MetadataHandler {
-    using MetadataHandler::MetadataHandler;
-
+class LibExifHandler : public MediaMetadataHandler {
 private:
-    // image resolution in pixels
-    // the problem is that I do not know when I encounter the
-    // tags for X and Y, so I have to save the information
-    // and in the very end - when I have both values - add the
-    // appropriate resource
-    std::string imageX;
-    std::string imageY;
-
     void process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc,
+        std::string& imageX, std::string& imageY,
         const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
 
 public:
+    explicit LibExifHandler(const std::shared_ptr<Context>& context);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 };

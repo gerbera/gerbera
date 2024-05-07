@@ -35,6 +35,7 @@
 #define __METADATA_HANDLER_H__
 
 #include "common.h"
+#include "config/config.h"
 #include "context.h"
 #include "util/grb_fs.h"
 
@@ -47,7 +48,6 @@ enum class ContentHandler;
 enum class MetadataFields;
 
 /// \brief This class is responsible for providing access to metadata information
-/// of various media.
 class MetadataHandler {
 protected:
     std::shared_ptr<Config> config;
@@ -72,6 +72,32 @@ public:
     /// \return iohandler to stream to client
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) = 0;
     virtual std::string getMimeType() const { return MIMETYPE_DEFAULT; }
+};
+
+/// \brief This class is responsible for providing access to metadata information
+/// of various media.
+class MediaMetadataHandler : public MetadataHandler {
+protected:
+    bool isEnabled {};
+    std::map<std::string, std::string> metaTags;
+    std::vector<std::string> auxTags;
+
+public:
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, config_option_t enableOption)
+        : MetadataHandler(context)
+        , isEnabled(this->config->getBoolOption(enableOption))
+    {
+    }
+
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, config_option_t enableOption, config_option_t metaOption, config_option_t auxOption)
+        : MetadataHandler(context)
+        , isEnabled(this->config->getBoolOption(enableOption))
+        , metaTags(this->config->getDictionaryOption(metaOption))
+        , auxTags(this->config->getArrayOption(auxOption))
+    {
+    }
+
+    virtual ~MediaMetadataHandler() = default;
 };
 
 #endif // __METADATA_HANDLER_H__

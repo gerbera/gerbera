@@ -34,10 +34,9 @@
 #include <wavpack/wavpack.h>
 
 /// \brief This class is responsible for reading wavpack tags metadata
-class WavPackHandler : public MetadataHandler {
-    using MetadataHandler::MetadataHandler;
-
+class WavPackHandler : public MediaMetadataHandler {
 public:
+    explicit WavPackHandler(const std::shared_ptr<Context>& context);
     ~WavPackHandler() override;
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
@@ -46,7 +45,7 @@ public:
 
 private:
     static void getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    static void getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    void getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
     void getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
     std::string getContentTypeFromByteVector(const char* data, int size) const;
 

@@ -64,7 +64,7 @@ suite(() => {
       await loginPage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO)
+      image.resize(1280, Jimp.AUTO);
       image.crop(0, 0, 1280, 780);
       image.write(fileName);
     });

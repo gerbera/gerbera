@@ -30,6 +30,7 @@
 #include "cds/cds_item.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 static const auto fileFormats = std::map<int, std::string_view> {
@@ -56,6 +57,11 @@ static const auto metaTags = std::map<std::string_view, MetadataFields> {
 #define MAX_WV_IMAGE_SIZE 1024 * 1024
 #define ALBUMART_OPTION "albumArtTag"
 
+WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_WVC_ENABLED)
+{
+}
+
 WavPackHandler::~WavPackHandler()
 {
     if (context)
@@ -65,7 +71,7 @@ WavPackHandler::~WavPackHandler()
 void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!item || !isEnabled)
         return;
 
     char error[MAX_WV_TEXT_SIZE];
@@ -215,6 +221,7 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
 
 void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
 {
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation(), config);
     auto tagCount = WavpackGetNumTagItems(context);
     char tag[MAX_WV_TEXT_SIZE];
     char value[MAX_WV_TEXT_SIZE];
@@ -231,11 +238,11 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
             auto meta = metaTags.find(tag);
             if (meta == metaTags.end()) {
                 if (std::string_view(tag) == "Year") {
-                    auto dateValue = std::string(value);
+                    auto dateValue = sc->convert(value);
                     if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
                         log_debug("Identified metadata '{}': {}", tag, value);
-                        item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", value));
-                        item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", value));
+                        item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", sc->convert(value)));
+                        item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", sc->convert(value)));
                     }
                 } else {
                     log_warning("file {}: wavpack tag {} unknown", item->getLocation().c_str(), tag);
@@ -243,7 +250,7 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
             } else {
                 log_debug("Identified metadata '{}': {}", tag, value);
                 item->removeMetaData(metaTags.at(tag)); // wavpack tags overwrite existing values
-                item->addMetaData(metaTags.at(tag), value);
+                item->addMetaData(metaTags.at(tag), sc->convert(value));
             }
         }
     }

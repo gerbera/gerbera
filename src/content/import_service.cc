@@ -389,6 +389,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
     return false;
 }
 
+///\brief create containers for all discovered folders
 void ImportService::createContainers(int parentContainerId, AutoScanSetting& settings)
 {
     log_debug("start {} {}", rootPath.string(), parentContainerId);
@@ -425,6 +426,7 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
     log_debug("end {}", rootPath.string());
 }
 
+///\brief create items for all discovered files
 void ImportService::createItems(AutoScanSetting& settings)
 {
     log_debug("start {}", rootPath.string());
@@ -439,6 +441,7 @@ void ImportService::createItems(AutoScanSetting& settings)
             continue;
         }
         auto cdsObj = stateEntry->getObject();
+        // cache containers as parent item for following item
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (contPath != "") {
@@ -459,8 +462,10 @@ void ImportService::createItems(AutoScanSetting& settings)
             log_debug("wrong state entry {}", itemPath.string());
             continue;
         }
+        // create items from files
         auto dirEntry = stateEntry->getDirEntry();
-        if (isRegularFile(dirEntry, ec)) { // item
+        if (isRegularFile(dirEntry, ec)) {
+            // Start with cached item
             auto contState = contentStateCache[itemPath.parent_path()];
             if (contState)
                 parentContainer = std::dynamic_pointer_cast<CdsContainer>(contState->getObject());
@@ -468,10 +473,12 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_error("No Container parent for Item {}", itemPath.string());
 
             if (!cdsObj) {
+                // Search item in database
                 log_debug("Searching Item {} in database", itemPath.string());
                 cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
             }
             if (cdsObj && cdsObj->isItem() && stateEntry->getMTime() != cdsObj->getMTime()) {
+                // Update changed item in database
                 log_debug("Updating Item {} in database {}", itemPath.string(), cdsObj->getID());
                 auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
                 item->clearMetaData();
@@ -484,6 +491,7 @@ void ImportService::createItems(AutoScanSetting& settings)
                 stateEntry->setObject(ImportState::Created, cdsObj);
                 log_debug("Item changed {} {}", itemPath.string(), cdsObj->getID());
             } else if (cdsObj) {
+                // Store local item
                 if (contState && contState->getMTime() < cdsObj->getMTime()) {
                     contState->setMTime(cdsObj->getMTime());
                     if (lastModifiedNewMax < cdsObj->getMTime())
@@ -492,6 +500,7 @@ void ImportService::createItems(AutoScanSetting& settings)
                 stateEntry->setObject(ImportState::Existing, cdsObj);
                 log_debug("Item found {} {}", itemPath.string(), cdsObj->getID());
             } else {
+                // Create item from scratch
                 log_debug("Creating Item {}", itemPath.string());
                 auto [skip, newCdsObj] = createSingleItem(dirEntry);
                 if (newCdsObj) {

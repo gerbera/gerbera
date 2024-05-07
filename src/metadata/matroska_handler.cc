@@ -104,10 +104,15 @@ public:
     }
 };
 
+MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_MKV_ENABLED)
+{
+}
+
 void MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!item || !isEnabled)
         return;
 
     parseMKV(item, nullptr);
@@ -260,7 +265,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     // master elements
     info->Read(ebmlStream, EBML_CONTEXT(info), iUpperLevel, dummyEl, true);
 
-    auto sc = StringConverter::i2i(config); // sure is sure
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_MKV_CHARSET, item->getLocation(), config);
     for (auto&& el : *info) {
         if (EbmlId(*el) == EBML_ID(KaxTitle)) {
             auto titleEl = dynamic_cast<KaxTitle*>(el);
