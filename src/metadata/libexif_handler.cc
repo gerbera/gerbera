@@ -178,8 +178,15 @@ static int getTagFromString(const std::string& tag)
     return result;
 }
 
+LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_EXIF_ENABLED, CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST)
+{
+}
+
 void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item,
-    const std::unique_ptr<StringConverter>& sc, const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags)
+    const std::unique_ptr<StringConverter>& sc,
+    std::string& imageX, std::string& imageY,
+    const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags)
 {
     constexpr auto BUFLEN = 4096;
     std::array<char, BUFLEN> exif_entry_buffer;
@@ -260,23 +267,29 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
 void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!item || !isEnabled)
         return;
 
     auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
     ExifData* exifData = exif_data_new_from_file(item->getLocation().c_str());
 
-    if (exifData == nullptr) {
+    if (!exifData) {
         log_debug("Exif data not found, attempting to set resolution internally...");
         setJpegResolutionResource(item);
         return;
     }
 
-    auto aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST);
-    auto meta = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST);
+    // image resolution in pixels
+    // the problem is that I do not know when I encounter the
+    // tags for X and Y, so I have to save the information
+    // and in the very end - when I have both values - add the
+    // appropriate resource
+    std::string imageX;
+    std::string imageY;
+
     for (auto* exifContent : exifData->ifd) {
         if (exifContent != nullptr) {
-            process_ifd(exifContent, item, sc, aux, meta);
+            process_ifd(exifContent, item, sc, imageX, imageY, auxTags, metaTags);
         }
     }
 
@@ -314,15 +327,17 @@ std::unique_ptr<IOHandler> LibExifHandler::serveContent(const std::shared_ptr<Cd
     if (resource->getPurpose() != ResourcePurpose::Thumbnail)
         throw_std_runtime_error("Resource {} is not a Thumbnail", resource->getPurpose());
 
-    ExifData* ed = exif_data_new_from_file(item->getLocation().c_str());
-    if (!ed)
+    ExifData* exifData = exif_data_new_from_file(item->getLocation().c_str());
+    if (!exifData)
         throw_std_runtime_error("Resource {} has no exif information", item->getLocation().string());
 
-    if (!(ed->size))
+    if (exifData->size == 0U) {
+        exif_data_unref(exifData);
         throw_std_runtime_error("Resource {} has no exif thumbnail", item->getLocation().string());
+    }
 
-    auto ioHandler = std::make_unique<MemIOHandler>(ed->data, ed->size);
-    exif_data_unref(ed);
+    auto ioHandler = std::make_unique<MemIOHandler>(exifData->data, exifData->size);
+    exif_data_unref(exifData);
     return ioHandler;
 }
 #endif // HAVE_LIBEXIF

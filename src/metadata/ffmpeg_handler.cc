@@ -68,21 +68,19 @@ extern "C" {
 #endif
 
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_FFMPEG_ENABLED, CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
 {
-    specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST);
+    mappings = this->config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata");
         return;
     }
 
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
-    std::vector<std::string> aux = config->getArrayOption(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST);
-    for (auto&& desiredTag : aux) {
+    for (auto&& desiredTag : auxTags) {
         if (!desiredTag.empty()) {
             auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
@@ -93,10 +91,9 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
     }
 } // addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
 
     // only use ffmpeg meta data if not found by other handler
     auto emptyProperties = std::map<MetadataFields, bool>();
@@ -104,7 +101,7 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         emptyProperties[prop.first] = item->getMetaData(prop.first).empty();
     }
     auto emptySpecProperties = std::map<std::string, bool>();
-    for (auto&& prop : specialPropertyMap) {
+    for (auto&& prop : metaTags) {
         emptySpecProperties[prop.second] = item->getMetaData(prop.second).empty();
     }
 
@@ -112,8 +109,8 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         std::string key = toLower(e->key);
         std::string value = e->value;
         log_debug("FFMpeg tag: {}: {}", key, value);
-        auto it = specialPropertyMap.find(e->key);
-        if (it != specialPropertyMap.end() && emptySpecProperties[it->second]) {
+        auto it = metaTags.find(e->key);
+        if (it != metaTags.end() && emptySpecProperties[it->second]) {
             log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
             item->addMetaData(it->second, sc->convert(trimString(value)));
             continue; // iterate while loop
@@ -257,7 +254,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
 void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!item || !isEnabled)
         return;
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
@@ -280,10 +277,11 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
     }
+    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
     // Add metadata using ffmpeg library calls
-    addFfmpegMetadataFields(item, pFormatCtx);
+    addFfmpegMetadataFields(item, sc, pFormatCtx);
     // Add auxdata
-    addFfmpegAuxdataFields(item, pFormatCtx);
+    addFfmpegAuxdataFields(item, sc, pFormatCtx);
     // Add resources using ffmpeg library calls
     addFfmpegResourceFields(item, pFormatCtx);
     // Close the video file
@@ -297,7 +295,6 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
 
 std::string FfmpegHandler::getMimeType() const
 {
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     return getValueOrDefault(mappings, CONTENT_TYPE_JPG, "image/jpeg");
 }
 #endif // HAVE_FFMPEG

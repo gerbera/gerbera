@@ -46,7 +46,7 @@
 class StringConverter;
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata
-class TagLibHandler : public MetadataHandler {
+class TagLibHandler : public MediaMetadataHandler {
 public:
     explicit TagLibHandler(const std::shared_ptr<Context>& context);
 
@@ -63,7 +63,6 @@ public:
 private:
     std::string entrySeparator;
     std::string legacyEntrySeparator;
-    std::map<std::string, std::string> specialPropertyMap;
 
     void addField(MetadataFields field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
     void addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;

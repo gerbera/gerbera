@@ -50,9 +50,10 @@
 // forward declaration
 class IOHandler;
 struct AVFormatContext;
+class StringConverter;
 
 /// \brief This class is responsible for reading id3 tags metadata
-class FfmpegHandler : public MetadataHandler {
+class FfmpegHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
@@ -60,10 +61,10 @@ public:
     std::string getMimeType() const override;
 
 private:
-    std::map<std::string, std::string> specialPropertyMap;
+    std::map<std::string, std::string> mappings;
 
-    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
 
     static constexpr std::array propertyMap {

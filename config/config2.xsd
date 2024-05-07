@@ -1016,6 +1016,8 @@
                 <xs:element ref="exiv2" minOccurs="0"/>
                 <xs:element ref="ffmpeg" minOccurs="0"/>
                 <xs:element ref="id3" minOccurs="0"/>
+                <xs:element ref="mkv" minOccurs="0"/>
+                <xs:element ref="wavpack" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="multi-value-separator" type="xs:string" minOccurs="0" default="; "/>
             <xs:attribute name="legacy-value-separator" type="xs:string" minOccurs="0"/>
@@ -1029,7 +1031,8 @@
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
-       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="exiv2">
@@ -1039,7 +1042,8 @@
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
-       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="ffmpeg">
@@ -1049,7 +1053,18 @@
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
-       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+    </xs:element>
+
+    <xs:element name="mkv">
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+    </xs:element>
+
+    <xs:element name="wavpack">
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="id3">
@@ -1059,7 +1074,8 @@
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
-       <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:attribute name="enabled" type="boolean" default="yes"/>
+        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="auxdata">

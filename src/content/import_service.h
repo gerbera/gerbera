@@ -184,7 +184,9 @@ private:
 
     void readDir(const fs::path& location, AutoScanSetting settings);
     void readFile(const fs::path& location);
+    ///\brief create containers for all discovered folders
     void createContainers(int parentContainerId, AutoScanSetting& settings);
+    ///\brief create items for all discovered files
     void createItems(AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);

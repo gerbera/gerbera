@@ -37,7 +37,7 @@
 
 #include <exiv2/exiv2.hpp>
 
-#include "cds/cds_objects.h"
+#include "cds/cds_item.h"
 #include "iohandler/io_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -47,16 +47,18 @@
 #endif
 
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_EXIV2_ENABLED, CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST)
 {
     // silence exiv2 messages without debug
     Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
-    metaTags = config->getDictionaryOption(CFG_IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST);
-    auxTags = config->getArrayOption(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST);
 }
 
-void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& item)
+void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (!item || !isEnabled)
+        return;
+
     try {
         std::string value;
         const auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation(), config);

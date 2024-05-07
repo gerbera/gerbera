@@ -72,7 +72,7 @@ void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFile
 
 std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
 {
-    if (!enabled)
+    if (!isEnabled)
         return nullptr;
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -114,7 +114,7 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
 
 void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
-    if (!enabled)
+    if (!isEnabled)
         return;
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -146,9 +146,9 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
 }
 
 FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context, config_option_t checkOption)
-    : MetadataHandler(context)
-    , enabled(config->getBoolOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) && config->getBoolOption(checkOption))
+    : MediaMetadataHandler(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)
 {
+    isEnabled = this->isEnabled && config->getBoolOption(checkOption);
 }
 
 #endif

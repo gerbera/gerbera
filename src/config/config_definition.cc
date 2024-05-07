@@ -968,6 +968,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIF_CHARSET,
         "/import/library-options/libexif/attribute::charset", "config-import.html#charset",
         ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_EXIF_ENABLED,
+        "/import/library-options/libexif/attribute::enabled", "config-import.html#enabled",
+        YES),
 #endif
 #ifdef HAVE_EXIV2
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
@@ -980,6 +983,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_EXIV2_CHARSET,
         "/import/library-options/exiv2/attribute::charset", "config-import.html#charset",
         ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_EXIV2_ENABLED,
+        "/import/library-options/exiv2/attribute::enabled", "config-import.html#enabled",
+        YES),
 #endif
 #ifdef HAVE_TAGLIB
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
@@ -992,6 +998,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_ID3_CHARSET,
         "/import/library-options/id3/attribute::charset", "config-import.html#charset",
         ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_ID3_ENABLED,
+        "/import/library-options/id3/attribute::enabled", "config-import.html#enabled",
+        YES),
 #endif
 #ifdef HAVE_FFMPEG
     std::make_shared<ConfigArraySetup>(CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
@@ -1004,6 +1013,25 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET,
         "/import/library-options/ffmpeg/attribute::charset", "config-import.html#charset",
         ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_FFMPEG_ENABLED,
+        "/import/library-options/ffmpeg/attribute::enabled", "config-import.html#enabled",
+        YES),
+#endif
+#ifdef HAVE_MATROSKA
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_MKV_CHARSET,
+        "/import/library-options/mkv/attribute::charset", "config-import.html#charset",
+        ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_MKV_ENABLED,
+        "/import/library-options/mkv/attribute::enabled", "config-import.html#enabled",
+        YES),
+#endif
+#ifdef HAVE_WAVPACK
+    std::make_shared<ConfigStringSetup>(CFG_IMPORT_LIBOPTS_WVC_CHARSET,
+        "/import/library-options/wavpack/attribute::charset", "config-import.html#charset",
+        ""),
+    std::make_shared<ConfigBoolSetup>(CFG_IMPORT_LIBOPTS_WVC_ENABLED,
+        "/import/library-options/wavpack/attribute::enabled", "config-import.html#enabled",
+        YES),
 #endif
 #ifdef HAVE_MAGIC
     std::make_shared<ConfigPathSetup>(CFG_IMPORT_MAGIC_FILE,

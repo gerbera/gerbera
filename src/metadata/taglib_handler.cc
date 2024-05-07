@@ -87,14 +87,13 @@ private:
 GerberaTagLibDebugListener GerberaTagLibDebugListener::grbListener;
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
-    : MetadataHandler(context)
+    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_ID3_ENABLED, CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST)
 {
     entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
     legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
     trimStringInPlace(legacyEntrySeparator);
     if (legacyEntrySeparator.empty())
         legacyEntrySeparator = "\n";
-    specialPropertyMap = this->config->getDictionaryOption(CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST);
 }
 
 void TagLibHandler::addField(MetadataFields field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const
@@ -188,7 +187,7 @@ void TagLibHandler::addSpecialFields(const TagLib::File& file, const TagLib::Tag
 
     auto sc = StringConverter::i2i(config); // sure is sure
 
-    for (auto&& [key, meta] : specialPropertyMap) {
+    for (auto&& [key, meta] : metaTags) {
         auto list = file.properties()[key];
         if (list.isEmpty())
             return;
@@ -244,8 +243,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
 
 void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const
 {
-    auto auxTagsList = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
-    for (auto&& desiredTag : auxTagsList) {
+    for (auto&& desiredTag : auxTags) {
         if (desiredTag.empty()) {
             continue;
         }
@@ -271,7 +269,7 @@ void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const 
 void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item)
+    if (!item || !isEnabled)
         return;
 
     auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
