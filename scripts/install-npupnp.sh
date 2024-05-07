@@ -30,10 +30,16 @@ tgz_file="${script_dir}/npupnp-${VERSION}.tgz"
 
 downloadSource https://framagit.org/medoc92/npupnp/-/archive/libnpupnp-v${VERSION}/npupnp-libnpupnp-v${VERSION}.tar.gz
 
+MODE="6"
+if [[ -f ./autogen.sh ]]; then
+    MODE="5"
+fi
+if [[ ${MODE} = "5" ]]; then
 (
     cd "${src_dir}"
     ./autogen.sh
 )
+fi
 
 if [ "${UNAME}" = 'FreeBSD' ]; then
     extraFlags=""
@@ -41,9 +47,18 @@ else
     extraFlags="--prefix=/usr/local"
 fi
 
-../configure --srcdir=.. $extraFlags --enable-ipv6 --enable-reuseaddr --enable-tools --enable-static
-
-makeInstall
+if [[ ${MODE} = "5" ]]; then
+    ../configure --srcdir=.. $extraFlags --enable-ipv6 --enable-reuseaddr --enable-tools --enable-static
+    makeInstall
+else
+    (
+    cd "${src_dir}"
+    meson setup $extraFlags --default-library both -D expat=enabled build
+    meson configure --buildtype release build
+    )
+    ninja -v
+    meson install
+fi
 
 ldConfig
 

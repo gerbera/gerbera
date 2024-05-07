@@ -9,9 +9,9 @@
 find_package(PkgConfig QUIET)
 pkg_search_module (PC_NPUPNP libnpupnp QUIET)
 
-find_path(UPNP_INCLUDE_DIR upnp.h
-    HINTS ${PC_NPUPNP_INCLUDEDIR} ${PC_NPUPNP_INCLUDEDIR}/npupnp ${PC_UPNP_INCLUDE_DIRS})
-message(STATUS "found npupnp include at ${UPNP_INCLUDE_DIR}")
+find_path(NPUPNP_INCLUDE_DIR upnp.h
+    HINTS ${PC_NPUPNP_INCLUDEDIR} ${PC_NPUPNP_INCLUDEDIR}/npupnp ${PC_NPUPNP_INCLUDE_DIRS})
+message(STATUS "found npupnp include at ${NPUPNP_INCLUDE_DIR}")
 
 if (STATIC_LIBUPNP)
     set(OLD_SUFFIX ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -27,14 +27,14 @@ if (STATIC_LIBUPNP)
     set(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_SUFFIX})
 endif()
 
-if(EXISTS ${UPNP_INCLUDE_DIR}/upnpconfig.h)
-    file (STRINGS ${UPNP_INCLUDE_DIR}/upnpconfig.h upnp_ver_str REGEX "^#define[ \t]+NPUPNP_VERSION_STRING[ \t]+\".+\"")
-    string(REGEX REPLACE "^#define[ \t]+NPUPNP_VERSION_STRING[ \t]+\"([^\"]+)\".*" "\\1" NPUPNP_VERSION "${upnp_ver_str}")
+if(EXISTS ${NPUPNP_INCLUDE_DIR}/upnpconfig.h)
+    file (STRINGS ${NPUPNP_INCLUDE_DIR}/upnpconfig.h npupnp_ver_str REGEX "^#define[ \t]+NPUPNP_VERSION_STRING[ \t]+\".+\"")
+    string(REGEX REPLACE "^#define[ \t]+NPUPNP_VERSION_STRING[ \t]+\"([^\"]+)\".*" "\\1" NPUPNP_VERSION "${npupnp_ver_str}")
 endif()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NPUPNP
-    REQUIRED_VARS NPUPNP_LIBRARY UPNP_INCLUDE_DIR
+    REQUIRED_VARS NPUPNP_LIBRARY NPUPNP_INCLUDE_DIR
     VERSION_VAR NPUPNP_VERSION)
 
 if (NPUPNP_FOUND)
@@ -42,13 +42,13 @@ if (NPUPNP_FOUND)
         add_library(NPUPNP::NPUPNP SHARED IMPORTED)
         set_target_properties(NPUPNP::NPUPNP PROPERTIES
                 IMPORTED_LOCATION ${NPUPNP_LIBRARY}
-                INTERFACE_INCLUDE_DIRECTORIES ${UPNP_INCLUDE_DIR}
+                INTERFACE_INCLUDE_DIRECTORIES ${NPUPNP_INCLUDE_DIR}
                 VERSION ${NPUPNP_VERSION}
         )
     endif()
 endif ()
 
 MARK_AS_ADVANCED(
-    UPNP_INCLUDE_DIR
+    NPUPNP_INCLUDE_DIR
     NPUPNP_LIBRARY
 )

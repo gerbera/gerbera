@@ -74,6 +74,7 @@ function install-googletest() {
 
 function install-npupnp() {
   echo "::group::Installing libnpupnp"
+  sudo apt-get install meson ninja-build -y
   sudo bash "${ROOT_DIR}"scripts/install-npupnp.sh
   echo "::endgroup::"
 }
