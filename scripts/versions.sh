@@ -50,7 +50,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     NPUPNP="5.1.2"
     SPDLOG="1.11.0"
     WAVPACK="5.4.0"
-    TAGLIB="1.12"
+    TAGLIB="1.13.1"
 
 else
 
@@ -67,7 +67,7 @@ else
     PUPNP="1.14.19"
     SPDLOG="1.14.1"
     WAVPACK="5.7.0"
-    TAGLIB="1.13.1"
+    TAGLIB="2.0.1"
 
 fi
 

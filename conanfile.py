@@ -55,7 +55,7 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "zlib/1.2.13",
         "pupnp/[>=1.14.16]",
-        "taglib/[>=1.12 <2.0]",
+        "taglib/[>=1.12]",
         "openssl/1.1.1w", # Needed to fix conflicts
     ]
 
