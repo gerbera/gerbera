@@ -62,7 +62,7 @@ module.exports = function (driver) {
     await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
     await driver.findElement(By.css('#toast button.close')).click();
     return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('toast'))), 2000);
-  }
+  };
 
   this.getCookie = async (cookie) => {
     let result;

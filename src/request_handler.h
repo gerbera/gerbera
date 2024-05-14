@@ -47,6 +47,7 @@
 
 // forward declaration
 class CdsObject;
+struct ClientInfo;
 class Config;
 class Context;
 class ContentManager;
@@ -64,12 +65,15 @@ public:
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
-    /// \param info File_Info structure, quite similar to statbuf.
-    virtual void getInfo(const char* filename, UpnpFileInfo* info) = 0;
+    /// \param info UpnpFileInfo structure, quite similar to statbuf.
+    /// \return the ClientInfo details to be provided to quirks
+    virtual const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
     /// \brief Prepares the output buffer and calls the process function.
-    /// \return IOHandler
-    virtual std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) = 0;
+    /// \param quirks allows modifying the content of the response based on the client
+    /// \param mode either UPNP_READ or UPNP_WRITE
+    /// \return the appropriate IOHandler for the request.
+    virtual std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) = 0;
 
     std::shared_ptr<CdsObject> loadObject(const std::map<std::string, std::string>& params) const;
 
@@ -81,7 +85,7 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
-    std::unique_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
+    std::shared_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
 };
 
 #endif // __REQUEST_HANDLER_H__

@@ -60,13 +60,14 @@ std::string getMime(const std::shared_ptr<Mime>& mime, std::string_view path)
     return "application/octet-stream";
 }
 
-void UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     std::string path = filename;
     if (path == "/") {
         path = "/index.html";
     }
 
+    auto quirks = getQuirks(info);
     auto uiEnabled = config->getBoolOption(CFG_SERVER_UI_ENABLED);
     if (!uiEnabled && !startswith(path, "/icons")) {
         log_warning("UI is disabled!");
@@ -74,7 +75,7 @@ void UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_ContentType(info, "application/html");
         UpnpFileInfo_set_IsReadable(info, -1);
         UpnpFileInfo_set_IsDirectory(info, -1);
-        return;
+        return quirks ? quirks->getInfo() : nullptr;
     }
 
     auto webroot = config->getOption(CFG_SERVER_WEBROOT);
@@ -89,11 +90,13 @@ void UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_ContentType(info, mime.c_str());
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
+
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
-std::unique_ptr<IOHandler> UIHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
-    log_debug("UI requested {}", filename);
+    log_debug("UI: requested {}", filename);
 
     std::string path = filename;
     if (path == "/") {

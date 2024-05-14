@@ -85,7 +85,7 @@ void WebRequestHandler::checkRequest(bool checkLogin)
     session->access();
 }
 
-void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     this->filename = filename;
 
@@ -120,9 +120,10 @@ void WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     if (quirks)
         quirks->updateHeaders(headers);
     headers.writeHeaders(info);
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
-std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
     this->filename = filename;
     auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);

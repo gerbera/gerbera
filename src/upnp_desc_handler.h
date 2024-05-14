@@ -35,8 +35,11 @@ class UpnpDescHandler : public RequestHandler {
 public:
     explicit UpnpDescHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder);
 
-    void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
+    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+
+private:
+    std::string getServiceDescription(const std::string& path, const std::shared_ptr<Quirks>& quirks);
 };
 
 #endif // GERBERA_UPNP_DESC_HANDLER_H

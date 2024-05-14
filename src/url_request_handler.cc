@@ -51,7 +51,7 @@
 #include "content/onlineservice/online_service_helper.h"
 #endif
 
-void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
@@ -79,7 +79,7 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #ifdef ONLINE_SERVICES
         std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
-        std::string url = item->getLocation();
+        std::string url = item->getLocation().string();
 #endif
         log_debug("Online content url: {}", url);
         try {
@@ -105,10 +105,11 @@ void URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #endif
     log_debug("web_get_info(): end");
 
-    /// \todo transcoding for get_info
+    auto quirks = getQuirks(info);
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
-std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
     log_debug("start");
 
@@ -127,7 +128,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, enum Up
 #ifdef ONLINE_SERVICES
     std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
-    std::string url = item->getLocation();
+    std::string url = item->getLocation().string();
 #endif
     log_debug("Online content url: {}", url);
 

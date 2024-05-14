@@ -38,15 +38,17 @@ UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<ContentManager>& content,
 {
 }
 
-void UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     UpnpFileInfo_set_FileLength(info, -1);
     UpnpFileInfo_set_ContentType(info, "application/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
+    auto quirks = getQuirks(info);
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
-std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
     std::string path = filename;
     // This is a hack, we shouldnt need to do this, because SCPDURL is defined as being relative to the description doc
@@ -59,9 +61,65 @@ std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, enum Upnp
     }
     auto webroot = config->getOption(CFG_SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
-    log_debug("UI: file: {}", webFile);
+    log_debug("Upnp: file: {}", webFile);
+    auto svcDescription = getServiceDescription(webFile, quirks);
 
-    auto ioHandler = std::make_unique<FileIOHandler>(webFile);
+    std::unique_ptr<IOHandler> ioHandler;
+    if (svcDescription.empty())
+        ioHandler = std::make_unique<FileIOHandler>(webFile);
+    else
+        ioHandler = std::make_unique<MemIOHandler>(svcDescription);
     ioHandler->open(mode);
     return ioHandler;
+}
+
+std::string UpnpDescHandler::getServiceDescription(const std::string& path, const std::shared_ptr<Quirks>& quirks)
+{
+    auto doc = std::make_unique<pugi::xml_document>();
+
+    auto parseResult = doc->load_file(path.c_str());
+    if (parseResult.status != pugi::xml_parse_status::status_ok)
+        return "";
+
+    auto root = doc->document_element();
+    pugi::xpath_node actionListNode = root.select_node("/scpd/actionList");
+    if (actionListNode.node()) {
+        const static std::map<std::string_view, QuirkFlags> actionFlags {
+            // cm.xml
+            std::pair("GetCurrentConnectionIDs", QUIRK_FLAG_NONE),
+            std::pair("GetCurrentConnectionInfo", QUIRK_FLAG_NONE),
+            std::pair("GetProtocolInfo", QUIRK_FLAG_NONE),
+            // cds.xml
+            std::pair("Browse", QUIRK_FLAG_NONE),
+            std::pair("Search", QUIRK_FLAG_NONE),
+            std::pair("GetSearchCapabilities", QUIRK_FLAG_NONE),
+            std::pair("GetSortCapabilities", QUIRK_FLAG_NONE),
+            std::pair("GetSystemUpdateID", QUIRK_FLAG_NONE),
+            std::pair("GetFeatureList", QUIRK_FLAG_NONE),
+            std::pair("GetSortExtensionCapabilities", QUIRK_FLAG_NONE),
+            std::pair("X_GetFeatureList", QUIRK_FLAG_SAMSUNG),
+            std::pair("X_GetObjectIDfromIndex", QUIRK_FLAG_SAMSUNG),
+            std::pair("X_GetIndexfromRID", QUIRK_FLAG_SAMSUNG),
+            std::pair("X_SetBookmark", QUIRK_FLAG_SAMSUNG),
+            // mr_reg.xml
+            std::pair("IsAuthorized", QUIRK_FLAG_NONE),
+            std::pair("RegisterDevice", QUIRK_FLAG_NONE),
+            std::pair("IsValidated", QUIRK_FLAG_NONE),
+        };
+        for (auto&& it : root.select_nodes("/scpd/actionList/action")) {
+            pugi::xml_node actionNode = it.node();
+            auto nameNode = actionNode.child("name");
+            std::string_view name = nameNode.text().as_string();
+            log_debug("Checking {} node {}", (bool)quirks, name);
+            if (quirks && actionFlags.find(name) != actionFlags.end() && actionFlags.at(name) != QUIRK_FLAG_NONE && !quirks->hasFlag(actionFlags.at(name))) {
+                actionListNode.node().remove_child(actionNode);
+                log_debug("Removing node {}", name);
+            }
+        }
+    }
+    std::ostringstream buf;
+    doc->print(buf, "", 0);
+    auto svcDescription = buf.str();
+    log_debug("Upnp: {}\ncontentSize: {}", path, svcDescription.length());
+    return svcDescription;
 }
