@@ -119,6 +119,14 @@ void Server::init(bool offln)
     metadataService = std::make_shared<MetadataService>(context, content);
 }
 
+struct UpnpDesc {
+    enum Upnp_DescType_e mode;
+    std::string desc;
+    int len;
+};
+
+#define ACTIVE_UPNP_DESCRIPION 0
+
 void Server::run()
 {
     log_debug("Starting...");
@@ -174,13 +182,18 @@ void Server::run()
     log_debug("Creating UpnpXMLBuilders");
     upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl());
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
+    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, ip, port);
 
-    auto descUrl = fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH);
-    log_debug("Registering with UPnP... ({})", descUrl.c_str());
+    // register root device with the library
+    auto upnpDesc = std::vector<UpnpDesc> {
+        { UPNPREG_URL_DESC, fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH), -1 },
+        { UPNPREG_BUF_DESC, devDescHdl->renderDeviceDescription(ip, port, nullptr), 0 }
+    };
+    log_debug("Registering with UPnP... ({})", upnpDesc[ACTIVE_UPNP_DESCRIPION].desc);
     ret = UpnpRegisterRootDevice2(
-        UPNPREG_URL_DESC,
-        descUrl.c_str(),
-        -1,
+        upnpDesc[ACTIVE_UPNP_DESCRIPION].mode,
+        upnpDesc[ACTIVE_UPNP_DESCRIPION].desc.c_str(),
+        upnpDesc[ACTIVE_UPNP_DESCRIPION].len >= 0 ? upnpDesc[ACTIVE_UPNP_DESCRIPION].desc.length() + 1 : upnpDesc[ACTIVE_UPNP_DESCRIPION].len,
         false,
         [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
@@ -189,6 +202,7 @@ void Server::run()
         throw UpnpException(ret, "run: UpnpRegisterRootDevice2 failed");
     }
 
+    log_debug("Registering UPnP client...");
     ret = UpnpRegisterClient(
         [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpClientEvent(eventType, event); },
         this,
@@ -598,15 +612,15 @@ int Server::registerVirtualDirCallbacks()
         try {
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
-            reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
+            *requestCookie = reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
             return 0;
         } catch (const ServerShutdownException&) {
             return -1;
-        } catch (const SubtitlesNotFoundException& sex) {
-            log_warning("{}", sex.what());
+        } catch (const SubtitlesNotFoundException& stex) {
+            log_warning("SubtitlesNotFoundException: {}", stex.what());
             return -1;
         } catch (const std::runtime_error& e) {
-            log_error("{}", e.what());
+            log_error("Exception: {}", e.what());
             return -1;
         }
     });
@@ -616,19 +630,21 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir OpenCallback");
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
+            auto client = requestCookie ? static_cast<const ClientInfo*>(requestCookie) : nullptr;
+            auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
-            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), mode);
+            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), quirks, mode);
             if (ioHandler) {
                 ioHandler->open(mode);
                 return ioHandler.release();
             }
             log_warning("No Handler for {}", link);
             return nullptr;
-        } catch (const ServerShutdownException& se) {
+        } catch (const ServerShutdownException&) {
             return nullptr;
-        } catch (const SubtitlesNotFoundException& sex) {
-            log_info("SubtitlesNotFoundException: {}", sex.what());
+        } catch (const SubtitlesNotFoundException& stex) {
+            log_warning("SubtitlesNotFoundException: {}", stex.what());
             return nullptr;
         } catch (const std::runtime_error& ex) {
             log_error("Exception: {}", ex.what());

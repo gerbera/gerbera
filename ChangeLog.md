@@ -3,6 +3,7 @@
 ### HEAD
 
 - Adding consistent album artist support
+- Build support for libnpupnp 6.1.2
 - Build: Allow build of ffmpegthumbnailer without ffmpeg
 - CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
 - CI: Pass publish-deb secrets via env instead
@@ -10,10 +11,15 @@
 - clang-tidy: don't cast through void
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
+- Documentation: Update with new WebUI
+- Fix discovery
 - Import: Add option case sensitive tags
 - Import: fix single file update
+- Metadata: Unify handling and allow to disable
 - Playlist: Allow configuration of directory depth
+- Server: Handle all HTTP via virtualdir
 - TagLib: Use DebugListener to suppress messages
+- UI: Fix auto logout
 - UI: Tidy up login and homepage
 
 ### 2.1.0

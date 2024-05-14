@@ -70,6 +70,11 @@ class Quirks {
 public:
     Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
 
+    Quirks(const struct ClientInfo* client)
+        : pClientInfo(client)
+    {
+    }
+
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers);
@@ -198,11 +203,12 @@ public:
      */
     void updateHeaders(Headers& headers) const;
 
+    bool hasFlag(QuirkFlags flag) const;
+    const struct ClientInfo* getInfo() { return pClientInfo; }
+
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientInfo* pClientInfo;
-
-    bool hasFlag(QuirkFlags flag) const;
 };
 
 #endif // __UPNP_QUIRKS_H__

@@ -125,18 +125,20 @@ public:
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
     /// \param info File_Info structure, quite similar to statbuf.
+    /// \return the ClientInfo details to be provided to quirks
     ///
     /// We need to override this, because for serving UI pages (mostly generated from
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    void getInfo(const char* filename, UpnpFileInfo* info) override;
+    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL
+    /// \param quirks allows modifying the content of the response based on the client
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
+    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual void process() = 0;

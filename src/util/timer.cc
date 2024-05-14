@@ -39,7 +39,10 @@ void Timer::run()
     threadRunner = std::make_unique<StdThreadRunner>(
         "TimerThread", [](void* arg) {
             auto inst = static_cast<Timer*>(arg);
-            inst->threadProc();
+            if (inst)
+                inst->threadProc();
+            else
+                log_error("Timer thread without timer");
         },
         this);
 

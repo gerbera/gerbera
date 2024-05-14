@@ -27,6 +27,7 @@
 #include "request_handler.h"
 
 #include <memory>
+#include <netinet/in.h>
 
 class UpnpXMLBuilder;
 
@@ -34,12 +35,14 @@ class DeviceDescriptionHandler : public RequestHandler {
 public:
     explicit DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port);
 
-    void getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, enum UpnpOpenFileMode mode) override;
+    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+    std::string renderDeviceDescription(std::string ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const;
 
 private:
-    std::string renderDeviceDescription(std::string ip, in_port_t port) const;
     std::string getPresentationUrl(std::string ip, in_port_t port) const;
+    std::string ip;
+    in_port_t port;
     std::string deviceDescription;
 };
 

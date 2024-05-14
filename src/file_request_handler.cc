@@ -61,7 +61,7 @@ FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& co
 {
 }
 
-void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("Start: {}", filename);
 
@@ -197,6 +197,7 @@ void FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("end: {}", filename);
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
 std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const
@@ -222,7 +223,7 @@ std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(
     return metadataService->getHandler(resHandler);
 }
 
-std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
     log_debug("start: {}", filename);
 

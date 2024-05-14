@@ -10,16 +10,20 @@ This update brings a new design for the start page, better logging for TagLib an
 - Configuration for case sensitive media tags (allow making them insensitive)
 - Configuration options for playlist layout
 - WebUI: New design for home page and login screen
+- Allow metadata handler to be disabled, add charset support
+- UPnP specification files (description.xml, cds.xml) now reflect client quirks
 
 ### FIXES
 
 - Album artist handling in default js layout
 - Build with ffmpegthumbnailer but without ffmpeg
 - Changed repository for ubuntu and debian to https://pkg.gerbera.io/
+- Autologout from UI
 
 ### Code Improvements
 
-- Update versions of pupnp (1.14.19), spdlog (1.14.1)
+- Rework of server mechanism for file and data requests
+- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1)
 
 ## 2.1.0
 

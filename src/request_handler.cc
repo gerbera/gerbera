@@ -68,10 +68,10 @@ std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string
     return database->loadObject(group, objectID);
 }
 
-std::unique_ptr<Quirks> RequestHandler::getQuirks(const UpnpFileInfo* info) const
+std::shared_ptr<Quirks> RequestHandler::getQuirks(const UpnpFileInfo* info) const
 {
     auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    return std::make_unique<Quirks>(xmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
+    return std::make_shared<Quirks>(xmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
 }

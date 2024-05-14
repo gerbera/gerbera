@@ -20,53 +20,62 @@
 */
 
 /// \file device_description_handler.cc
-#include "cds/cds_container.h"
-#include "cds/cds_item.h"
-#include "config/config_definition.h"
-#include "config/config_manager.h"
-#include "config/result/transcoding.h"
-#include "database/database.h"
-#include "request_handler.h"
-#include "upnp/clients.h"
-#include "util/grb_net.h"
-#include "util/url_utils.h"
-#include <array>
-#include <fmt/chrono.h>
-
 #define LOG_FAC log_facility_t::requests
 
 #include "device_description_handler.h" // API
 
-#include <sstream>
-
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
+#include "config/config_definition.h"
+#include "config/config_manager.h"
 #include "config/config_option_enum.h"
+#include "config/result/transcoding.h"
+#include "database/database.h"
 #include "iohandler/mem_io_handler.h"
+#include "request_handler.h"
+#include "upnp/clients.h"
 #include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
+#include "util/grb_net.h"
+#include "util/url_utils.h"
+
+#include <array>
+#include <fmt/chrono.h>
+#include <sstream>
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port)
     : RequestHandler(content, xmlBuilder)
+    , ip(ip)
+    , port(port)
 {
-    deviceDescription = renderDeviceDescription(ip, port);
+    deviceDescription = renderDeviceDescription(ip, port, nullptr);
 }
 
-void DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientInfo* DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
+    log_info("Device description requested {}", filename);
+    auto quirks = info ? getQuirks(info) : nullptr;
+
+    if (quirks) {
+        deviceDescription = renderDeviceDescription(ip, port, quirks);
+    }
+    log_debug("hasQuirks: {}, size {}", (bool)quirks, deviceDescription.size());
     // We should be able to do the generation here, but libupnp doesn't support the request cookies yet
-    UpnpFileInfo_set_FileLength(info, deviceDescription.size());
+    UpnpFileInfo_set_FileLength(info, deviceDescription.length());
     UpnpFileInfo_set_ContentType(info, "application/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
-
-    // We dont actually use the quirks yet
-    // But this also adds the client to the tracking
-    // In future we can dynamically change our device description per client!
-    getQuirks(info);
+    return quirks ? quirks->getInfo() : nullptr;
 }
 
-std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
-    log_debug("Device description requested {}", filename);
+    log_debug("Device description opened {}", filename);
+
+    if (quirks) {
+        deviceDescription = renderDeviceDescription(ip, port, quirks);
+    }
+    log_debug("hasQuirks: {}, size {}", (bool)quirks, deviceDescription.size());
 
     auto ioHandler = std::make_unique<MemIOHandler>(deviceDescription);
     ioHandler->open(mode);
@@ -92,7 +101,7 @@ std::string DeviceDescriptionHandler::getPresentationUrl(std::string ip, in_port
     return presentationURL;
 }
 
-std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in_port_t port) const
+std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
 {
     auto doc = std::make_unique<pugi::xml_document>();
 
@@ -115,7 +124,7 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
     // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
-    constexpr std::array deviceProperties {
+    constexpr std::array deviceConfigProperties {
         std::pair("friendlyName", CFG_SERVER_NAME),
         std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
         std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
@@ -126,17 +135,24 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
         std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
         std::pair("UDN", CFG_SERVER_UDN),
     };
-    for (auto&& [tag, field] : deviceProperties) {
+    for (auto&& [tag, field] : deviceConfigProperties) {
         device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
     }
-    const std::array deviceStringProperties {
-        std::pair("deviceType", std::string(UPNP_DESC_DEVICE_TYPE)),
-        std::pair("presentationURL", getPresentationUrl(ip, port)),
-        std::pair("sec:ProductCap", std::string(UPNP_DESC_PRODUCT_CAPS)),
-        std::pair("sec:X_ProductCap", std::string(UPNP_DESC_PRODUCT_CAPS)), // used by SAMSUNG
-    };
-    for (auto&& [tag, value] : deviceStringProperties) {
-        device.append_child(tag).append_child(pugi::node_pcdata).set_value(value.c_str());
+    {
+        const static struct ServiceCapabilities {
+            std::string_view serviceType;
+            std::string serviceId;
+            QuirkFlags quirkFlags;
+        } deviceStringProperties[] = {
+            { "deviceType", UPNP_DESC_DEVICE_TYPE, QUIRK_FLAG_NONE },
+            { "presentationURL", getPresentationUrl(ip, port), QUIRK_FLAG_NONE },
+            { "sec:ProductCap", UPNP_DESC_PRODUCT_CAPS, QUIRK_FLAG_NONE },
+            { "sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS, QUIRK_FLAG_SAMSUNG },
+        };
+        for (auto&& [tag, value, quirkFlags] : deviceStringProperties) {
+            if (!quirks || quirkFlags == QUIRK_FLAG_NONE || quirks->hasFlag(quirkFlags))
+                device.append_child(tag.data()).append_child(pugi::node_pcdata).set_value(value.c_str());
+        }
     }
 
     // add icons

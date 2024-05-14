@@ -106,9 +106,12 @@ protected:
         void notify()
         {
             try {
-                subscriber->timerNotify(parameter);
+                if (subscriber)
+                    subscriber->timerNotify(parameter);
+                else
+                    log_error("subscriber null");
             } catch (const std::runtime_error& e) {
-                log_error("timer caught exception!\n");
+                log_error("timer caught exception!");
             }
         }
         void updateNextNotify()
