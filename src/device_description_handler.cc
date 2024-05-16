@@ -122,9 +122,11 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
 
     auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
     dlnaDoc.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
-    dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
-    if (quirks && quirks->hasFlag(QUIRK_FLAG_SAMSUNG))
+    if (quirks && quirks->hasFlag(QUIRK_FLAG_SAMSUNG)) {
         dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
+    } else {
+        dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
+    }
 
     constexpr std::array deviceConfigProperties {
         std::pair("friendlyName", CFG_SERVER_NAME),
@@ -198,11 +200,11 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
             const char* eventSubURL;
         } services[] = {
             // cm
-            { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
+            { UPNP_DESC_CM_SERVICE_TYPE, UPNP_DESC_CM_SERVICE_ID, UPNP_DESC_SCPD_URL UPNP_DESC_CM_SCPD_URL, UPNP_DESC_CM_CONTROL_URL, UPNP_DESC_CM_EVENT_URL },
             // cds
-            { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
+            { UPNP_DESC_CDS_SERVICE_TYPE, UPNP_DESC_CDS_SERVICE_ID, UPNP_DESC_SCPD_URL UPNP_DESC_CDS_SCPD_URL, UPNP_DESC_CDS_CONTROL_URL, UPNP_DESC_CDS_EVENT_URL },
             // media receiver registrar service for the Xbox 360
-            { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
+            { UPNP_DESC_MRREG_SERVICE_TYPE, UPNP_DESC_MRREG_SERVICE_ID, UPNP_DESC_SCPD_URL UPNP_DESC_MRREG_SCPD_URL, UPNP_DESC_MRREG_CONTROL_URL, UPNP_DESC_MRREG_EVENT_URL },
         };
 
         for (auto&& s : services) {

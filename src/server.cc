@@ -84,7 +84,7 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
-constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view("/upnp/description.xml");
+constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view(UPNP_DESC_SCPD_URL UPNP_DESC_DEVICE_DESCRIPTION);
 
 Server::Server(std::shared_ptr<Config> config)
     : config(std::move(config))
@@ -576,11 +576,11 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         return Web::createWebRequestHandler(context, content, webXmlBuilder, rType);
     }
 
-    if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, "/description.xml")) {
+    if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, UPNP_DESC_DEVICE_DESCRIPTION)) {
         return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, ip, port);
     }
 
-    if (startswith(link, "/upnp") || endswith(link, "/cds.xml") || endswith(link, "/cm.xml") || endswith(link, "/mr_reg.xml")) {
+    if (startswith(link, UPNP_DESC_SCPD_URL) || endswith(link, UPNP_DESC_CDS_SCPD_URL) || endswith(link, UPNP_DESC_CM_SCPD_URL) || endswith(link, UPNP_DESC_MRREG_SCPD_URL)) {
         return std::make_unique<UpnpDescHandler>(content, upnpXmlBuilder);
     }
 
