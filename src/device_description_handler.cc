@@ -47,6 +47,7 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content
     : RequestHandler(content, xmlBuilder)
     , ip(ip)
     , port(port)
+    , useDynamicDescription(config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION))
 {
     deviceDescription = renderDeviceDescription(ip, port, nullptr);
 }
@@ -56,7 +57,7 @@ const struct ClientInfo* DeviceDescriptionHandler::getInfo(const char* filename,
     log_info("Device description requested {}", filename);
     auto quirks = info ? getQuirks(info) : nullptr;
 
-    if (quirks) {
+    if (quirks && useDynamicDescription) {
         deviceDescription = renderDeviceDescription(ip, port, quirks);
     }
     log_debug("hasQuirks: {}, size {}", (bool)quirks, deviceDescription.size());
@@ -72,7 +73,7 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
 {
     log_debug("Device description opened {}", filename);
 
-    if (quirks) {
+    if (quirks && useDynamicDescription) {
         deviceDescription = renderDeviceDescription(ip, port, quirks);
     }
     log_debug("hasQuirks: {}, size {}", (bool)quirks, deviceDescription.size());
@@ -122,7 +123,8 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
     auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
     dlnaDoc.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
     dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
-    // dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
+    if (quirks && quirks->hasFlag(QUIRK_FLAG_SAMSUNG))
+        dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
 
     constexpr std::array deviceConfigProperties {
         std::pair("friendlyName", CFG_SERVER_NAME),

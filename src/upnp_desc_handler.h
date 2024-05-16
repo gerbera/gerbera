@@ -40,6 +40,8 @@ public:
 
 private:
     std::string getServiceDescription(const std::string& path, const std::shared_ptr<Quirks>& quirks);
+
+    bool useDynamicDescription { false };
 };
 
 #endif // GERBERA_UPNP_DESC_HANDLER_H

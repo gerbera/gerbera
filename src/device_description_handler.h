@@ -41,8 +41,11 @@ public:
 
 private:
     std::string getPresentationUrl(std::string ip, in_port_t port) const;
+
     std::string ip;
     in_port_t port;
+    bool useDynamicDescription { false };
+
     std::string deviceDescription;
 };
 

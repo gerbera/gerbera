@@ -35,6 +35,7 @@
 
 UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)
+    , useDynamicDescription(config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION))
 {
 }
 
@@ -62,7 +63,7 @@ std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std
     auto webroot = config->getOption(CFG_SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
     log_debug("Upnp: file: {}", webFile);
-    auto svcDescription = getServiceDescription(webFile, quirks);
+    auto svcDescription = (useDynamicDescription && quirks) ? getServiceDescription(webFile, quirks) : "";
 
     std::unique_ptr<IOHandler> ioHandler;
     if (svcDescription.empty())

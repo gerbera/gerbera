@@ -755,6 +755,18 @@ This section defines the properties which are send to UPnP clients as part of th
 
         ::
 
+            dynamic-descriptions="no"
+
+        * Optional
+
+        * Default: **"yes"**
+
+        Return UPnP description requests based on the client type. This hides,
+        e.g., Samsung specific extensions in ``description.xml`` and ``cds.xml``
+        from clients that don't handle the respective requests.
+
+        ::
+
             literal-host-redirection="yes"
 
         * Optional

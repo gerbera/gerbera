@@ -125,8 +125,6 @@ struct UpnpDesc {
     int len;
 };
 
-#define ACTIVE_UPNP_DESCRIPION 0
-
 void Server::run()
 {
     log_debug("Starting...");
@@ -184,16 +182,17 @@ void Server::run()
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
     auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, ip, port);
 
+    int activeUpnpDescription = config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
     // register root device with the library
     auto upnpDesc = std::vector<UpnpDesc> {
         { UPNPREG_URL_DESC, fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH), -1 },
         { UPNPREG_BUF_DESC, devDescHdl->renderDeviceDescription(ip, port, nullptr), 0 }
     };
-    log_debug("Registering with UPnP... ({})", upnpDesc[ACTIVE_UPNP_DESCRIPION].desc);
+    log_debug("Registering with UPnP... ({})", upnpDesc[activeUpnpDescription].desc);
     ret = UpnpRegisterRootDevice2(
-        upnpDesc[ACTIVE_UPNP_DESCRIPION].mode,
-        upnpDesc[ACTIVE_UPNP_DESCRIPION].desc.c_str(),
-        upnpDesc[ACTIVE_UPNP_DESCRIPION].len >= 0 ? upnpDesc[ACTIVE_UPNP_DESCRIPION].desc.length() + 1 : upnpDesc[ACTIVE_UPNP_DESCRIPION].len,
+        upnpDesc[activeUpnpDescription].mode,
+        upnpDesc[activeUpnpDescription].desc.c_str(),
+        upnpDesc[activeUpnpDescription].len >= 0 ? upnpDesc[activeUpnpDescription].desc.length() + 1 : upnpDesc[activeUpnpDescription].len,
         false,
         [](auto eventType, auto event, auto cookie) { return static_cast<Server*>(cookie)->handleUpnpRootDeviceEvent(eventType, event); },
         this,
