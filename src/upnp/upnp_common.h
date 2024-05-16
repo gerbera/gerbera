@@ -126,19 +126,21 @@
 #define UPNP_DESC_SPEC_VERSION_MAJOR "1"
 #define UPNP_DESC_SPEC_VERSION_MINOR "0"
 #define UPNP_DESC_PRODUCT_CAPS "smi,DCM10,getMediaInfo.sec,getCaptionInfo.sec"
+#define UPNP_DESC_SCPD_URL "/upnp"
+#define UPNP_DESC_DEVICE_DESCRIPTION "/description.xml"
 
 // services
 //  connection manager
 #define UPNP_DESC_CM_SERVICE_TYPE "urn:schemas-upnp-org:service:ConnectionManager:1"
 #define UPNP_DESC_CM_SERVICE_ID "urn:upnp-org:serviceId:ConnectionManager"
-#define UPNP_DESC_CM_SCPD_URL "cm.xml"
+#define UPNP_DESC_CM_SCPD_URL "/cm.xml"
 #define UPNP_DESC_CM_CONTROL_URL "/upnp/control/cm"
 #define UPNP_DESC_CM_EVENT_URL "/upnp/event/cm"
 
 // content directory
 #define UPNP_DESC_CDS_SERVICE_TYPE "urn:schemas-upnp-org:service:ContentDirectory:1"
 #define UPNP_DESC_CDS_SERVICE_ID "urn:upnp-org:serviceId:ContentDirectory"
-#define UPNP_DESC_CDS_SCPD_URL "cds.xml"
+#define UPNP_DESC_CDS_SCPD_URL "/cds.xml"
 #define UPNP_DESC_CDS_CONTROL_URL "/upnp/control/cds"
 #define UPNP_DESC_CDS_EVENT_URL "/upnp/event/cds"
 
@@ -149,7 +151,7 @@
 // media receiver registrar (xbox 360)
 #define UPNP_DESC_MRREG_SERVICE_TYPE "urn:microsoft.com:service:X_MS_MediaReceiverRegistrar:1"
 #define UPNP_DESC_MRREG_SERVICE_ID "urn:microsoft.com:serviceId:X_MS_MediaReceiverRegistrar"
-#define UPNP_DESC_MRREG_SCPD_URL "mr_reg.xml"
+#define UPNP_DESC_MRREG_SCPD_URL "/mr_reg.xml"
 #define UPNP_DESC_MRREG_CONTROL_URL "/upnp/control/mr_reg"
 #define UPNP_DESC_MRREG_EVENT_URL "/upnp/event/mr_reg"
 

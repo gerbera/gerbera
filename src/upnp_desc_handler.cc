@@ -29,6 +29,7 @@
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "upnp/quirks.h"
+#include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/mime.h"
 #include "util/tools.h"
@@ -56,9 +57,9 @@ std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std
     // Which is served at /upnp/description.xml
     // HOWEVER it seems like its pretty common to just ignore that and request the base URL instead :(
     // Ideally we would print client info here too TODO!
-    if (!startswith(path, "/upnp/")) {
+    if (!startswith(path, UPNP_DESC_SCPD_URL)) {
         log_warning("Bad client is not following the SCPDURL spec! (requesting {} not /upnp{}) Remapping it.", path, path);
-        path = fmt::format("/upnp{}", path);
+        path = fmt::format("{}{}", UPNP_DESC_SCPD_URL, path);
     }
     auto webroot = config->getOption(CFG_SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
