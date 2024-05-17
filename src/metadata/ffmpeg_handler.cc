@@ -67,6 +67,62 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
+class FfmpegLogger {
+public:
+    FfmpegLogger()
+    {
+        av_log_set_level(AV_LOG_INFO);
+        av_log_set_callback(&FfmpegLogger::LogFfmpegMessage);
+    }
+    ~FfmpegLogger()
+    {
+        av_log_set_callback(nullptr);
+    }
+
+private:
+    FfmpegLogger(const FfmpegLogger&) = delete;
+    FfmpegLogger& operator=(const FfmpegLogger&) = delete;
+    static int printPrefix;
+
+    static void LogFfmpegMessage(void* ptr, int level, const char* fmt, va_list vargs)
+    {
+        int len = av_log_format_line2(ptr, level, fmt, vargs, nullptr, 0, &printPrefix);
+        std::vector<char> buf(len + 1); // need space for NUL
+        std::string message;
+        if (len > 0) {
+            av_log_format_line2(ptr, level, fmt, vargs, buf.data(), len, &printPrefix);
+            message = buf.data();
+        } else {
+            message = "Failed to format message";
+        }
+
+        switch (level) {
+        case AV_LOG_PANIC: // ffmpeg will crash now
+            log_error("FFMpeg: {}", message);
+            break;
+        case AV_LOG_FATAL: // fatal as in can't decode, not crash
+        case AV_LOG_ERROR:
+        case AV_LOG_WARNING:
+            log_warning("FFMpeg: {}", message);
+            break;
+        case AV_LOG_INFO:
+            log_info("FFMpeg: {}", message);
+            break;
+        case AV_LOG_VERBOSE:
+        case AV_LOG_DEBUG:
+        case AV_LOG_TRACE:
+            log_debug("FFMpeg: {}", message);
+            break;
+        default:
+            log_warning("FFMpeg unhandled {}: {}", message);
+            break;
+        }
+    }
+};
+
+static FfmpegLogger globalFfmpegLogger = FfmpegLogger();
+int FfmpegLogger::printPrefix = 1;
+
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_FFMPEG_ENABLED, CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
 {
@@ -260,9 +316,6 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     AVFormatContext* pFormatCtx = nullptr;
-
-    // Suppress all log messages
-    av_log_set_callback([](auto...) {});
 
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
