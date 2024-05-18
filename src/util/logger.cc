@@ -105,6 +105,7 @@ std::map<log_facility_t, std::string_view> GrbLogger::facilities = {
     { log_facility_t::web, "Web" },
     { log_facility_t::layout, "Layout" },
     { log_facility_t::exif, "Exif" },
+    { log_facility_t::exiv2, "Exiv2" },
     { log_facility_t::transcoding, "Transcoding" },
     { log_facility_t::taglib, "Taglib" },
     { log_facility_t::ffmpeg, "FFMpeg" },

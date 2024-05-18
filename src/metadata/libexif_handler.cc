@@ -178,9 +178,27 @@ static int getTagFromString(const std::string& tag)
     return result;
 }
 
+static void logfunc(ExifLog* log, ExifLogCode code, const char* domain, const char* format, va_list args, void* data)
+{
+    va_list args_copy;
+    va_copy(args_copy, args);
+    size_t len = std::vsnprintf(nullptr, 0, format, args_copy);
+    std::vector<char> buf(len + 1); // need space for NUL
+    std::vsnprintf(buf.data(), len + 1, format, args);
+    std::string message = buf.data();
+    log_debug("Exif: {}-{}, domain {}: {}", exif_log_code_get_title(code), exif_log_code_get_message(code), domain, message);
+}
+
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_EXIF_ENABLED, CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST)
 {
+    log = exif_log_new();
+    exif_log_set_func(log, logfunc, nullptr);
+}
+
+LibExifHandler::~LibExifHandler()
+{
+    exif_log_free(log);
 }
 
 void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item,
