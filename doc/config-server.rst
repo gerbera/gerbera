@@ -27,7 +27,7 @@ This section defines the server configuration parameters.
 
       Activate debugging messages only for certain subsystems. The following subsystems are available:
       ``thread``, ``sqlite3``, ``cds``, ``server``, ``content``, ``update``, ``mysql``, ``sqldatabase``, ``proc``, ``autoscan``, ``script``, ``web``, ``layout``,
-      ``exif``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``, ``requests``, ``connmgr``, ``mrregistrar``, ``xml``, ``clients``, ``iohandler``, ``online``,
+      ``exif``, ``exiv2``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``, ``requests``, ``connmgr``, ``mrregistrar``, ``xml``, ``clients``, ``iohandler``, ``online``,
       ``metadata``, ``matroska``.
       Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activted in cmake 
       options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).

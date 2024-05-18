@@ -49,12 +49,15 @@ class StringConverter;
 /// libexif library
 class LibExifHandler : public MediaMetadataHandler {
 private:
+    ExifLog* log = nullptr;
+
     void process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc,
         std::string& imageX, std::string& imageY,
         const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
 
 public:
     explicit LibExifHandler(const std::shared_ptr<Context>& context);
+    ~LibExifHandler();
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 };

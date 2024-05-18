@@ -62,6 +62,7 @@ enum class log_facility_t {
     web,
     layout,
     exif,
+    exiv2,
     transcoding,
     taglib,
     ffmpeg,
