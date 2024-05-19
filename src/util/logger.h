@@ -68,6 +68,7 @@ enum class log_facility_t {
     ffmpeg,
     wavpack,
     requests,
+    device,
     connmgr,
     mrregistrar,
     xml,

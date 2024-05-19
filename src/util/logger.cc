@@ -111,6 +111,7 @@ std::map<log_facility_t, std::string_view> GrbLogger::facilities = {
     { log_facility_t::ffmpeg, "FFMpeg" },
     { log_facility_t::wavpack, "WavPack" },
     { log_facility_t::requests, "Requests" },
+    { log_facility_t::device, "Device" },
     { log_facility_t::connmgr, "ConnMgr" },
     { log_facility_t::mrregistrar, "MRRegistrar" },
     { log_facility_t::xml, "XML" },
