@@ -67,7 +67,7 @@ else
     PUPNP="1.14.19"
     SPDLOG="1.14.1"
     WAVPACK="5.7.0"
-    TAGLIB="1.13.1"
+    TAGLIB="2.0.1"
 
 fi
 
@@ -78,6 +78,19 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 
+if [ -x "$(command -v lsb_release)" ]; then
+    lsb_codename=$(lsb_release -c --short)
+    if [[ "${lsb_codename}" == "n/a" ]]; then
+        lsb_codename="unstable"
+    fi
+    lsb_distro=$(lsb_release -i --short)
+    lsb_codename=${lsb_codename,,}
+    lsb_distro=${lsb_distro,,}
+else
+    lsb_codename="unknown"
+    lsb_distro="unknown"
+fi
+
 function downloadSource()
 {
     if [[ ! -f "${tgz_file}" ]]; then
@@ -85,7 +98,7 @@ function downloadSource()
             set +e
         fi
         wget ${1} -O "${tgz_file}"
-        if [[ ! -f "${tgz_file}" || ($? -eq 8 && $# -gt 1) ]]; then
+        if [[ ! -f "${tgz_file}" || ($? -eq 8 && $# -gt 1 && "${2}" != "-") ]]; then
             set -e
             wget ${2} --no-hsts --no-check-certificate -O "${tgz_file}"
         elif [[ $# -gt 1 ]]; then
@@ -104,11 +117,31 @@ function downloadSource()
 
     cd "${src_dir}"
 
+    if [[ $# -gt 2 ]]; then
+        patch -p1 < ${3}
+    fi
+
     if [[ -d build ]]; then
         rm -R build
     fi
     mkdir build
     cd build
+}
+
+function installDeps()
+{
+    root_dir=$1
+    package=$2
+    distr=${lsb_distro}
+    if [[ "${lsb_distro}" == "ubuntu" ]]; then
+        distr="debian"
+    fi
+    dep_file="${root_dir}/${distr}/dep-${package}.sh"
+    if [[ -f "${dep_file}" ]]; then
+        sudo bash "${dep_file}"
+    else
+	echo "No dep file ${dep_file}"
+    fi
 }
 
 function makeInstall()

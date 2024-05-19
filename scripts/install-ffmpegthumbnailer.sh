@@ -20,7 +20,9 @@
 # $Id$
 set -Eeuo pipefail
 
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${FFMPEGTHUMBNAILER-2.2.2}"
 
@@ -29,6 +31,8 @@ src_dir="${script_dir}/ffmpegthumbnailer-${VERSION}"
 tgz_file="${script_dir}/ffmpegthumbnailer-${VERSION}.tgz"
 
 downloadSource https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz
+
+installDeps ${main_dir} ffmpegthumbnailer
 
 cmake .. \
   -DCMAKE_BUILD_TYPE=Release -DENABLE_GIO=ON -DENABLE_THUMBNAILER=ON

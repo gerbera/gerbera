@@ -9,18 +9,23 @@
 - CI: Pass publish-deb secrets via env instead
 - CI: Upload debs to pkg.gerbera.io
 - clang-tidy: don't cast through void
+- Config: Add flag to disable dynamic descriptions
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
 - Documentation: Update with new WebUI
+- FFMpeg: add custom logger
 - Fix discovery
 - Import: Add option case sensitive tags
 - Import: fix single file update
+- Libexif: add custom logger
+- Logging: Separate description requests
 - Metadata: Unify handling and allow to disable
 - Playlist: Allow configuration of directory depth
 - Server: Handle all HTTP via virtualdir
 - TagLib: Use DebugListener to suppress messages
 - UI: Fix auto logout
 - UI: Tidy up login and homepage
+- UPnP specification files reflect client quirks
 
 ### 2.1.0
 
