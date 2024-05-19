@@ -20,6 +20,8 @@
 # $Id$
 set -Eeuo pipefail
 
+SCRIPT_DIR=$(dirname "$0")
+SCRIPT_DIR=$(realpath "${SCRIPT_DIR}")/
 ROOT_DIR=$(dirname "$0")/../../
 ROOT_DIR=$(realpath "${ROOT_DIR}")/
 
@@ -74,7 +76,6 @@ function install-googletest() {
 
 function install-npupnp() {
   echo "::group::Installing libnpupnp"
-  sudo apt-get install meson ninja-build -y
   sudo bash "${ROOT_DIR}"scripts/install-npupnp.sh
   echo "::endgroup::"
 }
@@ -177,11 +178,11 @@ fi
 echo "Running $0 ${my_sys} ${my_upnp}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
-  libexiv2="libexpat1-dev libbrotli-dev libinih-dev libinireader0"
+  libexiv2=""
   libduktape=""
   libmatroska=""
   libpugixml=""
-  ffmpegthumbnailer="ffmpeg libavfilter-dev libavcodec-dev libavutil-dev libavdevice-dev libavresample-dev"
+  ffmpegthumbnailer=""
   if [[ "$lsb_codename" == "jammy" ]]; then
     libmatroska="libebml-dev libmatroska-dev"
     ffmpegthumbnailer="libffmpegthumbnailer-dev"
@@ -213,10 +214,6 @@ if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" || "$lsb_coden
   libmysqlclient="libmysql++-dev"
 fi
 
-libupnp="libcurl4-openssl-dev"
-if [[ "${my_upnp}" == "npupnp" ]]; then
-  libupnp="libmicrohttpd-dev libexpat1-dev libcurl4-gnutls-dev"
-fi
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
 
@@ -235,7 +232,6 @@ if [[ ! -d build-deb ]]; then
       ${libduktape} \
       ${libmatroska} \
       ${libexiv2} \
-      ${libupnp} \
       libexif-dev \
       ${ffmpegthumbnailer} \
       libwavpack1 libwavpack-dev \

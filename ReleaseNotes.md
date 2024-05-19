@@ -6,12 +6,15 @@ This update brings a new design for the start page, better logging for TagLib an
 
 ### NEW Features
 
-- TagLib messages are logged with gerbera now. They also show up with `debug-mode="taglib"`.
 - Configuration for case sensitive media tags (allow making them insensitive)
 - Configuration options for playlist layout
 - WebUI: New design for home page and login screen
 - Allow metadata handler to be disabled, add charset support
 - UPnP specification files (description.xml, cds.xml) now reflect client quirks
+- TagLib messages are logged with gerbera now. They also show up with `debug-mode="taglib"`.
+- Exiv2 messages are logged with gerbera now. They also show up with `debug-mode="exiv2"`.
+- libexif messages are logged with gerbera now. They also show up with `debug-mode="exif"`.
+- ffmpeg messages are logged with gerbera now. They also show up with `debug-mode="ffmpeg"`.
 
 ### FIXES
 
@@ -23,7 +26,7 @@ This update brings a new design for the start page, better logging for TagLib an
 ### Code Improvements
 
 - Rework of server mechanism for file and data requests
-- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1)
+- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1)
 
 ## 2.1.0
 

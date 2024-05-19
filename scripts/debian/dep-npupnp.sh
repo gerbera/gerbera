@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# install-taglib.sh - this file is part of Gerbera.
+# dep-npupnp.sh - this file is part of Gerbera.
 #
-# Copyright (C) 2018-2024 Gerbera Contributors
+# Copyright (C) 2024 Gerbera Contributors
 #
 # Gerbera is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
@@ -18,26 +18,7 @@
 # along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 # $Id$
-set -Eeuo pipefail
 
-main_dir=$(dirname "${BASH_SOURCE[0]}")
-main_dir=$(realpath "${main_dir}")/
-. ${main_dir}/versions.sh
-
-VERSION="${TAGLIB-1.12}"
-
-script_dir=`pwd -P`
-src_dir="${script_dir}/taglib-${VERSION}"
-tgz_file="${script_dir}/taglib-${VERSION}.tgz"
-
-downloadSource https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz
-
-installDeps ${main_dir} taglib
-
-cmake ..
-
-makeInstall
-
-ldConfig
-
-exit 0
+sudo apt-get install -y \
+      meson ninja-build \
+      libmicrohttpd-dev libexpat1-dev libcurl4-gnutls-dev

@@ -20,7 +20,9 @@
 # $Id$
 set -Eeuo pipefail
 
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${NPUPNP-6.1.0}"
 
@@ -40,6 +42,8 @@ if [[ ${MODE} = "5" ]]; then
     ./autogen.sh
 )
 fi
+
+installDeps ${main_dir} npupnp
 
 if [ "${UNAME}" = 'FreeBSD' ]; then
     extraFlags=""

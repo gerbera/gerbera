@@ -20,7 +20,9 @@
 # $Id$
 set -Eeuo pipefail
 
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${PUPNP-1.14.12}"
 
@@ -29,6 +31,8 @@ src_dir="${script_dir}/pupnp-${VERSION}"
 tgz_file="${script_dir}/pupnp-${VERSION}.tgz"
 
 downloadSource https://github.com/pupnp/pupnp/archive/release-${VERSION}.tar.gz
+
+installDeps ${main_dir} pupnp
 
 (
     cd "${src_dir}"
