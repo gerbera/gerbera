@@ -185,7 +185,6 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   ffmpegthumbnailer=""
   if [[ "$lsb_codename" == "jammy" ]]; then
     libmatroska="libebml-dev libmatroska-dev"
-    ffmpegthumbnailer="libffmpegthumbnailer-dev"
   fi
 else
   libexiv2="libexiv2-dev"
@@ -254,9 +253,9 @@ if [[ ! -d build-deb ]]; then
     install-libexiv2 head
     install-pugixml
     install-duktape
+    install-ffmpegthumbnailer
     if [[ "$lsb_codename" != "jammy" ]]; then
       install-matroska
-      install-ffmpegthumbnailer
     fi
   fi
 

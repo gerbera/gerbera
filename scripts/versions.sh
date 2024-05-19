@@ -40,7 +40,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     DUKTAPE="2.6.0"
     EBML="1.3.9"
     EXIV2="v0.27.7"
-    FFMPEGTHUMBNAILER="2.2.0"
+    FFMPEGTHUMBNAILER="2.2.2"
     FMT="9.1.0"
     GOOGLETEST="1.10.0"
     LASTFM="0.4.0"
@@ -58,6 +58,7 @@ else
     EBML="1.4.5"
     EXIV2="v0.28.2"
     FFMPEGTHUMBNAILER="2.2.2"
+    FFMPEGTHUMBNAILER_commit="1b5a77983240bcf00a4ef7702c07bcd8f4e5f97c"
     FMT="10.2.1"
     GOOGLETEST="1.14.0"
     LASTFM="0.4.0"
@@ -98,11 +99,12 @@ function downloadSource()
             set +e
         fi
         wget ${1} -O "${tgz_file}"
-        if [[ ! -f "${tgz_file}" || ($? -eq 8 && $# -gt 1 && "${2}" != "-") ]]; then
+        WGET_RES=$?
+        if [[ ! -f "${tgz_file}" || (${WGET_RES} -eq 8 && $# -gt 1 && "${2}" != "-") ]]; then
             set -e
             wget ${2} --no-hsts --no-check-certificate -O "${tgz_file}"
-        elif [[ $# -gt 1 ]]; then
-            exit $?
+        elif [[ $# -gt 1 && ${WGET_RES} -gt 0 ]]; then
+            exit ${WGET_RES}
         fi
         set -e
     fi
@@ -138,7 +140,7 @@ function installDeps()
     fi
     dep_file="${root_dir}/${distr}/dep-${package}.sh"
     if [[ -f "${dep_file}" ]]; then
-        sudo bash "${dep_file}"
+        . ${dep_file}
     else
 	echo "No dep file ${dep_file}"
     fi

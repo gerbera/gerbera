@@ -24,18 +24,20 @@ main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
 . ${main_dir}/versions.sh
 
+COMMIT="${FFMPEGTHUMBNAILER_commit-0}"
 VERSION="${FFMPEGTHUMBNAILER-2.2.2}"
 
 script_dir=`pwd -P`
 src_dir="${script_dir}/ffmpegthumbnailer-${VERSION}"
 tgz_file="${script_dir}/ffmpegthumbnailer-${VERSION}.tgz"
 
-downloadSource https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz
+downloadSource https://github.com/dirkvdb/ffmpegthumbnailer/archive/${COMMIT}.tar.gz https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz
 
 installDeps ${main_dir} ffmpegthumbnailer
 
 cmake .. \
-  -DCMAKE_BUILD_TYPE=Release -DENABLE_GIO=ON -DENABLE_THUMBNAILER=ON
+  -DCMAKE_BUILD_TYPE=Release -DENABLE_GIO=ON -DENABLE_THUMBNAILER=OFF \
+  -DENABLE_TESTS=OFF -DENABLE_STATIC=ON -DENABLE_SHARED=ON
 
 makeInstall
 

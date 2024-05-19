@@ -67,7 +67,7 @@ sudo make install
 | libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
 | [libexiv2]          | v0.26       | v0.27.7     | v0.28.2       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
-| [ffmpegthumbnailer] |             | 2.2.0       | 2.2.2         | Optional      | Generate video thumbnails  | Disabled |
+| [ffmpegthumbnailer] |             | 2.2.2       | 2.2.2-60-g1b5a779  | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |               | Optional      | Efficient file monitoring  | Enabled  |
 
 ## Development Dependencies
