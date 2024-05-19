@@ -20,7 +20,7 @@
 */
 
 /// \file device_description_handler.cc
-#define LOG_FAC log_facility_t::requests
+#define LOG_FAC log_facility_t::device
 
 #include "device_description_handler.h" // API
 
@@ -54,7 +54,7 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content
 
 const struct ClientInfo* DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    log_info("Device description requested {}", filename);
+    log_debug("Device description requested {}", filename);
     auto quirks = info ? getQuirks(info) : nullptr;
 
     if (quirks && useDynamicDescription) {
