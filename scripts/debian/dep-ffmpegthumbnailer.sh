@@ -19,6 +19,14 @@
 #
 # $Id$
 
-sudo apt-get install -y \
+if [[ "$lsb_codename" == "jammy" ]]; then
+  sudo apt-get install -y \
     ffmpeg libavfilter-dev libavcodec-dev libavutil-dev \
+    libjpeg-dev libpng-dev \
+    libavdevice-dev libswresample-dev
+else
+  sudo apt-get install -y \
+    ffmpeg libavfilter-dev libavcodec-dev libavutil-dev \
+    libjpeg-dev libpng-dev \
     libavdevice-dev libavresample-dev
+fi
