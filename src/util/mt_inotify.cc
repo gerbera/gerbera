@@ -46,6 +46,7 @@
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#include <thread>
 #include <unistd.h>
 #ifdef SOLARIS
 #include <sys/filio.h> // FIONREAD
@@ -96,17 +97,28 @@ bool Inotify::supported()
     return true;
 }
 
-int Inotify::addWatch(const fs::path& path, uint32_t events) const
+int Inotify::addWatch(const fs::path& path, uint32_t events, unsigned int retryCount) const
 {
-    int wd = inotify_add_watch(inotify_fd, path.c_str(), events);
-    if (wd < 0 && errno != ENOENT) {
-        if (errno == ENOSPC)
-            throw_fmt_system_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
-        if (errno == EACCES) {
-            log_warning("Cannot add inotify watch for {}: {}", path.c_str(), std::strerror(errno));
-            return -1;
+    int wd = -1;
+    while (wd < 0) {
+        wd = inotify_add_watch(inotify_fd, path.c_str(), events);
+        if (wd < 0 && errno != ENOENT) {
+            if (errno == ENOSPC)
+                throw_fmt_system_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
+            if (errno == EACCES) {
+                if (retryCount > 0) {
+                    log_debug("Retrying {} to add inotify watch for {}: {}", retryCount, path.c_str(), std::strerror(errno));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    retryCount--;
+                    continue;
+                } else {
+                    log_warning("Cannot add inotify watch for {}: {}", path.c_str(), std::strerror(errno));
+                    return -1;
+                }
+            }
+            throw_fmt_system_error("Adding inotify watch failed");
         }
-        throw_fmt_system_error("");
+        return wd;
     }
     return wd;
 }

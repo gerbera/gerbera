@@ -114,6 +114,9 @@ public:
     void setRecursive(bool recursive) { this->recursive = recursive; }
     bool getRecursive() const { return recursive; }
 
+    void setRetryCount(unsigned int retryCount) { this->retryCount = retryCount; }
+    unsigned int getRetryCount() const { return retryCount; }
+
     void setOrig(bool orig) { this->isOrig = orig; }
     bool getOrig() const { return isOrig; }
 
@@ -221,6 +224,7 @@ protected:
     bool followSymlinks {};
     bool persistentFlag {};
     std::chrono::seconds interval = std::chrono::seconds::zero();
+    unsigned int retryCount { 0 };
     int taskCount {};
     int scanID { INVALID_SCAN_ID };
     int objectID { INVALID_OBJECT_ID };
