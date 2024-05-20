@@ -93,10 +93,14 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
         int mt = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
+
+        unsigned int retryCount = ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_AUTOSCAN_DIRECTORY_RETRYCOUNT)->getXmlContent(child);
         auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
+
         cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
         bool follow = cs->hasXmlElement(child) ? cs->getXmlContent(child) : followSymlinks;
+
         auto ctAudio = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child);
         auto ctImage = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child);
         auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
@@ -105,7 +109,9 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             containerMap[AutoscanMediaMode::Audio] = ctAudio;
             containerMap[AutoscanMediaMode::Image] = ctImage;
             containerMap[AutoscanMediaMode::Video] = ctVideo;
-            result.push_back(std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap));
+            auto adir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap);
+            adir->setRetryCount(retryCount);
+            result.push_back(adir);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
             return false;

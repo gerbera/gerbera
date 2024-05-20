@@ -715,6 +715,20 @@ the removed directory if it becomes available/gets created again.
 
         ::
 
+            retry-count="3"
+
+        * Optional
+        * Default: **0**
+
+        Allowed values: non-negative numbers.
+        This attribute can be used to allow multiple attempts to access files
+        in case of mounted volumes. In some cases inotify events are raised
+        before the directory or file is fully available, causing an access
+        permission error and the import fails.
+        This attribute is only available in config.xml at the moment.
+
+        ::
+
             media-type="Music|AudioBook"
 
         * Optional
