@@ -99,8 +99,7 @@ bool Inotify::supported()
 
 int Inotify::addWatch(const fs::path& path, uint32_t events, unsigned int retryCount) const
 {
-    int wd = -1;
-    while (wd < 0) {
+    for (int wd = -1; wd < 0;) {
         wd = inotify_add_watch(inotify_fd, path.c_str(), events);
         if (wd < 0 && errno != ENOENT) {
             if (errno == ENOSPC)
@@ -118,9 +117,10 @@ int Inotify::addWatch(const fs::path& path, uint32_t events, unsigned int retryC
             }
             throw_fmt_system_error("Adding inotify watch failed");
         }
+        log_warning("Add inotify watch for {}: {}", path.c_str(), wd);
         return wd;
     }
-    return wd;
+    return -1;
 }
 
 void Inotify::removeWatch(int wd) const

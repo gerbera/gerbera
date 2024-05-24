@@ -620,7 +620,7 @@ Specifies an alternative file for filemagic, containing mime type information.
 
 ::
 
-    <autoscan use-inotify="auto">
+    <autoscan use-inotify="auto" inotify-attrib="yes">
 
 * Optional
 
@@ -641,6 +641,15 @@ the removed directory if it becomes available/gets created again.
     Specifies if the inotify autoscan feature should be enabled. The default value is ``auto``, which means that
     availability of inotify support on the system will be detected automatically, it will then be used if available.
     Setting the option to 'no' will disable inotify even if it is available. Allowed values: "yes", "no", "auto"
+
+    ::
+
+        inotify-attrib="yes|no"
+
+    * Optional
+    * Default: **no**
+
+    Specifies if the inotify will also monitor for attribute changes like owner change or access given.
 
     **Child tags:**
 
@@ -1685,7 +1694,7 @@ A sample configuration for the example described above would be:
   </exiv2>
 
 ``mkv``
-----------
+-------
 
 .. code-block:: xml
 
@@ -1697,7 +1706,7 @@ These options apply to mkv library.
 
 
 ``wavpack``
-----------
+-----------
 
 .. code-block:: xml
 
