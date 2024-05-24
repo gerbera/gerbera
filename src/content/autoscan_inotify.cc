@@ -180,7 +180,7 @@ fs::path InotifyHandler::getPath(const std::shared_ptr<AutoscanInotify::Wd>& wdO
 std::pair<bool, std::shared_ptr<AutoscanDirectory>> InotifyHandler::getAutoscanDirectory(const fs::path& path, const std::shared_ptr<AutoscanInotify::Wd>& wdObj)
 {
     std::error_code ec;
-    auto dirEnt = fs::directory_entry(path, ec);
+    dirEnt = fs::directory_entry(path, ec);
     bool isDir = AUTOSCAN_IS_DIR(mask);
     if (!ec) {
         isDir = isDir || dirEnt.is_directory(ec);
@@ -295,7 +295,9 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<ContentManager>& content)
     }
 
     shutdownFlag = true;
-    events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT | IN_ATTRIB;
+    events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
+    if (this->config->getBoolOption(CFG_IMPORT_AUTOSCAN_INOTIFY_ATTRIB))
+        events |= IN_ATTRIB;
 }
 
 AutoscanInotify::~AutoscanInotify()
@@ -634,6 +636,8 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>
 
 std::shared_ptr<AutoscanInotify::Wd> AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool followSymlinks)
 {
+    log_debug("start {}", startPath.path().c_str());
+
     int result = INOTIFY_ROOT;
     if (unmonitor)
         unmonitorDirectory(startPath.path(), adir);
@@ -685,6 +689,9 @@ std::shared_ptr<AutoscanInotify::Wd> AutoscanInotify::monitorUnmonitorRecursive(
 int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool hasNonExisting, const fs::path& nonExistingPath)
 {
     int wd = inotify->addWatch(path, events, adir->getRetryCount());
+
+    log_debug("start {} => {}", path.c_str(), wd);
+
     if (wd <= INOTIFY_ROOT) {
         if (isStartPoint && adir && adir->persistent()) {
             monitorNonexisting(path, adir);
@@ -732,6 +739,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
 
 void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir)
 {
+    log_debug("start {}", path.c_str());
     // maybe there is a faster method...
     // we use addWatch, because it returns the wd to the filename
     // this should not add a new watch, because it should be already watched

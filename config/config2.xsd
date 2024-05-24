@@ -796,6 +796,7 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="inotify-attrib" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
