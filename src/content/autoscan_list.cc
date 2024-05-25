@@ -32,7 +32,8 @@
 #include "util/timer.h"
 
 #ifdef HAVE_INOTIFY
-#include "autoscan_inotify.h"
+#include "content/inotify/autoscan_inotify.h"
+#include "content/inotify/mt_inotify.h"
 #endif
 
 void AutoscanList::updateLMinDB(Database& database)

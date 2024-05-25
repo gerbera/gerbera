@@ -76,7 +76,7 @@
 #endif
 
 #ifdef HAVE_INOTIFY
-#include "autoscan_inotify.h"
+#include "content/inotify/autoscan_inotify.h"
 #endif
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,

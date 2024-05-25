@@ -38,10 +38,6 @@
 #include "config_setup_time.h"
 #include "content/autoscan_list.h"
 
-#ifdef HAVE_INOTIFY
-#include "util/mt_inotify.h"
-#endif
-
 std::string ConfigAutoscanSetup::getUniquePath() const
 {
     return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode));

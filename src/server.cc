@@ -77,7 +77,7 @@
 #endif
 
 #ifdef HAVE_INOTIFY
-#include "content/autoscan_inotify.h"
+#include "content/inotify/autoscan_inotify.h"
 #endif
 
 #ifdef ONLINE_SERVICES

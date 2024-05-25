@@ -52,7 +52,7 @@
 #include <sys/filio.h> // FIONREAD
 #endif
 
-#include "tools.h"
+#include "util/tools.h"
 
 #define MAX_EVENTS 4096
 
@@ -97,7 +97,7 @@ bool Inotify::supported()
     return true;
 }
 
-int Inotify::addWatch(const fs::path& path, uint32_t events, unsigned int retryCount) const
+int Inotify::addWatch(const fs::path& path, InotifyFlags events, unsigned int retryCount) const
 {
     for (int wd = -1; wd < 0;) {
         wd = inotify_add_watch(inotify_fd, path.c_str(), events);

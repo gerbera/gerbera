@@ -37,245 +37,17 @@
 
 #include "config/config_option_enum.h"
 #include "config/result/autoscan.h"
-#include "content_manager.h"
+#include "content/content_manager.h"
+#include "content/inotify/directory_watch.h"
+#include "content/inotify/inotify_handler.h"
+#include "content/inotify/mt_inotify.h"
+#include "content/inotify/watch.h"
 #include "database/database.h"
 #include "util/tools.h"
 
-#include <array>
-#include <numeric>
-#include <utility>
+#include <sys/inotify.h>
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
-
-#define AUTOSCAN_WAS_MOVED(mask) ((mask) & (IN_MOVE_SELF))
-#define AUTOSCAN_IS_GONE(mask) ((mask) & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT))
-#define AUTOSCAN_WAS_REMOVED(mask) ((mask) & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_FROM | IN_UNMOUNT))
-#define AUTOSCAN_IS_DIR(mask) ((mask) & (IN_ISDIR))
-#define AUTOSCAN_IS_NEW_FILE(mask) ((mask) & (IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
-#define AUTOSCAN_IS_MOVED(mask) ((mask) & (IN_MOVED_TO))
-#define AUTOSCAN_IS_NEW(mask) ((mask) & (IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
-#define AUTOSCAN_IS_CREATED(mask) ((mask) & (IN_CREATE | IN_ATTRIB))
-#define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_ATTRIB))
-#define AUTOSCAN_IS_IGNORED(mask) ((mask) & (IN_IGNORED))
-
-typedef uint32_t InotifyFlags;
-
-static constexpr std::array<std::pair<std::string_view, InotifyFlags>, 22> inotifyFlags {
-    /* the following are legal, implemented events that user-space can watch for */
-    std::pair("ACCESS", IN_ACCESS), /* File was accessed */
-    std::pair("MODIFY", IN_MODIFY), /* File was modified */
-    std::pair("ATTRIB", IN_ATTRIB), /* Metadata changed */
-    std::pair("CLOSE_WRITE", IN_CLOSE_WRITE), /* Writtable file was closed */
-    std::pair("CLOSE_NOWRITE", IN_CLOSE_NOWRITE), /* Unwrittable file closed */
-    std::pair("OPEN", IN_OPEN), /* File was opened */
-    std::pair("MOVED_FROM", IN_MOVED_FROM), /* File was moved from X */
-    std::pair("MOVED_TO", IN_MOVED_TO), /* File was moved to Y */
-    std::pair("CREATE", IN_CREATE), /* Subfile was created */
-    std::pair("DELETE", IN_DELETE), /* Subfile was deleted */
-    std::pair("DELETE_SELF", IN_DELETE_SELF), /* Self was deleted */
-    std::pair("MOVE_SELF", IN_MOVE_SELF), /* Self was moved */
-    /* the following are legal events.  they are sent as needed to any watch */
-    std::pair("UNMOUNT", IN_UNMOUNT), /* Backing fs was unmounted */
-    std::pair("Q_OVERFLOW", IN_Q_OVERFLOW), /* Event queued overflowed */
-    std::pair("IGNORED", IN_IGNORED), /* File was ignored */
-    /* special flags */
-    std::pair("ONLYDIR", IN_ONLYDIR), /* only watch the path if it is a directory */
-    std::pair("DONT_FOLLOW", IN_DONT_FOLLOW), /* don't follow a sym link */
-    std::pair("EXCL_UNLINK", IN_EXCL_UNLINK), /* exclude events on unlinked objects */
-    std::pair("MASK_CREATE", IN_MASK_CREATE), /* only create watches */
-    std::pair("MASK_ADD", IN_MASK_ADD), /* add to the mask of an already existing watch */
-    std::pair("ISDIR", IN_ISDIR), /* event occurred against dir */
-    std::pair("ONESHOT", IN_ONESHOT), /* only send event once */
-};
-
-class InotifyHandler {
-public:
-    InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags monitoredEvents)
-        : ai(ai)
-        , wd(event->wd)
-        , mask(event->mask & monitoredEvents)
-        , name(event->len > 0 ? event->name : "")
-    {
-        log_debug("inotify event: {} mask={} name={}", wd, mapFlags(mask), name);
-    }
-
-    static std::string mapFlags(InotifyFlags flags);
-    static InotifyFlags makeFlags(const std::string& optValue);
-    static InotifyFlags remapFlag(const std::string& flag);
-
-    fs::path getPath(const std::shared_ptr<AutoscanInotify::Wd>& wdObj);
-    std::pair<bool, std::shared_ptr<AutoscanDirectory>> getAutoscanDirectory(const fs::path& path, const std::shared_ptr<AutoscanInotify::Wd>& wdObj);
-    void doMove(const std::shared_ptr<AutoscanInotify::Wd>& wdObj);
-    void doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<AutoscanInotify::Wd>& wdObj);
-    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<AutoscanInotify::Wd>& wdObj, ImportMode importMode);
-    void doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, bool isDir);
-    void doIgnored();
-
-    bool hasEvent() { return mask; }
-    int getWd() { return wd; }
-
-private:
-    AutoscanInotify* ai;
-    int wd;
-    InotifyFlags mask;
-    std::string name;
-    std::shared_ptr<AutoscanDirectory> adir;
-    fs::directory_entry dirEnt;
-    fs::path path;
-};
-
-InotifyFlags InotifyHandler::remapFlag(const std::string& flag)
-{
-    for (auto [qLabel, qFlag] : inotifyFlags) {
-        if (flag == qLabel) {
-            return qFlag;
-        }
-    }
-    return stoulString(flag, 0, 0);
-}
-
-InotifyFlags InotifyHandler::makeFlags(const std::string& optValue)
-{
-    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | InotifyHandler::remapFlag(trimString(i)); });
-}
-
-std::string InotifyHandler::mapFlags(InotifyFlags flags)
-{
-    if (!flags)
-        return "None";
-
-    std::vector<std::string> myFlags;
-
-    for (auto [qLabel, qFlag] : inotifyFlags) {
-        if (flags & qFlag) {
-            myFlags.emplace_back(qLabel);
-            flags &= ~qFlag;
-        }
-    }
-
-    if (flags) {
-        myFlags.push_back(fmt::format("{:#04x}", flags));
-    }
-
-    return fmt::format("{}", fmt::join(myFlags, " | "));
-}
-
-fs::path InotifyHandler::getPath(const std::shared_ptr<AutoscanInotify::Wd>& wdObj)
-{
-    path = wdObj->getPath();
-    // file is not gone
-    if (AUTOSCAN_WAS_MOVED(mask)) {
-        log_debug("AUTOSCAN_WAS_MOVED {} -> {}", path.c_str(), (path.parent_path() / name).c_str());
-        path = path.parent_path() / name;
-    } else if (!AUTOSCAN_IS_GONE(mask) && !name.empty()) {
-        path /= name;
-        log_debug("!AUTOSCAN_IS_GONE: {}", path.c_str());
-    } else {
-        log_debug("processing {}", path.c_str());
-    }
-    return path;
-}
-
-std::pair<bool, std::shared_ptr<AutoscanDirectory>> InotifyHandler::getAutoscanDirectory(const fs::path& path, const std::shared_ptr<AutoscanInotify::Wd>& wdObj)
-{
-    std::error_code ec;
-    dirEnt = fs::directory_entry(path, ec);
-    bool isDir = AUTOSCAN_IS_DIR(mask);
-    if (!ec) {
-        isDir = isDir || dirEnt.is_directory(ec);
-    }
-    auto watchAs = AutoscanInotify::getAppropriateAutoscan(wdObj, path);
-    if (watchAs)
-        adir = watchAs->getAutoscanDirectory();
-    if (!watchAs || !adir) {
-        log_debug("autoscan not found in watches? ({}, watchAs:{}, adir:{}, {})", wd, watchAs != nullptr, adir != nullptr, path.c_str());
-    } else if (ec && !AUTOSCAN_WAS_REMOVED(mask)) {
-        log_error("Failed to read {}: {}", path.c_str(), ec.message());
-    }
-    return { isDir, adir };
-}
-
-void InotifyHandler::doMove(const std::shared_ptr<AutoscanInotify::Wd>& wdObj)
-{
-    // file is renamed
-    if (AUTOSCAN_WAS_MOVED(mask)) {
-        ai->checkMoveWatches(wd, wdObj);
-    }
-
-    // file is deleted
-    if (AUTOSCAN_IS_GONE(mask)) {
-        ai->recheckNonexistingMonitors(wd, wdObj);
-    }
-}
-
-void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<AutoscanInotify::Wd>& wdObj)
-{
-    if (AUTOSCAN_IS_NEW(mask)) {
-        ai->recheckNonexistingMonitors(wd, wdObj);
-    }
-
-    if (asSetting.recursive && AUTOSCAN_IS_CREATED(mask)) {
-        if (!content->isHiddenFile(dirEnt, true, asSetting)) {
-            log_debug("Detected new dir, adding to inotify: {}", path.c_str());
-            ai->monitorUnmonitorRecursive(dirEnt, false, asSetting.adir, false, asSetting.followSymlinks);
-        } else {
-            log_debug("Detected new dir, ignoring because it's hidden: {}", path.c_str());
-        }
-    }
-}
-
-int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<AutoscanInotify::Wd>& wdObj, ImportMode importMode)
-{
-    int result = INOTIFY_ROOT;
-    if (!AUTOSCAN_IS_NEW(mask)) {
-        // deleted
-        if (AUTOSCAN_IS_GONE(mask)) {
-            if (!AUTOSCAN_WAS_MOVED(mask)) {
-                log_debug("removing watch {}", path.c_str());
-                result = wd;
-            }
-            auto watch = ai->getStartPoint(wdObj);
-            if (watch && adir->persistent()) {
-                ai->monitorNonexisting(path, watch->getAutoscanDirectory());
-                content->handlePeristentAutoscanRemove(adir);
-            }
-        }
-
-        if (!AUTOSCAN_IS_WRITTEN(mask) || importMode != ImportMode::Gerbera) {
-            auto object = database->findObjectByPath(path, !AUTOSCAN_IS_DIR(mask) ? DbFileType::File : DbFileType::Directory);
-            if (object) {
-                log_debug("deleting {}", path.c_str());
-                content->removeObject(adir, object, path, !AUTOSCAN_IS_MOVED(mask));
-            }
-        }
-    }
-    return result;
-}
-
-void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, bool isDir)
-{
-    if (AUTOSCAN_IS_NEW_FILE(mask)) {
-        log_debug("Adding {}", path.c_str());
-        // dirEnt, path, rootPath, settings, lowPriority, cancellable
-        content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
-        if (isDir) {
-            auto wdObjPath = ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
-            if (AUTOSCAN_IS_MOVED(mask) && wdObjPath) {
-                log_debug("Resetting {} to {}", wdObjPath->getPath().c_str(), path.c_str());
-                wdObjPath->setPath(path);
-            }
-        }
-    }
-}
-
-void InotifyHandler::doIgnored()
-{
-    if (AUTOSCAN_IS_IGNORED(mask)) {
-        ai->removeWatchMoves(wd);
-        ai->removeDescendants(wd);
-    }
-}
 
 AutoscanInotify::AutoscanInotify(const std::shared_ptr<ContentManager>& content)
     : config(content->getContext()->getConfig())
@@ -413,13 +185,13 @@ void AutoscanInotify::threadProc()
             if (event) {
                 // lock.lock()
                 auto handler = InotifyHandler(this, event, events);
+                auto wdObj = getWatch(handler);
 
-                std::shared_ptr<Wd> wdObj = getWatch(handler.getWd());
                 if (!wdObj)
                     continue;
 
                 fs::path path = handler.getPath(wdObj);
-                auto [isDir, adir] = handler.getAutoscanDirectory(path, wdObj);
+                auto [isDir, adir] = handler.getAutoscanDirectory(wdObj);
 
                 handler.doMove(wdObj);
 
@@ -432,7 +204,7 @@ void AutoscanInotify::threadProc()
                 asSetting.async = true;
                 asSetting.mergeOptions(config, path);
 
-                // file is directory
+                // target is directory
                 if (isDir) {
                     handler.doDirectory(asSetting, content, wdObj);
                 }
@@ -440,7 +212,7 @@ void AutoscanInotify::threadProc()
                 // changed
                 if (adir && handler.hasEvent()) {
                     // not new
-                    int wd = handler.doExistingFile(database, content, wdObj, importMode);
+                    int wd = handler.doExistingFile(database, content, wdObj, importMode, isDir);
                     if (wd > INOTIFY_ROOT)
                         inotify->removeWatch(wd);
                     // new file
@@ -455,13 +227,13 @@ void AutoscanInotify::threadProc()
     }
 }
 
-std::shared_ptr<AutoscanInotify::Wd> AutoscanInotify::getWatch(int wd)
+std::shared_ptr<DirectoryWatch> AutoscanInotify::getWatch(const InotifyHandler& handler)
 {
-    std::shared_ptr<Wd> wdObj;
+    std::shared_ptr<DirectoryWatch> wdObj;
     try {
-        wdObj = watches.at(wd);
+        wdObj = watches.at(handler.getWd());
     } catch (const std::out_of_range&) {
-        inotify->removeWatch(wd);
+        inotify->removeWatch(handler.getWd());
     }
     return wdObj;
 }
@@ -504,7 +276,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
 {
     int wd = inotify->addWatch(path, events, retryCount);
     if (wd > INOTIFY_ROOT) {
-        std::shared_ptr<Wd> wdObj;
+        std::shared_ptr<DirectoryWatch> wdObj;
         try {
             // find
             wdObj = watches.at(wd);
@@ -520,7 +292,7 @@ int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parent
                 wdObj->setParentWd(parentWd);
         } catch (const std::out_of_range&) {
             // add new wstch
-            wdObj = std::make_shared<Wd>(path, wd, parentWd);
+            wdObj = std::make_shared<DirectoryWatch>(path, wd, parentWd);
             watches.emplace(wd, wdObj);
         }
 
@@ -558,7 +330,7 @@ void AutoscanInotify::recheckNonexistingMonitor(int curWd, const fs::path& nonEx
     }
 }
 
-void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
+void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<DirectoryWatch>& wdObj)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     for (auto it = wdWatches->begin(); it != wdWatches->end(); /*++it*/) {
@@ -581,7 +353,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
                 log_debug("found wd to remove because of move event: {} {}", removeWd, path.c_str());
 
                 inotify->removeWatch(removeWd);
-                auto watchToRemove = getStartPoint(wdToRemove);
+                auto watchToRemove = wdToRemove->getStartPoint();
                 if (watchToRemove) {
                     auto adir = watchToRemove->getAutoscanDirectory();
                     if (adir && adir->persistent()) {
@@ -600,7 +372,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<Wd>& wdObj)
     }
 }
 
-void AutoscanInotify::recheckNonexistingMonitors(int wd, const std::shared_ptr<Wd>& wdObj)
+void AutoscanInotify::recheckNonexistingMonitors(int wd, const std::shared_ptr<DirectoryWatch>& wdObj)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     for (auto&& watch : *wdWatches) {
@@ -614,7 +386,7 @@ void AutoscanInotify::recheckNonexistingMonitors(int wd, const std::shared_ptr<W
     }
 }
 
-void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>& wdObj, const fs::path& nonExistingPath)
+void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<DirectoryWatch>& wdObj, const fs::path& nonExistingPath)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     auto it = std::find_if(wdWatches->begin(), wdWatches->end(),
@@ -634,7 +406,7 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Wd>
     }
 }
 
-std::shared_ptr<AutoscanInotify::Wd> AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool followSymlinks)
+std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool followSymlinks)
 {
     log_debug("start {}", startPath.path().c_str());
 
@@ -702,7 +474,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
         if (isStartPoint)
             parentWd = watchPathForMoves(path, wd, adir->getRetryCount());
 
-        std::shared_ptr<Wd> wdObj;
+        std::shared_ptr<DirectoryWatch> wdObj;
         try {
             wdObj = watches.at(wd);
             if (parentWd > INOTIFY_ROOT && wdObj->getParentWd() <= INOTIFY_ROOT) {
@@ -715,7 +487,7 @@ int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_pt
             // should we check for already existing "nonexisting" watches?
             // ...
         } catch (const std::out_of_range&) {
-            wdObj = std::make_shared<Wd>(path, wd, parentWd);
+            wdObj = std::make_shared<DirectoryWatch>(path, wd, parentWd);
             watches.emplace(wd, wdObj);
         }
 
@@ -772,7 +544,7 @@ void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared
     }
 }
 
-std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir)
+std::shared_ptr<WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(const std::shared_ptr<DirectoryWatch>& wdObj, const std::shared_ptr<AutoscanDirectory>& adir)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     for (auto&& watch : *wdWatches) {
@@ -786,39 +558,12 @@ std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateA
     return nullptr;
 }
 
-std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getAppropriateAutoscan(const std::shared_ptr<Wd>& wdObj, const fs::path& path)
-{
-    fs::path pathBestMatch;
-    std::shared_ptr<WatchAutoscan> bestMatch;
-    auto&& wdWatches = wdObj->getWdWatches();
-    for (auto&& watch : *wdWatches) {
-        if (watch->getType() == WatchType::Autoscan) {
-            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
-            if (watchAs->getNonExistingPath().empty()) {
-                fs::path testLocation = watchAs->getAutoscanDirectory()->getLocation();
-                if (isSubDir(path, testLocation)) {
-                    if (!pathBestMatch.empty()) {
-                        if (pathBestMatch < testLocation) {
-                            pathBestMatch = testLocation;
-                            bestMatch = watchAs;
-                        }
-                    } else {
-                        pathBestMatch = testLocation;
-                        bestMatch = watchAs;
-                    }
-                }
-            }
-        }
-    }
-    return bestMatch;
-}
-
 void AutoscanInotify::removeWatchMoves(int wd)
 {
     bool first = true;
     int checkWd = wd;
     do {
-        std::shared_ptr<Wd> wdObj;
+        std::shared_ptr<DirectoryWatch> wdObj;
         try {
             wdObj = watches.at(checkWd);
         } catch (const std::out_of_range&) {
@@ -851,7 +596,7 @@ void AutoscanInotify::removeWatchMoves(int wd)
     } while (checkWd > INOTIFY_ROOT);
 }
 
-bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const std::shared_ptr<Watch>& toRemove)
+bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<DirectoryWatch>& wdObj, const std::shared_ptr<Watch>& toRemove)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     auto it = std::find(wdWatches->begin(), wdWatches->end(), toRemove);
@@ -867,23 +612,10 @@ bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<Wd>& wdObj, const st
     return false;
 }
 
-std::shared_ptr<AutoscanInotify::WatchAutoscan> AutoscanInotify::getStartPoint(const std::shared_ptr<Wd>& wdObj)
-{
-    auto&& wdWatches = wdObj->getWdWatches();
-    for (auto&& watch : *wdWatches) {
-        if (watch->getType() == WatchType::Autoscan) {
-            auto watchAs = std::static_pointer_cast<WatchAutoscan>(watch);
-            if (watchAs->getIsStartPoint())
-                return watchAs;
-        }
-    }
-    return nullptr;
-}
-
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shared_ptr<AutoscanDirectory>& adir)
 {
     // log_debug("called for {}, (adir->path={}); adding {}", startPointWd, adir->getLocation().c_str(), addWd);
-    std::shared_ptr<Wd> wdObj;
+    std::shared_ptr<DirectoryWatch> wdObj;
     try {
         wdObj = watches.at(startPointWd);
     } catch (const std::out_of_range&) {
@@ -903,7 +635,7 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
 
 void AutoscanInotify::removeDescendants(int wd)
 {
-    std::shared_ptr<Wd> wdObj;
+    std::shared_ptr<DirectoryWatch> wdObj;
     try {
         wdObj = watches.at(wd);
     } catch (const std::out_of_range&) {

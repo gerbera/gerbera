@@ -18,8 +18,10 @@
 - Documentation: Update with new WebUI
 - FFMpeg: add custom logger
 - Fix discovery
+- Handle broken Systemd on some debian
 - Import: Add option case sensitive tags
 - Import: fix single file update
+- Insecure download due to ubuntu-20.04/armhf failing
 - Libexif: add custom logger
 - Logging: Separate description requests
 - Metadata: Unify handling and allow to disable
@@ -648,7 +650,7 @@
 - Update node modules to fix security issues
 - use auto
 - use auto with cast
-- Use better primary key for grb_cds_resource 
+- Use better primary key for grb_cds_resource
 - use braced init list
 - Use correct method to set attribute
 - use dynamic cast for derived classes
@@ -787,7 +789,7 @@
 - simplify bool
 - some auto&& removals
 - add missing std::vector
--  string_view should not be taken by reference 
+- string_view should not be taken by reference
 - Build debian with arguments
 - libfmt formatters for quoted SQL identifiers
 - Read flac audio properties even if image does not exist
@@ -1304,15 +1306,15 @@ In order to benefit from all these improvements it is recommended to clear your 
 ### MediaTomb v0.12.1 08.04.2010
 - fixed YouTube service support (got broken after they updated their
   website)
-- fixed a problem in soap response http headers (solves "access error" 
+- fixed a problem in soap response http headers (solves "access error"
   on Yamaha RX-V2065)
-- turned out the change log for 0.12.0 was not complete (various 
+- turned out the change log for 0.12.0 was not complete (various
   closed bugs were not mentioned)
 - fixed automatic id3lib detection when taglib is not available
 
 ### MediaTomb v0.12.0 25.03.2010
 - added video thumbnail generation using libffmpegthumbnailer
-- added configure settings which allow to enable sqlite backups by 
+- added configure settings which allow to enable sqlite backups by
   default
 - added cross compile defaults for the inotify check to configure
 - added configure check for broken libmagic on Slackware
@@ -1322,7 +1324,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - added storage cache
 - added storage insert buffering
 - fixed mysql "threads didn't exit" issue
-- implemented YouTube service support which allows to watch YouTube 
+- implemented YouTube service support which allows to watch YouTube
   videos on your UPnP player (in combination with transcoding)
 - added fixes to allow PCM playback on the PS3 and other devices,
   thanks to mru for his findings. This allows streaming transcoded
@@ -1331,7 +1333,7 @@ In order to benefit from all these improvements it is recommended to clear your 
   for the patch
 - fixed bug #1986789 - Error when renaming a playlist container
 - added parameter -D/--debug (enable debug output)
-- closed feature request #1934646 - added parameter --version 
+- closed feature request #1934646 - added parameter --version
   (prints version information
 - added parameter --compile-info (prints compile information)
 - fixed problem "Negative duration in .m3u files" (SF forum)
@@ -1358,7 +1360,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - fixed a problem where the upnp-string-limit function was not
   correctly truncating UTF-8 strings
 - fixed a bug where --enable-id3lib did not turn off the automatic
-  enabling of taglib, which then resulted in an error message saying, 
+  enabling of taglib, which then resulted in an error message saying,
   that both libraries are enabled
 - implemented feature request #2833402 - ability to change
   ffmpegthumbnailer param "image quallity"
@@ -1372,12 +1374,12 @@ In order to benefit from all these improvements it is recommended to clear your 
 - fixed bug #2779907 SQLITE3: (1) cannot start a transaction within a
   transaction
 - fixed bug #2820213 build broken with libmp4v2-1.9.0
-- fixed bug #2161155 inotify thread aborts 
+- fixed bug #2161155 inotify thread aborts
 - fixed bug #2011296 SVN rev 1844 doesn't show more than 10 files on
   PS3
 - fixed bug #1988738 web ui docs miss note how to access web ui
 - fixed bug #1929230 invalid XML in UPNP messages
-- fixed bug #1865386 autoscan dir already exists error 
+- fixed bug #1865386 autoscan dir already exists error
 - implemented feature request #2313953 support for forked libmp4v2
   project
 - implemented feature request #1955192 flag/mark watched video files
@@ -1387,18 +1389,18 @@ In order to benefit from all these improvements it is recommended to clear your 
 ### MediaTomb v0.11.0 01.03.2008  External transcoding support
 - implemented transcoding support that allows to plug in an arbitrary
   transcoding application
-- added fourcc detection for AVI files and transcoding options to 
+- added fourcc detection for AVI files and transcoding options to
   limit transcoding to certain fourcc's
-- added new metadata extractor using ffmpeg, patch submitted by 
+- added new metadata extractor using ffmpeg, patch submitted by
   Ingo Preiml
 - added vorbis / theora detection for ogg containers, so video files
   should not end up in audio containers anymore
 - fixed bug where database-file option was still checked even when
   MySQL was selected in the configuration
-- fixed a bug where check of the home directory was enforced even if 
+- fixed a bug where check of the home directory was enforced even if
   the configuration file was specified on command line
-- UTF-8 fix suggested by piman - taglib should handle UTF-8 correctly, 
-  so we will request an UTF-8 string from taglib and do not do the 
+- UTF-8 fix suggested by piman - taglib should handle UTF-8 correctly,
+  so we will request an UTF-8 string from taglib and do not do the
   conversion ourselves
 - UTF-8 fix for libextractor, basically same as with TagLib
 - added default mapping for flv files since they are not correctly
@@ -1433,7 +1435,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - added album art support for the PS3
 - fixed a bug where path used by add container chain was not converted
   to UTF-8
-- added patch for author and director extraction from id3 tags, 
+- added patch for author and director extraction from id3 tags,
   submitted by Reinhard Enders
 - init script for fedora now uses the -e option instead of grepping
   for the IP (old variant only worked on systems with english
@@ -1446,7 +1448,7 @@ In order to benefit from all these improvements it is recommended to clear your 
   the server
 - added patch from Gabriel Burca to extract keywords from id3 tags
 - added runtime inotify detection
-- added a workaround for the Noxon V1 which for some reasons sends 
+- added a workaround for the Noxon V1 which for some reasons sends
   us a double encoded ampersand XML sequences in the URL
 - implemented feature request #1771561, extension to mimetype mappings
   can now be case insensitive
@@ -1499,22 +1501,22 @@ In order to benefit from all these improvements it is recommended to clear your 
   "--enable-threadsafe"
 - fixed a bug where setting -p 0 did not trigger automatic
   port selection if it had to override the value in config.xml
-- fixed bug 1425424 - crash on a bad config.xml - we did not handle 
+- fixed bug 1425424 - crash on a bad config.xml - we did not handle
   the case where the <udn> tag was not present.
   Thanks to Nektarios K. Papadopoulos <npapadop@users.sourceforge.net>
   for the report and patch.
-- added configure option and adapted the code to completely 
+- added configure option and adapted the code to completely
   supress all log output
 - added configure option and adapted the code to supress
   debug output
 - added taglib support, thanks to Benhur Stein <benhur.stein@gmail.com>
-  for the patch. 
+  for the patch.
 - bug 1524468 (startup in daemon mode fails) does no longer occur
   after the integration of libupnp 1.4.x sources
 - fixed bug 1292295 (string conversion was failing on 64bit platforms)
 - fixed issue with ContainerUpdateIDs (were not sent out along with
   accepted subscription)
-- fixed issue where some directories could not be browsed (filesystem 
+- fixed issue where some directories could not be browsed (filesystem
   browser). It turned out that we forgot to convert the filenames
   to UTF-8, as the result invalid characters made their way into
   the XML that was feeded to the browser.
@@ -1528,7 +1530,7 @@ In order to benefit from all these improvements it is recommended to clear your 
   can also be used in the import script. import.js has been adapted
   to add tracknumbers to song names in the Album container.
 - added option to supress hidden files when browsing the filesystem
-- added X_MS_MediaReceiverRegistrar Service to allow future Xbox 360 
+- added X_MS_MediaReceiverRegistrar Service to allow future Xbox 360
   support
 - added workarounds to enable Telegent TG100 avi playback
 - server can now be restarted by sending it a SIGHUP
@@ -1562,7 +1564,7 @@ In order to benefit from all these improvements it is recommended to clear your 
   disabled.
 - added charset option to the import script, it is not possible to
   specify the script encoding
-- we now validate filesystem, metadata and scripting charsets upon 
+- we now validate filesystem, metadata and scripting charsets upon
   startup
 - added a special option that allows limiting title and description
   lengths in UPnP browse replies to a specified length; this was
@@ -1570,15 +1572,15 @@ In order to benefit from all these improvements it is recommended to clear your 
   browsing items where title length exceeds 101 characters.
 - import.js can now specify the upnp class of the last container in the
   chain
-- all items within a container which upnp class is set to 
-  object.container.album.musicAlbum will automatically be sorted by 
+- all items within a container which upnp class is set to
+  object.container.album.musicAlbum will automatically be sorted by
   track number.
 - added option to configure the presentation URL to make it easier
   for NAS vendors to integrate the server into their web UI
 - made model number configurable
 
 ### MediaTomb v0.8.1	07.09.2005
-- added "serve" directory, any files there can be downloaded 
+- added "serve" directory, any files there can be downloaded
   like from a normal webserver
 - implemented keyword extraction for auxdata from libexif
 - implemented keyword extraction for auxdata from libextractor
@@ -1587,7 +1589,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - added bitrate and duration attribute to mp3 res tag (via id3lib)
 - added auxdata field for items, auxilary data can be extracted
   and used by import scripts.
-- added configuration options to specify which aux fields should 
+- added configuration options to specify which aux fields should
   be extracted and filled by the library.
 - added mysql support
 - refined configure script, almost all dependencies are now
