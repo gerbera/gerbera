@@ -125,8 +125,6 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
         src/config/setup/config_setup_vector.h
-        src/content/autoscan_inotify.cc
-        src/content/autoscan_inotify.h
         src/content/autoscan_list.cc
         src/content/autoscan_list.h
         src/content/autoscan_setting.cc
@@ -137,6 +135,16 @@ add_library(libgerbera STATIC
         src/content/content_manager.h
         src/content/import_service.cc
         src/content/import_service.h
+        src/content/inotify/autoscan_inotify.cc
+        src/content/inotify/autoscan_inotify.h
+        src/content/inotify/directory_watch.cc
+        src/content/inotify/directory_watch.h
+        src/content/inotify/inotify_handler.cc
+        src/content/inotify/inotify_handler.h
+        src/content/inotify/inotify_types.h
+        src/content/inotify/mt_inotify.cc
+        src/content/inotify/mt_inotify.h
+        src/content/inotify/watch.h
         src/content/layout/builtin_layout.cc
         src/content/layout/builtin_layout.h
         src/content/layout/js_layout.cc
@@ -286,8 +294,6 @@ add_library(libgerbera STATIC
         src/util/logger.h
         src/util/mime.cc
         src/util/mime.h
-        src/util/mt_inotify.cc
-        src/util/mt_inotify.h
         src/util/process_executor.cc
         src/util/process_executor.h
         src/util/string_converter.cc

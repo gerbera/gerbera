@@ -605,6 +605,11 @@
           "editable": true
         },
         {
+          "item": "/import/attribute::inotify-attrib",
+          "caption": "Monitor Inotify Attribute Changes",
+          "editable": false
+        },
+        {
           "item": "/import/autoscan/timed/directory",
           "caption": "Timed Autoscan Directories",
           "type": "List",
@@ -701,6 +706,11 @@
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
               "caption": "Recursive",
               "editable": true
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::retry-count",
+              "caption": "Retry Count for Inotify Reads",
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::media-type",
@@ -1844,6 +1854,11 @@
         {
           "item": "/server/upnp/attribute::multi-value",
           "caption": "Enable Multi Value",
+          "editable": true
+        },
+        {
+          "item": "/server/upnp/attribute::dynamic-descriptions",
+          "caption": "Enable Dynamic Descriptions",
           "editable": true
         },
         {
