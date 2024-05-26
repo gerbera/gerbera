@@ -8,6 +8,7 @@ This update brings a new design for the start page, better logging for TagLib an
 
 - Configuration for case sensitive media tags (allow making them insensitive)
 - Configuration options for playlist layout
+- Configuration option to activate `IN_ATTRIB` event for, e.g. permission changes on disk incl. retry if that fails
 - WebUI: New design for home page and login screen
 - Allow metadata handler to be disabled, add charset support
 - UPnP specification files (description.xml, cds.xml) now reflect client quirks
