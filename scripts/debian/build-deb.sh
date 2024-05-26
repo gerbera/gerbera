@@ -25,6 +25,12 @@ SCRIPT_DIR=$(realpath "${SCRIPT_DIR}")/
 ROOT_DIR=$(dirname "$0")/../../
 ROOT_DIR=$(realpath "${ROOT_DIR}")/
 
+if [[ -f "${ROOT_DIR}scripts/gerbera-shell.sh" ]]; then
+  . "${ROOT_DIR}scripts/gerbera-shell.sh"
+else
+  echo "No script library found at ${ROOT_DIR}scripts/gerbera-shell.sh"
+fi
+
 function install-gcc {
   echo "::group::Installing GCC"
   # bionic defaults to gcc-7
@@ -53,73 +59,6 @@ function install-cmake() {
     sudo snap install core
     sudo snap install cmake --classic
   fi
-  echo "::endgroup::"
-}
-
-function install-fmt {
-  echo "::group::Installing fmt"
-  sudo bash "${ROOT_DIR}"scripts/install-fmt.sh static
-  echo "::endgroup::"
-}
-
-function install-spdlog() {
-  echo "::group::Installing spdlog"
-  sudo bash "${ROOT_DIR}"scripts/install-spdlog.sh static
-  echo "::endgroup::"
-}
-
-function install-googletest() {
-  echo "::group::Installing googletest"
-  sudo bash "${ROOT_DIR}"scripts/install-googletest.sh
-  echo "::endgroup::"
-}
-
-function install-npupnp() {
-  echo "::group::Installing libnpupnp"
-  sudo bash "${ROOT_DIR}"scripts/install-npupnp.sh
-  echo "::endgroup::"
-}
-
-function install-pupnp() {
-  echo "::group::Installing libupnp"
-  sudo bash "${ROOT_DIR}"scripts/install-pupnp.sh
-  echo "::endgroup::"
-}
-
-function install-taglib() {
-  echo "::group::Installing taglib"
-  sudo bash "${ROOT_DIR}"scripts/install-taglib.sh
-  echo "::endgroup::"
-}
-
-function install-ffmpegthumbnailer() {
-  echo "::group::Installing ffmpegthumbnailer"
-  sudo bash "${ROOT_DIR}"scripts/install-ffmpegthumbnailer.sh
-  echo "::endgroup::"
-}
-
-function install-pugixml() {
-  echo "::group::Installing pugixml"
-  sudo bash "${ROOT_DIR}"scripts/install-pugixml.sh
-  echo "::endgroup::"
-}
-
-function install-duktape() {
-  echo "::group::Installing duktape"
-  sudo bash "${ROOT_DIR}"scripts/install-duktape.sh
-  echo "::endgroup::"
-}
-
-function install-libexiv2() {
-  echo "::group::Installing libexiv2"
-  sudo bash "${ROOT_DIR}"scripts/install-libexiv2.sh static $*
-  echo "::endgroup::"
-}
-
-function install-matroska() {
-  echo "::group::Installing matroska"
-  sudo bash "${ROOT_DIR}"scripts/install-ebml.sh
-  sudo bash "${ROOT_DIR}"scripts/install-matroska.sh
   echo "::endgroup::"
 }
 
@@ -178,6 +117,7 @@ fi
 echo "Running $0 ${my_sys} ${my_upnp}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
+  libexif=""
   libexiv2=""
   libduktape=""
   libmatroska=""
@@ -187,6 +127,7 @@ if [[ "${my_sys}" == "HEAD" ]]; then
     libmatroska="libebml-dev libmatroska-dev"
   fi
 else
+  libexif="libexif-dev"
   libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
   libmatroska="libebml-dev libmatroska-dev"
@@ -231,7 +172,7 @@ if [[ ! -d build-deb ]]; then
       ${libduktape} \
       ${libmatroska} \
       ${libexiv2} \
-      libexif-dev \
+      ${libexif} \
       ${ffmpegthumbnailer} \
       libwavpack1 libwavpack-dev \
       libmagic-dev \
@@ -250,6 +191,7 @@ if [[ ! -d build-deb ]]; then
 
   if [[ "${my_sys}" == "HEAD" ]]; then
     install-googletest
+    install-libexif
     install-libexiv2 head
     install-pugixml
     install-duktape

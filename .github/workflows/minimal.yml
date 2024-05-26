@@ -15,10 +15,11 @@ jobs:
     strategy:
       matrix:
         platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le']
-        branch: ['latest-stable']
+        branch: ['v3.19']
         include:
           - platform: 'riscv64'
             branch: 'edge'
+    name: Minimal ${{matrix.platform}}
     defaults:
       run:
         shell: alpine.sh {0}

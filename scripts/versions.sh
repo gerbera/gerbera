@@ -23,6 +23,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     DUKTAPE="2.2.1"
     EBML="1.3.9"
     EXIV2="v0.26"
+    EXIF="v0.6.22"
     FFMPEGTHUMBNAILER="2.2.0"
     FMT="7.1.3"
     GOOGLETEST="1.10.0"
@@ -40,6 +41,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     DUKTAPE="2.6.0"
     EBML="1.3.9"
     EXIV2="v0.27.7"
+    EXIF="v0.6.24"
     FFMPEGTHUMBNAILER="2.2.2"
     FMT="9.1.0"
     GOOGLETEST="1.10.0"
@@ -57,6 +59,8 @@ else
     DUKTAPE="2.7.0"
     EBML="1.4.5"
     EXIV2="v0.28.2"
+    EXIF="v0.6.24"
+    EXIF_commit="87abeae2a492629cd54e6bb38345b4d1d55b288d"
     FFMPEGTHUMBNAILER="2.2.2"
     FFMPEGTHUMBNAILER_commit="1b5a77983240bcf00a4ef7702c07bcd8f4e5f97c"
     FMT="10.2.1"
@@ -137,12 +141,14 @@ function installDeps()
     distr=${lsb_distro}
     if [[ "${lsb_distro}" == "ubuntu" ]]; then
         distr="debian"
+    elif [[ "${lsb_distro}" == "suse" ]]; then
+        distr="opensuse"
     fi
     dep_file="${root_dir}/${distr}/dep-${package}.sh"
     if [[ -f "${dep_file}" ]]; then
         . ${dep_file}
     else
-	echo "No dep file ${dep_file}"
+        echo "No dep file ${dep_file}"
     fi
 }
 

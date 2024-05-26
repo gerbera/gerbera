@@ -10,82 +10,109 @@ When gerbera is already installed, running ``gerbera --compile-info`` will show 
 
 .. _gerbera-requirements:
 
+Development Environment
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Gerbera supports compiling with g++ (from version 9) and clang (from version 11).
+You also have to install cmake (at least version 3.19), pkg-config and autoconf.
+
 Dependencies
 ~~~~~~~~~~~~
 
 .. Note:: Remember to install associated development packages, because development headers are needed for compilation!
 
-In order to compile Gerbera you will have to install the following packages:
+In order to compile Gerbera you will have to install the following packages if the respective compile-time option is set to ``ON``.
 
+Required Packages
+-----------------
 
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| Library             | Required?     | Note                       | Compile-time option     | Default  | Script                       |
-+=====================+===============+============================+=========================+==========+==============================+
-| libpupnp_           | XOR libnpupnp | pupnp                      |                         |          | install-pupnp.sh             |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libnpupnp_          | XOR libupnp   | npupnp                     | WITH\_NPUPNP            | Disabled |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libuuid             | Depends on OS | Not required on \*BSD      |                         |          |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| pugixml_            | Required      | XML file and data support  |                         |          | install-pugixml.sh           |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libiconv            | Required      | Charset conversion         |                         |          |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| sqlite3             | Required      | Database storage           |                         |          |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| zlib                | Required      | Data compression           |                         |          |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| fmtlib_             | Required      | Fast string formatting     |                         |          | install-fmt.sh               |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| spdlog_             | Required      | Runtime logging            |                         |          | install-spdlog.sh            |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| duktape_            | Optional      | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| mysql               | Optional      | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| curl                | Optional      | Enables web services       | WITH\_CURL              | Enabled  |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| taglib_             | Optional      | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| wavpack_            | Optional      | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libmagic            | Optional      | File type detection        | WITH\_MAGIC             | Enabled  |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libmatroska_        | Optional      | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
-| libebml_            | Optional      | required for MKV           |                         | Enabled  | install-ebml.sh              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| ffmpeg/libav        | Optional      | File metadata              | WITH\_AVCODEC           | Disabled |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libexif             | Optional      | JPEG Exif metadata         | WITH\_EXIF              | Enabled  |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| libexiv2_           | Optional      | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| lastfmlib_          | Optional      | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| ffmpegthumbnailer_  | Optional      | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| inotify             | Optional      | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
-| googletest_         | Optional      | Running tests              | WITH\_TESTS             | Disabled | install-googletest.sh        |
-+---------------------+---------------+----------------------------+-------------------------+----------+------------------------------+
++------------+------------------------------+---------------------+--------------------+
+| Library    | Note                         | Compile-time option | Script             |
++============+==============================+=====================+====================+
+| libpupnp_  | UPnP protocol support        |                     | install-pupnp.sh   |
+|            | by **pupnp** (XOR libnpupnp),|                     |                    |
+|            | enabled by default           |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| libnpupnp_ | UPnP protocol support        | WITH\_NPUPNP        | install-npupnp.sh  |
+|            | by **npupnp** (XOR libupnp), |                     |                    |
+|            | disabled by default          |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| libuuid    | Depends on OS.               |                     |                    |
+|            | Not required on \*BSD        |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| pugixml_   | XML file and data support    |                     | install-pugixml.sh |
++------------+------------------------------+---------------------+--------------------+
+| libiconv   | Charset conversion           |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| sqlite3    | Database storage             |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| zlib       | Data compression             |                     |                    |
++------------+------------------------------+---------------------+--------------------+
+| fmtlib_    | Fast string formatting       |                     | install-fmt.sh     |
++------------+------------------------------+---------------------+--------------------+
+| spdlog_    | Runtime logging              |                     | install-spdlog.sh  |
++------------+------------------------------+---------------------+--------------------+
+
+Optional Packages
+-----------------
+
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| Library             | Note                       | Compile-time option     | Default  | Script                       |
++=====================+============================+=========================+==========+==============================+
+| curl                | Enables web services       | WITH\_CURL              | Enabled  |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| duktape_            | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| ffmpeg/libav        | File metadata              | WITH\_AVCODEC           | Disabled |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| ffmpegthumbnailer_  | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| googletest_         | Running tests              | WITH\_TESTS             | Disabled | install-googletest.sh        |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| inotify             | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| lastfmlib_          | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libebml_            | required for MKV           | WITH\_MATROSKA          | Enabled  | install-ebml.sh              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libexif_            | JPEG Exif metadata         | WITH\_EXIF              | Enabled  | install-libexif.sh           |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libexiv2_           | Exif, IPTC, XMP metadata   | WITH\_EXIV2             | Disabled | install-libexiv2.sh          |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libmagic            | File type detection        | WITH\_MAGIC             | Enabled  |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libmatroska_        | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| mysql               | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| taglib_             | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| wavpack_            | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
 
 .. _duktape: https://duktape.org
-.. _libexiv2: https://github.com/Exiv2/exiv2
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _googletest: https://github.com/google/googletest
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
-.. _libmatroska: https://github.com/Matroska-Org/libmatroska
 .. _libebml: https://github.com/Matroska-Org/libebml
+.. _libexif: https://github.com/libexif/libexif
+.. _libexiv2: https://github.com/Exiv2/exiv2
+.. _libmatroska: https://github.com/Matroska-Org/libmatroska
 .. _libnpupnp: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
-.. _pugixml: https://github.com/zeux/pugixml
 .. _libpupnp: https://github.com/pupnp/pupnp
+.. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog
 .. _taglib: https://taglib.org/
 .. _wavpack: https://www.wavpack.com/
 
-Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version of the package.
-Make sure no other version of the development package is installed.
+Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version
+of the package. The scripts automatically install prerequisites for debian/ubuntu and opensuse/suse.
+
+In order to build the whole package there are ``scripts/debian/build-deb.sh`` and ``scripts/opensuse/build-suse.sh`` which also take the 
+different requirements of distribution versions into account.
+
+Make sure no conflicting versions of the development packages are installed.
 
 
 .. index:: Quick Start Build
@@ -99,7 +126,7 @@ Quick Start Build
   mkdir build
   cd build
   cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
-  -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+    -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
   make -j4
   sudo make install
 
@@ -198,9 +225,9 @@ options and libfmt from source
 
 ::
 
-  wget "https://github.com/pupnp/pupnp/releases/download/release-1.14.10/libupnp-1.14.10.tar.bz2" -O libupnp-1.14.10.tar.bz2
-  tar -xf libupnp-1.14.10.tar.bz2
-  cd libupnp-1.14.10
+  wget "https://github.com/pupnp/pupnp/releases/download/release-1.14.19/libupnp-1.14.19.tar.bz2" -O libupnp-1.14.19.tar.bz2
+  tar -xf libupnp-1.14.19.tar.bz2
+  cd libupnp-1.14.19
   ./configure --enable-ipv6 --enable-reuseaddr --disable-blocking-tcp-connections
   make
   sudo make install
@@ -261,6 +288,7 @@ This guide is based on building Gerbera on Pogo Kirkwood Armel architecture boxe
 4. Use Apt-get to install the rest of the dev packages as per dependencies list. It is best to load fmtlib-dev and libspdlog.dev from the Buster Backports
 
 5. Clone the Gerbera git and edit the CMakeLists.txt file and comment the original version and add the new.
+
 ::
 
   # set(GERBERA_VERSION "git")
@@ -275,6 +303,7 @@ and add these lines to make the debian package
   include(packaging)
 
 6. This is the Cmake command:
+
 ::
 
   cmake -g DEB ../gerbera -DWITH_NPUPNP=YES -DWITH_JS=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_TAGLIB=1 -DWITH_MAGIC=1 -DWITH_MATROSKA=0 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_EXIV2=0 -DWITH_LASTFM=0 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_INOTIFY=1
@@ -286,6 +315,7 @@ Resolve any dependency issues now!
 8. ``cpack -G DEB`` will create a debian package file - All being well - no errors. Use dpkg to install.
 
 9. follow the gerbera manual for installation. Create the gerbera user (give the user a home directory e.g. /home/gerbera). Make the /etc/gerbera folder and get the config.xml. Symbolic link the config file:
+
 ::
 
   ln -s /etc/gerbera/config.xml /home/gerbera/.config/gerbera
@@ -296,16 +326,19 @@ Symbolic link the web directory:
   ln -s /usr/share/gerbera /usr/local/share
 
 10. Edit ``config.xml`` and change the path to
+
 ::
 
   <home>/home/gerbera/.config/gerbera</home>
 
 11. Start gerbera with the standard launch command. The server should start - watch the messages for errors. Check the web interface functions too. when happy that all is good - control-c to get back to shell
+
 ::
 
   gerbera -c /etc/gerbera/config.xml
 
 12. For SystemD users, copy the gerbera.service script into /usr/systemd/system and edit it to correct the path to the gerbera server the use the systemctl command as per the manual to start and stop the server and debug any problems.
+
 ::
 
   ExecStart=/usr/bin/gerbera -c /etc/gerbera/config.xml
@@ -313,6 +346,7 @@ Symbolic link the web directory:
 13. For init.d users, you need a gerbera script which I took from the earlier version which is in the Debian APT library
 
 14. You need to put your new gerbera package on hold to prevent apt-get upgrade downgrading back to 1.1
+
 ::
 
   apt-mark hold gerbera
@@ -329,6 +363,7 @@ Build On FreeBSD
 
 1. Install the required :ref:`prerequisites <gerbera-requirements>` as root using either ports or packages. This can be done via Package manager or ports.
 (pkg manager is used here.)  Include mysql if you wish to use that instead of SQLite3.
+
 ::
 
   pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg \
@@ -336,6 +371,7 @@ Build On FreeBSD
 
 
 2. Clone repository, build depdences in current in ports and then build gerbera.
+
 ::
 
   git clone https://github.com/gerbera/gerbera.git
@@ -422,13 +458,13 @@ First Steps
 
     git clone git@github.com:your-username/gerbera.git
 
-2. Make your change.
+3. Make your change.
 
-3. Compile and run ``ctest`` if tests are enabled
+4. Compile and run ``ctest`` if tests are enabled
 
-4. Push to your fork
+5. Push to your fork
 
-5. Submit a `pull request <https://github.com/gerbera/gerbera/compare>`__.
+6. Submit a `pull request <https://github.com/gerbera/gerbera/compare>`__.
 
 Some things that will increase the chance that your pull request is accepted:
 

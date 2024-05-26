@@ -19,12 +19,13 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - name: gcc 9
+          - name: gcc
             cc: gcc-9
             cxx: g++-9
-          - name: clang 11
+          - name: clang
             cc: clang-11
             cxx: clang++-11
+    name: Compile ${{ matrix.compiler.name }}
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}

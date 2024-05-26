@@ -64,7 +64,7 @@ sudo make install
 | [libmatroska]       |             | 1.6.3       | 1.7.1         | Optional      | MKV metadata               | Enabled  |
 | [libebml]           |             | 1.4.2       | 1.4.5         | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |               | Optional      | File metadata              | Disabled |
-| libexif             |             |             |               | Optional      | JPEG Exif metadata         | Enabled  |
+| [libexif]           |             | v0.6.24     | v0.6.24-89-g87abeae  | Optional      | JPEG Exif metadata         | Enabled  |
 | [libexiv2]          | v0.26       | v0.27.7     | v0.28.2       | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0         | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.2       | 2.2.2-60-g1b5a779  | Optional      | Generate video thumbnails  | Disabled |
@@ -99,6 +99,7 @@ sudo make install
 [googletest]: https://github.com/google/googletest
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [libebml]: https://github.com/Matroska-Org/libebml
+[libexif]: https://github.com/libexif/libexif
 [libexiv2]: https://github.com/Exiv2/exiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html

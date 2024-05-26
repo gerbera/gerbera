@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cd $(dirname "${BASH_SOURCE[0]}")
 ROOT_PATH=$PWD
 DOC_BUILD_DIR=$PWD/_build
 DOC_DIST_DIR=$DOC_BUILD_DIR/dist
