@@ -227,6 +227,13 @@ fi
 
 deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
+set +e
+SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
+WITH_SYSTEMD="ON"
+if [[ -z "${SYSTEMD_BROKEN}" ]]; then
+  WITH_SYSTEMD="OFF"
+fi
+set -e
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
@@ -239,6 +246,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   set -o pipefail
 
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
+    -DWITH_SYSTEMD=${WITH_SYSTEMD} \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
