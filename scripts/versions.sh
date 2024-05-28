@@ -123,7 +123,7 @@ function downloadSource()
 
     cd "${src_dir}"
 
-    if [[ $# -gt 2 ]]; then
+    if [[ $# -gt 2 && -f "${3}" ]]; then
         patch -p1 < ${3}
     fi
 

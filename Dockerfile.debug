@@ -3,19 +3,21 @@ ARG BASE_IMAGE=alpine:edge
 FROM ${BASE_IMAGE} AS builder
 
 RUN apk add --no-cache  \
+    sudo \
     bash \
     cmake zlib-dev \
     curl-dev \
     ffmpeg4-dev \
-    jpeg-dev \
     file-dev \
     g++ \
     gcc \
     gdb \
     git \
-    libexif-dev \
-    expat-dev brotli-dev inih-dev inih-inireader-dev \
     make \
+    patch \
+    tar \
+    xz \
+    lsb-release \
     mariadb-connector-c-dev \
     pkgconf \
     sqlite-dev \
@@ -23,7 +25,6 @@ RUN apk add --no-cache  \
     util-linux-dev \
     # libexecinfo-dev \
     # libexecinfo \
-    # packages to build libupnp \
     autoconf \
     automake \
     libtool \
@@ -33,62 +34,80 @@ RUN apk add --no-cache  \
 # Build fmt
 WORKDIR /fmt_build
 COPY scripts/install-fmt.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-fmt.sh
 
 # Build spdlog
 WORKDIR /spdlog_build
 COPY scripts/install-spdlog.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-spdlog.sh
 
 # Build taglib
 WORKDIR /taglib_build
 COPY scripts/install-taglib.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-taglib.sh
 
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build wavpack
-WORKDIR /ebml_build
+WORKDIR /wavpack_build
 COPY scripts/install-wavpack.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-wavpack.sh
 
 # Build ebml
 WORKDIR /ebml_build
 COPY scripts/install-ebml.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-ebml.sh
 
 # Build matroska
 WORKDIR /mastroska_build
 COPY scripts/install-matroska.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-matroska.sh
 
 # Build pugixml
 WORKDIR /pugixml_build
 COPY scripts/install-pugixml.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-pugixml.sh
 
 # Build googletest
 WORKDIR /gtest_build
 COPY scripts/install-googletest.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-googletest.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-pupnp.sh
 
 # Build duktape
 WORKDIR /duktape_build
 COPY scripts/install-duktape.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-duktape.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
 COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-libexiv2.sh
+
+# Build libexif
+WORKDIR /libexif_build
+COPY scripts/install-libexif.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
+RUN ./install-libexif.sh
 
 # Build Gerbera
 WORKDIR /gerbera_build
@@ -144,6 +163,8 @@ COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
 # Copy libexiv2
 COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
+# Copy libexif
+COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

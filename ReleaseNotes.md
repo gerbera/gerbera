@@ -27,7 +27,8 @@ This update brings a new design for the start page, better logging for TagLib an
 ### Code Improvements
 
 - Rework of server mechanism for file and data requests
-- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1)
+- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1), ffmpegthumbnailer(2.2.2-60-g1b5a779)
+- Allow building of libexif (up to v0.6.24-89-g87abeae)
 
 ## 2.1.0
 

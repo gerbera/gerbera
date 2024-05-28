@@ -4,6 +4,8 @@
 
 - Adding consistent album artist support
 - Build support for libnpupnp 6.1.2
+- Build: Add install scripts for OpenSuSE
+- Build: Add install scripts for alpine/docker
 - Build: Allow build of ffmpegthumbnailer without ffmpeg
 - Build: rework dependency handling
 - CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
