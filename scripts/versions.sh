@@ -102,7 +102,7 @@ function downloadSource()
         if [[ $# -gt 1 ]]; then
             set +e
         fi
-        wget ${1} -O "${tgz_file}"
+        wget ${1} --no-hsts --no-check-certificate -O "${tgz_file}"
         WGET_RES=$?
         if [[ ! -f "${tgz_file}" || (${WGET_RES} -eq 8 && $# -gt 1 && "${2}" != "-") ]]; then
             set -e
