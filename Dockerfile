@@ -1,24 +1,25 @@
-ARG BASE_IMAGE=alpine:3.19
+ARG BASE_IMAGE=alpine:3.20
 FROM ${BASE_IMAGE} AS builder
 
 RUN apk add --no-cache  \
+    sudo \
     bash \
     cmake zlib-dev \
     curl-dev \
     duktape-dev \
     ffmpeg4-dev \
-    jpeg-dev \
     file-dev \
     fmt-dev \
     g++ \
     gcc \
     git \
     libebml-dev \
-    expat-dev brotli-dev inih-dev inih-inireader-dev \
-    libexif-dev \
     libmatroska-dev \
     wavpack wavpack-dev \
     make \
+    patch \
+    tar \
+    lsb-release \
     mariadb-connector-c-dev \
     pkgconf \
     pugixml-dev \
@@ -27,7 +28,6 @@ RUN apk add --no-cache  \
     taglib-dev \
     tini \
     util-linux-dev \
-    # packages to build libupnp
     autoconf \
     automake \
     libtool \
@@ -37,17 +37,26 @@ RUN apk add --no-cache  \
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-pupnp.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
 COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
 RUN ./install-libexiv2.sh
+
+# Build libexif
+WORKDIR /libexif_build
+COPY scripts/install-libexif.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
+RUN ./install-libexif.sh
 
 # Build Gerbera
 WORKDIR /gerbera_build
@@ -91,6 +100,8 @@ RUN apk add --no-cache \
 COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/libupnp.so* /usr/lib/
 # Copy libexiv2
 COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
+# Copy libexif
+COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
 
