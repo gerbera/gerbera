@@ -85,7 +85,7 @@
                 <xs:element ref="upnp" minOccurs="0"/>
                 <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
-            <xs:attribute name="debug-mode" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="debug-mode" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -127,14 +127,14 @@
 
     <xs:element name="udn" type="xs:string"/>
 
-    <xs:element name="home" type="xs:string" default="~">
+    <xs:element name="home" default="~">
         <xs:complexType>
             <xs:simpleContent>
                 <xs:extension base="xs:string">
-            <xs:attribute name="override" type="boolean" default="no"/>
+                    <xs:attribute name="override" type="boolean" default="no"/>
                 </xs:extension>
             </xs:simpleContent>
-        </xs:complexType>´
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="webroot" type="xs:string"/>
@@ -418,6 +418,7 @@
     <xs:element name="username" type="xs:string" default="mediatomb"/>
     <xs:element name="password" type="xs:string"/>
     <xs:element name="database" type="xs:string" default="localhost"/>
+    <xs:element name="init-sql-file" type="xs:string"/>
     <xs:element name="socket" type="xs:string"/>
     <xs:element name="upgrade-file" type="xs:string"/>
 
@@ -503,7 +504,7 @@
 
     <xs:element name="upnp-namespace">
         <xs:complexType>
-            <xs:attribute name="xmlns" type="xs:string" use="required"/>
+            <xs:attribute name="FIXMExmlns" type="xs:string" use="required"/>
             <xs:attribute name="uri" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
@@ -527,8 +528,8 @@
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="header" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="ip" type="xs:string" minOccurs="0"/>
-            <xs:attribute name="userAgent" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="ip" type="xs:string"/>
+            <xs:attribute name="userAgent" type="xs:string"/>
             <xs:attribute name="flags" type="xs:string" use="required"/>
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
             <xs:attribute name="upnp-string-limit" default="-1"/>
@@ -634,7 +635,7 @@
     </xs:element>
     <xs:element name="audio-file" type="xs:string"/>
     <xs:element name="video-file" type="xs:string"/>
-    <xs:element name="imyge-file" type="xs:string"/>
+    <xs:element name="image-file" type="xs:string"/>
     <xs:element name="meta-file" type="xs:string"/>
     <xs:element name="trailer" type="xs:string"/>
     <xs:element name="playlist">
@@ -653,8 +654,8 @@
                 <xs:element ref="import-script" minOccurs="0"/>
                 <xs:element ref="script-options" minOccurs="0"/>
                 <xs:element ref="genre-map" minOccurs="0"/>
-                <xs:element ref="box-layout " minOccurs="0"/>
-                <xs:element ref="structured-layout " minOccurs="0"/>
+                <xs:element ref="boxlayout" minOccurs="0"/>
+                <xs:element ref="structured-layout" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -740,7 +741,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="box-layout">
+    <xs:element name="boxlayout">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="box" minOccurs="0" maxOccurs="unbounded"/>
@@ -753,7 +754,7 @@
             <xs:attribute name="key" type="xs:string"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="class" type="xs:string"/>
-            <xs:attribute name="enabled" type="boolean" default="true"/>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="size" type="xs:positiveInteger" default="1"/>
         </xs:complexType>
     </xs:element>
@@ -926,7 +927,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="order" minOccurs="0"/>
-                <xs:element ref="container" minOccurs="0"/>
+                <xs:element name="container" type="resContainer" minOccurs="0"/>
                 <xs:element ref="fanart" minOccurs="0"/>
                 <xs:element ref="subtitle" minOccurs="0"/>
                 <xs:element ref="metafile" minOccurs="0"/>
@@ -944,16 +945,14 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="container">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="add-file" minOccurs="0"/>
-                <xs:element ref="add-dir" minOccurs="0"/>
-            </xs:sequence>
-            <xs:attribute name="parentCount" default="2"/>
-            <xs:attribute name="minDepth" default="2"/>
-        </xs:complexType>
-    </xs:element>
+    <xs:complexType name="resContainer">
+        <xs:sequence>
+            <xs:element ref="add-file" minOccurs="0"/>
+            <xs:element ref="add-dir" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="parentCount" default="2"/>
+        <xs:attribute name="minDepth" default="2"/>
+    </xs:complexType>
 
     <xs:element name="fanart">
         <xs:complexType>
@@ -1020,8 +1019,8 @@
                 <xs:element ref="mkv" minOccurs="0"/>
                 <xs:element ref="wavpack" minOccurs="0"/>
             </xs:all>
-            <xs:attribute name="multi-value-separator" type="xs:string" minOccurs="0" default="; "/>
-            <xs:attribute name="legacy-value-separator" type="xs:string" minOccurs="0"/>
+            <xs:attribute name="multi-value-separator" type="xs:string" default="; "/>
+            <xs:attribute name="legacy-value-separator" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1031,9 +1030,9 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="exiv2">
@@ -1042,9 +1041,9 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="ffmpeg">
@@ -1053,19 +1052,23 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="mkv">
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:complexType>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="wavpack">
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
+        <xs:complexType>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="id3">
@@ -1074,9 +1077,9 @@
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
-        <xs:attribute name="enabled" type="boolean" default="yes"/>
-        <xs:attribute name="charset" type="xs:string" minOccurs="0"/>
     </xs:element>
 
     <xs:element name="auxdata">
@@ -1180,11 +1183,11 @@
 
     <xs:element name="agent">
         <xs:complexType>
-            <xs:attribute name="command" type="xs:string" use="required"/>
-            <xs:attribute name="arguments" type="xs:string" use="required"/>
             <xs:sequence>
                 <xs:element ref="environ" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="command" type="xs:string" use="required"/>
+            <xs:attribute name="arguments" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
