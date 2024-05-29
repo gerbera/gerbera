@@ -613,24 +613,26 @@
     <xs:element name="script-folder">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="common-folder" minOccurs="0"/>
-                <xs:element ref="custom-folder" minOccurs="0"/>
+                <xs:element ref="common" minOccurs="0"/>
+                <xs:element ref="custom" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+    <xs:element name="common" type="xs:string"/>
+    <xs:element name="custom" type="xs:string"/>
     <xs:element name="common-folder" type="xs:string"/>
     <xs:element name="custom-folder" type="xs:string"/>
 
     <xs:element name="import-function">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="audio-file" minOccurs="0"/>
                 <xs:element ref="video-file" minOccurs="0"/>
                 <xs:element ref="image-file" minOccurs="0"/>
                 <xs:element ref="playlist" minOccurs="0"/>
                 <xs:element ref="meta-file" minOccurs="0"/>
                 <xs:element ref="trailer" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
         </xs:complexType>
     </xs:element>
     <xs:element name="audio-file" type="xs:string"/>
