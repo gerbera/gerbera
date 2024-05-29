@@ -503,10 +503,10 @@ Below are the available scripting options:
 
             ::
 
-                enabled="false"
+                enabled="no"
 
             * Optional
-            * Default: "true"
+            * Default: "yes"
 
             Disable the respective box. Not all boxes can be disabled.
 
