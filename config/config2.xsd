@@ -30,7 +30,7 @@
 
     $Id$
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/config/2" xmlns="http://mediatomb.cc/config/2">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/config/2" xmlns="http://mediatomb.cc/config/2" elementFormDefault="qualified">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
@@ -658,13 +658,13 @@
 
     <xs:element name="virtual-layout">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="import-script" minOccurs="0"/>
                 <xs:element ref="script-options" minOccurs="0"/>
                 <xs:element ref="genre-map" minOccurs="0"/>
                 <xs:element ref="boxlayout" minOccurs="0"/>
                 <xs:element ref="structured-layout" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
@@ -787,6 +787,15 @@
             <xs:sequence>
                 <xs:element ref="directory" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="use-inotify">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="auto"/>
+                        <xs:enumeration value="yes"/>
+                        <xs:enumeration value="no"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
@@ -800,7 +809,7 @@
             <xs:attribute name="hidden-files" type="boolean"/>
             <xs:attribute name="follow-symlinks" type="boolean"/>
             <xs:attribute name="recursive" type="boolean" use="required"/>
-            <xs:attribute name="mediatype" type="xs:string"/>
+            <xs:attribute name="media-type" type="xs:string"/>
             <xs:attribute name="container-type-audio" type="xs:string"/>
             <xs:attribute name="container-type-image" type="xs:string"/>
             <xs:attribute name="container-type-video" type="xs:string"/>
@@ -842,7 +851,7 @@
             <xs:sequence>
                 <xs:element ref="path" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="enabled" type="boolean" default="no"/>
+            <xs:attribute name="parent-path" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -958,6 +967,7 @@
             <xs:element ref="add-file" minOccurs="0"/>
             <xs:element ref="add-dir" minOccurs="0"/>
         </xs:sequence>
+        <xs:attribute name="location"/>
         <xs:attribute name="parentCount" default="2"/>
         <xs:attribute name="minDepth" default="2"/>
     </xs:complexType>
@@ -1248,14 +1258,7 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-            <xs:attribute name="purge-after" default="no">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="yes"/>
-                        <xs:enumeration value="no"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" />
             <xs:attribute name="resolution" type="xs:nonNegativeInteger" default="640"/>
         </xs:complexType>
     </xs:element>
