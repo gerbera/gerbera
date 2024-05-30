@@ -66,10 +66,12 @@
                 <xs:element ref="storage"/>
                 <xs:element ref="ip" minOccurs="0"/>
                 <xs:element ref="interface" minOccurs="0"/>
+                <xs:element ref="modelURL" minOccurs="0"/>
                 <xs:element ref="modelName" minOccurs="0"/>
                 <xs:element ref="modelNumber" minOccurs="0"/>
                 <xs:element ref="bookmark" minOccurs="0"/>
                 <xs:element ref="model" minOccurs="0"/>
+                <xs:element ref="manufacturer" minOccurs="0"/>
                 <xs:element ref="manufacturerURL" minOccurs="0"/>
                 <xs:element ref="virtualURL" minOccurs="0"/>
                 <xs:element ref="externalURL" minOccurs="0"/>
@@ -101,7 +103,11 @@
 
     <xs:element name="modelNumber" type="xs:string"/>
 
+    <xs:element name="modelURL" type="xs:string"/>
+
     <xs:element name="modelDescription" type="xs:string"/>
+
+    <xs:element name="manufacturer" type="xs:string"/>
 
     <xs:element name="manufacturerURL" type="xs:string" default="http://mediatomb.cc/"/>
 
