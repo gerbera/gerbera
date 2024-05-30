@@ -284,7 +284,7 @@ For example: A value of 62 will result in an SSDP advertisement being sent every
 The default value of 180 results results in alive messages every 60s. (180 / 2 = 90) - 30 = 60.
 
 Note:
-   If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes, 
+   If you experience disconnection problems from your device, e.g. Playstation 4, when streaming videos after about 5 minutes,
    you can try changing the alive value to 86400 (which is 24 hours)
 
 ``pc-directory``
@@ -534,7 +534,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
     * Default: **no**
 
     Enables transactions. This feature should improve the overall import speed and avoid race-conditions on import.
-    The feature caused some issues and set to **no**. If you want to support testing, turn it to **yes** and report 
+    The feature caused some issues and set to **no**. If you want to support testing, turn it to **yes** and report
     if you can reproduce the issue.
 
     **SQLite**
@@ -901,9 +901,9 @@ This section defines the properties which are send to UPnP clients as part of th
 
         * Required
 
-        Name of the metadata tag to export in upnp response. The following values are supported: 
-        M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION, 
-        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_CREATOR, M_AUTHOR, M_DIRECTOR, M_PUBLISHER, 
+        Name of the metadata tag to export in upnp response. The following values are supported:
+        M_TITLE, M_ARTIST, M_ALBUM, M_DATE, M_UPNP_DATE, M_GENRE, M_DESCRIPTION, M_LONGDESCRIPTION,
+        M_PARTNUMBER, M_TRACKNUMBER, M_ALBUMARTURI, M_REGION, M_CREATOR, M_AUTHOR, M_DIRECTOR, M_PUBLISHER,
         M_RATING, M_ACTOR, M_PRODUCER, M_ALBUMARTIST, M_COMPOSER, M_CONDUCTOR, M_ORCHESTRA.
 
         Instead of metadata, you may also use auxdata entries as defined in ``library-options``.
