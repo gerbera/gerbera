@@ -87,6 +87,18 @@ Specifies the interface to bind to, by default one of the available interfaces w
 
 Server friendly name, you will see this on your devices that you use to access the server.
 
+``manufacturer``
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <manufacturer>Gerbera Developers</manufacturer>
+
+* Optional
+* Default: empty
+
+This tag sets the manufacturer name of a UPnP device.
+
 ``manufacturerURL``
 ~~~~~~~~~~~~~~~~~~~
 
@@ -151,6 +163,18 @@ enable special features that otherwise are only active with the vendor implement
 
 This tag sets the model number of a UPnP device, a custom setting may be necessary to trick some renderers in order
 to enable special features that otherwise are only active with the vendor implemented server.
+
+``modelURL``
+~~~~~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <modelURL>http://example.org/product-23</modelURL>
+
+* Optional
+* Default: empty
+
+This tag sets the model URL (homepage) of a UPnP device.
 
 ``serialNumber``
 ~~~~~~~~~~~~~~~~
