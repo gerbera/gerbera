@@ -1178,6 +1178,7 @@
                 <xs:element ref="accept-ogg-theora" minOccurs="0"/>
                 <xs:element ref="agent"/>
                 <xs:element ref="buffer"/>
+                <xs:element ref="sample-frequency" minOccurs="0"/>
                 <xs:element ref="resolution" minOccurs="0"/>
                 <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
@@ -1218,6 +1219,8 @@
             <xs:attribute name="fill-size" type="xs:nonNegativeInteger" use="required"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:element name="sample-frequency" type="xs:string"/>
 
     <xs:element name="resolution" type="xs:string"/>
     <xs:element name="thumbnail" type="boolean"/>
