@@ -64,7 +64,14 @@ function install-cmake() {
 
 function upload_to_repo() {
   echo "::group::Uploading package"
-  sudo apt-get install -y ruby gpg
+  if [[ "$lsb_codename" == "bionic" ]]; then
+    sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
+    sudo add-apt-repository ppa:brightbox/ruby-ng-experimental
+    sudo apt-get update -y
+    sudo apt-get install -y ruby2.6 gpg
+  else
+    sudo apt-get install -y ruby gpg
+  fi
   sudo gem install deb-s3
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
@@ -224,6 +231,9 @@ if [[ $git_ver == *"+"* ]]; then
   deb_version="${git_ver}~${commit_date}-${lsb_codename}1"
   is_tag=0
 fi
+if [[ ${GH_EVENT-} == "pull_request" ]]; then
+  is_tag=2
+fi
 
 deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
@@ -265,7 +275,7 @@ if [[ "${lsb_distro}" != "Raspbian" ]]; then
       # Tags only for main repo
       [[ $is_tag == 1 ]] && upload_to_repo debian
       # Git builds go to git
-      upload_to_repo debian-git
+      [[ $is_tag == 0 ]] && upload_to_repo debian-git
     else
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"
     fi
