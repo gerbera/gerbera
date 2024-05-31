@@ -52,6 +52,10 @@
 #define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_ATTRIB))
 #define AUTOSCAN_IS_IGNORED(mask) ((mask) & (IN_IGNORED))
 
+#ifndef IN_MASK_CREATE
+#define IN_MASK_CREATE 0x10000000
+#endif
+
 static constexpr std::array<std::pair<std::string_view, InotifyFlags>, 22> inotifyFlags {
     /* the following are legal, implemented events that user-space can watch for */
     std::pair("ACCESS", IN_ACCESS), /* File was accessed */
