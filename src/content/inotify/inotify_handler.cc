@@ -52,13 +52,17 @@
 #define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_ATTRIB))
 #define AUTOSCAN_IS_IGNORED(mask) ((mask) & (IN_IGNORED))
 
+#ifndef IN_MASK_CREATE
+#define IN_MASK_CREATE 0x10000000
+#endif
+
 static constexpr std::array<std::pair<std::string_view, InotifyFlags>, 22> inotifyFlags {
     /* the following are legal, implemented events that user-space can watch for */
     std::pair("ACCESS", IN_ACCESS), /* File was accessed */
     std::pair("MODIFY", IN_MODIFY), /* File was modified */
     std::pair("ATTRIB", IN_ATTRIB), /* Metadata changed */
-    std::pair("CLOSE_WRITE", IN_CLOSE_WRITE), /* Writtable file was closed */
-    std::pair("CLOSE_NOWRITE", IN_CLOSE_NOWRITE), /* Unwrittable file closed */
+    std::pair("CLOSE_WRITE", IN_CLOSE_WRITE), /* Writable file was closed */
+    std::pair("CLOSE_NOWRITE", IN_CLOSE_NOWRITE), /* Unwritable file closed */
     std::pair("OPEN", IN_OPEN), /* File was opened */
     std::pair("MOVED_FROM", IN_MOVED_FROM), /* File was moved from X */
     std::pair("MOVED_TO", IN_MOVED_TO), /* File was moved to Y */
