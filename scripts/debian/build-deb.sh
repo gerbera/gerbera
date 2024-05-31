@@ -68,7 +68,7 @@ function upload_to_repo() {
     sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
     sudo add-apt-repository ppa:brightbox/ruby-ng-experimental
     sudo apt-get update -y
-    sudo apt-get install -y ruby2.6 gpg
+    sudo apt-get install -y ruby2.7 gpg
   else
     sudo apt-get install -y ruby gpg
   fi
