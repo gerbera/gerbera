@@ -6,6 +6,13 @@ on:
       - master
     tags:
       - v*
+  pull_request:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deb-package:
@@ -14,7 +21,18 @@ jobs:
       matrix:
         os-ver: ["ubuntu:18.04", "ubuntu:20.04", "ubuntu:22.04", "ubuntu:23.04", "ubuntu:23.10", "debian:stable", "debian:testing", "debian:unstable"]
         arch: ["linux/amd64", "linux/arm/v7", "linux/arm64/v8"]
+
+        isPR:
+          - ${{github.event_name == 'pull_request'}}
+        # Run only the amd64 build in pull reqs:
+        exclude:
+          - isPR: true
+            arch: "linux/arm/v7"
+          - isPR: true
+            arch: "linux/arm64/v8"
+
     runs-on: ubuntu-latest
+    name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,12 +58,14 @@ jobs:
             -e PKG_SIGNING_KEY \
             -e PKG_SIGNING_KEY_ID \
             -e GH_ACTIONS=y \
+            -e GH_EVENT=${{github.event_name}} \
             -v "$(pwd):/build" \
             -w /build \
           ${{ matrix.os-ver }} \
           bash /build/scripts/debian/build-deb.sh ${{ matrix.os-ver }} ${{ matrix.arch }}
 
       - uses: frabert/replace-string-action@v2.5
+        if: ${{github.event_name != 'pull_request'}}
         id: replace
         with:
           pattern: '(\w+):([\w\.]+):linux/(\w+)(?:/(\w+))?'
@@ -53,6 +73,7 @@ jobs:
           replace-with: $1-$2-$3$4.deb
 
       - uses: actions/upload-artifact@v4
+        if: ${{github.event_name != 'pull_request'}}
         with:
           name: ${{ steps.replace.outputs.replaced }}
           path: build-deb/*.deb
