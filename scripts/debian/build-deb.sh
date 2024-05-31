@@ -243,7 +243,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   if [[ ${ex_preset} -eq 0 ]]; then
     cmake_preset="release-${my_upnp}"
   fi
-  set -o pipefail
+  set -euEo pipefail
 
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \

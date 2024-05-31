@@ -185,14 +185,15 @@ if [[ (! -f ${suse_name}) || "${my_sys}" == "HEAD" ]]; then
   if [[ ${ex_preset} -eq 0 ]]; then
     cmake_preset="release-${my_upnp}"
   fi
-  set -o pipefail
+  set -euEo pipefail
 
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
+  # https://cmake.org/cmake/help/latest/cpack_gen/rpm.html#cpack_gen:CPack%20RPM%20Generator
   if [[ "${my_sys}" != "HEAD" ]]; then
-    cpack -G RPM -R "$suse_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$suse_arch"
+    cpack -G RPM -R "$suse_version" -D CPACK_RPM_PACKAGE_ARCHITECTURE="$suse_arch"
   fi
 else
   printf "OpenSUSE ${suse_name} already built!\n"
