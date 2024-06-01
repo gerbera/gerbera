@@ -64,13 +64,9 @@ function install-cmake() {
 
 function upload_to_repo() {
   echo "::group::Uploading package"
+  sudo apt-get install -y ruby gpg
   if [[ "$lsb_codename" == "bionic" ]]; then
-    sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
-    sudo add-apt-repository ppa:brightbox/ruby-ng-experimental
-    sudo apt-get update -y
-    sudo apt-get install -y ruby2.7 gpg
-  else
-    sudo apt-get install -y ruby gpg
+    sudo gem install thor -v 1.2.2
   fi
   sudo gem install deb-s3
 
