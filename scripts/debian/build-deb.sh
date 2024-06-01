@@ -67,8 +67,10 @@ function upload_to_repo() {
   sudo apt-get install -y ruby gpg
   if [[ "$lsb_codename" == "bionic" ]]; then
     sudo gem install thor -v 1.2.2
+    sudo gem install deb-s3 -v 0.10.0
+  else
+    sudo gem install deb-s3
   fi
-  sudo gem install deb-s3
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
 
