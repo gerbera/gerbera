@@ -31,50 +31,45 @@ else
   echo "No script library found at ${ROOT_DIR}scripts/gerbera-shell.sh"
 fi
 
-function install-gcc {
+function install-gcc() {
   echo "::group::Installing GCC"
   # bionic defaults to gcc-7
-  if [[ "$lsb_codename" == "bionic" ]]; then
-    sudo apt-get install gcc-8 g++-8 libstdc++-8-dev -y
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-    sudo update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-8 800
-  else
-    sudo apt-get install g++ -y
-  fi
+  sudo apt-get install g++ -y
   echo "::endgroup::"
 }
 
 function install-cmake() {
   echo "::group::Installing CMake"
-  if [[ "$lsb_distro" != "Raspbian" ]]; then
-    if [[ "$lsb_codename" == "buster" || "$lsb_codename" == "bionic" || "$lsb_codename" == "focal" ]]; then
-      sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
-      curl https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-      sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
-      sudo apt-get update -y
-    fi
-    sudo apt-get install cmake -y
-  else
-    sudo apt-get install snapd -y
-    sudo snap install core
-    sudo snap install cmake --classic
-  fi
+  sudo apt-get install cmake -y
   echo "::endgroup::"
+}
+
+function set-libraries-dist() {
+  echo "no ${lsb_distro} libs"
+}
+
+function set-libraries-rel() {
+  echo "no ${lsb_codename} libs"
+}
+
+function set-libraries() {
+  libexif="libexif-dev"
+  libexiv2="libexiv2-dev"
+  libpugixml="libpugixml-dev"
+  libmatroska="libebml-dev libmatroska-dev"
+  ffmpegthumbnailer="libffmpegthumbnailer-dev"
+  libduktape="duktape-dev libduktape207"
+  libmysqlclient="libmysqlclient-dev"
+}
+
+function install-deb-s3() {
+  sudo apt-get install -y ruby gpg
+  sudo gem install deb-s3
 }
 
 function upload_to_repo() {
   echo "::group::Uploading package"
-  sudo apt-get install -y ruby gpg
-  if [[ "$lsb_codename" == "bionic" ]]; then
-    sudo gem install thor -v 1.2.2
-    sudo gem install deb-s3 -v 0.10.0
-  else
-    if [[ "$lsb_codename" == "focal" ]]; then
-      gem sources -r https://rubygems.org/
-      gem sources -a http://rubygems.org/
-    fi
-    sudo gem install deb-s3
-  fi
+  install-deb-s3
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
 
@@ -114,6 +109,16 @@ if [[ "${lsb_codename}" == "n/a" ]]; then
 fi
 lsb_distro=$(lsb_release -i --short)
 
+if [[ -f ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh ]]; then
+  . ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh
+fi
+if [[ -f ${SCRIPT_DIR}include-${lsb_codename}.sh ]]; then
+  . ${SCRIPT_DIR}include-${lsb_codename}.sh
+fi
+if [[ -f ${SCRIPT_DIR}include-${lsb_distro}.sh ]]; then
+  . ${SCRIPT_DIR}include-${lsb_distro}.sh
+fi
+
 my_sys=${lsb_codename}
 my_upnp=pupnp
 if [ $# -gt 0 ]; then
@@ -123,44 +128,23 @@ if [ $# -gt 1 ]; then
   my_upnp=$2
 fi
 
-echo "Running $0 ${my_sys} ${my_upnp}"
+echo "Running $0 ${my_sys} ${my_upnp} for ${lsb_distro}-${lsb_codename}"
+
+set-libraries
+set-libraries-dist
+set-libraries-rel
+
+echo "Selecting $libduktape for $lsb_distro $lsb_codename"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
   libexif=""
   libexiv2=""
   libduktape=""
-  libmatroska=""
   libpugixml=""
   ffmpegthumbnailer=""
-  if [[ "$lsb_codename" == "jammy" ]]; then
-    libmatroska="libebml-dev libmatroska-dev"
+  if [[ "$lsb_codename" != "jammy" ]]; then
+    libmatroska=""
   fi
-else
-  libexif="libexif-dev"
-  libexiv2="libexiv2-dev"
-  libpugixml="libpugixml-dev"
-  libmatroska="libebml-dev libmatroska-dev"
-  ffmpegthumbnailer="libffmpegthumbnailer-dev"
-
-  libduktape="libduktape207"
-  if [[ "$lsb_codename" == "bionic" ]]; then
-    libduktape="libduktape202"
-  elif [[ "$lsb_codename" == "buster" ]]; then
-    libduktape="libduktape203"
-  elif [[ "$lsb_codename" == "focal" ]]; then
-    libduktape="libduktape205"
-  fi
-  libduktape="duktape-dev ${libduktape}"
-
-  echo "Selecting $libduktape for $lsb_distro $lsb_codename"
-fi
-
-libmysqlclient="libmysqlclient-dev"
-if [[ "$lsb_distro" == "Debian" || "$lsb_distro" == "Raspbian" ]]; then
-  libmysqlclient="libmariadb-dev-compat"
-fi
-if [[ "$lsb_codename" == "hirsute" || "$lsb_codename" == "impish" || "$lsb_codename" == "jammy" ]]; then
-  libmysqlclient="libmysql++-dev"
 fi
 
 if [[ ! -d build-deb ]]; then
@@ -257,6 +241,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   fi
   set -euEo pipefail
 
+  echo "::group::Building gerbera"
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
     -DCMAKE_INSTALL_PREFIX=/usr
@@ -264,9 +249,12 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
 
   if [[ "${lsb_distro}" != "Raspbian" ]]; then
     if [[ "${my_sys}" != "HEAD" ]]; then
-      cpack -G DEB -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+      cpack -G DEB \
+	      -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" \
+	      -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
     fi
   fi
+  echo "::endgroup::"
 else
   printf "Deb ${deb_name} already built!\n"
 fi
