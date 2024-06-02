@@ -45,11 +45,11 @@ function install-cmake() {
 }
 
 function set-libraries-dist() {
-  echo "no ${lsb_distro} libs"
+  echo "No ${lsb_distro} libs"
 }
 
 function set-libraries-rel() {
-  echo "no ${lsb_codename} libs"
+  echo "No ${lsb_codename} libs"
 }
 
 function set-libraries() {
@@ -108,6 +108,7 @@ if [[ "${lsb_codename}" == "n/a" ]]; then
   lsb_codename="unstable"
 fi
 lsb_distro=$(lsb_release -i --short)
+deb_arch=$(dpkg --print-architecture)
 
 if [[ -f ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh ]]; then
   . ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh
@@ -221,7 +222,6 @@ if [[ ${GH_EVENT-} == "pull_request" ]]; then
   is_tag=2
 fi
 
-deb_arch=$(dpkg --print-architecture)
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 set +e
 SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)

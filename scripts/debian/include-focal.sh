@@ -39,7 +39,9 @@ function set-libraries-rel() {
 
 function install-deb-s3() {
   sudo apt-get install -y ruby gpg
-  gem sources -r https://rubygems.org/
-  gem sources -f --add http://rubygems.org/
+  if [[ "${deb_arch:-}" == "armhf"  ]]; then
+    gem sources -r https://rubygems.org/
+    echo -e "---\n :ssl_verify_mode: 0\n :backtrace: false\n :bulk_threshold: 1000\n :sources: ["http://rubygems.org"]\n :update_sources: true\n :verbose: true\n" > ~/.gemrc
+  fi
   sudo gem install deb-s3
 }
