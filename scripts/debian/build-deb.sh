@@ -69,6 +69,10 @@ function upload_to_repo() {
     sudo gem install thor -v 1.2.2
     sudo gem install deb-s3 -v 0.10.0
   else
+    if [[ "$lsb_codename" == "focal" ]]; then
+      gem sources -r https://rubygems.org/
+      gem sources -a http://rubygems.org/
+    fi
     sudo gem install deb-s3
   fi
 
