@@ -48,6 +48,7 @@ jobs:
           DEB_UPLOAD_SECRET_ACCESS_KEY: ${{ secrets.DEB_UPLOAD_SECRET_ACCESS_KEY }}
           PKG_SIGNING_KEY: ${{ secrets.PKG_SIGNING_KEY }}
           PKG_SIGNING_KEY_ID: ${{ secrets.PKG_SIGNING_KEY_ID }}
+          GH_EVENT: ${{ github.event_name }}
         run: |
           docker run \
             --platform=${{ matrix.arch }} \
@@ -58,7 +59,7 @@ jobs:
             -e PKG_SIGNING_KEY \
             -e PKG_SIGNING_KEY_ID \
             -e GH_ACTIONS=y \
-            -e GH_EVENT=${{github.event_name}} \
+            -e GH_EVENT \
             -v "$(pwd):/build" \
             -w /build \
           ${{ matrix.os-ver }} \

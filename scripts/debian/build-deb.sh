@@ -218,7 +218,7 @@ if [[ $git_ver == *"+"* ]]; then
   deb_version="${git_ver}~${commit_date}-${lsb_codename}1"
   is_tag=0
 fi
-if [[ ${GH_EVENT-} == "pull_request" ]]; then
+if [[ ${GH_EVENT:-} == "pull_request" ]]; then
   is_tag=2
 fi
 
