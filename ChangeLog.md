@@ -2,16 +2,25 @@
 
 ### HEAD
 
+- Add missing define on ubuntu 18
+- Add sample-frequency to config2.xsd
 - Adding consistent album artist support
 - Build support for libnpupnp 6.1.2
-- Build: Add install scripts for OpenSuSE
 - Build: Add install scripts for alpine/docker
+- Build: Add install scripts for OpenSuSE
 - Build: Allow build of ffmpegthumbnailer without ffmpeg
 - Build: rework dependency handling
+- Build: Scripts fail again with build
+- Build: split debian modules
+- Build: Upload for bionic
+- Build: Upload for focal
+- Build: Use Ruby2.6 for bionic
+- Build: Use Ruby2.7 for bionic
 - CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
 - CI: Pass publish-deb secrets via env instead
 - CI: Upload debs to pkg.gerbera.io
 - clang-tidy: don't cast through void
+- config2.xsd fixes
 - Config: Add flag to disable dynamic descriptions
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
@@ -21,6 +30,7 @@
 - Handle broken Systemd on some debian
 - Import: Add option case sensitive tags
 - Import: fix single file update
+- Inotify: Handle Inotify access failed
 - Insecure download due to ubuntu-20.04/armhf failing
 - Libexif: add custom logger
 - Logging: Separate description requests
