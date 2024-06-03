@@ -25,8 +25,8 @@ function install-cmake() {
   echo "::group::Installing CMake"
   sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
   curl https://apt.kitware.com/keys/kitware-archive-latest.asc \
-	  | gpg --dearmor - \
-	  | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+    | gpg --dearmor - \
+    | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
   sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
   sudo apt-get update -y
   sudo apt-get install cmake -y

@@ -33,7 +33,6 @@ fi
 
 function install-gcc() {
   echo "::group::Installing GCC"
-  # bionic defaults to gcc-7
   sudo apt-get install g++ -y
   echo "::endgroup::"
 }
@@ -45,11 +44,11 @@ function install-cmake() {
 }
 
 function set-libraries-dist() {
-  echo "No ${lsb_distro} libs"
+  echo "No ${lsb_distro} Libraries"
 }
 
 function set-libraries-rel() {
-  echo "No ${lsb_codename} libs"
+  echo "No ${lsb_codename} Libraries"
 }
 
 function set-libraries() {
@@ -87,6 +86,8 @@ function upload_to_repo() {
   echo "::endgroup::"
 }
 
+echo "::group::Preparing Libraries"
+
 # Fix time issues
 if [[ ! -f /etc/timezone ]]; then
   ln -snf /usr/share/zoneinfo/"$TZ" /etc/localtime && echo "$TZ" > /etc/timezone
@@ -98,7 +99,7 @@ apt-get update -y
 apt-get install -y lsb-release sudo wget curl git ca-certificates
 
 # Work around https://github.com/actions/checkout/issues/760
-GH_ACTIONS="${GH_ACTIONS-n}"
+GH_ACTIONS="${GH_ACTIONS:-n}"
 if [[ "${GH_ACTIONS}" == "y" ]]; then
   git config --global --add safe.directory "$(pwd)"
 fi
@@ -135,7 +136,7 @@ set-libraries
 set-libraries-dist
 set-libraries-rel
 
-echo "Selecting $libduktape for $lsb_distro $lsb_codename"
+echo "Selecting ${libduktape} for ${lsb_distro} ${lsb_codename}"
 
 if [[ "${my_sys}" == "HEAD" ]]; then
   libexif=""
@@ -143,10 +144,12 @@ if [[ "${my_sys}" == "HEAD" ]]; then
   libduktape=""
   libpugixml=""
   ffmpegthumbnailer=""
-  if [[ "$lsb_codename" != "jammy" ]]; then
+  if [[ "${lsb_codename}" != "jammy" ]]; then
     libmatroska=""
   fi
 fi
+
+echo "::endgroup::"
 
 if [[ ! -d build-deb ]]; then
   mkdir build-deb
@@ -175,13 +178,13 @@ if [[ ! -d build-deb ]]; then
       libsqlite3-dev \
       uuid-dev
   sudo apt-get clean
-  echo "::endgroup::"
 
-  if [[ "$lsb_codename" == "bionic" ]]; then
+  if [[ "${lsb_codename}" == "bionic" ]]; then
     # dpkg-dev pulls g++ which changes your GCC symlinks because ubuntu knows better than you
     sudo update-alternatives --set gcc /usr/bin/gcc-8
     sudo update-alternatives --set cpp /usr/bin/cpp-8
   fi
+  echo "::endgroup::"
 
   if [[ "${my_sys}" == "HEAD" ]]; then
     install-googletest
@@ -190,7 +193,7 @@ if [[ ! -d build-deb ]]; then
     install-pugixml
     install-duktape
     install-ffmpegthumbnailer
-    if [[ "$lsb_codename" != "jammy" ]]; then
+    if [[ "${lsb_codename}" != "jammy" ]]; then
       install-matroska
     fi
   fi
@@ -214,7 +217,7 @@ git_ver=$(git describe --tags | sed 's/\(.*\)-.*/\1/' | sed s/-/+/ | sed s/v//)
 # If version contains a + this is a non-tag build so add commit date
 deb_version="${git_ver}-${lsb_codename}1"
 is_tag=1
-if [[ $git_ver == *"+"* ]]; then
+if [[ ${git_ver} == *"+"* ]]; then
   deb_version="${git_ver}~${commit_date}-${lsb_codename}1"
   is_tag=0
 fi
@@ -250,8 +253,8 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   if [[ "${lsb_distro}" != "Raspbian" ]]; then
     if [[ "${my_sys}" != "HEAD" ]]; then
       cpack -G DEB \
-	      -D CPACK_DEBIAN_PACKAGE_VERSION="$deb_version" \
-	      -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="$deb_arch"
+            -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
+            -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}"
     fi
   fi
   echo "::endgroup::"
