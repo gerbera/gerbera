@@ -31,6 +31,7 @@
 #include "upnp/quirks.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
+#include "util/grb_time.h"
 #include "util/mime.h"
 #include "util/tools.h"
 
@@ -40,19 +41,8 @@ UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<ContentManager>& content,
 {
 }
 
-const struct ClientInfo* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
+fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::string path)
 {
-    UpnpFileInfo_set_FileLength(info, -1);
-    UpnpFileInfo_set_ContentType(info, "application/xml");
-    UpnpFileInfo_set_IsReadable(info, 1);
-    UpnpFileInfo_set_IsDirectory(info, 0);
-    auto quirks = getQuirks(info);
-    return quirks ? quirks->getInfo() : nullptr;
-}
-
-std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
-{
-    std::string path = filename;
     // This is a hack, we shouldnt need to do this, because SCPDURL is defined as being relative to the description doc
     // Which is served at /upnp/description.xml
     // HOWEVER it seems like its pretty common to just ignore that and request the base URL instead :(
@@ -64,7 +54,28 @@ std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std
     auto webroot = config->getOption(CFG_SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
     log_debug("Upnp: file: {}", webFile);
+    return webFile;
+}
+
+const struct ClientInfo* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
+{
+    auto quirks = getQuirks(info);
+    auto webFile = getPath(quirks, filename);
     auto svcDescription = (useDynamicDescription && quirks) ? getServiceDescription(webFile, quirks) : "";
+
+    UpnpFileInfo_set_FileLength(info, !svcDescription.empty() ? svcDescription.length() : getFileSize(fs::directory_entry(webFile)));
+    UpnpFileInfo_set_ContentType(info, "text/xml");
+    UpnpFileInfo_set_IsReadable(info, 1);
+    UpnpFileInfo_set_IsDirectory(info, 0);
+    UpnpFileInfo_set_LastModified(info, currentTime().count());
+    return quirks ? quirks->getInfo() : nullptr;
+}
+
+std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+{
+    auto webFile = getPath(quirks, filename);
+    auto svcDescription = (useDynamicDescription && quirks) ? getServiceDescription(webFile, quirks) : "";
+    log_debug("Upnp: {}\nsvcDescription: {}", webFile.c_str(), svcDescription);
 
     std::unique_ptr<IOHandler> ioHandler;
     if (svcDescription.empty())
@@ -82,6 +93,10 @@ std::string UpnpDescHandler::getServiceDescription(const std::string& path, cons
     auto parseResult = doc->load_file(path.c_str());
     if (parseResult.status != pugi::xml_parse_status::status_ok)
         return "";
+
+    auto decl = doc->prepend_child(pugi::node_declaration);
+    decl.append_attribute("version") = "1.0";
+    decl.append_attribute("encoding") = "UTF-8";
 
     auto root = doc->document_element();
     pugi::xpath_node actionListNode = root.select_node("/scpd/actionList");
@@ -119,8 +134,9 @@ std::string UpnpDescHandler::getServiceDescription(const std::string& path, cons
             }
         }
     }
+
     std::ostringstream buf;
-    doc->print(buf, "", 0);
+    doc->print(buf, "  ", pugi::format_indent);
     auto svcDescription = buf.str();
     log_debug("Upnp: {}\ncontentSize: {}", path, svcDescription.length());
     return svcDescription;
