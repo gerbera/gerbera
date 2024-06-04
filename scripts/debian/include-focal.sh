@@ -41,7 +41,7 @@ function install-deb-s3() {
   sudo apt-get install -y ruby gpg
   if [[ "${deb_arch:-}" == "armhf"  ]]; then
     sudo mkdir -pv /usr/local/share/ca-certificates
-    sudo echo"-----BEGIN CERTIFICATE-----\
+    sudo echo "-----BEGIN CERTIFICATE-----\
 MIIDXzCCAkegAwIBAgILBAAAAAABIVhTCKIwDQYJKoZIhvcNAQELBQAwTDEgMB4\
 GA1UECxMXR2xvYmFsU2lnbiBSb290IENBIC0gUjMxEzARBgNVBAoTCkdsb2JhbF\
 NpZ24xEzARBgNVBAMTCkdsb2JhbFNpZ24wHhcNMDkwMzE4MTAwMDAwWhcNMjkwM\
@@ -62,7 +62,7 @@ dEe3jgr25sbwMpjjM5RcOO5LlXbKr8EpbsU8Yt5CRsuZRj+9xTaGdWPoO4zzUhw\
 TI53O9zJrlAGomecsMx86OyXShkDOOyyGeMlhLxS67ttVb9+E7gUJTb0o2HLO02\
 JQZR7rkpeDMdmztcpHWD9f\
 -----END CERTIFICATE-----" > /usr/local/share/ca-certificates/GlobalSignR3.pem
-echo "-----BEGIN CERTIFICATE-----\
+    sudo echo "-----BEGIN CERTIFICATE-----\
 MIICxjCCAk2gAwIBAgIRALO93/inhFu86QOgQTWzSkUwCgYIKoZIzj0EAwMwTzEL\
 MAkGA1UEBhMCVVMxKTAnBgNVBAoTIEludGVybmV0IFNlY3VyaXR5IFJlc2VhcmNo\
 IEdyb3VwMRUwEwYDVQQDEwxJU1JHIFJvb3QgWDIwHhcNMjAwOTA0MDAwMDAwWhcN\

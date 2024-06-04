@@ -25,6 +25,7 @@
 #define GERBERA_UPNP_DESC_HANDLER_H
 
 #include "request_handler.h"
+#include "util/grb_fs.h"
 #include "util/grb_net.h"
 
 #include <memory>
@@ -40,6 +41,7 @@ public:
 
 private:
     std::string getServiceDescription(const std::string& path, const std::shared_ptr<Quirks>& quirks);
+    fs::path getPath(const std::shared_ptr<Quirks>& quirks, std::string path);
 
     bool useDynamicDescription { false };
 };

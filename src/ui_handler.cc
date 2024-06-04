@@ -30,6 +30,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
+#include "util/grb_time.h"
 #include "util/mime.h"
 #include "util/tools.h"
 
@@ -72,9 +73,10 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
     if (!uiEnabled && !startswith(path, "/icons")) {
         log_warning("UI is disabled!");
         UpnpFileInfo_set_FileLength(info, -1);
-        UpnpFileInfo_set_ContentType(info, "application/html");
+        UpnpFileInfo_set_ContentType(info, "text/html");
         UpnpFileInfo_set_IsReadable(info, -1);
         UpnpFileInfo_set_IsDirectory(info, -1);
+        UpnpFileInfo_set_LastModified(info, currentTime().count());
         return quirks ? quirks->getInfo() : nullptr;
     }
 
@@ -90,6 +92,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
     UpnpFileInfo_set_ContentType(info, mime.c_str());
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
+    UpnpFileInfo_set_LastModified(info, currentTime().count());
 
     return quirks ? quirks->getInfo() : nullptr;
 }
