@@ -125,6 +125,8 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
         src/config/setup/config_setup_vector.h
+        src/config/grb_runtime.cc
+        src/config/grb_runtime.h
         src/content/autoscan_list.cc
         src/content/autoscan_list.h
         src/content/autoscan_setting.cc
@@ -358,9 +360,9 @@ endif()
 # Generate Compile Information
 include("GenCompileInfo")
 generate_compile_info()
-target_compile_definitions(gerbera PRIVATE COMPILE_INFO="${COMPILE_INFO}")
-target_compile_definitions(gerbera PRIVATE GIT_BRANCH="${GIT_BRANCH}")
-target_compile_definitions(gerbera PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+target_compile_definitions(libgerbera PRIVATE COMPILE_INFO="${COMPILE_INFO}")
+target_compile_definitions(libgerbera PRIVATE GIT_BRANCH="${GIT_BRANCH}")
+target_compile_definitions(libgerbera PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 if ((${GERBERA_VERSION} STREQUAL "git") AND (NOT "${GIT_TAG}" STREQUAL ""))
     # Master/git build so use git info
@@ -368,8 +370,7 @@ if ((${GERBERA_VERSION} STREQUAL "git") AND (NOT "${GIT_TAG}" STREQUAL ""))
 endif()
 message(STATUS "Gerbera Version: ${GERBERA_VERSION}")
 target_compile_definitions(libgerbera PUBLIC GERBERA_VERSION="${GERBERA_VERSION}")
-
-target_compile_definitions(gerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}")
+target_compile_definitions(libgerbera PRIVATE PACKAGE_DATADIR="${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}")
 
 if (WITH_DEBUG)
     target_compile_definitions(libgerbera PUBLIC TOMBDEBUG)
