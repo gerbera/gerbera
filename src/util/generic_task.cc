@@ -33,7 +33,7 @@
 
 #include "generic_task.h" // API
 
-GenericTask::GenericTask(task_owner_t taskOwner)
+GenericTask::GenericTask(TaskOwner taskOwner)
     : taskOwner(taskOwner)
 {
 }

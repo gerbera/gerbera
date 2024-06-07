@@ -28,6 +28,7 @@
 #include "content/inotify/inotify_handler.h" // API
 
 #include "config/result/autoscan.h"
+#include "content/autoscan_setting.h"
 #include "content/content_manager.h"
 #include "content/inotify/autoscan_inotify.h"
 #include "content/inotify/directory_watch.h"

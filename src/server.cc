@@ -55,6 +55,7 @@
 #include "file_request_handler.h"
 #include "iohandler/io_handler.h"
 #include "metadata/metadata_service.h"
+#include "request_handler.h"
 #include "subscription_request.h"
 #include "ui_handler.h"
 #include "upnp/clients.h"
@@ -233,6 +234,23 @@ void Server::run()
         UpnpSetAllowLiteralHostRedirection(1);
 #endif
 
+    std::string url = getVirtualUrl();
+    writeBookmark(url);
+    log_info("The Web UI can be reached by following this link: {}", url);
+
+    validHosts = std::vector<std::string> {
+        std::string(UpnpGetServerIpAddress()),
+        std::string(UpnpGetServerIp6Address()),
+        std::string(UpnpGetServerUlaGuaIp6Address()),
+    };
+    if (!url.empty()) {
+        validHosts.push_back(url);
+    }
+    url = getExternalUrl();
+    if (!url.empty()) {
+        validHosts.push_back(url);
+    }
+
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
             auto hostStr = std::string(host);
@@ -252,23 +270,6 @@ void Server::run()
             return UPNP_E_BAD_HTTPMSG;
         },
         this);
-
-    std::string url = getVirtualUrl();
-    writeBookmark(url);
-    log_info("The Web UI can be reached by following this link: {}", url);
-
-    validHosts = std::vector<std::string> {
-        std::string(UpnpGetServerIpAddress()),
-        std::string(UpnpGetServerIp6Address()),
-        std::string(UpnpGetServerUlaGuaIp6Address()),
-    };
-    if (!url.empty()) {
-        validHosts.push_back(url);
-    }
-    url = getExternalUrl();
-    if (!url.empty()) {
-        validHosts.push_back(url);
-    }
 }
 
 int Server::startupInterface(const std::string& iface, in_port_t inPort)
@@ -380,20 +381,24 @@ void Server::shutdown()
     if (ret != UPNP_E_SUCCESS) {
         log_error("UpnpUnRegisterRootDevice failed ({})", ret);
     }
+    UpnpSetHostValidateCallback(nullptr, nullptr);
 
 #ifdef HAVE_CURL
     curl_global_cleanup();
 #endif
 
     log_debug("now calling upnp finish");
-    UpnpFinish();
+    ret = UpnpFinish();
+    if (ret != UPNP_E_SUCCESS) {
+        log_error("UpnpFinish failed ({})", ret);
+    }
 
     if (content) {
         content->shutdown();
-        content = nullptr;
+        content.reset();
     }
 
-    sessionManager = nullptr;
+    sessionManager.reset();
 
     if (database->threadCleanupRequired()) {
         try {
@@ -402,15 +407,21 @@ void Server::shutdown()
         }
     }
     database->shutdown();
-    database = nullptr;
+    database.reset();
 
     timer->shutdown();
-    timer = nullptr;
+    timer.reset();
+    context.reset();
+    mime.reset();
+    clientManager.reset();
+    metadataService.reset();
+    upnpXmlBuilder.reset();
+    webXmlBuilder.reset();
+    cds.reset();
+    cmgr.reset();
+    mrreg.reset();
 
-    context = nullptr;
-
-    mime = nullptr;
-    clientManager = nullptr;
+    log_debug("Server down");
 }
 
 int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event)
@@ -502,21 +513,23 @@ void Server::routeActionRequest(ActionRequest& request)
     // we need to match the serviceID to one of our services
     if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the lifetime stats service
-        // log_debug("request for connection manager service");
+        log_debug("request for connection manager service");
         cmgr->processActionRequest(request);
     } else if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the toaster control service
-        // log_debug("routeActionRequest: request for content directory service");
+        log_debug("request for content directory service");
         if (!offline)
             cds->processActionRequest(request);
         else
             request.setErrorCode(UPNP_E_INVALID_ACTION);
 
     } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+        log_debug("request for MR Registrar service");
         mrreg->processActionRequest(request);
     } else {
         // cp is asking for a nonexistent service, or for a service
         // that does not support any actions
+        log_debug("Service {} does not exist or action not supported", request.getServiceID());
         throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
     }
 }
@@ -526,25 +539,27 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     // make sure that the request is for our device
     if (request.getUDN() != serverUDN) {
         // not for us
-        log_debug("routeSubscriptionRequest: request not for this device: {} vs {}", request.getUDN(), serverUDN);
+        log_debug("request not for this device: {} vs {}", request.getUDN(), serverUDN);
         throw UpnpException(UPNP_E_BAD_REQUEST, "routeSubscriptionRequest: request not for this device");
     }
 
     // we need to match the serviceID to one of our services
     if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
         // this call is for the content directory service
-        // log_debug("routeSubscriptionRequest: request for content directory service");
+        log_debug("request for content directory service");
         if (!offline)
             cds->processSubscriptionRequest(request);
     } else if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
         // this call is for the connection manager service
-        // log_debug("routeSubscriptionRequest: request for connection manager service");
+        log_debug("request for connection manager service");
         cmgr->processSubscriptionRequest(request);
     } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+        log_debug("request for MRRegistrar service");
         mrreg->processSubscriptionRequest(request);
     } else {
         // cp asks for a nonexistent service or for a service that
         // does not support subscriptions
+        log_debug("Service {} does not exist or action not supported", request.getServiceID());
         throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
     }
 }

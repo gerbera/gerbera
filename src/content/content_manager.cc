@@ -40,6 +40,7 @@
 #include "autoscan_list.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "cm_task.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
 #include "config/result/autoscan.h"
@@ -294,9 +295,9 @@ void ContentManager::shutdown()
         }
         autoscanList->updateLMinDB(*database);
 
-        autoscanList = nullptr;
+        autoscanList.reset();
 #ifdef HAVE_INOTIFY
-        inotify = nullptr;
+        inotify.reset();
 #endif
     }
 
@@ -316,17 +317,17 @@ void ContentManager::shutdown()
 
 #ifdef HAVE_LASTFMLIB
     last_fm->shutdown();
-    last_fm = nullptr;
+    last_fm.reset();
 #endif
 #ifdef HAVE_JS
-    scriptingRuntime = nullptr;
+    scriptingRuntime.reset();
 #endif
 #ifdef ONLINE_SERVICES
     task_processor->shutdown();
-    task_processor = nullptr;
+    task_processor.reset();
 #endif
     update_manager->shutdown();
-    update_manager = nullptr;
+    update_manager.reset();
 
     log_debug("end");
 }
@@ -1393,7 +1394,7 @@ void ContentManager::cleanupOnlineServiceObjects(const std::shared_ptr<OnlineSer
 
 void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path)
 {
-    if (t->getType() == AddFile) {
+    if (t->getType() == TaskType::AddFile) {
         auto addTask = std::static_pointer_cast<CMAddFileTask>(t);
         log_debug("comparing, task path: {}, remove path: {}", addTask->getPath().c_str(), path.c_str());
         if (isSubDir(addTask->getPath(), path)) {
@@ -1403,9 +1404,9 @@ void ContentManager::invalidateAddTask(const std::shared_ptr<GenericTask>& t, co
     }
 }
 
-void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
+void ContentManager::invalidateTask(unsigned int taskID, TaskOwner taskOwner)
 {
-    if (taskOwner == ContentManagerTask) {
+    if (taskOwner == TaskOwner::ContentManagerTask) {
         auto lock = threadRunner->lockGuard("invalidateTask");
         auto tc = getCurrentTask();
         if (tc && ((tc->getID() == taskID) || (tc->getParentID() == taskID)))
@@ -1422,7 +1423,7 @@ void ContentManager::invalidateTask(unsigned int taskID, task_owner_t taskOwner)
         }
     }
 #ifdef ONLINE_SERVICES
-    else if (taskOwner == TaskProcessorTask)
+    else if (taskOwner == TaskOwner::TaskProcessorTask)
         task_processor->invalidateTask(taskID);
 #endif
 }

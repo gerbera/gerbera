@@ -117,7 +117,7 @@ int Inotify::addWatch(const fs::path& path, InotifyFlags events, unsigned int re
             }
             throw_fmt_system_error("Adding inotify watch failed");
         }
-        log_warning("Add inotify watch for {}: {}", path.c_str(), wd);
+        log_debug("Add inotify watch for {}: {}", path.c_str(), wd);
         return wd;
     }
     return -1;

@@ -39,6 +39,7 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config_manager.h"
+#include "content/autoscan_setting.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "scripting_runtime.h"
