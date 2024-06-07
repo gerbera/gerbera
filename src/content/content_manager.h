@@ -39,10 +39,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "cm_task.h"
 #include "common.h"
-#include "context.h"
 #include "util/executor.h"
+#include "util/generic_task.h"
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
@@ -58,18 +57,26 @@ enum class OnlineServiceType;
 #endif // ONLINE_SERVICES
 
 class AutoscanList;
-enum class AutoscanScanMode;
 class AutoScanSetting;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
 class CdsResource;
+class CMAddFileTask;
 class ContentManager;
+class Context;
 class ImportService;
-class Layout;
 class LastFm;
+class Layout;
+class Mime;
 class ScriptingRuntime;
 class Server;
+class TaskProcessor;
+class UpdateManager;
+enum class AutoscanScanMode;
+namespace Web {
+class SessionManager;
+}
 
 enum class ImportMode {
     MediaTomb,
@@ -93,7 +100,7 @@ public:
     std::deque<std::shared_ptr<GenericTask>> getTasklist();
 
     /// \brief Find a task identified by the task ID and invalidate it.
-    void invalidateTask(unsigned int taskID, task_owner_t taskOwner = ContentManagerTask);
+    void invalidateTask(unsigned int taskID, TaskOwner taskOwner = TaskOwner::ContentManagerTask);
 
     /// \brief Adds a file or directory to the database.
     /// \param dirEnt absolute path to the file
@@ -303,12 +310,11 @@ protected:
 
     unsigned int taskID { 1 };
 
-    friend class ImportService;
-    friend void CMAddFileTask::run();
-    friend void CMRemoveObjectTask::run();
-    friend void CMRescanDirectoryTask::run();
+    friend class CMAddFileTask;
+    friend class CMRemoveObjectTask;
+    friend class CMRescanDirectoryTask;
 #ifdef ONLINE_SERVICES
-    friend void CMFetchOnlineContentTask::run();
+    friend class CMFetchOnlineContentTask;
 #endif
 };
 

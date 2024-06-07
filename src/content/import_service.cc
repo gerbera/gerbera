@@ -29,6 +29,7 @@
 #include <fmt/chrono.h>
 #include <regex>
 
+#include "autoscan_setting.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/result/autoscan.h"

@@ -47,6 +47,7 @@
 #include "upnp/cont_dir_service.h"
 #include "upnp/mr_reg_service.h"
 
+#include <condition_variable>
 #include <csignal>
 #include <fmt/core.h>
 #include <mutex>
@@ -118,6 +119,11 @@ static void signalHandler(int signum)
 static void installSignalHandler()
 {
     _ctx.mainThreadId = pthread_self();
+
+    sigset_t maskSet;
+    sigfillset(&maskSet);
+    if (pthread_sigmask(SIG_SETMASK, &maskSet, nullptr))
+        log_error("Error installing masked signals {}", std::strerror(errno));
 
     struct sigaction action = {};
     action.sa_handler = signalHandler;
@@ -223,11 +229,9 @@ int main(int argc, char** argv, char** envp)
             runtime.exit(EXIT_FAILURE);
         }
 
-        sigset_t maskSet;
-        sigfillset(&maskSet);
-        pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
-
         installSignalHandler();
+        sigset_t emptyMaskSet;
+        sigemptyset(&emptyMaskSet);
 
         auto server = std::make_shared<Server>(configManager);
 
@@ -237,8 +241,8 @@ int main(int argc, char** argv, char** envp)
         } catch (const UpnpException& ue) {
             log_error("{}", ue.what());
 
-            sigemptyset(&maskSet);
-            pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
+            if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
+                log_error("Error clearing masked signals {}", std::strerror(errno));
 
             if (ue.getErrorCode() == UPNP_E_SOCKET_BIND) {
                 log_error("LibUPnP could not bind to socket");
@@ -274,11 +278,11 @@ int main(int argc, char** argv, char** envp)
 
         runtime.handleServerOptions(server);
 
-        sigemptyset(&maskSet);
-        pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
-
         // wait until signalled to terminate
         while (!_ctx.shutdownFlag) {
+            if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
+                log_error("Error clearing masked signals {}", std::strerror(errno));
+
             _ctx.cond.wait(_ctx.lock);
 
             if (_ctx.restartFlag != 0) {
@@ -289,8 +293,6 @@ int main(int argc, char** argv, char** envp)
                     configManager.reset();
 
                     GerberaRuntime runtimeChild(&options);
-
-                    installSignalHandler();
                     try {
                         runtimeChild.handleOptions(&results, false);
                         configManager = std::make_shared<ConfigManager>(
@@ -315,6 +317,8 @@ int main(int argc, char** argv, char** envp)
                         runtime.exit(EXIT_FAILURE);
                     }
 
+                    installSignalHandler();
+
                     server = std::make_shared<Server>(configManager);
                     server->init(runtimeChild.getOffline());
                     server->run();
@@ -323,9 +327,10 @@ int main(int argc, char** argv, char** envp)
                 } catch (const std::runtime_error& e) {
                     _ctx.restartFlag = 0;
                     _ctx.shutdownFlag = 1;
-                    sigemptyset(&maskSet);
-                    pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
-                    log_error("Could not restart Gerbera");
+
+                    if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
+                        log_error("Error clearing masked signals {}", std::strerror(errno));
+                    log_error("Could not restart Gerbera {}", e.what());
                 }
             }
         }

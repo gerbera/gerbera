@@ -169,7 +169,7 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
     std::shared_ptr<Layout> layout,
     bool cancellable,
     bool unscheduledRefresh)
-    : GenericTask(TaskProcessorTask)
+    : GenericTask(TaskOwner::TaskProcessorTask)
     , content(std::move(content))
     , task_processor(std::move(taskProcessor))
     , timer(std::move(timer))
@@ -178,7 +178,7 @@ TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManage
     , unscheduled_refresh(unscheduledRefresh)
 {
     this->cancellable = cancellable;
-    this->taskType = FetchOnlineContent;
+    this->taskType = TaskType::FetchOnlineContent;
 }
 
 void TPFetchOnlineContentTask::run()

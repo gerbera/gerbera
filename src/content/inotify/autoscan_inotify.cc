@@ -37,6 +37,7 @@
 
 #include "config/config_option_enum.h"
 #include "config/result/autoscan.h"
+#include "content/autoscan_setting.h"
 #include "content/content_manager.h"
 #include "content/inotify/directory_watch.h"
 #include "content/inotify/inotify_handler.h"

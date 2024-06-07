@@ -29,6 +29,7 @@ Gerbera - https://gerbera.io/
 #include "config/config_generator.h"
 #include "config/config_manager.h"
 #include "config/config_setup.h"
+#include "content/autoscan_setting.h"
 #include "content/content_manager.h"
 #include "server.h"
 
@@ -570,11 +571,12 @@ void GerberaRuntime::handleAdditionalArgs(const std::vector<ConfigOptionArgs>& a
 void GerberaRuntime::cleanUp()
 {
     // remove pidfile if one was written
+    log_debug("Cleanup {}", pidfile && startup);
     if (pidfile && startup) {
         std::error_code ec;
         if (fs::remove(*pidfile, ec)) {
             log_debug("Pidfile {} removed.", pidfile->c_str());
-        } else {
+        } else if (ec) {
             log_info("Could not remove pidfile {}: {}", pidfile->c_str(), ec.message());
         }
     }

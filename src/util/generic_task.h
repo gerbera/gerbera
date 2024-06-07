@@ -33,7 +33,7 @@
 #ifndef __GENERIC_TASK_H__
 #define __GENERIC_TASK_H__
 
-enum task_type_t {
+enum class TaskType {
     Invalid,
     AddFile,
     RemoveObject,
@@ -41,7 +41,7 @@ enum task_type_t {
     FetchOnlineContent
 };
 
-enum task_owner_t {
+enum class TaskOwner {
     ContentManagerTask,
     TaskProcessorTask
 };
@@ -49,20 +49,20 @@ enum task_owner_t {
 class GenericTask {
 protected:
     std::string description;
-    task_type_t taskType { Invalid };
-    task_owner_t taskOwner;
+    TaskType taskType { TaskType::Invalid };
+    TaskOwner taskOwner;
     unsigned int parentTaskID {};
     unsigned int taskID {};
     bool valid { true };
     bool cancellable { true };
 
 public:
-    explicit GenericTask(task_owner_t taskOwner);
+    explicit GenericTask(TaskOwner taskOwner);
     virtual ~GenericTask() = default;
     virtual void run() = 0;
     void setDescription(const std::string& description) { this->description = description; }
     std::string getDescription() const { return description; }
-    task_type_t getType() const { return taskType; }
+    TaskType getType() const { return taskType; }
     unsigned int getID() const { return taskID; }
     unsigned int getParentID() const { return parentTaskID; }
     void setID(unsigned int taskID) { this->taskID = taskID; }

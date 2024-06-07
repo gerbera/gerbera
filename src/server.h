@@ -34,23 +34,31 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
+#include <memory>
 #include <netinet/in.h>
+#include <string>
+#include <upnp.h>
+#include <vector>
 
-#include "request_handler.h"
-
-// forward declaration
+// forward declarations
 class ActionRequest;
 class ClientManager;
+class Config;
 class ConnectionManagerService;
 class ContentDirectoryService;
 class ContentManager;
 class Context;
+class Database;
 class MetadataService;
+class Mime;
 class MRRegistrarService;
 class RequestHandler;
 class SubscriptionRequest;
 class Timer;
 class UpnpXMLBuilder;
+namespace Web {
+class SessionManager;
+}
 
 /// \brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.

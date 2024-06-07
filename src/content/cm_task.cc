@@ -28,6 +28,7 @@
 
 #include "config/result/autoscan.h"
 #include "content_manager.h"
+#include "context.h"
 #include "database/database.h"
 
 #ifdef ONLINE_SERVICES
@@ -36,14 +37,14 @@
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManagerTask)
     , content(std::move(content))
     , dirEnt(std::move(dirEnt))
     , rootpath(std::move(rootpath))
     , asSetting(std::move(asSetting))
 {
     this->cancellable = cancellable;
-    this->taskType = AddFile;
+    this->taskType = TaskType::AddFile;
     if (this->asSetting.adir)
         this->asSetting.adir->incTaskCount();
 }
@@ -68,7 +69,7 @@ void CMAddFileTask::run()
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
     std::shared_ptr<CdsObject> object, fs::path path, bool rescanResource, bool all)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
     , object(std::move(object))
@@ -76,7 +77,7 @@ CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, 
     , all(all)
     , rescanResource(rescanResource)
 {
-    this->taskType = RemoveObject;
+    this->taskType = TaskType::RemoveObject;
     this->cancellable = false;
 }
 
@@ -87,13 +88,13 @@ void CMRemoveObjectTask::run()
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
     , containerID(containerId)
 {
     this->cancellable = cancellable;
-    this->taskType = RescanDirectory;
+    this->taskType = TaskType::RescanDirectory;
 }
 
 void CMRescanDirectoryTask::run()
@@ -114,7 +115,7 @@ void CMRescanDirectoryTask::run()
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> taskProcessor, std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout, bool cancellable, bool unscheduledRefresh)
-    : GenericTask(ContentManagerTask)
+    : GenericTask(TaskOwner::ContentManagerTask)
     , content(std::move(content))
     , task_processor(std::move(taskProcessor))
     , timer(std::move(timer))
@@ -123,7 +124,7 @@ CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManage
     , unscheduled_refresh(unscheduledRefresh)
 {
     this->cancellable = cancellable;
-    this->taskType = FetchOnlineContent;
+    this->taskType = TaskType::FetchOnlineContent;
 }
 
 void CMFetchOnlineContentTask::run()

@@ -42,6 +42,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "content/content_manager.h"
+#include "context.h"
 #include "metadata/metadata_enums.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
