@@ -22,7 +22,7 @@
 */
 
 /// \file mime.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "mime.h" // API
 
 #include "config/config_manager.h"

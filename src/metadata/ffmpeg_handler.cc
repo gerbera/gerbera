@@ -42,7 +42,7 @@
 // in the ffmpeg sources
 
 #ifdef HAVE_FFMPEG
-#define LOG_FAC log_facility_t::ffmpeg
+#define GRB_LOG_FAC GrbLogFacility::ffmpeg
 #include "ffmpeg_handler.h"
 
 #include <fmt/chrono.h>

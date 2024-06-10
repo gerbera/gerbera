@@ -32,7 +32,7 @@
 /// \file scripting_runtime.cc
 
 #ifdef HAVE_JS
-#define LOG_FAC log_facility_t::script
+#define GRB_LOG_FAC GrbLogFacility::script
 
 #include "scripting_runtime.h" // API
 

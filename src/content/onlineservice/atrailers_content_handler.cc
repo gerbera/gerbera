@@ -32,7 +32,7 @@
 /// \file atrailers_content_handler.cc
 
 #ifdef ATRAILERS
-#define LOG_FAC log_facility_t::online
+#define GRB_LOG_FAC GrbLogFacility::online
 #include "atrailers_content_handler.h" // API
 
 #include <array>

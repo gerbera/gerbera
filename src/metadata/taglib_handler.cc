@@ -32,7 +32,7 @@
 /// \file taglib_handler.cc
 
 #ifdef HAVE_TAGLIB
-#define LOG_FAC log_facility_t::taglib
+#define GRB_LOG_FAC GrbLogFacility::taglib
 
 #include "taglib_handler.h" // API
 

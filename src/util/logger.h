@@ -47,11 +47,12 @@
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
 
-enum class log_facility_t {
+enum class GrbLogFacility {
     thread,
     sqlite3,
     cds,
     server,
+    config,
     content,
     update,
     mysql,
@@ -97,11 +98,11 @@ public:
     static GrbLogger Logger;
 
     void init(int debugMode);
-    bool isDebugging(log_facility_t facility)
+    bool isDebugging(GrbLogFacility facility)
     {
         return GrbLogger::Logger.hasDebugging[to_underlying(facility)];
     }
-    static std::string_view mapFacility(log_facility_t facility)
+    static std::string_view mapFacility(GrbLogFacility facility)
     {
         return GrbLogger::facilities[facility];
     }
@@ -110,17 +111,17 @@ public:
     static int makeFacility(const std::string& optValue);
 
 private:
-    static std::map<log_facility_t, std::string_view> facilities;
+    static std::map<GrbLogFacility, std::string_view> facilities;
 
-    std::array<bool, to_underlying(log_facility_t::log_MAX)> hasDebugging {};
+    std::array<bool, to_underlying(GrbLogFacility::log_MAX)> hasDebugging {};
 };
 
 #define log_facility(fac, ...) GrbLogger::Logger.isDebugging((fac)) ? log_faci(__VA_ARGS__) : log_dbg(__VA_ARGS__)
 
-#ifdef LOG_FAC
+#ifdef GRB_LOG_FAC
 
 #undef log_debug
-#define log_debug(...) log_facility(LOG_FAC, __VA_ARGS__)
+#define log_debug(...) log_facility(GRB_LOG_FAC, __VA_ARGS__)
 
 #endif
 
@@ -130,7 +131,7 @@ private:
 
 #endif
 
-#define log_threading(...) log_facility(log_facility_t::thread, __VA_ARGS__)
+#define log_threading(...) log_facility(GrbLogFacility::thread, __VA_ARGS__)
 
 #if FMT_VERSION >= 80100
 template <typename T>

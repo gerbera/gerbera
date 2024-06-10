@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_headers.cc - this file is part of Gerbera.
+    headers.cc - this file is part of Gerbera.
 
     Copyright (C) 2016-2024 Gerbera Contributors
 
@@ -21,7 +21,8 @@
     $Id$
 */
 
-/// \file upnp_headers.cc
+/// \file headers.cc
+#define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "headers.h" // API
 

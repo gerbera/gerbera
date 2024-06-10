@@ -32,7 +32,7 @@
 */
 
 /// \file xml_to_json.cc
-
+#define GRB_LOG_FAC GrbLogFacility::cds
 #include "xml_to_json.h"
 
 #include <regex>

@@ -30,7 +30,7 @@
 */
 
 /// \file server.cc
-#define LOG_FAC log_facility_t::server
+#define GRB_LOG_FAC GrbLogFacility::server
 
 #include "server.h" // API
 

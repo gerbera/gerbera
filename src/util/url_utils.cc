@@ -20,7 +20,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file url_utils.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "url_utils.h" // API
 
 #include <fmt/format.h>

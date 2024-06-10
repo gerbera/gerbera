@@ -22,6 +22,7 @@
 */
 
 /// \file config_generator.cc
+#define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_generator.h"
 

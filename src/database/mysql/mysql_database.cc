@@ -30,7 +30,7 @@
 */
 
 /// \file mysql_database.cc
-#define LOG_FAC log_facility_t::mysql
+#define GRB_LOG_FAC GrbLogFacility::mysql
 
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"

@@ -22,6 +22,7 @@
 */
 
 /// \file box_layout.cc
+#define GRB_LOG_FAC GrbLogFacility::content
 
 #include "box_layout.h" // API
 

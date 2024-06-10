@@ -30,7 +30,7 @@
 */
 
 /// \file request_handler.cc
-#define LOG_FAC log_facility_t::requests
+#define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "request_handler.h" // API
 

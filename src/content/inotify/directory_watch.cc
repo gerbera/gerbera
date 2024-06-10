@@ -22,7 +22,7 @@
 */
 
 /// \file directory_watch.cc
-#define LOG_FAC log_facility_t::autoscan
+#define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/directory_watch.h" // API

@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file grb_time.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "grb_time.h" // API
 
 #include "common.h"

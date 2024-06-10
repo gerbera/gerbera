@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file grb_runtime.cc
-#define LOG_FAC log_facility_t::server
+#define GRB_LOG_FAC GrbLogFacility::server
 
 #include "grb_runtime.h" // API
 

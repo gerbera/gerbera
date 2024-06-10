@@ -26,7 +26,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file cds_types.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_enums.h" // API
 
 #include <algorithm>

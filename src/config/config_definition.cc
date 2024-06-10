@@ -23,6 +23,7 @@
 
 /// \file config_definition.cc
 ///\brief Definitions of default values and setup for configuration.
+#define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_definition.h" // API
 

@@ -20,6 +20,7 @@
 
 /// \file sqlite_config.cc
 
+#define GRB_LOG_FAC GrbLogFacility::sqlite3
 #include "sqlite_config.h" // API
 
 #include <array>

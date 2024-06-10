@@ -20,7 +20,7 @@
 */
 
 /// \file ui_handler.cc
-#define LOG_FAC log_facility_t::requests
+#define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "ui_handler.h" // API
 

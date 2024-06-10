@@ -22,7 +22,7 @@
 */
 
 /// \file cm_task.cc
-#define LOG_FAC log_facility_t::content
+#define GRB_LOG_FAC GrbLogFacility::content
 
 #include "cm_task.h" // API
 

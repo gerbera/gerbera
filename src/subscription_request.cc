@@ -30,7 +30,7 @@
 */
 
 /// \file subscription_request.cc
-#define LOG_FAC log_facility_t::requests
+#define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "subscription_request.h" // API
 

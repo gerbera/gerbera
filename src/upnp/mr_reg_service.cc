@@ -30,7 +30,7 @@
 */
 
 /// \file upnp_mrreg.cc
-#define LOG_FAC log_facility_t::mrregistrar
+#define GRB_LOG_FAC GrbLogFacility::mrregistrar
 
 #include "mr_reg_service.h" // API
 

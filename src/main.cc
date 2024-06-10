@@ -36,7 +36,7 @@
 /// This documentation was generated using doxygen, you can reproduce it by
 /// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
 
-#define LOG_FAC log_facility_t::server
+#define GRB_LOG_FAC GrbLogFacility::server
 
 #include "common.h"
 #include "config/config_manager.h"

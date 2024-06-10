@@ -27,7 +27,7 @@ This section defines the server configuration parameters.
 
       Activate debugging messages only for certain subsystems.
       The following subsystems are available:
-      ``thread``, ``sqlite3``, ``cds``, ``server``, ``content``, ``update``, ``mysql``,
+      ``thread``, ``sqlite3``, ``cds``, ``server``, ``config``, ``content``, ``update``, ``mysql``,
       ``sqldatabase``, ``proc``, ``autoscan``, ``script``, ``web``, ``layout``,
       ``exif``, ``exiv2``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``,
       ``requests``, ``device``, ``connmgr``, ``mrregistrar``, ``xml``,

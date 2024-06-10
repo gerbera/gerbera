@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file grb_net.cc
-
+#define GRB_LOG_FAC GrbLogFacility::clients
 #include "grb_net.h" // API
 
 #include <arpa/inet.h>

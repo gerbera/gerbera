@@ -22,7 +22,7 @@
 */
 
 /// \file import_service.cc
-#define LOG_FAC log_facility_t::content
+#define GRB_LOG_FAC GrbLogFacility::content
 
 #include "import_service.h" // API
 

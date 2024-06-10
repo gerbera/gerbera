@@ -30,7 +30,7 @@
 */
 
 /// \file js_layout.cc
-#define LOG_FAC log_facility_t::layout
+#define GRB_LOG_FAC GrbLogFacility::layout
 
 #ifdef HAVE_JS
 #include "js_layout.h" // API

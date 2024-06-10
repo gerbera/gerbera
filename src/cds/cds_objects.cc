@@ -31,6 +31,7 @@
 
 /// \file cds_objects.cc
 
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_objects.h" // API
 
 #include <array>

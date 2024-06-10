@@ -30,7 +30,7 @@
 */
 
 /// \file content_manager.cc
-#define LOG_FAC log_facility_t::content
+#define GRB_LOG_FAC GrbLogFacility::content
 
 #include "content_manager.h" // API
 

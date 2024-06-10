@@ -24,7 +24,7 @@
 /// \file wavpack_handler.cc
 
 #ifdef HAVE_WAVPACK
-#define LOG_FAC log_facility_t::wavpack
+#define GRB_LOG_FAC GrbLogFacility::wavpack
 #include "wavpack_handler.h" // API
 
 #include "cds/cds_item.h"

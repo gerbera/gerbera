@@ -32,7 +32,7 @@
 /// \file online_service_helper.cc
 
 #ifdef ONLINE_SERVICES
-#define LOG_FAC log_facility_t::online
+#define GRB_LOG_FAC GrbLogFacility::online
 #include "online_service_helper.h" // API
 
 #include "cds/cds_item.h"

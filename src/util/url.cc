@@ -32,6 +32,7 @@
 /// \file url.cc
 
 #ifdef HAVE_CURL
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "url.h" // API
 
 #include <sstream>

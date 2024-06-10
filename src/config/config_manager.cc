@@ -30,6 +30,7 @@
 */
 
 /// \file config_manager.cc
+#define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_manager.h" // API
 

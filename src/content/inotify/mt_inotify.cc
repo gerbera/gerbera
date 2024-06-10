@@ -37,7 +37,7 @@
 */
 
 /// \file mt_inotify.cc
-#define LOG_FAC log_facility_t::autoscan
+#define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY
 #include "mt_inotify.h"

@@ -22,7 +22,7 @@
 */
 
 /// \file context.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "context.h" // API
 
 Context::Context(std::shared_ptr<Config> config,

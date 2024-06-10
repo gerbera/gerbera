@@ -20,7 +20,7 @@
 */
 
 /// \file device_description_handler.cc
-#define LOG_FAC log_facility_t::device
+#define GRB_LOG_FAC GrbLogFacility::device
 
 #include "device_description_handler.h" // API
 

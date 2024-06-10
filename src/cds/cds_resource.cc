@@ -31,6 +31,7 @@
 
 /// \file cds_resource.cc
 
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_resource.h" // API
 
 #include "metadata/resolution.h"

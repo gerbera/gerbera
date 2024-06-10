@@ -30,7 +30,7 @@
 */
 
 /// \file process_executor.cc
-#define LOG_FAC log_facility_t::proc
+#define GRB_LOG_FAC GrbLogFacility::proc
 
 #include "process_executor.h" // API
 

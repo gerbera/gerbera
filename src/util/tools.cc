@@ -30,7 +30,7 @@
 */
 
 /// \file tools.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "tools.h" // API
 
 #include <numeric>

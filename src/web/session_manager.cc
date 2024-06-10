@@ -30,7 +30,7 @@
 */
 
 /// \file session_manager.cc
-#define LOG_FAC log_facility_t::web
+#define GRB_LOG_FAC GrbLogFacility::web
 
 #include "session_manager.h" // API
 
