@@ -82,17 +82,33 @@ Debugging
 If you experience unexpected behaviour, you can run gerbera with ``--debug`` for
 a full log output or ``--debug-mode`` for specific parts of gerbera.
 
-Log To File
------------
+Logging
+--------
 
-Normally gerbera writes all messages to the system log (via standard output). Writing to your own log file
+Normally gerbera writes all messages to standard output. Writing to your own log file
 helps to search the logs for particular messages. Make sure you backup the file before restarting gerbera.
 
 ::
 
-    --logfile or -l
+    --logfile or -l FILE
 
 Do not output log messages to stdout, but redirect everything to a specified file.
+
+::
+
+    --rotatelog FILE
+
+Do not output log messages to stdout, but redirect everything to a rotating list of files. The max size of each
+log file can be set with config option ``server/logging/attribute::rotate-file-size``. The max count of log files
+can be set with config option ``server/logging/attribute::rotate-file-count``. See :ref:`Logging <logging>`.
+
+::
+
+    --syslog LOG
+
+Do not output log messages to stdout, but redirect everything to syslog. The optional
+argument contains the syslog facility. If no argument is given LOG_USER is used. The following values for ``LOG``
+are supported ``USER`` (default), ``LOCAL0`` to ``LOCAL7``.
 
 Debug Output
 ------------

@@ -368,6 +368,40 @@ as a workaround for the TG100 bug which can only handle titles no longer than 10
 A negative value will disable this feature, the minimum allowed value is "4" because three dots will be appended
 to the string if it has been cut off to indicate that limiting took place.
 
+.. _logging:
+
+``logging``
+~~~~~~~~~~~
+
+.. code-block:: xml
+
+    <logging rotate-file-size="1000000" rotate-file-count="3"/>
+
+* Optional
+
+This section defines various logging settings.
+
+
+    **Attributes:**
+
+    ::
+
+        rotate-file-size=...
+
+    * Optional
+    * Default: **5242880** (5 MB)
+
+    When using command line option ``--rotatelog`` this value defines the maximum size of the log file before rotating.
+
+    ::
+
+        rotate-file-count=...
+
+    * Optional
+    * Default: **10**
+
+    When using command line option --rotatelog this value defines the number of files in the log rotation.
+
 .. _ui:
 
 ``ui``

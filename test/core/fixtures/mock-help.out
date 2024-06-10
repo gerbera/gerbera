@@ -17,8 +17,10 @@ Usage:
                                e.g. /run/gerbera.pid
   -c, --config DIR             Path to config file
   -f, --cfgdir DIR             Override name of config folder
-                               (.config/gerbera) in home folder.
+                               (.config/gerbera) in home folder
   -l, --logfile FILE           Set log location
+      --rotatelog FILE         Set rotating log location
+      --syslog [=LOG(=USER)]   Log to syslog
       --add-file FILE          Scan a file into the DB on startup, can be
                                specified multiple times
       --set-option OPT=VAL     Set simple config option OPT to value VAL, can

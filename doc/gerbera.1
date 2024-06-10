@@ -46,6 +46,10 @@ gerbera \- UPnP MediaServer
 \fR] [
 \fB-l|--logfile \fIlogfile\fB
 \fR] [
+\fB--rotatelog \fIlogfile\fB
+\fR] [
+\fB--syslog \fILOG\fB
+\fR] [
 \fB--add-file \fIfile\fB
 \fR] [
 \fB--set-option \fIopt=val\fB
@@ -136,6 +140,14 @@ with another use of --set-option.
 \*(T<\fB\-l\fR\*(T>, \*(T<\fB\-\-logfile\fR\*(T>
 Do not output log messages to stdout, but redirect everything to a specified
 file.
+.TP
+\*(T<\fB\-l\fR\*(T>, \*(T<\fB\-\-rotatelog\fR\*(T>
+Do not output log messages to stdout, but redirect everything to a specified
+rotating file. It will rotate 10 files at 5MB.
+.TP
+\*(T<\fB\-l\fR\*(T>, \*(T<\fB\-\-syslog\fR\*(T>
+Do not output log messages to stdout, but redirect everything to syslog. The optional
+argument contains the syslog facility. If no argument is given LOG_USER is used.
 .TP
 \*(T<\fB\-D\fR\*(T>, \*(T<\fB\-\-debug\fR\*(T>
 Enable debug log output.

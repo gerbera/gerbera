@@ -8,6 +8,7 @@
 - Build support for libnpupnp 6.1.2
 - Build: Add install scripts for alpine/docker
 - Build: Add install scripts for OpenSuSE
+- Build: add older debian
 - Build: Allow build of ffmpegthumbnailer without ffmpeg
 - Build: rework dependency handling
 - Build: Scripts fail again with build
@@ -25,7 +26,9 @@
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
 - Documentation: Update with new WebUI
+- Extract command line argument handling to Runtime class
 - FFMpeg: add custom logger
+- Fix creation of mr_reg.xml
 - Fix discovery
 - Handle broken Systemd on some debian
 - Import: Add option case sensitive tags

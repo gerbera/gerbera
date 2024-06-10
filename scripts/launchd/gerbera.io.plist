@@ -11,7 +11,7 @@
             <string>/usr/bin/gerbera</string>
             <string>-c</string>
             <string>/etc/gerbera/config.xml</string>
-            <string>-l</string>
+            <string>--rotatelog</string>
             <string>/var/log/gerbera.log</string>
         </array>
         <key>RunAtLoad</key>

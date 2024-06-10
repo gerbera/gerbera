@@ -35,9 +35,33 @@ Gerbera - https://gerbera.io/
 
 class ConfigManager;
 class Server;
+namespace spdlog {
+class logger;
+}
 
 using ParseCallback = std::function<bool(const std::string& arg)>;
 using HandleCallback = std::function<bool()>;
+
+#define GRB_OPTION_HELP "help"
+#define GRB_OPTION_DEBUG "debug"
+#define GRB_OPTION_VERSION "version"
+#define GRB_OPTION_COMPILEINFO "compile-info"
+#define GRB_OPTION_PRINTOPTIONS "print-options"
+#define GRB_OPTION_LOGFILE "logfile"
+#define GRB_OPTION_SYSLOG "syslog"
+#define GRB_OPTION_ROTATELOG "rotatelog"
+#define GRB_OPTION_CREATECONFIG "create-config"
+#define GRB_OPTION_CREATEEXAMPLECONFIG "create-example-config"
+#define GRB_OPTION_CHECKCONFIG "check-config"
+#define GRB_OPTION_OFFLINE "offline"
+#define GRB_OPTION_DAEMON "daemon"
+#define GRB_OPTION_USER "user"
+#define GRB_OPTION_HOME "home"
+#define GRB_OPTION_PIDFILE "pidfile"
+#define GRB_OPTION_CONFIG "config"
+#define GRB_OPTION_CFGDIR "cfgdir"
+#define GRB_OPTION_SETOPTION "set-option"
+#define GRB_OPTION_ADDFILE "add-file"
 
 struct ArgumentHandler {
     std::string argument;
@@ -63,6 +87,7 @@ public:
     void exit(int status)
     {
         cleanUp();
+        shutdown();
         std::exit(status);
     }
 
@@ -73,6 +98,8 @@ public:
     void handleConfigOptions(const std::shared_ptr<ConfigManager>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs);
     // \brief: Handle command line options that require a running server
     void handleServerOptions(const std::shared_ptr<Server>& server);
+    // \brief: Release all loggers
+    void shutdown();
 
     std::optional<std::string> getMagic() { return magic; }
     fs::path getHome() { return home.value_or(""); }
@@ -82,6 +109,8 @@ public:
     fs::path getPidFile() { return pidfile.value_or(""); }
     bool getDebug() { return debug; }
     bool getOffline() { return offline; }
+
+    static const std::string ProgramName;
 
 private:
     const cxxopts::Options* options;
@@ -106,6 +135,8 @@ private:
     const cxxopts::ParseResult* results;
     std::shared_ptr<ConfigManager> configManager;
     std::shared_ptr<Server> server;
+    std::vector<std::string> grbLoggers;
+    std::shared_ptr<spdlog::logger> defaultLogger;
 
     bool printHelpMessage(const std::string& arg);
     bool setDebugMode(const std::string& arg);
@@ -113,6 +144,8 @@ private:
     bool printOptions(const std::string& arg);
     bool printCompileInfo(const std::string& arg);
     bool setLogFile(const std::string& arg);
+    bool setSyslog(const std::string& arg);
+    bool setRotatelog(const std::string& arg);
     bool createConfig(const std::string& arg);
     bool createExampleConfig(const std::string& arg);
     bool setHome(const std::string& arg);

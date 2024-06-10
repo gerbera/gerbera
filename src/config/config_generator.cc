@@ -257,7 +257,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
         { CFG_UPNP_TITLE_NAMESPACES, false },
         { CFG_UPNP_CAPTION_COUNT, false },
 #ifdef GRBDEBUG
-        { CFG_SERVER_DEBUG_MODE, false },
+        { CFG_SERVER_LOG_DEBUG_MODE, false },
 #endif
     };
 

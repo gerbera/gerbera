@@ -41,6 +41,8 @@ Gerbera - https://gerbera.io/
 #include <pwd.h>
 
 #include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+#include <spdlog/sinks/syslog_sink.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -51,6 +53,30 @@ static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);
 GerberaRuntime::GerberaRuntime()
     : confDir(DEFAULT_CONFIG_HOME)
 {
+}
+
+const std::string GerberaRuntime::ProgramName = "gerbera";
+
+static constexpr std::array syslogFlags {
+    std::pair("USER", LOG_USER),
+    std::pair("LOCAL0", LOG_LOCAL0),
+    std::pair("LOCAL1", LOG_LOCAL1),
+    std::pair("LOCAL2", LOG_LOCAL2),
+    std::pair("LOCAL3", LOG_LOCAL3),
+    std::pair("LOCAL4", LOG_LOCAL4),
+    std::pair("LOCAL5", LOG_LOCAL5),
+    std::pair("LOCAL6", LOG_LOCAL6),
+    std::pair("LOCAL7", LOG_LOCAL7),
+};
+
+static int remapSyslogFlag(const std::string& flag)
+{
+    for (auto [qLabel, qFlag] : syslogFlags) {
+        if (flag == qLabel) {
+            return qFlag;
+        }
+    }
+    return stoiString(flag, 0, 0);
 }
 
 GerberaRuntime::GerberaRuntime(const cxxopts::Options* options)
@@ -67,30 +93,41 @@ void GerberaRuntime::init(const cxxopts::Options* options)
         dataDir = PACKAGE_DATADIR;
 
     argumentCallbacks = std::vector<ArgumentHandler> {
-        { "help", [=](const std::string& arg) { return this->printHelpMessage(arg); }, true },
-        { "version", [=](const std::string& arg) { return this->printCopyright(arg); }, true },
-        { "print-options", [=](const std::string& arg) { return this->printOptions(arg); }, true },
-        { "compile-info", [=](const std::string& arg) { return this->printCompileInfo(arg); }, true },
-        { "debug", [=](const std::string& arg) { return this->setDebugMode(arg); } },
-        { "logfile", [=](const std::string& arg) { return this->setLogFile(arg); } },
-        { "create-config", [=](const std::string& arg) { return this->createConfig(arg); }, true, [=]() { return this->printConfig(); } },
-        { "create-example-config", [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
-        { "home", [=](const std::string& arg) { return this->setHome(arg); } },
-        { "user", [=](const std::string& arg) { return this->setUser(arg); } },
-        { "daemon", [=](const std::string& arg) { return this->runAsDeamon(arg); } },
-        { "offline", [=](const std::string& arg) { return this->setOfflineMode(arg); } },
-        { "pidfile", [=](const std::string& arg) { return this->createPidFile(arg); } },
-        { "config", [=](const std::string& arg) { return this->setConfigFile(arg); } },
-        { "cfgdir", [=](const std::string& arg) { return this->setConfigDir(arg); }, false, [=]() { return this->checkDirs(); } },
+        { GRB_OPTION_HELP, [=](const std::string& arg) { return this->printHelpMessage(arg); }, true },
+        { GRB_OPTION_DEBUG, [=](const std::string& arg) { return this->setDebugMode(arg); } },
+        { GRB_OPTION_VERSION, [=](const std::string& arg) { return this->printCopyright(arg); }, true },
+        { GRB_OPTION_COMPILEINFO, [=](const std::string& arg) { return this->printCompileInfo(arg); }, true },
+        { GRB_OPTION_PRINTOPTIONS, [=](const std::string& arg) { return this->printOptions(arg); }, true },
+        { GRB_OPTION_LOGFILE, [=](const std::string& arg) { return this->setLogFile(arg); } },
+        { GRB_OPTION_SYSLOG, [=](const std::string& arg) { return this->setSyslog(arg); } },
+        { GRB_OPTION_CREATECONFIG, [=](const std::string& arg) { return this->createConfig(arg); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_HOME, [=](const std::string& arg) { return this->setHome(arg); } },
+        { GRB_OPTION_USER, [=](const std::string& arg) { return this->setUser(arg); } },
+        { GRB_OPTION_DAEMON, [=](const std::string& arg) { return this->runAsDeamon(arg); } },
+        { GRB_OPTION_OFFLINE, [=](const std::string& arg) { return this->setOfflineMode(arg); } },
+        { GRB_OPTION_PIDFILE, [=](const std::string& arg) { return this->createPidFile(arg); } },
+        { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
+        { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); }, false, [=]() { return this->checkDirs(); } },
     };
 
     argumentOptionCallbacks = std::vector<ArgumentHandler> {
-        { "set-option", [=](const std::string& arg) { return this->handleOptionArgs(arg); } },
+        { GRB_OPTION_SETOPTION, [=](const std::string& arg) { return this->handleOptionArgs(arg); } },
+        { GRB_OPTION_ROTATELOG, [=](const std::string& arg) { return this->setRotatelog(arg); } },
     };
 
     argumentServerCallbacks = std::vector<ArgumentHandler> {
-        { "add-file", [=](const std::string& arg) { return this->addFile(arg); } },
+        { GRB_OPTION_ADDFILE, [=](const std::string& arg) { return this->addFile(arg); } },
     };
+}
+
+void GerberaRuntime::shutdown()
+{
+    for (auto&& grbLogger : grbLoggers) {
+        spdlog::drop(grbLogger);
+    }
+    if (defaultLogger)
+        spdlog::set_default_logger(defaultLogger);
 }
 
 bool GerberaRuntime::handleOptionArgs(const std::string& arg)
@@ -139,9 +176,45 @@ bool GerberaRuntime::setLogFile(const std::string& arg)
     if (!fs::directory_entry(logfile->parent_path()).exists()) {
         log_warning("Log dir {} missing", logfile->parent_path().c_str());
     }
-    auto fileLogger = spdlog::basic_logger_mt("basic_logger", *logfile);
+    auto fileLogger = spdlog::basic_logger_mt("file_logger", *logfile);
+    if (!defaultLogger)
+        defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(fileLogger);
     spdlog::flush_on(spdlog::level::trace);
+    grbLoggers.push_back("file_logger");
+    return true;
+}
+
+bool GerberaRuntime::setRotatelog(const std::string& arg)
+{
+    auto max_size = configManager->getUIntOption(CFG_SERVER_LOG_ROTATE_SIZE);
+    auto max_files = configManager->getUIntOption(CFG_SERVER_LOG_ROTATE_COUNT);
+    logfile = (*results)[arg].as<fs::path>();
+    if (!fs::directory_entry(logfile->parent_path()).exists()) {
+        log_warning("Log dir {} missing", logfile->parent_path().c_str());
+    }
+    auto rotateLogger = spdlog::rotating_logger_st("rotate_logger", *logfile, max_size, max_files);
+    if (!defaultLogger)
+        defaultLogger = spdlog::default_logger();
+    spdlog::set_default_logger(rotateLogger);
+    spdlog::flush_on(spdlog::level::trace);
+    grbLoggers.push_back("rotate_logger");
+    return true;
+}
+
+bool GerberaRuntime::setSyslog(const std::string& arg)
+{
+    std::optional<std::string> logLevelStr = (*results)[arg].as<std::string>();
+    auto logLevel = remapSyslogFlag(logLevelStr.value_or("USER"));
+    if (logLevel == 0) {
+        log_warning("Unknown Log facility {}, using USER", logLevelStr.value_or(""));
+    }
+    auto sysLogger = spdlog::syslog_logger_st("syslog_logger", ProgramName, LOG_PID, logLevel, true);
+    if (!defaultLogger)
+        defaultLogger = spdlog::default_logger();
+    spdlog::set_default_logger(sysLogger);
+    spdlog::flush_on(spdlog::level::trace);
+    grbLoggers.push_back("syslog_logger");
     return true;
 }
 
@@ -306,7 +379,7 @@ bool GerberaRuntime::setConfigDir(const std::string& arg)
 {
     confDir = (*results)[arg].as<fs::path>();
     if (!fs::directory_entry(*confDir).exists()) {
-        log_warning("confdir {} missing", confDir->c_str());
+        log_warning("Config Dir {} missing", confDir->c_str());
     }
     configDirSet = true;
     return true;
